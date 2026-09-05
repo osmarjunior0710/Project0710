@@ -7,6 +7,7 @@ import { tiposElegiveisResistenciaInfera } from '../../../core/resistenciaInfera
 import { useRoll } from '../../roll/RollContext';
 import InfoValor from '../../components/InfoValor';
 import ItemComDescricao from '../../components/ItemComDescricao';
+import TickPips from '../../components/TickPips';
 import TrocarArmaMaestria from '../../components/TrocarArmaMaestria';
 import TrocarValorSimples from '../../components/TrocarValorSimples';
 import styles from './AtributosTab.module.css';
@@ -132,12 +133,11 @@ export default function AtributosTab({
       </div>
 
       <div className={styles.hpRow}>
-        <div
-          className={`box ${styles.hpBox} ${inspiracaoHeroicaAtiva ? styles.hpBoxAtivo : ''}`}
-          onClick={onAlternarInspiracaoHeroica}
-        >
+        <div className={`box ${styles.hpBox}`} onClick={onAlternarInspiracaoHeroica}>
           <div className="label">Ins. Her.</div>
-          <div className={styles.hpNum}>{inspiracaoHeroicaAtiva ? '✨ Sim' : '—'}</div>
+          <div className={styles.hpPipRow}>
+            <TickPips total={1} usados={inspiracaoHeroicaAtiva ? 0 : 1} tamanho="lg" />
+          </div>
         </div>
         <div className={`box ${styles.hpBox}`}>
           <div className="label">
@@ -156,9 +156,7 @@ export default function AtributosTab({
           <div className="label">
             Iniciativa <InfoValor titulo="Iniciativa" explicacao={explicacaoIniciativa} />
           </div>
-          <div className={styles.hpNum}>
-            {iniciativa !== null ? `${iniciativa >= 0 ? '+' : ''}${iniciativa} 🎲` : '—'}
-          </div>
+          <div className={styles.hpNum}>{iniciativa !== null ? `${iniciativa >= 0 ? '+' : ''}${iniciativa}` : '—'}</div>
         </div>
         <div className={`box ${styles.hpBox}`}>
           <div className="label">Bônus Prof.</div>

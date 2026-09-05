@@ -364,3 +364,8 @@ que o Osmar vai definir como implementar antes da gente mexer).
       Humano nível 1 mostra "—" antes do Descanso Longo e "✨ Sim"
       depois. `npx tsc -b`, `npm test -- --run` (203 testes) e `npm
       run build` passando.
+      **Ajuste pedido pelo Osmar na hora:** "Sim/—" em texto não
+      parecia um controle tocável — trocado por 1 pip (`TickPips`,
+      mesmo padrão visual de todo contador de uso do app: azul = tem,
+      cinza = não tem). Removido também o emoji 🎲 do valor de
+      Iniciativa na aba Atributos (só o número, sem o dado).
