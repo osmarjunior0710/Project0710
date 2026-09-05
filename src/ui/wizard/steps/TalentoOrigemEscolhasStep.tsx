@@ -2,7 +2,7 @@ import { origens } from '../../../data/rulesets/dnd2024/origens';
 import { talentosOrigem } from '../../../data/rulesets/dnd2024/talentos';
 import { pericias } from '../../../data/rulesets/dnd2024/pericias';
 import { gruposFerramenta } from '../../../data/rulesets/dnd2024/ferramentas';
-import { proficienciasJaConcedidas } from '../../../core/proficienciasOrigem';
+import { concessoesJaConcedidas, type FonteConcessao } from '../../../core/concessoesJaConcedidas';
 import type { StepProps } from './StepProps';
 
 const todasFerramentas = Array.from(new Set(Object.values(gruposFerramenta).flat().map((f) => f.nome))).sort();
@@ -16,7 +16,7 @@ export default function TalentoOrigemEscolhasStep({ selection, update }: StepPro
     return <div className="label">Volte e selecione uma origem primeiro.</div>;
   }
 
-  const jaConcedidas = proficienciasJaConcedidas(selection, origem);
+  const jaConcedidas = concessoesJaConcedidas(selection, origem);
   const max = concede.quantidade;
   const escolhidas = selection.proficienciasTalentoOrigemEscolhidas;
 
@@ -28,14 +28,14 @@ export default function TalentoOrigemEscolhasStep({ selection, update }: StepPro
     }
   }
 
-  function linha(nome: string, jaTem: boolean) {
+  function linha(nome: string, fonte: FonteConcessao | undefined) {
     return (
       <div key={nome} className="check-row" onClick={() => toggle(nome)}>
         <div className={`check-box ${escolhidas.includes(nome) ? 'checked' : ''}`} />
         <span className="check-label">{nome}</span>
-        {jaTem && (
+        {fonte && (
           <span className="tag" style={{ marginLeft: 'auto' }}>
-            já possui
+            já possui - {fonte.toLowerCase()}
           </span>
         )}
       </div>
@@ -61,7 +61,7 @@ export default function TalentoOrigemEscolhasStep({ selection, update }: StepPro
           <div className="label" style={{ marginTop: 6 }}>
             Perícias
           </div>
-          {pericias.map((p) => linha(p.nome, jaConcedidas.pericias.has(p.nome)))}
+          {pericias.map((p) => linha(p.nome, jaConcedidas.pericias.get(p.nome)))}
         </>
       )}
 
@@ -70,7 +70,7 @@ export default function TalentoOrigemEscolhasStep({ selection, update }: StepPro
           <div className="label" style={{ marginTop: 6 }}>
             Ferramentas
           </div>
-          {todasFerramentas.map((nome) => linha(nome, jaConcedidas.ferramentas.has(nome)))}
+          {todasFerramentas.map((nome) => linha(nome, jaConcedidas.ferramentas.get(nome)))}
         </>
       )}
     </>

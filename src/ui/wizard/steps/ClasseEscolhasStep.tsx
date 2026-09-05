@@ -1,4 +1,7 @@
 import { classes } from '../../../data/rulesets/dnd2024/classes';
+import { origens } from '../../../data/rulesets/dnd2024/origens';
+import { especies } from '../../../data/rulesets/dnd2024/especies';
+import { concessoesJaConcedidas } from '../../../core/concessoesJaConcedidas';
 import { caracteristicasClasse } from '../../../data/rulesets/dnd2024/caracteristicasClasse';
 import { estilosDeLuta } from '../../../data/rulesets/dnd2024/estilosDeLuta';
 import { proficienciasIniciaisClasse } from '../../../data/rulesets/dnd2024/classesProficienciasIniciais';
@@ -37,6 +40,12 @@ export default function ClasseEscolhasStep({ selection, update }: StepProps) {
   }
 
   const proficiencias = proficienciasIniciaisClasse[classe.id];
+  // Só relevante se o jogador voltou aqui depois de já ter passado por
+  // Origem/Espécie (ordem normal do wizard é Classe ANTES das duas) —
+  // sem isso, os Maps simplesmente vêm vazios pra essas 2 fontes.
+  const origemAtual = origens.find((o) => o.nome === selection.origem);
+  const especieAtual = especies.find((e) => e.nome === selection.especie);
+  const jaConcedidas = concessoesJaConcedidas(selection, origemAtual, especieAtual);
   const profArmaArmadura = proficienciasArmaArmaduraClasse.find((p) => p.classe === classe.nome);
   const caracteristicasNivel1 = caracteristicasClasse.filter((c) => c.classe === classe.nome && c.nivel === 1);
   const qtdMaestria = quantidadeMaestriaEmArma(classe, 1);
@@ -269,24 +278,42 @@ export default function ClasseEscolhasStep({ selection, update }: StepProps) {
           <div className="section-title">
             Perícias — escolha {maxPericias} ({selection.periciasClasseEscolhidas.length}/{maxPericias})
           </div>
-          {proficiencias.periciasEscolha.opcoes.map((nome) => (
-            <div key={nome} className="check-row" onClick={() => togglePericia(nome)}>
-              <div className={`check-box ${selection.periciasClasseEscolhidas.includes(nome) ? 'checked' : ''}`} />
-              <span className="check-label">{nome}</span>
-            </div>
-          ))}
+          {proficiencias.periciasEscolha.opcoes.map((nome) => {
+            const fonte = jaConcedidas.pericias.get(nome);
+            const outraFonte = fonte && fonte !== 'Classe' ? fonte : null;
+            return (
+              <div key={nome} className="check-row" onClick={() => togglePericia(nome)}>
+                <div className={`check-box ${selection.periciasClasseEscolhidas.includes(nome) ? 'checked' : ''}`} />
+                <span className="check-label">{nome}</span>
+                {outraFonte && (
+                  <span className="tag" style={{ marginLeft: 'auto' }}>
+                    já possui - {outraFonte.toLowerCase()}
+                  </span>
+                )}
+              </div>
+            );
+          })}
 
           {maxFerramentas > 0 && (
             <>
               <div className="section-title">
                 Ferramentas — escolha {maxFerramentas} ({selection.ferramentasClasseEscolhidas.length}/{maxFerramentas})
               </div>
-              {opcoesFerramenta.map((f) => (
-                <div key={f.nome} className="check-row" onClick={() => toggleFerramenta(f.nome)}>
-                  <div className={`check-box ${selection.ferramentasClasseEscolhidas.includes(f.nome) ? 'checked' : ''}`} />
-                  <span className="check-label">{f.nome}</span>
-                </div>
-              ))}
+              {opcoesFerramenta.map((f) => {
+                const fonte = jaConcedidas.ferramentas.get(f.nome);
+                const outraFonte = fonte && fonte !== 'Classe' ? fonte : null;
+                return (
+                  <div key={f.nome} className="check-row" onClick={() => toggleFerramenta(f.nome)}>
+                    <div className={`check-box ${selection.ferramentasClasseEscolhidas.includes(f.nome) ? 'checked' : ''}`} />
+                    <span className="check-label">{f.nome}</span>
+                    {outraFonte && (
+                      <span className="tag" style={{ marginLeft: 'auto' }}>
+                        já possui - {outraFonte.toLowerCase()}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </>
           )}
 
@@ -295,15 +322,24 @@ export default function ClasseEscolhasStep({ selection, update }: StepProps) {
               <div className="section-title">
                 Truques — escolha {maxTruques} ({selection.truquesEscolhidos.length}/{maxTruques})
               </div>
-              {truquesDaClasse.map((m) => (
-                <div key={m.id} className="check-row" onClick={() => toggleTruque(m.nome)}>
-                  <div className={`check-box ${selection.truquesEscolhidos.includes(m.nome) ? 'checked' : ''}`} />
-                  <span className="check-label">
-                    <MagiaComDescricao magia={m} rotulo={m.nome} />
-                    {' '}{iconesMagia(m)}
-                  </span>
-                </div>
-              ))}
+              {truquesDaClasse.map((m) => {
+                const fonte = jaConcedidas.truques.get(m.nome);
+                const outraFonte = fonte && fonte !== 'Classe' ? fonte : null;
+                return (
+                  <div key={m.id} className="check-row" onClick={() => toggleTruque(m.nome)}>
+                    <div className={`check-box ${selection.truquesEscolhidos.includes(m.nome) ? 'checked' : ''}`} />
+                    <span className="check-label">
+                      <MagiaComDescricao magia={m} rotulo={m.nome} />
+                      {' '}{iconesMagia(m)}
+                    </span>
+                    {outraFonte && (
+                      <span className="tag" style={{ marginLeft: 'auto' }}>
+                        já possui - {outraFonte.toLowerCase()}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </>
           )}
 
@@ -316,15 +352,24 @@ export default function ClasseEscolhasStep({ selection, update }: StepProps) {
               <div className="label" style={{ marginBottom: 4 }}>
                 sugestão do livro: Enfeitiçar Pessoa, Leque Cromático, Palavra Curativa e Sussurros Dissonantes.
               </div>
-              {magiasNivel1.map((m) => (
-                <div key={m.id} className="check-row" onClick={() => toggleMagiaPreparada(m.nome)}>
-                  <div className={`check-box ${selection.magiasPreparadasEscolhidas.includes(m.nome) ? 'checked' : ''}`} />
-                  <span className="check-label">
-                    <MagiaComDescricao magia={m} rotulo={m.nome} />
-                    {' '}{iconesMagia(m)}
-                  </span>
-                </div>
-              ))}
+              {magiasNivel1.map((m) => {
+                const fonte = jaConcedidas.magias.get(m.nome);
+                const outraFonte = fonte && fonte !== 'Classe' ? fonte : null;
+                return (
+                  <div key={m.id} className="check-row" onClick={() => toggleMagiaPreparada(m.nome)}>
+                    <div className={`check-box ${selection.magiasPreparadasEscolhidas.includes(m.nome) ? 'checked' : ''}`} />
+                    <span className="check-label">
+                      <MagiaComDescricao magia={m} rotulo={m.nome} />
+                      {' '}{iconesMagia(m)}
+                    </span>
+                    {outraFonte && (
+                      <span className="tag" style={{ marginLeft: 'auto' }}>
+                        já possui - {outraFonte.toLowerCase()}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </>
           )}
 

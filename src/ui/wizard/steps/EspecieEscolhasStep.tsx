@@ -1,10 +1,11 @@
 import { especies } from '../../../data/rulesets/dnd2024/especies';
 import { pericias } from '../../../data/rulesets/dnd2024/pericias';
 import { origens } from '../../../data/rulesets/dnd2024/origens';
-import { proficienciasJaConcedidas } from '../../../core/proficienciasOrigem';
+import { concessoesJaConcedidas } from '../../../core/concessoesJaConcedidas';
 import { valorFinalAtributo } from '../../../core/personagem';
 import { atributosOrdem, type Atributo } from '../../../data/wizardFixtures';
 import { descricaoTracoResolvida, opcoesSubescolhaNoWizard, tracoComEscolhaDePericia } from '../../../core/especieSubescolha';
+import { truquesEspecie, magiasEspecie } from '../../../core/magiasEspecie';
 import InfoChip from '../../components/InfoChip';
 import TelaEscolherTalento from '../../ficha/levelup/TelaEscolherTalento';
 import type { StepProps } from './StepProps';
@@ -18,13 +19,22 @@ export default function EspecieEscolhasStep({ selection, update }: StepProps) {
 
   const temTraco = (id: string) => especie.traços.some((t) => t.id === id);
   const origem = origens.find((o) => o.nome === selection.origem);
-  const jaConcedidas = proficienciasJaConcedidas(selection, origem);
+  const jaConcedidas = concessoesJaConcedidas(selection, origem, especie);
   const atributosFinais = Object.fromEntries(
     atributosOrdem.map((a) => [a, valorFinalAtributo(selection, a) ?? 10]),
   ) as Record<Atributo, number>;
   const opcoesSubescolha = opcoesSubescolhaNoWizard(especie);
   const tracoPericia = tracoComEscolhaDePericia(especie);
   const opcoesPericia = tracoPericia?.opcoesPericia ?? pericias.map((p) => p.nome);
+  // Truques/Magias que a Espécie concede de graça (truqueFixo + linhagem
+  // escolhida acima nesta MESMA tela) e que colidem com o que já foi
+  // escolhido na etapa de Classe (1b, roda ANTES de Espécie) — não dá
+  // pra impedir a escolha repetida na hora (Classe já passou), só
+  // avisar aqui pra o jogador voltar e trocar se quiser.
+  const colisoesTruqueClasse = truquesEspecie(selection).filter((nome) => selection.truquesEscolhidos.includes(nome));
+  const colisoesMagiaClasse = magiasEspecie(selection, 1).filter((nome) =>
+    selection.magiasPreparadasEscolhidas.includes(nome),
+  );
 
   return (
     <>
@@ -88,6 +98,13 @@ export default function EspecieEscolhasStep({ selection, update }: StepProps) {
         ))}
       </div>
 
+      {[...colisoesTruqueClasse, ...colisoesMagiaClasse].map((nome) => (
+        <div key={nome} className="label" style={{ color: 'var(--warn)', marginBottom: 4 }}>
+          ⚠️ {nome} — já possui - classe (a Espécie também concede de graça; volte e troque a escolha da Classe se
+          quiser aproveitar as duas vagas)
+        </div>
+      ))}
+
       {tracoPericia && (
         <>
           <div className="section-title">{tracoPericia.nome} — perícia à escolha</div>
@@ -97,7 +114,7 @@ export default function EspecieEscolhasStep({ selection, update }: StepProps) {
               <span className="check-label">{nome}</span>
               {jaConcedidas.pericias.has(nome) && (
                 <span className="tag" style={{ marginLeft: 'auto' }}>
-                  já possui
+                  já possui - {jaConcedidas.pericias.get(nome)?.toLowerCase()}
                 </span>
               )}
             </div>

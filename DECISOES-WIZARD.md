@@ -249,29 +249,40 @@ existiam lá:
 escolha do wizard já foi concedida em outra etapa. Escopo confirmado
 com o Osmar: **só a criação de personagem por enquanto** — a Ficha
 precisaria de uma abordagem diferente (não é escolha, é revisão de
-personagem já pronto), fica pra depois. Hoje a única sobreposição
-real e alcançável no wizard é **Perícia da Origem × Perícia da
-Classe** (ex.: Bardo pode escolher livremente entre as 18 perícias do
-jogo, então qualquer Origem cujas 2 perícias fixas colidam com o que
-já foi escolhido na Classe deve avisar). Espécies com truque/magia
-concedida por traço (Alto Elfo → Prestidigitação Arcana, Drow → Luzes
-Dançantes, etc.) existem na planilha mas nenhuma está `disponivel:
-true` ainda — não há hoje um 2º caso real de duplicidade de
-Talento/Truque/Magia alcançável no wizard. Ver PENDENCIAS.md pro
-ponto de extensão.
+personagem já pronto), fica pra depois.
 
-Implementação: `core/duplicidadeSelecao.ts` exporta `nomesDuplicados(
-...grupos: string[][]): Set<string>` — genérica, conta nomes únicos
-por grupo e marca quem aparece em 2+ grupos. Como a ordem real do
-wizard é **Classe (com Perícia) → Origem** (não o contrário — ver
-`WizardShell.tsx`), o aviso não faz sentido nos checkboxes de Perícia
-da Classe (a Origem ainda não foi escolhida nesse ponto — sempre
-`null`). Em vez disso, o aviso aparece nos **cards de Origem**
-(`OrigemStep.tsx`): cada card calcula `nomesDuplicados(
-selection.periciasClasseEscolhidas, origem.pericias)` e, se houver
-sobreposição, ganha borda tracejada `var(--warn)` (classe
-`.opt-card-duplicada`) + texto "⚠️ X já escolhida na Classe" abaixo da
-descrição. Escolher aquela Origem continua permitido — é só aviso.
+Duas implementações convivem, cada uma resolvendo uma forma diferente
+de sobreposição:
+
+- `core/duplicidadeSelecao.ts` (`nomesDuplicados(...grupos: string[][]):
+  Set<string>`) — genérica, conta nomes únicos por grupo e marca quem
+  aparece em 2+ grupos. Único uso hoje: **Perícia da Origem × Perícia
+  da Classe** nos **cards de Origem** (`OrigemStep.tsx`, já que a
+  ordem real do wizard é Classe→Origem, não o contrário — o aviso não
+  faz sentido nos checkboxes de Perícia da Classe, a Origem ainda nem
+  foi escolhida nesse ponto). Cada card calcula `nomesDuplicados(
+  selection.periciasClasseEscolhidas, origem.pericias)` e, se houver
+  sobreposição, ganha borda tracejada `var(--warn)` (classe
+  `.opt-card-duplicada`) + texto "⚠️ X já escolhida na Classe" abaixo
+  da descrição.
+- `core/concessoesJaConcedidas.ts` (`concessoesJaConcedidas(selection,
+  origem?, especie?): { pericias, ferramentas, truques, magias }`,
+  cada um um `Map<nome, FonteConcessao>` com `FonteConcessao = 'Classe'
+  | 'Origem' | 'Talento' | 'Espécie'`) — pra telas de escolha LIVRE
+  (não card de opção fixa): mostra a tag "já possui - {fonte}" ao lado
+  do item, cobrindo hoje Perícia (Hábil do Humano, Talento de Origem
+  livre) e, desde que as 10 espécies ficaram disponíveis, também
+  Truque/Magia — a colisão real é Espécie (truque/magia fixo da
+  linhagem, ex. Alto Elfo → Prestidigitação Arcana) × o que já foi
+  escolhido na Classe. Como Classe roda ANTES de Espécie no wizard, o
+  aviso aparece no lado inverso do fluxo normal (na tela de Espécie,
+  não na de Classe) — "avise depois, deixe o jogador voltar" é o mesmo
+  padrão já usado pela Origem. `ClasseEscolhasStep.tsx` também usa a
+  mesma função (só entra em jogo se o jogador voltou depois de já ter
+  passado por Origem/Espécie). Empate entre 2 fontes → prioridade
+  Classe > Origem > Espécie na fonte mostrada (Talento hoje não
+  concede truque/magia de forma estruturada, ver PENDENCIAS.md
+  "Origens com seleção extra no Talento de Origem").
 
 **2. Iconografia de Magias.** ⚔️ ataque / ❤️‍🩹 cura / 🪙 componente com
 custo em PO — podem aparecer sozinhos ou combinados na mesma pill de
