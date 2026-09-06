@@ -1,5 +1,9 @@
 # EmDev.md
 
+> Arquivo da conta principal / branch padrão (ver seção 14.1 do
+> `CLAUDE.md`). A outra conta usa `EmDevB.md` — nunca escreva aqui a
+> partir da branch `claude/read-claude-md-c75hsf`.
+>
 > Plano do foco que está em andamento **agora** (ver ciclo de foco,
 > seção 6 do `CLAUDE.md`). Diferente da família `DECISOES-*.md`
 > (decisão já tomada, permanente) e de `PENDENCIAS.md` (adiado de
