@@ -6,7 +6,7 @@
 
 .pip {
   background: var(--accent);
-  border-radius: var(--shape-xs);
+  border-radius: 50%;
   transition: background var(--motion-standard) var(--ease-standard);
 }
 

@@ -9,6 +9,7 @@ import { cdConjuracao } from '../../../core/magiasPersonagem';
 import { useRoll } from '../../roll/RollContext';
 import InfoChip from '../../components/InfoChip';
 import LinearProgressBar from '../../components/LinearProgressBar';
+import ContadorUsos from '../../components/ContadorUsos';
 import SidePanel from '../combat/SidePanel';
 import AcaoPanelContent, { type DanoPendente } from '../combat/AcaoPanelContent';
 import BonusPanelContent from '../combat/BonusPanelContent';
@@ -610,10 +611,12 @@ export default function CombatTab({
           }}
           onClick={usosAtaqueDeSoproRestantes > 0 ? abrirAtaqueDeSopro : undefined}
         >
-          <div className="opt-card-name">🐉 Ataque de Sopro</div>
+          <div className="opt-card-name" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            🐉 Ataque de Sopro
+            <ContadorUsos total={usosAtaqueDeSoproMaximo} usados={usosAtaqueDeSoproMaximo - usosAtaqueDeSoproRestantes} />
+          </div>
           <div className="opt-card-desc">
-            substitui um ataque — Cone de 4,5m ou Linha de 9m×1,5m ({usosAtaqueDeSoproRestantes}/
-            {usosAtaqueDeSoproMaximo} usos — recarrega no Descanso Longo)
+            substitui um ataque — Cone de 4,5m ou Linha de 9m×1,5m (recarrega no Descanso Longo)
           </div>
         </div>
       )}
@@ -630,11 +633,14 @@ export default function CombatTab({
           }}
           onClick={usosAncestralidadeGiganteRestantes > 0 ? usarAncestralidadeGiganteAoAcertar : undefined}
         >
-          <div className="opt-card-name">🏔 {ancestralidadeGiganteEscolhida.split(' (')[0]}</div>
-          <div className="opt-card-desc">
-            toque ao acertar um ataque ({usosAncestralidadeGiganteRestantes}/{usosAncestralidadeGiganteMaximo} usos —
-            recarrega no Descanso Longo)
+          <div className="opt-card-name" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            🏔 {ancestralidadeGiganteEscolhida.split(' (')[0]}
+            <ContadorUsos
+              total={usosAncestralidadeGiganteMaximo}
+              usados={usosAncestralidadeGiganteMaximo - usosAncestralidadeGiganteRestantes}
+            />
           </div>
+          <div className="opt-card-desc">toque ao acertar um ataque (recarrega no Descanso Longo)</div>
         </div>
       )}
 
@@ -652,7 +658,10 @@ export default function CombatTab({
 
       {indomavelMaximo > 0 && (
         <>
-          <div className="section-title">Indomável</div>
+          <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span>Indomável</span>
+            <ContadorUsos total={indomavelMaximo} usados={indomavelMaximo - indomavelRestantes} />
+          </div>
           <div
             className="box"
             style={{
@@ -665,8 +674,7 @@ export default function CombatTab({
           >
             <div style={{ fontSize: 13 }}>🛡️ Ao falhar uma salvaguarda, toque aqui</div>
             <div className="label" style={{ marginTop: 2 }}>
-              Rola de novo somando seu nível de Guerreiro ({indomavelRestantes}/{indomavelMaximo} usos — só recupera
-              no Descanso Longo).
+              Rola de novo somando seu nível de Guerreiro (só recupera no Descanso Longo).
             </div>
           </div>
         </>
@@ -674,7 +682,10 @@ export default function CombatTab({
 
       {pontosDeSorteMaximo > 0 && (
         <>
-          <div className="section-title">Pontos de Sorte</div>
+          <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span>Pontos de Sorte</span>
+            <ContadorUsos total={pontosDeSorteMaximo} usados={pontosDeSorteMaximo - pontosDeSorteRestantes} />
+          </div>
           <div
             className="box"
             style={{
@@ -689,8 +700,7 @@ export default function CombatTab({
             <div className="label" style={{ marginTop: 2 }}>
               Dá Vantagem numa jogada sua de d20, ou impõe Desvantagem num ataque contra você
               {pontosDeSorteNegaCritico ? ', ou vira um crítico contra você em acerto normal' : ''} — use os botões
-              Vantagem/Desvantagem já disponíveis em qualquer rolagem ({pontosDeSorteRestantes}/{pontosDeSorteMaximo}{' '}
-              usos — só recupera no Descanso Longo).
+              Vantagem/Desvantagem já disponíveis em qualquer rolagem (só recupera no Descanso Longo).
             </div>
           </div>
         </>
@@ -698,7 +708,10 @@ export default function CombatTab({
 
       {usosFolegoMaximo > 0 && (
         <>
-          <div className="section-title">Mente Tática</div>
+          <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span>Mente Tática</span>
+            <ContadorUsos total={usosFolegoMaximo} usados={usosFolegoMaximo - usosFolegoRestantes} />
+          </div>
           <div
             className="box"
             style={{
@@ -710,8 +723,7 @@ export default function CombatTab({
           >
             <div style={{ fontSize: 13 }}>🧠 Ao falhar um teste de atributo, toque aqui</div>
             <div className="label" style={{ marginTop: 2 }}>
-              Gasta 1 uso de Recuperar Fôlego, joga 1d10 e soma ao teste ({usosFolegoRestantes}/{usosFolegoMaximo}{' '}
-              usos — banco compartilhado com Recuperar Fôlego).
+              Gasta 1 uso de Recuperar Fôlego, joga 1d10 e soma ao teste (banco compartilhado com Recuperar Fôlego).
             </div>
           </div>
         </>
@@ -719,7 +731,10 @@ export default function CombatTab({
 
       {periciaInigualavelDisponivel && (
         <>
-          <div className="section-title">Perícia Inigualável</div>
+          <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span>Perícia Inigualável</span>
+            <ContadorUsos total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} />
+          </div>
           {periciaInigualavelPendente ? (
             <div className="box" style={{ padding: 12, marginBottom: 12 }}>
               <div style={{ fontSize: 13 }}>Somou o dado ao d20 e ainda assim falhou?</div>
@@ -750,7 +765,7 @@ export default function CombatTab({
               <div style={{ fontSize: 13 }}>🎓 Ao falhar um teste de atributo ou ataque, toque aqui</div>
               <div className="label" style={{ marginTop: 2 }}>
                 Gasta 1 uso de Inspiração de Bardo (d{tamanhoDadoInspiracao}), soma ao d20 — se ainda assim falhar, o
-                uso não é gasto ({usosInspiracaoRestantes}/{usosInspiracaoMaximo} usos).
+                uso não é gasto.
               </div>
             </div>
           )}

@@ -1149,3 +1149,52 @@ nunca marcam, então nunca mostram, sem precisar de lista de exclusão.
 **Pra próxima característica parecida** (ex: um "Orientação"/Guidance
 +1d4 futuro): reaproveitar o mesmo `BonusExtraProvider`, só trocando
 rótulo/lados/fonte do `usar()` — não criar um 2º mecanismo.
+
+## Todo contador "N usos de M" vira pip circular ao lado do nome — nunca texto no meio do parágrafo (2026-09)
+
+**Regra permanente, sem exceção, daqui pra frente:** qualquer recurso
+onde o jogador "tem N vezes pra usar algo" (Indomável, Surto de Ação,
+Pontos de Sorte, Recuperar Fôlego, Inspiração de Bardo, Espaços de
+Magia, Ataque de Sopro, Ancestralidade Gigante, Conhecimento de
+Pedras, Pico de Adrenalina, Salto da Nuvem, Perícia Inigualável,
+Mente Tática, e qualquer coisa nova parecida) mostra o "quanto resta"
+como **pip circular** ao lado do NOME/título do recurso — nunca como
+`(3/5 usos — recarrega no Descanso Longo)` enfiado no meio do
+parágrafo de descrição. Motivo: a Ficha tinha vários desses contadores
+embutidos assim, texto corrido demais pra ler rápido numa tela de
+celular no meio de uma sessão de jogo (pedido do Osmar revisando a
+tela de Combat).
+
+**Como implementar (2 componentes, `ui/components/`):**
+- `TickPips` — os pips em si (bolinha cheia = disponível, cinza = já
+  gasto; esvazia do ÚLTIMO índice pro primeiro, nunca do primeiro pro
+  último). Círculo (`border-radius: 50%`), não quadrado com canto
+  arredondado — decisão visual explícita do Osmar, não usar
+  `--shape-xs`/`--shape-sm` aqui.
+- `ContadorUsos` — pips + texto pequeno "restantes/total" (cinza,
+  `var(--text-faint)`), pronto pra colocar do lado de um título;
+  cuida de neutralizar o `text-transform`/`letter-spacing` herdado de
+  `.section-title` (que não deve afetar números).
+
+**Onde plugar:** o container do título (`.section-title`,
+`.opt-card-name`, ou o rótulo de um `.slotCounter` dentro de um painel
+de Ação/Bônus/Reação) vira flex (`display:flex; align-items:center;
+gap:8px; flexWrap:wrap`) com o nome + `<ContadorUsos .../>` dentro. O
+parágrafo de descrição abaixo mantém só a informação de QUANDO recarga
+(Descanso Curto/Longo) — nunca repete o número, que já está no pip.
+
+**Não é pip:** um toggle de 1 uso só (Vigor Implacável, Astúcia
+Mágica, Inspiração Heroica) não é "N de M", é liga/desliga — continua
+sendo o card/checkbox normal, sem pip (a única exceção existente,
+Inspiração Heroica em `AtributosTab`, usa `TickPips` com `total={1}`
+só porque já existia antes dessa regra; não é o padrão a copiar pra
+um toggle novo).
+
+**Auditoria 2026-09:** os painéis de Ação/Bônus/Reação
+(`AcaoPanelContent`/`BonusPanelContent`/`ReacaoPanelContent`,
+`EscolherCirculoShell`, `MagiasTab`) já seguiam esse padrão antes da
+regra existir formalmente — só precisaram da troca de quadrado pra
+círculo. O único lugar com o anti-padrão (contador enterrado no texto)
+era `CombatTab.tsx`: Indomável, Pontos de Sorte, Mente Tática, Perícia
+Inigualável, Ataque de Sopro, Ancestralidade Gigante — todos
+corrigidos.
