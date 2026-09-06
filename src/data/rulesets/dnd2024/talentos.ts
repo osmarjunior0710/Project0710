@@ -83,7 +83,13 @@ export type EfeitoMecanicoTalento =
    * hoje, esse talento só é alcançável via Talento de Origem (sempre
    * ganho no nível 1 da criação, nunca escolhido depois via ASI). Ver
    * `core/calculoPersonagem.ts` (`bonusPvPorNivelDoTalento`). */
-  | { tipo: 'bonus-pv-por-nivel'; porNivel: number };
+  | { tipo: 'bonus-pv-por-nivel'; porNivel: number }
+  /** Troca o dado de dano do Ataque Desarmado, de "1 fixo" pra
+   * `quantidade`d`lados` (Valentão de Taverna: 1d4). Mesmo campo serve
+   * pro Estilo de Luta Combate Desarmado (1d6, ou 1d8 desarmado de
+   * verdade) quando ele ganhar `efeitoMecanico` — ver
+   * `core/ataque.ts` (`ataqueDesarmado`). */
+  | { tipo: 'dado-ataque-desarmado'; quantidade: number; lados: number };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -237,6 +243,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'nenhum' },
+    efeitoMecanico: { tipo: 'dado-ataque-desarmado', quantidade: 1, lados: 4 },
     beneficios: "Ataque Desarmado causa 1d4+Força Contundente (em vez do normal); pode rerolar 1 no dano. Proficiência com armas improvisadas. 1x/turno, ao acertar Desarmado na ação Atacar, pode empurrar o alvo 1,5m.",
     pagina: 202,
     fonte: "PHB 2024",

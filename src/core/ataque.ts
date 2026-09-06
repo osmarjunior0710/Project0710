@@ -7,7 +7,7 @@
 import { armas, type Arma } from '../data/rulesets/dnd2024/armas';
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { estilosDeLuta } from '../data/rulesets/dnd2024/estilosDeLuta';
-import { bonusProficiencia } from './calculoPersonagem';
+import { bonusProficiencia, efeitoMecanicoDoTalento } from './calculoPersonagem';
 import { identificarEquipamento } from './equipamento';
 import { classeProficienteComArma } from './proficienciaArma';
 import type { AtaqueInfo } from '../data/exampleCombat';
@@ -39,13 +39,20 @@ function parseDano(dano: string): { quantidade: number; lados: number; tipo: str
  * igual a 1 mais seu modificador de Força." Só a opção "Dano" está
  * implementada aqui — "Empurrar"/"Imobilizar" (testes de resistência,
  * sem rolagem de dano) ficam de fora por enquanto, ver PENDENCIAS.md.
+ *
+ * `talentosAtuais` — Valentão de Taverna troca o "1 fixo" por um dado
+ * de verdade (`dado-ataque-desarmado`, ver `talentos.ts`); sem esse
+ * talento, o dano continua o "1d1" padrão (na prática, sempre 1).
  */
-export function ataqueDesarmado(classe: Classe, nivel: number, forMod: number): AtaqueResolvido {
+export function ataqueDesarmado(classe: Classe, nivel: number, forMod: number, talentosAtuais?: string[]): AtaqueResolvido {
   const prof = bonusProficiencia(classe, nivel);
+  const dadoTalento = efeitoMecanicoDoTalento(talentosAtuais, 'dado-ataque-desarmado');
+  const danoQuantidade = dadoTalento?.quantidade ?? 1;
+  const danoLados = dadoTalento?.lados ?? 1;
   return {
     nome: 'Ataque Desarmado',
     descricao: 'Soco, chute ou golpe corpo a corpo sem arma. Dano Contundente.',
-    info: { modAcerto: forMod + prof, danoQuantidade: 1, danoLados: 1, danoMod: forMod, danoTipo: 'Contundente' },
+    info: { modAcerto: forMod + prof, danoQuantidade, danoLados, danoMod: forMod, danoTipo: 'Contundente' },
   };
 }
 
@@ -133,11 +140,12 @@ export function ataqueAtual(
   estiloDeLutaEscolhido?: string | null,
   outraArmaNaMaoSecundaria = false,
   atribForcada?: number,
+  talentosAtuais?: string[],
 ): AtaqueResolvido {
   const arma = nomeArmaEquipada ? armas.find((a) => a.nome === nomeArmaEquipada) : undefined;
   return arma
     ? ataqueComArma(arma, classe, nivel, forMod, desMod, false, duasMaosAtivo, estiloDeLutaEscolhido, outraArmaNaMaoSecundaria, atribForcada)
-    : ataqueDesarmado(classe, nivel, forMod);
+    : ataqueDesarmado(classe, nivel, forMod, talentosAtuais);
 }
 
 /**

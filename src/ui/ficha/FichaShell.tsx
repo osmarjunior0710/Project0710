@@ -403,6 +403,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         personagem.estiloDeLuta,
         equipadoAtual.maoSecundaria !== null,
         armaEquipada?.armaDePacto ? carMod : undefined,
+        talentosEfetivos,
       )
     : null;
   const numAtaques = Math.max(

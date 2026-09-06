@@ -76,10 +76,18 @@ não é um problema de importação como foi com Espécies. Os gaps são de
       `tsc -b`/`npm test` (212)/`npm run build` limpos + Playwright
       (Artesão → 3 ferramentas escolhidas → Ficha, aba Atributos, mostra
       as 4 ferramentas certas com mod./bônus).
-- [ ] **Grupo D** — Ataque Desarmado do Valentão de Taverna vira
-      1d4+Força (em vez do padrão 1+Força) — plugar em `core/ataque.ts`
-      (`ataqueDesarmado`), que já modela isso de verdade. Reroll de 1 no
-      dano e empurrar 1,5m ficam de fora (ver Backlog.md).
+- [x] **Grupo D** — Ataque Desarmado do Valentão de Taverna vira
+      1d4+Força (em vez do padrão 1+Força). Novo
+      `EfeitoMecanicoTalento` (`dado-ataque-desarmado`, quantidade +
+      lados) plugado em `core/ataque.ts` (`ataqueDesarmado` agora aceita
+      `talentosAtuais` e usa `efeitoMecanicoDoTalento`, mesmo padrão dos
+      outros talentos de Fase 4) — pensado pra já servir o Estilo de
+      Luta Combate Desarmado (1d6/1d8) quando ele ganhar
+      `efeitoMecanico` depois. 2 testes novos (Vitest, com/sem
+      talento). Reroll de 1 no dano e empurrar 1,5m continuam de fora
+      (ver Backlog.md). Verificado: `tsc -b`/`npm test` (214)/
+      `npm run build` limpos + Playwright (Marinheiro → Combat → Ação →
+      Atacar Desarmado → Rolar Dano mostra "1d4").
 - [ ] **Grupo E** — Pontos de Sorte do Sortudo (pool = Bônus de
       Proficiência, recarrega em Descanso Longo; gasta 1 pra dar
       Vantagem numa rolagem sua, ou Desvantagem num ataque contra você,
@@ -93,5 +101,4 @@ não é um problema de importação como foi com Espécies. Os gaps são de
       de uma Origem, não pelo Versátil. Só fazer depois que todas as
       telas de Origem (Grupos A-G) estiverem prontas.
 
-Próximo passo: perguntar ao Osmar qual entre Grupo D (Valentão) e
-Grupo E (Sortudo) seguir primeiro.
+Próximo passo: Grupo E (Pontos de Sorte do Sortudo).
