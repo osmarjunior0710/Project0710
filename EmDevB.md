@@ -16,5 +16,40 @@
 
 ---
 
-Sem foco em andamento nesta conta no momento (a Auditoria de Conteúdo
-fechou — ver `DECISOES-DADOS.md`). Aguardando o próximo foco.
+## Foco: Auditoria de Magias — Upcast + Dano Base + AtaqueOuSalvaguarda
+
+Continuação do que ficou registrado em `PENDENCIAS.md` ("Motor de
+rolagem de dano de Magia") e `AUDITORIA-CONTEUDO.md` seção 3.1. Fonte
+dos livros: 2 PDFs fornecidos pelo Osmar (Cap. 7 Magias do Livro do
+Jogador, "A a I" e "I a Z" — juntos cobrem as 390 magias).
+
+- [x] **1. Importar Upcast estruturado pro `magias.ts` — FEITA.** A
+      planilha já tinha as colunas `Upcast_Tipo`/`Upcast_CirculoBase`/
+      `Upcast_Dado`/`Upcast_Flat`/`Upcast_Alvos`/`Upcast_Texto`
+      (trabalho de uma entrega anterior, ver `DECISOES-DADOS.md`), só
+      não tinham sido trazidas pro código ainda. Adicionados os 6
+      campos novos na interface `Magia` (tipo `UpcastTipo` novo,
+      `'Nenhum'` da planilha vira `null` no código, igual ao padrão já
+      usado em Itens Mágicos). 391 entradas preenchidas (390 da
+      planilha + 1 entrada sintética "Falar com Animais - Traço de
+      Gnomo", que corretamente ficou com upcast `null` igual a magia
+      real "Falar com Animais"). `npx tsc --noEmit`, `npm test` (221
+      passando) e `npm run build` OK.
+- [ ] **2. Extrair Dano Base (`DanoBase_Dado` + `DanoBase_Tipo`)** das
+      magias com dano — mesmo processo usado pro Upcast (cruzar PDF +
+      planilha, coluna "Círculo" já existente como checagem cruzada).
+      Trabalho grande (~130+ magias de dano) — quebrar em lotes.
+- [ ] **3. `AtaqueOuSalvaguarda`** — decidir se dá pra extrair
+      confiável só do texto (melhorar `core/classificarMagia.ts`) ou
+      se precisa de coluna nova na planilha (`AUDITORIA-CONTEUDO.md`
+      seção 3, ainda em aberto).
+- [ ] **4. `core/magiaDano.ts`** — função que combina Dano Base +
+      Upcast Estruturado dado o círculo do espaço usado, com teste
+      Vitest (caso sem upcast, caso com upcast tipo "Dado por Círculo"
+      acima do círculo base, caso "Fórmula Própria"/"Outro").
+- [ ] **5. UI na Ficha** (aba Magias, ao escolher círculo pra
+      conjurar) mostrando o total de dados antes de confirmar e
+      disparando a rolagem via `RollContext`. **Perguntar ao Osmar
+      onde fica e como o jogador ativa antes de codar** (regra do
+      `LICOES-RAPIDAS.md`) — ainda não perguntado, fazer antes de
+      começar este item.
