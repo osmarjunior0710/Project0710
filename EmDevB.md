@@ -62,7 +62,26 @@ Jogador, "A a I" e "I a Z" — juntos cobrem as 390 magias).
         por escolha do jogador (Orbe Cromático, Explosão Elemental) —
         `danoBaseTipo: "escolhido"`, dado ainda fixo. `npx tsc
         --noEmit`, `npm test` (221 passando) e `npm run build` OK.
-  - [ ] **Lote 2 (Círculo 2-4, ~46 magias)**
+  - [x] **Lote 2 (Círculo 2-4, 44 magias) — FEITA.** 2 candidatas do
+        regex descartadas ao ler contra o PDF: "Invocar Aberração"
+        (o dado achado era da criatura invocada, não da magia em si —
+        mesmo critério de excluir Invocar/Convocar com bloco de
+        estatística próprio) e "Mesclar-se às Rochas" (6d6 Energético
+        é dano de PUNIÇÃO ao conjurador se a rocha for destruída, não
+        dano num alvo — fora do escopo de "Dano Base"). 6 magias com 2
+        efeitos de dano no mesmo lançamento (Escudo Ardente, Esfera
+        Vitriólica, Flecha Relâmpago, Flecha Ácida de Melf, Fome de
+        Hadar, Tempestade Glacial) — guardado o valor que bate com o
+        que `upcastTexto` escala (mesmo critério do Lote 1); Guardiões
+        Espirituais tem o TIPO (não o dado) variando por tendência do
+        conjurador — `danoBaseTipo: "escolhido"` (mesmo valor de dado
+        nos dois casos, só o tipo muda). **Bug de script achado e
+        corrigido antes de commitar**: a 1ª tentativa de gerar o
+        `.ts` trocou os grupos do regex e gerou `"2d6"null"Radiante"`
+        (JS quebrado) — pego no `npm run build` (não no `tsc --noEmit`
+        sozinho, que não aparenta cobrir esse arquivo — rodar sempre
+        os 3 comandos, nunca confiar só no tsc solto). `npx tsc -b`,
+        `npm test` (221 passando) e `npm run build` OK.
   - [ ] **Lote 3 (Círculo 5-9, ~45 magias)**
 - [ ] **3. `AtaqueOuSalvaguarda`** — decidir se dá pra extrair
       confiável só do texto (melhorar `core/classificarMagia.ts`) ou
