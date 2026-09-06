@@ -35,7 +35,7 @@ Jogador, "A a I" e "I a Z" — juntos cobrem as 390 magias).
       Gnomo", que corretamente ficou com upcast `null` igual a magia
       real "Falar com Animais"). `npx tsc --noEmit`, `npm test` (221
       passando) e `npm run build` OK.
-- [ ] **2. Extrair Dano Base (`DanoBase_Dado` + `DanoBase_Tipo`)** das
+- [x] **2. Extrair Dano Base (`DanoBase_Dado` + `DanoBase_Tipo`)** das
       magias com dano — mesmo processo usado pro Upcast (cruzar PDF +
       planilha, coluna "Círculo" já existente como checagem cruzada).
       129 magias com dano de um total de 390 (confirmado lendo o PDF
@@ -82,7 +82,31 @@ Jogador, "A a I" e "I a Z" — juntos cobrem as 390 magias).
         sozinho, que não aparenta cobrir esse arquivo — rodar sempre
         os 3 comandos, nunca confiar só no tsc solto). `npx tsc -b`,
         `npm test` (221 passando) e `npm run build` OK.
-  - [ ] **Lote 3 (Círculo 5-9, ~45 magias)**
+  - [x] **Lote 3 (Círculo 5-9, 40 de 45 magias) — FEITA, item 2
+        concluído.** 5 candidatas do regex descartadas depois de ler
+        contra o PDF, todas pelo mesmo motivo (dano NÃO é infligido num
+        alvo/inimigo): "Desejo" e "Contato Extraplanar" causam dano no
+        PRÓPRIO conjurador como efeito colateral (Desejo: risco por
+        abusar do efeito; Contato Extraplanar: falha na salvaguarda ao
+        conjurar); "Missão" é dano condicional futuro se o alvo
+        desobedecer (não acontece no lançamento, sem ataque/salvaguarda
+        no momento do dano); "Teleporte" é dano de tabela de "Azar"
+        (viagem deu errado); "Tempestade da Vingança" tem 5 efeitos de
+        dano diferentes em turnos sucessivos (2d6 Trovejante, 4d6
+        Ácido, 10d6 Elétrico, 2d6 Contundente, 1d6 Gélido) — não cabe
+        no campo único, mesmo espírito do `Upcast_Tipo: "Outro"`.
+        6 magias com 2+ efeitos de dano simultâneos guardam só o valor
+        que bate com `upcastTexto` (ou o primeiro/principal quando
+        ambos escalam igual, mesmo critério dos lotes 1/2). 2 magias
+        com o TIPO sorteado por tabela (Rajada Prismática, Muralha
+        Prismática — 1d8/1d6 pra escolher a cor) ganharam
+        `danoBaseTipo: "aleatório"` (diferente de `"escolhido"`, que é
+        decisão do jogador). `npx tsc -b`, `npm test` (221 passando) e
+        `npm run build` OK. **Com isso, a extração de Dano Base está
+        concluída** — 122 de 129 magias de dano candidatas viraram
+        `danoBaseDado`/`danoBaseTipo` estruturado (7 descartadas ao
+        ler contra o livro: 2 no Lote 2, 5 no Lote 3, todas com o
+        motivo registrado acima/no Lote 2).
 - [ ] **3. `AtaqueOuSalvaguarda`** — decidir se dá pra extrair
       confiável só do texto (melhorar `core/classificarMagia.ts`) ou
       se precisa de coluna nova na planilha (`AUDITORIA-CONTEUDO.md`
