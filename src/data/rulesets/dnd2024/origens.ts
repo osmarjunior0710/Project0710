@@ -5,6 +5,19 @@
 // grafa o talento da origem Artesão como "Artífice", mas o nome oficial é
 // "Artifista" (confirmado no Livro do Jogador 2024 e na aba Talentos da
 // própria planilha). Ver DECISOES-DESIGN.md.
+//
+// Nomes de item ajustados pra bater exatamente com o catálogo de
+// equipamento (`equipamentoAventura.ts`) — `buscarPesoItem` busca por
+// nome exato, então "Roupas de Viagem"/"Fantasia"/"Roupas Finas"/
+// "Balde de Ferro" (como o livro descreve) viravam "sem peso
+// cadastrado" na Mochila por não baterem com "Roupas, Viagem"/
+// "Roupas, Fantasia"/"Roupas, Finas"/"Balde" (como o catálogo grafa).
+// Os 3 "Livro (tema)" (orações/filosofia/história) viraram só "Livro"
+// pelo mesmo motivo — o catálogo não tem variante temática; o tema
+// original fica em comentário ao lado de cada linha. Ver
+// PENDENCIAS.md "Itens sem peso cadastrado" pro resto da auditoria
+// (Flecha/Virote avulsos e Kit de Jogos ainda têm lacuna própria,
+// não é erro de nome).
 
 import type { Atributo } from '../../wizardFixtures';
 
@@ -48,7 +61,7 @@ export const origens: Origem[] = [
     equipamentoOpcaoA: {
       itens: [
         { nome: "Suprimentos de Calígrafo", quantidade: 1, unidade: null },
-        { nome: "Livro (orações)", quantidade: 1, unidade: null },
+        { nome: "Livro", quantidade: 1, unidade: null }, // livro de orações — catálogo não tem variante temática, ver DECISOES-FICHA.md
         { nome: "Símbolo Sagrado", quantidade: 1, unidade: null },
         { nome: "Pergaminho", quantidade: 10, unidade: "folhas" },
         { nome: "Túnica", quantidade: 1, unidade: null }
@@ -74,7 +87,7 @@ export const origens: Origem[] = [
         { nome: "Ferramentas de Ladrão", quantidade: 1, unidade: null },
         { nome: "Kit de Jogos", quantidade: 1, unidade: null },
         { nome: "Algibeira", quantidade: 2, unidade: null },
-        { nome: "Roupas de Viagem", quantidade: 1, unidade: null },
+        { nome: "Roupas, Viagem", quantidade: 1, unidade: null },
         { nome: "Saco de Dormir", quantidade: 1, unidade: null }
       ],
       ouro: 16,
@@ -96,7 +109,7 @@ export const origens: Origem[] = [
       itens: [
         { nome: "Ferramentas de Artesão", quantidade: 1, unidade: null },
         { nome: "Algibeira", quantidade: 2, unidade: null },
-        { nome: "Roupas de Viagem", quantidade: 1, unidade: null }
+        { nome: "Roupas, Viagem", quantidade: 1, unidade: null }
       ],
       ouro: 32,
     },
@@ -117,9 +130,9 @@ export const origens: Origem[] = [
       itens: [
         { nome: "Instrumento Musical", quantidade: 1, unidade: null },
         { nome: "Espelho", quantidade: 1, unidade: null },
-        { nome: "Fantasia", quantidade: 2, unidade: null },
+        { nome: "Roupas, Fantasia", quantidade: 2, unidade: null },
         { nome: "Perfume", quantidade: 1, unidade: null },
-        { nome: "Roupas de Viagem", quantidade: 1, unidade: null }
+        { nome: "Roupas, Viagem", quantidade: 1, unidade: null }
       ],
       ouro: 11,
     },
@@ -139,8 +152,8 @@ export const origens: Origem[] = [
     equipamentoOpcaoA: {
       itens: [
         { nome: "Kit de Falsificação", quantidade: 1, unidade: null },
-        { nome: "Fantasia", quantidade: 1, unidade: null },
-        { nome: "Roupas Finas", quantidade: 1, unidade: null }
+        { nome: "Roupas, Fantasia", quantidade: 1, unidade: null },
+        { nome: "Roupas, Finas", quantidade: 1, unidade: null }
       ],
       ouro: 15,
     },
@@ -163,7 +176,7 @@ export const origens: Origem[] = [
         { nome: "Ferramentas de Ladrão", quantidade: 1, unidade: null },
         { nome: "Algibeira", quantidade: 2, unidade: null },
         { nome: "Pé de Cabra", quantidade: 1, unidade: null },
-        { nome: "Roupas de Viagem", quantidade: 1, unidade: null }
+        { nome: "Roupas, Viagem", quantidade: 1, unidade: null }
       ],
       ouro: 16,
     },
@@ -185,9 +198,9 @@ export const origens: Origem[] = [
         { nome: "Cajado", quantidade: 1, unidade: null },
         { nome: "Kit de Herbalismo", quantidade: 1, unidade: null },
         { nome: "Lâmpada", quantidade: 1, unidade: null },
-        { nome: "Livro (filosofia)", quantidade: 1, unidade: null },
+        { nome: "Livro", quantidade: 1, unidade: null }, // livro de filosofia — catálogo não tem variante temática, ver DECISOES-FICHA.md
         { nome: "Óleo", quantidade: 3, unidade: "frascos" },
-        { nome: "Roupas de Viagem", quantidade: 1, unidade: null },
+        { nome: "Roupas, Viagem", quantidade: 1, unidade: null },
         { nome: "Saco de Dormir", quantidade: 1, unidade: null }
       ],
       ouro: 16,
@@ -211,7 +224,7 @@ export const origens: Origem[] = [
         { nome: "Lâmpada", quantidade: 1, unidade: null },
         { nome: "Óleo", quantidade: 3, unidade: "frascos" },
         { nome: "Pergaminho", quantidade: 12, unidade: "folhas" },
-        { nome: "Roupas Finas", quantidade: 1, unidade: null }
+        { nome: "Roupas, Finas", quantidade: 1, unidade: null }
       ],
       ouro: 23,
     },
@@ -233,7 +246,7 @@ export const origens: Origem[] = [
         { nome: "Foice", quantidade: 1, unidade: null },
         { nome: "Ferramentas de Carpinteiro", quantidade: 1, unidade: null },
         { nome: "Kit de Curandeiro", quantidade: 1, unidade: null },
-        { nome: "Balde de Ferro", quantidade: 1, unidade: null },
+        { nome: "Balde", quantidade: 1, unidade: null },
         { nome: "Pá", quantidade: 1, unidade: null }
       ],
       ouro: 30,
@@ -260,7 +273,7 @@ export const origens: Origem[] = [
         { nome: "Aljava", quantidade: 1, unidade: null },
         { nome: "Grilhões", quantidade: 1, unidade: null },
         { nome: "Lanterna Coberta", quantidade: 1, unidade: null },
-        { nome: "Roupas de Viagem", quantidade: 1, unidade: null }
+        { nome: "Roupas, Viagem", quantidade: 1, unidade: null }
       ],
       ouro: 12,
     },
@@ -283,7 +296,7 @@ export const origens: Origem[] = [
         { nome: "Flecha", quantidade: 20, unidade: null },
         { nome: "Ferramentas de Cartógrafo", quantidade: 1, unidade: null },
         { nome: "Aljava", quantidade: 1, unidade: null },
-        { nome: "Roupas de Viagem", quantidade: 1, unidade: null },
+        { nome: "Roupas, Viagem", quantidade: 1, unidade: null },
         { nome: "Saco de Dormir", quantidade: 1, unidade: null },
         { nome: "Tenda", quantidade: 1, unidade: null }
       ],
@@ -307,7 +320,7 @@ export const origens: Origem[] = [
         { nome: "Adaga", quantidade: 1, unidade: null },
         { nome: "Ferramentas de Navegador", quantidade: 1, unidade: null },
         { nome: "Corda", quantidade: 1, unidade: null },
-        { nome: "Roupas de Viagem", quantidade: 1, unidade: null }
+        { nome: "Roupas, Viagem", quantidade: 1, unidade: null }
       ],
       ouro: 20,
     },
@@ -328,7 +341,7 @@ export const origens: Origem[] = [
       itens: [
         { nome: "Ferramentas de Navegador", quantidade: 1, unidade: null },
         { nome: "Algibeira", quantidade: 2, unidade: null },
-        { nome: "Roupas de Viagem", quantidade: 1, unidade: null }
+        { nome: "Roupas, Viagem", quantidade: 1, unidade: null }
       ],
       ouro: 22,
     },
@@ -349,7 +362,7 @@ export const origens: Origem[] = [
       itens: [
         { nome: "Kit de Jogos", quantidade: 1, unidade: null },
         { nome: "Perfume", quantidade: 1, unidade: null },
-        { nome: "Roupas Finas", quantidade: 1, unidade: null }
+        { nome: "Roupas, Finas", quantidade: 1, unidade: null }
       ],
       ouro: 29,
     },
@@ -370,7 +383,7 @@ export const origens: Origem[] = [
       itens: [
         { nome: "Cajado", quantidade: 1, unidade: null },
         { nome: "Suprimentos de Calígrafo", quantidade: 1, unidade: null },
-        { nome: "Livro (história)", quantidade: 1, unidade: null },
+        { nome: "Livro", quantidade: 1, unidade: null }, // livro de história — catálogo não tem variante temática, ver DECISOES-FICHA.md
         { nome: "Pergaminho", quantidade: 8, unidade: "folhas" },
         { nome: "Túnica", quantidade: 1, unidade: null }
       ],
@@ -397,7 +410,7 @@ export const origens: Origem[] = [
         { nome: "Kit de Curandeiro", quantidade: 1, unidade: null },
         { nome: "Kit de Jogos", quantidade: 1, unidade: null },
         { nome: "Aljava", quantidade: 1, unidade: null },
-        { nome: "Roupas de Viagem", quantidade: 1, unidade: null }
+        { nome: "Roupas, Viagem", quantidade: 1, unidade: null }
       ],
       ouro: 14,
     },

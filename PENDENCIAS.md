@@ -470,24 +470,14 @@ silenciosamente — a Mochila trata isso sem quebrar (mostra "sem peso
 cadastrado" e avisa quantos itens ficaram de fora da soma), mas o
 número de carga fica sub-contado até corrigir.
 
-**Prováveis bugs de nome (o catálogo TEM o peso, só o nome não bate) —
-corrigir o nome usado em `origens.ts`/`classesProficienciasIniciais.ts`
-pro nome exato do catálogo, não mexer na planilha:**
-- `"Balde de Ferro"` → catálogo tem só `"Balde"` (1 kg). Usado na
-  Origem Fazendeiro.
-- `"Fantasia"` → catálogo tem `"Roupas, Fantasia"` (2 kg). Usado na
-  Origem Artista (2×) e Charlatão (1×).
-- `"Roupas Finas"` → catálogo tem `"Roupas, Finas"` (3 kg). Usado nas
-  Origens Charlatão, Escriba e Nobre.
-- `"Roupas de Viagem"` → catálogo tem `"Roupas, Viagem"` (2 kg). É o
-  nome mais repetido no arquivo (aparece em quase toda Origem) —
-  provavelmente o de maior impacto no peso sub-contado hoje.
-- `"Livro (filosofia)"` (Origem Eremita), `"Livro (história)"` (Origem
-  Sábio), `"Livro (orações)"` (Origem Acólito) → catálogo tem só
-  `"Livro"` (2,5 kg), sem variantes temáticas. Decidir: usar o nome
-  genérico "Livro" nesses 3 lugares (perde o sabor do texto, ganha o
-  peso certo), ou o Osmar decide se vale criar entradas próprias no
-  catálogo pra cada variante.
+**Prováveis bugs de nome — resolvido (2026-09, foco Origens, Grupo H):**
+todos os nomes em `origens.ts` foram corrigidos pro nome exato do
+catálogo (`"Balde de Ferro"`→`"Balde"`, `"Fantasia"`→`"Roupas,
+Fantasia"`, `"Roupas Finas"`→`"Roupas, Finas"`, `"Roupas de
+Viagem"`→`"Roupas, Viagem"`, e os 3 `"Livro (tema)"`→`"Livro"` genérico
+com o tema original preservado em comentário ao lado da linha).
+`classesProficienciasIniciais.ts` já não tinha nenhuma dessas
+ocorrências, não precisou de ajuste.
 
 **Possível lacuna real de planilha (ou decisão de dado a tomar, não é
 só digitar o nome certo):**
