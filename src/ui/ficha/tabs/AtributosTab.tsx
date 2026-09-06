@@ -104,7 +104,11 @@ export default function AtributosTab({
       <div className={styles.topRow}>
         <div className={`box-solid ${styles.levelBox}`}>
           <div>
-            <div className="label">nível atual</div>
+            <div className="label">
+              nível
+              <br />
+              atual
+            </div>
             <div style={{ fontSize: 17 }}>{nivel}</div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -130,14 +134,37 @@ export default function AtributosTab({
             {pvAtual}/{pvMax}
           </div>
         </div>
-      </div>
-
-      <div className={styles.hpRow}>
-        <div className={`box ${styles.hpBox}`} onClick={onAlternarInspiracaoHeroica}>
-          <div className="label">Ins. Her.</div>
+        <div className={`box ${styles.hpBox} ${styles.hpBoxAccent}`} onClick={onAlternarInspiracaoHeroica}>
+          <div className="label">
+            Ins.
+            <br />
+            Her.
+          </div>
           <div className={styles.hpPipRow}>
             <TickPips total={1} usados={inspiracaoHeroicaAtiva ? 0 : 1} tamanho="lg" />
           </div>
+        </div>
+      </div>
+
+      <div className={styles.hpRow}>
+        <div className={`box ${styles.hpBox}`}>
+          <div className="label">
+            Bônus
+            <br />
+            Prof.
+          </div>
+          <div className={styles.hpNum}>
+            {bonusProficiencia >= 0 ? '+' : ''}
+            {bonusProficiencia}
+          </div>
+        </div>
+        <div className={`box ${styles.hpBox}`}>
+          <div className="label">
+            Percepção
+            <br />
+            Passiva <InfoValor titulo="Percepção Passiva" explicacao={explicacaoPercepcaoPassiva} />
+          </div>
+          <div className={styles.hpNum}>{percepcaoPassiva ?? '—'}</div>
         </div>
         <div className={`box ${styles.hpBox}`}>
           <div className="label">
@@ -146,7 +173,7 @@ export default function AtributosTab({
           <div className={styles.hpNum}>{ca ?? '—'}</div>
         </div>
         <div
-          className={`box ${styles.hpBox}`}
+          className={`box ${styles.hpBox} ${styles.hpBoxAccent}`}
           onClick={() => {
             if (iniciativa === null) return;
             rolarD20({ label: 'Iniciativa', formula: `1d20 + ${iniciativa}`, mod: iniciativa });
@@ -157,13 +184,6 @@ export default function AtributosTab({
             Iniciativa <InfoValor titulo="Iniciativa" explicacao={explicacaoIniciativa} />
           </div>
           <div className={styles.hpNum}>{iniciativa !== null ? `${iniciativa >= 0 ? '+' : ''}${iniciativa}` : '—'}</div>
-        </div>
-        <div className={`box ${styles.hpBox}`}>
-          <div className="label">Bônus Prof.</div>
-          <div className={styles.hpNum}>
-            {bonusProficiencia >= 0 ? '+' : ''}
-            {bonusProficiencia}
-          </div>
         </div>
       </div>
 
@@ -215,12 +235,6 @@ export default function AtributosTab({
           </span>
         </div>
       ))}
-      <div className={styles.skillRow}>
-        <span>
-          Percepção Passiva <InfoValor titulo="Percepção Passiva" explicacao={explicacaoPercepcaoPassiva} />
-        </span>
-        <span>{percepcaoPassiva ?? '—'}</span>
-      </div>
       <div className="label" style={{ marginTop: 6, marginBottom: 12 }}>
         toque num atributo, perícia ou iniciativa pra rolar o dado.
       </div>

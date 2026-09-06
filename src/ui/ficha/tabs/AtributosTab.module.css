@@ -5,7 +5,7 @@
 }
 
 .levelBox {
-  flex: 1;
+  flex: 2;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -24,6 +24,14 @@
   padding: var(--space-1);
   text-align: center;
   min-height: var(--touch-target-min);
+}
+
+/* Caixa com interação real (rola dado ou liga/desliga) — mesmo azul do
+   levelBox, pra distinguir de caixa só informativa/passiva (que fica
+   com a borda cinza padrão do .box). Ver DECISOES-DESIGN.md. */
+.hpBoxAccent {
+  border-color: var(--accent);
+  cursor: pointer;
 }
 
 .hpNum {

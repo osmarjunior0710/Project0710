@@ -1198,3 +1198,37 @@ círculo. O único lugar com o anti-padrão (contador enterrado no texto)
 era `CombatTab.tsx`: Indomável, Pontos de Sorte, Mente Tática, Perícia
 Inigualável, Ataque de Sopro, Ancestralidade Gigante — todos
 corrigidos.
+
+## Borda azul = interativo, borda cinza = passivo — regra pro topo da aba Atributos (2026-09)
+
+**Problema:** o topo da aba Atributos (PV/CA/Iniciativa/Bônus Prof./
+Inspiração Heroica) usava a borda cinza padrão (`.box`) em toda caixa
+por igual, sem distinguir visualmente qual toca/rola dado (Iniciativa,
+Inspiração Heroica) de qual é só informativo (PV, CA, Bônus de
+Proficiência) — só a caixa de Nível já tinha borda azul de propósito.
+Também não havia lugar de destaque pra Percepção Passiva (Feedback.md:
+ela vivia como a 19ª linha da lista de Perícias, com a mesma cara das
+perícias de verdade, mesmo não sendo clicável nem rolável).
+
+**Solução, regra permanente pra qualquer caixa desse estilo daqui pra
+frente:** borda azul (`var(--accent)`, classe `.hpBoxAccent` em
+`AtributosTab.module.css`, mesmo tom já usado em `.levelBox`) em
+qualquer caixa que role dado OU tenha interação de toque (liga/desliga
+etc); borda cinza padrão (`.box` sem modificador) em qualquer caixa
+só informativa, sem toque nenhum. A cor sozinha já comunica "dá pra
+tocar" vs "é só um número" — dispensa qualquer instrução escrita.
+
+**Layout resultante (3 linhas, decidido com o Osmar):**
+- Linha 1: Nível (50% da largura, `flex:2` vs `flex:1` das outras
+  duas) · PV · Inspiração Heroica.
+- Linha 2, 4 colunas iguais: Bônus de Proficiência · **Percepção
+  Passiva** (nova, resolve o pedido do Feedback.md — fica ao lado de
+  CA/Bônus Prof., mesma família de "número fixo pra consulta", com
+  borda cinza reforçando que não é clicável) · CA · Iniciativa.
+- Linha 3: grade de atributos (inalterada).
+
+**Rótulo de mais de 1 palavra sempre quebra depois da 1ª palavra**
+(pedido explícito do Osmar, regra geral pra qualquer label de caixa
+pequena daqui pra frente): "nível\natual", "Ins.\nHer.", "Bônus\n
+Prof.", "Percepção\nPassiva". Rótulo de 1 palavra só (PV, CA,
+Iniciativa) não quebra.
