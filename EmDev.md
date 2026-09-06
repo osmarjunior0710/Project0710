@@ -56,17 +56,36 @@ não é um problema de importação como foi com Espécies. Os gaps são de
       pra cada fonte). 3 testes novos (Vitest). Verificado:
       `tsc -b`/`npm test` (212)/`npm run build` limpos + Playwright
       (Fazendeiro nível 1 → popup mostra "Vigoroso +2" e o total bate).
-- [ ] **Grupo C** — demais talentos de Origem sem `efeitoMecanico`
-      ainda (9 origin-slots / 7 talentos distintos, além de Vigoroso) —
-      auditar cada um e decidir se entra em `EfeitoMecanicoTalento` ou
-      se é caso "sem número calculado hoje" (ex: precisa do motor de
-      dano/reroll que ainda não existe — ver nota de Curandeiro/
-      Atacante Selvagem abaixo).
-- [ ] **Grupo D-G** — pendente de detalhar (mecanismo de reroll de
-      "dados" não-d20 pra Curandeiro/Atacante Selvagem — ver
-      `Backlog.md` sobre Inspiração Heroica só cobrir d20 hoje —, e
-      outros achados menores do restante da auditoria de talentos de
-      Origem).
+- [x] **Grupo C — auditoria + proficiências (Artifista/Músico)**:
+      dos 6 Talentos de Origem sem `efeitoMecanico` (Artifista,
+      Atacante Selvagem, Curandeiro, Músico, Sortudo, Valentão de
+      Taverna), auditados 1 a 1 — resultado completo no Backlog.md
+      (novo tópico "Talentos de Origem — pedaços implementáveis").
+      Implementado agora: novo `Talento.concedeFerramentaGrupo`
+      (reaproveita o formato `ferramentasEscolha` já usado por
+      proficiência de CLASSE) — Artifista ganha 3 Ferramentas de
+      Artesão, Músico ganha 3 Instrumentos Musicais, ambos com tela
+      própria em `TalentoOrigemEscolhasStep` e "já possui" cruzando com
+      a ferramenta fixa/escolhida da Origem. `ferramentasProficientes`
+      (calculoPersonagem.ts) já lia `proficienciasTalentoOrigemEscolhidas`
+      genericamente (do Habilidoso) — nenhuma mudança extra precisou.
+      Resto de Artifista (desconto de loja, fabricar item por Descanso
+      Longo) e de Músico (dar Inspiração Heroica a ALIADOS) travados
+      estruturalmente (sem sistema de economia/downtime nem de grupo/
+      outros personagens) — movidos pro `Backlog.md`. Verificado:
+      `tsc -b`/`npm test` (212)/`npm run build` limpos + Playwright
+      (Artesão → 3 ferramentas escolhidas → Ficha, aba Atributos, mostra
+      as 4 ferramentas certas com mod./bônus).
+- [ ] **Grupo D** — Ataque Desarmado do Valentão de Taverna vira
+      1d4+Força (em vez do padrão 1+Força) — plugar em `core/ataque.ts`
+      (`ataqueDesarmado`), que já modela isso de verdade. Reroll de 1 no
+      dano e empurrar 1,5m ficam de fora (ver Backlog.md).
+- [ ] **Grupo E** — Pontos de Sorte do Sortudo (pool = Bônus de
+      Proficiência, recarrega em Descanso Longo; gasta 1 pra dar
+      Vantagem numa rolagem sua, ou Desvantagem num ataque contra você,
+      ou — nível 5+ — vira crítico contra você em acerto normal).
+      Maior que os outros — precisa integrar com o RollContext de
+      verdade, não só um contador.
 - [ ] **Última coisa do foco** — espécie Humana (traço Versátil) deixa
       escolher QUALQUER talento de Origem, inclusive Habilidoso e
       Iniciado em Magia, mas a tela de escolha extra desses 2 (perícia/
@@ -74,4 +93,5 @@ não é um problema de importação como foi com Espécies. Os gaps são de
       de uma Origem, não pelo Versátil. Só fazer depois que todas as
       telas de Origem (Grupos A-G) estiverem prontas.
 
-Próximo passo: Grupo C (demais talentos de Origem sem `efeitoMecanico`).
+Próximo passo: perguntar ao Osmar qual entre Grupo D (Valentão) e
+Grupo E (Sortudo) seguir primeiro.

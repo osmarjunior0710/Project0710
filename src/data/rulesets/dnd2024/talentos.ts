@@ -97,6 +97,19 @@ export type ConcedeProficienciasTalento = {
   tipos: ('pericia' | 'ferramenta')[];
 };
 
+/** Escolha de ferramenta restrita a 1 grupo específico de
+ * `gruposFerramenta` (ex.: Artifista pede 3 "Ferramentas de Artesão",
+ * Músico pede 3 "Instrumento Musical") — diferente de
+ * `ConcedeProficienciasTalento`, que mistura perícia/ferramenta
+ * livremente sem restringir a um grupo. Mesmo formato já usado pra
+ * ferramenta de CLASSE (`ferramentasEscolha` em
+ * `classesProficienciasIniciais.ts`), só reaproveitado aqui pro
+ * Talento de Origem (CLAUDE.md 6.1). */
+export type ConcedeFerramentaGrupoTalento = {
+  quantidade: number;
+  grupo: string;
+};
+
 export interface Talento {
   id: string;
   nome: string;
@@ -105,6 +118,7 @@ export interface Talento {
   prerequisitos: PrerequisitosTalento;
   concedeAsi: ConcedeAsiTalento;
   concedeProficiencias?: ConcedeProficienciasTalento;
+  concedeFerramentaGrupo?: ConcedeFerramentaGrupoTalento;
   /** `true` só pro talento Iniciado em Magia — sinaliza que o wizard
    * precisa mostrar a tela de escolha de 2 truques + 1 magia de 1º
    * círculo (lista de classe fixada em `Origem.talentoOrigemVariante`)
@@ -142,6 +156,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'nenhum' },
+    concedeFerramentaGrupo: { quantidade: 3, grupo: 'Ferramentas de Artesão' },
     beneficios: "Proficiência com 3 Ferramentas de Artesão à escolha. 20% de desconto em itens não-mágicos. Ao completar Descanso Longo, fabrica um item da tabela Fabricação Rápida (se tiver a ferramenta certa); some no próximo Descanso Longo.",
     pagina: 200,
     fonte: "PHB 2024",
@@ -199,6 +214,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'nenhum' },
+    concedeFerramentaGrupo: { quantidade: 3, grupo: 'Instrumento Musical' },
     beneficios: "Proficiência com 3 Instrumentos Musicais. Ao completar Descanso Curto/Longo, toca música e dá Inspiração Heroica a um número de aliados = seu Bônus de Proficiência.",
     pagina: 202,
     fonte: "PHB 2024",

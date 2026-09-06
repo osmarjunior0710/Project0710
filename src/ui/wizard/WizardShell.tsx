@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { alinhamentos, arrayPadrao, atributosOrdem, type Atributo } from '../../data/wizardFixtures';
 import { origens } from '../../data/rulesets/dnd2024/origens';
-import { talentosOrigem, type ConcedeProficienciasTalento } from '../../data/rulesets/dnd2024/talentos';
+import { talentosOrigem, type ConcedeProficienciasTalento, type ConcedeFerramentaGrupoTalento } from '../../data/rulesets/dnd2024/talentos';
 import { especies } from '../../data/rulesets/dnd2024/especies';
 import { idiomas } from '../../data/rulesets/dnd2024/idiomas';
 import { idiomaExtraClasse } from '../../data/rulesets/dnd2024/idiomaExtraClasse';
@@ -79,6 +79,12 @@ function concedeMagiaIniciadaDaOrigem(s: WizardSelection): boolean {
   const origemSelecionada = origens.find((o) => o.nome === s.origem);
   if (!origemSelecionada) return false;
   return talentosOrigem.find((t) => t.id === origemSelecionada.talentoOrigemId)?.concedeMagiaIniciada === true;
+}
+
+function concedeFerramentaGrupoDaOrigem(s: WizardSelection): ConcedeFerramentaGrupoTalento | undefined {
+  const origemSelecionada = origens.find((o) => o.nome === s.origem);
+  if (!origemSelecionada) return undefined;
+  return talentosOrigem.find((t) => t.id === origemSelecionada.talentoOrigemId)?.concedeFerramentaGrupo;
 }
 
 export default function WizardShell() {
@@ -288,7 +294,10 @@ export default function WizardShell() {
     {
       name: '2c. Talento da Origem',
       render: (p) => <TalentoOrigemEscolhasStep {...p} />,
-      condicao: (s) => concedeProficienciasDaOrigem(s) !== undefined || concedeMagiaIniciadaDaOrigem(s),
+      condicao: (s) =>
+        concedeProficienciasDaOrigem(s) !== undefined ||
+        concedeMagiaIniciadaDaOrigem(s) ||
+        concedeFerramentaGrupoDaOrigem(s) !== undefined,
       isValid: (s) => {
         const concede = concedeProficienciasDaOrigem(s);
         if (concede) return s.proficienciasTalentoOrigemEscolhidas.length === concede.quantidade;
@@ -299,6 +308,8 @@ export default function WizardShell() {
             s.atributoMagiaIniciadaEscolhido !== null
           );
         }
+        const concedeFerramenta = concedeFerramentaGrupoDaOrigem(s);
+        if (concedeFerramenta) return s.proficienciasTalentoOrigemEscolhidas.length === concedeFerramenta.quantidade;
         return true;
       },
       mensagemInvalida: 'Complete as escolhas do talento da origem antes de avançar.',

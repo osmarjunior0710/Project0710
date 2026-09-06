@@ -30,13 +30,20 @@ export default function TalentoOrigemEscolhasStep({ selection, update }: StepPro
   }
 
   const concede = talento.concedeProficiencias;
-  if (!concede) {
+  const concedeFerramentaGrupo = talento.concedeFerramentaGrupo;
+  if (!concede && !concedeFerramentaGrupo) {
     return <div className="label">Volte e selecione uma origem primeiro.</div>;
   }
 
   const jaConcedidas = concessoesJaConcedidas(selection, origem);
-  const max = concede.quantidade;
+  const max = concede?.quantidade ?? concedeFerramentaGrupo!.quantidade;
   const escolhidas = selection.proficienciasTalentoOrigemEscolhidas;
+  const opcoesFerramenta = concedeFerramentaGrupo
+    ? (gruposFerramenta[concedeFerramentaGrupo.grupo] ?? []).map((f) => f.nome)
+    : todasFerramentas;
+  const mostrarPericias = concede?.tipos.includes('pericia') ?? false;
+  const mostrarFerramentas = concedeFerramentaGrupo !== undefined || (concede?.tipos.includes('ferramenta') ?? false);
+  const rotuloFerramentas = concedeFerramentaGrupo?.grupo ?? 'Ferramentas';
 
   function toggle(nome: string) {
     if (escolhidas.includes(nome)) {
@@ -74,7 +81,7 @@ export default function TalentoOrigemEscolhasStep({ selection, update }: StepPro
         Pode escolher algo que você já tem — só não ganha nada a mais por isso.
       </div>
 
-      {concede.tipos.includes('pericia') && (
+      {mostrarPericias && (
         <>
           <div className="label" style={{ marginTop: 6 }}>
             Perícias
@@ -83,12 +90,12 @@ export default function TalentoOrigemEscolhasStep({ selection, update }: StepPro
         </>
       )}
 
-      {concede.tipos.includes('ferramenta') && (
+      {mostrarFerramentas && (
         <>
           <div className="label" style={{ marginTop: 6 }}>
-            Ferramentas
+            {rotuloFerramentas}
           </div>
-          {todasFerramentas.map((nome) => linha(nome, jaConcedidas.ferramentas.get(nome)))}
+          {opcoesFerramenta.map((nome) => linha(nome, jaConcedidas.ferramentas.get(nome)))}
         </>
       )}
     </>
