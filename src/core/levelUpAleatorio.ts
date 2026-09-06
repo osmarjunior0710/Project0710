@@ -75,6 +75,9 @@ export interface ResultadoLevelUpRapido {
   talentoGeralEscolhido: string | null;
   dadivaEpicaEscolhida: string | null;
   arcanaMisticaAlteracoes: Record<number, string> | null;
+  /** Level Up Rápido nunca troca a magia de Iniciado em Magia (não faz
+   * sentido sortear uma troca opcional) — sempre `null` aqui. */
+  magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
 }
 
 /** Escolhe Invocações Místicas respeitando pré-requisito (uma pode
@@ -236,5 +239,6 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     talentoGeralEscolhido,
     dadivaEpicaEscolhida,
     arcanaMisticaAlteracoes,
+    magiaIniciadaAlteracoes: null,
   };
 }

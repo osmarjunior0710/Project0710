@@ -56,10 +56,17 @@ de propor a quebra de cada um, sempre relê tudo que já existe (código
       Verificado: `tsc -b`/`npm test` (221)/`npm run build` limpos +
       Playwright (Math.random forçado pra 1 no 1d4 → botão aparece →
       reroll dá outro valor → botão some, não pode usar 2x).
-- [ ] **A.3 — Substituição de Magia (Iniciado em Magia)**: no Level
-      Up, trocar a magia de 1º círculo escolhida por outra do mesmo
-      círculo/lista — reaproveita `TrocarValorSimples` (mesmo
-      componente de Resistência Ínfera/Arcana Mística).
+- [x] **A.3 — Substituição de Magia (Iniciado em Magia)**: novo passo
+      `iniciadoEmMagia` no `LevelUpShell` — a cada level-up (sem
+      limite de 1, diferente de Arcana Mística), troca a magia de 1º
+      círculo por outra da mesma lista, pra cada gaveta ativa (Origem
+      e/ou Versátil, independentes). Reaproveita `TrocarValorSimples`
+      e o padrão visual de "trocar já conhecido" da Arcana Mística.
+      Padrão generalizado registrado em `DECISOES-CLASSES.md`.
+      Verificado: `tsc -b`/`npm test` (221)/`npm run build` limpos +
+      Playwright (personagem Sábio nível 1 → Level Up nível 2 → troca
+      Alarme por Armadura Arcana → Confirmar → persistido em
+      `selecao.magiaMagiaIniciadaEscolhida`).
 - Bloqueados (registrados no Backlog.md, sem entrega de código por
   enquanto): Troca de Iniciativa (Alerta), desconto de loja/Fabricação
   Rápida (Artifista), Atacante Selvagem completo, Médico de Combate
@@ -74,4 +81,7 @@ repetir o processo do A.0 (ler os 42 talentos Gerais no código +
 livro, quando o Osmar fornecer o PDF de novo ou a seção continuar no
 mesmo arquivo).
 
-Próximo passo: A.3 (Substituição de Magia do Iniciado em Magia).
+Grupo A (Origem) fechado — todos os itens não-bloqueados em `[x]`,
+bloqueados registrados no Backlog.md. Próximo passo: abrir Grupo B
+(repetir o processo do A.0 — ler os 42 talentos Gerais no código +
+livro antes de propor a quebra em sub-grupos).

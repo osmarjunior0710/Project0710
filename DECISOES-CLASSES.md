@@ -843,3 +843,40 @@ assim a mesma UI serve qualquer gaveta sem duplicar JSX.
 
 **Data/origem:** 2026-09, foco Origens — "última coisa do foco"
 (Humano/Versátil).
+
+## Substituição de escolha de Talento no Level Up — padrão "gaveta(s) opcional(is), sem limite de 1 troca"
+
+Vários Talentos/características de classe deixam trocar 1 escolha
+fixa (magia, arma, etc.) a cada level-up (não só quando desbloqueia
+algo novo) — Arcana Mística (Bruxo) já tinha esse padrão, travado em
+"no máximo 1 troca por level-up" porque a regra real do Bruxo diz
+isso. Iniciado em Magia (Talento de Origem) tem a mesma mecânica de
+troca, mas SEM esse limite (regra real: "sempre que você alcança um
+novo nível, pode substituir uma das magias" — sem teto de 1) — por
+isso não reaproveita o contador `trocasArcanaMistica`, só o
+componente visual (`TrocarValorSimples`) e a estrutura de passo do
+`LevelUpShell` (estado inicializado com o valor atual, comparado no
+fim pra saber se mudou, passo só aparece se a gaveta existir).
+
+**Duas gavetas independentes, mesmo passo:** como o talento pode vir
+da Origem E do Versátil ao mesmo tempo (ver seção acima), o passo
+`iniciadoEmMagia` do Level Up mostra 1 card por gaveta ativa
+(`magiaIniciadaOrigemAtual`/`magiaIniciadaEspecieAtual`, cada um
+`{ lista, magia } | null`) — sem card nenhum quando nem uma gaveta
+tem o talento. Cada card troca só a própria magia, sem afetar a
+outra.
+
+**Padrão pra qualquer futura "troca de escolha fixa" parecida:**
+1. Prop `xAtual` no `LevelUpShell` com o valor já escolhido (`null` =
+   personagem não tem essa fonte).
+2. Passo só entra em `luSteps` se a prop existir.
+3. Estado local inicializado com o valor atual; "mudou" = comparação
+   simples com o valor original (não precisa de dado por nível igual
+   à Arcana Mística, que indexa por círculo).
+4. `onConfirmar` só manda o campo alterado (`null` = sem troca) — a
+   tela pai (`FichaShell`) aplica em `selecao`/`xAtuais` só quando não
+   for `null`, preservando o valor atual em qualquer outro caso.
+5. `sortearLevelUpRapido` (Level Up aleatório) sempre manda `null`
+   pra esse campo — não faz sentido sortear uma troca opcional.
+
+**Data/origem:** 2026-09, foco Talentos Fase 4 (Grupo A — Origem, A.3).
