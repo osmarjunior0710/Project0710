@@ -74,14 +74,52 @@ de propor a quebra de cada um, sempre relê tudo que já existe (código
   Improvisado/Corrida Aprimorada/Ataque em Investida (Valentão de
   Taverna).
 
-### B. Geral — ainda não começado
+### B. Geral
 
-Só abre depois que A fechar. Antes de propor a quebra em grupos,
-repetir o processo do A.0 (ler os 42 talentos Gerais no código +
-livro, quando o Osmar fornecer o PDF de novo ou a seção continuar no
-mesmo arquivo).
+**B.0 — leitura/revisão (feita 2026-09):** comparado o código
+(`talentos.ts`, 43 talentos — 42 sem efeito mecânico + Mestre em
+Armaduras Médias já pronto) contra a planilha mestra (aba Talentos,
+sem diferença nenhuma de texto) e o livro (PDF Cap. 5, p.202-209).
+Achado: **Conjurador Ritualista** falta 1 frase real do livro
+("sempre que seu Bônus de Proficiência aumentar, pode adicionar mais
+1 magia de 1º círculo com Ritual às sempre preparadas") — vira B.1.
+Grupos propostos e aprovados pelo Osmar:
 
-Grupo A (Origem) fechado — todos os itens não-bloqueados em `[x]`,
-bloqueados registrados no Backlog.md. Próximo passo: abrir Grupo B
-(repetir o processo do A.0 — ler os 42 talentos Gerais no código +
-livro antes de propor a quebra em sub-grupos).
+- [x] **B.0.1 — Marcação de placeholder por talento** (pedido do
+      Osmar antes de começar B.1): `talentoTemPlaceholder` (já
+      existia em `classificarTalento.ts`, só era usado no Perfil)
+      agora também aparece na própria tela de escolha do Level Up
+      (`TelaEscolherTalento`) e nos 2 pontos do Perfil que ainda não
+      usavam (card do Talento de Origem, talento pego pelo Versátil).
+      Corrigido também um falso-positivo: Habilidoso e Iniciado em
+      Magia são cobertos por mecanismo próprio (`concedeProficiencias`/
+      `concedeMagiaIniciada`), não por `efeitoMecanico` — sem isso
+      apareceriam como `[PH]` mesmo estando 100% prontos. Músico
+      continua `[PH]` de propósito (só a proficiência com instrumento
+      está pronta, a Canção Encorajadora ainda falta). Conforme cada
+      talento do Grupo B ganhar `efeitoMecanico`, o `[PH]` some
+      sozinho — não precisa mexer nesse texto de novo.
+      Verificado: `tsc -b`/`npm test` (223)/`npm run build` limpos +
+      Playwright (Guerreiro nível 3→4, tela de escolha de Talento
+      mostra `[PH]` em cada card sem efeito, largura 390px).
+- [ ] **B.1 — Correção de texto (sem mecânica nova)**: Conjurador
+      Ritualista ganha a frase que falta sobre o número de magias
+      Rituais crescer com o Bônus de Proficiência.
+- [ ] **B.2 — Proficiências simples**: Especialista em Armaduras
+      Leves/Médias/Pesadas, Treinamento com Armas Marciais —
+      reaproveita o padrão de leitura de talento já usado pra CA/
+      Iniciativa (`efeitoMecanicoDoTalento`).
+- [ ] **B.3 — Bônus numérico direto**: Velocista (Deslocamento),
+      Líder Inspirador/Chef (PV temporário) — mesmo padrão de
+      `bonus-pv-por-nivel`/`bonus-ca-com-armadura`.
+- [ ] **B.4 — Magia sempre-preparada**: Adepto Elemental, Atirador
+      Arcano, Conjurador Ritualista, Telecinético, Telepático, Tocado
+      pela Sombra/Fadas — reaproveita o padrão do Iniciado em Magia
+      (escolha na tela de Talento + magia(s) sempre preparada(s)).
+- [ ] **B.5 — Escolha de perícia**: Analítico, Mente Aguçada,
+      Especialista em Perícia — reaproveita o padrão do Habilidoso
+      (`concedeProficiencias`).
+- Resto (Agressor, Esmagador, Sentinela, Perfurador, Talhador, etc.)
+  fica bloqueado no Backlog.md — depende de um motor de combate com
+  tipo de dano/arma/posição que a Ficha ainda não modela (mesmo motivo
+  já registrado pro Atacante Selvagem em Backlog.md).
