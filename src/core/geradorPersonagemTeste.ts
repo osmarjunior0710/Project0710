@@ -304,10 +304,11 @@ export function opcoesGeradorTeste(): {
   origens: OpcaoGeradorTeste[];
   especies: OpcaoGeradorTeste[];
 } {
+  const porNome = (a: OpcaoGeradorTeste, b: OpcaoGeradorTeste) => a.nome.localeCompare(b.nome, 'pt-BR');
   return {
-    classes: classes.filter((c) => c.disponivel).map((c) => ({ id: c.id, nome: c.nome })),
-    origens: origens.filter((o) => o.disponivel).map((o) => ({ id: o.id, nome: o.nome })),
-    especies: especies.filter((e) => e.disponivel).map((e) => ({ id: e.id, nome: e.nome })),
+    classes: classes.filter((c) => c.disponivel).map((c) => ({ id: c.id, nome: c.nome })).sort(porNome),
+    origens: origens.filter((o) => o.disponivel).map((o) => ({ id: o.id, nome: o.nome })).sort(porNome),
+    especies: especies.filter((e) => e.disponivel).map((e) => ({ id: e.id, nome: e.nome })).sort(porNome),
   };
 }
 

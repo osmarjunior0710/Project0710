@@ -1,11 +1,13 @@
 import { especies } from '../../../data/rulesets/dnd2024/especies';
 import type { StepProps } from './StepProps';
 
+const especiesOrdenadas = [...especies].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+
 export default function EspecieStep({ selection, update }: StepProps) {
   return (
     <>
       <div className="section-title">Selecione uma espécie</div>
-      {especies.map((e) => (
+      {especiesOrdenadas.map((e) => (
         <div
           key={e.id}
           className={`opt-card ${selection.especie === e.nome ? 'selected' : ''} ${!e.disponivel ? 'btn-disabled' : ''}`}

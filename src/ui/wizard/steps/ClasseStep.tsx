@@ -14,13 +14,18 @@ const CLASSES_EM_BREVE = [
   { nome: 'Paladino', id: 'paladino' },
 ];
 
+function porNome<T extends { nome: string }>(a: T, b: T): number {
+  return a.nome.localeCompare(b.nome, 'pt-BR');
+}
+
 export default function ClasseStep({ selection, update }: StepProps) {
-  const disponiveis = classes.filter((c) => c.disponivel);
+  const disponiveis = classes.filter((c) => c.disponivel).sort(porNome);
   // Classes com dado real (núcleo já importado) mas ainda não prontas
   // pro wizard de ponta a ponta (ex: Bardo, Etapa 1 só de dados feita)
   // aparecem na lista "em breve" com o nome/emblema reais, não mais o
   // placeholder genérico.
-  const indisponiveis = classes.filter((c) => !c.disponivel);
+  const indisponiveis = classes.filter((c) => !c.disponivel).sort(porNome);
+  const classesEmBreve = [...CLASSES_EM_BREVE].sort(porNome);
 
   return (
     <>
@@ -57,7 +62,7 @@ export default function ClasseStep({ selection, update }: StepProps) {
           </div>
         </div>
       ))}
-      {CLASSES_EM_BREVE.map((classe) => (
+      {classesEmBreve.map((classe) => (
         <div key={classe.id} className="opt-card btn-disabled">
           <div className="opt-card-row">
             <IconeClasse id={classe.id} />
