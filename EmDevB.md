@@ -107,10 +107,26 @@ Jogador, "A a I" e "I a Z" — juntos cobrem as 390 magias).
         `danoBaseDado`/`danoBaseTipo` estruturado (7 descartadas ao
         ler contra o livro: 2 no Lote 2, 5 no Lote 3, todas com o
         motivo registrado acima/no Lote 2).
-- [ ] **3. `AtaqueOuSalvaguarda`** — decidir se dá pra extrair
-      confiável só do texto (melhorar `core/classificarMagia.ts`) ou
-      se precisa de coluna nova na planilha (`AUDITORIA-CONTEUDO.md`
-      seção 3, ainda em aberto).
+- [x] **3. `AtaqueOuSalvaguarda` — FEITA, entrega única (não em
+      lotes — muito menos revisão manual que o Dano Base).**
+      Respondida a pergunta em aberto da `AUDITORIA-CONTEUDO.md` seção
+      3: dá pra extrair confiável só do texto (frases fixas "ataque
+      mágico à distância"/"ataque mágico corpo a corpo"/"salvaguarda
+      de <atributo>" no mesmo corpus de parágrafos já extraído do PDF
+      pro Dano Base — não precisou reler os PDFs nem coluna nova na
+      planilha). De 390 magias, só 8 tinham 2+ mecânicas no mesmo
+      lançamento e precisaram de decisão manual (ex.: Faca de Gelo —
+      ataque + salvaguarda — ficou com o mesmo tipo que o Dano Base já
+      escolhera, Destreza; Mão de Bigby — ataque + 2 salvaguardas
+      diferentes — ficou com Ataque Corpo a Corpo, que é a opção com
+      dano estruturado). 2 magias (Rajada/Muralha Prismática) ganharam
+      `"aleatório"` (tipo de salvaguarda sorteado pela própria magia,
+      mesmo padrão já usado no Dano Base dessas 2). "Tempestade da
+      Vingança" ficou `null` — mesmo motivo do Dano Base (5 efeitos
+      diferentes por turno, não cabe num campo só). Nova coluna
+      "AtaqueOuSalvaguarda" na planilha, campo `ataqueOuSalvaguarda`
+      no `.ts` (390 preenchidas). `npx tsc -b`, `npm test` (221
+      passando) e `npm run build` OK.
 - [ ] **4. `core/magiaDano.ts`** — função que combina Dano Base +
       Upcast Estruturado dado o círculo do espaço usado, com teste
       Vitest (caso sem upcast, caso com upcast tipo "Dado por Círculo"
