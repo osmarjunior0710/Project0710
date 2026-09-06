@@ -127,10 +127,26 @@ Jogador, "A a I" e "I a Z" — juntos cobrem as 390 magias).
       "AtaqueOuSalvaguarda" na planilha, campo `ataqueOuSalvaguarda`
       no `.ts` (390 preenchidas). `npx tsc -b`, `npm test` (221
       passando) e `npm run build` OK.
-- [ ] **4. `core/magiaDano.ts`** — função que combina Dano Base +
-      Upcast Estruturado dado o círculo do espaço usado, com teste
-      Vitest (caso sem upcast, caso com upcast tipo "Dado por Círculo"
-      acima do círculo base, caso "Fórmula Própria"/"Outro").
+- [x] **4. `core/magiaDano.ts` — FEITA.** `calcularDanoMagia(magia,
+      circuloUsado)` combina `danoBaseDado`/`danoBaseTipo` com o
+      Upcast estruturado, devolvendo `{ quantidade, lados, mod, tipo,
+      upcastNaoAutomatico }` — o formato bate com o que `RollContext.
+      rolarDados` já espera (`quantidade`/`lados`/`mod` separados, um
+      só tamanho de dado por rolagem), pronto pra ligar na UI do item
+      5 sem tradução extra. `null` = magia sem `danoBaseDado`. Upcast
+      "Dado por Círculo"/"Flat por Círculo" soma automático quando o
+      dado do upcast tem o mesmo nº de lados do Dano Base (sempre bate
+      nos dados reais, nenhum caso de tamanho diferente encontrado);
+      "Alvo por Círculo" devolve o Dano Base sem mudança (upcast só
+      aumenta nº de alvos, não o dado por alvo); "Fórmula Própria"/
+      "Outro" (ou um "Dado por Círculo" com lados incompatível, caso
+      hipotético não observado nos dados de hoje) devolve o Dano Base
+      do círculo mínimo com `upcastNaoAutomatico: true` — a UI do item
+      5 deve avisar isso e mostrar `upcastTexto`, nunca somar sozinha.
+      6 testes Vitest (fixtures reais: Luz sem dano, Chama Sagrada sem
+      upcast, Bola de Fogo com/sem upcast aplicado, Danação/Hex com
+      upcast "outro" com/sem aviso). `npx tsc -b`, `npm test` (227
+      passando) e `npm run build` OK.
 - [ ] **5. UI na Ficha** (aba Magias, ao escolher círculo pra
       conjurar) mostrando o total de dados antes de confirmar e
       disparando a rolagem via `RollContext`. **Perguntar ao Osmar
