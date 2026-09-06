@@ -748,16 +748,8 @@ pro segundo caso) e as 6 origens já estão `disponivel: true`.
 `core/conjuracao.ts` conta a magia do talento como fonte de conjuração
 (`core/magiaTalentoOrigem.ts`). Ver decisão no `DECISOES-WIZARD.md`.
 
-**Gap conhecido, não resolvido nesta entrega:** a espécie Humana
-(traço Versátil, "talento de Origem à escolha") usa `TelaEscolherTalento`
-pra deixar escolher QUALQUER talento de Origem — inclusive Habilidoso
-ou Iniciado em Magia — mas essa tela não tem a UI de escolha extra
-(perícia/ferramenta ou truque/magia) que esses 2 talentos pedem.
-Escolhido via Versátil, o talento fica salvo mas sem a
-perícia/ferramenta ou truque/magia de verdade. Baixo impacto hoje (a
-maioria dos personagens pega esses talentos pela Origem, não por
-Versátil), mas precisa de UI própria se/quando alguém tentar montar um
-Humano Versátil com um desses 2 talentos.
+Gap da espécie Humana (Versátil) com esses 2 talentos: ver `EmDev.md`
+(último item do foco Origens, só depois de todos os grupos A-G).
 
 ## Classes/Subclasses — variação estrutural grande, ainda sem schema
 

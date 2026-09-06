@@ -40,15 +40,22 @@ não é um problema de importação como foi com Espécies. Os gaps são de
       Verificado: `tsc -b`/`npm test`/`npm run build` limpos +
       Playwright ponta a ponta (Sábio → escolhas → Ficha mostra as
       magias certas na aba Magias e "Livro" com peso certo na Mochila).
-      Gap conhecido registrado em PENDENCIAS.md: espécie Humana
-      (Versátil) pode escolher esse talento sem passar pela tela de
-      escolha extra.
-- [ ] **Grupo B** — talento Vigoroso (Origem Fazendeiro) sem
-      `efeitoMecanico`: PV máximo devia ganhar +2×nível no momento em
-      que o talento é adquirido, +2 PV extra a cada nível seguinte.
-      Mais complexo que Tenacidade Anã/Porte Poderoso porque precisa
-      guardar "nível em que foi adquirido" pra fórmula não recalcular
-      errado depois. Precisa desenho antes de codar.
+- [x] **Grupo B** — talento Vigoroso (Origem Fazendeiro): novo
+      `EfeitoMecanicoTalento` (`bonus-pv-por-nivel`). Como esse talento
+      só é alcançável via Talento de Origem (sempre ganho no nível 1 da
+      criação, nunca escolhido depois via ASI), "+2×nível ao pegar,
+      +2/nível seguinte" colapsa num +2 fixo por nível — mesmo padrão
+      de `bonusPvPorNivelDaEspecie` (Tenacidade Anã), não precisou
+      guardar "nível de aquisição" como imaginado antes de investigar.
+      `bonusPvPorNivelDoTalento` novo em `calculoPersonagem.ts`, somado
+      em `calcularPvMaximoNivel1`/`explicarPvMaximo*` (wizard e Ficha) e
+      no PV de Level Up (`FichaShell`, `geradorPersonagemTeste.ts` —
+      `LevelUpShell`/`levelUpAleatorio.ts` só consomem o número já
+      combinado). Label do popup/drama generalizado (antes hardcoded
+      "Tenacidade Anã", agora `bonusPvPorNivelLabel` monta o nome certo
+      pra cada fonte). 3 testes novos (Vitest). Verificado:
+      `tsc -b`/`npm test` (212)/`npm run build` limpos + Playwright
+      (Fazendeiro nível 1 → popup mostra "Vigoroso +2" e o total bate).
 - [ ] **Grupo C** — demais talentos de Origem sem `efeitoMecanico`
       ainda (9 origin-slots / 7 talentos distintos, além de Vigoroso) —
       auditar cada um e decidir se entra em `EfeitoMecanicoTalento` ou
@@ -60,6 +67,11 @@ não é um problema de importação como foi com Espécies. Os gaps são de
       `Backlog.md` sobre Inspiração Heroica só cobrir d20 hoje —, e
       outros achados menores do restante da auditoria de talentos de
       Origem).
+- [ ] **Última coisa do foco** — espécie Humana (traço Versátil) deixa
+      escolher QUALQUER talento de Origem, inclusive Habilidoso e
+      Iniciado em Magia, mas a tela de escolha extra desses 2 (perícia/
+      ferramenta ou truque/magia) só aparece hoje quando o talento vem
+      de uma Origem, não pelo Versátil. Só fazer depois que todas as
+      telas de Origem (Grupos A-G) estiverem prontas.
 
-Próximo passo: validar Grupo A com o Osmar, depois perguntar qual
-grupo seguir.
+Próximo passo: Grupo C (demais talentos de Origem sem `efeitoMecanico`).

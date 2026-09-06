@@ -72,6 +72,46 @@ export function bonusPvPorNivelDaEspecie(selection: WizardSelection): number {
   return selection.especie === 'Anão' ? 1 : 0;
 }
 
+/** Talento de Origem com `efeitoMecanico.tipo === 'bonus-pv-por-nivel'`
+ * (hoje só Vigoroso, Origem Fazendeiro) — `null` se a origem atual não
+ * tiver um. Só olha o talento da ORIGEM (nunca `talentosGeraisAtuais`)
+ * porque esse tipo de talento é categoria "Origem": só alcançável pela
+ * Origem ou pelo traço Versátil do Humano (ambos resolvidos no nível 1
+ * da criação — ver `PENDENCIAS.md`/`EmDev.md` sobre o gap do Versátil). */
+function talentoComBonusPvPorNivel(selection: WizardSelection) {
+  const origemSelecionada = origens.find((o) => o.nome === selection.origem);
+  const talento = origemSelecionada ? talentos.find((t) => t.id === origemSelecionada.talentoOrigemId) : undefined;
+  return talento?.efeitoMecanico?.tipo === 'bonus-pv-por-nivel' ? talento : null;
+}
+
+/** Vigoroso: PV máximo +2 por nível de personagem. O livro descreve
+ * como "+2x nível ao pegar o talento, +2 a cada nível seguinte" — como
+ * só é alcançável no nível 1 da criação (ver `talentoComBonusPvPorNivel`),
+ * isso colapsa num valor fixo por nível, mesmo padrão de
+ * `bonusPvPorNivelDaEspecie` (Tenacidade Anã). Reaproveitado nos mesmos
+ * lugares (nível 1 e cada Level Up). */
+export function bonusPvPorNivelDoTalento(selection: WizardSelection): number {
+  const talento = talentoComBonusPvPorNivel(selection);
+  return talento?.efeitoMecanico?.tipo === 'bonus-pv-por-nivel' ? talento.efeitoMecanico.porNivel : 0;
+}
+
+/** Nome do talento por trás de `bonusPvPorNivelDoTalento` (ex.:
+ * "Vigoroso") — `null` se nenhum ativo. Só pro texto explicativo. */
+export function nomeTalentoBonusPvPorNivel(selection: WizardSelection): string | null {
+  return talentoComBonusPvPorNivel(selection)?.nome ?? null;
+}
+
+/** Nomes de todo bônus fixo de PV-por-nível já ativo (espécie e/ou
+ * talento) — usado só pra montar o texto explicativo ("Tenacidade Anã",
+ * "Vigoroso", etc.), nunca pro valor em si. */
+export function rotulosBonusPvPorNivel(selection: WizardSelection): string[] {
+  const rotulos: string[] = [];
+  if (bonusPvPorNivelDaEspecie(selection) > 0) rotulos.push('Tenacidade Anã');
+  const nomeTalento = nomeTalentoBonusPvPorNivel(selection);
+  if (nomeTalento) rotulos.push(nomeTalento);
+  return rotulos;
+}
+
 /**
  * Nível 1 nunca rola nem tira média — dado de vida MÁXIMO + mod. CON.
  * Exceções de classe pra PV (nenhuma conhecida hoje) entrariam aqui.
@@ -80,7 +120,12 @@ export function calcularPvMaximoNivel1(selection: WizardSelection): number | nul
   const classe = classeDaSelecao(selection);
   const conValor = valorFinalAtributo(selection, 'CON');
   if (!classe || conValor === null) return null;
-  return parseDadoDeVida(classe.dadoDeVida) + modificador(conValor) + bonusPvPorNivelDaEspecie(selection);
+  return (
+    parseDadoDeVida(classe.dadoDeVida) +
+    modificador(conValor) +
+    bonusPvPorNivelDaEspecie(selection) +
+    bonusPvPorNivelDoTalento(selection)
+  );
 }
 
 /** Item de armadura (se houver) escolhido no equipamento inicial da classe. */
@@ -442,16 +487,16 @@ export function explicarPvMaximoNivel1(selection: WizardSelection): ExplicacaoCa
   const dado = parseDadoDeVida(classe.dadoDeVida);
   const conMod = modificador(conValor);
   const bonusEspecie = bonusPvPorNivelDaEspecie(selection);
+  const bonusTalento = bonusPvPorNivelDoTalento(selection);
   const linhas = [
     { label: `Dado de Vida máximo da classe (${classe.dadoDeVida})`, valor: `${dado}` },
     { label: 'mod. Constituição', valor: fmtMod(conMod) },
   ];
-  if (bonusEspecie > 0) {
-    linhas.push({ label: 'Tenacidade Anã', valor: fmtMod(bonusEspecie) });
-  }
+  if (bonusEspecie > 0) linhas.push({ label: 'Tenacidade Anã', valor: fmtMod(bonusEspecie) });
+  if (bonusTalento > 0) linhas.push({ label: nomeTalentoBonusPvPorNivel(selection)!, valor: fmtMod(bonusTalento) });
   return {
     linhas,
-    total: { label: 'Pontos de Vida máximos', valor: `${dado + conMod + bonusEspecie}` },
+    total: { label: 'Pontos de Vida máximos', valor: `${dado + conMod + bonusEspecie + bonusTalento}` },
   };
 }
 
@@ -473,11 +518,13 @@ export function explicarPvMaximo(selection: WizardSelection, pvMaxAtual: number)
   const dado = parseDadoDeVida(classe.dadoDeVida);
   const conMod = modificador(conValor);
   const bonusEspecie = bonusPvPorNivelDaEspecie(selection);
-  const baseNivel1 = dado + conMod + bonusEspecie;
+  const bonusTalento = bonusPvPorNivelDoTalento(selection);
+  const baseNivel1 = dado + conMod + bonusEspecie + bonusTalento;
   const ganhoPosterior = pvMaxAtual - baseNivel1;
+  const rotulosBonus = rotulosBonusPvPorNivel(selection);
   const rotuloNivel1 =
-    bonusEspecie > 0
-      ? `Nível 1 (Dado de Vida máximo da classe (${classe.dadoDeVida}) + mod. Constituição + Tenacidade Anã)`
+    rotulosBonus.length > 0
+      ? `Nível 1 (Dado de Vida máximo da classe (${classe.dadoDeVida}) + mod. Constituição + ${rotulosBonus.join(' + ')})`
       : `Nível 1 (Dado de Vida máximo da classe (${classe.dadoDeVida}) + mod. Constituição)`;
   const linhas = [{ label: rotuloNivel1, valor: `${baseNivel1}` }];
   if (ganhoPosterior > 0) {

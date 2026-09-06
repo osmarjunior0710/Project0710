@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   bonusProficiencia,
   bonusPvPorNivelDaEspecie,
+  bonusPvPorNivelDoTalento,
   calcularCA,
   calcularCAEquipado,
   calcularPvMaximoNivel1,
@@ -66,8 +67,23 @@ describe('calcularPvMaximoNivel1', () => {
     expect(calcularPvMaximoNivel1(selecaoGuerreiro({ especie: 'Anão' }))).toBe(10 + 1 + 1); // d10 + mod. CON (+1) + Tenacidade Anã (+1)
   });
 
+  it('Fazendeiro soma +2 de Vigoroso por cima do dado de vida + mod. Constituição', () => {
+    expect(calcularPvMaximoNivel1(selecaoGuerreiro({ origem: 'Fazendeiro' }))).toBe(10 + 1 + 2); // d10 + mod. CON (+1) + Vigoroso (+2)
+  });
+
   it('retorna null quando falta Constituição ou Classe (personagem em criação)', () => {
     expect(calcularPvMaximoNivel1(criarSelecaoInicial())).toBeNull();
+  });
+});
+
+describe('bonusPvPorNivelDoTalento (Vigoroso)', () => {
+  it('Origem Fazendeiro (talento Vigoroso) dá +2 de PV máximo por nível', () => {
+    expect(bonusPvPorNivelDoTalento(selecaoGuerreiro({ origem: 'Fazendeiro' }))).toBe(2);
+  });
+
+  it('qualquer outra origem (ou nenhuma ainda escolhida) não tem bônus', () => {
+    expect(bonusPvPorNivelDoTalento(selecaoGuerreiro({ origem: 'Soldado' }))).toBe(0);
+    expect(bonusPvPorNivelDoTalento(criarSelecaoInicial())).toBe(0);
   });
 });
 

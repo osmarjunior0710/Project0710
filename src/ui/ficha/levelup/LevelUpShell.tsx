@@ -48,9 +48,14 @@ export interface PersonagemNivel {
   subclasse: string | null;
   estiloDeLuta: string | null;
   /** Bônus fixo de PV máximo por nível ganho, de traço de espécie
-   * (ex.: Tenacidade Anã, +1) — 0 pra quem não tem nenhum. Ver
-   * `core/calculoPersonagem.ts` (`bonusPvPorNivelDaEspecie`). */
+   * (ex.: Tenacidade Anã, +1) e/ou talento de Origem (ex.: Vigoroso,
+   * +2) — 0 pra quem não tem nenhum. Ver `core/calculoPersonagem.ts`
+   * (`bonusPvPorNivelDaEspecie`/`bonusPvPorNivelDoTalento`). */
   bonusPvPorNivel: number;
+  /** Nome(s) da(s) fonte(s) de `bonusPvPorNivel`, já concatenados (ex.:
+   * "Tenacidade Anã", "Vigoroso", "Tenacidade Anã + Vigoroso") — string
+   * vazia se `bonusPvPorNivel` for 0. Ver `rotulosBonusPvPorNivel`. */
+  bonusPvPorNivelLabel: string;
 }
 
 interface LevelUpShellProps {
@@ -668,7 +673,7 @@ export default function LevelUpShell({
             <div className={styles.dramaSub}>
               {hpRolado} + mod. CON ({personagem.conMod >= 0 ? '+' : ''}
               {personagem.conMod})
-              {personagem.bonusPvPorNivel > 0 && ` + Tenacidade Anã (+${personagem.bonusPvPorNivel})`}
+              {personagem.bonusPvPorNivel > 0 && ` + ${personagem.bonusPvPorNivelLabel} (+${personagem.bonusPvPorNivel})`}
             </div>
             <div className={styles.dramaTotal}>+{(hpRolado ?? 0) + personagem.conMod + personagem.bonusPvPorNivel} PV</div>
             <div className={`btn btn-primary ${styles.dramaBtn}`} onClick={continuarAposRolagem}>
@@ -729,7 +734,7 @@ export default function LevelUpShell({
                 <div className="opt-card-desc">
                   Rolou <b>{hpRolado}</b> em 1{personagem.dadoVida} + mod. CON ({personagem.conMod >= 0 ? '+' : ''}
                   {personagem.conMod})
-                  {personagem.bonusPvPorNivel > 0 && ` + Tenacidade Anã (+${personagem.bonusPvPorNivel})`} ={' '}
+                  {personagem.bonusPvPorNivel > 0 && ` + ${personagem.bonusPvPorNivelLabel} (+${personagem.bonusPvPorNivel})`} ={' '}
                   <b>+{hpRolado + personagem.conMod + personagem.bonusPvPorNivel} PV</b>. Não dá pra rolar de novo.
                 </div>
               </div>
@@ -740,7 +745,7 @@ export default function LevelUpShell({
                   <div className="opt-card-desc">
                     {dadoVidaValor[personagem.dadoVida]} (média de {personagem.dadoVida}) + mod. CON ({personagem.conMod >= 0 ? '+' : ''}
                     {personagem.conMod})
-                    {personagem.bonusPvPorNivel > 0 && ` + Tenacidade Anã (+${personagem.bonusPvPorNivel})`} ={' '}
+                    {personagem.bonusPvPorNivel > 0 && ` + ${personagem.bonusPvPorNivelLabel} (+${personagem.bonusPvPorNivel})`} ={' '}
                     <b>+{media} PV</b>
                   </div>
                 </div>
@@ -749,7 +754,7 @@ export default function LevelUpShell({
                   <div className="opt-card-desc">
                     Rola 1{personagem.dadoVida} + mod. CON ({personagem.conMod >= 0 ? '+' : ''}
                     {personagem.conMod})
-                    {personagem.bonusPvPorNivel > 0 && ` + Tenacidade Anã (+${personagem.bonusPvPorNivel})`} — ao
+                    {personagem.bonusPvPorNivel > 0 && ` + ${personagem.bonusPvPorNivelLabel} (+${personagem.bonusPvPorNivel})`} — ao
                     tocar em "Avançar" o dado rola e o resultado é definitivo, sem chance de rolar de novo.
                   </div>
                 </div>

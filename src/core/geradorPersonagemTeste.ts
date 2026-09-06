@@ -29,7 +29,7 @@ import {
   valorFinalAtributo,
   type WizardSelection,
 } from './personagem';
-import { bonusPvPorNivelDaEspecie, calcularPvMaximoNivel1, periciasProficientes } from './calculoPersonagem';
+import { bonusPvPorNivelDaEspecie, bonusPvPorNivelDoTalento, calcularPvMaximoNivel1, periciasProficientes } from './calculoPersonagem';
 import { armasParaMaestria, quantidadeMaestriaEmArma } from './maestriaArma';
 import { valorRecursoClasse } from './recursosClasse';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
@@ -215,7 +215,8 @@ function aplicarLevelUpsAleatorios(
   let talentosGeraisAtual: string[] = [];
 
   const conValor = valorFinalAtributo(selecao, 'CON') ?? 10;
-  const mediaPvPorNivel = dadoVidaValor[classe.dadoDeVida] + modificador(conValor) + bonusPvPorNivelDaEspecie(selecao);
+  const mediaPvPorNivel =
+    dadoVidaValor[classe.dadoDeVida] + modificador(conValor) + bonusPvPorNivelDaEspecie(selecao) + bonusPvPorNivelDoTalento(selecao);
   const subclassesDaClasse = subclasses.filter((s) => s.classeId === classe.id);
 
   for (let nivel = 2; nivel <= nivelAlvo; nivel++) {

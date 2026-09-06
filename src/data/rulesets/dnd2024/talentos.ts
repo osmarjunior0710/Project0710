@@ -76,7 +76,14 @@ export type EfeitoMecanicoTalento =
   | { tipo: 'bonus-ataque-distancia'; bonus: number }
   /** +`bonus` no dano ao empunhar 1 arma corpo a corpo numa mão e
    * nenhuma outra arma (Duelismo, do Estilo de Luta). */
-  | { tipo: 'bonus-dano-uma-mao-sem-outra-arma'; bonus: number };
+  | { tipo: 'bonus-dano-uma-mao-sem-outra-arma'; bonus: number }
+  /** +`porNivel` de PV máximo a cada nível de personagem (Vigoroso).
+   * O livro descreve como "+2x nível ao pegar o talento, +2 a cada
+   * nível seguinte" — só colapsa nesse valor fixo por nível porque,
+   * hoje, esse talento só é alcançável via Talento de Origem (sempre
+   * ganho no nível 1 da criação, nunca escolhido depois via ASI). Ver
+   * `core/calculoPersonagem.ts` (`bonusPvPorNivelDoTalento`). */
+  | { tipo: 'bonus-pv-por-nivel'; porNivel: number };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -225,6 +232,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'nenhum' },
+    efeitoMecanico: { tipo: 'bonus-pv-por-nivel', porNivel: 2 },
     beneficios: "PV máximo +2x seu nível de personagem ao pegar o talento; +2 PV extra a cada nível seguinte.",
     pagina: 202,
     fonte: "PHB 2024",
