@@ -102,9 +102,16 @@ Grupos propostos e aprovados pelo Osmar:
       Verificado: `tsc -b`/`npm test` (223)/`npm run build` limpos +
       Playwright (Guerreiro nível 3→4, tela de escolha de Talento
       mostra `[PH]` em cada card sem efeito, largura 390px).
-- [ ] **B.1 — Correção de texto (sem mecânica nova)**: Conjurador
-      Ritualista ganha a frase que falta sobre o número de magias
-      Rituais crescer com o Bônus de Proficiência.
+- [x] **B.1 — Correção de texto (sem mecânica nova)**: Conjurador
+      Ritualista ganhou a frase que faltava (livro, p.203) sobre o
+      número de magias Rituais sempre preparadas crescer +1 toda vez
+      que o Bônus de Proficiência aumentar depois de pegar o talento,
+      e a nota de que o atributo de conjuração é o atributo aumentado
+      por este talento. A planilha mestra (aba Talentos) também está
+      sem essa frase — avisar o Osmar pra ele decidir se atualiza lá
+      também. Verificado: `tsc -b`/`npm test` (223)/`npm run build`
+      limpos (só texto, nada plugado em cálculo ainda — `[PH]`
+      continua até B.4).
 - [ ] **B.2 — Proficiências simples**: Especialista em Armaduras
       Leves/Médias/Pesadas, Treinamento com Armas Marciais —
       reaproveita o padrão de leitura de talento já usado pra CA/
