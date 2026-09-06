@@ -46,16 +46,15 @@ não tem — registrado aqui pra não redescobrir do zero.
   conceito de "outros personagens da mesa" no app).
 - **Curandeiro** — ação com Kit de Curandeiro (curar OUTRO personagem
   usando um Dado de Vida DELE) é mecânica nova inteira, trava pelo
-  mesmo motivo dos itens acima (sem outros personagens na tela). Reroll
-  de 1 em dado de cura tem o mesmo bloqueio do item abaixo.
+  mesmo motivo dos itens acima (sem outros personagens na tela). O
+  motor de reroll de 1 já existe (`RollContext.usarRerollSe1`, feito
+  pro Valentão de Taverna — ver abaixo) — quando a ação de cura em si
+  existir, é só passar `rerollSe1: { rotulo: 'Cura Garantida' }` na
+  chamada de `rolarDados`, sem mecanismo novo.
 - **Atacante Selvagem** — rolar o dano da arma 2x e usar o melhor
   resultado precisa de um motor de dano de ataque rolável de verdade;
   a aba Combat ainda usa números de exemplo pro dano (não é fixture só
   desse talento, é limitação geral do Combat hoje).
-- **Reroll de "qualquer dado" que não seja d20** (Curandeiro: dado de
-  cura; Valentão de Taverna: dado de dano Desarmado) — mesmo mecanismo
-  que falta pro reroll de dano da Inspiração Heroica (ver tópico acima)
-  — quando um existir, os outros 2 casos usam o mesmo.
 - **Valentão de Taverna — Armamento Improvisado** (proficiência com
   armas improvisadas) — não existe essa categoria de proficiência de
   arma no schema hoje (`core/proficienciaArma.ts` só conhece

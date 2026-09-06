@@ -327,3 +327,41 @@ página) e mostra um badge vermelho no avatar quando ativo — pra nunca
 "esquecer ligado" no meio de uma sessão de jogo de verdade sem
 perceber.
 
+## Reroll de "saiu 1" — motor genérico pra dado avulso (não-d20)
+
+**Problema:** vários talentos/características têm a mesma regra —
+"se esse dado de dano/cura sair 1, pode jogar de novo e usar o novo
+resultado, só 1x" (Dano Garantido do Valentão de Taverna, Cura
+Garantida do Curandeiro) — mas o `RollContext` só sabia fazer isso pra
+d20 (`usarSorte`, Sorte do Pequenino). `rolarDados` (tipo `'dados'`)
+nem guardava o valor de cada dado — só a soma total, mostrando sempre
+"💥" decorativo.
+
+**Mecanismo:** quando `rolarDados` é chamado com `quantidade === 1`,
+`RollState.valorDado` agora guarda o número de verdade (não "💥") e
+aceita `rerollSe1: { rotulo }` — se o resultado sair 1, o
+`RollOverlay` mostra um botão "🎲 {rotulo} — jogar de novo"
+(`usarRerollSe1` no contexto), mesmo padrão visual do botão de Sorte.
+Só funciona com 1 dado só de propósito: com `quantidade > 1` não dá
+pra saber qual dos dados saiu 1 sem guardar cada resultado
+individual, que não existe hoje (só a soma) — nenhum caso real do
+projeto ainda precisa disso (Ataque Desarmado e Cura Garantida são
+sempre 1 dado).
+
+**Como plugar num talento novo:** no `rolarDados({...})` da ação,
+passar `rerollSe1: { rotulo: 'Nome do Benefício' }` só quando o
+personagem tiver o talento — resto é automático. Primeiro uso:
+Valentão de Taverna (Ataque Desarmado, `CombatTab.rolarDanoPendente`,
+gate por `efeitoMecanicoDoTalento(talentosEfetivos,
+'dado-ataque-desarmado')`, mesma característica que já controla o
+dado 1d4). Curandeiro (Cura Garantida) fica só com o motor pronto —
+falta a ação de cura em si existir (ver Backlog.md, curar OUTRO
+personagem ainda não é modelado).
+
+**Achado no caminho:** o `nome` passado pra `rolarAtaque` já vem com
+emoji (`` `🗡 ${ataqueAtual.nome}` ``), então `DanoPendente.label` fica
+`"Dano — 🗡 Ataque Desarmado"`, não `"Dano — Ataque Desarmado"`.
+Comparação exata (`===`) falha silenciosamente aqui — use
+`.endsWith(...)` ou `.includes(...)` pra detectar o nome do ataque
+dentro do label sempre que precisar comparar por nome de novo.
+

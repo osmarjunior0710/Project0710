@@ -10,6 +10,7 @@ export default function RollOverlay() {
     aplicarBonusExtra,
     sorteDisponivel,
     usarSorte,
+    usarRerollSe1,
     inspiracaoHeroicaDisponivel,
     usarInspiracaoHeroica,
   } = useRoll();
@@ -75,6 +76,15 @@ export default function RollOverlay() {
           !estado.sorteUsada && (
             <div className={styles.bonusExtraBtn} onClick={usarSorte}>
               🍀 Sorte — jogar de novo
+            </div>
+          )}
+        {estado.fase === 'concluido' &&
+          estado.tipo === 'dados' &&
+          estado.rerollSe1 &&
+          estado.valorDado === 1 &&
+          !estado.rerollSe1Usado && (
+            <div className={styles.bonusExtraBtn} onClick={usarRerollSe1}>
+              🎲 {estado.rerollSe1.rotulo} — jogar de novo
             </div>
           )}
         {inspiracaoHeroicaDisponivel &&
