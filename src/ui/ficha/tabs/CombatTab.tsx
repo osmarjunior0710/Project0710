@@ -117,6 +117,9 @@ interface CombatTabProps {
   pontosDeSorteMaximo: number;
   pontosDeSorteRestantes: number;
   onUsarPontoDeSorte: () => boolean;
+  /** Valentão de Taverna (Dano Garantido) — `true` = pode rerolar 1 no
+   * dano do Ataque Desarmado. */
+  danoDesarmadoRerollDisponivel: boolean;
   surtoMaximo: number;
   surtoRestantes: number;
   surtoUsadoTurno: boolean;
@@ -220,6 +223,7 @@ export default function CombatTab({
   pontosDeSorteMaximo,
   pontosDeSorteRestantes,
   onUsarPontoDeSorte,
+  danoDesarmadoRerollDisponivel,
   surtoMaximo,
   surtoRestantes,
   surtoUsadoTurno,
@@ -470,12 +474,14 @@ export default function CombatTab({
 
   function rolarDanoPendente() {
     if (!danoPendente) return;
+    const ehDanoDesarmado = danoPendente.label.endsWith('Ataque Desarmado');
     rolarDados({
       label: danoPendente.label,
       formula: `${danoPendente.quantidade}d${danoPendente.lados}${danoPendente.mod ? ` + ${danoPendente.mod}` : ''}`,
       quantidade: danoPendente.quantidade,
       lados: danoPendente.lados,
       mod: danoPendente.mod,
+      rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
     });
   }
 

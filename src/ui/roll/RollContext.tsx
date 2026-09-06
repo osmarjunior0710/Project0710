@@ -74,6 +74,22 @@ export interface RollState {
   sorteUsada?: boolean;
   /** `true` = o jogador já usou Inspiração Heroica nesta rolagem. */
   inspiracaoHeroicaUsada?: boolean;
+  /** Lados do dado — só preenchido em rolagens 'dados' de 1 dado só
+   * elegíveis pro reroll de "saiu 1" (ver `rerollSe1`), pra dar pra
+   * rejogar o mesmo dado depois. */
+  lados?: number;
+  /** "Reroll de 1" genérico (Cura Garantida do Curandeiro, Dano
+   * Garantido do Valentão de Taverna — mesma regra: "se esse dado sair
+   * 1, pode jogar de novo e usar o novo resultado, só 1x"). `rotulo` é
+   * o texto do botão, varia por talento. Só faz sentido numa rolagem
+   * 'dados' de 1 dado só (`quantidade === 1` na chamada de
+   * `rolarDados`) — com mais de 1 dado não dá pra saber qual dado
+   * rerolar sem guardar cada resultado individual, que não existe
+   * hoje (só a soma). */
+  rerollSe1?: { rotulo: string } | null;
+  /** `true` = o jogador já usou o `rerollSe1` desta rolagem — só 1x,
+   * mesmo que o novo resultado também seja 1. */
+  rerollSe1Usado?: boolean;
 }
 
 /** Inspiração Heroica — flag booleano por personagem (nunca contador,
@@ -110,6 +126,9 @@ interface RollDadosOptions {
   quantidade: number;
   lados: number;
   mod: number;
+  /** Ver `RollState.rerollSe1` — só tem efeito quando `quantidade`
+   * é 1. */
+  rerollSe1?: { rotulo: string };
   onResultado?: (total: number) => void;
 }
 
@@ -146,6 +165,12 @@ interface RollContextValue {
    * Vantagem/Desvantagem e do Bônus Extra). Sempre usa a nova jogada,
    * mesmo se também sair 1 (regra real). */
   usarSorte: () => void;
+  /** Joga de novo o dado de uma rolagem 'dados' de 1 dado só (ver
+   * `RollState.rerollSe1`) que mostrou 1 e ainda não usou o reroll —
+   * substitui o resultado, sempre usa a nova jogada mesmo se também
+   * sair 1 (mesma regra do `usarSorte`, só que pra dano/cura em vez
+   * de d20). */
+  usarRerollSe1: () => void;
   /** `true` só quando o personagem da tela atual tem Inspiração
    * Heroica agora — controla se o botão de reroll aparece em QUALQUER
    * d20 concluído (sem Vantagem/Desvantagem em jogo). */
@@ -276,7 +301,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
     }, DURACAO_ANIMACAO_MS);
   }, []);
 
-  const rolarDados = useCallback(({ label, formula, quantidade, lados, mod, onResultado }: RollDadosOptions) => {
+  const rolarDados = useCallback(({ label, formula, quantidade, lados, mod, rerollSe1, onResultado }: RollDadosOptions) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setEstado({
       label,
@@ -292,15 +317,22 @@ export function RollProvider({ children }: { children: ReactNode }) {
       let soma = 0;
       for (let i = 0; i < quantidade; i++) soma += 1 + Math.floor(Math.random() * lados);
       const total = soma + mod;
+      // "reroll se 1" só faz sentido sabendo o valor de UM dado só —
+      // com mais de 1 dado, `soma` não diz qual deles saiu 1.
+      const umDadoSo = quantidade === 1;
       setEstado({
         label,
         formula,
         fase: 'concluido',
         tipo: 'dados',
-        valorDado: '💥',
+        valorDado: umDadoSo ? soma : '💥',
         total,
         critico: null,
         podeEscolherVantagem: false,
+        lados: umDadoSo ? lados : undefined,
+        mod: umDadoSo ? mod : undefined,
+        rerollSe1: umDadoSo ? (rerollSe1 ?? null) : null,
+        rerollSe1Usado: false,
       });
       onResultado?.(total);
     }, DURACAO_ANIMACAO_MS);
@@ -364,6 +396,22 @@ export function RollProvider({ children }: { children: ReactNode }) {
     }, DURACAO_ANIMACAO_MS);
   }, [estado, sorteDisponivel]);
 
+  const usarRerollSe1 = useCallback(() => {
+    if (!estado || estado.fase !== 'concluido' || estado.tipo !== 'dados') return;
+    if (!estado.rerollSe1 || estado.rerollSe1Usado) return;
+    if (estado.valorDado !== 1) return;
+    setEstado((prev) => (prev ? { ...prev, valorDado: '🎲', rerollSe1Usado: true } : prev));
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setEstado((prev) => {
+        if (!prev || prev.tipo !== 'dados' || prev.lados === undefined) return prev;
+        const novaRolagem = 1 + Math.floor(Math.random() * prev.lados);
+        const total = novaRolagem + (prev.mod ?? 0);
+        return { ...prev, valorDado: novaRolagem, total };
+      });
+    }, DURACAO_ANIMACAO_MS);
+  }, [estado]);
+
   const [inspiracaoHeroicaProvider, setInspiracaoHeroicaProvider] = useState<InspiracaoHeroicaProvider | null>(null);
   const registrarInspiracaoHeroica = useCallback(
     (provider: InspiracaoHeroicaProvider | null) => setInspiracaoHeroicaProvider(provider),
@@ -401,6 +449,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         sorteDisponivel,
         registrarSorte,
         usarSorte,
+        usarRerollSe1,
         inspiracaoHeroicaDisponivel: inspiracaoHeroicaProvider?.disponivel ?? false,
         registrarInspiracaoHeroica,
         usarInspiracaoHeroica,

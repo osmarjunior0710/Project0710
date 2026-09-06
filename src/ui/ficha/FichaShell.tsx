@@ -378,6 +378,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const indomavelMaximo = classe ? contarRepeticoesCaracteristica(classe, 'Indomável', personagem.nivel) : 0;
   const indomavelRestantes = Math.max(0, indomavelMaximo - indomavelGasto);
   const pontosDeSorteDisponivel = efeitoMecanicoDoTalento(talentosEfetivos, 'pontos-de-sorte') !== null;
+  const danoDesarmadoRerollDisponivel = efeitoMecanicoDoTalento(talentosEfetivos, 'dado-ataque-desarmado') !== null;
   const pontosDeSorteMaximo = pontosDeSorteDisponivel ? bonusProficienciaAtual : 0;
   const pontosDeSorteRestantes = Math.max(0, pontosDeSorteMaximo - pontosDeSorteGasto);
   const surtoMaximo = classe ? contarRepeticoesCaracteristica(classe, 'Surto de Ação', personagem.nivel) : 0;
@@ -1263,6 +1264,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             pontosDeSorteMaximo={pontosDeSorteMaximo}
             pontosDeSorteRestantes={pontosDeSorteRestantes}
             onUsarPontoDeSorte={usarPontoDeSorte}
+            danoDesarmadoRerollDisponivel={danoDesarmadoRerollDisponivel}
             surtoMaximo={surtoMaximo}
             surtoRestantes={surtoRestantes}
             surtoUsadoTurno={surtoUsadoTurno}

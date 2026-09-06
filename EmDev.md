@@ -40,11 +40,22 @@ de propor a quebra de cada um, sempre relê tudo que já existe (código
       Aprimorada, Ataque em Investida), com o que falta implementar
       listado no Backlog.md. Verificado: `tsc -b`/`npm test`
       (221)/`npm run build` limpos.
-- [ ] **A.2 — Motor de reroll de dado não-d20** (genérico,
-      reaproveitável em 2+ lugares): "esse dado saiu 1? pode rerolar"
-      — serve pro Curandeiro (Cura Garantida) e Valentão de Taverna
-      (Dano Garantido). Mesmo mecanismo que falta pro reroll de dano
-      da Inspiração Heroica (Backlog.md).
+- [x] **A.2 — Motor de reroll de dado não-d20**: `RollContext` ganhou
+      `rerollSe1`/`usarRerollSe1` — quando `rolarDados` é chamado com
+      `quantidade === 1`, mostra o valor de verdade (antes sempre
+      "💥") e aceita `{ rotulo }` pra oferecer reroll se sair 1, mesmo
+      botão visual da Sorte (Pequenino). Plugado no Valentão de
+      Taverna (Dano Garantido, `CombatTab.rolarDanoPendente`, só
+      quando o dano é do Ataque Desarmado E o talento está ativo).
+      Curandeiro (Cura Garantida) fica só com o motor pronto — falta a
+      ação de cura em si (Backlog.md, bloqueada por "curar outro
+      personagem" não existir). Achado no caminho: `DanoPendente.label`
+      do Ataque Desarmado vem com emoji (`"Dano — 🗡 Ataque
+      Desarmado"`), comparação exata (`===`) não bate — usar
+      `.endsWith()`. Detalhe completo em `DECISOES-COMBATE.md`.
+      Verificado: `tsc -b`/`npm test` (221)/`npm run build` limpos +
+      Playwright (Math.random forçado pra 1 no 1d4 → botão aparece →
+      reroll dá outro valor → botão some, não pode usar 2x).
 - [ ] **A.3 — Substituição de Magia (Iniciado em Magia)**: no Level
       Up, trocar a magia de 1º círculo escolhida por outra do mesmo
       círculo/lista — reaproveita `TrocarValorSimples` (mesmo
@@ -63,4 +74,4 @@ repetir o processo do A.0 (ler os 42 talentos Gerais no código +
 livro, quando o Osmar fornecer o PDF de novo ou a seção continuar no
 mesmo arquivo).
 
-Próximo passo: A.2 (motor de reroll de dado não-d20).
+Próximo passo: A.3 (Substituição de Magia do Iniciado em Magia).
