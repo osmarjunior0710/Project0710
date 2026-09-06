@@ -68,7 +68,7 @@
 
 .deleteBtn {
   flex-shrink: 0;
-  width: var(--touch-target-min);
+  min-width: var(--touch-target-min);
   height: var(--touch-target-min);
   border-radius: var(--shape-sm);
   display: flex;
@@ -76,65 +76,26 @@
   justify-content: center;
   font-size: 15px;
   color: var(--danger);
+  padding: 0 var(--space-2);
+  transition:
+    background var(--motion-standard) var(--ease-standard),
+    color var(--motion-standard) var(--ease-standard);
 }
 
 .deleteBtn:active {
   background: var(--danger-dim);
 }
 
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 55;
-  padding: var(--space-5);
-  overscroll-behavior: contain;
-  touch-action: none;
-}
-
-.confirmCard {
-  background: var(--panel);
-  border: 1px solid var(--danger);
-  border-radius: var(--shape-lg);
-  padding: var(--space-5);
-  box-shadow: var(--elevation-3);
-  max-width: 340px;
-  width: 100%;
-}
-
-.confirmTitle {
-  font-size: 15px;
-  font-weight: bold;
-  margin-bottom: var(--space-3);
-}
-
-.confirmDesc {
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--text-dim);
-  margin-bottom: var(--space-4);
-}
-
-.confirmInput {
-  width: 100%;
-  padding: 10px;
-  background: transparent;
-  color: var(--text);
-  font-family: inherit;
-  font-size: 13px;
-  margin-bottom: var(--space-4);
-}
-
-.confirmActions {
-  display: flex;
-  gap: var(--space-3);
-}
-
-.confirmBtnApagar {
+/* 1º toque arma (vira isso); 2º toque no mesmo botão apaga de vez —
+   ver DECISOES-FICHA.md "Apagar personagem". */
+.deleteBtnConfirm {
   background: var(--danger);
-  border-color: var(--danger);
   color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.deleteBtnConfirm:active {
+  background: var(--danger);
+  opacity: 0.85;
 }

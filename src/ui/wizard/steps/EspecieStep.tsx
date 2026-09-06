@@ -1,11 +1,13 @@
 import { especies } from '../../../data/rulesets/dnd2024/especies';
 import type { StepProps } from './StepProps';
 
+const especiesOrdenadas = [...especies].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+
 export default function EspecieStep({ selection, update }: StepProps) {
   return (
     <>
       <div className="section-title">Selecione uma espécie</div>
-      {especies.map((e) => (
+      {especiesOrdenadas.map((e) => (
         <div
           key={e.id}
           className={`opt-card ${selection.especie === e.nome ? 'selected' : ''} ${!e.disponivel ? 'btn-disabled' : ''}`}
@@ -24,8 +26,9 @@ export default function EspecieStep({ selection, update }: StepProps) {
         </div>
       ))}
       <div className="label" style={{ marginTop: 6 }}>
-        5 espécies ficam "(em breve)" — têm uma sub-escolha (linhagem, herança) que ainda não tem
-        tela própria. Ver <code>PENDENCIAS.md</code>.
+        As 10 espécies do Livro do Jogador estão disponíveis. Alguns traços ativos (ex: Mãos
+        Curativas e Revelação Celestial do Aasimar) ainda não têm ação própria em Combat — aparecem
+        como texto na aba Perfil por enquanto. Ver <code>EmDev.md</code>.
       </div>
     </>
   );

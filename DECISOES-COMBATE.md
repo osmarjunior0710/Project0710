@@ -298,3 +298,32 @@ anterior:
 
 **Data/origem:** 2026-08.
 
+## Modo de Teste — sequência fixa de d20, sem afetar dano nem persistir (2026-09)
+
+**Decisão:** o RNG de verdade (`Math.random()` em `RollContext.tsx`)
+já era genuinamente aleatório — auditado, sem bug encontrado. O pedido
+do Osmar era outra coisa: um jeito de FORÇAR resultados previsíveis de
+d20 pra testar os 4 estados visuais que mais importam (1 = falha
+crítica, 20 = sucesso crítico, 10/15 = meio-termo) sem depender de
+sorte durante teste manual.
+
+**Mecanismo:** `RollContext` ganhou `modoTeste`/`alternarModoTeste`,
+toggle no `AvatarMenu` (canto superior direito da Ficha). Ligado, todo
+d20 sai da sequência fixa `[1, 10, 15, 20]` em ordem, dando a volta no
+fim — `rolarD20Dado` vira função pura parametrizada por 2 refs
+(`modoTeste`/`indice`, não state, porque é chamada de dentro de
+callbacks memoizados com `[]` de dependência). Quando 2 d20 saem
+juntos (Vantagem/Desvantagem), cada um consome o PRÓXIMO da fila —
+nunca reseta entre eles — então "1, 10" sai sozinho sem lógica
+adicional, só por chamar a mesma função 2x em sequência.
+
+**Escopo deliberadamente restrito a d20:** dano e qualquer outro dado
+(`rolarDados`, Bônus Extra tipo Sorte do Tenebroso) continuam de
+verdade mesmo com o modo ligado — o objetivo é testar acerto/crítico,
+não dano.
+
+**Nunca persiste** (sempre nasce desligado a cada carregamento de
+página) e mostra um badge vermelho no avatar quando ativo — pra nunca
+"esquecer ligado" no meio de uma sessão de jogo de verdade sem
+perceber.
+

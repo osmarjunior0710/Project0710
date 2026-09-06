@@ -12,7 +12,11 @@ import {
   calcularPericias,
   calcularProficienciasFerramenta,
   calcularPvMaximoNivel1,
+  bonusPvPorNivelDaEspecie,
+  bonusPvPorNivelDoTalento,
+  rotulosBonusPvPorNivel,
   classeDaSelecao,
+  efeitoMecanicoDoTalento,
   explicarCAEquipado,
   explicarIniciativa,
   explicarPercepcaoPassiva,
@@ -43,9 +47,14 @@ import { quantidadeRecuperarFolego } from '../../core/recursosClasse';
 import { personagemConjura } from '../../core/conjuracao';
 import { magiasGratisDasInvocacoes, type MagiaGratisDeInvocacao } from '../../core/invocacoesMagiaGratis';
 import { aplicarAlteracaoPv, ganharPvTemporario } from '../../core/pvTemporario';
+import { deveAplicarVigorImplacavel } from '../../core/vigorImplacavel';
+import { tipoDanoSubescolha, opcoesEscolhaReutilizavel } from '../../core/especieSubescolha';
+import { dadosAtaqueDeSopro } from '../../core/ataqueDeSopro';
 import { calcularSentidos } from '../../core/sentidos';
 import { valorBencaoDoTenebroso } from '../../core/bencaoDoTenebroso';
 import { magiasPactoDoInfero } from '../../core/magiasPactoDoInfero';
+import { truquesEspecie, magiasEspecie as magiasEspecieDoPersonagem } from '../../core/magiasEspecie';
+import { truquesMagiaIniciada, magiasMagiaIniciada } from '../../core/magiaTalentoOrigem';
 import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
 import { useRoll } from '../roll/RollContext';
 import { sortearLevelUpRapido } from '../../core/levelUpAleatorio';
@@ -70,6 +79,7 @@ import {
 } from '../../core/levelUp';
 import { estilosDeLuta } from '../../data/rulesets/dnd2024/estilosDeLuta';
 import { origens } from '../../data/rulesets/dnd2024/origens';
+import { especies } from '../../data/rulesets/dnd2024/especies';
 import { magias, magiasDaClasse, type Magia } from '../../data/rulesets/dnd2024/magias';
 import AvatarMenu from './AvatarMenu';
 import styles from './FichaShell.module.css';
@@ -83,6 +93,11 @@ import CompletarMagiasShell from './levelup/CompletarMagiasShell';
 import LivroDasSombrasShell from './levelup/LivroDasSombrasShell';
 
 type TabName = 'atributos' | 'perfil' | 'mochila' | 'magias' | 'combat';
+
+/** Nome do "Falar com Animais" concedido pelo Gnomo do Bosque — ver
+ * comentário em `magias.ts` (id "falarcomanimais-gnomo") sobre por que
+ * é uma entrada separada da magia normal. */
+const NOME_FALAR_COM_ANIMAIS_GNOMO = 'Falar com Animais - Traço de Gnomo';
 
 const TABS: { id: TabName; label: string; icon: string }[] = [
   { id: 'atributos', label: 'Atributos', icon: '🧬' },
@@ -125,7 +140,7 @@ export default function FichaShell() {
 
 function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }) {
   const navigate = useNavigate();
-  const { registrarBonusExtra } = useRoll();
+  const { registrarBonusExtra, registrarSorte, registrarInspiracaoHeroica } = useRoll();
   const [selecao, setSelecao] = useState<WizardSelection>(personagemSalvo.selecao);
   const classe = classeDaSelecao(selecao);
   const conValor = selecao.atributos.CON;
@@ -138,6 +153,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     conMod: conValor !== null ? modificador(conValor) : 0,
     subclasse: personagemSalvo.subclasseAtual ?? null,
     estiloDeLuta: personagemSalvo.estiloDeLutaAtual ?? selecao.estiloDeLutaEscolhido,
+    bonusPvPorNivel: bonusPvPorNivelDaEspecie(selecao) + bonusPvPorNivelDoTalento(selecao),
+    bonusPvPorNivelLabel: rotulosBonusPvPorNivel(selecao).join(' + '),
   });
   const [pvAtual, setPvAtual] = useState(personagemSalvo.pvAtual);
   const [pvTemporario, setPvTemporario] = useState(personagemSalvo.pvTemporarioAtual ?? 0);
@@ -168,7 +185,27 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [talentosGeraisAtuais, setTalentosGeraisAtuais] = useState<string[]>(personagemSalvo.talentosGeraisAtual ?? []);
   const [talentosFavoritos, setTalentosFavoritos] = useState<string[]>(personagemSalvo.talentosFavoritosAtual ?? []);
   const [folegoGasto, setFolegoGasto] = useState(personagemSalvo.folegoGasto ?? 0);
+  const [vigorImplacavelGasto, setVigorImplacavelGasto] = useState(personagemSalvo.vigorImplacavelGasto ?? false);
+  const [conhecimentoDePedrasGasto, setConhecimentoDePedrasGasto] = useState(personagemSalvo.conhecimentoDePedrasGasto ?? 0);
+  const [picoDeAdrenalinaGasto, setPicoDeAdrenalinaGasto] = useState(personagemSalvo.picoDeAdrenalinaGasto ?? 0);
+  const [ataqueDeSoproGasto, setAtaqueDeSoproGasto] = useState(personagemSalvo.ataqueDeSoproGasto ?? 0);
+  const [vooDraconicoGasto, setVooDraconicoGasto] = useState(personagemSalvo.vooDraconicoGasto ?? false);
+  const [ancestralidadeGiganteGasto, setAncestralidadeGiganteGasto] = useState(
+    personagemSalvo.ancestralidadeGiganteGasto ?? 0,
+  );
+  const [formaGrandeGasto, setFormaGrandeGasto] = useState(personagemSalvo.formaGrandeGasto ?? false);
+  const [formaGrandeAtiva, setFormaGrandeAtiva] = useState(personagemSalvo.formaGrandeAtiva ?? false);
+  const [maosCurativasGasto, setMaosCurativasGasto] = useState(personagemSalvo.maosCurativasGasto ?? false);
+  const [revelacaoCelestialGasto, setRevelacaoCelestialGasto] = useState(personagemSalvo.revelacaoCelestialGasto ?? false);
+  const [revelacaoCelestialFormaAtiva, setRevelacaoCelestialFormaAtiva] = useState(
+    personagemSalvo.revelacaoCelestialFormaAtiva ?? null,
+  );
+  const [falarComAnimaisGnomoGasto, setFalarComAnimaisGnomoGasto] = useState(
+    personagemSalvo.falarComAnimaisGnomoGasto ?? 0,
+  );
+  const [inspiracaoHeroicaAtiva, setInspiracaoHeroicaAtiva] = useState(personagemSalvo.inspiracaoHeroicaAtiva ?? false);
   const [indomavelGasto, setIndomavelGasto] = useState(personagemSalvo.indomavelGasto ?? 0);
+  const [pontosDeSorteGasto, setPontosDeSorteGasto] = useState(personagemSalvo.pontosDeSorteGasto ?? 0);
   const [sorteDoTenebrosoGasto, setSorteDoTenebrosoGasto] = useState(personagemSalvo.sorteDoTenebrosoGasto ?? 0);
   const [resistenciaInferaAtual, setResistenciaInferaAtual] = useState<string | null>(
     personagemSalvo.resistenciaInferaAtual ?? null,
@@ -212,11 +249,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Talentos que entram no cálculo (Fase 4): os escolhidos em Level
   // Up (`talentosGeraisAtuais`) MAIS o Talento de Origem, ganho fixo
   // na criação (ex: Alerta) — nunca passa pelo picker de Level Up,
-  // então não vive em `talentosGeraisAtuais`.
+  // então não vive em `talentosGeraisAtuais` — MAIS o talento pego
+  // pelo traço Versátil (Humano), mesmo motivo.
   const origemPersonagem = origens.find((o) => o.nome === selecao.origem) ?? null;
-  const talentosEfetivos = origemPersonagem
-    ? [...talentosGeraisAtuais, origemPersonagem.talentoOrigemId]
-    : talentosGeraisAtuais;
+  const talentosEfetivos = [
+    ...talentosGeraisAtuais,
+    ...(origemPersonagem ? [origemPersonagem.talentoOrigemId] : []),
+    ...(selecao.talentoEspecieEscolhido ? [selecao.talentoEspecieEscolhido] : []),
+  ];
   const ca = calcularCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos);
   const iniciativa = calcularIniciativa(selecao, classe, personagem.nivel, talentosEfetivos);
   const percepcaoPassiva = calcularPercepcaoPassiva(selecao, personagem.nivel);
@@ -227,8 +267,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const pericias = calcularPericias(selecao, personagem.nivel, periciasEspecialistaAtuais, periciasSubclasseBonusAtuais);
   const proficienciasFerramenta = calcularProficienciasFerramenta(selecao, personagem.nivel);
   const bonusProficienciaAtual = classe ? bonusProficiencia(classe, personagem.nivel) : 0;
-  const capacidadeMaxima = calcularCapacidadeMaxima(selecao);
-  const explicacaoCapacidadeMaxima = explicarCapacidadeMaxima(selecao);
+  const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva);
+  const explicacaoCapacidadeMaxima = explicarCapacidadeMaxima(selecao, formaGrandeAtiva);
   const explicacaoPv = explicarPvMaximo(selecao, personagem.pvMax);
   const explicacaoCa = explicarCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos);
   const explicacaoIniciativa = explicarIniciativa(selecao, classe, personagem.nivel, talentosEfetivos);
@@ -236,7 +276,39 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const estiloDeLuta = estilosDeLuta.find((e) => e.nome === personagem.estiloDeLuta) ?? null;
   const usosFolegoMaximo = classe ? quantidadeRecuperarFolego(classe, personagem.nivel) : 0;
   const usosFolegoRestantes = Math.max(0, usosFolegoMaximo - folegoGasto);
-  const conjura = personagemConjura(classe);
+  const temVigorImplacavel = selecao.especie === 'Orc';
+  const usosConhecimentoDePedrasMaximo = selecao.especie === 'Anão' && classe ? bonusProficiencia(classe, personagem.nivel) : 0;
+  const usosConhecimentoDePedrasRestantes = Math.max(0, usosConhecimentoDePedrasMaximo - conhecimentoDePedrasGasto);
+  const usosPicoDeAdrenalinaMaximo = selecao.especie === 'Orc' && classe ? bonusProficiencia(classe, personagem.nivel) : 0;
+  const usosPicoDeAdrenalinaRestantes = Math.max(0, usosPicoDeAdrenalinaMaximo - picoDeAdrenalinaGasto);
+  const especieAtual = especies.find((e) => e.nome === selecao.especie) ?? null;
+  const ataqueDeSoproDisponivel = selecao.especie === 'Draconato';
+  const usosAtaqueDeSoproMaximo = ataqueDeSoproDisponivel && classe ? bonusProficiencia(classe, personagem.nivel) : 0;
+  const usosAtaqueDeSoproRestantes = Math.max(0, usosAtaqueDeSoproMaximo - ataqueDeSoproGasto);
+  const conValorFinal = valorFinalAtributo(selecao, 'CON') ?? 10;
+  const cdAtaqueDeSopro = 8 + modificador(conValorFinal) + bonusProficienciaAtual;
+  const numDadosAtaqueDeSopro = dadosAtaqueDeSopro(personagem.nivel);
+  const tipoDanoAtaqueDeSopro = especieAtual ? tipoDanoSubescolha(especieAtual, selecao) : null;
+  const vooDraconicoDisponivel = selecao.especie === 'Draconato' && personagem.nivel >= 5;
+  const ancestralidadeGiganteEscolhida = selecao.especie === 'Golias' ? selecao.subescolhaEspecieEscolhida : null;
+  const usosAncestralidadeGiganteMaximo =
+    ancestralidadeGiganteEscolhida && classe ? bonusProficiencia(classe, personagem.nivel) : 0;
+  const usosAncestralidadeGiganteRestantes = Math.max(0, usosAncestralidadeGiganteMaximo - ancestralidadeGiganteGasto);
+  const formaGrandeDisponivel = selecao.especie === 'Golias' && personagem.nivel >= 5;
+  const modConstituicaoAtual = modificador(conValorFinal);
+  const maosCurativasDisponivel = selecao.especie === 'Aasimar';
+  const dadosMaosCurativas = bonusProficienciaAtual;
+  const revelacaoCelestialDisponivel = selecao.especie === 'Aasimar' && personagem.nivel >= 3;
+  const opcoesRevelacaoCelestial = especieAtual ? opcoesEscolhaReutilizavel(especieAtual) ?? [] : [];
+  const danoBonusRevelacaoCelestial = bonusProficienciaAtual;
+  const carValorFinal = valorFinalAtributo(selecao, 'CAR') ?? 10;
+  const cdMantoNecrotico = 8 + modificador(carValorFinal) + bonusProficienciaAtual;
+  const falarComAnimaisGnomoDisponivel =
+    selecao.especie === 'Gnomo' && selecao.subescolhaEspecieEscolhida === 'Gnomo do Bosque';
+  const usosFalarComAnimaisGnomoMaximo =
+    falarComAnimaisGnomoDisponivel && classe ? bonusProficiencia(classe, personagem.nivel) : 0;
+  const usosFalarComAnimaisGnomoRestantes = Math.max(0, usosFalarComAnimaisGnomoMaximo - falarComAnimaisGnomoGasto);
+  const conjura = personagemConjura(classe, selecao);
   const espacos = espacosDeMagiaAtivos(classe, personagem.nivel);
   const truques = truquesDoPersonagem(truquesAtuais);
   const magiasPreparadas = magiasPreparadasDoPersonagem(magiasPreparadasAtuais);
@@ -256,7 +328,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const astuciaMagicaRecupera = espacoPactoAtual
     ? espacosARecuperar(espacoPactoAtual.maximo, espacosGastosPacto, mestreMisticoDisponivel)
     : 0;
-  const sentidos = calcularSentidos(selecao.especie, invocacoesMisticasAtuais);
+  const sentidos = calcularSentidos(selecao.especie, invocacoesMisticasAtuais, selecao.subescolhaEspecieEscolhida);
   const faltamTruques = deficitTruques(classe, personagem.nivel, truquesAtuais);
   const faltamMagiasPreparadas = deficitMagiasPreparadas(classe, personagem.nivel, magiasPreparadasAtuais);
   // Descobertas Mágicas/Livro das Sombras contam como magia sempre
@@ -266,7 +338,35 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const magiasPactoDoInferoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Magias de Pacto do Ínfero', personagem.nivel);
   const magiasPactoDoInferoAtuais = magiasPactoDoInferoDisponivel ? magiasPactoDoInfero(personagem.nivel) : [];
   const magiasPactoDoInferoPreparadas = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
-  const magiasConjuraveis = [...magiasPreparadas, ...magiasDescobertasMagicas, ...livroDasSombras, ...magiasPactoDoInferoPreparadas];
+  // Truques + magias fixas da Linhagem Élfica/Gnômica (e futuramente
+  // Legado Ínfero) — gatilho é nível de PERSONAGEM, não de classe
+  // (espécie não tem classe própria), ver `core/magiasEspecie.ts`.
+  const magiasEspecieAtuais = [
+    ...truquesEspecie(selecao),
+    ...magiasEspecieDoPersonagem(selecao, personagem.nivel),
+  ];
+  const magiasEspeciePreparadas = magiasPreparadasDoPersonagem(magiasEspecieAtuais);
+  // "Falar com Animais - Traço de Gnomo" sai da lista genérica de
+  // conjuração (que sempre exige gastar Espaço de Magia de verdade) —
+  // ela tem card e contador PRÓPRIOS no painel Ação (usos = Bônus de
+  // Proficiência, grátis, ver `usarFalarComAnimaisGnomo` abaixo), mas
+  // continua aparecendo em "Magias da Espécie" na aba Magias
+  // (`magiasEspecieAtuais`, sem filtro) só como referência.
+  const magiasEspeciePreparadasConjuraveis = magiasEspeciePreparadas.filter(
+    (m) => m.nome !== NOME_FALAR_COM_ANIMAIS_GNOMO,
+  );
+  // Talento de Origem "Iniciado em Magia" (Acólito/Guia/Sábio) — fixo
+  // desde a criação, ver `core/magiaTalentoOrigem.ts`.
+  const magiasTalentoOrigemAtuais = [...truquesMagiaIniciada(selecao), ...magiasMagiaIniciada(selecao)];
+  const magiasTalentoOrigemPreparadas = magiasPreparadasDoPersonagem(magiasTalentoOrigemAtuais);
+  const magiasConjuraveis = [
+    ...magiasPreparadas,
+    ...magiasDescobertasMagicas,
+    ...livroDasSombras,
+    ...magiasPactoDoInferoPreparadas,
+    ...magiasEspeciePreparadasConjuraveis,
+    ...magiasTalentoOrigemPreparadas,
+  ];
   const magiasPreparadasReacao = magiasConjuraveis.filter(ehMagiaDeReacao);
   const magiasPreparadasAcao = magiasConjuraveis.filter((m) => !ehMagiaDeReacao(m));
   const modAcertoConjuracao = calcularModAcertoConjuracao(selecao, classe, personagem.nivel);
@@ -277,6 +377,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const numAtaquesBase = classe ? numeroDeAtaques(classe, personagem.nivel) : 1;
   const indomavelMaximo = classe ? contarRepeticoesCaracteristica(classe, 'Indomável', personagem.nivel) : 0;
   const indomavelRestantes = Math.max(0, indomavelMaximo - indomavelGasto);
+  const pontosDeSorteDisponivel = efeitoMecanicoDoTalento(talentosEfetivos, 'pontos-de-sorte') !== null;
+  const pontosDeSorteMaximo = pontosDeSorteDisponivel ? bonusProficienciaAtual : 0;
+  const pontosDeSorteRestantes = Math.max(0, pontosDeSorteMaximo - pontosDeSorteGasto);
   const surtoMaximo = classe ? contarRepeticoesCaracteristica(classe, 'Surto de Ação', personagem.nivel) : 0;
   const surtoRestantes = Math.max(0, surtoMaximo - surtoGasto);
   const mestreTatico = classe ? caracteristicaDesbloqueada(classe, 'Mestre Tático', personagem.nivel) : null;
@@ -308,6 +411,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         personagem.estiloDeLuta,
         equipadoAtual.maoSecundaria !== null,
         armaEquipada?.armaDePacto ? carMod : undefined,
+        talentosEfetivos,
       )
     : null;
   const numAtaques = Math.max(
@@ -345,7 +449,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       estiloDeLutaAtual: personagem.estiloDeLuta,
       maestriaArmaAtual: maestriaArma,
       folegoGasto,
+      vigorImplacavelGasto,
+      conhecimentoDePedrasGasto,
+      picoDeAdrenalinaGasto,
+      ataqueDeSoproGasto,
+      vooDraconicoGasto,
+      ancestralidadeGiganteGasto,
+      formaGrandeGasto,
+      formaGrandeAtiva,
+      maosCurativasGasto,
+      revelacaoCelestialGasto,
+      revelacaoCelestialFormaAtiva,
+      falarComAnimaisGnomoGasto,
+      inspiracaoHeroicaAtiva,
       indomavelGasto,
+      pontosDeSorteGasto,
       sorteDoTenebrosoGasto,
       resistenciaInferaAtual,
       resistenciaInferaGasto,
@@ -383,7 +501,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     pvTemporario,
     maestriaArma,
     folegoGasto,
+    vigorImplacavelGasto,
+    conhecimentoDePedrasGasto,
+    picoDeAdrenalinaGasto,
+    ataqueDeSoproGasto,
+    vooDraconicoGasto,
+    ancestralidadeGiganteGasto,
+    formaGrandeGasto,
+    formaGrandeAtiva,
+    maosCurativasGasto,
+    revelacaoCelestialGasto,
+    revelacaoCelestialFormaAtiva,
+    falarComAnimaisGnomoGasto,
+    inspiracaoHeroicaAtiva,
     indomavelGasto,
+    pontosDeSorteGasto,
     sorteDoTenebrosoGasto,
     resistenciaInferaAtual,
     resistenciaInferaGasto,
@@ -417,8 +549,81 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   function alterarPv(delta: number) {
     const resultado = aplicarAlteracaoPv(pvAtual, personagem.pvMax, pvTemporario, delta);
+    if (temVigorImplacavel && deveAplicarVigorImplacavel(pvAtual, resultado.pvAtual, vigorImplacavelGasto)) {
+      setPvAtual(1);
+      setVigorImplacavelGasto(true);
+      setRestStatus('🩸 Vigor Implacável — em vez de cair a 0, você fica com 1 Ponto de Vida (recarrega no Descanso Longo).');
+      setPvTemporario(resultado.pvTemporario);
+      return;
+    }
     setPvAtual(resultado.pvAtual);
     setPvTemporario(resultado.pvTemporario);
+  }
+
+  function usarConhecimentoDePedras(): boolean {
+    if (usosConhecimentoDePedrasRestantes <= 0) return false;
+    setConhecimentoDePedrasGasto((v) => v + 1);
+    return true;
+  }
+
+  function usarPicoDeAdrenalina(): boolean {
+    if (usosPicoDeAdrenalinaRestantes <= 0) return false;
+    setPicoDeAdrenalinaGasto((v) => v + 1);
+    setPvTemporario((atual) => ganharPvTemporario(atual, bonusProficienciaAtual));
+    return true;
+  }
+
+  function usarAtaqueDeSopro(): boolean {
+    if (usosAtaqueDeSoproRestantes <= 0) return false;
+    setAtaqueDeSoproGasto((v) => v + 1);
+    return true;
+  }
+
+  function usarVooDraconico(): boolean {
+    if (vooDraconicoGasto) return false;
+    setVooDraconicoGasto(true);
+    return true;
+  }
+
+  function usarAncestralidadeGigante(): boolean {
+    if (usosAncestralidadeGiganteRestantes <= 0) return false;
+    setAncestralidadeGiganteGasto((v) => v + 1);
+    return true;
+  }
+
+  /** Toggle — ligar (1ª vez, gasta o uso) ou desligar (encerrar antes
+   * do Descanso Longo, sem devolver o uso) a Forma Grande. Só o
+   * Descanso Longo desliga sozinho e devolve o uso (ver
+   * `descansoLongo`) — o app não segue tempo real pra saber quando os
+   * 10 minutos da transformação acabam. */
+  function usarFormaGrande(): boolean {
+    if (formaGrandeAtiva) {
+      setFormaGrandeAtiva(false);
+      return true;
+    }
+    if (formaGrandeGasto) return false;
+    setFormaGrandeGasto(true);
+    setFormaGrandeAtiva(true);
+    return true;
+  }
+
+  function usarMaosCurativas(): boolean {
+    if (maosCurativasGasto) return false;
+    setMaosCurativasGasto(true);
+    return true;
+  }
+
+  function usarRevelacaoCelestial(formaEscolhida: string): boolean {
+    if (revelacaoCelestialGasto) return false;
+    setRevelacaoCelestialGasto(true);
+    setRevelacaoCelestialFormaAtiva(formaEscolhida);
+    return true;
+  }
+
+  function usarFalarComAnimaisGnomo(): boolean {
+    if (usosFalarComAnimaisGnomoRestantes <= 0) return false;
+    setFalarComAnimaisGnomoGasto((v) => v + 1);
+    return true;
   }
 
   function marcarUsado(categoria: RecursoTurno) {
@@ -487,9 +692,27 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   function descansoLongo() {
     setPvAtual(personagem.pvMax);
+    // Eficiente (Humano) — "começa cada dia com Inspiração Heroica";
+    // como o app não segue tempo real, a aproximação (ver SDD) é
+    // conceder de novo a cada Descanso Longo. Nunca desliga sozinho
+    // aqui — só o jogador desliga (manual ou usando o reroll).
+    if (selecao.especie === 'Humano') setInspiracaoHeroicaAtiva(true);
     setEspacosGastosPorCirculo({});
     setFolegoGasto(0);
+    setVigorImplacavelGasto(false);
+    setConhecimentoDePedrasGasto(0);
+    setPicoDeAdrenalinaGasto(0);
+    setAtaqueDeSoproGasto(0);
+    setVooDraconicoGasto(false);
+    setAncestralidadeGiganteGasto(0);
+    setFormaGrandeGasto(false);
+    setFormaGrandeAtiva(false);
+    setMaosCurativasGasto(false);
+    setRevelacaoCelestialGasto(false);
+    setRevelacaoCelestialFormaAtiva(null);
+    setFalarComAnimaisGnomoGasto(0);
     setIndomavelGasto(0);
+    setPontosDeSorteGasto(0);
     setSorteDoTenebrosoGasto(0);
     setSurtoGasto(0);
     setInspiracaoGasto(0);
@@ -501,7 +724,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setArcanaMisticaGastos([]);
     setMagiasGratisGastas([]);
     fimDoTurno();
-    setRestStatus(`Descanso Longo: PV restaurado para ${personagem.pvMax}/${personagem.pvMax}, Espaços de Magia, Recuperar Fôlego, Indomável, Surto de Ação e Inspiração de Bardo recuperados.`);
+    setRestStatus(`Descanso Longo: PV restaurado para ${personagem.pvMax}/${personagem.pvMax}, Espaços de Magia, Recuperar Fôlego, Indomável, Surto de Ação, Inspiração de Bardo, Pontos de Sorte e traços de espécie recuperados.`);
   }
 
   function descansoCurto() {
@@ -517,8 +740,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setFolegoGasto((v) => Math.max(0, v - 1));
     setLivroDasSombrasGasto(false);
     setResistenciaInferaGasto(false);
+    setPicoDeAdrenalinaGasto(0);
     setRestStatus(
-      `Descanso Curto: ${circulosQueRecuperam.length > 0 ? 'Espaços de Magia recuperados, ' : ''}${fonteDeInspiracao ? 'Inspiração de Bardo recuperada, ' : ''}1 uso de Recuperar Fôlego devolvido. PV não recupera automaticamente por descanso curto.`,
+      `Descanso Curto: ${circulosQueRecuperam.length > 0 ? 'Espaços de Magia recuperados, ' : ''}${fonteDeInspiracao ? 'Inspiração de Bardo recuperada, ' : ''}1 uso de Recuperar Fôlego devolvido, Pico de Adrenalina recuperado. PV não recupera automaticamente por descanso curto.`,
     );
   }
 
@@ -607,6 +831,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return true;
   }
 
+  function usarPontoDeSorte(): boolean {
+    if (pontosDeSorteRestantes <= 0) return false;
+    setPontosDeSorteGasto((v) => v + 1);
+    return true;
+  }
+
   function usarSorteDoTenebroso(): boolean {
     if (sorteDoTenebrosoRestantes <= 0) return false;
     setSorteDoTenebrosoGasto((v) => v + 1);
@@ -644,6 +874,28 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     });
     return () => registrarBonusExtra(null);
   }, [sorteDoTenebrosoDisponivel, sorteDoTenebrosoRestantes, sorteDoTenebrosoMaximo, registrarBonusExtra]);
+
+  // Registra Sorte (Pequenino) no modal de rolagem global — some
+  // sozinho se a Ficha desmontar ou a espécie mudar.
+  useEffect(() => {
+    registrarSorte(selecao.especie === 'Pequenino');
+    return () => registrarSorte(false);
+  }, [selecao.especie, registrarSorte]);
+
+  function alternarInspiracaoHeroica() {
+    setInspiracaoHeroicaAtiva((v) => !v);
+  }
+
+  // Registra Inspiração Heroica no modal de rolagem global — some
+  // sozinha se a Ficha desmontar. `usar` zera o flag quando o
+  // jogador reroga um d20 pelo RollOverlay (ver RollContext).
+  useEffect(() => {
+    registrarInspiracaoHeroica({
+      disponivel: inspiracaoHeroicaAtiva,
+      usar: () => setInspiracaoHeroicaAtiva(false),
+    });
+    return () => registrarInspiracaoHeroica(null);
+  }, [inspiracaoHeroicaAtiva, registrarInspiracaoHeroica]);
 
   function usarSurto(): boolean {
     if (surtoRestantes <= 0 || surtoUsadoTurno) return false;
@@ -862,6 +1114,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               setResistenciaInferaAtual(tipo);
               setResistenciaInferaGasto(true);
             }}
+            temVigorImplacavel={temVigorImplacavel}
+            vigorImplacavelGasto={vigorImplacavelGasto}
+            inspiracaoHeroicaAtiva={inspiracaoHeroicaAtiva}
+            onAlternarInspiracaoHeroica={alternarInspiracaoHeroica}
           />
         )}
         {tab === 'perfil' && (
@@ -920,6 +1176,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             magiasGratisGastas={magiasGratisGastas}
             onUsarMagiaGratis={usarMagiaGratisDeInvocacao}
             magiasPactoDoInferoAtuais={magiasPactoDoInferoAtuais}
+            magiasEspecieAtuais={magiasEspecieAtuais}
+            magiasTalentoOrigemAtuais={magiasTalentoOrigemAtuais}
             temPactoDaLamina={invocacoesMisticasAtuais.includes('pacto-da-lamina')}
             armaDePactoAtual={armaDePactoAtual(itensMochila)}
             onVincularArmaDePacto={vincularArmaDePactoHandler}
@@ -953,6 +1211,46 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             usosFolegoMaximo={usosFolegoMaximo}
             usosFolegoRestantes={usosFolegoRestantes}
             onUsarUsoFolego={usarUsoFolego}
+            usosConhecimentoDePedrasMaximo={usosConhecimentoDePedrasMaximo}
+            usosConhecimentoDePedrasRestantes={usosConhecimentoDePedrasRestantes}
+            onUsarConhecimentoDePedras={usarConhecimentoDePedras}
+            usosPicoDeAdrenalinaMaximo={usosPicoDeAdrenalinaMaximo}
+            usosPicoDeAdrenalinaRestantes={usosPicoDeAdrenalinaRestantes}
+            onUsarPicoDeAdrenalina={usarPicoDeAdrenalina}
+            ataqueDeSoproDisponivel={ataqueDeSoproDisponivel}
+            usosAtaqueDeSoproMaximo={usosAtaqueDeSoproMaximo}
+            usosAtaqueDeSoproRestantes={usosAtaqueDeSoproRestantes}
+            cdAtaqueDeSopro={cdAtaqueDeSopro}
+            numDadosAtaqueDeSopro={numDadosAtaqueDeSopro}
+            tipoDanoAtaqueDeSopro={tipoDanoAtaqueDeSopro}
+            onUsarAtaqueDeSopro={usarAtaqueDeSopro}
+            vooDraconicoDisponivel={vooDraconicoDisponivel}
+            vooDraconicoGasto={vooDraconicoGasto}
+            onUsarVooDraconico={usarVooDraconico}
+            ancestralidadeGiganteEscolhida={ancestralidadeGiganteEscolhida}
+            usosAncestralidadeGiganteMaximo={usosAncestralidadeGiganteMaximo}
+            usosAncestralidadeGiganteRestantes={usosAncestralidadeGiganteRestantes}
+            onUsarAncestralidadeGigante={usarAncestralidadeGigante}
+            modConstituicaoAtual={modConstituicaoAtual}
+            formaGrandeDisponivel={formaGrandeDisponivel}
+            formaGrandeGasto={formaGrandeGasto}
+            formaGrandeAtiva={formaGrandeAtiva}
+            onUsarFormaGrande={usarFormaGrande}
+            maosCurativasDisponivel={maosCurativasDisponivel}
+            maosCurativasGasto={maosCurativasGasto}
+            dadosMaosCurativas={dadosMaosCurativas}
+            onUsarMaosCurativas={usarMaosCurativas}
+            revelacaoCelestialDisponivel={revelacaoCelestialDisponivel}
+            revelacaoCelestialGasto={revelacaoCelestialGasto}
+            revelacaoCelestialFormaAtiva={revelacaoCelestialFormaAtiva}
+            opcoesRevelacaoCelestial={opcoesRevelacaoCelestial}
+            danoBonusRevelacaoCelestial={danoBonusRevelacaoCelestial}
+            cdMantoNecrotico={cdMantoNecrotico}
+            onUsarRevelacaoCelestial={usarRevelacaoCelestial}
+            falarComAnimaisGnomoDisponivel={falarComAnimaisGnomoDisponivel}
+            usosFalarComAnimaisGnomoMaximo={usosFalarComAnimaisGnomoMaximo}
+            usosFalarComAnimaisGnomoRestantes={usosFalarComAnimaisGnomoRestantes}
+            onUsarFalarComAnimaisGnomo={usarFalarComAnimaisGnomo}
             conjura={conjura}
             truques={truques}
             magiasPreparadasAcao={magiasPreparadasAcao}
@@ -962,6 +1260,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             indomavelMaximo={indomavelMaximo}
             indomavelRestantes={indomavelRestantes}
             onUsarIndomavel={usarIndomavel}
+            pontosDeSorteMaximo={pontosDeSorteMaximo}
+            pontosDeSorteRestantes={pontosDeSorteRestantes}
+            onUsarPontoDeSorte={usarPontoDeSorte}
             surtoMaximo={surtoMaximo}
             surtoRestantes={surtoRestantes}
             surtoUsadoTurno={surtoUsadoTurno}

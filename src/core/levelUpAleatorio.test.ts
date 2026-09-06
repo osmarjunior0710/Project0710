@@ -11,7 +11,7 @@ describe('sortearLevelUpRapido', () => {
   it('sobe exatamente 1 nível e ganha PV pela média (sem rolar dado)', () => {
     const resultado = sortearLevelUpRapido({
       classe: guerreiro,
-      personagem: { nivel: 1, pvMax: 12, dadoVida: 'd10', conMod: 2, subclasse: null, estiloDeLuta: 'Duelismo' },
+      personagem: { nivel: 1, pvMax: 12, dadoVida: 'd10', conMod: 2, subclasse: null, estiloDeLuta: 'Duelismo', bonusPvPorNivel: 0 },
       truquesAtuais: [],
       magiasPreparadasAtuais: [],
       invocacoesMisticasAtuais: [],
@@ -30,7 +30,7 @@ describe('sortearLevelUpRapido', () => {
   it('nível sem subclasse escolhida ainda: não mexe em subclasse', () => {
     const resultado = sortearLevelUpRapido({
       classe: guerreiro,
-      personagem: { nivel: 1, pvMax: 12, dadoVida: 'd10', conMod: 0, subclasse: null, estiloDeLuta: null },
+      personagem: { nivel: 1, pvMax: 12, dadoVida: 'd10', conMod: 0, subclasse: null, estiloDeLuta: null, bonusPvPorNivel: 0 },
       truquesAtuais: [],
       magiasPreparadasAtuais: [],
       invocacoesMisticasAtuais: [],
@@ -48,7 +48,7 @@ describe('sortearLevelUpRapido', () => {
   it('Bruxo nível 2→3: sorteia subclasse (nivelSubclasse=3) e Invocações Místicas', () => {
     const resultado = sortearLevelUpRapido({
       classe: bruxo,
-      personagem: { nivel: 2, pvMax: 14, dadoVida: 'd8', conMod: 1, subclasse: null, estiloDeLuta: null },
+      personagem: { nivel: 2, pvMax: 14, dadoVida: 'd8', conMod: 1, subclasse: null, estiloDeLuta: null, bonusPvPorNivel: 0 },
       truquesAtuais: [],
       magiasPreparadasAtuais: [],
       invocacoesMisticasAtuais: [],
@@ -70,7 +70,7 @@ describe('sortearLevelUpRapido', () => {
   it('nível de ASI: sempre escolhe um talento (real ou Aumento no Valor de Atributo)', () => {
     const resultado = sortearLevelUpRapido({
       classe: guerreiro,
-      personagem: { nivel: 3, pvMax: 24, dadoVida: 'd10', conMod: 1, subclasse: 'Cavaleiro Místico', estiloDeLuta: 'Duelismo' },
+      personagem: { nivel: 3, pvMax: 24, dadoVida: 'd10', conMod: 1, subclasse: 'Cavaleiro Místico', estiloDeLuta: 'Duelismo', bonusPvPorNivel: 0 },
       truquesAtuais: [],
       magiasPreparadasAtuais: [],
       invocacoesMisticasAtuais: [],

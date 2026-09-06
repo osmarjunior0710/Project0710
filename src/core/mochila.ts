@@ -15,30 +15,60 @@ import { identificarEquipamento } from './equipamento';
  * (Livro do Jogador D&D 5e 2024) varia o multiplicador por Tamanho da
  * criatura — Minúsculo For×3,5kg; Pequeno/Médio For×7kg; Grande
  * For×13,5kg; Enorme For×27kg; Colossal For×54,5kg. Toda espécie
- * jogável deste projeto (`data/rulesets/dnd2024/especies.ts`) é
- * Pequeno ou Médio, e as duas usam o mesmo multiplicador (×7), então
- * a fórmula abaixo não precisa ler o Tamanho da espécie ainda — só
- * precisará se uma espécie Grande (ou o traço "Porte Poderoso", que
- * conta um tamanho a mais) for suportada no futuro. Ver
- * DECISOES-DESIGN.md.
+ * jogável deste projeto é Pequeno ou Médio (mesmo multiplicador —
+ * índice 0 da tabela abaixo), então a fórmula não precisa ler o
+ * Tamanho de verdade — só "quantos passos ACIMA do Pequeno/Médio"
+ * (`passosTamanhoAcima`), hoje só usado por Golias: Porte Poderoso
+ * (+1 passo, sempre) e Forma Grande (+1 passo A MAIS enquanto ativa —
+ * ver `formaGrandeAtiva` abaixo). Ver DECISOES-FICHA.md.
  */
-const KG_POR_PONTO_DE_FORCA_PEQUENO_MEDIO = 7;
+const MULTIPLICADOR_KG_POR_PASSO_DE_TAMANHO = [7, 13.5, 27, 54.5];
 
-export function calcularCapacidadeMaxima(selection: WizardSelection): number | null {
-  const forValor = valorFinalAtributo(selection, 'FOR');
-  if (forValor === null) return null;
-  return Math.round(forValor * KG_POR_PONTO_DE_FORCA_PEQUENO_MEDIO);
+/** Quantos "passos de tamanho" acima do Pequeno/Médio contam pra
+ * Capacidade de Carga — Porte Poderoso (Golias, sempre) + Forma
+ * Grande (só enquanto o jogador marcou como ativa na Ficha, já que o
+ * app não segue tempo real pra saber quando os 10 minutos acabam). */
+function passosTamanhoAcimaParaCarga(selection: WizardSelection, formaGrandeAtiva: boolean): number {
+  const portePoderoso = selection.especie === 'Golias' ? 1 : 0;
+  const formaGrande = selection.especie === 'Golias' && formaGrandeAtiva ? 1 : 0;
+  return portePoderoso + formaGrande;
 }
 
-export function explicarCapacidadeMaxima(selection: WizardSelection): ExplicacaoCalculo {
+function multiplicadorCarga(passosAcima: number): number {
+  const indice = Math.min(passosAcima, MULTIPLICADOR_KG_POR_PASSO_DE_TAMANHO.length - 1);
+  return MULTIPLICADOR_KG_POR_PASSO_DE_TAMANHO[indice];
+}
+
+/** `formaGrandeAtiva` — `true` só quando o Golias marcou a Forma
+ * Grande como ativa na Ficha agora (ver `combat/BonusPanelContent`);
+ * ausente/`false` em todo outro contexto (ex.: resumo do wizard, onde
+ * a característica nem existe ainda). */
+export function calcularCapacidadeMaxima(selection: WizardSelection, formaGrandeAtiva = false): number | null {
+  const forValor = valorFinalAtributo(selection, 'FOR');
+  if (forValor === null) return null;
+  const multiplicador = multiplicadorCarga(passosTamanhoAcimaParaCarga(selection, formaGrandeAtiva));
+  return Math.round(forValor * multiplicador);
+}
+
+export function explicarCapacidadeMaxima(selection: WizardSelection, formaGrandeAtiva = false): ExplicacaoCalculo {
   const forValor = valorFinalAtributo(selection, 'FOR');
   if (forValor === null) return { linhas: [], total: { label: 'Capacidade máxima de carga', valor: '—' } };
+  const passos = passosTamanhoAcimaParaCarga(selection, formaGrandeAtiva);
+  const multiplicador = multiplicadorCarga(passos);
+  const linhas = [{ label: 'Força', valor: `${forValor}` }];
+  if (passos === 0) {
+    linhas.push({ label: `× ${multiplicador} kg (Tamanho Pequeno/Médio, tabela oficial)`, valor: '' });
+  } else {
+    const notaPorte = selection.especie === 'Golias' ? ' + Porte Poderoso' : '';
+    const notaForma = formaGrandeAtiva ? ' + Forma Grande ativa' : '';
+    linhas.push({
+      label: `× ${multiplicador} kg (conta ${passos} tamanho${passos > 1 ? 's' : ''} acima de Pequeno/Médio${notaPorte}${notaForma}, tabela oficial)`,
+      valor: '',
+    });
+  }
   return {
-    linhas: [
-      { label: 'Força', valor: `${forValor}` },
-      { label: `× ${KG_POR_PONTO_DE_FORCA_PEQUENO_MEDIO} kg (Tamanho Pequeno/Médio, tabela oficial)`, valor: '' },
-    ],
-    total: { label: 'Capacidade máxima de carga', valor: `${calcularCapacidadeMaxima(selection)} kg` },
+    linhas,
+    total: { label: 'Capacidade máxima de carga', valor: `${calcularCapacidadeMaxima(selection, formaGrandeAtiva)} kg` },
   };
 }
 

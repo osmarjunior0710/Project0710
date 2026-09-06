@@ -36,6 +36,16 @@ describe('calcularSentidos', () => {
     const r = calcularSentidos(null, ['pacto-da-lamina']);
     expect(r).toEqual({ visaoNoEscuro: 0, visaoAsCegas: 0, visaoVerdadeira: 0, sismiconsciencia: 0 });
   });
+
+  it('Elfo Drow: linhagem escolhida aumenta a Visão no Escuro de 18m pra 36m (usa o maior valor)', () => {
+    const r = calcularSentidos('Elfo', [], 'Drow');
+    expect(r.visaoNoEscuro).toBe(36);
+  });
+
+  it('Elfo Alto Elfo: linhagem sem sentido próprio, mantém o 18m do traço base', () => {
+    const r = calcularSentidos('Elfo', [], 'Alto Elfo');
+    expect(r.visaoNoEscuro).toBe(18);
+  });
 });
 
 describe('sentidosAtivos', () => {

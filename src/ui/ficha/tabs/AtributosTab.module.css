@@ -1,9 +1,15 @@
+.topRow {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
 .levelBox {
+  flex: 2;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: var(--space-2) var(--space-3);
-  margin-bottom: var(--space-2);
   border-color: var(--accent);
 }
 
@@ -20,8 +26,25 @@
   min-height: var(--touch-target-min);
 }
 
+/* Caixa com interação real (rola dado ou liga/desliga) — mesmo azul
+   CONTÍNUO do levelBox (nunca tracejado, mesmo partindo de .box/
+   .stat-box, que são tracejados por padrão), pra distinguir de caixa
+   só informativa/passiva (que fica cinza tracejada, .box sem
+   modificador). Ver DECISOES-DESIGN.md. */
+.hpBoxAccent {
+  border-style: solid;
+  border-color: var(--accent);
+  cursor: pointer;
+}
+
 .hpNum {
   font-size: 16px;
+}
+
+.hpPipRow {
+  display: flex;
+  justify-content: center;
+  padding-top: 2px;
 }
 
 .skillRow {

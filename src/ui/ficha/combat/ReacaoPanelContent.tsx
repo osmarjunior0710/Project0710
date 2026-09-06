@@ -19,6 +19,14 @@ interface ReacaoPanelContentProps {
   usosInspiracaoRestantes: number;
   tamanhoDadoInspiracao: number;
   onUsarInspiracao: () => boolean;
+  /** Ancestralidade Gigante (Golias) — só aparece quando a opção
+   * escolhida na criação for uma dessas 2 (reação). */
+  resistenciaDaPedraDisponivel: boolean;
+  trovaoDaTempestadeDisponivel: boolean;
+  usosAncestralidadeGiganteMaximo: number;
+  usosAncestralidadeGiganteRestantes: number;
+  onUsarAncestralidadeGigante: () => boolean;
+  modConstituicaoAtual: number;
 }
 
 export default function ReacaoPanelContent({
@@ -34,6 +42,12 @@ export default function ReacaoPanelContent({
   usosInspiracaoRestantes,
   tamanhoDadoInspiracao,
   onUsarInspiracao,
+  resistenciaDaPedraDisponivel,
+  trovaoDaTempestadeDisponivel,
+  usosAncestralidadeGiganteMaximo,
+  usosAncestralidadeGiganteRestantes,
+  onUsarAncestralidadeGigante,
+  modConstituicaoAtual,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const { rolarD20, rolarDados } = useRoll();
@@ -72,6 +86,24 @@ export default function ReacaoPanelContent({
       '🎶 Contra-Encantamento',
       'Some seu modificador de salvaguarda (ou o de quem está sendo protegido, se não for você) ao resultado mostrado.',
     );
+  }
+
+  function usarResistenciaDaPedra() {
+    if (!onUsarAncestralidadeGigante()) return;
+    rolarDados({
+      label: 'Resistência da Pedra — Redução de Dano',
+      formula: `1d12 + ${modConstituicaoAtual}`,
+      quantidade: 1,
+      lados: 12,
+      mod: modConstituicaoAtual,
+    });
+    onEscolher('🪨 Resistência da Pedra', 'Reduza o dano que você sofreu pelo total mostrado.');
+  }
+
+  function usarTrovaoDaTempestade() {
+    if (!onUsarAncestralidadeGigante()) return;
+    rolarDados({ label: 'Trovão da Tempestade — Dano', formula: '1d8', quantidade: 1, lados: 8, mod: 0 });
+    onEscolher('⚡ Trovão da Tempestade', 'Causa esse dano Trovejante à criatura que te acertou (até 18m).');
   }
 
   function usarPalavrasDeInterrupcao() {
@@ -125,6 +157,38 @@ export default function ReacaoPanelContent({
             <div className={styles.rowDesc}>
               Você ou uma criatura a até 9m falhou salvaguarda contra Amedrontado/Enfeitiçado — role de novo, com
               Vantagem. Sem custo de recurso.
+            </div>
+          )}
+        </div>
+      )}
+      {resistenciaDaPedraDisponivel && (
+        <div
+          className={styles.row}
+          style={usosAncestralidadeGiganteRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+          onClick={usarResistenciaDaPedra}
+        >
+          <div className={styles.rowName}>🪨 Resistência da Pedra</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Você sofreu dano — gasta 1 uso da Ancestralidade Gigante ({usosAncestralidadeGiganteRestantes}/
+              {usosAncestralidadeGiganteMaximo} restantes) e reduz o dano pelo resultado de 1d12 + seu mod. de
+              Constituição.
+            </div>
+          )}
+        </div>
+      )}
+      {trovaoDaTempestadeDisponivel && (
+        <div
+          className={styles.row}
+          style={usosAncestralidadeGiganteRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+          onClick={usarTrovaoDaTempestade}
+        >
+          <div className={styles.rowName}>⚡ Trovão da Tempestade</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Criatura a até 18m te acertou com ataque — gasta 1 uso da Ancestralidade Gigante (
+              {usosAncestralidadeGiganteRestantes}/{usosAncestralidadeGiganteMaximo} restantes) e causa 1d8 de dano
+              Trovejante nela.
             </div>
           )}
         </div>

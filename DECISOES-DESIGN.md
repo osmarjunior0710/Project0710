@@ -1149,3 +1149,98 @@ nunca marcam, então nunca mostram, sem precisar de lista de exclusão.
 **Pra próxima característica parecida** (ex: um "Orientação"/Guidance
 +1d4 futuro): reaproveitar o mesmo `BonusExtraProvider`, só trocando
 rótulo/lados/fonte do `usar()` — não criar um 2º mecanismo.
+
+## Todo contador "N usos de M" vira pip circular ao lado do nome — nunca texto no meio do parágrafo (2026-09)
+
+**Regra permanente, sem exceção, daqui pra frente:** qualquer recurso
+onde o jogador "tem N vezes pra usar algo" (Indomável, Surto de Ação,
+Pontos de Sorte, Recuperar Fôlego, Inspiração de Bardo, Espaços de
+Magia, Ataque de Sopro, Ancestralidade Gigante, Conhecimento de
+Pedras, Pico de Adrenalina, Salto da Nuvem, Perícia Inigualável,
+Mente Tática, e qualquer coisa nova parecida) mostra o "quanto resta"
+como **pip circular** ao lado do NOME/título do recurso — nunca como
+`(3/5 usos — recarrega no Descanso Longo)` enfiado no meio do
+parágrafo de descrição. Motivo: a Ficha tinha vários desses contadores
+embutidos assim, texto corrido demais pra ler rápido numa tela de
+celular no meio de uma sessão de jogo (pedido do Osmar revisando a
+tela de Combat).
+
+**Como implementar (2 componentes, `ui/components/`):**
+- `TickPips` — os pips em si (bolinha cheia = disponível, cinza = já
+  gasto; esvazia do ÚLTIMO índice pro primeiro, nunca do primeiro pro
+  último). Círculo (`border-radius: 50%`), não quadrado com canto
+  arredondado — decisão visual explícita do Osmar, não usar
+  `--shape-xs`/`--shape-sm` aqui.
+- `ContadorUsos` — pips + texto pequeno "restantes/total" (cinza,
+  `var(--text-faint)`), pronto pra colocar do lado de um título;
+  cuida de neutralizar o `text-transform`/`letter-spacing` herdado de
+  `.section-title` (que não deve afetar números).
+
+**Onde plugar:** o container do título (`.section-title`,
+`.opt-card-name`, ou o rótulo de um `.slotCounter` dentro de um painel
+de Ação/Bônus/Reação) vira flex (`display:flex; align-items:center;
+gap:8px; flexWrap:wrap`) com o nome + `<ContadorUsos .../>` dentro. O
+parágrafo de descrição abaixo mantém só a informação de QUANDO recarga
+(Descanso Curto/Longo) — nunca repete o número, que já está no pip.
+
+**Não é pip:** um toggle de 1 uso só (Vigor Implacável, Astúcia
+Mágica, Inspiração Heroica) não é "N de M", é liga/desliga — continua
+sendo o card/checkbox normal, sem pip (a única exceção existente,
+Inspiração Heroica em `AtributosTab`, usa `TickPips` com `total={1}`
+só porque já existia antes dessa regra; não é o padrão a copiar pra
+um toggle novo).
+
+**Auditoria 2026-09:** os painéis de Ação/Bônus/Reação
+(`AcaoPanelContent`/`BonusPanelContent`/`ReacaoPanelContent`,
+`EscolherCirculoShell`, `MagiasTab`) já seguiam esse padrão antes da
+regra existir formalmente — só precisaram da troca de quadrado pra
+círculo. O único lugar com o anti-padrão (contador enterrado no texto)
+era `CombatTab.tsx`: Indomável, Pontos de Sorte, Mente Tática, Perícia
+Inigualável, Ataque de Sopro, Ancestralidade Gigante — todos
+corrigidos.
+
+## Borda azul = interativo, borda cinza = passivo — regra pro topo da aba Atributos (2026-09)
+
+**Problema:** o topo da aba Atributos (PV/CA/Iniciativa/Bônus Prof./
+Inspiração Heroica) usava a borda cinza padrão (`.box`) em toda caixa
+por igual, sem distinguir visualmente qual toca/rola dado (Iniciativa,
+Inspiração Heroica) de qual é só informativo (PV, CA, Bônus de
+Proficiência) — só a caixa de Nível já tinha borda azul de propósito.
+Também não havia lugar de destaque pra Percepção Passiva (Feedback.md:
+ela vivia como a 19ª linha da lista de Perícias, com a mesma cara das
+perícias de verdade, mesmo não sendo clicável nem rolável).
+
+**Solução, regra permanente pra qualquer caixa desse estilo daqui pra
+frente:** borda azul CONTÍNUA (`var(--accent)`, `border-style: solid`
+— classe `.hpBoxAccent` em `AtributosTab.module.css`, mesmo tom/traço
+já usado em `.levelBox`) em qualquer caixa que role dado OU tenha
+interação de toque (liga/desliga etc); borda cinza TRACEJADA padrão
+(`.box` sem modificador, sem mudar `border-style`) em qualquer caixa
+só informativa, sem toque nenhum. A cor E o traço sozinhos já comunicam
+"dá pra tocar" vs "é só um número" — dispensa qualquer instrução
+escrita. `.hpBoxAccent` precisa fixar `border-style: solid` explicitamente
+porque tanto `.box` quanto `.stat-box` partem tracejados por padrão —
+só sobrescrever a cor deixava a caixa "azul tracejada", não contínua.
+
+**Layout resultante (3 linhas, decidido com o Osmar):**
+- Linha 1: Nível (50% da largura, `flex:2` vs `flex:1` das outras
+  duas) · PV · Inspiração Heroica.
+- Linha 2, 4 colunas iguais: Bônus de Proficiência · **Percepção
+  Passiva** (nova, resolve o pedido do Feedback.md — fica ao lado de
+  CA/Bônus Prof., mesma família de "número fixo pra consulta", com
+  borda cinza reforçando que não é clicável) · CA · Iniciativa.
+- Linha 3: grade de atributos (`.stat-box`, cada um rola d20 — ganhou
+  `.hpBoxAccent` também, mesma regra azul/cinza acima; correção rápida
+  pedida pelo Osmar logo depois da entrega original, que tinha deixado
+  essa linha de fora "sem mudança" por engano — ela é tão interativa
+  quanto Iniciativa). `.stat-box` também é usado no passo Atributos do
+  WIZARD (`AtributosStep.tsx`), onde borda azul já significa outra
+  coisa ("valor já atribuído aqui") — por isso o modificador é
+  aplicado só na Ficha (`AtributosTab.tsx`), nunca na classe global
+  `.stat-box` em si.
+
+**Rótulo de mais de 1 palavra sempre quebra depois da 1ª palavra**
+(pedido explícito do Osmar, regra geral pra qualquer label de caixa
+pequena daqui pra frente): "nível\natual", "Ins.\nHer.", "Bônus\n
+Prof.", "Percepção\nPassiva". Rótulo de 1 palavra só (PV, CA,
+Iniciativa) não quebra.

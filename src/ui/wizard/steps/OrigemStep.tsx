@@ -12,6 +12,8 @@ function descricaoPericia(nome: string): string | null {
   return p ? `${p.atributo} — ${p.exemplo}` : null;
 }
 
+const origensOrdenadas = [...origens].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+
 export default function OrigemStep({ selection, update }: StepProps) {
   // Marcação de duplicidade — só Perícias por enquanto (única sobreposição
   // hoje alcançável no wizard: Perícia da Classe, escolhida na etapa
@@ -21,7 +23,7 @@ export default function OrigemStep({ selection, update }: StepProps) {
   return (
     <>
       <div className="section-title">Selecione uma origem</div>
-      {origens.map((o) => {
+      {origensOrdenadas.map((o) => {
         const duplicadas = nomesDuplicados(selection.periciasClasseEscolhidas, o.pericias);
         const duplicada = duplicadas.size > 0;
         const talento = talentosOrigem.find((t) => t.id === o.talentoOrigemId);
@@ -73,10 +75,6 @@ export default function OrigemStep({ selection, update }: StepProps) {
           </div>
         );
       })}
-      <div className="label" style={{ marginTop: 6 }}>
-        3 origens ficam "(em breve)" — o talento delas (Iniciado em Magia) pede uma seleção extra que ainda não tem
-        tela própria. Ver <code>PENDENCIAS.md</code>.
-      </div>
     </>
   );
 }

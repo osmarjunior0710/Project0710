@@ -38,6 +38,11 @@ export interface PersonagemParaLevelUpRapido {
   conMod: number;
   subclasse: string | null;
   estiloDeLuta: string | null;
+  /** Bônus fixo de PV máximo por nível ganho, de traço de espécie
+   * (ex.: Tenacidade Anã, +1) e/ou talento de Origem (ex.: Vigoroso,
+   * +2) — 0 pra quem não tem nenhum. Ver `core/calculoPersonagem.ts`
+   * (`bonusPvPorNivelDaEspecie`/`bonusPvPorNivelDoTalento`). */
+  bonusPvPorNivel: number;
 }
 
 export interface ParamsLevelUpRapido {
@@ -105,7 +110,7 @@ function sortearInvocacoes(catalogo: InvocacaoMistica[], max: number): string[] 
 export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLevelUpRapido {
   const { classe, personagem } = params;
   const novoNivel = personagem.nivel + 1;
-  const pvGanho = dadoVidaValor[personagem.dadoVida] + personagem.conMod;
+  const pvGanho = dadoVidaValor[personagem.dadoVida] + personagem.conMod + personagem.bonusPvPorNivel;
 
   let subclasseEscolhida = personagem.subclasse;
   if (classe.nivelSubclasse === novoNivel && !personagem.subclasse) {

@@ -89,6 +89,13 @@ export interface PersonagemSalvo {
    * Ínfero, nível 6) desde o último Descanso Longo — só ele reseta.
    * Máximo = mod. Carisma (mín. 1), ver `core/sorteDoTenebroso.ts`. */
   sorteDoTenebrosoGasto?: number;
+  /** Pontos de Sorte gastos (Talento de Origem Sortudo) desde o último
+   * Descanso Longo — só ele reseta. Máximo = Bônus de Proficiência
+   * atual. Sem cálculo automático de vantagem/desvantagem: o jogador
+   * já tem os botões de Vantagem/Desvantagem em qualquer rolagem de
+   * d20 no RollOverlay — este contador só acompanha quantos pontos
+   * ainda restam. Ver `EmDev.md` (Grupo E). */
+  pontosDeSorteGasto?: number;
   /** Resistência Ínfera (Bruxo, Patrono Ínfero, nível 10) — tipo de
    * dano escolhido na característica (qualquer um exceto Energético),
    * trocável a cada Descanso Curto ou Longo. `null`/ausente = ainda
@@ -157,6 +164,62 @@ export interface PersonagemSalvo {
    * Ver DECISOES-DESIGN.md "Level Up — dado de vida rolado...". */
   levelUpHpModo?: 'media' | 'rolar' | null;
   levelUpHpRolado?: number | null;
+  /** Vigor Implacável (Orc) já disparou desde o último Descanso Longo
+   * — só ele reseta. Ver `core/vigorImplacavel.ts`. */
+  vigorImplacavelGasto?: boolean;
+  /** Usos gastos de Conhecimento de Pedras (Anão) desde o último
+   * Descanso Longo — só ele reseta. Máximo = Bônus de Proficiência. */
+  conhecimentoDePedrasGasto?: number;
+  /** Usos gastos de Pico de Adrenalina (Orc) desde o último Descanso
+   * Curto OU Longo — os dois resetam (mesmo padrão de Recuperar
+   * Fôlego). Máximo = Bônus de Proficiência. */
+  picoDeAdrenalinaGasto?: number;
+  /** Usos gastos de Ataque de Sopro (Draconato) desde o último
+   * Descanso Longo — só ele reseta. Máximo = Bônus de Proficiência. */
+  ataqueDeSoproGasto?: number;
+  /** `true` = Voo Dracônico (Draconato, nível 5+) já usado desde o
+   * último Descanso Longo — só ele reseta. */
+  vooDraconicoGasto?: boolean;
+  /** Usos gastos de Ancestralidade Gigante (Golias) desde o último
+   * Descanso Longo — só ele reseta. Máximo = Bônus de Proficiência.
+   * Mesmo contador pras 6 ancestralidades (só 1 foi escolhida na
+   * criação, ver `selecao.subescolhaEspecieEscolhida`). */
+  ancestralidadeGiganteGasto?: number;
+  /** `true` = Forma Grande (Golias, nível 5+) já usada desde o último
+   * Descanso Longo — só ele reseta. */
+  formaGrandeGasto?: boolean;
+  /** `true` = Forma Grande está TRANSFORMADA agora (diferente de
+   * `formaGrandeGasto`: o app não segue tempo real, então quem ativou
+   * também controla quando desliga — ligar/desligar não mexe no uso
+   * gasto, só o Descanso Longo desliga e devolve o uso junto). Usado
+   * pra saber se o bônus de tamanho de Capacidade de Carga (Porte
+   * Poderoso + Forma Grande) está valendo agora — ver `core/mochila.ts`. */
+  formaGrandeAtiva?: boolean;
+  /** `true` = Mãos Curativas (Aasimar) já usada desde o último Descanso
+   * Longo — só ele reseta. */
+  maosCurativasGasto?: boolean;
+  /** `true` = Revelação Celestial (Aasimar, nível 3+) já usada desde o
+   * último Descanso Longo — só ele reseta. */
+  revelacaoCelestialGasto?: boolean;
+  /** Nome da forma de Revelação Celestial ativa no momento (Asas
+   * Celestiais/Manto Necrótico/Transfiguração Radiante) — `null`/
+   * ausente = nenhuma transformação ativa. Como o app não rastreia
+   * tempo real (a transformação dura "1 minuto ou até encerrar"), essa
+   * lembrança fica visível até o próximo Descanso Longo, junto com
+   * `revelacaoCelestialGasto` (reseta os dois juntos). */
+  revelacaoCelestialFormaAtiva?: string | null;
+  /** Usos gastos de "Falar com Animais - Traço de Gnomo" (Gnomo do
+   * Bosque) desde o último Descanso Longo — só ele reseta. Máximo =
+   * Bônus de Proficiência. */
+  falarComAnimaisGnomoGasto?: number;
+  /** Inspiração Heroica (recurso universal, ver `Backlog.md`/SDD) —
+   * flag booleano, nunca contador ("nunca mais de uma de cada vez").
+   * `true` = personagem tem agora. O jogador liga/desliga manualmente
+   * na aba Atributos (representa concessão do Mestre, já que o app
+   * não tem modo Mestre); Humano também vira `true` sozinho a cada
+   * Descanso Longo (traço Eficiente). Gasto = usar o reroll no
+   * RollOverlay, que zera pra `false`. */
+  inspiracaoHeroicaAtiva?: boolean;
 }
 
 export interface ArmazenamentoPersonagens {

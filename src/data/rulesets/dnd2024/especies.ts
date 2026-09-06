@@ -2,14 +2,18 @@
 // Não editar valores à mão.
 //
 // Schema de sub-escolha decidido em DECISOES-DESIGN.md ("Dados —
-// Espécies têm 3 naturezas diferentes de sub-escolha"). As 6 espécies
-// com sub-escolha (Aasimar, Draconato, Elfo, Gnomo, Golias, Tiferino)
-// ainda não têm as opções da sub-escolha estruturadas (ex: as 10 cores
-// de dragão do Draconato) — esse dado existe na planilha, mas embutido
-// como texto corrido dentro da descrição do traço (ex: "Tabela Herança
-// Dracônica (Dragão: Tipo de Dano) — Azul: Elétrico; ..."), não como
-// linhas próprias. Extrair isso fica pra quando cada espécie for
-// desbloqueada de verdade — ver PENDENCIAS.md.
+// Espécies têm 3 naturezas diferentes de sub-escolha"). Das 6 espécies
+// com sub-escolha, todas já têm as opções estruturadas em
+// `opcoesSubescolha` (ver `OpcaoSubescolha`). Draconato/Golias/Elfo/
+// Gnomo/Tiferino escolhem 1x no wizard (`identidade_permanente`/
+// `linhagem_com_progressao_magica`). Aasimar (`escolha_reutilizavel`)
+// é diferente: a Revelação Celestial é escolhida de novo A CADA USO em
+// combate, não no wizard — ver `core/especieSubescolha.ts`
+// (`opcoesEscolhaReutilizavel`) e a UI em `BonusPanelContent.tsx`.
+//
+// Todas as 10 espécies do Livro do Jogador 2024 já estão liberadas
+// (`disponivel: true`) — o que falta agora é só mecânica de traço
+// ATIVO em Combat, não mais dado/wizard. Ver `EmDev.md` item 8.
 //
 // introducaoCurta vem da coluna "Descrição Curta (auto, revisar)" —
 // gerada automaticamente (corta na frase mais próxima de ~350
@@ -46,6 +50,20 @@ export interface TracoEspecie {
    * leitura a partir de `Especie.opcoesSubescolha`, nunca duplicado
    * como valor fixo aqui. */
   usaTipoDanoDaSubescolha?: boolean;
+  /** Traço cujo texto já lista TODAS as opções de sub-escolha (ex.:
+   * Ancestralidade Gigante do Golias, que descreve as 6 ancestralidades
+   * dentro do próprio traço) — a UI mostra, junto do texto original
+   * (nunca alterado), qual `descricaoEfeito` de `Especie.opcoesSubescolha`
+   * foi escolhida. Diferente de `usaTipoDanoDaSubescolha` (efeito
+   * distribuído em outros traços, ex. Draconato). */
+  usaDescricaoEfeitoDaSubescolha?: boolean;
+  /** Traço que concede proficiência numa perícia à escolha, restrita a
+   * uma lista curta (ex.: Sentidos Aguçados do Elfo — Intuição,
+   * Percepção ou Sobrevivência) — reaproveita o mesmo campo
+   * `WizardSelection.periciaEspecieEscolhida` do Hábil (Humano), só
+   * filtrando as opções mostradas. `undefined` = sem restrição (não
+   * usado hoje, já que Hábil não define este campo). */
+  opcoesPericia?: string[];
 }
 
 export type NaturezaSubescolha =
@@ -58,16 +76,40 @@ export interface Subescolha {
   natureza: NaturezaSubescolha;
 }
 
-/** Uma opção de sub-escolha `identidade_permanente` (ex.: cada cor de
- * dragão do Draconato, cada ancestralidade do Golias) — escolhida 1x
- * na criação, nunca muda depois. `tipoDano` só existe pras espécies
- * cujos traços dependem de um tipo de dano único (Draconato); Golias
- * não usa esse campo — cada ancestralidade já é um benefício descrito
- * por completo em `descricaoEfeito`. */
-export interface OpcaoIdentidadePermanente {
+/** Uma opção de sub-escolha `identidade_permanente` OU
+ * `linhagem_com_progressao_magica` (ex.: cada cor de dragão do
+ * Draconato, cada ancestralidade do Golias, cada linhagem do Elfo) —
+ * escolhida 1x na criação, nunca muda depois (mesma experiência de
+ * escolha nas duas naturezas, só o que a escolha desbloqueia depois
+ * difere — ver `NaturezaSubescolha`). Campos opcionais porque cada
+ * espécie usa só o subconjunto que faz sentido pro seu texto:
+ * - `tipoDano` — Draconato (traços que dependem de um tipo de dano
+ *   único, ver `TracoEspecie.usaTipoDanoDaSubescolha`).
+ * - `descricaoEfeito` — Golias (efeito completo, próprio traço já
+ *   lista todas as opções) e Elfo/Tiferino (benefício de nível 1 da
+ *   linhagem/legado).
+ * - `sentidoConcedido` — quando a opção muda um sentido já concedido
+ *   por outro traço da espécie (ex.: Drow aumenta o alcance da Visão
+ *   no Escuro) — somado em `core/sentidos.ts` junto das outras fontes,
+ *   nunca sobrescrevendo o traço original.
+ * - `truquesConhecidos` — nomes dos truques concedidos de forma
+ *   permanente (`linhagem_com_progressao_magica`; ver
+ *   `core/magiasEspecie.ts`) — normalmente 1, Gnomo das Rochas
+ *   concede 2 (Prestidigitação Arcana + Reparar).
+ * - `magiaNivel1`/`magiaNivel3`/`magiaNivel5` — nome da magia sempre
+ *   preparada desbloqueada automaticamente nesse nível DE PERSONAGEM
+ *   (não de classe) — só `linhagem_com_progressao_magica`.
+ *   `magiaNivel1` é raro (Gnomo do Bosque — Falar com Animais desde a
+ *   criação); Elfo/Tiferino só usam nível 3/5. */
+export interface OpcaoSubescolha {
   nome: string;
   tipoDano?: string;
   descricaoEfeito?: string;
+  sentidoConcedido?: SentidoConcedido;
+  truquesConhecidos?: string[];
+  magiaNivel1?: string;
+  magiaNivel3?: string;
+  magiaNivel5?: string;
 }
 
 export interface Especie {
@@ -84,7 +126,13 @@ export interface Especie {
   /** Opções da sub-escolha, só preenchido pras espécies já
    * estruturadas (ver comentário no topo do arquivo) — `undefined`
    * pras que ainda têm o dado só como texto corrido no traço. */
-  opcoesSubescolha?: OpcaoIdentidadePermanente[];
+  opcoesSubescolha?: OpcaoSubescolha[];
+  /** Truque concedido pra TODA a espécie, sem depender da sub-escolha
+   * (ex.: Presença Sobrenatural do Tiferino — Taumaturgia, igual pra
+   * qualquer Legado Ínfero escolhido). Diferente de
+   * `OpcaoSubescolha.truquesConhecidos`, que só o jogador que escolheu
+   * aquela opção específica recebe. */
+  truqueFixo?: string;
   disponivel: boolean;
   fonte: string;
 }
@@ -181,7 +229,25 @@ export const especies: Especie[] = [
       { nome: "Revelação Celestial", descricao: "No nível 3 de personagem, você pode se transformar como uma Ação Bônus usando uma das opções abaixo (escolha a opção cada vez que você se transformar). A transformação se mantém por 1 minuto ou até você a encerrar (nenhuma ação é necessária). Uma vez que você se transforma, não pode fazê-lo novamente até completar um Descanso Longo. Uma vez em cada um dos seus turnos, até que a transformação termine, você pode infligir dano adicional a um alvo ao causar dano a ele com um ataque ou uma magia. O dano adicional é igual ao seu Bônus de Proficiência, e o tipo de dano adicional é Necrótico para Manto Necrótico ou Radiante para Asas Celestiais e Transfiguração Radiante. Aqui estão as opções de transformação: Asas Celestiais. Duas asas espectrais brotam em suas costas temporariamente. Até que a transformação se encerre, você tem um Deslocamento de Voo igual ao seu Deslocamento. Manto Necrótico. Seus olhos se tornam brevemente poças de escuridão, e asas que não voam brotam em suas costas temporariamente. Criaturas que não sejam seus aliados a até 3 metros de você devem ser bem-sucedidas em uma salvaguarda de Carisma (CD 8 + seu modificador de Carisma e seu Bônus de Proficiência) ou têm a condição Amedrontado até o final do seu próximo turno. Transfiguração Radiante. Luz abrasadora irradia temporariamente de seus olhos e boca. Pela duração da transformação, você emite Luz Plena em um raio de 3 metros e Meia-luz por mais 3 metros, e no fim de cada um de seus turnos, cada criatura a até 3 metros de você sofre dano Radiante igual ao seu Bônus de Proficiência." },
     ],
     subescolha: { nome: "Revelação Celestial", natureza: "escolha_reutilizavel" },
-    disponivel: false,
+    opcoesSubescolha: [
+      {
+        nome: "Asas Celestiais",
+        tipoDano: "Radiante",
+        descricaoEfeito: "Duas asas espectrais brotam em suas costas temporariamente. Até que a transformação se encerre, você tem um Deslocamento de Voo igual ao seu Deslocamento.",
+      },
+      {
+        nome: "Manto Necrótico",
+        tipoDano: "Necrótico",
+        descricaoEfeito: "Seus olhos se tornam brevemente poças de escuridão, e asas que não voam brotam em suas costas temporariamente. Criaturas que não sejam seus aliados a até 3 metros de você devem ser bem-sucedidas em uma salvaguarda de Carisma (CD 8 + seu modificador de Carisma e seu Bônus de Proficiência) ou têm a condição Amedrontado até o final do seu próximo turno.",
+      },
+      {
+        nome: "Transfiguração Radiante",
+        tipoDano: "Radiante",
+        descricaoEfeito: "Luz abrasadora irradia temporariamente de seus olhos e boca. Pela duração da transformação, você emite Luz Plena em um raio de 3 metros e Meia-luz por mais 3 metros, e no fim de cada um de seus turnos, cada criatura a até 3 metros de você sofre dano Radiante igual ao seu Bônus de Proficiência.",
+      },
+    ],
+    truqueFixo: "Luz",
+    disponivel: true,
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -227,13 +293,43 @@ export const especies: Especie[] = [
     introducaoCurta: "Criados por Corellon, os primeiros elfos podiam mudar de forma à vontade. Essa habilidade foi perdida quando Corellon os amaldiçoou por conspirarem com Lolth, que falhou em usurpar seu domínio. Após a queda de Lolth no Abismo, a maioria dos elfos a renunciou e recebeu o perdão de Corellon, mas o que ele havia tomado deles se perdeu para sempre.",
     traços: [
       { nome: "Visão no Escuro", descricao: "Você tem Visão no Escuro com um alcance de 18 metros.", sentidoConcedido: { tipo: 'visaoNoEscuro', alcanceMetros: 18 } },
-      { nome: "Linhagem Élfica", descricao: "Você é de uma linhagem que lhe concede habilidades sobrenaturais. Escolha uma linhagem da tabela Linhagem Élfica. Você adquire o benefício de nível 1 dessa linhagem. Ao atingir os níveis 3 e 5, você aprende uma magia de círculo superior, conforme indicado na tabela. Essa magia está sempre preparada e pode ser conjurada uma vez sem usar um espaço de magia, restaurando essa capacidade ao completar um Descanso Longo. Além disso, você pode conjurá-la usando qualquer espaço de magia apropriado que possua. Inteligência, Sabedoria ou Carisma é seu atributo de conjuração para as magias que você conjura com este traço (escolha o atributo quando selecionar a linhagem). Tabela Linhagem Élfica — Alto Elfo: Nível 1: você conhece o truque Prestidigitação Arcana (sempre que completar um Descanso Longo, pode substituir este truque por outro da lista de magias de Mago); Nível 3: Detectar Magia; Nível 5: Passo Nebuloso. Drow: Nível 1: o alcance da sua Visão no Escuro aumenta para 36 metros e você também conhece o truque Luzes Dançantes; Nível 3: Fogo das Fadas; Nível 5: Escuridão. Elfo Silvestre: Nível 1: seu Deslocamento aumenta para 10,5 metros e você também conhece o truque Arte Druídica; Nível 3: Passos Largos; Nível 5: Passos Sem Rastro." },
+      { nome: "Linhagem Élfica", descricao: "Você é de uma linhagem que lhe concede habilidades sobrenaturais. Escolha uma linhagem da tabela Linhagem Élfica. Você adquire o benefício de nível 1 dessa linhagem. Ao atingir os níveis 3 e 5, você aprende uma magia de círculo superior, conforme indicado na tabela. Essa magia está sempre preparada e pode ser conjurada uma vez sem usar um espaço de magia, restaurando essa capacidade ao completar um Descanso Longo. Além disso, você pode conjurá-la usando qualquer espaço de magia apropriado que possua. Inteligência, Sabedoria ou Carisma é seu atributo de conjuração para as magias que você conjura com este traço (escolha o atributo quando selecionar a linhagem). Tabela Linhagem Élfica — Alto Elfo: Nível 1: você conhece o truque Prestidigitação Arcana (sempre que completar um Descanso Longo, pode substituir este truque por outro da lista de magias de Mago); Nível 3: Detectar Magia; Nível 5: Passo Nebuloso. Drow: Nível 1: o alcance da sua Visão no Escuro aumenta para 36 metros e você também conhece o truque Luzes Dançantes; Nível 3: Fogo das Fadas; Nível 5: Escuridão. Elfo Silvestre: Nível 1: seu Deslocamento aumenta para 10,5 metros e você também conhece o truque Arte Druídica; Nível 3: Passos Largos; Nível 5: Passos Sem Rastro.", usaDescricaoEfeitoDaSubescolha: true },
       { nome: "Ancestralidade Feérica", descricao: "Você tem Vantagem ao realizar salvaguardas para evitar ou encerrar a condição Enfeitiçado." },
-      { nome: "Sentidos Aguçados", descricao: "Você tem proficiência na perícia Intuição, Percepção ou Sobrevivência." },
+      { nome: "Sentidos Aguçados", descricao: "Você tem proficiência na perícia Intuição, Percepção ou Sobrevivência.", opcoesPericia: ["Intuição", "Percepção", "Sobrevivência"] },
       { nome: "Transe", descricao: "Você pode completar um Descanso Longo em 4 horas ao meditar, sem a necessidade de dormir, mantendo a consciência, e magia não pode forçá-lo a dormir." },
     ],
     subescolha: { nome: "Linhagem Élfica", natureza: "linhagem_com_progressao_magica" },
-    disponivel: false,
+    opcoesSubescolha: [
+      {
+        nome: "Alto Elfo",
+        descricaoEfeito: "Você conhece o truque Prestidigitação Arcana (sempre que completar um Descanso Longo, pode substituir este truque por outro da lista de magias de Mago).",
+        truquesConhecidos: ["Prestidigitação Arcana"],
+        magiaNivel3: "Detectar Magia",
+        magiaNivel5: "Passo Nebuloso",
+      },
+      {
+        nome: "Drow",
+        descricaoEfeito: "O alcance da sua Visão no Escuro aumenta para 36 metros e você também conhece o truque Luzes Dançantes.",
+        truquesConhecidos: ["Luzes Dançantes"],
+        magiaNivel3: "Fogo das Fadas",
+        magiaNivel5: "Escuridão",
+        sentidoConcedido: { tipo: 'visaoNoEscuro', alcanceMetros: 36 },
+      },
+      {
+        nome: "Elfo Silvestre",
+        descricaoEfeito: "Seu Deslocamento aumenta para 10,5 metros e você também conhece o truque Arte Druídica.",
+        truquesConhecidos: ["Arte Druídica"],
+        magiaNivel3: "Passos Largos",
+        // "Passo Sem Rastro" (singular) — assim que está no catálogo de
+        // Magias (magias.ts, id "passosemrastro"); o texto oficial do
+        // traço de Elfo (linha acima, nunca alterado) usa "Passos Sem
+        // Rastro" (plural). Divergência de nome entre as 2 abas da
+        // planilha mestra — avisado ao Osmar, usando aqui o nome que
+        // bate com o catálogo real pra busca funcionar.
+        magiaNivel5: "Passo Sem Rastro",
+      },
+    ],
+    disponivel: true,
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -248,10 +344,23 @@ export const especies: Especie[] = [
     traços: [
       { nome: "Visão no Escuro", descricao: "Você tem Visão no Escuro com um alcance de 18 metros.", sentidoConcedido: { tipo: 'visaoNoEscuro', alcanceMetros: 18 } },
       { nome: "Astúcia de Gnomo", descricao: "Você tem Vantagem em salvaguardas de Inteligência, Sabedoria e Carisma." },
-      { nome: "Linhagem Gnômica", descricao: "Você pertence a uma linhagem que lhe confere habilidades sobrenaturais. Escolha uma das seguintes opções; sua escolha determina se Inteligência, Sabedoria ou Carisma é seu atributo de conjuração para as magias desse traço (escolha o atributo quando selecionar a linhagem): Gnomo das Rochas. Você conhece os truques Prestidigitação Arcana e Reparar. Além disso, você pode gastar 10 minutos conjurando Prestidigitação Arcana para fabricar um dispositivo mecânico minúsculo (CA 5, 1 PV), como um brinquedo, isqueiro mecânico ou caixa de música. Ao fabricar o dispositivo, você determina a função dele escolhendo um efeito de Prestidigitação Arcana; o dispositivo produz esse efeito sempre que você ou outra criatura executa uma Ação Bônus para ativá-lo com um toque. Se o efeito escolhido tiver opções possíveis, você escolhe uma dessas opções para o dispositivo ao fabricá-lo. Por exemplo, se você escolher o efeito de Brincar com Fogo da magia, você determina se o dispositivo acende ou extingue fogo; o dispositivo não faz ambas as coisas. Você pode ter três desses dispositivos ao mesmo tempo, e cada um se desfaz 8 horas após ser fabricado ou quando você o desmonta com um toque como uma ação Usar Objeto. Gnomo do Bosque. Você conhece o truque Ilusão Menor. Você também sempre tem a magia Falar com Animais preparada. É possível conjurá-la sem um espaço de magia um número de vezes igual ao seu Bônus de Proficiência, e você restaura todos os usos gastos quando completa um Descanso Longo. Você também pode usar qualquer espaço de magia que tiver para conjurá-la." },
+      { nome: "Linhagem Gnômica", descricao: "Você pertence a uma linhagem que lhe confere habilidades sobrenaturais. Escolha uma das seguintes opções; sua escolha determina se Inteligência, Sabedoria ou Carisma é seu atributo de conjuração para as magias desse traço (escolha o atributo quando selecionar a linhagem): Gnomo das Rochas. Você conhece os truques Prestidigitação Arcana e Reparar. Além disso, você pode gastar 10 minutos conjurando Prestidigitação Arcana para fabricar um dispositivo mecânico minúsculo (CA 5, 1 PV), como um brinquedo, isqueiro mecânico ou caixa de música. Ao fabricar o dispositivo, você determina a função dele escolhendo um efeito de Prestidigitação Arcana; o dispositivo produz esse efeito sempre que você ou outra criatura executa uma Ação Bônus para ativá-lo com um toque. Se o efeito escolhido tiver opções possíveis, você escolhe uma dessas opções para o dispositivo ao fabricá-lo. Por exemplo, se você escolher o efeito de Brincar com Fogo da magia, você determina se o dispositivo acende ou extingue fogo; o dispositivo não faz ambas as coisas. Você pode ter três desses dispositivos ao mesmo tempo, e cada um se desfaz 8 horas após ser fabricado ou quando você o desmonta com um toque como uma ação Usar Objeto. Gnomo do Bosque. Você conhece o truque Ilusão Menor. Você também sempre tem a magia Falar com Animais preparada. É possível conjurá-la sem um espaço de magia um número de vezes igual ao seu Bônus de Proficiência, e você restaura todos os usos gastos quando completa um Descanso Longo. Você também pode usar qualquer espaço de magia que tiver para conjurá-la.", usaDescricaoEfeitoDaSubescolha: true },
     ],
     subescolha: { nome: "Linhagem Gnômica", natureza: "linhagem_com_progressao_magica" },
-    disponivel: false,
+    opcoesSubescolha: [
+      {
+        nome: "Gnomo das Rochas",
+        descricaoEfeito: "Você conhece os truques Prestidigitação Arcana e Reparar. Além disso, você pode gastar 10 minutos conjurando Prestidigitação Arcana para fabricar um dispositivo mecânico minúsculo (CA 5, 1 PV), como um brinquedo, isqueiro mecânico ou caixa de música — mesmo efeito de Prestidigitação Arcana, ativado com um toque como Ação Bônus. Você pode ter três desses dispositivos ao mesmo tempo.",
+        truquesConhecidos: ["Prestidigitação Arcana", "Reparar"],
+      },
+      {
+        nome: "Gnomo do Bosque",
+        descricaoEfeito: "Você conhece o truque Ilusão Menor. Você também sempre tem a magia Falar com Animais preparada, conjurável sem espaço de magia um número de vezes igual ao seu Bônus de Proficiência (recarrega em Descanso Longo), além de com qualquer espaço de magia que tiver.",
+        truquesConhecidos: ["Ilusão Menor"],
+        magiaNivel1: "Falar com Animais - Traço de Gnomo",
+      },
+    ],
+    disponivel: true,
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -264,12 +373,20 @@ export const especies: Especie[] = [
     introducao: "Os golias, que se destacam pela altura, são descendentes distantes de gigantes. Cada um deles possui as bênçãos dos antigos gigantes, manifestadas em diversos dons sobrenaturais, como o crescimento rápido e a habilidade de alcançar temporariamente a estatura de seus parentes gigantes. Os golias possuem características físicas que refletem a aparência de gigantes em suas linhagens familiares. Alguns têm o aspecto de gigantes da pedra, enquanto outros se assemelham a gigantes do fogo. Apesar de suas origens, os golias traçaram seu próprio caminho no multiverso, livres dos conflitos internos que devastaram os gigantes por séculos, e almejam alcançar alturas superiores às de seus ancestrais.",
     introducaoCurta: "Os golias, que se destacam pela altura, são descendentes distantes de gigantes. Cada um deles possui as bênçãos dos antigos gigantes, manifestadas em diversos dons sobrenaturais, como o crescimento rápido e a habilidade de alcançar temporariamente a estatura de seus parentes gigantes.",
     traços: [
-      { nome: "Ancestralidade Gigante", descricao: "Você é descendente de Gigantes. Escolha um dos seguintes benefícios — um benefício sobrenatural de sua ancestralidade; você pode usar o benefício escolhido um número de vezes igual ao seu Bônus de Proficiência, e você restaura todos os usos gastos quando completa um Descanso Longo: Arrepio do Gelo (Gigante do Gelo). Ao atingir um alvo com uma jogada de ataque e causar dano a ele, você também pode infligir 1d6 pontos de dano Gélido a esse alvo e reduzir o Deslocamento dele em 3 metros até o início do seu próximo turno. Queimadura de Fogo (Gigante de Fogo). Ao atingir um alvo com uma jogada de ataque e causar dano a ele, você também pode causar 1d10 pontos de dano Ígneo a esse alvo. Resistência da Pedra (Gigante da Pedra). Ao sofrer dano, pode executar uma Reação para jogar 1d12. Adicione seu modificador de Constituição ao número obtido e reduza o dano desse total. Salto da Nuvem (Gigante das Nuvens). Como uma Ação Bônus, você se teleporta magicamente até 9 metros para um espaço desocupado à sua vista. Tombo da Colina (Gigante da Colina). Ao atingir uma criatura Grande ou menor com uma jogada de ataque e causar dano a ela, você pode impor a esse alvo a condição Caído. Trovão da Tempestade (Gigante da Tempestade). Ao sofrer dano de uma criatura a até 18 metros de você, você pode executar uma Reação para causar 1d8 pontos de dano Trovejante a essa criatura." },
+      { nome: "Ancestralidade Gigante", descricao: "Você é descendente de Gigantes. Escolha um dos seguintes benefícios — um benefício sobrenatural de sua ancestralidade; você pode usar o benefício escolhido um número de vezes igual ao seu Bônus de Proficiência, e você restaura todos os usos gastos quando completa um Descanso Longo: Arrepio do Gelo (Gigante do Gelo). Ao atingir um alvo com uma jogada de ataque e causar dano a ele, você também pode infligir 1d6 pontos de dano Gélido a esse alvo e reduzir o Deslocamento dele em 3 metros até o início do seu próximo turno. Queimadura de Fogo (Gigante de Fogo). Ao atingir um alvo com uma jogada de ataque e causar dano a ele, você também pode causar 1d10 pontos de dano Ígneo a esse alvo. Resistência da Pedra (Gigante da Pedra). Ao sofrer dano, pode executar uma Reação para jogar 1d12. Adicione seu modificador de Constituição ao número obtido e reduza o dano desse total. Salto da Nuvem (Gigante das Nuvens). Como uma Ação Bônus, você se teleporta magicamente até 9 metros para um espaço desocupado à sua vista. Tombo da Colina (Gigante da Colina). Ao atingir uma criatura Grande ou menor com uma jogada de ataque e causar dano a ela, você pode impor a esse alvo a condição Caído. Trovão da Tempestade (Gigante da Tempestade). Ao sofrer dano de uma criatura a até 18 metros de você, você pode executar uma Reação para causar 1d8 pontos de dano Trovejante a essa criatura.", usaDescricaoEfeitoDaSubescolha: true },
       { nome: "Forma Grande", descricao: "A partir do nível 5 de personagem, você pode alterar seu tamanho para Grande como uma Ação Bônus se estiver em um espaço grande o suficiente. Essa transformação se mantém por 10 minutos ou até que você a encerrar (nenhuma ação é necessária). Pela duração, você tem Vantagem em testes de Força, e seu Deslocamento aumenta em 3 metros. Após usar este traço, você não pode utilizá-lo novamente até completar um Descanso Longo." },
       { nome: "Porte Poderoso", descricao: "Você tem Vantagem em qualquer teste de atributo que realizar para encerrar a condição Imobilizado. Você também conta como um tamanho maior ao determinar sua capacidade de carga." },
     ],
     subescolha: { nome: "Ancestralidade Gigante", natureza: "identidade_permanente" },
-    disponivel: false,
+    opcoesSubescolha: [
+      { nome: "Arrepio do Gelo (Gigante do Gelo)", descricaoEfeito: "Ao atingir um alvo com uma jogada de ataque e causar dano a ele, você também pode infligir 1d6 pontos de dano Gélido a esse alvo e reduzir o Deslocamento dele em 3 metros até o início do seu próximo turno." },
+      { nome: "Queimadura de Fogo (Gigante de Fogo)", descricaoEfeito: "Ao atingir um alvo com uma jogada de ataque e causar dano a ele, você também pode causar 1d10 pontos de dano Ígneo a esse alvo." },
+      { nome: "Resistência da Pedra (Gigante da Pedra)", descricaoEfeito: "Ao sofrer dano, pode executar uma Reação para jogar 1d12. Adicione seu modificador de Constituição ao número obtido e reduza o dano desse total." },
+      { nome: "Salto da Nuvem (Gigante das Nuvens)", descricaoEfeito: "Como uma Ação Bônus, você se teleporta magicamente até 9 metros para um espaço desocupado à sua vista." },
+      { nome: "Tombo da Colina (Gigante da Colina)", descricaoEfeito: "Ao atingir uma criatura Grande ou menor com uma jogada de ataque e causar dano a ela, você pode impor a esse alvo a condição Caído." },
+      { nome: "Trovão da Tempestade (Gigante da Tempestade)", descricaoEfeito: "Ao sofrer dano de uma criatura a até 18 metros de você, você pode executar uma Reação para causar 1d8 pontos de dano Trovejante a essa criatura." },
+    ],
+    disponivel: true,
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -283,11 +400,35 @@ export const especies: Especie[] = [
     introducaoCurta: "Os tiferinos nascem nos Planos Inferiores ou têm ancestrais que se originaram lá. Estão ligados por sangue a um diabo, demônio ou outro Ínfero. Essa conexão representa o legado ínfero do tiferino, prometendo poder, mas não influi em sua perspectiva moral. Um tiferino decide aceitar ou lamentar seu legado ínfero.",
     traços: [
       { nome: "Visão no Escuro", descricao: "Você tem Visão no Escuro com um alcance de 18 metros.", sentidoConcedido: { tipo: 'visaoNoEscuro', alcanceMetros: 18 } },
-      { nome: "Legado Ínfero", descricao: "Você é o portador de um legado que lhe confere poderes sobrenaturais. Escolha um legado da tabela Legados Ínferos. Você adquire o benefício de nível 1 do legado escolhido. Ao atingir os níveis de personagem 3 e 5, você aprende magias de círculo superior, conforme indicado na tabela. Essas magias estão sempre preparadas e podem ser conjuradas uma vez sem usar um espaço de magia, sendo restauradas quando completa um Descanso Longo. Além disso, você pode conjurá-las utilizando qualquer espaço de magia que possua do círculo correspondente. Atributos como Inteligência, Sabedoria ou Carisma servem como seu atributo de conjuração para essas magias (escolha um atributo ao selecionar o legado). Tabela Legados Ínferos — Abissal: Nível 1: Resistência a dano Venenoso e o truque Rajada de Veneno; Nível 3: Raio Nauseante; Nível 5: Paralisar Pessoa. Ctônico: Nível 1: Resistência a dano Necrótico e o truque Toque Necrótico; Nível 3: Vitalidade Vazia; Nível 5: Raio do Enfraquecimento. Infernal: Nível 1: Resistência a dano Ígneo e o truque Raio de Fogo; Nível 3: Repreensão Diabólica; Nível 5: Escuridão." },
+      { nome: "Legado Ínfero", descricao: "Você é o portador de um legado que lhe confere poderes sobrenaturais. Escolha um legado da tabela Legados Ínferos. Você adquire o benefício de nível 1 do legado escolhido. Ao atingir os níveis de personagem 3 e 5, você aprende magias de círculo superior, conforme indicado na tabela. Essas magias estão sempre preparadas e podem ser conjuradas uma vez sem usar um espaço de magia, sendo restauradas quando completa um Descanso Longo. Além disso, você pode conjurá-las utilizando qualquer espaço de magia que possua do círculo correspondente. Atributos como Inteligência, Sabedoria ou Carisma servem como seu atributo de conjuração para essas magias (escolha um atributo ao selecionar o legado). Tabela Legados Ínferos — Abissal: Nível 1: Resistência a dano Venenoso e o truque Rajada de Veneno; Nível 3: Raio Nauseante; Nível 5: Paralisar Pessoa. Ctônico: Nível 1: Resistência a dano Necrótico e o truque Toque Necrótico; Nível 3: Vitalidade Vazia; Nível 5: Raio do Enfraquecimento. Infernal: Nível 1: Resistência a dano Ígneo e o truque Raio de Fogo; Nível 3: Repreensão Diabólica; Nível 5: Escuridão.", usaDescricaoEfeitoDaSubescolha: true },
       { nome: "Presença Sobrenatural", descricao: "Você conhece o truque Taumaturgia. Ao conjurar com este traço, a magia usa o mesmo atributo de conjuração que você usa para sua Característica Legado Ínfero." },
     ],
     subescolha: { nome: "Legado Ínfero", natureza: "linhagem_com_progressao_magica" },
-    disponivel: false,
+    opcoesSubescolha: [
+      {
+        nome: "Abissal",
+        descricaoEfeito: "Resistência a dano Venenoso e o truque Rajada de Veneno.",
+        truquesConhecidos: ["Rajada de Veneno"],
+        magiaNivel3: "Raio Nauseante",
+        magiaNivel5: "Paralisar Pessoa",
+      },
+      {
+        nome: "Ctônico",
+        descricaoEfeito: "Resistência a dano Necrótico e o truque Toque Necrótico.",
+        truquesConhecidos: ["Toque Necrótico"],
+        magiaNivel3: "Vitalidade Vazia",
+        magiaNivel5: "Raio do Enfraquecimento",
+      },
+      {
+        nome: "Infernal",
+        descricaoEfeito: "Resistência a dano Ígneo e o truque Raio de Fogo.",
+        truquesConhecidos: ["Raio de Fogo"],
+        magiaNivel3: "Repreensão Diabólica",
+        magiaNivel5: "Escuridão",
+      },
+    ],
+    truqueFixo: "Taumaturgia",
+    disponivel: true,
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
 ];

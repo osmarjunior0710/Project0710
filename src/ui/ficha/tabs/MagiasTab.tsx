@@ -40,6 +40,17 @@ interface MagiasTabProps {
    * própria, fora do limite normal de Magias Preparadas). Vazio pra
    * quem não tem essa característica. */
   magiasPactoDoInferoAtuais: string[];
+  /** Truque + magias de nível 3/5 concedidos pela sub-escolha de
+   * espécie (ex.: Linhagem Élfica do Elfo) — mesmo tratamento de
+   * "sempre preparada, fora do limite normal" das outras listas fixas
+   * acima. Vazio pra espécie sem essa sub-escolha, ou sem escolha
+   * ainda feita. */
+  magiasEspecieAtuais: string[];
+  /** Truque(s) + magia de 1º círculo do talento de Origem "Iniciado em
+   * Magia" (Acólito/Guia/Sábio) — fixo desde a criação, mesmo
+   * tratamento de "sempre preparada" das outras listas fixas acima.
+   * Vazio pra origem sem esse talento. */
+  magiasTalentoOrigemAtuais: string[];
   /** Livro das Sombras (Bruxo, Pacto do Tomo) — 3 truques + 2 magias
    * rituais sempre preparadas enquanto o livro existir, mesmo
    * tratamento de "Descobertas Mágicas" (seção própria, fora do
@@ -109,6 +120,8 @@ export default function MagiasTab({
   magiasPreparadasAtuais,
   magiasDescobertasMagicasAtuais,
   magiasPactoDoInferoAtuais,
+  magiasEspecieAtuais,
+  magiasTalentoOrigemAtuais,
   livroDasSombrasAtuais,
   temPactoDoTomo,
   livroDasSombrasGasto,
@@ -153,6 +166,8 @@ export default function MagiasTab({
   const preparadas = magiasPreparadasDoPersonagem(magiasPreparadasAtuais);
   const descobertasMagicas = magiasPreparadasDoPersonagem(magiasDescobertasMagicasAtuais);
   const pactoDoInfero = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
+  const magiasEspecie = magiasPreparadasDoPersonagem(magiasEspecieAtuais);
+  const magiasTalentoOrigem = magiasPreparadasDoPersonagem(magiasTalentoOrigemAtuais);
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
   const [espacosExpandido, setEspacosExpandido] = useColapsavel('espacos-de-magia', true);
 
@@ -441,6 +456,60 @@ export default function MagiasTab({
             Patrono Ínfero — sempre preparadas, não contam na conta de Magias Preparadas.
           </div>
           {pactoDoInfero.map((m) => {
+            const semEspaco = m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+            const temAcao = usarMagiaTemAcaoAutomatizada(m);
+            return (
+              <div key={m.id} className={styles.spellRow}>
+                <div className={styles.spellName}>
+                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                </div>
+                <span className={styles.spellCirculo}>{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
+                <div
+                  className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                  onClick={() => temAcao && usarMagia(m)}
+                >
+                  {temAcao ? 'Usar' : 'Usar (pendência)'}
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+
+      {magiasEspecie.length > 0 && (
+        <>
+          <div className="section-title">Magias da Espécie</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Concedidas pela espécie — sempre preparadas, não contam na conta de Magias Preparadas.
+          </div>
+          {magiasEspecie.map((m) => {
+            const semEspaco = m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+            const temAcao = usarMagiaTemAcaoAutomatizada(m);
+            return (
+              <div key={m.id} className={styles.spellRow}>
+                <div className={styles.spellName}>
+                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                </div>
+                <span className={styles.spellCirculo}>{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
+                <div
+                  className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                  onClick={() => temAcao && usarMagia(m)}
+                >
+                  {temAcao ? 'Usar' : 'Usar (pendência)'}
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+
+      {magiasTalentoOrigem.length > 0 && (
+        <>
+          <div className="section-title">Magias do Talento de Origem</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Iniciado em Magia — sempre preparadas, não contam na conta de Magias Preparadas.
+          </div>
+          {magiasTalentoOrigem.map((m) => {
             const semEspaco = m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (

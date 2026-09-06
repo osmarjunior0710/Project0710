@@ -470,24 +470,14 @@ silenciosamente — a Mochila trata isso sem quebrar (mostra "sem peso
 cadastrado" e avisa quantos itens ficaram de fora da soma), mas o
 número de carga fica sub-contado até corrigir.
 
-**Prováveis bugs de nome (o catálogo TEM o peso, só o nome não bate) —
-corrigir o nome usado em `origens.ts`/`classesProficienciasIniciais.ts`
-pro nome exato do catálogo, não mexer na planilha:**
-- `"Balde de Ferro"` → catálogo tem só `"Balde"` (1 kg). Usado na
-  Origem Fazendeiro.
-- `"Fantasia"` → catálogo tem `"Roupas, Fantasia"` (2 kg). Usado na
-  Origem Artista (2×) e Charlatão (1×).
-- `"Roupas Finas"` → catálogo tem `"Roupas, Finas"` (3 kg). Usado nas
-  Origens Charlatão, Escriba e Nobre.
-- `"Roupas de Viagem"` → catálogo tem `"Roupas, Viagem"` (2 kg). É o
-  nome mais repetido no arquivo (aparece em quase toda Origem) —
-  provavelmente o de maior impacto no peso sub-contado hoje.
-- `"Livro (filosofia)"` (Origem Eremita), `"Livro (história)"` (Origem
-  Sábio), `"Livro (orações)"` (Origem Acólito) → catálogo tem só
-  `"Livro"` (2,5 kg), sem variantes temáticas. Decidir: usar o nome
-  genérico "Livro" nesses 3 lugares (perde o sabor do texto, ganha o
-  peso certo), ou o Osmar decide se vale criar entradas próprias no
-  catálogo pra cada variante.
+**Prováveis bugs de nome — resolvido (2026-09, foco Origens, Grupo H):**
+todos os nomes em `origens.ts` foram corrigidos pro nome exato do
+catálogo (`"Balde de Ferro"`→`"Balde"`, `"Fantasia"`→`"Roupas,
+Fantasia"`, `"Roupas Finas"`→`"Roupas, Finas"`, `"Roupas de
+Viagem"`→`"Roupas, Viagem"`, e os 3 `"Livro (tema)"`→`"Livro"` genérico
+com o tema original preservado em comentário ao lado da linha).
+`classesProficienciasIniciais.ts` já não tinha nenhuma dessas
+ocorrências, não precisou de ajuste.
 
 **Possível lacuna real de planilha (ou decisão de dado a tomar, não é
 só digitar o nome certo):**
@@ -748,70 +738,6 @@ Ideia extra do Osmar (registrada, sem decisão ainda — é decisão de
 produto, não de dado/regra): uma aba de anotações de talento; se for
 pra frente, reaproveitaria `ItemComDescricao`/`MagiaComDescricao`, não
 precisa de componente novo.
-
-## Origens com seleção extra no Talento de Origem (Iniciado em Magia)
-
-**O que é:** dos 10 Talentos de Origem usados nas 16 origens do Livro do
-Jogador 2024, o talento **Iniciado em Magia** (origens: Acólito, Guia,
-Sábio) pede uma escolha adicional no momento de pegar a origem — a
-classe já vem fixa no nome da origem (ex: "Iniciado em Magia
-(Clérigo)"), mas ainda pede escolher 2 truques + 1 magia de 1º círculo
-daquela lista de classe, e qual atributo conjurador usar (Int/Sab/Car).
-
-**Já resolvido:** o outro talento que pedia seleção extra, Habilidoso
-(origens Nobre, Escriba, Charlatão — 3 perícias/ferramentas livres),
-ganhou a tela própria e as 3 origens já estão `disponivel: true`. Ver
-decisão "Passo condicional no wizard + escolha livre de proficiência
-(Talento de Origem)" no `DECISOES-WIZARD.md` pro schema genérico
-(`concedeProficiencias`) e o passo condicional do wizard — a mesma
-peça (`WizardStepDef.condicao`) serve de base pro passo do Iniciado em
-Magia também, só muda o conteúdo (escolha de magia, não de
-perícia/ferramenta).
-
-**Estado atual:** Acólito, Guia e Sábio continuam **"(em breve)"** e
-não-selecionáveis (mesmo tratamento visual que "🛠 Ferramentas de GM"
-na Home) até essa UI existir.
-
-**O que falta pra resolver:**
-1. Desenhar a tela/componente de "escolha de truque + magia de uma lista
-   de classe" (reutilizável — mesmo padrão serve pra Iniciado em Magia e
-   depois pra escolha de magias conhecidas de classes conjuradoras).
-2. Depois de existir, tirar o "(em breve)" dessas 3 origens.
-3. Quando Iniciado em Magia virar selecionável, `core/conjuracao.ts`
-   (`personagemConjura()`) precisa passar a contar essa fonte também
-   — hoje só olha a classe, essas 3 origens ainda não entram no
-   cálculo porque são inalcançáveis no wizard.
-
-## Espécies com sub-escolha ainda não têm as opções estruturadas (Aasimar, Draconato, Elfo, Gnomo, Golias, Tiferino)
-
-**O que é:** das 10 espécies do Livro do Jogador 2024 (não são 40 como eu
-tinha registrado errado antes — só 10), **Anão, Orc e Pequenino** já
-estão importadas e selecionáveis no wizard (sem sub-escolha nenhuma,
-`disponivel: true`). As outras 7 ficam "(em breve)": Humano (concede
-perícia/talento à escolha livre, mesmo problema do Habilidoso — ver
-pendência acima) e 6 espécies com sub-escolha de linhagem/herança
-(Aasimar, Draconato, Elfo, Gnomo, Golias, Tiferino — schema da
-sub-escolha já definido em `DECISOES-DADOS.md`, ver "Dados — Espécies
-têm 3 naturezas diferentes de sub-escolha").
-
-**Por que foi adiado:** as opções de cada sub-escolha (as 10 cores de
-dragão do Draconato, as 3 linhagens do Elfo, as 6 ancestralidades do
-Golias, etc.) **existem** na planilha, mas embutidas como texto corrido
-dentro da descrição do traço (ex: "Tabela Herança Dracônica (Dragão:
-Tipo de Dano) — Azul: Elétrico; Branco: Gélido; ..."), não como linhas
-próprias — precisam ser extraídas/parseadas antes de virarem uma lista
-selecionável na UI.
-
-**O que falta pra resolver:**
-1. Pra cada uma das 6 espécies, parsear o texto embutido da sub-escolha
-   pra uma lista estruturada de opções (nome + efeito).
-2. Desenhar a UI de escolha — provavelmente reutilizável entre as 3
-   naturezas de sub-escolha (`identidade_permanente`,
-   `linhagem_com_progressao_magica`, `escolha_reutilizavel`), mas cada
-   natureza aparece em lugar diferente (wizard vs. aba Combat) e
-   `linhagem_com_progressao_magica` precisa avisar o motor de level-up
-   pra desbloquear magia nos níveis 3/5.
-3. Depois de ambos existirem, tirar o "(em breve)" dessas espécies.
 
 ## Classes/Subclasses — variação estrutural grande, ainda sem schema
 
@@ -1101,22 +1027,6 @@ Bruxo, Clérigo, Feiticeiro, Guardião, Guerreiro, Mago, Monge, Paladino)
 ainda não foram auditadas linha a linha na aba "Características de
 Classe" pra confirmar se concedem idioma extra também — auditar quando
 cada uma for implementada.
-
-## Marcação de duplicidade — só Perícias hoje, Talentos/Truques/Magias dormentes
-
-`core/duplicidadeSelecao.ts` (`nomesDuplicados`) foi escrito genérico
-(aceita N grupos de nomes, não só 2), mas só está **realmente usado**
-pra Perícia da Origem × Perícia da Classe (`OrigemStep.tsx`) — a única
-sobreposição hoje alcançável no wizard. Talentos, Truques e Magias não
-têm um 2º ponto de concessão alcançável ainda: as Espécies com
-truque/magia grátis por traço (Alto Elfo, Drow, etc.) existem na
-planilha mas nenhuma está `disponivel: true`. Quando a 1ª Espécie com
-esse tipo de traço for habilitada, revisar se faz sentido extrair o
-truque/magia concedida de forma estruturada (hoje está só em prosa
-dentro de `descricao`) e então marcar a pill correspondente na etapa
-de Classe (Truques/Magias Preparadas) usando a mesma função. Ver
-DECISOES-WIZARD.md "Marcação de duplicidade... — só na criação" pro
-resto do contexto.
 
 ## Card padronizado de descrição — só Magias hoje, falta Itens/Armas/Armaduras/Itens Mágicos
 

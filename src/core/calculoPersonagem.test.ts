@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   bonusProficiencia,
+  bonusPvPorNivelDaEspecie,
+  bonusPvPorNivelDoTalento,
   calcularCA,
   calcularCAEquipado,
   calcularPvMaximoNivel1,
@@ -8,6 +10,8 @@ import {
   calcularPercepcaoPassiva,
   calcularPericias,
   calcularProficienciasFerramenta,
+  periciasProficientes,
+  ferramentasProficientes,
 } from './calculoPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { criarSelecaoInicial, type WizardSelection } from './personagem';
@@ -45,13 +49,43 @@ function itemEquipado(nome: string, slot: ItemMochila['slot']): ItemMochila {
   return { id: nome, nome, quantidade: 1, peso: null, origemDoItem: 'Manual', slot };
 }
 
+describe('bonusPvPorNivelDaEspecie (Tenacidade Anã)', () => {
+  it('Anão tem +1 de PV máximo por nível', () => {
+    expect(bonusPvPorNivelDaEspecie(selecaoGuerreiro({ especie: 'Anão' }))).toBe(1);
+  });
+
+  it('qualquer outra espécie (ou nenhuma ainda escolhida) não tem bônus', () => {
+    expect(bonusPvPorNivelDaEspecie(selecaoGuerreiro({ especie: 'Elfo' }))).toBe(0);
+    expect(bonusPvPorNivelDaEspecie(criarSelecaoInicial())).toBe(0);
+  });
+});
+
 describe('calcularPvMaximoNivel1', () => {
   it('usa o dado de vida MÁXIMO da classe + mod. Constituição (nunca rola nem tira média no nível 1)', () => {
     expect(calcularPvMaximoNivel1(selecaoGuerreiro())).toBe(10 + 1); // d10 + mod. CON 13 (+1)
   });
 
+  it('Anão soma +1 de Tenacidade Anã por cima do dado de vida + mod. Constituição', () => {
+    expect(calcularPvMaximoNivel1(selecaoGuerreiro({ especie: 'Anão' }))).toBe(10 + 1 + 1); // d10 + mod. CON (+1) + Tenacidade Anã (+1)
+  });
+
+  it('Fazendeiro soma +2 de Vigoroso por cima do dado de vida + mod. Constituição', () => {
+    expect(calcularPvMaximoNivel1(selecaoGuerreiro({ origem: 'Fazendeiro' }))).toBe(10 + 1 + 2); // d10 + mod. CON (+1) + Vigoroso (+2)
+  });
+
   it('retorna null quando falta Constituição ou Classe (personagem em criação)', () => {
     expect(calcularPvMaximoNivel1(criarSelecaoInicial())).toBeNull();
+  });
+});
+
+describe('bonusPvPorNivelDoTalento (Vigoroso)', () => {
+  it('Origem Fazendeiro (talento Vigoroso) dá +2 de PV máximo por nível', () => {
+    expect(bonusPvPorNivelDoTalento(selecaoGuerreiro({ origem: 'Fazendeiro' }))).toBe(2);
+  });
+
+  it('qualquer outra origem (ou nenhuma ainda escolhida) não tem bônus', () => {
+    expect(bonusPvPorNivelDoTalento(selecaoGuerreiro({ origem: 'Soldado' }))).toBe(0);
+    expect(bonusPvPorNivelDoTalento(criarSelecaoInicial())).toBe(0);
   });
 });
 
@@ -176,5 +210,43 @@ describe('calcularProficienciasFerramenta', () => {
     });
     const resultado = calcularProficienciasFerramenta(s, 1);
     expect(resultado).toHaveLength(1);
+  });
+});
+
+describe('periciasProficientes (Talento de Origem + Versátil)', () => {
+  it('inclui a parte de perícia de proficienciasTalentoOrigemEscolhidas (ex: Habilidoso pego pela Origem)', () => {
+    const s = selecaoGuerreiro({ proficienciasTalentoOrigemEscolhidas: ['Medicina', 'Ferramentas de Ladrão'] });
+    expect(periciasProficientes(s)).toContain('Medicina');
+    expect(periciasProficientes(s)).not.toContain('Ferramentas de Ladrão');
+  });
+
+  it('inclui a parte de perícia da gaveta separada do Versátil, sem duplicar a de proficienciasTalentoOrigemEscolhidas', () => {
+    const s = selecaoGuerreiro({
+      proficienciasTalentoOrigemEscolhidas: ['Medicina'],
+      proficienciasTalentoEspecieEscolhidas: ['Medicina', 'Percepção'],
+    });
+    const resultado = periciasProficientes(s);
+    expect(resultado.filter((p) => p === 'Medicina')).toHaveLength(1);
+    expect(resultado).toContain('Percepção');
+  });
+
+  it('sem nenhum talento com escolha de perícia, não quebra (borda)', () => {
+    expect(periciasProficientes(selecaoGuerreiro())).toEqual([]);
+  });
+});
+
+describe('ferramentasProficientes (Talento de Origem + Versátil)', () => {
+  it('inclui a parte de ferramenta das duas gavetas (Origem e Versátil) ao mesmo tempo', () => {
+    const s = selecaoGuerreiro({
+      proficienciasTalentoOrigemEscolhidas: ['Ferramentas de Ladrão'],
+      proficienciasTalentoEspecieEscolhidas: ['Ferramentas de Navegador'],
+    });
+    const resultado = ferramentasProficientes(s);
+    expect(resultado).toContain('Ferramentas de Ladrão');
+    expect(resultado).toContain('Ferramentas de Navegador');
+  });
+
+  it('sem nenhuma ferramenta de talento, devolve só o que vier de Origem/Classe (borda)', () => {
+    expect(ferramentasProficientes(selecaoGuerreiro())).toEqual([]);
   });
 });

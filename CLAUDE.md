@@ -26,7 +26,10 @@
 > vira decisão de verdade num `DECISOES-*.md` (ver seção 16). Bug/
 > melhoria que o Osmar apontar e não for corrigido na hora fica em
 > `Feedback.md` — leia esse antes de propor a próxima entrega, pode ter
-> algo relevante já anotado lá (ver seção 15).
+> algo relevante já anotado lá (ver seção 15). Melhoria conhecida e
+> tecnicamente possível, mas que a gente decide não fazer agora por
+> prioridade (diferente de `PENDENCIAS.md`, que é o que trava
+> estruturalmente) fica em `Backlog.md` (ver seção 17).
 
 ## 1. Quem está do outro lado
 
@@ -482,5 +485,26 @@ padrão de vista.
   no `DECISOES-*.md` certo (seguindo o teste da seção 7.1) e apague
   daqui. Se não, risque/apague também — 2 ocorrências sem virar regra
   não precisam ficar acumulando pra sempre.
+
+## 17. Regra de atualização do Backlog.md
+
+`Backlog.md` guarda melhoria conhecida e tecnicamente possível, mas
+que a gente decide não fazer AGORA por prioridade — diferente de
+`PENDENCIAS.md` (que é o que trava estruturalmente: falta dado que a
+planilha não tem, motor que ainda não existe, decisão do Osmar em
+aberto). Backlog é "dá pra fazer, só não é a hora"; Pendências é "não
+dá pra fazer sem outra coisa acontecer primeiro".
+
+- Sempre que, ao entregar uma característica, você perceber um pedaço
+  dela que dá pra fazer mas decidiu deixar de fora por escopo/tempo
+  (ex: "essa regra vale pra qualquer dado, mas só implementei pro
+  D20") — registre aqui, agrupado por tópico (`## Nome do assunto`),
+  1-3 frases por item.
+- Quando o Osmar decidir puxar um item do Backlog pra implementar de
+  verdade, ele vira um foco normal (`EmDev.md`, seção 6) e a entrada
+  correspondente sai daqui.
+- Diferente de `PENDENCIAS.md`, aqui não precisa agrupar por foco de
+  origem — agrupe pelo assunto/característica em si, já que o vínculo
+  com o foco que a criou não importa tanto quanto o que falta fazer.
 - Diferente de `PENDENCIAS.md` (trabalho ainda não feito) — isso aqui
   é só observação de padrão de comportamento/processo, não uma tarefa.

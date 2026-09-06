@@ -936,6 +936,27 @@ export const magias: Magia[] = [
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
+    // Mesma magia de "Falar com Animais" (id "falarcomanimais"), mas
+    // com nome próprio pra não colidir com a Falar com Animais que um
+    // conjurador de verdade (ex.: Druida) já conhece pela classe — o
+    // Gnomo do Bosque tem sua PRÓPRIA conta de usos grátis (Bônus de
+    // Proficiência, Descanso Longo), ver `BonusPanelContent`/
+    // `AcaoPanelContent` e `core/especieSubescolha.ts`. Se o personagem
+    // tiver as duas, aparecem como 2 entradas separadas (esperado).
+    id: "falarcomanimais-gnomo",
+    nome: "Falar com Animais - Traço de Gnomo",
+    circulo: 1,
+    escola: "Adivinhação",
+    classes: [],
+    tempoConjuracao: "Ação ou Ritual",
+    alcance: "Pessoal",
+    componentes: "V, S",
+    duracao: "10 minutos",
+    descricaoCompleta: "Pela duração da magia, você pode compreender e se comunicar verbalmente com Feras, e pode usar com elas qualquer uma das opções de perícia da ação Influenciar. A maioria das Feras oferece pouca informação sobre assuntos que não estejam diretamente ligados à sobrevivência ou ao companheirismo mas, no mínimo, uma Fera pode fornecer informações sobre áreas vizinhas e monstros, incluindo o que percebeu no último dia.",
+    descricaoCurta: "Traço do Gnomo do Bosque — conjurável de graça (sem gastar Espaço de Magia) um número de vezes igual ao seu Bônus de Proficiência, recarrega no Descanso Longo. Compreende e conversa com Feras por 10 min.",
+    fonte: "Livro do Jogador (D&D 5e 2024)",
+  },
+  {
     id: "favordivino",
     nome: "Favor Divino",
     circulo: 1,

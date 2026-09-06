@@ -13,13 +13,23 @@ function sentidosZerados(): Record<TipoSentido, number> {
   return { visaoNoEscuro: 0, visaoAsCegas: 0, visaoVerdadeira: 0, sismiconsciencia: 0 };
 }
 
-export function calcularSentidos(nomeEspecie: string | null, invocacoesAtuais: string[]): Record<TipoSentido, number> {
+export function calcularSentidos(
+  nomeEspecie: string | null,
+  invocacoesAtuais: string[],
+  subescolhaEspecieEscolhida: string | null = null,
+): Record<TipoSentido, number> {
   const resultado = sentidosZerados();
 
   const especie = especies.find((e) => e.nome === nomeEspecie);
   for (const traco of especie?.traços ?? []) {
     const s = traco.sentidoConcedido;
     if (s) resultado[s.tipo] = Math.max(resultado[s.tipo], s.alcanceMetros);
+  }
+
+  const opcaoSubescolha = especie?.opcoesSubescolha?.find((o) => o.nome === subescolhaEspecieEscolhida);
+  const sentidoDaSubescolha = opcaoSubescolha?.sentidoConcedido;
+  if (sentidoDaSubescolha) {
+    resultado[sentidoDaSubescolha.tipo] = Math.max(resultado[sentidoDaSubescolha.tipo], sentidoDaSubescolha.alcanceMetros);
   }
 
   for (const id of invocacoesAtuais) {

@@ -1,9 +1,11 @@
 import { especies } from '../../../data/rulesets/dnd2024/especies';
 import { pericias } from '../../../data/rulesets/dnd2024/pericias';
 import { origens } from '../../../data/rulesets/dnd2024/origens';
-import { proficienciasJaConcedidas } from '../../../core/proficienciasOrigem';
+import { concessoesJaConcedidas } from '../../../core/concessoesJaConcedidas';
 import { valorFinalAtributo } from '../../../core/personagem';
 import { atributosOrdem, type Atributo } from '../../../data/wizardFixtures';
+import { descricaoTracoResolvida, opcoesSubescolhaNoWizard, tracoComEscolhaDePericia } from '../../../core/especieSubescolha';
+import { truquesEspecie, magiasEspecie } from '../../../core/magiasEspecie';
 import InfoChip from '../../components/InfoChip';
 import TelaEscolherTalento from '../../ficha/levelup/TelaEscolherTalento';
 import type { StepProps } from './StepProps';
@@ -17,10 +19,22 @@ export default function EspecieEscolhasStep({ selection, update }: StepProps) {
 
   const temTraco = (id: string) => especie.traços.some((t) => t.id === id);
   const origem = origens.find((o) => o.nome === selection.origem);
-  const jaConcedidas = proficienciasJaConcedidas(selection, origem);
+  const jaConcedidas = concessoesJaConcedidas(selection, origem, especie);
   const atributosFinais = Object.fromEntries(
     atributosOrdem.map((a) => [a, valorFinalAtributo(selection, a) ?? 10]),
   ) as Record<Atributo, number>;
+  const opcoesSubescolha = opcoesSubescolhaNoWizard(especie);
+  const tracoPericia = tracoComEscolhaDePericia(especie);
+  const opcoesPericia = tracoPericia?.opcoesPericia ?? pericias.map((p) => p.nome);
+  // Truques/Magias que a Espécie concede de graça (truqueFixo + linhagem
+  // escolhida acima nesta MESMA tela) e que colidem com o que já foi
+  // escolhido na etapa de Classe (1b, roda ANTES de Espécie) — não dá
+  // pra impedir a escolha repetida na hora (Classe já passou), só
+  // avisar aqui pra o jogador voltar e trocar se quiser.
+  const colisoesTruqueClasse = truquesEspecie(selection).filter((nome) => selection.truquesEscolhidos.includes(nome));
+  const colisoesMagiaClasse = magiasEspecie(selection, 1).filter((nome) =>
+    selection.magiasPreparadasEscolhidas.includes(nome),
+  );
 
   return (
     <>
@@ -58,20 +72,20 @@ export default function EspecieEscolhasStep({ selection, update }: StepProps) {
         </>
       )}
 
-      {especie.subescolha?.natureza === 'identidade_permanente' && especie.opcoesSubescolha && (
+      {opcoesSubescolha && especie.subescolha && (
         <>
           <div className="section-title">{especie.subescolha.nome} — escolha 1</div>
-          {especie.opcoesSubescolha.map((opcao) => (
+          {opcoesSubescolha.map((opcao) => (
             <div
               key={opcao.nome}
               className={`opt-card ${selection.subescolhaEspecieEscolhida === opcao.nome ? 'selected' : ''}`}
-              style={{ padding: '10px 12px' }}
               onClick={() => update({ subescolhaEspecieEscolhida: opcao.nome })}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="opt-card-name">{opcao.nome}</span>
                 {opcao.tipoDano && <span className="label">Dano {opcao.tipoDano}</span>}
               </div>
+              {opcao.descricaoEfeito && <div className="opt-card-desc">{opcao.descricaoEfeito}</div>}
             </div>
           ))}
         </>
@@ -79,25 +93,28 @@ export default function EspecieEscolhasStep({ selection, update }: StepProps) {
 
       <div className="section-title">Traços da espécie</div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-        {especie.traços.map((t) => {
-          const tipoDano = t.usaTipoDanoDaSubescolha
-            ? especie.opcoesSubescolha?.find((o) => o.nome === selection.subescolhaEspecieEscolhida)?.tipoDano
-            : null;
-          const descricao = tipoDano ? `${t.descricao} (Tipo de dano: ${tipoDano})` : t.descricao;
-          return <InfoChip key={t.nome} nome={t.nome} descricao={descricao} />;
-        })}
+        {especie.traços.map((t) => (
+          <InfoChip key={t.nome} nome={t.nome} descricao={descricaoTracoResolvida(t, especie, selection)} />
+        ))}
       </div>
 
-      {temTraco('habil') && (
+      {[...colisoesTruqueClasse, ...colisoesMagiaClasse].map((nome) => (
+        <div key={nome} className="label" style={{ color: 'var(--warn)', marginBottom: 4 }}>
+          ⚠️ {nome} — já possui - classe (a Espécie também concede de graça; volte e troque a escolha da Classe se
+          quiser aproveitar as duas vagas)
+        </div>
+      ))}
+
+      {tracoPericia && (
         <>
-          <div className="section-title">Hábil — perícia à escolha</div>
-          {pericias.map((p) => (
-            <div key={p.nome} className="check-row" onClick={() => update({ periciaEspecieEscolhida: p.nome })}>
-              <div className={`check-box ${selection.periciaEspecieEscolhida === p.nome ? 'checked' : ''}`} />
-              <span className="check-label">{p.nome}</span>
-              {jaConcedidas.pericias.has(p.nome) && (
+          <div className="section-title">{tracoPericia.nome} — perícia à escolha</div>
+          {opcoesPericia.map((nome) => (
+            <div key={nome} className="check-row" onClick={() => update({ periciaEspecieEscolhida: nome })}>
+              <div className={`check-box ${selection.periciaEspecieEscolhida === nome ? 'checked' : ''}`} />
+              <span className="check-label">{nome}</span>
+              {jaConcedidas.pericias.has(nome) && (
                 <span className="tag" style={{ marginLeft: 'auto' }}>
-                  já possui
+                  já possui - {jaConcedidas.pericias.get(nome)?.toLowerCase()}
                 </span>
               )}
             </div>

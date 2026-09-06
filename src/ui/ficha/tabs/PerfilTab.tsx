@@ -11,6 +11,7 @@ import type { WizardSelection } from '../../../core/personagem';
 import { invocacoesMisticas } from '../../../data/rulesets/dnd2024/invocacoesMisticas';
 import { invocacaoTemPlaceholder } from '../../../core/invocacoesMisticas';
 import { talentoTemPlaceholder } from '../../../core/classificarTalento';
+import { descricaoTracoResolvida, opcoesSubescolhaNoWizard, tracoComEscolhaDePericia } from '../../../core/especieSubescolha';
 
 interface PerfilTabProps {
   selecao: WizardSelection;
@@ -139,7 +140,7 @@ export default function PerfilTab({
       <div className="section-title" style={{ marginTop: 16 }}>
         Espécie{especie ? ` — ${especie.nome}` : ''}
       </div>
-      {especie && especie.subescolha?.natureza === 'identidade_permanente' && especie.opcoesSubescolha && (
+      {especie && opcoesSubescolhaNoWizard(especie) && especie.subescolha && (
         <div className="summary-row" style={{ marginBottom: 8 }}>
           <span>{especie.subescolha.nome}</span>
           <span>{selecao.subescolhaEspecieEscolhida ?? '—'}</span>
@@ -152,27 +153,19 @@ export default function PerfilTab({
             t.id === 'versatil' && selecao.talentoEspecieEscolhido
               ? talentos.find((tt) => tt.id === selecao.talentoEspecieEscolhido)
               : null;
-          const tipoDano = t.usaTipoDanoDaSubescolha
-            ? especie.opcoesSubescolha?.find((o) => o.nome === selecao.subescolhaEspecieEscolhida)?.tipoDano
-            : null;
+          const ehTracoPericia = t === tracoComEscolhaDePericia(especie);
           return (
             <div key={t.nome} className="opt-card" style={{ cursor: 'default' }}>
               <div className="opt-card-name">{t.nome}</div>
               <div className="opt-card-desc">
-                {t.descricao}
-                {t.id === 'habil' && selecao.periciaEspecieEscolhida && (
+                {descricaoTracoResolvida(t, especie, selecao)}
+                {ehTracoPericia && selecao.periciaEspecieEscolhida && (
                   <> — escolhida: <strong>{selecao.periciaEspecieEscolhida}</strong></>
                 )}
                 {talentoVersatil && (
                   <>
                     {' '}
                     — escolhido: <strong>{talentoVersatil.nome}</strong>. {talentoVersatil.beneficios}
-                  </>
-                )}
-                {tipoDano && (
-                  <>
-                    {' '}
-                    (Tipo de dano: <strong>{tipoDano}</strong>)
                   </>
                 )}
               </div>

@@ -47,6 +47,15 @@ export interface PersonagemNivel {
   conMod: number;
   subclasse: string | null;
   estiloDeLuta: string | null;
+  /** Bônus fixo de PV máximo por nível ganho, de traço de espécie
+   * (ex.: Tenacidade Anã, +1) e/ou talento de Origem (ex.: Vigoroso,
+   * +2) — 0 pra quem não tem nenhum. Ver `core/calculoPersonagem.ts`
+   * (`bonusPvPorNivelDaEspecie`/`bonusPvPorNivelDoTalento`). */
+  bonusPvPorNivel: number;
+  /** Nome(s) da(s) fonte(s) de `bonusPvPorNivel`, já concatenados (ex.:
+   * "Tenacidade Anã", "Vigoroso", "Tenacidade Anã + Vigoroso") — string
+   * vazia se `bonusPvPorNivel` for 0. Ver `rotulosBonusPvPorNivel`. */
+  bonusPvPorNivelLabel: string;
 }
 
 interface LevelUpShellProps {
@@ -308,8 +317,15 @@ export default function LevelUpShell({
   const [asiEscolhas, setAsiEscolhas] = useState<Atributo[]>([]);
   const [aviso, setAviso] = useAvisoTemporario();
 
-  const media = dadoVidaValor[personagem.dadoVida] + personagem.conMod;
-  const pvGanho = hpModo === 'media' ? media : hpModo === 'rolar' ? (hpRolado !== null ? hpRolado + personagem.conMod : null) : null;
+  const media = dadoVidaValor[personagem.dadoVida] + personagem.conMod + personagem.bonusPvPorNivel;
+  const pvGanho =
+    hpModo === 'media'
+      ? media
+      : hpModo === 'rolar'
+        ? hpRolado !== null
+          ? hpRolado + personagem.conMod + personagem.bonusPvPorNivel
+          : null
+        : null;
 
   // Rolagem do dado de vida é definitiva assim que acontece — só roda
   // uma vez, disparada pelo "Avançar" (não por um botão dentro do
@@ -657,8 +673,9 @@ export default function LevelUpShell({
             <div className={styles.dramaSub}>
               {hpRolado} + mod. CON ({personagem.conMod >= 0 ? '+' : ''}
               {personagem.conMod})
+              {personagem.bonusPvPorNivel > 0 && ` + ${personagem.bonusPvPorNivelLabel} (+${personagem.bonusPvPorNivel})`}
             </div>
-            <div className={styles.dramaTotal}>+{(hpRolado ?? 0) + personagem.conMod} PV</div>
+            <div className={styles.dramaTotal}>+{(hpRolado ?? 0) + personagem.conMod + personagem.bonusPvPorNivel} PV</div>
             <div className={`btn btn-primary ${styles.dramaBtn}`} onClick={continuarAposRolagem}>
               Continuar →
             </div>
@@ -716,7 +733,9 @@ export default function LevelUpShell({
                 <div className="opt-card-name">🎲 Dado de vida rolado — resultado travado</div>
                 <div className="opt-card-desc">
                   Rolou <b>{hpRolado}</b> em 1{personagem.dadoVida} + mod. CON ({personagem.conMod >= 0 ? '+' : ''}
-                  {personagem.conMod}) = <b>+{hpRolado + personagem.conMod} PV</b>. Não dá pra rolar de novo.
+                  {personagem.conMod})
+                  {personagem.bonusPvPorNivel > 0 && ` + ${personagem.bonusPvPorNivelLabel} (+${personagem.bonusPvPorNivel})`} ={' '}
+                  <b>+{hpRolado + personagem.conMod + personagem.bonusPvPorNivel} PV</b>. Não dá pra rolar de novo.
                 </div>
               </div>
             ) : (
@@ -725,15 +744,18 @@ export default function LevelUpShell({
                   <div className="opt-card-name">Usar a média fixa</div>
                   <div className="opt-card-desc">
                     {dadoVidaValor[personagem.dadoVida]} (média de {personagem.dadoVida}) + mod. CON ({personagem.conMod >= 0 ? '+' : ''}
-                    {personagem.conMod}) = <b>+{media} PV</b>
+                    {personagem.conMod})
+                    {personagem.bonusPvPorNivel > 0 && ` + ${personagem.bonusPvPorNivelLabel} (+${personagem.bonusPvPorNivel})`} ={' '}
+                    <b>+{media} PV</b>
                   </div>
                 </div>
                 <div className={`opt-card ${hpModo === 'rolar' ? 'selected' : ''}`} onClick={() => onHpModoChange('rolar')}>
                   <div className="opt-card-name">Rolar o dado de vida 🎲</div>
                   <div className="opt-card-desc">
                     Rola 1{personagem.dadoVida} + mod. CON ({personagem.conMod >= 0 ? '+' : ''}
-                    {personagem.conMod}) — ao tocar em "Avançar" o dado rola e o resultado é definitivo, sem chance
-                    de rolar de novo.
+                    {personagem.conMod})
+                    {personagem.bonusPvPorNivel > 0 && ` + ${personagem.bonusPvPorNivelLabel} (+${personagem.bonusPvPorNivel})`} — ao
+                    tocar em "Avançar" o dado rola e o resultado é definitivo, sem chance de rolar de novo.
                   </div>
                 </div>
               </>

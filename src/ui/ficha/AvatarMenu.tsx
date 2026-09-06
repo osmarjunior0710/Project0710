@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRoll } from '../roll/RollContext';
 import styles from './AvatarMenu.module.css';
 
 interface AvatarMenuProps {
@@ -14,6 +15,7 @@ interface AvatarMenuProps {
  * ponto de entrada na UI. */
 export default function AvatarMenu({ itensDetalhados, onToggleItensDetalhados, pesoAtivo, onTogglePeso }: AvatarMenuProps) {
   const [aberto, setAberto] = useState(false);
+  const { modoTeste, alternarModoTeste } = useRoll();
 
   const preferencias = [
     {
@@ -28,12 +30,19 @@ export default function AvatarMenu({ itensDetalhados, onToggleItensDetalhados, p
       valor: pesoAtivo,
       onToggle: onTogglePeso,
     },
+    {
+      label: '🎲 Modo de Teste',
+      desc: 'Todo d20 sai fixo em 1, 10, 15, 20 (em sequência) — dano continua de verdade. Desliga sozinho ao recarregar a página.',
+      valor: modoTeste,
+      onToggle: alternarModoTeste,
+    },
   ];
 
   return (
     <div className={styles.wrap}>
       <div className={styles.avatar} onClick={() => setAberto((v) => !v)}>
         👤
+        {modoTeste && <div className={styles.badgeModoTeste} title="Modo de Teste ativo" />}
       </div>
       {aberto && (
         <>

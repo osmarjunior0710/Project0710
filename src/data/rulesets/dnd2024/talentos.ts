@@ -76,7 +76,29 @@ export type EfeitoMecanicoTalento =
   | { tipo: 'bonus-ataque-distancia'; bonus: number }
   /** +`bonus` no dano ao empunhar 1 arma corpo a corpo numa mão e
    * nenhuma outra arma (Duelismo, do Estilo de Luta). */
-  | { tipo: 'bonus-dano-uma-mao-sem-outra-arma'; bonus: number };
+  | { tipo: 'bonus-dano-uma-mao-sem-outra-arma'; bonus: number }
+  /** +`porNivel` de PV máximo a cada nível de personagem (Vigoroso).
+   * O livro descreve como "+2x nível ao pegar o talento, +2 a cada
+   * nível seguinte" — só colapsa nesse valor fixo por nível porque,
+   * hoje, esse talento só é alcançável via Talento de Origem (sempre
+   * ganho no nível 1 da criação, nunca escolhido depois via ASI). Ver
+   * `core/calculoPersonagem.ts` (`bonusPvPorNivelDoTalento`). */
+  | { tipo: 'bonus-pv-por-nivel'; porNivel: number }
+  /** Troca o dado de dano do Ataque Desarmado, de "1 fixo" pra
+   * `quantidade`d`lados` (Valentão de Taverna: 1d4). Mesmo campo serve
+   * pro Estilo de Luta Combate Desarmado (1d6, ou 1d8 desarmado de
+   * verdade) quando ele ganhar `efeitoMecanico` — ver
+   * `core/ataque.ts` (`ataqueDesarmado`). */
+  | { tipo: 'dado-ataque-desarmado'; quantidade: number; lados: number }
+  /** Concede a pool "Pontos de Sorte" (Sortudo) — máximo = Bônus de
+   * Proficiência atual, recarrega em Descanso Longo. Cada ponto gasto
+   * dá Vantagem numa rolagem sua ou Desvantagem num ataque contra
+   * você (ou, nível 5+, vira acerto normal um crítico contra você) —
+   * como o RollOverlay já tem Vantagem/Desvantagem livres em qualquer
+   * rolagem de d20, este efeito só precisa acompanhar a pool em si
+   * (ver `FichaShell.tsx`/`CombatTab.tsx`, sem cálculo automático de
+   * bônus como Sorte do Tenebroso). */
+  | { tipo: 'pontos-de-sorte' };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -90,6 +112,19 @@ export type ConcedeProficienciasTalento = {
   tipos: ('pericia' | 'ferramenta')[];
 };
 
+/** Escolha de ferramenta restrita a 1 grupo específico de
+ * `gruposFerramenta` (ex.: Artifista pede 3 "Ferramentas de Artesão",
+ * Músico pede 3 "Instrumento Musical") — diferente de
+ * `ConcedeProficienciasTalento`, que mistura perícia/ferramenta
+ * livremente sem restringir a um grupo. Mesmo formato já usado pra
+ * ferramenta de CLASSE (`ferramentasEscolha` em
+ * `classesProficienciasIniciais.ts`), só reaproveitado aqui pro
+ * Talento de Origem (CLAUDE.md 6.1). */
+export type ConcedeFerramentaGrupoTalento = {
+  quantidade: number;
+  grupo: string;
+};
+
 export interface Talento {
   id: string;
   nome: string;
@@ -98,6 +133,13 @@ export interface Talento {
   prerequisitos: PrerequisitosTalento;
   concedeAsi: ConcedeAsiTalento;
   concedeProficiencias?: ConcedeProficienciasTalento;
+  concedeFerramentaGrupo?: ConcedeFerramentaGrupoTalento;
+  /** `true` só pro talento Iniciado em Magia — sinaliza que o wizard
+   * precisa mostrar a tela de escolha de 2 truques + 1 magia de 1º
+   * círculo (lista de classe fixada em `Origem.talentoOrigemVariante`)
+   * + atributo de conjuração (Int/Sab/Car), em vez da tela genérica de
+   * `concedeProficiencias`. Ver `TalentoOrigemEscolhasStep`. */
+  concedeMagiaIniciada?: true;
   /** Texto bruto da coluna "Benefícios" — Fase 2 classifica em
    * Ação/Ação Bônus/Reação/Passiva, quebrando em frases quando o
    * talento tiver múltiplos efeitos (ex: Conjurador Bélico). */
@@ -129,6 +171,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'nenhum' },
+    concedeFerramentaGrupo: { quantidade: 3, grupo: 'Ferramentas de Artesão' },
     beneficios: "Proficiência com 3 Ferramentas de Artesão à escolha. 20% de desconto em itens não-mágicos. Ao completar Descanso Longo, fabrica um item da tabela Fabricação Rápida (se tiver a ferramenta certa); some no próximo Descanso Longo.",
     pagina: 200,
     fonte: "PHB 2024",
@@ -174,6 +217,7 @@ export const talentos: Talento[] = [
     repetivel: true,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'nenhum' },
+    concedeMagiaIniciada: true,
     beneficios: "Escolhe lista de Clérigo, Druida ou Mago: 2 truques + 1 magia de 1º círculo sempre preparada (conjura 1x/dia grátis, senão gasta espaço). Atributo de conjuração (Int/Sab/Car) escolhido ao pegar o talento. Repetível: precisa escolher lista diferente cada vez.",
     pagina: 201,
     fonte: "PHB 2024",
@@ -185,6 +229,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'nenhum' },
+    concedeFerramentaGrupo: { quantidade: 3, grupo: 'Instrumento Musical' },
     beneficios: "Proficiência com 3 Instrumentos Musicais. Ao completar Descanso Curto/Longo, toca música e dá Inspiração Heroica a um número de aliados = seu Bônus de Proficiência.",
     pagina: 202,
     fonte: "PHB 2024",
@@ -196,7 +241,8 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'nenhum' },
-    beneficios: "Pontos de Sorte = Bônus de Proficiência (recarrega em Descanso Longo). Gaste 1 pra: dar Vantagem numa jogada sua de d20, impor Desvantagem num ataque contra você, ou (nível 5+) transformar um acerto crítico contra você em acerto normal.",
+    efeitoMecanico: { tipo: 'pontos-de-sorte' },
+    beneficios: "Pontos de Sorte = Bônus de Proficiência (recarrega em Descanso Longo). Gaste 1 pra: dar Vantagem numa jogada sua de Teste de D20 (teste, salvaguarda ou ataque), ou impor Desvantagem numa jogada de ataque contra você.",
     pagina: 201,
     fonte: "PHB 2024",
   },
@@ -207,7 +253,8 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'nenhum' },
-    beneficios: "Ataque Desarmado causa 1d4+Força Contundente (em vez do normal); pode rerolar 1 no dano. Proficiência com armas improvisadas. 1x/turno, ao acertar Desarmado na ação Atacar, pode empurrar o alvo 1,5m.",
+    efeitoMecanico: { tipo: 'dado-ataque-desarmado', quantidade: 1, lados: 4 },
+    beneficios: "Ataque Desarmado Aprimorado: causa 1d4+Força Contundente (em vez do normal). Dano Garantido: pode rerolar 1 no dado de dano do Ataque Desarmado. Armamento Improvisado: proficiência com armas improvisadas. Corrida Aprimorada: +3m de Deslocamento na ação Correr. Ataque em Investida: se mover pelo menos 3m em linha reta antes de acertar um ataque corpo a corpo como parte da ação Atacar, escolha +1d8 no dano OU empurrar o alvo até 3m (não maior que você) — só 1x por turno.",
     pagina: 202,
     fonte: "PHB 2024",
   },
@@ -218,6 +265,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'nenhum' },
+    efeitoMecanico: { tipo: 'bonus-pv-por-nivel', porNivel: 2 },
     beneficios: "PV máximo +2x seu nível de personagem ao pegar o talento; +2 PV extra a cada nível seguinte.",
     pagina: 202,
     fonte: "PHB 2024",

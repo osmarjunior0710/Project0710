@@ -7,6 +7,7 @@ import { classificarMagia } from '../../../core/classificarMagia';
 import { useRoll } from '../../roll/RollContext';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
+import TickPips from '../../components/TickPips';
 import styles from './PanelRows.module.css';
 
 export interface DanoPendente {
@@ -34,6 +35,18 @@ interface AcaoPanelContentProps {
   onUsarSurto: () => void;
   ataqueAtual: AtaqueResolvido | null;
   detalhesAtivo: boolean;
+  /** Mãos Curativas (Aasimar) — `false` = espécie não é Aasimar. */
+  maosCurativasDisponivel: boolean;
+  maosCurativasGasto: boolean;
+  dadosMaosCurativas: number;
+  onUsarMaosCurativas: () => boolean;
+  /** Falar com Animais - Traço de Gnomo (Gnomo do Bosque) — `false` =
+   * não é essa sub-escolha. Grátis, não gasta Espaço de Magia (por
+   * isso fica fora da lista genérica de "Usar Magia"). */
+  falarComAnimaisGnomoDisponivel: boolean;
+  usosFalarComAnimaisGnomoMaximo: number;
+  usosFalarComAnimaisGnomoRestantes: number;
+  onUsarFalarComAnimaisGnomo: () => boolean;
 }
 
 export default function AcaoPanelContent({
@@ -54,9 +67,31 @@ export default function AcaoPanelContent({
   onUsarSurto,
   ataqueAtual,
   detalhesAtivo,
+  maosCurativasDisponivel,
+  maosCurativasGasto,
+  dadosMaosCurativas,
+  onUsarMaosCurativas,
+  falarComAnimaisGnomoDisponivel,
+  usosFalarComAnimaisGnomoMaximo,
+  usosFalarComAnimaisGnomoRestantes,
+  onUsarFalarComAnimaisGnomo,
 }: AcaoPanelContentProps) {
   const [telaMagia, setTelaMagia] = useState<'lista' | { magia: Magia; circulos: number[] } | null>(null);
-  const { rolarD20 } = useRoll();
+  const { rolarD20, rolarDados } = useRoll();
+
+  function usarMaosCurativas() {
+    if (!onUsarMaosCurativas()) return;
+    rolarDados({ label: 'Mãos Curativas — Cura', formula: `${dadosMaosCurativas}d4`, quantidade: dadosMaosCurativas, lados: 4, mod: 0 });
+    onEscolher('🙌 Mãos Curativas', 'Toque uma criatura — ela recupera o total mostrado em Pontos de Vida.');
+  }
+
+  function usarFalarComAnimaisGnomo() {
+    if (!onUsarFalarComAnimaisGnomo()) return;
+    onEscolher(
+      '🐾 Falar com Animais (Traço de Gnomo)',
+      'Por 10 minutos, você compreende e conversa com Feras — grátis, sem gastar Espaço de Magia.',
+    );
+  }
 
   function rolarAtaque(nome: string, ataque: AtaqueInfo, finalizar: (nome: string, desc: string, dano: DanoPendente) => void) {
     rolarD20({
@@ -170,6 +205,59 @@ export default function AcaoPanelContent({
           <div className={styles.rowName}>✨ Usar Magia</div>
           {detalhesAtivo && <div className={styles.rowDesc}>Conjurar Truque ou Magia Preparada</div>}
         </div>
+      )}
+
+      {maosCurativasDisponivel && (
+        <>
+          <div
+            className={styles.row}
+            style={maosCurativasGasto ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+            onClick={usarMaosCurativas}
+          >
+            <div className={styles.rowName}>🙌 Mãos Curativas</div>
+            {detalhesAtivo && (
+              <div className={styles.rowDesc}>
+                Ação Usar Magia — toque uma criatura, jogue {dadosMaosCurativas}d4 e ela recupera esse total em
+                Pontos de Vida. 1x — recupera no Descanso Longo.
+              </div>
+            )}
+          </div>
+          {maosCurativasGasto && (
+            <div className="label" style={{ marginTop: 6 }}>
+              já usado — descanse pra recuperar.
+            </div>
+          )}
+        </>
+      )}
+
+      {falarComAnimaisGnomoDisponivel && (
+        <>
+          <div className={styles.slotCounter}>
+            <span>Falar com Animais (Traço de Gnomo):</span>
+            <TickPips total={usosFalarComAnimaisGnomoMaximo} usados={usosFalarComAnimaisGnomoMaximo - usosFalarComAnimaisGnomoRestantes} />
+            <span style={{ color: 'var(--text-faint)' }}>
+              {usosFalarComAnimaisGnomoRestantes}/{usosFalarComAnimaisGnomoMaximo} disponíveis
+            </span>
+          </div>
+          <div
+            className={styles.row}
+            style={usosFalarComAnimaisGnomoRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+            onClick={usarFalarComAnimaisGnomo}
+          >
+            <div className={styles.rowName}>🐾 Falar com Animais (Traço de Gnomo)</div>
+            {detalhesAtivo && (
+              <div className={styles.rowDesc}>
+                Grátis (sem gastar Espaço de Magia) — compreende e conversa com Feras por 10 minutos. Gasta 1 uso,
+                todos voltam no Descanso Longo.
+              </div>
+            )}
+          </div>
+          {usosFalarComAnimaisGnomoRestantes <= 0 && (
+            <div className="label" style={{ marginTop: 6 }}>
+              sem usos grátis disponíveis — descanse pra recuperar.
+            </div>
+          )}
+        </>
       )}
 
       <div

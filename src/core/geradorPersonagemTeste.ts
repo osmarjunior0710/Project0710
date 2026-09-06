@@ -29,11 +29,12 @@ import {
   valorFinalAtributo,
   type WizardSelection,
 } from './personagem';
-import { calcularPvMaximoNivel1, periciasProficientes } from './calculoPersonagem';
+import { bonusPvPorNivelDaEspecie, bonusPvPorNivelDoTalento, calcularPvMaximoNivel1, periciasProficientes } from './calculoPersonagem';
 import { armasParaMaestria, quantidadeMaestriaEmArma } from './maestriaArma';
 import { valorRecursoClasse } from './recursosClasse';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
 import { niveisComASI, niveisComEspecialista, temEstiloDeLutaTrocavel, subclasseImplementada } from './levelUp';
+import { opcoesSubescolhaNoWizard, tracoComEscolhaDePericia } from './especieSubescolha';
 import { gerarIdPersonagem, type PersonagemSalvo } from './armazenamentoPersonagens';
 import { embaralhar, sorteiaUm } from './sorteio';
 
@@ -125,20 +126,24 @@ function gerarSelecaoNivel1(classe: Classe, origemNome: string, especieNome: str
     selection.ferramentaOrigemEscolhida = sorteiaUm(opcoes)?.nome ?? null;
   }
 
-  // Escolhas da Espécie (Tamanho, Hábil, Versátil) — só as espécies com
-  // esses traços preenchem algo, mesma lógica de `randomizarEscolhasEspecie`.
+  // Escolhas da Espécie (Tamanho, perícia à escolha, Versátil,
+  // sub-escolha) — só as espécies com esses traços preenchem algo,
+  // mesma lógica de `randomizarEscolhasEspecie`.
   const especieObj = especies.find((e) => e.nome === especieNome);
   if (especieObj?.tamanho.opcoes) {
     selection.tamanhoEspecieEscolhido = sorteiaUm(especieObj.tamanho.opcoes) ?? null;
   }
-  if (especieObj?.traços.some((t) => t.id === 'habil')) {
-    selection.periciaEspecieEscolhida = sorteiaUm(pericias)?.nome ?? null;
+  const tracoPericia = especieObj ? tracoComEscolhaDePericia(especieObj) : undefined;
+  if (tracoPericia) {
+    const opcoes = tracoPericia.opcoesPericia ?? pericias.map((p) => p.nome);
+    selection.periciaEspecieEscolhida = sorteiaUm(opcoes) ?? null;
   }
   if (especieObj?.traços.some((t) => t.id === 'versatil')) {
     selection.talentoEspecieEscolhido = sorteiaUm(talentosOrigem)?.id ?? null;
   }
-  if (especieObj?.subescolha?.natureza === 'identidade_permanente' && especieObj.opcoesSubescolha) {
-    selection.subescolhaEspecieEscolhida = sorteiaUm(especieObj.opcoesSubescolha)?.nome ?? null;
+  const opcoesSubescolha = especieObj ? opcoesSubescolhaNoWizard(especieObj) : null;
+  if (opcoesSubescolha) {
+    selection.subescolhaEspecieEscolhida = sorteiaUm(opcoesSubescolha)?.nome ?? null;
   }
 
   // Línguas, alinhamento — genérico, mesma lógica do wizard.
@@ -210,7 +215,8 @@ function aplicarLevelUpsAleatorios(
   let talentosGeraisAtual: string[] = [];
 
   const conValor = valorFinalAtributo(selecao, 'CON') ?? 10;
-  const mediaPvPorNivel = dadoVidaValor[classe.dadoDeVida] + modificador(conValor);
+  const mediaPvPorNivel =
+    dadoVidaValor[classe.dadoDeVida] + modificador(conValor) + bonusPvPorNivelDaEspecie(selecao) + bonusPvPorNivelDoTalento(selecao);
   const subclassesDaClasse = subclasses.filter((s) => s.classeId === classe.id);
 
   for (let nivel = 2; nivel <= nivelAlvo; nivel++) {
@@ -298,10 +304,11 @@ export function opcoesGeradorTeste(): {
   origens: OpcaoGeradorTeste[];
   especies: OpcaoGeradorTeste[];
 } {
+  const porNome = (a: OpcaoGeradorTeste, b: OpcaoGeradorTeste) => a.nome.localeCompare(b.nome, 'pt-BR');
   return {
-    classes: classes.filter((c) => c.disponivel).map((c) => ({ id: c.id, nome: c.nome })),
-    origens: origens.filter((o) => o.disponivel).map((o) => ({ id: o.id, nome: o.nome })),
-    especies: especies.filter((e) => e.disponivel).map((e) => ({ id: e.id, nome: e.nome })),
+    classes: classes.filter((c) => c.disponivel).map((c) => ({ id: c.id, nome: c.nome })).sort(porNome),
+    origens: origens.filter((o) => o.disponivel).map((o) => ({ id: o.id, nome: o.nome })).sort(porNome),
+    especies: especies.filter((e) => e.disponivel).map((e) => ({ id: e.id, nome: e.nome })).sort(porNome),
   };
 }
 

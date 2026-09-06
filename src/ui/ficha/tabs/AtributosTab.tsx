@@ -7,6 +7,7 @@ import { tiposElegiveisResistenciaInfera } from '../../../core/resistenciaInfera
 import { useRoll } from '../../roll/RollContext';
 import InfoValor from '../../components/InfoValor';
 import ItemComDescricao from '../../components/ItemComDescricao';
+import TickPips from '../../components/TickPips';
 import TrocarArmaMaestria from '../../components/TrocarArmaMaestria';
 import TrocarValorSimples from '../../components/TrocarValorSimples';
 import styles from './AtributosTab.module.css';
@@ -51,6 +52,14 @@ interface AtributosTabProps {
    * até o próximo Descanso Curto ou Longo. */
   resistenciaInferaGasto: boolean;
   onTrocarResistenciaInfera: (tipo: string) => void;
+  /** `true` só pra espécie Orc — controla se a seção aparece. */
+  temVigorImplacavel: boolean;
+  /** `true` = já disparou desde o último Descanso Longo. */
+  vigorImplacavelGasto: boolean;
+  /** Inspiração Heroica (recurso universal, flag booleano — nunca
+   * contador). O jogador liga/desliga tocando na caixa. */
+  inspiracaoHeroicaAtiva: boolean;
+  onAlternarInspiracaoHeroica: () => void;
 }
 
 export default function AtributosTab({
@@ -82,34 +91,41 @@ export default function AtributosTab({
   resistenciaInferaAtual,
   resistenciaInferaGasto,
   onTrocarResistenciaInfera,
+  temVigorImplacavel,
+  vigorImplacavelGasto,
+  inspiracaoHeroicaAtiva,
+  onAlternarInspiracaoHeroica,
 }: AtributosTabProps) {
   const { rolarD20 } = useRoll();
   const sentidosParaExibir = sentidosAtivos(sentidos);
 
   return (
     <>
-      <div className={`box-solid ${styles.levelBox}`}>
-        <div>
-          <div className="label">nível atual</div>
-          <div style={{ fontSize: 17 }}>{nivel}</div>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div className="btn btn-primary" style={{ padding: '8px 16px' }} onClick={onAbrirLevelUp}>
-            ⬆ Level Up
-          </div>
-          {onLevelUpRapido && (
-            <div
-              className="btn"
-              style={{ padding: '8px 16px', background: 'var(--warn)', borderColor: 'var(--warn)', color: '#fff', fontWeight: 'bold' }}
-              onClick={onLevelUpRapido}
-            >
-              ⚡ Rápido
+      <div className={styles.topRow}>
+        <div className={`box-solid ${styles.levelBox}`}>
+          <div>
+            <div className="label">
+              nível
+              <br />
+              atual
             </div>
-          )}
+            <div style={{ fontSize: 17 }}>{nivel}</div>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div className="btn btn-primary" style={{ padding: '8px 10px' }} onClick={onAbrirLevelUp}>
+              ⬆️
+            </div>
+            {onLevelUpRapido && (
+              <div
+                className="btn"
+                style={{ padding: '8px 10px', background: 'var(--warn)', borderColor: 'var(--warn)', color: '#fff', fontWeight: 'bold' }}
+                onClick={onLevelUpRapido}
+              >
+                ⚡
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-
-      <div className={styles.hpRow}>
         <div className={`box ${styles.hpBox}`}>
           <div className="label">
             PV <InfoValor titulo="Pontos de Vida máximos" explicacao={explicacaoPv} />
@@ -118,6 +134,38 @@ export default function AtributosTab({
             {pvAtual}/{pvMax}
           </div>
         </div>
+        <div className={`box ${styles.hpBox} ${styles.hpBoxAccent}`} onClick={onAlternarInspiracaoHeroica}>
+          <div className="label">
+            Ins.
+            <br />
+            Her.
+          </div>
+          <div className={styles.hpPipRow}>
+            <TickPips total={1} usados={inspiracaoHeroicaAtiva ? 0 : 1} tamanho="lg" />
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.hpRow}>
+        <div className={`box ${styles.hpBox}`}>
+          <div className="label">
+            Bônus
+            <br />
+            Prof.
+          </div>
+          <div className={styles.hpNum}>
+            {bonusProficiencia >= 0 ? '+' : ''}
+            {bonusProficiencia}
+          </div>
+        </div>
+        <div className={`box ${styles.hpBox}`}>
+          <div className="label">
+            Percepção
+            <br />
+            Passiva <InfoValor titulo="Percepção Passiva" explicacao={explicacaoPercepcaoPassiva} />
+          </div>
+          <div className={styles.hpNum}>{percepcaoPassiva ?? '—'}</div>
+        </div>
         <div className={`box ${styles.hpBox}`}>
           <div className="label">
             CA <InfoValor titulo="Classe de Armadura" explicacao={explicacaoCa} />
@@ -125,7 +173,7 @@ export default function AtributosTab({
           <div className={styles.hpNum}>{ca ?? '—'}</div>
         </div>
         <div
-          className={`box ${styles.hpBox}`}
+          className={`box ${styles.hpBox} ${styles.hpBoxAccent}`}
           onClick={() => {
             if (iniciativa === null) return;
             rolarD20({ label: 'Iniciativa', formula: `1d20 + ${iniciativa}`, mod: iniciativa });
@@ -135,16 +183,7 @@ export default function AtributosTab({
           <div className="label">
             Iniciativa <InfoValor titulo="Iniciativa" explicacao={explicacaoIniciativa} />
           </div>
-          <div className={styles.hpNum}>
-            {iniciativa !== null ? `${iniciativa >= 0 ? '+' : ''}${iniciativa} 🎲` : '—'}
-          </div>
-        </div>
-        <div className={`box ${styles.hpBox}`}>
-          <div className="label">Bônus Prof.</div>
-          <div className={styles.hpNum}>
-            {bonusProficiencia >= 0 ? '+' : ''}
-            {bonusProficiencia}
-          </div>
+          <div className={styles.hpNum}>{iniciativa !== null ? `${iniciativa >= 0 ? '+' : ''}${iniciativa}` : '—'}</div>
         </div>
       </div>
 
@@ -152,7 +191,7 @@ export default function AtributosTab({
         {atributos.map((a) => (
           <div
             key={a.atributo}
-            className="box stat-box"
+            className={`box stat-box ${styles.hpBoxAccent}`}
             onClick={() =>
               rolarD20({
                 label: a.atributo,
@@ -196,12 +235,6 @@ export default function AtributosTab({
           </span>
         </div>
       ))}
-      <div className={styles.skillRow}>
-        <span>
-          Percepção Passiva <InfoValor titulo="Percepção Passiva" explicacao={explicacaoPercepcaoPassiva} />
-        </span>
-        <span>{percepcaoPassiva ?? '—'}</span>
-      </div>
       <div className="label" style={{ marginTop: 6, marginBottom: 12 }}>
         toque num atributo, perícia ou iniciativa pra rolar o dado.
       </div>
@@ -295,6 +328,17 @@ export default function AtributosTab({
               : 'Toque no 🔄 pra escolher — trava até o próximo Descanso Curto ou Longo.'}{' '}
             Informativo: a Ficha ainda não calcula dano recebido sozinha, então a redução é aplicada de cabeça na
             mesa.
+          </div>
+        </>
+      )}
+
+      {temVigorImplacavel && (
+        <>
+          <div className="section-title">Vigor Implacável</div>
+          <div className="label" style={{ marginBottom: 12 }}>
+            {vigorImplacavelGasto
+              ? 'Já usado — disponível de novo após Descanso Longo.'
+              : 'Disponível — ao ser reduzido a 0 PV, você fica com 1 em vez disso (automático, sem precisar tocar em nada).'}
           </div>
         </>
       )}

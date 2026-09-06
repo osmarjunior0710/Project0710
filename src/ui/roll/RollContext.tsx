@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 
 type CritTipo = 'sucesso' | 'falha' | null;
 
@@ -69,6 +69,25 @@ export interface RollState {
    * `valor: '🎲'` enquanto anima (mesmo efeito do 2º d20 de Vantagem/
    * Desvantagem) — `total` só soma o valor quando a animação termina. */
   bonusExtra?: { rotulo: string; lados: number; valor: number | string } | null;
+  /** `true` = o jogador já usou Sorte (Pequenino) nesta rolagem — só 1x
+   * por rolagem, mesmo que o novo resultado também seja 1. */
+  sorteUsada?: boolean;
+  /** `true` = o jogador já usou Inspiração Heroica nesta rolagem. */
+  inspiracaoHeroicaUsada?: boolean;
+}
+
+/** Inspiração Heroica — flag booleano por personagem (nunca contador,
+ * ver SDD): se `disponivel`, rejoga QUALQUER d20 já concluído (sem
+ * Vantagem/Desvantagem em jogo) e usa o novo resultado, gastando a
+ * inspiração (`usar()` zera o flag no personagem). Registrado pela
+ * Ficha do mesmo jeito que `BonusExtraProvider`, pelo mesmo motivo
+ * (`RollOverlay` é global, sem acesso direto ao estado do personagem).
+ * Só cobre rolagens de D20 por enquanto — reroll de dano fica pro
+ * Backlog.md. */
+export interface InspiracaoHeroicaProvider {
+  disponivel: boolean;
+  /** Gasta a Inspiração Heroica no personagem (zera o flag). */
+  usar: () => void;
 }
 
 interface RollD20Options {
@@ -117,13 +136,62 @@ interface RollContextValue {
    * numa rolagem 'd20' concluída, com a categoria certa, sem bônus
    * já aplicado, e com usos restantes. */
   aplicarBonusExtra: () => void;
+  /** `true` só pro personagem da tela atual ter Sorte (Pequenino) —
+   * controla se o botão de reroll aparece quando o d20 mostrar 1. */
+  sorteDisponivel: boolean;
+  registrarSorte: (disponivel: boolean) => void;
+  /** Joga de novo o d20 de uma rolagem 'd20' concluída que mostrou 1,
+   * sem Vantagem/Desvantagem em jogo e ainda não usada nesta rolagem —
+   * substitui o resultado (não soma um 2º dado, diferente de
+   * Vantagem/Desvantagem e do Bônus Extra). Sempre usa a nova jogada,
+   * mesmo se também sair 1 (regra real). */
+  usarSorte: () => void;
+  /** `true` só quando o personagem da tela atual tem Inspiração
+   * Heroica agora — controla se o botão de reroll aparece em QUALQUER
+   * d20 concluído (sem Vantagem/Desvantagem em jogo). */
+  inspiracaoHeroicaDisponivel: boolean;
+  registrarInspiracaoHeroica: (provider: InspiracaoHeroicaProvider | null) => void;
+  /** Joga de novo o d20 de uma rolagem 'd20' concluída (qualquer
+   * resultado, sem Vantagem/Desvantagem em jogo, ainda não usada
+   * nesta rolagem) — substitui o resultado e gasta a Inspiração
+   * Heroica do personagem (`InspiracaoHeroicaProvider.usar`). */
+  usarInspiracaoHeroica: () => void;
+  /** Modo de Teste (ver `AvatarMenu`) — `true` faz todo d20 sair da
+   * sequência fixa 1/10/15/20 em vez de rolar de verdade (dano e
+   * outros dados continuam aleatórios). Não persiste entre sessões —
+   * sempre nasce desligado, pra nunca "esquecer ligado" sem perceber. */
+  modoTeste: boolean;
+  alternarModoTeste: () => void;
 }
 
 const RollContext = createContext<RollContextValue | null>(null);
 
 const DURACAO_ANIMACAO_MS = 480;
 
-function rolarD20Dado(): number {
+/** Modo de Teste (ver `AvatarMenu`): em vez de rolar de verdade, todo
+ * d20 sai dessa sequência fixa, em ordem, dando a volta quando chega
+ * no fim — pensada pra exercitar os 4 estados visuais de acerto que
+ * mais importam testar (1 = falha crítica, 10/15 = resultado
+ * mediano, 20 = sucesso crítico) sem depender de sorte. Quando 2 d20
+ * saem juntos (Vantagem/Desvantagem), cada um consome o PRÓXIMO da
+ * fila — nunca reseta entre eles — então uma rolagem com Vantagem já
+ * sai como "1, depois 10" naturalmente, sem lógica extra. Só afeta
+ * d20 — dano e qualquer outro dado (`rolarDados`) continuam de
+ * verdade mesmo com o modo ligado, já que o objetivo é testar
+ * acerto/crítico, não dano. */
+const SEQUENCIA_MODO_TESTE = [1, 10, 15, 20];
+
+/** `modoTeste`/`indice` são refs (não state) de propósito: esta função
+ * roda dentro de callbacks memoizados com `[]` de dependência
+ * (`rolarD20`, `escolherVantagemPosRolagem`, etc.) — só uma ref
+ * garante que a leitura enxergue o valor mais recente do toggle, sem
+ * precisar recriar esses callbacks a cada mudança. */
+function rolarD20Dado(modoTeste: MutableRefObject<boolean>, indice: MutableRefObject<number>): number {
+  if (modoTeste.current) {
+    const valor = SEQUENCIA_MODO_TESTE[indice.current % SEQUENCIA_MODO_TESTE.length];
+    indice.current += 1;
+    return valor;
+  }
   return 1 + Math.floor(Math.random() * 20);
 }
 
@@ -134,6 +202,14 @@ function criticoDe(d20: number): CritTipo {
 export function RollProvider({ children }: { children: ReactNode }) {
   const [estado, setEstado] = useState<RollState | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [modoTeste, setModoTesteState] = useState(false);
+  const modoTesteRef = useRef(false);
+  const indiceModoTesteRef = useRef(0);
+  const alternarModoTeste = useCallback(() => {
+    modoTesteRef.current = !modoTesteRef.current;
+    indiceModoTesteRef.current = 0;
+    setModoTesteState(modoTesteRef.current);
+  }, []);
 
   const rolarD20 = useCallback(({ label, formula, mod, vantagem, categoria, onResultado }: RollD20Options) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -153,9 +229,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
       bonusExtra: null,
     });
     timeoutRef.current = setTimeout(() => {
-      const rolagem1 = rolarD20Dado();
+      const rolagem1 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
       if (vantagem) {
-        const rolagem2 = rolarD20Dado();
+        const rolagem2 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
         const usado = vantagem === 'vantagem' ? Math.max(rolagem1, rolagem2) : Math.min(rolagem1, rolagem2);
         const total = usado + mod;
         setEstado({
@@ -172,6 +248,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
           podeEscolherVantagem: false,
           categoria,
           bonusExtra: null,
+          sorteUsada: false,
+          inspiracaoHeroicaUsada: false,
         });
         onResultado?.(total, usado);
       } else {
@@ -190,6 +268,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
           podeEscolherVantagem: true,
           categoria,
           bonusExtra: null,
+          sorteUsada: false,
+          inspiracaoHeroicaUsada: false,
         });
         onResultado?.(total, rolagem1);
       }
@@ -236,7 +316,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
       setEstado((prev) => {
         if (!prev || prev.tipo !== 'd20') return prev;
         const rolagem1 = typeof prev.valorDado === 'number' ? prev.valorDado : 0;
-        const rolagem2 = rolarD20Dado();
+        const rolagem2 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
         const usado = prev.vantagem === 'vantagem' ? Math.max(rolagem1, rolagem2) : Math.min(rolagem1, rolagem2);
         const total = usado + (prev.mod ?? 0);
         return { ...prev, dado2: rolagem2, total, critico: criticoDe(usado) };
@@ -265,6 +345,48 @@ export function RollProvider({ children }: { children: ReactNode }) {
     }, DURACAO_ANIMACAO_MS);
   }, [estado, bonusExtraProvider]);
 
+  const [sorteDisponivel, setSorteDisponivel] = useState(false);
+  const registrarSorte = useCallback((disponivel: boolean) => setSorteDisponivel(disponivel), []);
+
+  const usarSorte = useCallback(() => {
+    if (!sorteDisponivel) return;
+    if (!estado || estado.fase !== 'concluido' || estado.tipo !== 'd20') return;
+    if (estado.valorDado !== 1 || estado.dado2 || estado.sorteUsada) return;
+    setEstado((prev) => (prev ? { ...prev, valorDado: '🎲', sorteUsada: true } : prev));
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setEstado((prev) => {
+        if (!prev || prev.tipo !== 'd20') return prev;
+        const novaRolagem = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
+        const total = novaRolagem + (prev.mod ?? 0) + (typeof prev.bonusExtra?.valor === 'number' ? prev.bonusExtra.valor : 0);
+        return { ...prev, valorDado: novaRolagem, total, critico: criticoDe(novaRolagem) };
+      });
+    }, DURACAO_ANIMACAO_MS);
+  }, [estado, sorteDisponivel]);
+
+  const [inspiracaoHeroicaProvider, setInspiracaoHeroicaProvider] = useState<InspiracaoHeroicaProvider | null>(null);
+  const registrarInspiracaoHeroica = useCallback(
+    (provider: InspiracaoHeroicaProvider | null) => setInspiracaoHeroicaProvider(provider),
+    [],
+  );
+
+  const usarInspiracaoHeroica = useCallback(() => {
+    if (!inspiracaoHeroicaProvider?.disponivel) return;
+    if (!estado || estado.fase !== 'concluido' || estado.tipo !== 'd20') return;
+    if (estado.dado2 || estado.inspiracaoHeroicaUsada) return;
+    inspiracaoHeroicaProvider.usar();
+    setEstado((prev) => (prev ? { ...prev, valorDado: '🎲', inspiracaoHeroicaUsada: true } : prev));
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setEstado((prev) => {
+        if (!prev || prev.tipo !== 'd20') return prev;
+        const novaRolagem = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
+        const total = novaRolagem + (prev.mod ?? 0) + (typeof prev.bonusExtra?.valor === 'number' ? prev.bonusExtra.valor : 0);
+        return { ...prev, valorDado: novaRolagem, total, critico: criticoDe(novaRolagem) };
+      });
+    }, DURACAO_ANIMACAO_MS);
+  }, [estado, inspiracaoHeroicaProvider]);
+
   return (
     <RollContext.Provider
       value={{
@@ -276,6 +398,14 @@ export function RollProvider({ children }: { children: ReactNode }) {
         bonusExtraDisponivel: bonusExtraProvider,
         registrarBonusExtra,
         aplicarBonusExtra,
+        sorteDisponivel,
+        registrarSorte,
+        usarSorte,
+        inspiracaoHeroicaDisponivel: inspiracaoHeroicaProvider?.disponivel ?? false,
+        registrarInspiracaoHeroica,
+        usarInspiracaoHeroica,
+        modoTeste,
+        alternarModoTeste,
       }}
     >
       {children}

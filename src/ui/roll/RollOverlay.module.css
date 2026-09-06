@@ -149,6 +149,19 @@
   cursor: default;
 }
 
+.bonusExtraBtnColuna {
+  flex-direction: column;
+  min-height: 52px;
+  padding: var(--space-2) var(--space-3);
+  gap: 2px;
+}
+
+.bonusExtraBtnSub {
+  font-size: 10px;
+  font-weight: normal;
+  color: var(--text-faint);
+}
+
 .dieBonusExtra {
   width: 48px;
   height: 48px;

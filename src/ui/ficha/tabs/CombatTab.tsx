@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { EstiloDeLuta } from '../../../data/rulesets/dnd2024/estilosDeLuta';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
+import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
@@ -8,11 +9,13 @@ import { cdConjuracao } from '../../../core/magiasPersonagem';
 import { useRoll } from '../../roll/RollContext';
 import InfoChip from '../../components/InfoChip';
 import LinearProgressBar from '../../components/LinearProgressBar';
+import ContadorUsos from '../../components/ContadorUsos';
 import SidePanel from '../combat/SidePanel';
 import AcaoPanelContent, { type DanoPendente } from '../combat/AcaoPanelContent';
 import BonusPanelContent from '../combat/BonusPanelContent';
 import ReacaoPanelContent from '../combat/ReacaoPanelContent';
 import LancarNoInfernoModal from '../combat/LancarNoInfernoModal';
+import AtaqueDeSoproModal from '../combat/AtaqueDeSoproModal';
 import styles from './CombatTab.module.css';
 
 export type RecursoTurno = 'acao' | 'bonus' | 'reacao';
@@ -46,6 +49,62 @@ interface CombatTabProps {
   usosFolegoMaximo: number;
   usosFolegoRestantes: number;
   onUsarUsoFolego: () => boolean;
+  /** Conhecimento de Pedras (Anão) — 0 = espécie não é Anão. */
+  usosConhecimentoDePedrasMaximo: number;
+  usosConhecimentoDePedrasRestantes: number;
+  onUsarConhecimentoDePedras: () => boolean;
+  /** Pico de Adrenalina (Orc) — 0 = espécie não é Orc. */
+  usosPicoDeAdrenalinaMaximo: number;
+  usosPicoDeAdrenalinaRestantes: number;
+  onUsarPicoDeAdrenalina: () => boolean;
+  /** Ataque de Sopro (Draconato) — `false` = espécie não é Draconato. */
+  ataqueDeSoproDisponivel: boolean;
+  usosAtaqueDeSoproMaximo: number;
+  usosAtaqueDeSoproRestantes: number;
+  cdAtaqueDeSopro: number;
+  numDadosAtaqueDeSopro: number;
+  tipoDanoAtaqueDeSopro: string | null;
+  onUsarAtaqueDeSopro: () => boolean;
+  /** Voo Dracônico (Draconato, nível 5+) — `false` = não disponível. */
+  vooDraconicoDisponivel: boolean;
+  vooDraconicoGasto: boolean;
+  onUsarVooDraconico: () => boolean;
+  /** Ancestralidade Gigante (Golias) — nome da opção escolhida na
+   * criação (ex.: "Arrepio do Gelo (Gigante do Gelo)"), `null` = não é
+   * Golias. Mesmo contador de usos pras 6 opções possíveis. */
+  ancestralidadeGiganteEscolhida: string | null;
+  usosAncestralidadeGiganteMaximo: number;
+  usosAncestralidadeGiganteRestantes: number;
+  onUsarAncestralidadeGigante: () => boolean;
+  modConstituicaoAtual: number;
+  /** Forma Grande (Golias, nível 5+) — `false` = não disponível. */
+  formaGrandeDisponivel: boolean;
+  formaGrandeGasto: boolean;
+  /** `true` = transformado agora (diferente de `formaGrandeGasto` —
+   * ver comentário em `armazenamentoPersonagens.ts`). */
+  formaGrandeAtiva: boolean;
+  onUsarFormaGrande: () => boolean;
+  /** Mãos Curativas (Aasimar) — `false` = espécie não é Aasimar. */
+  maosCurativasDisponivel: boolean;
+  maosCurativasGasto: boolean;
+  dadosMaosCurativas: number;
+  onUsarMaosCurativas: () => boolean;
+  /** Revelação Celestial (Aasimar, nível 3+) — escolhida de novo a
+   * cada uso (natureza `escolha_reutilizavel`), por isso a lista de
+   * opções vem daqui, não do wizard. */
+  revelacaoCelestialDisponivel: boolean;
+  revelacaoCelestialGasto: boolean;
+  revelacaoCelestialFormaAtiva: string | null;
+  opcoesRevelacaoCelestial: OpcaoSubescolha[];
+  danoBonusRevelacaoCelestial: number;
+  cdMantoNecrotico: number;
+  onUsarRevelacaoCelestial: (formaEscolhida: string) => boolean;
+  /** Falar com Animais - Traço de Gnomo (Gnomo do Bosque) — `false` =
+   * não é essa sub-escolha. */
+  falarComAnimaisGnomoDisponivel: boolean;
+  usosFalarComAnimaisGnomoMaximo: number;
+  usosFalarComAnimaisGnomoRestantes: number;
+  onUsarFalarComAnimaisGnomo: () => boolean;
   conjura: boolean;
   truques: Magia[];
   magiasPreparadasAcao: Magia[];
@@ -55,6 +114,9 @@ interface CombatTabProps {
   indomavelMaximo: number;
   indomavelRestantes: number;
   onUsarIndomavel: () => boolean;
+  pontosDeSorteMaximo: number;
+  pontosDeSorteRestantes: number;
+  onUsarPontoDeSorte: () => boolean;
   surtoMaximo: number;
   surtoRestantes: number;
   surtoUsadoTurno: boolean;
@@ -106,6 +168,46 @@ export default function CombatTab({
   usosFolegoMaximo,
   usosFolegoRestantes,
   onUsarUsoFolego,
+  usosConhecimentoDePedrasMaximo,
+  usosConhecimentoDePedrasRestantes,
+  onUsarConhecimentoDePedras,
+  usosPicoDeAdrenalinaMaximo,
+  usosPicoDeAdrenalinaRestantes,
+  onUsarPicoDeAdrenalina,
+  ataqueDeSoproDisponivel,
+  usosAtaqueDeSoproMaximo,
+  usosAtaqueDeSoproRestantes,
+  cdAtaqueDeSopro,
+  numDadosAtaqueDeSopro,
+  tipoDanoAtaqueDeSopro,
+  onUsarAtaqueDeSopro,
+  vooDraconicoDisponivel,
+  vooDraconicoGasto,
+  onUsarVooDraconico,
+  ancestralidadeGiganteEscolhida,
+  usosAncestralidadeGiganteMaximo,
+  usosAncestralidadeGiganteRestantes,
+  onUsarAncestralidadeGigante,
+  modConstituicaoAtual,
+  formaGrandeDisponivel,
+  formaGrandeGasto,
+  formaGrandeAtiva,
+  onUsarFormaGrande,
+  maosCurativasDisponivel,
+  maosCurativasGasto,
+  dadosMaosCurativas,
+  onUsarMaosCurativas,
+  revelacaoCelestialDisponivel,
+  revelacaoCelestialGasto,
+  revelacaoCelestialFormaAtiva,
+  opcoesRevelacaoCelestial,
+  danoBonusRevelacaoCelestial,
+  cdMantoNecrotico,
+  onUsarRevelacaoCelestial,
+  falarComAnimaisGnomoDisponivel,
+  usosFalarComAnimaisGnomoMaximo,
+  usosFalarComAnimaisGnomoRestantes,
+  onUsarFalarComAnimaisGnomo,
   conjura,
   truques,
   magiasPreparadasAcao,
@@ -115,6 +217,9 @@ export default function CombatTab({
   indomavelMaximo,
   indomavelRestantes,
   onUsarIndomavel,
+  pontosDeSorteMaximo,
+  pontosDeSorteRestantes,
+  onUsarPontoDeSorte,
   surtoMaximo,
   surtoRestantes,
   surtoUsadoTurno,
@@ -145,6 +250,7 @@ export default function CombatTab({
   const [iniciativaValor, setIniciativaValor] = useState<number | null>(null);
   const [periciaInigualavelPendente, setPericiaInigualavelPendente] = useState(false);
   const [lancarNoInfernoAberto, setLancarNoInfernoAberto] = useState(false);
+  const [ataqueDeSoproAberto, setAtaqueDeSoproAberto] = useState(false);
   const cdLancarNoInferno = modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null;
   const temEspacoDePactoDisponivel = espacos.some((e) => (espacosGastosPorCirculo[e.circulo] ?? 0) < e.maximo);
   const { rolarD20, rolarDados } = useRoll();
@@ -187,6 +293,66 @@ export default function CombatTab({
     setPainelAberto(null);
     setFeedback(`${nome} — ${desc}`);
     setDanoPendente(dano ?? null);
+  }
+
+  function usarConhecimentoDePedras() {
+    if (!onUsarConhecimentoDePedras()) return;
+    onMarcarUsado('bonus');
+  }
+
+  function usarPicoDeAdrenalina() {
+    if (!onUsarPicoDeAdrenalina()) return;
+    onMarcarUsado('bonus');
+  }
+
+  function usarVooDraconico() {
+    if (!onUsarVooDraconico()) return;
+    onMarcarUsado('bonus');
+  }
+
+  function usarAncestralidadeGiganteAoAcertar() {
+    if (!onUsarAncestralidadeGigante()) return;
+    if (ancestralidadeGiganteEscolhida === 'Arrepio do Gelo (Gigante do Gelo)') {
+      rolarDados({ label: 'Arrepio do Gelo — Dano', formula: '1d6', quantidade: 1, lados: 6, mod: 0 });
+      setFeedback('🧊 Arrepio do Gelo — soma esse dano Gélido e reduz o Deslocamento do alvo em 3m até o início do seu próximo turno.');
+    } else if (ancestralidadeGiganteEscolhida === 'Queimadura de Fogo (Gigante de Fogo)') {
+      rolarDados({ label: 'Queimadura de Fogo — Dano', formula: '1d10', quantidade: 1, lados: 10, mod: 0 });
+      setFeedback('🔥 Queimadura de Fogo — soma esse dano Ígneo.');
+    } else if (ancestralidadeGiganteEscolhida === 'Tombo da Colina (Gigante da Colina)') {
+      setFeedback('⛰️ Tombo da Colina — o alvo (Grande ou menor) fica Caído, sem dano extra.');
+    }
+  }
+
+  function usarSaltoDaNuvem() {
+    if (!onUsarAncestralidadeGigante()) return;
+    onMarcarUsado('bonus');
+    setFeedback('☁️ Salto da Nuvem — teleporte até 9m pra um espaço desocupado à sua vista.');
+  }
+
+  function usarFormaGrande() {
+    if (!onUsarFormaGrande()) return;
+    onMarcarUsado('bonus');
+  }
+
+  function usarRevelacaoCelestial(formaEscolhida: string) {
+    if (!onUsarRevelacaoCelestial(formaEscolhida)) return;
+    onMarcarUsado('bonus');
+  }
+
+  function abrirAtaqueDeSopro() {
+    if (!onUsarAtaqueDeSopro()) return;
+    setAtaqueDeSoproAberto(true);
+  }
+
+  function rolarDanoAtaqueDeSopro() {
+    setAtaqueDeSoproAberto(false);
+    rolarDados({
+      label: 'Ataque de Sopro — Dano',
+      formula: `${numDadosAtaqueDeSopro}d10`,
+      quantidade: numDadosAtaqueDeSopro,
+      lados: 10,
+      mod: 0,
+    });
   }
 
   function usarRecuperarFolego() {
@@ -240,6 +406,11 @@ export default function CombatTab({
     if (!onUsarUsoFolego()) return;
     rolarDados({ label: 'Mente Tática', formula: '1d10', quantidade: 1, lados: 10, mod: 0 });
     setFeedback('🧠 Mente Tática — some o resultado ao teste de atributo que falhou.');
+  }
+
+  function usarPontoDeSorte() {
+    if (!onUsarPontoDeSorte()) return;
+    setFeedback('🍀 Ponto de Sorte gasto — use o botão Vantagem/Desvantagem na rolagem.');
   }
 
   function usarIndomavel() {
@@ -424,6 +595,49 @@ export default function CombatTab({
         </div>
       )}
 
+      {ataqueDeSoproDisponivel && (
+        <div
+          className="opt-card"
+          style={{
+            marginBottom: 12,
+            cursor: usosAtaqueDeSoproRestantes > 0 ? 'pointer' : 'default',
+            opacity: usosAtaqueDeSoproRestantes > 0 ? 1 : 0.5,
+          }}
+          onClick={usosAtaqueDeSoproRestantes > 0 ? abrirAtaqueDeSopro : undefined}
+        >
+          <div className="opt-card-name" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            🐉 Ataque de Sopro
+            <ContadorUsos total={usosAtaqueDeSoproMaximo} usados={usosAtaqueDeSoproMaximo - usosAtaqueDeSoproRestantes} />
+          </div>
+          <div className="opt-card-desc">
+            substitui um ataque — Cone de 4,5m ou Linha de 9m×1,5m (recarrega no Descanso Longo)
+          </div>
+        </div>
+      )}
+
+      {(ancestralidadeGiganteEscolhida === 'Arrepio do Gelo (Gigante do Gelo)' ||
+        ancestralidadeGiganteEscolhida === 'Queimadura de Fogo (Gigante de Fogo)' ||
+        ancestralidadeGiganteEscolhida === 'Tombo da Colina (Gigante da Colina)') && (
+        <div
+          className="opt-card"
+          style={{
+            marginBottom: 12,
+            cursor: usosAncestralidadeGiganteRestantes > 0 ? 'pointer' : 'default',
+            opacity: usosAncestralidadeGiganteRestantes > 0 ? 1 : 0.5,
+          }}
+          onClick={usosAncestralidadeGiganteRestantes > 0 ? usarAncestralidadeGiganteAoAcertar : undefined}
+        >
+          <div className="opt-card-name" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            🏔 {ancestralidadeGiganteEscolhida.split(' (')[0]}
+            <ContadorUsos
+              total={usosAncestralidadeGiganteMaximo}
+              usados={usosAncestralidadeGiganteMaximo - usosAncestralidadeGiganteRestantes}
+            />
+          </div>
+          <div className="opt-card-desc">toque ao acertar um ataque (recarrega no Descanso Longo)</div>
+        </div>
+      )}
+
       {(estiloDeLuta || mestreTatico || ataquesEstudados || ajusteTatico) && (
         <>
           <div className="section-title">Características</div>
@@ -438,7 +652,10 @@ export default function CombatTab({
 
       {indomavelMaximo > 0 && (
         <>
-          <div className="section-title">Indomável</div>
+          <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span>Indomável</span>
+            <ContadorUsos total={indomavelMaximo} usados={indomavelMaximo - indomavelRestantes} />
+          </div>
           <div
             className="box"
             style={{
@@ -451,8 +668,33 @@ export default function CombatTab({
           >
             <div style={{ fontSize: 13 }}>🛡️ Ao falhar uma salvaguarda, toque aqui</div>
             <div className="label" style={{ marginTop: 2 }}>
-              Rola de novo somando seu nível de Guerreiro ({indomavelRestantes}/{indomavelMaximo} usos — só recupera
-              no Descanso Longo).
+              Rola de novo somando seu nível de Guerreiro (só recupera no Descanso Longo).
+            </div>
+          </div>
+        </>
+      )}
+
+      {pontosDeSorteMaximo > 0 && (
+        <>
+          <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span>Pontos de Sorte</span>
+            <ContadorUsos total={pontosDeSorteMaximo} usados={pontosDeSorteMaximo - pontosDeSorteRestantes} />
+          </div>
+          <div
+            className="box"
+            style={{
+              padding: 12,
+              marginBottom: 12,
+              cursor: pontosDeSorteRestantes > 0 ? 'pointer' : 'default',
+              opacity: pontosDeSorteRestantes > 0 ? 1 : 0.5,
+            }}
+            onClick={pontosDeSorteRestantes > 0 ? usarPontoDeSorte : undefined}
+          >
+            <div style={{ fontSize: 13 }}>🍀 Toque aqui pra gastar 1 ponto</div>
+            <div className="label" style={{ marginTop: 2 }}>
+              Dá Vantagem numa jogada sua de d20, ou impõe Desvantagem num ataque contra você — use
+              os botões Vantagem/Desvantagem já disponíveis em qualquer rolagem (só recupera no
+              Descanso Longo).
             </div>
           </div>
         </>
@@ -460,7 +702,10 @@ export default function CombatTab({
 
       {usosFolegoMaximo > 0 && (
         <>
-          <div className="section-title">Mente Tática</div>
+          <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span>Mente Tática</span>
+            <ContadorUsos total={usosFolegoMaximo} usados={usosFolegoMaximo - usosFolegoRestantes} />
+          </div>
           <div
             className="box"
             style={{
@@ -472,8 +717,7 @@ export default function CombatTab({
           >
             <div style={{ fontSize: 13 }}>🧠 Ao falhar um teste de atributo, toque aqui</div>
             <div className="label" style={{ marginTop: 2 }}>
-              Gasta 1 uso de Recuperar Fôlego, joga 1d10 e soma ao teste ({usosFolegoRestantes}/{usosFolegoMaximo}{' '}
-              usos — banco compartilhado com Recuperar Fôlego).
+              Gasta 1 uso de Recuperar Fôlego, joga 1d10 e soma ao teste (banco compartilhado com Recuperar Fôlego).
             </div>
           </div>
         </>
@@ -481,7 +725,10 @@ export default function CombatTab({
 
       {periciaInigualavelDisponivel && (
         <>
-          <div className="section-title">Perícia Inigualável</div>
+          <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span>Perícia Inigualável</span>
+            <ContadorUsos total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} />
+          </div>
           {periciaInigualavelPendente ? (
             <div className="box" style={{ padding: 12, marginBottom: 12 }}>
               <div style={{ fontSize: 13 }}>Somou o dado ao d20 e ainda assim falhou?</div>
@@ -512,7 +759,7 @@ export default function CombatTab({
               <div style={{ fontSize: 13 }}>🎓 Ao falhar um teste de atributo ou ataque, toque aqui</div>
               <div className="label" style={{ marginTop: 2 }}>
                 Gasta 1 uso de Inspiração de Bardo (d{tamanhoDadoInspiracao}), soma ao d20 — se ainda assim falhar, o
-                uso não é gasto ({usosInspiracaoRestantes}/{usosInspiracaoMaximo} usos).
+                uso não é gasto.
               </div>
             </div>
           )}
@@ -587,6 +834,14 @@ export default function CombatTab({
             onUsarSurto={usarSurtoDeAcao}
             ataqueAtual={ataqueAtual}
             detalhesAtivo={detalhesAtivo}
+            maosCurativasDisponivel={maosCurativasDisponivel}
+            maosCurativasGasto={maosCurativasGasto}
+            dadosMaosCurativas={dadosMaosCurativas}
+            onUsarMaosCurativas={onUsarMaosCurativas}
+            falarComAnimaisGnomoDisponivel={falarComAnimaisGnomoDisponivel}
+            usosFalarComAnimaisGnomoMaximo={usosFalarComAnimaisGnomoMaximo}
+            usosFalarComAnimaisGnomoRestantes={usosFalarComAnimaisGnomoRestantes}
+            onUsarFalarComAnimaisGnomo={onUsarFalarComAnimaisGnomo}
           />
         )}
         {painelAberto === 'bonus' && (
@@ -594,6 +849,30 @@ export default function CombatTab({
             usosFolegoMaximo={usosFolegoMaximo}
             usosFolegoRestantes={usosFolegoRestantes}
             onUsarRecuperarFolego={usarRecuperarFolego}
+            usosConhecimentoDePedrasMaximo={usosConhecimentoDePedrasMaximo}
+            usosConhecimentoDePedrasRestantes={usosConhecimentoDePedrasRestantes}
+            onUsarConhecimentoDePedras={usarConhecimentoDePedras}
+            usosPicoDeAdrenalinaMaximo={usosPicoDeAdrenalinaMaximo}
+            usosPicoDeAdrenalinaRestantes={usosPicoDeAdrenalinaRestantes}
+            onUsarPicoDeAdrenalina={usarPicoDeAdrenalina}
+            vooDraconicoDisponivel={vooDraconicoDisponivel}
+            vooDraconicoGasto={vooDraconicoGasto}
+            onUsarVooDraconico={usarVooDraconico}
+            saltoDaNuvemDisponivel={ancestralidadeGiganteEscolhida === 'Salto da Nuvem (Gigante das Nuvens)'}
+            usosSaltoDaNuvemMaximo={usosAncestralidadeGiganteMaximo}
+            usosSaltoDaNuvemRestantes={usosAncestralidadeGiganteRestantes}
+            onUsarSaltoDaNuvem={usarSaltoDaNuvem}
+            formaGrandeDisponivel={formaGrandeDisponivel}
+            formaGrandeGasto={formaGrandeGasto}
+            formaGrandeAtiva={formaGrandeAtiva}
+            onUsarFormaGrande={usarFormaGrande}
+            revelacaoCelestialDisponivel={revelacaoCelestialDisponivel}
+            revelacaoCelestialGasto={revelacaoCelestialGasto}
+            revelacaoCelestialFormaAtiva={revelacaoCelestialFormaAtiva}
+            opcoesRevelacaoCelestial={opcoesRevelacaoCelestial}
+            danoBonusRevelacaoCelestial={danoBonusRevelacaoCelestial}
+            cdMantoNecrotico={cdMantoNecrotico}
+            onUsarRevelacaoCelestial={usarRevelacaoCelestial}
             ataqueBonus={ataqueBonus}
             onUsarAtaqueBonus={usarAtaqueMaoSecundaria}
             usosInspiracaoMaximo={usosInspiracaoMaximo}
@@ -621,6 +900,12 @@ export default function CombatTab({
             usosInspiracaoRestantes={usosInspiracaoRestantes}
             tamanhoDadoInspiracao={tamanhoDadoInspiracao}
             onUsarInspiracao={onUsarInspiracao}
+            resistenciaDaPedraDisponivel={ancestralidadeGiganteEscolhida === 'Resistência da Pedra (Gigante da Pedra)'}
+            trovaoDaTempestadeDisponivel={ancestralidadeGiganteEscolhida === 'Trovão da Tempestade (Gigante da Tempestade)'}
+            usosAncestralidadeGiganteMaximo={usosAncestralidadeGiganteMaximo}
+            usosAncestralidadeGiganteRestantes={usosAncestralidadeGiganteRestantes}
+            onUsarAncestralidadeGigante={onUsarAncestralidadeGigante}
+            modConstituicaoAtual={modConstituicaoAtual}
           />
         )}
       </SidePanel>
@@ -629,6 +914,15 @@ export default function CombatTab({
           cd={cdLancarNoInferno}
           onRolarDano={rolarDanoLancarNoInferno}
           onFechar={() => setLancarNoInfernoAberto(false)}
+        />
+      )}
+      {ataqueDeSoproAberto && (
+        <AtaqueDeSoproModal
+          cd={cdAtaqueDeSopro}
+          tipoDano={tipoDanoAtaqueDeSopro}
+          numDados={numDadosAtaqueDeSopro}
+          onRolarDano={rolarDanoAtaqueDeSopro}
+          onFechar={() => setAtaqueDeSoproAberto(false)}
         />
       )}
     </>
