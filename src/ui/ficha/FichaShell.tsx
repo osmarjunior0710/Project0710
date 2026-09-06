@@ -380,7 +380,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const pontosDeSorteDisponivel = efeitoMecanicoDoTalento(talentosEfetivos, 'pontos-de-sorte') !== null;
   const pontosDeSorteMaximo = pontosDeSorteDisponivel ? bonusProficienciaAtual : 0;
   const pontosDeSorteRestantes = Math.max(0, pontosDeSorteMaximo - pontosDeSorteGasto);
-  const pontosDeSorteNegaCritico = personagem.nivel >= 5;
   const surtoMaximo = classe ? contarRepeticoesCaracteristica(classe, 'Surto de Ação', personagem.nivel) : 0;
   const surtoRestantes = Math.max(0, surtoMaximo - surtoGasto);
   const mestreTatico = classe ? caracteristicaDesbloqueada(classe, 'Mestre Tático', personagem.nivel) : null;
@@ -1263,7 +1262,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onUsarIndomavel={usarIndomavel}
             pontosDeSorteMaximo={pontosDeSorteMaximo}
             pontosDeSorteRestantes={pontosDeSorteRestantes}
-            pontosDeSorteNegaCritico={pontosDeSorteNegaCritico}
             onUsarPontoDeSorte={usarPontoDeSorte}
             surtoMaximo={surtoMaximo}
             surtoRestantes={surtoRestantes}

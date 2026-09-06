@@ -116,7 +116,6 @@ interface CombatTabProps {
   onUsarIndomavel: () => boolean;
   pontosDeSorteMaximo: number;
   pontosDeSorteRestantes: number;
-  pontosDeSorteNegaCritico: boolean;
   onUsarPontoDeSorte: () => boolean;
   surtoMaximo: number;
   surtoRestantes: number;
@@ -220,7 +219,6 @@ export default function CombatTab({
   onUsarIndomavel,
   pontosDeSorteMaximo,
   pontosDeSorteRestantes,
-  pontosDeSorteNegaCritico,
   onUsarPontoDeSorte,
   surtoMaximo,
   surtoRestantes,
@@ -412,11 +410,7 @@ export default function CombatTab({
 
   function usarPontoDeSorte() {
     if (!onUsarPontoDeSorte()) return;
-    setFeedback(
-      `🍀 Ponto de Sorte gasto — use o botão Vantagem/Desvantagem na rolagem${
-        pontosDeSorteNegaCritico ? ', ou vire o crítico contra você em acerto normal' : ''
-      }.`,
-    );
+    setFeedback('🍀 Ponto de Sorte gasto — use o botão Vantagem/Desvantagem na rolagem.');
   }
 
   function usarIndomavel() {
@@ -698,9 +692,9 @@ export default function CombatTab({
           >
             <div style={{ fontSize: 13 }}>🍀 Toque aqui pra gastar 1 ponto</div>
             <div className="label" style={{ marginTop: 2 }}>
-              Dá Vantagem numa jogada sua de d20, ou impõe Desvantagem num ataque contra você
-              {pontosDeSorteNegaCritico ? ', ou vira um crítico contra você em acerto normal' : ''} — use os botões
-              Vantagem/Desvantagem já disponíveis em qualquer rolagem (só recupera no Descanso Longo).
+              Dá Vantagem numa jogada sua de d20, ou impõe Desvantagem num ataque contra você — use
+              os botões Vantagem/Desvantagem já disponíveis em qualquer rolagem (só recupera no
+              Descanso Longo).
             </div>
           </div>
         </>

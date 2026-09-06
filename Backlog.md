@@ -56,6 +56,20 @@ não tem — registrado aqui pra não redescobrir do zero.
   cura; Valentão de Taverna: dado de dano Desarmado) — mesmo mecanismo
   que falta pro reroll de dano da Inspiração Heroica (ver tópico acima)
   — quando um existir, os outros 2 casos usam o mesmo.
-- **Empurrar o alvo 1,5m** (Valentão de Taverna, 1x/turno ao acertar
-  Desarmado) — não existe efeito de posicionamento/deslocamento tático
-  na ficha hoje.
+- **Valentão de Taverna — Armamento Improvisado** (proficiência com
+  armas improvisadas) — não existe essa categoria de proficiência de
+  arma no schema hoje (`core/proficienciaArma.ts` só conhece
+  Simples/Marcial).
+- **Valentão de Taverna — Corrida Aprimorada** (+3m de Deslocamento na
+  ação Correr) — a ação Correr no Combat hoje só concede o
+  Deslocamento extra padrão, sem lugar pra somar bônus condicional de
+  talento.
+- **Valentão de Taverna — Ataque em Investida** (mover 3m+ em linha
+  reta antes de acertar um ataque corpo a corpo → +1d8 de dano OU
+  empurrar até 3m) — precisa rastrear que o personagem se moveu antes
+  do ataque (a ficha não modela posição/deslocamento em combate) e um
+  efeito de empurrão que também não existe. Corrigido em 2026-09: o
+  texto anterior desse talento descrevia errado esse benefício como
+  "empurrar 1,5m ao acertar Desarmado" — não é isso, é um "ataque de
+  investida" que vale pra qualquer arma corpo a corpo, com a escolha
+  entre dano extra OU empurrão. Ver livro Cap. 5, p.201.
