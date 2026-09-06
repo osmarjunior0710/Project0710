@@ -38,7 +38,32 @@ Jogador, "A a I" e "I a Z" — juntos cobrem as 390 magias).
 - [ ] **2. Extrair Dano Base (`DanoBase_Dado` + `DanoBase_Tipo`)** das
       magias com dano — mesmo processo usado pro Upcast (cruzar PDF +
       planilha, coluna "Círculo" já existente como checagem cruzada).
-      Trabalho grande (~130+ magias de dano) — quebrar em lotes.
+      129 magias com dano de um total de 390 (confirmado lendo o PDF
+      completo, cruzado com regex) — quebrado em 3 lotes por círculo:
+  - [x] **Lote 1 (Círculo 0-1, 38 magias) — FEITA.** Extração via
+        script: localiza cada magia no PDF pelo cabeçalho "Nome\nNº
+        Círculo, Escola (Classes)" (ou "Nome\nTruque de Escola" pros
+        truques), fatia até o próximo cabeçalho, corta o texto no
+        marcador "Usando um Espaço de Magia..."/"Aprimoramento de
+        Truque" antes de buscar o dado base (pra não pegar o valor do
+        upcast por engano). **1 correção de dado real, achada de
+        graça durante a extração**: a planilha tinha `Upcast_Dado`
+        errado pra "Relâmpago" (1d10, o livro diz 1d6) — corrigido na
+        planilha e no `.ts`. **1 bug de contaminação corrigido**:
+        "Badalar Fúnebre" tinha uma frase de "Banquete de Heróis"
+        colada no meio da descrição (já era um problema conhecido,
+        registrado no cabeçalho do arquivo desde antes) — corrigido
+        contra o texto limpo do PDF, na planilha e no `.ts`. 2 magias
+        com 2 efeitos de dano distintos (Faca de Gelo: acerto +
+        explosão; Raio de Bruxa: dano inicial + manutenção por turno)
+        — guardado só o valor que o Upcast realmente escala (conferido
+        contra `upcastTexto` de cada uma), o outro efeito é fixo e já
+        aparece em `descricaoCurta`. 2 magias com tipo de dano variável
+        por escolha do jogador (Orbe Cromático, Explosão Elemental) —
+        `danoBaseTipo: "escolhido"`, dado ainda fixo. `npx tsc
+        --noEmit`, `npm test` (221 passando) e `npm run build` OK.
+  - [ ] **Lote 2 (Círculo 2-4, ~46 magias)**
+  - [ ] **Lote 3 (Círculo 5-9, ~45 magias)**
 - [ ] **3. `AtaqueOuSalvaguarda`** — decidir se dá pra extrair
       confiável só do texto (melhorar `core/classificarMagia.ts`) ou
       se precisa de coluna nova na planilha (`AUDITORIA-CONTEUDO.md`

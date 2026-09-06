@@ -15,10 +15,11 @@
 //
 // `descricaoCompleta` é o texto bruto da planilha — algumas células têm
 // trechos de OUTRA magia colados no meio (mesmo problema de extração já
-// documentado no CLAUDE.md pra Características de Classe/Subclasses,
-// aqui também presente em pelo menos 1 caso confirmado: "Badalar
-// Fúnebre"). Não foi limpo célula por célula nesta entrega (390 magias,
-// custo alto demais pra revisar uma por uma agora) — `descricaoCurta`
+// documentado no CLAUDE.md pra Características de Classe/Subclasses).
+// 1 caso confirmado ("Badalar Fúnebre") foi corrigido durante a
+// auditoria de Dano Base (cruzado contra o PDF do livro), mas o resto
+// das 390 células não foi revisado uma por uma (custo alto demais) —
+// `descricaoCurta`
 // (coluna já curada da planilha, ver decisão "Planilha mestra —
 // proficiências de classe e duplicidade de Magias resolvidas") é
 // preferível pra exibir em UI compacta. Registrado em PENDENCIAS.md.
@@ -27,11 +28,25 @@
 // `upcastAlvos`/`upcastTexto` vêm das colunas estruturadas da planilha
 // (Upcast_*, ver DECISOES-DADOS.md "Magias — Upcast estruturado") —
 // só descrevem COMO o efeito escala ao gastar espaço de magia de
-// círculo mais alto, ainda sem o Dano Base pra rodar o dado completo
-// (ver PENDENCIAS.md "Motor de rolagem de dano de Magia"). `null` em
-// `upcastTipo` = a magia não tem upcast (truque ou magia sem regra de
-// escalar). `upcastTexto` é a frase pronta pra exibir mesmo nos casos
-// "outro" (regra não-linear, sem fórmula automática).
+// círculo mais alto. `null` em `upcastTipo` = a magia não tem upcast
+// (truque ou magia sem regra de escalar). `upcastTexto` é a frase
+// pronta pra exibir mesmo nos casos "outro" (regra não-linear, sem
+// fórmula automática).
+//
+// `danoBaseDado`/`danoBaseTipo` são o dado + tipo de dano da magia no
+// círculo/nível mínimo dela (ex.: Bola de Fogo = "8d6"/"Ígneo") —
+// junto com Upcast, fecha o motor de rolagem de dano completo (ver
+// PENDENCIAS.md "Motor de rolagem de dano de Magia"). Extraído lote a
+// lote cruzando os PDFs do Cap. 7 do Livro do Jogador com a planilha
+// (mesmo processo do Upcast) — auditoria em andamento, `null` = ainda
+// não processado OU a magia não causa dano direto (`EmDevB.md`).
+// `danoBaseTipo: "escolhido"` = o tipo de dano varia por escolha do
+// jogador ao conjurar (ex.: Orbe Cromático) — o dado é fixo, só o
+// tipo muda. Magia com 2 efeitos de dano distintos (ex.: Faca de
+// Gelo: 1d10 Perfurante no acerto + 2d6 Gélido na explosão) guarda só
+// o valor que o Upcast realmente escala (conferido linha a linha
+// contra `upcastTexto`) — o outro efeito é fixo e não precisa de
+// campo próprio, já aparece em `descricaoCurta`.
 
 export type UpcastTipo =
   | 'dado-por-circulo'
@@ -59,6 +74,8 @@ export interface Magia {
   upcastFlat: number | null;
   upcastAlvos: number | null;
   upcastTexto: string | null;
+  danoBaseDado: string | null;
+  danoBaseTipo: string | null;
 }
 
 export const magias: Magia[] = [
@@ -81,6 +98,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "amigos",
@@ -101,6 +120,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "artedruidica",
@@ -121,6 +142,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "badalarfunebre",
@@ -132,7 +155,7 @@ export const magias: Magia[] = [
     alcance: "18 metros",
     componentes: "V, S",
     duracao: "Instantânea",
-    descricaoCompleta: "Você aponta para uma criatura à sua vista e no alcance da magia, então um único toque de um badalar doloroso é audível a até 3 metros do alvo. O alvo deve ser bem-sucedido em uma salvaguarda de Sabedoria ou sofre 1d8 pontos de dano Necrótico. Caso o alvo tenha A magia Banquete dos Heróis prepara os aventureiros para a glória. perdido algum de seus Pontos de Vida, em vez de 1d8, ele sofre 1d12 pontos de dano Necrótico. Aprimoramento de Truque. O dano aumenta em um dado quando você atinge os níveis 5 (2d8 ou 2d12), 11 (3d8 ou 3d12) e 17 (4d8 ou 4d12).",
+    descricaoCompleta: "Você aponta para uma criatura à sua vista e no alcance da magia, então um único toque de um badalar doloroso é audível a até 3 metros do alvo. O alvo deve ser bem-sucedido em uma salvaguarda de Sabedoria ou sofre 1d8 pontos de dano Necrótico. Caso o alvo tenha perdido algum de seus Pontos de Vida, em vez de 1d8, ele sofre 1d12 pontos de dano Necrótico. Aprimoramento de Truque. O dano aumenta em um dado quando você atinge os níveis 5 (2d8 ou 2d12), 11 (3d8 ou 3d12) e 17 (4d8 ou 4d12).",
     descricaoCurta: "Um sino sombrio soa perto do alvo. Salv. Sabedoria ou 1d8 dano Necrótico (1d12 se o alvo já estiver ferido). Escala nos níveis 5/11/17.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
     upcastTipo: null,
@@ -141,6 +164,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d8",
+    danoBaseTipo: "Necrótico",
   },
   {
     id: "bolhaacida",
@@ -161,6 +186,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d6",
+    danoBaseTipo: "Ácido",
   },
   {
     id: "bordaomistico",
@@ -181,6 +208,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "chamasagrada",
@@ -201,6 +230,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d8",
+    danoBaseTipo: "Radiante",
   },
   {
     id: "chicotedeespinhos",
@@ -221,6 +252,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d6",
+    danoBaseTipo: "Perfurante",
   },
   {
     id: "criarchamas",
@@ -241,6 +274,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d8",
+    danoBaseTipo: "Ígneo",
   },
   {
     id: "elementalismo",
@@ -261,6 +296,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "explosaoelemental",
@@ -281,6 +318,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d8",
+    danoBaseTipo: "escolhido",
   },
   {
     id: "fagulhaestelar",
@@ -301,6 +340,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d8",
+    danoBaseTipo: "Radiante",
   },
   {
     id: "golpecerteiro",
@@ -321,6 +362,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "ilusaomenor",
@@ -341,6 +384,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "luz",
@@ -361,6 +406,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "luzesdancantes",
@@ -381,6 +428,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "mensagem",
@@ -401,6 +450,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "maosmagicas",
@@ -421,6 +472,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "orientacao",
@@ -441,6 +494,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "palavraderadiancia",
@@ -461,6 +516,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d6",
+    danoBaseTipo: "Radiante",
   },
   {
     id: "prestidigitacaoarcana",
@@ -481,6 +538,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "protecaocontralaminas",
@@ -501,6 +560,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "raiomistico",
@@ -521,6 +582,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d10",
+    danoBaseTipo: "Energético",
   },
   {
     id: "raiodefogo",
@@ -541,6 +604,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d10",
+    danoBaseTipo: "Ígneo",
   },
   {
     id: "raiodegelo",
@@ -561,6 +626,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d8",
+    danoBaseTipo: "Gélido",
   },
   {
     id: "rajadadeveneno",
@@ -581,6 +648,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d12",
+    danoBaseTipo: "Veneno",
   },
   {
     id: "reparar",
@@ -601,6 +670,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "resistencia",
@@ -621,6 +692,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "talhomental",
@@ -641,6 +714,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d6",
+    danoBaseTipo: "Psíquico",
   },
   {
     id: "taumaturgia",
@@ -661,6 +736,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "toquechocante",
@@ -681,6 +758,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d8",
+    danoBaseTipo: "Elétrico",
   },
   {
     id: "toquenecrotico",
@@ -701,6 +780,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d10",
+    danoBaseTipo: "Necrótico",
   },
   {
     id: "trovao",
@@ -721,6 +802,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d6",
+    danoBaseTipo: "Trovejante",
   },
   {
     id: "zombariaperversa",
@@ -741,6 +824,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d6",
+    danoBaseTipo: "Psíquico",
   },
   {
     id: "alarme",
@@ -761,6 +846,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "amizadeanimal",
@@ -781,6 +868,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "armaduraarcana",
@@ -801,6 +890,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "armaduradeagathys",
@@ -821,6 +912,8 @@ export const magias: Magia[] = [
     upcastFlat: 5,
     upcastAlvos: null,
     upcastTexto: "Você ganha +5 Pontos de Vida Temporários e o dano de retaliação Gélido aumenta em +5 para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "bomfruto",
@@ -841,6 +934,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "bracosdehadar",
@@ -861,6 +956,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 pontos para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "2d6",
+    danoBaseTipo: "Necrótico",
   },
   {
     id: "bencao",
@@ -881,6 +978,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "comando",
@@ -901,6 +1000,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "compreenderidiomas",
@@ -921,6 +1022,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "convocarfamiliar",
@@ -941,6 +1044,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "criaroudestruiragua",
@@ -961,6 +1066,8 @@ export const magias: Magia[] = [
     upcastFlat: 1,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você cria ou destrói 40 litros adicionais de água, ou o tamanho do Cubo aumenta em 1,5 metro de lado, para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "curarferimentos",
@@ -981,6 +1088,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A cura aumenta em 2d8 para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "danacao",
@@ -1001,6 +1110,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Sua Concentração pode durar mais com um espaço de magia de 2º círculo (em até 4 horas), 3º–4º círculo (em até 8 horas) ou 5º círculo ou superior (em até 24 horas).",
+    danoBaseDado: "1d6",
+    danoBaseTipo: "Necrótico",
   },
   {
     id: "destruicaocauterizante",
@@ -1021,6 +1132,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Todo dano aumenta em 1d6 para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "1d6",
+    danoBaseTipo: "Ígneo",
   },
   {
     id: "destruicaocolerica",
@@ -1041,6 +1154,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 pontos para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "1d6",
+    danoBaseTipo: "Necrótico",
   },
   {
     id: "destruicaodivina",
@@ -1061,6 +1176,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "2d8",
+    danoBaseTipo: "Radiante",
   },
   {
     id: "destruicaoestrondosa",
@@ -1081,6 +1198,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 pontos para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "2d6",
+    danoBaseTipo: "Trovejante",
   },
   {
     id: "detectarmagia",
@@ -1101,6 +1220,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "detectarvenenoedoenca",
@@ -1121,6 +1242,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "detectarobemeomal",
@@ -1141,6 +1264,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "discoflutuantedetenser",
@@ -1161,6 +1286,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "disfarcarse",
@@ -1181,6 +1308,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "duelocompelido",
@@ -1201,6 +1330,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "emaranhar",
@@ -1221,6 +1352,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "enfeiticarpessoa",
@@ -1241,6 +1374,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "escritailusoria",
@@ -1261,6 +1396,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "escudoarcano",
@@ -1281,6 +1418,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "escudodafe",
@@ -1301,6 +1440,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "facadegelo",
@@ -1321,6 +1462,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano Gélido aumenta em 1d6 para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "2d6",
+    danoBaseTipo: "Gélido",
   },
   {
     id: "falarcomanimais",
@@ -1341,6 +1484,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     // Mesma magia de "Falar com Animais" (id "falarcomanimais"), mas
@@ -1368,6 +1513,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "favordivino",
@@ -1388,6 +1535,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: "1d4",
+    danoBaseTipo: "Radiante",
   },
   {
     id: "fogodasfadas",
@@ -1408,6 +1557,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "gargalhadanefastadetasha",
@@ -1428,6 +1579,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "golpeconstritor",
@@ -1448,6 +1601,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 pontos para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "1d6",
+    danoBaseTipo: "Perfurante",
   },
   {
     id: "graxa",
@@ -1468,6 +1623,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "heroismo",
@@ -1488,6 +1645,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "identificar",
@@ -1508,6 +1667,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "imagemsilenciosa",
@@ -1528,6 +1689,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "infligirferimentos",
@@ -1548,6 +1711,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d10 para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "2d10",
+    danoBaseTipo: "Necrótico",
   },
   {
     id: "lequecromatico",
@@ -1568,6 +1733,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "marcadopredador",
@@ -1588,6 +1755,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Sua Concentração pode durar mais com um espaço de magia de 3º–4º círculo (em até 8 horas) ou 5º círculo ou superior (em até 24 horas).",
+    danoBaseDado: "1d6",
+    danoBaseTipo: "Energético",
   },
   {
     id: "maosflamejantes",
@@ -1608,6 +1777,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 pontos para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "3d6",
+    danoBaseTipo: "Ígneo",
   },
   {
     id: "misseismagicos",
@@ -1628,6 +1799,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "A magia cria um dardo adicional para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "1d4 + 1",
+    danoBaseTipo: "Energético",
   },
   {
     id: "nevoaobscurecente",
@@ -1648,6 +1821,8 @@ export const magias: Magia[] = [
     upcastFlat: 6,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O raio da névoa aumenta em 6 metros para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "ondatrovejante",
@@ -1668,6 +1843,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "2d8",
+    danoBaseTipo: "Trovejante",
   },
   {
     id: "orbecromatico",
@@ -1688,6 +1865,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 1. O orbe pode saltar um número máximo de vezes igual ao círculo do espaço de magia utilizado, e uma criatura pode ser atingida apenas uma vez por cada conjuração desta magia.",
+    danoBaseDado: "3d8",
+    danoBaseTipo: "escolhido",
   },
   {
     id: "palavracurativa",
@@ -1708,6 +1887,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A cura aumenta em 2d4 para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "passoslargos",
@@ -1728,6 +1909,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "perdicao",
@@ -1748,6 +1931,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "protecaocontraobemeomal",
@@ -1768,6 +1953,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "purificaralimentosebebidas",
@@ -1788,6 +1975,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "quedasuave",
@@ -1808,6 +1997,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "raioguia",
@@ -1828,6 +2019,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 pontos para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "4d6",
+    danoBaseTipo: "Radiante",
   },
   {
     id: "raionauseante",
@@ -1848,6 +2041,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "2d8",
+    danoBaseTipo: "Veneno",
   },
   {
     id: "raiodebruxa",
@@ -1868,6 +2063,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano inicial aumenta em 1d12 para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "2d12",
+    danoBaseTipo: "Elétrico",
   },
   {
     id: "repreensaodiabolica",
@@ -1888,6 +2085,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d10 para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "2d10",
+    danoBaseTipo: "Ígneo",
   },
   {
     id: "retiradaacelerada",
@@ -1908,6 +2107,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "salto",
@@ -1928,6 +2129,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "santuario",
@@ -1948,6 +2151,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "saraivadadeespinhos",
@@ -1968,6 +2173,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d10 para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "1d10",
+    danoBaseTipo: "Perfurante",
   },
   {
     id: "servoinvisivel",
@@ -1988,6 +2195,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "sono",
@@ -2008,6 +2217,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "sussurrosdissonantes",
@@ -2028,6 +2239,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 pontos para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: "3d6",
+    danoBaseTipo: "Psíquico",
   },
   {
     id: "vitalidadevazia",
@@ -2048,6 +2261,8 @@ export const magias: Magia[] = [
     upcastFlat: 5,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você obtém 5 Pontos de Vida Temporários adicionais para cada círculo de espaço de magia acima de 1.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "acalmaremocoes",
@@ -2068,6 +2283,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "alterarse",
@@ -2088,6 +2305,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "aprimoraratributo",
@@ -2108,6 +2327,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Você pode escolher uma criatura adicional (o atributo aprimorado pode variar por alvo) para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "armaespiritual",
@@ -2128,6 +2349,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "armamagica",
@@ -2148,6 +2371,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O bônus aumenta para +2 com um espaço de magia de 3º–5º círculo. O bônus aumenta para +3 com um espaço de magia de 6º círculo ou superior.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "arrombar",
@@ -2168,6 +2393,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "augurio",
@@ -2188,6 +2415,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "aumentarreduzir",
@@ -2208,6 +2437,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "auramagicadenystul",
@@ -2228,6 +2459,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "auxilio",
@@ -2248,6 +2481,8 @@ export const magias: Magia[] = [
     upcastFlat: 5,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Os Pontos de Vida de cada alvo aumentam em 5 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "bocaencantada",
@@ -2268,6 +2503,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "cativar",
@@ -2288,6 +2525,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "cegueirasurdez",
@@ -2308,6 +2547,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "chamacontinua",
@@ -2328,6 +2569,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "convocarmontaria",
@@ -2348,6 +2591,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Use o círculo do espaço de magia para o círculo da magia no bloco de estatísticas.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "cordaextradimensional",
@@ -2368,6 +2613,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "cordaodeflechas",
@@ -2388,6 +2635,8 @@ export const magias: Magia[] = [
     upcastFlat: 2,
     upcastAlvos: null,
     upcastTexto: "A quantidade de munição que pode ser afetada aumenta em 2 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "coroadaloucura",
@@ -2408,6 +2657,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "crescerespinhos",
@@ -2428,6 +2679,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "despedacar",
@@ -2448,6 +2701,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "destruicaoradiante",
@@ -2468,6 +2723,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "detectarpensamentos",
@@ -2488,6 +2745,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "encontrararmadilhas",
@@ -2508,6 +2767,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "escaladadearanha",
@@ -2528,6 +2789,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "escuridao",
@@ -2548,6 +2811,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "esferaflamejante",
@@ -2568,6 +2833,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "espinhomental",
@@ -2588,6 +2855,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "esquentarmetal",
@@ -2608,6 +2877,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "flechaacidademelf",
@@ -2628,6 +2899,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano (inicial e posterior) aumenta em 1d4 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "forcaespectral",
@@ -2648,6 +2921,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invisibilidade",
@@ -2668,6 +2943,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocarfera",
@@ -2688,6 +2965,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Use o círculo do espaço de magia para o círculo da magia no bloco de estatísticas.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "levitacao",
@@ -2708,6 +2987,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "localizaranimaisouplantas",
@@ -2728,6 +3009,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "localizarobjeto",
@@ -2748,6 +3031,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "lufadadevento",
@@ -2768,6 +3053,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "laminaflamejante",
@@ -2788,6 +3075,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "mensageiroanimal",
@@ -2808,6 +3097,8 @@ export const magias: Magia[] = [
     upcastFlat: 48,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A duração da magia aumenta em 48 horas para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "nuvemdeadagas",
@@ -2828,6 +3119,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 2d4 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "oracaodecura",
@@ -2848,6 +3141,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A cura aumenta em 1d8 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "paralisarpessoa",
@@ -2868,6 +3163,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher um Humanoide adicional para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "passonebuloso",
@@ -2888,6 +3185,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "passosemrastro",
@@ -2908,6 +3207,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "pelecasca",
@@ -2928,6 +3229,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "protecaocontraveneno",
@@ -2948,6 +3251,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "raioardente",
@@ -2968,6 +3273,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Você cria um raio adicional para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "raiolunar",
@@ -2988,6 +3295,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d10 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "raiodoenfraquecimento",
@@ -3008,6 +3317,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "reflexos",
@@ -3028,6 +3339,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "repousotranquilo",
@@ -3048,6 +3361,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "restauracaomenor",
@@ -3068,6 +3383,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "sentidoferal",
@@ -3088,6 +3405,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "silencio",
@@ -3108,6 +3427,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "soprodedragao",
@@ -3128,6 +3449,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "sugestao",
@@ -3148,6 +3471,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "teia",
@@ -3168,6 +3493,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "trancaarcana",
@@ -3188,6 +3515,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "turvar",
@@ -3208,6 +3537,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "veroinvisivel",
@@ -3228,6 +3559,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "vigorarcano",
@@ -3248,6 +3581,8 @@ export const magias: Magia[] = [
     upcastFlat: 1,
     upcastAlvos: null,
     upcastTexto: "O número de Dados de Vida não gastos que você pode jogar aumenta em 1 para cada círculo de espaço de magia acima de 2.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "visaonoescuro",
@@ -3268,6 +3603,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "vinculodeprotecao",
@@ -3288,6 +3625,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "zonadaverdade",
@@ -3308,6 +3647,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "armaelemental",
@@ -3328,6 +3669,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Upcast: +2/+2d4 com espaço 5º-6º; +3/+3d4 com 7º+.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "auradevitalidade",
@@ -3348,6 +3691,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "boladefogo",
@@ -3368,6 +3713,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "caminharsobreasaguas",
@@ -3388,6 +3735,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "celeridade",
@@ -3408,6 +3757,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "clarividencia",
@@ -3428,6 +3779,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "contramagia",
@@ -3448,6 +3801,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "convocarfeerico",
@@ -3468,6 +3823,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Use o círculo do espaço de magia para o círculo da magia no bloco de estatísticas.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "convocarrelampagos",
@@ -3488,6 +3845,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano é aumentado em 1d10 pontos para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "crescimentodeplantas",
@@ -3508,6 +3867,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "criarcomidaeagua",
@@ -3528,6 +3889,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "circulomagico",
@@ -3548,6 +3911,8 @@ export const magias: Magia[] = [
     upcastFlat: 1,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A duração aumenta em 1 hora para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "destruicaocegante",
@@ -3568,6 +3933,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano adicional aumenta em 1d8 para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "dissiparmagia",
@@ -3588,6 +3955,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Se o círculo do espaço de magia usado for igual ou maior que o círculo da magia alvo, ela encerra automaticamente.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "falarcommortos",
@@ -3608,6 +3977,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "falarcomplantas",
@@ -3628,6 +3999,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "flecharelampago",
@@ -3648,6 +4021,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano para ambos os efeitos da magia aumenta em 1d8 para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "fomedehadar",
@@ -3668,6 +4043,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "formagasosa",
@@ -3688,6 +4065,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "glifodeprotecao",
@@ -3708,6 +4087,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano de uma runa explosiva aumenta em 1d8 para cada círculo de espaço de magia acima de 3. Se você criar um glifo de magia, você pode armazenar qualquer magia de até o mesmo círculo que o espaço de magia que você usa para o Glifo de Proteção.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "guardioesespirituais",
@@ -3728,6 +4109,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "imagemmaior",
@@ -3748,6 +4131,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A magia dura até ser dissipada, sem exigir Concentração, se conjurada com um espaço de magia de 4º círculo ou superior.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "indetectavel",
@@ -3768,6 +4153,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocaranimais",
@@ -3788,6 +4175,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "O dano/cura de cada Fera invocada aumenta em 1d10 para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocarbarragem",
@@ -3808,6 +4197,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocarmortovivo",
@@ -3828,6 +4219,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Use o círculo do espaço de magia para o círculo da magia no bloco de estatísticas.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "lentidao",
@@ -3848,6 +4241,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "luzdodia",
@@ -3868,6 +4263,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "linguas",
@@ -3888,6 +4285,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "mantodocruzado",
@@ -3908,6 +4307,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "medo",
@@ -3928,6 +4329,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "mesclarseasrochas",
@@ -3948,6 +4351,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "montariafantasmagorica",
@@ -3968,6 +4373,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "muralhadevento",
@@ -3988,6 +4395,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "nevasca",
@@ -4008,6 +4417,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "nuvemfetida",
@@ -4028,6 +4439,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "padraohipnotico",
@@ -4048,6 +4461,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "palavracurativaemmassa",
@@ -4068,6 +4483,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A cura aumenta em 1d4 para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "pequenorefugiodeleomund",
@@ -4088,6 +4505,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "piscar",
@@ -4108,6 +4527,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "protecaocontraenergia",
@@ -4128,6 +4549,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "relampago",
@@ -4144,10 +4567,12 @@ export const magias: Magia[] = [
     fonte: "Livro do Jogador (D&D 5e 2024)",
     upcastTipo: "dado-por-circulo",
     upcastCirculoBase: 3,
-    upcastDado: "1d10",
+    upcastDado: "1d6",
     upcastFlat: null,
     upcastAlvos: null,
-    upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d10 para cada círculo de espaço de magia acima de 3.",
+    upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "remeter",
@@ -4168,6 +4593,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "removermaldicao",
@@ -4188,6 +4615,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "respirarnaagua",
@@ -4208,6 +4637,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "revivificar",
@@ -4228,6 +4659,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "rogarmaldicao",
@@ -4248,6 +4681,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Se você conjurar esta magia usando um espaço de magia de 4º círculo, você pode manter a Concentração nela por até 10 minutos. Se você usar um espaço de magia de 5º círculo ou superior, a magia não requer Concentração, e a duração se torna 8 horas (espaço de 5º e 6º círculo) ou 24 horas (espaço de 7º ou 8º círculo). Se você usar um espaço de magia de 9º círculo, a magia permanece até ser dissipada.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "simularmorte",
@@ -4268,6 +4703,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "sinaldeesperanca",
@@ -4288,6 +4725,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "toquevampirico",
@@ -4308,6 +4747,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "voo",
@@ -4328,6 +4769,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 3.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "arcasecretadeleomund",
@@ -4348,6 +4791,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "assassinofantasmagorico",
@@ -4368,6 +4813,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d10 para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "auradepureza",
@@ -4388,6 +4835,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "auradevida",
@@ -4408,6 +4857,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "banimento",
@@ -4428,6 +4879,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "compulsao",
@@ -4448,6 +4901,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "confusao",
@@ -4468,6 +4923,8 @@ export const magias: Magia[] = [
     upcastFlat: 1,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O raio da Esfera aumenta em 1,5 metro para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "controlaragua",
@@ -4488,6 +4945,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "convocarelemental",
@@ -4508,6 +4967,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Use o círculo do espaço de magia para o círculo da magia no bloco de estatísticas.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "caofieldemordenkainen",
@@ -4528,6 +4989,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "defensordafe",
@@ -4548,6 +5011,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "destruicaoatordoante",
@@ -4568,6 +5033,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano adicional aumenta em 1d6 para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "dominarfera",
@@ -4588,6 +5055,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Sua Concentração pode durar mais com um espaço de magia de 5º círculo (em até 10 minutos), 6º círculo (em até 1 hora) ou 7º círculo ou superior (em até 8 horas).",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "enfeiticarmonstro",
@@ -4608,6 +5077,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "escudoardente",
@@ -4628,6 +5099,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "esferaresilientedeotiluke",
@@ -4648,6 +5121,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "esferavitriolica",
@@ -4668,6 +5143,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano inicial aumenta em 2d4 para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "fabricar",
@@ -4688,6 +5165,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "fontedoluar",
@@ -4708,6 +5187,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "insetogigante",
@@ -4728,6 +5209,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Use o círculo do espaço de magia para o círculo da magia no bloco de estatísticas.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invisibilidademaior",
@@ -4748,6 +5231,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocaraberracao",
@@ -4768,6 +5253,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Use o círculo do espaço de magia para o círculo da magia no bloco de estatísticas.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocarconstructo",
@@ -4788,6 +5275,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Use o círculo do espaço de magia para o círculo da magia no bloco de estatísticas.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocarelementaismenores",
@@ -4808,6 +5297,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocarseresdafloresta",
@@ -4828,6 +5319,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "localizarcriatura",
@@ -4848,6 +5341,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "malogro",
@@ -4868,6 +5363,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "moldarrochas",
@@ -4888,6 +5385,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "movimentacaolivre",
@@ -4908,6 +5407,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "muralhadefogo",
@@ -4928,6 +5429,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 pontos para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "olhoarcano",
@@ -4948,6 +5451,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "pelerocha",
@@ -4968,6 +5473,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "polimorfia",
@@ -4988,6 +5495,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "portadimensional",
@@ -5008,6 +5517,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "pressagio",
@@ -5028,6 +5539,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "protecaocontraamorte",
@@ -5048,6 +5561,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "santuarioparticulardemordenkainen",
@@ -5068,6 +5583,8 @@ export const magias: Magia[] = [
     upcastFlat: 30,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode aumentar o tamanho do Cubo em 30 metros para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "tempestadeglacial",
@@ -5088,6 +5605,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano Contundente aumenta em 1d10 para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "tentaculosnegrosdeevard",
@@ -5108,6 +5627,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "terrenoalucinatorio",
@@ -5128,6 +5649,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "vinhaagarradora",
@@ -5148,6 +5671,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "O número de criaturas que a vinha pode imobilizar aumenta em 1 para cada círculo de espaço de magia acima de 4.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "aljavaveloz",
@@ -5168,6 +5693,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "animarobjetos",
@@ -5188,6 +5715,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano de Pancada da criatura aumenta em 1d4 (Médio ou menor), 1d6 (Grande) ou 1d12 (Enorme) para cada círculo de espaço de magia acima de 5.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "colunadechamas",
@@ -5208,6 +5737,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano Ígneo e o dano Radiante aumentam em 1d6 para cada círculo de espaço de magia acima de 5.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "comunhao",
@@ -5228,6 +5759,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "comunhaocomanatureza",
@@ -5248,6 +5781,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "conedefrio",
@@ -5268,6 +5803,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 5.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "consagrar",
@@ -5288,6 +5825,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "contatoextraplanar",
@@ -5308,6 +5847,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "contagio",
@@ -5328,6 +5869,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "convocarcelestial",
@@ -5348,6 +5891,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Use o círculo do espaço de magia para o círculo da magia no bloco de estatísticas.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "criarpassagem",
@@ -5368,6 +5913,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "criacao",
@@ -5388,6 +5935,8 @@ export const magias: Magia[] = [
     upcastFlat: 1,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O Cubo aumenta em 1,5 metro de lado para cada círculo de espaço de magia acima de 5.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "curarferimentosemmassa",
@@ -5408,6 +5957,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A cura aumenta em 1d8 para cada círculo de espaço de magia acima de 5.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "circulodepoder",
@@ -5428,6 +5979,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "circulodeteleporte",
@@ -5448,6 +6001,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "cupulaantivida",
@@ -5468,6 +6023,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "despertar",
@@ -5488,6 +6045,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "despistar",
@@ -5508,6 +6067,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "destruicaobanidora",
@@ -5528,6 +6089,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "dissiparobemeomal",
@@ -5548,6 +6111,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "dominarpessoa",
@@ -5568,6 +6133,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Upcast: Concentração dura mais (6º:10min / 7º:1h / 8º+:8h).",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "estaticasinaptica",
@@ -5588,6 +6155,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "golpedearco",
@@ -5608,6 +6177,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocardragao",
@@ -5628,6 +6199,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Use o círculo do espaço de magia para o círculo da magia no bloco de estatísticas.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocarelemental",
@@ -5648,6 +6221,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 5.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocarsaraivada",
@@ -5668,6 +6243,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "lendasehistorias",
@@ -5688,6 +6265,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "ligacaotelepaticaderary",
@@ -5708,6 +6287,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "missao",
@@ -5728,6 +6309,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Se você usar um espaço de magia de 7º ou 8º círculo, a duração é de 365 dias. Se você usar um espaço de magia de 9º círculo, a magia dura até que seja encerrada por uma das magias mencionadas acima.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "modificarmemoria",
@@ -5748,6 +6331,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode alterar as memórias do alvo em relação a um evento que ocorreu há até 7 dias (espaço de magia de 6º círculo), 30 dias (espaço de magia de 7º círculo), 365 dias (espaço de magia de 8º círculo) ou em qualquer momento do passado da criatura (espaço de magia de 9º círculo).",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "muralhadeenergia",
@@ -5768,6 +6353,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "muralhadepedra",
@@ -5788,6 +6375,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "maodebigby",
@@ -5808,6 +6397,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano do Punho Cerrado aumenta em 2d8 e o dano da Mão Esmagadora aumenta em 2d6 para cada círculo de espaço de magia acima de 5.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "nevoamortal",
@@ -5828,6 +6419,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d8 para cada círculo de espaço de magia acima de 5.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "ondadestrutiva",
@@ -5848,6 +6441,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "paralisarmonstro",
@@ -5868,6 +6463,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Você pode escolher uma criatura adicional para cada círculo de espaço de magia acima de 5.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "passoarboreo",
@@ -5888,6 +6485,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "pragadeinsetos",
@@ -5908,6 +6507,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d10 para cada círculo de espaço de magia acima de 5.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "presencaregiadeyolande",
@@ -5928,6 +6529,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "reencarnar",
@@ -5948,6 +6551,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "restauracaomaior",
@@ -5968,6 +6573,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "reviverosmortos",
@@ -5988,6 +6595,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "similaridade",
@@ -6008,6 +6617,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "sonho",
@@ -6028,6 +6639,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "telecinese",
@@ -6048,6 +6661,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "tempestaderadiantedejallarzi",
@@ -6068,6 +6683,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano Radiante e Trovejante aumentam em 1d10 para cada círculo de espaço de magia acima de 5.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "videncia",
@@ -6088,6 +6705,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "ancoraplanar",
@@ -6108,6 +6727,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A duração aumenta com um espaço de magia 6º círculo (10 dias), 7º círculo (30 dias), 8º círculo (180 dias) e 9º círculo (366 dias).",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "aliadoextraplanar",
@@ -6128,6 +6749,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "banquetedeherois",
@@ -6148,6 +6771,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "barreiradelaminas",
@@ -6168,6 +6793,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "caldeiraoborbulhantedetasha",
@@ -6188,6 +6815,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "caminharnovento",
@@ -6208,6 +6837,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "contingencia",
@@ -6228,6 +6859,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "correntederelampagos",
@@ -6248,6 +6881,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 1,
     upcastTexto: "Um raio adicional salta do primeiro alvo para outro alvo para cada círculo de espaço de magia acima de 6.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "criarmortosvivos",
@@ -6268,6 +6903,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Se você usar um espaço de magia de 7º círculo, você pode animar ou reafirmar o controle sobre quatro Carniçais. Se você usar um espaço de magia de 8º círculo, você pode animar ou reafirmar o controle sobre dois Carneçais ou Inumanos ou cinco Carniçais. Se você usar um espaço de magia de 9º círculo, poderá animar ou reafirmar o controle sobre seis Carniçais, três Carneçais ou Inumanos, ou duas Múmias. Veja também o Livro dos Monstros para esses blocos de estatísticas.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "curacompleta",
@@ -6288,6 +6925,8 @@ export const magias: Magia[] = [
     upcastFlat: 10,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A cura aumenta em 10 para cada círculo de espaço de magia acima de 6.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "circulodamorte",
@@ -6308,6 +6947,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 2d8 para cada círculo de espaço de magia acima de 6.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "dancairresistiveldeotto",
@@ -6328,6 +6969,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "decarneparapedra",
@@ -6348,6 +6991,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "desintegrar",
@@ -6368,6 +7013,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 3d6 para cada círculo de espaço de magia acima de 6.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "encontrarocaminho",
@@ -6388,6 +7035,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "esferacongelantedeotiluke",
@@ -6408,6 +7057,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d6 para cada círculo de espaço de magia acima de 6.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "globodeinvulnerabilidade",
@@ -6428,6 +7079,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A barreira bloqueia magias de 1º círculo ou superior para cada círculo de espaço de magia acima de 6.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "ilusaoprogramada",
@@ -6448,6 +7101,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocarfeerico",
@@ -6468,6 +7123,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano aumenta em 1d12 para cada círculo de espaço de magia acima de 6.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocarinfero",
@@ -6488,6 +7145,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Use o círculo do espaço de magia para o círculo da magia no bloco de estatísticas.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocacaoinstantaneadedrawmij",
@@ -6508,6 +7167,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "mauolhado",
@@ -6528,6 +7189,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "molestia",
@@ -6548,6 +7211,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "moverterra",
@@ -6568,6 +7233,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "muralhadeespinhos",
@@ -6588,6 +7255,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Ambos os tipos de dano aumentam em 1d8 para cada círculo de espaço de magia acima de 6.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "muralhadegelo",
@@ -6608,6 +7277,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano que a muralha causa quando aparece aumenta em 2d6 e o dano ao passar pela camada de ar gélido aumenta em 1d6 para cada círculo de espaço de magia acima de 6.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "palavraderegresso",
@@ -6628,6 +7299,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "portaisarcanos",
@@ -6648,6 +7321,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "proibicao",
@@ -6668,6 +7343,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "protegerfortaleza",
@@ -6688,6 +7365,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "raiosolar",
@@ -6708,6 +7387,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "receptaculoarcano",
@@ -6728,6 +7409,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "sugestaoemmassa",
@@ -6748,6 +7431,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A duração é maior com um espaço de magia 7º círculo (10 dias), 8º círculo (30 dias) ou 9º círculo (366 dias).",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "transporteviaplantas",
@@ -6768,6 +7453,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "visaodaverdade",
@@ -6788,6 +7475,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "boladefogoadiavel",
@@ -6808,6 +7497,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. O dano base aumenta em 1d6 pontos para cada círculo de espaço de magia acima de 7.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "carceredeenergia",
@@ -6828,6 +7519,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "dedodamorte",
@@ -6848,6 +7541,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "espadademordenkainen",
@@ -6868,6 +7563,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "formaeterea",
@@ -6888,6 +7585,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: 3,
     upcastTexto: "Você pode escolher até 3 criaturas voluntárias adicionais (incluindo você) para cada círculo de espaço de magia acima de 7.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "inverteragravidade",
@@ -6908,6 +7607,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "invocarcelestial",
@@ -6928,6 +7629,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. A cura e o dano aumentam em 1d12 para cada círculo de espaço de magia acima de 7.",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "mansaomagnificademordenkainen",
@@ -6948,6 +7651,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "miragemarcana",
@@ -6968,6 +7673,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "palavrasagrada",
@@ -6988,6 +7695,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "palavradepoderfortificar",
@@ -7008,6 +7717,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "projetarimagem",
@@ -7028,6 +7739,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "rajadaprismatica",
@@ -7048,6 +7761,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "refugiar",
@@ -7068,6 +7783,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "regeneracao",
@@ -7088,6 +7805,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "ressurreicao",
@@ -7108,6 +7827,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "simulacro",
@@ -7128,6 +7849,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "simbolo",
@@ -7148,6 +7871,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "teleporte",
@@ -7168,6 +7893,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "tempestadedefogo",
@@ -7188,6 +7915,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "transicaoplanar",
@@ -7208,6 +7937,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "antipatiasimpatia",
@@ -7228,6 +7959,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "aurasagrada",
@@ -7248,6 +7981,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "campoantimagia",
@@ -7268,6 +8003,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "clone",
@@ -7288,6 +8025,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "controlaroclima",
@@ -7308,6 +8047,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "dominarmonstro",
@@ -7328,6 +8069,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: "Usando um Espaço de Magia de Círculo Superior. Sua Concentração pode durar mais com um espaço de magia de 9º círculo (em até 8 horas).",
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "explosaosolar",
@@ -7348,6 +8091,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "formasanimais",
@@ -7368,6 +8113,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "labirinto",
@@ -7388,6 +8135,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "limparamente",
@@ -7408,6 +8157,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "loquacidade",
@@ -7428,6 +8179,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "nuvemincendiaria",
@@ -7448,6 +8201,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "palavradepoderatordoar",
@@ -7468,6 +8223,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "semiplano",
@@ -7488,6 +8245,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "suplicio",
@@ -7508,6 +8267,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "telepatia",
@@ -7528,6 +8289,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "terremoto",
@@ -7548,6 +8311,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "tsunami",
@@ -7568,6 +8333,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "aprisionamento",
@@ -7588,6 +8355,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "chuvademeteoros",
@@ -7608,6 +8377,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "curacompletaemmassa",
@@ -7628,6 +8399,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "desejo",
@@ -7648,6 +8421,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "encarnacaofantasmagorica",
@@ -7668,6 +8443,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "metamorfose",
@@ -7688,6 +8465,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "muralhaprismatica",
@@ -7708,6 +8487,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "palavradepodermatar",
@@ -7728,6 +8509,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "palavradepodersalvar",
@@ -7748,6 +8531,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "pararotempo",
@@ -7768,6 +8553,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "polimorfiatotal",
@@ -7788,6 +8575,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "portal",
@@ -7808,6 +8597,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "projecaoastral",
@@ -7828,6 +8619,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "ressurreicaoverdadeira",
@@ -7848,6 +8641,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "sextosentido",
@@ -7868,6 +8663,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
   {
     id: "tempestadedavinganca",
@@ -7888,6 +8685,8 @@ export const magias: Magia[] = [
     upcastFlat: null,
     upcastAlvos: null,
     upcastTexto: null,
+    danoBaseDado: null,
+    danoBaseTipo: null,
   },
 ];
 
