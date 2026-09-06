@@ -16,6 +16,7 @@ import {
   bonusPvPorNivelDoTalento,
   rotulosBonusPvPorNivel,
   classeDaSelecao,
+  efeitoMecanicoDoTalento,
   explicarCAEquipado,
   explicarIniciativa,
   explicarPercepcaoPassiva,
@@ -204,6 +205,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   );
   const [inspiracaoHeroicaAtiva, setInspiracaoHeroicaAtiva] = useState(personagemSalvo.inspiracaoHeroicaAtiva ?? false);
   const [indomavelGasto, setIndomavelGasto] = useState(personagemSalvo.indomavelGasto ?? 0);
+  const [pontosDeSorteGasto, setPontosDeSorteGasto] = useState(personagemSalvo.pontosDeSorteGasto ?? 0);
   const [sorteDoTenebrosoGasto, setSorteDoTenebrosoGasto] = useState(personagemSalvo.sorteDoTenebrosoGasto ?? 0);
   const [resistenciaInferaAtual, setResistenciaInferaAtual] = useState<string | null>(
     personagemSalvo.resistenciaInferaAtual ?? null,
@@ -372,6 +374,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const numAtaquesBase = classe ? numeroDeAtaques(classe, personagem.nivel) : 1;
   const indomavelMaximo = classe ? contarRepeticoesCaracteristica(classe, 'Indomável', personagem.nivel) : 0;
   const indomavelRestantes = Math.max(0, indomavelMaximo - indomavelGasto);
+  const pontosDeSorteDisponivel = efeitoMecanicoDoTalento(talentosEfetivos, 'pontos-de-sorte') !== null;
+  const pontosDeSorteMaximo = pontosDeSorteDisponivel ? bonusProficienciaAtual : 0;
+  const pontosDeSorteRestantes = Math.max(0, pontosDeSorteMaximo - pontosDeSorteGasto);
+  const pontosDeSorteNegaCritico = personagem.nivel >= 5;
   const surtoMaximo = classe ? contarRepeticoesCaracteristica(classe, 'Surto de Ação', personagem.nivel) : 0;
   const surtoRestantes = Math.max(0, surtoMaximo - surtoGasto);
   const mestreTatico = classe ? caracteristicaDesbloqueada(classe, 'Mestre Tático', personagem.nivel) : null;
@@ -455,6 +461,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       falarComAnimaisGnomoGasto,
       inspiracaoHeroicaAtiva,
       indomavelGasto,
+      pontosDeSorteGasto,
       sorteDoTenebrosoGasto,
       resistenciaInferaAtual,
       resistenciaInferaGasto,
@@ -506,6 +513,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     falarComAnimaisGnomoGasto,
     inspiracaoHeroicaAtiva,
     indomavelGasto,
+    pontosDeSorteGasto,
     sorteDoTenebrosoGasto,
     resistenciaInferaAtual,
     resistenciaInferaGasto,
@@ -702,6 +710,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setRevelacaoCelestialFormaAtiva(null);
     setFalarComAnimaisGnomoGasto(0);
     setIndomavelGasto(0);
+    setPontosDeSorteGasto(0);
     setSorteDoTenebrosoGasto(0);
     setSurtoGasto(0);
     setInspiracaoGasto(0);
@@ -713,7 +722,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setArcanaMisticaGastos([]);
     setMagiasGratisGastas([]);
     fimDoTurno();
-    setRestStatus(`Descanso Longo: PV restaurado para ${personagem.pvMax}/${personagem.pvMax}, Espaços de Magia, Recuperar Fôlego, Indomável, Surto de Ação, Inspiração de Bardo e traços de espécie recuperados.`);
+    setRestStatus(`Descanso Longo: PV restaurado para ${personagem.pvMax}/${personagem.pvMax}, Espaços de Magia, Recuperar Fôlego, Indomável, Surto de Ação, Inspiração de Bardo, Pontos de Sorte e traços de espécie recuperados.`);
   }
 
   function descansoCurto() {
@@ -817,6 +826,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   function usarIndomavel(): boolean {
     if (indomavelRestantes <= 0) return false;
     setIndomavelGasto((v) => v + 1);
+    return true;
+  }
+
+  function usarPontoDeSorte(): boolean {
+    if (pontosDeSorteRestantes <= 0) return false;
+    setPontosDeSorteGasto((v) => v + 1);
     return true;
   }
 
@@ -1243,6 +1258,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             indomavelMaximo={indomavelMaximo}
             indomavelRestantes={indomavelRestantes}
             onUsarIndomavel={usarIndomavel}
+            pontosDeSorteMaximo={pontosDeSorteMaximo}
+            pontosDeSorteRestantes={pontosDeSorteRestantes}
+            pontosDeSorteNegaCritico={pontosDeSorteNegaCritico}
+            onUsarPontoDeSorte={usarPontoDeSorte}
             surtoMaximo={surtoMaximo}
             surtoRestantes={surtoRestantes}
             surtoUsadoTurno={surtoUsadoTurno}

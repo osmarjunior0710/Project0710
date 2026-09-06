@@ -88,12 +88,19 @@ não é um problema de importação como foi com Espécies. Os gaps são de
       (ver Backlog.md). Verificado: `tsc -b`/`npm test` (214)/
       `npm run build` limpos + Playwright (Marinheiro → Combat → Ação →
       Atacar Desarmado → Rolar Dano mostra "1d4").
-- [ ] **Grupo E** — Pontos de Sorte do Sortudo (pool = Bônus de
-      Proficiência, recarrega em Descanso Longo; gasta 1 pra dar
-      Vantagem numa rolagem sua, ou Desvantagem num ataque contra você,
-      ou — nível 5+ — vira crítico contra você em acerto normal).
-      Maior que os outros — precisa integrar com o RollContext de
-      verdade, não só um contador.
+- [x] **Grupo E** — Pontos de Sorte do Sortudo. Acabou sendo menor do
+      que parecia: como o RollOverlay já tem botões livres de Vantagem/
+      Desvantagem em QUALQUER rolagem de d20, o talento não precisava
+      de integração nova nenhuma — só uma pool de contagem, mesmo
+      padrão de Indomável/Surto de Ação (novo `EfeitoMecanicoTalento`
+      `pontos-de-sorte`, máximo = Bônus de Proficiência,
+      `pontosDeSorteGasto` no `PersonagemSalvo`, reseta em Descanso
+      Longo, card em `CombatTab` com o lembrete de qual botão usar).
+      Nível 5+ só muda o texto do lembrete (menção a negar crítico) —
+      sem cálculo automático, o jogador aplica de cabeça. Verificado:
+      `tsc -b`/`npm test`/`npm run build` limpos + Playwright (Andarilho
+      nível 1 → 2/2 usos → gasta 1 → 1/2 persiste após F5 → Descanso
+      Longo → volta 2/2).
 - [ ] **Última coisa do foco** — espécie Humana (traço Versátil) deixa
       escolher QUALQUER talento de Origem, inclusive Habilidoso e
       Iniciado em Magia, mas a tela de escolha extra desses 2 (perícia/
@@ -101,4 +108,5 @@ não é um problema de importação como foi com Espécies. Os gaps são de
       de uma Origem, não pelo Versátil. Só fazer depois que todas as
       telas de Origem (Grupos A-G) estiverem prontas.
 
-Próximo passo: Grupo E (Pontos de Sorte do Sortudo).
+Próximo passo: "Última coisa do foco" (Versátil + telas de escolha
+extra do Talento de Origem) — depois disso o foco Origens fecha.

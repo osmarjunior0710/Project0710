@@ -113,6 +113,10 @@ interface CombatTabProps {
   indomavelMaximo: number;
   indomavelRestantes: number;
   onUsarIndomavel: () => boolean;
+  pontosDeSorteMaximo: number;
+  pontosDeSorteRestantes: number;
+  pontosDeSorteNegaCritico: boolean;
+  onUsarPontoDeSorte: () => boolean;
   surtoMaximo: number;
   surtoRestantes: number;
   surtoUsadoTurno: boolean;
@@ -213,6 +217,10 @@ export default function CombatTab({
   indomavelMaximo,
   indomavelRestantes,
   onUsarIndomavel,
+  pontosDeSorteMaximo,
+  pontosDeSorteRestantes,
+  pontosDeSorteNegaCritico,
+  onUsarPontoDeSorte,
   surtoMaximo,
   surtoRestantes,
   surtoUsadoTurno,
@@ -399,6 +407,15 @@ export default function CombatTab({
     if (!onUsarUsoFolego()) return;
     rolarDados({ label: 'Mente Tática', formula: '1d10', quantidade: 1, lados: 10, mod: 0 });
     setFeedback('🧠 Mente Tática — some o resultado ao teste de atributo que falhou.');
+  }
+
+  function usarPontoDeSorte() {
+    if (!onUsarPontoDeSorte()) return;
+    setFeedback(
+      `🍀 Ponto de Sorte gasto — use o botão Vantagem/Desvantagem na rolagem${
+        pontosDeSorteNegaCritico ? ', ou vire o crítico contra você em acerto normal' : ''
+      }.`,
+    );
   }
 
   function usarIndomavel() {
@@ -650,6 +667,30 @@ export default function CombatTab({
             <div className="label" style={{ marginTop: 2 }}>
               Rola de novo somando seu nível de Guerreiro ({indomavelRestantes}/{indomavelMaximo} usos — só recupera
               no Descanso Longo).
+            </div>
+          </div>
+        </>
+      )}
+
+      {pontosDeSorteMaximo > 0 && (
+        <>
+          <div className="section-title">Pontos de Sorte</div>
+          <div
+            className="box"
+            style={{
+              padding: 12,
+              marginBottom: 12,
+              cursor: pontosDeSorteRestantes > 0 ? 'pointer' : 'default',
+              opacity: pontosDeSorteRestantes > 0 ? 1 : 0.5,
+            }}
+            onClick={pontosDeSorteRestantes > 0 ? usarPontoDeSorte : undefined}
+          >
+            <div style={{ fontSize: 13 }}>🍀 Toque aqui pra gastar 1 ponto</div>
+            <div className="label" style={{ marginTop: 2 }}>
+              Dá Vantagem numa jogada sua de d20, ou impõe Desvantagem num ataque contra você
+              {pontosDeSorteNegaCritico ? ', ou vira um crítico contra você em acerto normal' : ''} — use os botões
+              Vantagem/Desvantagem já disponíveis em qualquer rolagem ({pontosDeSorteRestantes}/{pontosDeSorteMaximo}{' '}
+              usos — só recupera no Descanso Longo).
             </div>
           </div>
         </>

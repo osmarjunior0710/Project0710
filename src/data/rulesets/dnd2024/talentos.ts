@@ -89,7 +89,16 @@ export type EfeitoMecanicoTalento =
    * pro Estilo de Luta Combate Desarmado (1d6, ou 1d8 desarmado de
    * verdade) quando ele ganhar `efeitoMecanico` — ver
    * `core/ataque.ts` (`ataqueDesarmado`). */
-  | { tipo: 'dado-ataque-desarmado'; quantidade: number; lados: number };
+  | { tipo: 'dado-ataque-desarmado'; quantidade: number; lados: number }
+  /** Concede a pool "Pontos de Sorte" (Sortudo) — máximo = Bônus de
+   * Proficiência atual, recarrega em Descanso Longo. Cada ponto gasto
+   * dá Vantagem numa rolagem sua ou Desvantagem num ataque contra
+   * você (ou, nível 5+, vira acerto normal um crítico contra você) —
+   * como o RollOverlay já tem Vantagem/Desvantagem livres em qualquer
+   * rolagem de d20, este efeito só precisa acompanhar a pool em si
+   * (ver `FichaShell.tsx`/`CombatTab.tsx`, sem cálculo automático de
+   * bônus como Sorte do Tenebroso). */
+  | { tipo: 'pontos-de-sorte' };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -232,6 +241,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'nenhum' },
+    efeitoMecanico: { tipo: 'pontos-de-sorte' },
     beneficios: "Pontos de Sorte = Bônus de Proficiência (recarrega em Descanso Longo). Gaste 1 pra: dar Vantagem numa jogada sua de d20, impor Desvantagem num ataque contra você, ou (nível 5+) transformar um acerto crítico contra você em acerto normal.",
     pagina: 201,
     fonte: "PHB 2024",

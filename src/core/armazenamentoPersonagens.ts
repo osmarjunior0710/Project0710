@@ -89,6 +89,13 @@ export interface PersonagemSalvo {
    * Ínfero, nível 6) desde o último Descanso Longo — só ele reseta.
    * Máximo = mod. Carisma (mín. 1), ver `core/sorteDoTenebroso.ts`. */
   sorteDoTenebrosoGasto?: number;
+  /** Pontos de Sorte gastos (Talento de Origem Sortudo) desde o último
+   * Descanso Longo — só ele reseta. Máximo = Bônus de Proficiência
+   * atual. Sem cálculo automático de vantagem/desvantagem: o jogador
+   * já tem os botões de Vantagem/Desvantagem em qualquer rolagem de
+   * d20 no RollOverlay — este contador só acompanha quantos pontos
+   * ainda restam. Ver `EmDev.md` (Grupo E). */
+  pontosDeSorteGasto?: number;
   /** Resistência Ínfera (Bruxo, Patrono Ínfero, nível 10) — tipo de
    * dano escolhido na característica (qualquer um exceto Energético),
    * trocável a cada Descanso Curto ou Longo. `null`/ausente = ainda

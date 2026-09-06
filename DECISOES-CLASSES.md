@@ -776,3 +776,24 @@ Rápido) foi atualizado junto.
 
 **Data/origem:** 2026-09, pedido do Osmar revisando os itens ainda
 abertos do Bruxo.
+
+## Talento/característica que só "dá Vantagem/Desvantagem numa rolagem" não precisa integrar com o RollOverlay
+
+**Padrão:** vários talentos e características descrevem o efeito como
+"gaste 1 uso pra dar Vantagem numa jogada sua" ou "impor Desvantagem
+num ataque contra você" (ex: Sortudo). Antes de desenhar uma
+integração nova com o sistema de rolagem, verifique se o RollOverlay já
+resolve isso sozinho — ele já tem botões livres de Vantagem/Desvantagem
+em QUALQUER rolagem de d20 (ataque, teste, salvaguarda, iniciativa),
+sem precisar de nenhum recurso pra usar. Nesse caso, o talento não
+precisa de NENHUMA integração de rolagem — só precisa acompanhar a
+pool de usos em si (mesmo padrão de contador com reset em Descanso
+Curto/Longo de Indomável/Surto de Ação: `EfeitoMecanicoTalento` +
+campo `xGasto` no `PersonagemSalvo` + card em `CombatTab` com um
+lembrete em texto de qual botão apertar). Só vale a pena integrar de
+verdade com o RollOverlay quando o efeito muda automaticamente um
+NÚMERO da rolagem (bônus, dado extra) — isso sim precisa de um
+mecanismo como o de Sorte do Tenebroso/Perícia Inigualável
+(`registrarBonusExtra`).
+
+**Data/origem:** 2026-09, foco Origens Grupo E (Sortudo).
