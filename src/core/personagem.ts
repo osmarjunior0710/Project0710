@@ -57,6 +57,26 @@ export interface WizardSelection {
    * do Draconato, ancestralidade do Golias) — nome de
    * `Especie.opcoesSubescolha`, escolhido 1x na criação. */
   subescolhaEspecieEscolhida: string | null;
+  /** Escolha extra do talento pego pelo traço Versátil (Humano) —
+   * mesma forma de `proficienciasTalentoOrigemEscolhidas`/
+   * `truquesMagiaIniciadaEscolhidos`/`magiaMagiaIniciadaEscolhida`/
+   * `atributoMagiaIniciadaEscolhido`, só que numa "gaveta" separada.
+   * Precisa ser separado porque o Versátil pode escolher um talento do
+   * MESMO tipo que o Talento de Origem já concedeu (ex.: Origem Sábio
+   * já dá Iniciado em Magia, e o Versátil escolhe Iniciado em Magia de
+   * novo numa variante diferente) — se dividisse a mesma gaveta, a
+   * escolha de um apagaria a do outro. Ver `TalentoEspecieEscolhasStep`. */
+  proficienciasTalentoEspecieEscolhidas: string[];
+  /** Lista de classe (Clérigo/Druida/Mago) escolhida livremente pra
+   * "Iniciado em Magia" pego pelo Versátil — a Origem fixa isso
+   * sozinha (`Origem.talentoOrigemVariante`), mas o Versátil não tem
+   * Origem nenhuma pra herdar, então o jogador escolhe. `null` =
+   * ainda não escolheu (só relevante quando `talentoEspecieEscolhido`
+   * é "iniciado-em-magia"). */
+  listaMagiaIniciadaEspecieEscolhida: string | null;
+  truquesMagiaIniciadaEspecieEscolhidos: string[];
+  magiaMagiaIniciadaEspecieEscolhida: string | null;
+  atributoMagiaIniciadaEspecieEscolhido: Atributo | null;
   linguas: string[];
   alinhamento: string | null;
   itens: ItemCarrinho[];
@@ -94,6 +114,11 @@ export function criarSelecaoInicial(): WizardSelection {
     periciaEspecieEscolhida: null,
     talentoEspecieEscolhido: null,
     subescolhaEspecieEscolhida: null,
+    proficienciasTalentoEspecieEscolhidas: [],
+    listaMagiaIniciadaEspecieEscolhida: null,
+    truquesMagiaIniciadaEspecieEscolhidos: [],
+    magiaMagiaIniciadaEspecieEscolhida: null,
+    atributoMagiaIniciadaEspecieEscolhido: null,
     linguas: ['Comum'],
     alinhamento: null,
     itens: [],

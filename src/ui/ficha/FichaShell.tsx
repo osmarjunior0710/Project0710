@@ -249,11 +249,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Talentos que entram no cálculo (Fase 4): os escolhidos em Level
   // Up (`talentosGeraisAtuais`) MAIS o Talento de Origem, ganho fixo
   // na criação (ex: Alerta) — nunca passa pelo picker de Level Up,
-  // então não vive em `talentosGeraisAtuais`.
+  // então não vive em `talentosGeraisAtuais` — MAIS o talento pego
+  // pelo traço Versátil (Humano), mesmo motivo.
   const origemPersonagem = origens.find((o) => o.nome === selecao.origem) ?? null;
-  const talentosEfetivos = origemPersonagem
-    ? [...talentosGeraisAtuais, origemPersonagem.talentoOrigemId]
-    : talentosGeraisAtuais;
+  const talentosEfetivos = [
+    ...talentosGeraisAtuais,
+    ...(origemPersonagem ? [origemPersonagem.talentoOrigemId] : []),
+    ...(selecao.talentoEspecieEscolhido ? [selecao.talentoEspecieEscolhido] : []),
+  ];
   const ca = calcularCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos);
   const iniciativa = calcularIniciativa(selecao, classe, personagem.nivel, talentosEfetivos);
   const percepcaoPassiva = calcularPercepcaoPassiva(selecao, personagem.nivel);

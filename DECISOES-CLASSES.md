@@ -797,3 +797,49 @@ mecanismo como o de Sorte do Tenebroso/Perícia Inigualável
 (`registrarBonusExtra`).
 
 **Data/origem:** 2026-09, foco Origens Grupo E (Sortudo).
+
+## Mesmo talento pego por 2 fontes independentes — gaveta de estado separada por fonte, nunca compartilhada
+
+**Problema:** um talento com escolha extra (Habilidoso — perícia/
+ferramenta; Iniciado em Magia — lista + truques + magia + atributo)
+pode vir de mais de uma fonte independente no mesmo personagem — hoje
+Talento de Origem (fixo, vem da Origem escolhida) e traço Versátil
+(Humano, escolha livre entre qualquer Talento de Origem). Se as duas
+fontes escreverem no MESMO campo de estado (ex: uma lista só de
+"perícias/ferramentas escolhidas"), escolher a 2ª sobrescreve a 1ª —
+sério quando as duas fontes concedem o MESMO talento (ex: Origem Sábio
+já dá Iniciado em Magia, e o jogador usa o Versátil pra pegar Iniciado
+em Magia de novo, numa lista de classe diferente).
+
+**Solução, padrão pra qualquer futuro "mesmo talento, 2+ fontes
+possíveis":** cada fonte grava numa gaveta de estado PRÓPRIA, nunca
+compartilhada, mesmo que isso duplique o formato do campo. Pro caso do
+Versátil: `proficienciasTalentoOrigemEscolhidas` (Origem) ganhou o
+espelho `proficienciasTalentoEspecieEscolhidas` (Versátil); mesma
+coisa pra `truquesMagiaIniciadaEscolhidos`/`magiaMagiaIniciadaEscolhida`/
+`atributoMagiaIniciadaEscolhido` → sufixo `Especie`. As funções de
+LEITURA (`periciasProficientes`/`ferramentasProficientes` em
+`calculoPersonagem.ts`, `truquesMagiaIniciada`/`magiasMagiaIniciada` em
+`magiaTalentoOrigem.ts`) somam as duas gavetas sempre, sem precisar
+saber qual fonte concedeu o quê — o jogo já garante que a mesma coisa
+nunca é escolhida 2x com benefício dobrado (Habilidoso deixa escolher
+algo repetido de propósito, sem ganho extra).
+
+**Iniciado em Magia pego avulso não tem lista de classe fixada** — a
+Origem fixa a lista sozinha (`Origem.talentoOrigemVariante`), mas o
+Versátil não tem Origem nenhuma pra herdar, então `TalentoEspecieEscolhasStep`
+mostra um seletor extra (Clérigo/Druida/Mago) antes de truques/magia
+aparecerem — campo novo `listaMagiaIniciadaEspecieEscolhida`. Trocar de
+lista limpa truques/magia escolhidos da lista antiga (fica inválido
+misturar magia de uma lista com truque de outra).
+
+**UI compartilhada:** `TalentoOrigemEscolhasStep` e
+`TalentoEspecieEscolhasStep` são telas de wizard finas que só
+resolvem QUAL talento e QUAL gaveta usar — o corpo visual de verdade
+(`ProficienciaOuFerramentaEscolhas`/`IniciadoEmMagiaEscolhas`) mora em
+`talentoEscolhasCompartilhado.tsx`, parametrizado por callbacks
+(`onToggle`/`onToggleTruque`/etc) em vez de ler `selection` direto —
+assim a mesma UI serve qualquer gaveta sem duplicar JSX.
+
+**Data/origem:** 2026-09, foco Origens — "última coisa do foco"
+(Humano/Versátil).

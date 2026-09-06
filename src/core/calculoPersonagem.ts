@@ -350,7 +350,14 @@ export interface PericiaFinal {
 export function periciasProficientes(selection: WizardSelection): string[] {
   const origem = origens.find((o) => o.nome === selection.origem);
   const periciaEspecie = selection.periciaEspecieEscolhida ? [selection.periciaEspecieEscolhida] : [];
-  return [...new Set<string>([...(origem?.pericias ?? []), ...selection.periciasClasseEscolhidas, ...periciaEspecie])];
+  const nomesPericias = new Set(pericias.map((p) => p.nome));
+  const periciasDoTalento = [
+    ...selection.proficienciasTalentoOrigemEscolhidas,
+    ...selection.proficienciasTalentoEspecieEscolhidas,
+  ].filter((nome) => nomesPericias.has(nome));
+  return [
+    ...new Set<string>([...(origem?.pericias ?? []), ...selection.periciasClasseEscolhidas, ...periciaEspecie, ...periciasDoTalento]),
+  ];
 }
 
 /** As 18 perícias do jogo, sempre — não só as proficientes. Cada uma
@@ -419,15 +426,17 @@ const ATRIBUTO_DA_FERRAMENTA: Record<string, string | null> = Object.fromEntries
 );
 
 /** Nomes das ferramentas em que o personagem é proficiente — Origem
- * (fixa ou escolhida), Classe, e a parte de `proficienciasTalentoOrigemEscolhidas`
- * que não é nome de perícia (ex: as 3 escolhas de Habilidoso, quando o
- * jogador mistura perícia e ferramenta). */
+ * (fixa ou escolhida), Classe, e a parte de
+ * `proficienciasTalentoOrigemEscolhidas`/`proficienciasTalentoEspecieEscolhidas`
+ * (Versátil) que não é nome de perícia (ex: as 3 escolhas de
+ * Habilidoso, quando o jogador mistura perícia e ferramenta). */
 export function ferramentasProficientes(selection: WizardSelection): string[] {
   const origem = origens.find((o) => o.nome === selection.origem);
   const nomesPericias = new Set(pericias.map((p) => p.nome));
-  const ferramentasDoTalento = selection.proficienciasTalentoOrigemEscolhidas.filter(
-    (nome) => !nomesPericias.has(nome),
-  );
+  const ferramentasDoTalento = [
+    ...selection.proficienciasTalentoOrigemEscolhidas,
+    ...selection.proficienciasTalentoEspecieEscolhidas,
+  ].filter((nome) => !nomesPericias.has(nome));
   const daOrigem: string[] = [];
   if (origem) {
     if (origem.ferramenta.categoria === 'fixa') {

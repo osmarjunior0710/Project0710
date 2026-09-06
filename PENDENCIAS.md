@@ -739,18 +739,6 @@ produto, não de dado/regra): uma aba de anotações de talento; se for
 pra frente, reaproveitaria `ItemComDescricao`/`MagiaComDescricao`, não
 precisa de componente novo.
 
-## Origens com seleção extra no Talento de Origem — resolvido (2026-09, foco Origens, Grupo A)
-
-Os 2 talentos de Origem que pediam escolha adicional (Habilidoso —
-Nobre/Escriba/Charlatão; Iniciado em Magia — Acólito/Guia/Sábio) agora
-têm tela própria em `TalentoOrigemEscolhasStep` (`Talento.concedeMagiaIniciada`
-pro segundo caso) e as 6 origens já estão `disponivel: true`.
-`core/conjuracao.ts` conta a magia do talento como fonte de conjuração
-(`core/magiaTalentoOrigem.ts`). Ver decisão no `DECISOES-WIZARD.md`.
-
-Gap da espécie Humana (Versátil) com esses 2 talentos: ver `EmDev.md`
-(último item do foco Origens, só depois de todos os grupos A-G).
-
 ## Classes/Subclasses — variação estrutural grande, ainda sem schema
 
 **O que é:** diferente de Origens, as abas de Classe (Progressão de

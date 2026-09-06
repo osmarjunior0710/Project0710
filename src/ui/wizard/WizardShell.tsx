@@ -31,6 +31,7 @@ import TalentoOrigemEscolhasStep from './steps/TalentoOrigemEscolhasStep';
 import LivroDasSombrasStep from './steps/LivroDasSombrasStep';
 import EspecieStep from './steps/EspecieStep';
 import EspecieEscolhasStep from './steps/EspecieEscolhasStep';
+import TalentoEspecieEscolhasStep from './steps/TalentoEspecieEscolhasStep';
 import AtributosStep from './steps/AtributosStep';
 import LinguasStep from './steps/LinguasStep';
 import AlinhamentoStep from './steps/AlinhamentoStep';
@@ -85,6 +86,10 @@ function concedeFerramentaGrupoDaOrigem(s: WizardSelection): ConcedeFerramentaGr
   const origemSelecionada = origens.find((o) => o.nome === s.origem);
   if (!origemSelecionada) return undefined;
   return talentosOrigem.find((t) => t.id === origemSelecionada.talentoOrigemId)?.concedeFerramentaGrupo;
+}
+
+function talentoDoVersatil(s: WizardSelection) {
+  return s.talentoEspecieEscolhido ? talentosOrigem.find((t) => t.id === s.talentoEspecieEscolhido) : undefined;
 }
 
 export default function WizardShell() {
@@ -337,7 +342,34 @@ export default function WizardShell() {
       randomize: randomizarEscolhasEspecie,
     },
     {
-      name: '3c. Atributos',
+      name: '3c. Talento do Versátil',
+      render: (p) => <TalentoEspecieEscolhasStep {...p} />,
+      condicao: (s) => {
+        const talento = talentoDoVersatil(s);
+        return (
+          talento?.concedeProficiencias !== undefined ||
+          talento?.concedeMagiaIniciada === true ||
+          talento?.concedeFerramentaGrupo !== undefined
+        );
+      },
+      isValid: (s) => {
+        const talento = talentoDoVersatil(s);
+        if (talento?.concedeProficiencias) return s.proficienciasTalentoEspecieEscolhidas.length === talento.concedeProficiencias.quantidade;
+        if (talento?.concedeMagiaIniciada) {
+          return (
+            s.listaMagiaIniciadaEspecieEscolhida !== null &&
+            s.truquesMagiaIniciadaEspecieEscolhidos.length === 2 &&
+            s.magiaMagiaIniciadaEspecieEscolhida !== null &&
+            s.atributoMagiaIniciadaEspecieEscolhido !== null
+          );
+        }
+        if (talento?.concedeFerramentaGrupo) return s.proficienciasTalentoEspecieEscolhidas.length === talento.concedeFerramentaGrupo.quantidade;
+        return true;
+      },
+      mensagemInvalida: 'Complete as escolhas do talento do Versátil antes de avançar.',
+    },
+    {
+      name: '3d. Atributos',
       render: (p) => (
         <AtributosStep {...p} valorSelecionado={valorSelecionado} setValorSelecionado={setValorSelecionado} />
       ),

@@ -10,6 +10,8 @@ import {
   calcularPercepcaoPassiva,
   calcularPericias,
   calcularProficienciasFerramenta,
+  periciasProficientes,
+  ferramentasProficientes,
 } from './calculoPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { criarSelecaoInicial, type WizardSelection } from './personagem';
@@ -208,5 +210,43 @@ describe('calcularProficienciasFerramenta', () => {
     });
     const resultado = calcularProficienciasFerramenta(s, 1);
     expect(resultado).toHaveLength(1);
+  });
+});
+
+describe('periciasProficientes (Talento de Origem + Versátil)', () => {
+  it('inclui a parte de perícia de proficienciasTalentoOrigemEscolhidas (ex: Habilidoso pego pela Origem)', () => {
+    const s = selecaoGuerreiro({ proficienciasTalentoOrigemEscolhidas: ['Medicina', 'Ferramentas de Ladrão'] });
+    expect(periciasProficientes(s)).toContain('Medicina');
+    expect(periciasProficientes(s)).not.toContain('Ferramentas de Ladrão');
+  });
+
+  it('inclui a parte de perícia da gaveta separada do Versátil, sem duplicar a de proficienciasTalentoOrigemEscolhidas', () => {
+    const s = selecaoGuerreiro({
+      proficienciasTalentoOrigemEscolhidas: ['Medicina'],
+      proficienciasTalentoEspecieEscolhidas: ['Medicina', 'Percepção'],
+    });
+    const resultado = periciasProficientes(s);
+    expect(resultado.filter((p) => p === 'Medicina')).toHaveLength(1);
+    expect(resultado).toContain('Percepção');
+  });
+
+  it('sem nenhum talento com escolha de perícia, não quebra (borda)', () => {
+    expect(periciasProficientes(selecaoGuerreiro())).toEqual([]);
+  });
+});
+
+describe('ferramentasProficientes (Talento de Origem + Versátil)', () => {
+  it('inclui a parte de ferramenta das duas gavetas (Origem e Versátil) ao mesmo tempo', () => {
+    const s = selecaoGuerreiro({
+      proficienciasTalentoOrigemEscolhidas: ['Ferramentas de Ladrão'],
+      proficienciasTalentoEspecieEscolhidas: ['Ferramentas de Navegador'],
+    });
+    const resultado = ferramentasProficientes(s);
+    expect(resultado).toContain('Ferramentas de Ladrão');
+    expect(resultado).toContain('Ferramentas de Navegador');
+  });
+
+  it('sem nenhuma ferramenta de talento, devolve só o que vier de Origem/Classe (borda)', () => {
+    expect(ferramentasProficientes(selecaoGuerreiro())).toEqual([]);
   });
 });
