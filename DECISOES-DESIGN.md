@@ -1211,12 +1211,16 @@ ela vivia como a 19ª linha da lista de Perícias, com a mesma cara das
 perícias de verdade, mesmo não sendo clicável nem rolável).
 
 **Solução, regra permanente pra qualquer caixa desse estilo daqui pra
-frente:** borda azul (`var(--accent)`, classe `.hpBoxAccent` em
-`AtributosTab.module.css`, mesmo tom já usado em `.levelBox`) em
-qualquer caixa que role dado OU tenha interação de toque (liga/desliga
-etc); borda cinza padrão (`.box` sem modificador) em qualquer caixa
-só informativa, sem toque nenhum. A cor sozinha já comunica "dá pra
-tocar" vs "é só um número" — dispensa qualquer instrução escrita.
+frente:** borda azul CONTÍNUA (`var(--accent)`, `border-style: solid`
+— classe `.hpBoxAccent` em `AtributosTab.module.css`, mesmo tom/traço
+já usado em `.levelBox`) em qualquer caixa que role dado OU tenha
+interação de toque (liga/desliga etc); borda cinza TRACEJADA padrão
+(`.box` sem modificador, sem mudar `border-style`) em qualquer caixa
+só informativa, sem toque nenhum. A cor E o traço sozinhos já comunicam
+"dá pra tocar" vs "é só um número" — dispensa qualquer instrução
+escrita. `.hpBoxAccent` precisa fixar `border-style: solid` explicitamente
+porque tanto `.box` quanto `.stat-box` partem tracejados por padrão —
+só sobrescrever a cor deixava a caixa "azul tracejada", não contínua.
 
 **Layout resultante (3 linhas, decidido com o Osmar):**
 - Linha 1: Nível (50% da largura, `flex:2` vs `flex:1` das outras
