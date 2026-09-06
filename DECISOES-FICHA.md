@@ -120,11 +120,18 @@ de checar em todo componente de popup novo.
 
 **Data/origem:** 2026-08.
 
-## Apagar personagem — confirmação por texto digitado
+## Apagar personagem — dupla confirmação no próprio botão (revertido de "digitar a palavra", 2026-09)
 
-**Decisão:** ação destrutiva permanente (sem lixeira/desfazer) pede
-digitar a palavra "apagar" pra destravar o botão — não só um "tem
-certeza? sim/não", fácil de confirmar no automático sem querer.
+**Decisão atual:** 1º toque no 🗑️ arma o botão (vira "Confirmar",
+vermelho/texto branco); 2º toque no MESMO botão apaga de vez. Qualquer
+outro toque na tela desarma sem apagar.
+
+**Histórico:** a versão anterior pedia digitar a palavra "apagar" num
+modal, justamente pra evitar confirmar no automático sem querer — o
+Osmar pediu a troca de volta pra um fluxo de 2 toques mais rápido,
+ciente de que fica mais fácil de apagar sem querer que digitar uma
+palavra. Se isso virar problema de novo, a solução anterior (modal +
+palavra digitada) já está no histórico do Git pra recuperar.
 
 ## Capacidade máxima de carga — Força × 7 kg (Pequeno/Médio)
 

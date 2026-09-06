@@ -5,20 +5,18 @@ import { ID_PERSONAGEM_DEMO } from '../../core/personagemDemo';
 import { calcularPvMaximoNivel1 } from '../../core/calculoPersonagem';
 import { classes } from '../../data/rulesets/dnd2024/classes';
 import { subclasses } from '../../data/rulesets/dnd2024/subclasses';
-import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 import IconeClasse from '../components/IconeClasse';
 import PersonagemTesteModal from './PersonagemTesteModal';
 import styles from './CharacterList.module.css';
 
-const PALAVRA_CONFIRMACAO = 'apagar';
-
 export default function CharacterList() {
   const navigate = useNavigate();
   const [, setVersao] = useState(0);
-  const [alvoApagar, setAlvoApagar] = useState<{ id: string; nome: string } | null>(null);
-  const [textoDigitado, setTextoDigitado] = useState('');
+  /** Id do personagem com o botão de apagar "armado" — 1º toque arma
+   * (botão vira "Confirmar" vermelho), 2º toque nesse mesmo botão
+   * apaga de vez. Qualquer outro toque na tela desarma sem apagar. */
+  const [confirmandoId, setConfirmandoId] = useState<string | null>(null);
   const [modalTesteAberto, setModalTesteAberto] = useState(false);
-  useLockBodyScroll(alvoApagar !== null);
 
   const personagens = armazenamentoPersonagens.listar().map((p) => {
     const classeId = classes.find((c) => c.nome === p.selecao.classe)?.id ?? null;
@@ -50,26 +48,19 @@ export default function CharacterList() {
     };
   });
 
-  function abrirConfirmacao(id: string, nome: string, e: React.MouseEvent) {
+  function onClickApagar(id: string, e: React.MouseEvent) {
     e.stopPropagation();
-    setAlvoApagar({ id, nome });
-    setTextoDigitado('');
-  }
-
-  function fecharConfirmacao() {
-    setAlvoApagar(null);
-    setTextoDigitado('');
-  }
-
-  function confirmarApagar() {
-    if (!alvoApagar) return;
-    armazenamentoPersonagens.apagar(alvoApagar.id);
-    fecharConfirmacao();
-    setVersao((v) => v + 1);
+    if (confirmandoId === id) {
+      armazenamentoPersonagens.apagar(id);
+      setConfirmandoId(null);
+      setVersao((v) => v + 1);
+    } else {
+      setConfirmandoId(id);
+    }
   }
 
   return (
-    <div className={styles.screen}>
+    <div className={styles.screen} onClick={() => setConfirmandoId(null)}>
       <div className={styles.header}>
         <span className="back" onClick={() => navigate('/home')}>
           ←
@@ -110,46 +101,15 @@ export default function CharacterList() {
               🔒 fixo
             </span>
           ) : (
-            <div className={styles.deleteBtn} onClick={(e) => abrirConfirmacao(c.id, c.nome, e)}>
-              🗑️
+            <div
+              className={`${styles.deleteBtn} ${confirmandoId === c.id ? styles.deleteBtnConfirm : ''}`}
+              onClick={(e) => onClickApagar(c.id, e)}
+            >
+              {confirmandoId === c.id ? 'Confirmar' : '🗑️'}
             </div>
           )}
         </div>
       ))}
-
-      {alvoApagar && (
-        <div className={styles.overlay} onClick={(e) => { e.stopPropagation(); fecharConfirmacao(); }}>
-          <div className={styles.confirmCard} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.confirmTitle}>Apagar {alvoApagar.nome}?</div>
-            <div className={styles.confirmDesc}>
-              Isso apaga o personagem de vez, sem como desfazer. Digite <b>{PALAVRA_CONFIRMACAO}</b> pra
-              confirmar.
-            </div>
-            <input
-              className={`box ${styles.confirmInput}`}
-              autoFocus
-              value={textoDigitado}
-              onChange={(e) => setTextoDigitado(e.target.value)}
-              placeholder={PALAVRA_CONFIRMACAO}
-            />
-            <div className={styles.confirmActions}>
-              <div className="btn" style={{ flex: 1 }} onClick={(e) => { e.stopPropagation(); fecharConfirmacao(); }}>
-                Cancelar
-              </div>
-              <div
-                className={`btn ${styles.confirmBtnApagar} ${textoDigitado.trim().toLowerCase() !== PALAVRA_CONFIRMACAO ? 'btn-disabled' : ''}`}
-                style={{ flex: 1 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (textoDigitado.trim().toLowerCase() === PALAVRA_CONFIRMACAO) confirmarApagar();
-                }}
-              >
-                Apagar
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {modalTesteAberto && (
         <PersonagemTesteModal

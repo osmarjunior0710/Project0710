@@ -18,6 +18,20 @@
   cursor: pointer;
 }
 
+/* Lembrete visível de que os d20 não estão rolando de verdade — ver
+   AvatarMenu "🎲 Modo de Teste". Sem isso, fácil de esquecer ligado no
+   meio de uma sessão de jogo de verdade. */
+.badgeModoTeste {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--danger);
+  border: 2px solid var(--bg);
+}
+
 .backdrop {
   position: fixed;
   inset: 0;

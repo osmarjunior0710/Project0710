@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 
 type CritTipo = 'sucesso' | 'falha' | null;
 
@@ -156,13 +156,42 @@ interface RollContextValue {
    * nesta rolagem) — substitui o resultado e gasta a Inspiração
    * Heroica do personagem (`InspiracaoHeroicaProvider.usar`). */
   usarInspiracaoHeroica: () => void;
+  /** Modo de Teste (ver `AvatarMenu`) — `true` faz todo d20 sair da
+   * sequência fixa 1/10/15/20 em vez de rolar de verdade (dano e
+   * outros dados continuam aleatórios). Não persiste entre sessões —
+   * sempre nasce desligado, pra nunca "esquecer ligado" sem perceber. */
+  modoTeste: boolean;
+  alternarModoTeste: () => void;
 }
 
 const RollContext = createContext<RollContextValue | null>(null);
 
 const DURACAO_ANIMACAO_MS = 480;
 
-function rolarD20Dado(): number {
+/** Modo de Teste (ver `AvatarMenu`): em vez de rolar de verdade, todo
+ * d20 sai dessa sequência fixa, em ordem, dando a volta quando chega
+ * no fim — pensada pra exercitar os 4 estados visuais de acerto que
+ * mais importam testar (1 = falha crítica, 10/15 = resultado
+ * mediano, 20 = sucesso crítico) sem depender de sorte. Quando 2 d20
+ * saem juntos (Vantagem/Desvantagem), cada um consome o PRÓXIMO da
+ * fila — nunca reseta entre eles — então uma rolagem com Vantagem já
+ * sai como "1, depois 10" naturalmente, sem lógica extra. Só afeta
+ * d20 — dano e qualquer outro dado (`rolarDados`) continuam de
+ * verdade mesmo com o modo ligado, já que o objetivo é testar
+ * acerto/crítico, não dano. */
+const SEQUENCIA_MODO_TESTE = [1, 10, 15, 20];
+
+/** `modoTeste`/`indice` são refs (não state) de propósito: esta função
+ * roda dentro de callbacks memoizados com `[]` de dependência
+ * (`rolarD20`, `escolherVantagemPosRolagem`, etc.) — só uma ref
+ * garante que a leitura enxergue o valor mais recente do toggle, sem
+ * precisar recriar esses callbacks a cada mudança. */
+function rolarD20Dado(modoTeste: MutableRefObject<boolean>, indice: MutableRefObject<number>): number {
+  if (modoTeste.current) {
+    const valor = SEQUENCIA_MODO_TESTE[indice.current % SEQUENCIA_MODO_TESTE.length];
+    indice.current += 1;
+    return valor;
+  }
   return 1 + Math.floor(Math.random() * 20);
 }
 
@@ -173,6 +202,14 @@ function criticoDe(d20: number): CritTipo {
 export function RollProvider({ children }: { children: ReactNode }) {
   const [estado, setEstado] = useState<RollState | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [modoTeste, setModoTesteState] = useState(false);
+  const modoTesteRef = useRef(false);
+  const indiceModoTesteRef = useRef(0);
+  const alternarModoTeste = useCallback(() => {
+    modoTesteRef.current = !modoTesteRef.current;
+    indiceModoTesteRef.current = 0;
+    setModoTesteState(modoTesteRef.current);
+  }, []);
 
   const rolarD20 = useCallback(({ label, formula, mod, vantagem, categoria, onResultado }: RollD20Options) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -192,9 +229,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
       bonusExtra: null,
     });
     timeoutRef.current = setTimeout(() => {
-      const rolagem1 = rolarD20Dado();
+      const rolagem1 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
       if (vantagem) {
-        const rolagem2 = rolarD20Dado();
+        const rolagem2 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
         const usado = vantagem === 'vantagem' ? Math.max(rolagem1, rolagem2) : Math.min(rolagem1, rolagem2);
         const total = usado + mod;
         setEstado({
@@ -279,7 +316,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
       setEstado((prev) => {
         if (!prev || prev.tipo !== 'd20') return prev;
         const rolagem1 = typeof prev.valorDado === 'number' ? prev.valorDado : 0;
-        const rolagem2 = rolarD20Dado();
+        const rolagem2 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
         const usado = prev.vantagem === 'vantagem' ? Math.max(rolagem1, rolagem2) : Math.min(rolagem1, rolagem2);
         const total = usado + (prev.mod ?? 0);
         return { ...prev, dado2: rolagem2, total, critico: criticoDe(usado) };
@@ -320,7 +357,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
     timeoutRef.current = setTimeout(() => {
       setEstado((prev) => {
         if (!prev || prev.tipo !== 'd20') return prev;
-        const novaRolagem = rolarD20Dado();
+        const novaRolagem = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
         const total = novaRolagem + (prev.mod ?? 0) + (typeof prev.bonusExtra?.valor === 'number' ? prev.bonusExtra.valor : 0);
         return { ...prev, valorDado: novaRolagem, total, critico: criticoDe(novaRolagem) };
       });
@@ -343,7 +380,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
     timeoutRef.current = setTimeout(() => {
       setEstado((prev) => {
         if (!prev || prev.tipo !== 'd20') return prev;
-        const novaRolagem = rolarD20Dado();
+        const novaRolagem = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
         const total = novaRolagem + (prev.mod ?? 0) + (typeof prev.bonusExtra?.valor === 'number' ? prev.bonusExtra.valor : 0);
         return { ...prev, valorDado: novaRolagem, total, critico: criticoDe(novaRolagem) };
       });
@@ -367,6 +404,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
         inspiracaoHeroicaDisponivel: inspiracaoHeroicaProvider?.disponivel ?? false,
         registrarInspiracaoHeroica,
         usarInspiracaoHeroica,
+        modoTeste,
+        alternarModoTeste,
       }}
     >
       {children}
