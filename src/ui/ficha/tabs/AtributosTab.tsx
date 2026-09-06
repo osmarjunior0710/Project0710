@@ -191,7 +191,7 @@ export default function AtributosTab({
         {atributos.map((a) => (
           <div
             key={a.atributo}
-            className="box stat-box"
+            className={`box stat-box ${styles.hpBoxAccent}`}
             onClick={() =>
               rolarD20({
                 label: a.atributo,

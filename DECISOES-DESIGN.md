@@ -1225,7 +1225,15 @@ tocar" vs "é só um número" — dispensa qualquer instrução escrita.
   Passiva** (nova, resolve o pedido do Feedback.md — fica ao lado de
   CA/Bônus Prof., mesma família de "número fixo pra consulta", com
   borda cinza reforçando que não é clicável) · CA · Iniciativa.
-- Linha 3: grade de atributos (inalterada).
+- Linha 3: grade de atributos (`.stat-box`, cada um rola d20 — ganhou
+  `.hpBoxAccent` também, mesma regra azul/cinza acima; correção rápida
+  pedida pelo Osmar logo depois da entrega original, que tinha deixado
+  essa linha de fora "sem mudança" por engano — ela é tão interativa
+  quanto Iniciativa). `.stat-box` também é usado no passo Atributos do
+  WIZARD (`AtributosStep.tsx`), onde borda azul já significa outra
+  coisa ("valor já atribuído aqui") — por isso o modificador é
+  aplicado só na Ficha (`AtributosTab.tsx`), nunca na classe global
+  `.stat-box` em si.
 
 **Rótulo de mais de 1 palavra sempre quebra depois da 1ª palavra**
 (pedido explícito do Osmar, regra geral pra qualquer label de caixa
