@@ -6,19 +6,16 @@
 // ainda conjura o truque da linhagem), mas fica pronta pra somar
 // outras fontes assim que existirem de verdade no app:
 // - Multiclasse (pendência em aberto, ver PENDENCIAS.md).
-// - Talento de Origem que concede magia (ex: "Iniciado em Magia" — dá
-//   2 truques + 1 magia de 1º círculo; concedido por Acólito/Guia/
-//   Sábio). Essas 3 origens já têm o talento certo no dado
-//   (`origens.ts`), mas estão `disponivel: false` — a tela de
-//   escolher truque/magia da lista ainda não existe (ver pendência
-//   "Origens com seleção extra no Talento de Origem"). Inalcançável
-//   na prática hoje, por isso não entra ainda no cálculo abaixo.
+// - Talento de Origem que concede magia ("Iniciado em Magia" — 2
+//   truques + 1 magia de 1º círculo; concedido por Acólito/Guia/
+//   Sábio, escolhido em `TalentoOrigemEscolhasStep`).
 // Item mágico com magia NUNCA entra aqui — é sistema separado
 // (Mochila + ação "Usar Objeto"), não afeta essa resposta.
 
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import type { WizardSelection } from './personagem';
 import { temMagiaDeEspecie } from './magiasEspecie';
+import { temMagiaIniciada } from './magiaTalentoOrigem';
 
 /** Convenção assumida pra detectar recurso de conjuração: nome do
  * `RecursoClasse` menciona "Espaços de Magia" ou "Magias Preparadas"
@@ -30,5 +27,5 @@ import { temMagiaDeEspecie } from './magiasEspecie';
 export function personagemConjura(classe: Classe | null, selecao?: WizardSelection): boolean {
   const classeConjura = classe ? classe.recursos.some((r) => r.nome.includes('Espaços de Magia') || r.nome.includes('Magias Preparadas')) : false;
   if (classeConjura) return true;
-  return selecao ? temMagiaDeEspecie(selecao) : false;
+  return selecao ? temMagiaDeEspecie(selecao) || temMagiaIniciada(selecao) : false;
 }

@@ -29,11 +29,20 @@ não é um problema de importação como foi com Espécies. Os gaps são de
       comentário). Verificado: `tsc -b`, `npm test`, `npm run build`
       passando; exibição em tela consistente com o nome já usado pela
       Loja pro mesmo item.
-- [ ] **Grupo A** — "Iniciado em Magia" (talento repetível, Origem):
-      criar UI de escolha (lista Clérigo/Druida/Mago → 2 truques + 1
-      magia de 1º círculo + atributo de conjuração) análoga ao padrão
-      já usado em `core/magiasEspecie.ts`. Desbloqueia as 3 Origens
-      hoje com `disponivel: false`: Acólito, Guia, Sábio.
+- [x] **Grupo A** — "Iniciado em Magia" (Acólito/Guia/Sábio): nova UI
+      em `TalentoOrigemEscolhasStep` (`Talento.concedeMagiaIniciada`) —
+      2 truques + 1 magia de 1º círculo da lista fixada em
+      `Origem.talentoOrigemVariante` + atributo de conjuração livre
+      (Int/Sab/Car). `core/magiaTalentoOrigem.ts` novo, ligado em
+      `core/conjuracao.ts` (fonte de conjuração) e `MagiasTab.tsx`
+      (seção "Magias do Talento de Origem", mesmo tratamento de
+      "Magias da Espécie"). As 3 origens viraram `disponivel: true`.
+      Verificado: `tsc -b`/`npm test`/`npm run build` limpos +
+      Playwright ponta a ponta (Sábio → escolhas → Ficha mostra as
+      magias certas na aba Magias e "Livro" com peso certo na Mochila).
+      Gap conhecido registrado em PENDENCIAS.md: espécie Humana
+      (Versátil) pode escolher esse talento sem passar pela tela de
+      escolha extra.
 - [ ] **Grupo B** — talento Vigoroso (Origem Fazendeiro) sem
       `efeitoMecanico`: PV máximo devia ganhar +2×nível no momento em
       que o talento é adquirido, +2 PV extra a cada nível seguinte.
@@ -52,6 +61,5 @@ não é um problema de importação como foi com Espécies. Os gaps são de
       outros achados menores do restante da auditoria de talentos de
       Origem).
 
-Próximo passo: validar Grupo H com o Osmar, depois perguntar qual
-grupo seguir (provável prioridade: Grupo A, desbloqueia 3 Origens
-inteiras).
+Próximo passo: validar Grupo A com o Osmar, depois perguntar qual
+grupo seguir.

@@ -73,10 +73,6 @@ export default function OrigemStep({ selection, update }: StepProps) {
           </div>
         );
       })}
-      <div className="label" style={{ marginTop: 6 }}>
-        3 origens ficam "(em breve)" — o talento delas (Iniciado em Magia) pede uma seleção extra que ainda não tem
-        tela própria. Ver <code>PENDENCIAS.md</code>.
-      </div>
     </>
   );
 }

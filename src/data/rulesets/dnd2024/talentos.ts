@@ -98,6 +98,12 @@ export interface Talento {
   prerequisitos: PrerequisitosTalento;
   concedeAsi: ConcedeAsiTalento;
   concedeProficiencias?: ConcedeProficienciasTalento;
+  /** `true` só pro talento Iniciado em Magia — sinaliza que o wizard
+   * precisa mostrar a tela de escolha de 2 truques + 1 magia de 1º
+   * círculo (lista de classe fixada em `Origem.talentoOrigemVariante`)
+   * + atributo de conjuração (Int/Sab/Car), em vez da tela genérica de
+   * `concedeProficiencias`. Ver `TalentoOrigemEscolhasStep`. */
+  concedeMagiaIniciada?: true;
   /** Texto bruto da coluna "Benefícios" — Fase 2 classifica em
    * Ação/Ação Bônus/Reação/Passiva, quebrando em frases quando o
    * talento tiver múltiplos efeitos (ex: Conjurador Bélico). */
@@ -174,6 +180,7 @@ export const talentos: Talento[] = [
     repetivel: true,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'nenhum' },
+    concedeMagiaIniciada: true,
     beneficios: "Escolhe lista de Clérigo, Druida ou Mago: 2 truques + 1 magia de 1º círculo sempre preparada (conjura 1x/dia grátis, senão gasta espaço). Atributo de conjuração (Int/Sab/Car) escolhido ao pegar o talento. Repetível: precisa escolher lista diferente cada vez.",
     pagina: 201,
     fonte: "PHB 2024",

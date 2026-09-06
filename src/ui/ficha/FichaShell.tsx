@@ -51,6 +51,7 @@ import { calcularSentidos } from '../../core/sentidos';
 import { valorBencaoDoTenebroso } from '../../core/bencaoDoTenebroso';
 import { magiasPactoDoInfero } from '../../core/magiasPactoDoInfero';
 import { truquesEspecie, magiasEspecie as magiasEspecieDoPersonagem } from '../../core/magiasEspecie';
+import { truquesMagiaIniciada, magiasMagiaIniciada } from '../../core/magiaTalentoOrigem';
 import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
 import { useRoll } from '../roll/RollContext';
 import { sortearLevelUpRapido } from '../../core/levelUpAleatorio';
@@ -346,12 +347,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const magiasEspeciePreparadasConjuraveis = magiasEspeciePreparadas.filter(
     (m) => m.nome !== NOME_FALAR_COM_ANIMAIS_GNOMO,
   );
+  // Talento de Origem "Iniciado em Magia" (Acólito/Guia/Sábio) — fixo
+  // desde a criação, ver `core/magiaTalentoOrigem.ts`.
+  const magiasTalentoOrigemAtuais = [...truquesMagiaIniciada(selecao), ...magiasMagiaIniciada(selecao)];
+  const magiasTalentoOrigemPreparadas = magiasPreparadasDoPersonagem(magiasTalentoOrigemAtuais);
   const magiasConjuraveis = [
     ...magiasPreparadas,
     ...magiasDescobertasMagicas,
     ...livroDasSombras,
     ...magiasPactoDoInferoPreparadas,
     ...magiasEspeciePreparadasConjuraveis,
+    ...magiasTalentoOrigemPreparadas,
   ];
   const magiasPreparadasReacao = magiasConjuraveis.filter(ehMagiaDeReacao);
   const magiasPreparadasAcao = magiasConjuraveis.filter((m) => !ehMagiaDeReacao(m));
@@ -1150,6 +1156,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onUsarMagiaGratis={usarMagiaGratisDeInvocacao}
             magiasPactoDoInferoAtuais={magiasPactoDoInferoAtuais}
             magiasEspecieAtuais={magiasEspecieAtuais}
+            magiasTalentoOrigemAtuais={magiasTalentoOrigemAtuais}
             temPactoDaLamina={invocacoesMisticasAtuais.includes('pacto-da-lamina')}
             armaDePactoAtual={armaDePactoAtual(itensMochila)}
             onVincularArmaDePacto={vincularArmaDePactoHandler}

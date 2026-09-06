@@ -739,38 +739,25 @@ produto, não de dado/regra): uma aba de anotações de talento; se for
 pra frente, reaproveitaria `ItemComDescricao`/`MagiaComDescricao`, não
 precisa de componente novo.
 
-## Origens com seleção extra no Talento de Origem (Iniciado em Magia)
+## Origens com seleção extra no Talento de Origem — resolvido (2026-09, foco Origens, Grupo A)
 
-**O que é:** dos 10 Talentos de Origem usados nas 16 origens do Livro do
-Jogador 2024, o talento **Iniciado em Magia** (origens: Acólito, Guia,
-Sábio) pede uma escolha adicional no momento de pegar a origem — a
-classe já vem fixa no nome da origem (ex: "Iniciado em Magia
-(Clérigo)"), mas ainda pede escolher 2 truques + 1 magia de 1º círculo
-daquela lista de classe, e qual atributo conjurador usar (Int/Sab/Car).
+Os 2 talentos de Origem que pediam escolha adicional (Habilidoso —
+Nobre/Escriba/Charlatão; Iniciado em Magia — Acólito/Guia/Sábio) agora
+têm tela própria em `TalentoOrigemEscolhasStep` (`Talento.concedeMagiaIniciada`
+pro segundo caso) e as 6 origens já estão `disponivel: true`.
+`core/conjuracao.ts` conta a magia do talento como fonte de conjuração
+(`core/magiaTalentoOrigem.ts`). Ver decisão no `DECISOES-WIZARD.md`.
 
-**Já resolvido:** o outro talento que pedia seleção extra, Habilidoso
-(origens Nobre, Escriba, Charlatão — 3 perícias/ferramentas livres),
-ganhou a tela própria e as 3 origens já estão `disponivel: true`. Ver
-decisão "Passo condicional no wizard + escolha livre de proficiência
-(Talento de Origem)" no `DECISOES-WIZARD.md` pro schema genérico
-(`concedeProficiencias`) e o passo condicional do wizard — a mesma
-peça (`WizardStepDef.condicao`) serve de base pro passo do Iniciado em
-Magia também, só muda o conteúdo (escolha de magia, não de
-perícia/ferramenta).
-
-**Estado atual:** Acólito, Guia e Sábio continuam **"(em breve)"** e
-não-selecionáveis (mesmo tratamento visual que "🛠 Ferramentas de GM"
-na Home) até essa UI existir.
-
-**O que falta pra resolver:**
-1. Desenhar a tela/componente de "escolha de truque + magia de uma lista
-   de classe" (reutilizável — mesmo padrão serve pra Iniciado em Magia e
-   depois pra escolha de magias conhecidas de classes conjuradoras).
-2. Depois de existir, tirar o "(em breve)" dessas 3 origens.
-3. Quando Iniciado em Magia virar selecionável, `core/conjuracao.ts`
-   (`personagemConjura()`) precisa passar a contar essa fonte também
-   — hoje só olha a classe, essas 3 origens ainda não entram no
-   cálculo porque são inalcançáveis no wizard.
+**Gap conhecido, não resolvido nesta entrega:** a espécie Humana
+(traço Versátil, "talento de Origem à escolha") usa `TelaEscolherTalento`
+pra deixar escolher QUALQUER talento de Origem — inclusive Habilidoso
+ou Iniciado em Magia — mas essa tela não tem a UI de escolha extra
+(perícia/ferramenta ou truque/magia) que esses 2 talentos pedem.
+Escolhido via Versátil, o talento fica salvo mas sem a
+perícia/ferramenta ou truque/magia de verdade. Baixo impacto hoje (a
+maioria dos personagens pega esses talentos pela Origem, não por
+Versátil), mas precisa de UI própria se/quando alguém tentar montar um
+Humano Versátil com um desses 2 talentos.
 
 ## Classes/Subclasses — variação estrutural grande, ainda sem schema
 

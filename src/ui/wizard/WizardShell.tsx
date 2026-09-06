@@ -75,6 +75,12 @@ function concedeProficienciasDaOrigem(s: WizardSelection): ConcedeProficienciasT
   return talentosOrigem.find((t) => t.id === origemSelecionada.talentoOrigemId)?.concedeProficiencias;
 }
 
+function concedeMagiaIniciadaDaOrigem(s: WizardSelection): boolean {
+  const origemSelecionada = origens.find((o) => o.nome === s.origem);
+  if (!origemSelecionada) return false;
+  return talentosOrigem.find((t) => t.id === origemSelecionada.talentoOrigemId)?.concedeMagiaIniciada === true;
+}
+
 export default function WizardShell() {
   const navigate = useNavigate();
   const [wizIndex, setWizIndex] = useState(0);
@@ -282,11 +288,18 @@ export default function WizardShell() {
     {
       name: '2c. Talento da Origem',
       render: (p) => <TalentoOrigemEscolhasStep {...p} />,
-      condicao: (s) => concedeProficienciasDaOrigem(s) !== undefined,
+      condicao: (s) => concedeProficienciasDaOrigem(s) !== undefined || concedeMagiaIniciadaDaOrigem(s),
       isValid: (s) => {
         const concede = concedeProficienciasDaOrigem(s);
-        if (!concede) return true;
-        return s.proficienciasTalentoOrigemEscolhidas.length === concede.quantidade;
+        if (concede) return s.proficienciasTalentoOrigemEscolhidas.length === concede.quantidade;
+        if (concedeMagiaIniciadaDaOrigem(s)) {
+          return (
+            s.truquesMagiaIniciadaEscolhidos.length === 2 &&
+            s.magiaMagiaIniciadaEscolhida !== null &&
+            s.atributoMagiaIniciadaEscolhido !== null
+          );
+        }
+        return true;
       },
       mensagemInvalida: 'Complete as escolhas do talento da origem antes de avançar.',
     },

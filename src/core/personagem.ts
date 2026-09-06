@@ -36,6 +36,15 @@ export interface WizardSelection {
    * de perícia (`Pericia.nome`) e de ferramenta (nome de item do
    * catálogo/`gruposFerramenta`) misturados na mesma lista. */
   proficienciasTalentoOrigemEscolhidas: string[];
+  /** Talento Iniciado em Magia (Acólito/Guia/Sábio) — 2 truques + 1
+   * magia de 1º círculo da lista de classe fixada em
+   * `Origem.talentoOrigemVariante`, mais o atributo de conjuração
+   * (livre entre Int/Sab/Car, não precisa bater com a lista). Fixo
+   * desde a criação — este talento não ganha truque/magia extra por
+   * nível. */
+  truquesMagiaIniciadaEscolhidos: string[];
+  magiaMagiaIniciadaEscolhida: string | null;
+  atributoMagiaIniciadaEscolhido: Atributo | null;
   especie: string | null;
   /** Escolhas da espécie que a UI precisa reconhecer por ID (ver
    * `TracoEspecie.id`) — hoje só o Humano preenche algum destes.
@@ -77,6 +86,9 @@ export function criarSelecaoInicial(): WizardSelection {
     ferramentaOrigemEscolhida: null,
     equipamentoOrigemEscolhido: null,
     proficienciasTalentoOrigemEscolhidas: [],
+    truquesMagiaIniciadaEscolhidos: [],
+    magiaMagiaIniciadaEscolhida: null,
+    atributoMagiaIniciadaEscolhido: null,
     especie: null,
     tamanhoEspecieEscolhido: null,
     periciaEspecieEscolhida: null,

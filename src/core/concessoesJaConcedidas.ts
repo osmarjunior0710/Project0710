@@ -24,9 +24,7 @@ export interface ConcessoesJaConcedidas {
  * da etapa de Espécie do wizard (ex.: "2c. Talento da Origem" roda
  * antes) — nesse caso os truques/magias de Espécie simplesmente não
  * entram ainda, sem erro. Ordem de prioridade quando o mesmo nome
- * aparece em 2 fontes: Classe > Origem > Espécie (Talento hoje não
- * concede truque/magia de forma estruturada — ver PENDENCIAS.md
- * "Origens com seleção extra no Talento de Origem"). */
+ * aparece em 2 fontes: Classe > Origem > Talento > Espécie. */
 export function concessoesJaConcedidas(
   selection: WizardSelection,
   origem: Origem | undefined,
@@ -51,6 +49,14 @@ export function concessoesJaConcedidas(
     } else if (selection.ferramentaOrigemEscolhida && !ferramentas.has(selection.ferramentaOrigemEscolhida)) {
       ferramentas.set(selection.ferramentaOrigemEscolhida, 'Origem');
     }
+  }
+
+  // Talento de Origem "Iniciado em Magia" (Acólito/Guia/Sábio).
+  for (const nome of selection.truquesMagiaIniciadaEscolhidos) {
+    if (!truques.has(nome)) truques.set(nome, 'Talento');
+  }
+  if (selection.magiaMagiaIniciadaEscolhida && !magias.has(selection.magiaMagiaIniciadaEscolhida)) {
+    magias.set(selection.magiaMagiaIniciadaEscolhida, 'Talento');
   }
 
   if (especie) {
