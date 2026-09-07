@@ -22,6 +22,14 @@ describe('ataqueComArma — atribForcada (Pacto da Lâmina)', () => {
     expect(comForcar.info.modAcerto).toBe(5 + (semForcar.info.modAcerto - 3));
     expect(comForcar.info.danoMod).toBe(5);
   });
+
+  it('com Treinamento com Armas Marciais: Bruxo (só Simples) soma Bônus de Proficiência na Rapieira (Marcial)', () => {
+    const semTalento = ataqueComArma(rapieira, bruxo, 1, 1, 3, false, false, null, false, undefined, []);
+    const comTalento = ataqueComArma(rapieira, bruxo, 1, 1, 3, false, false, null, false, undefined, [
+      'treinamento-com-armas-marciais',
+    ]);
+    expect(comTalento.info.modAcerto).toBe(semTalento.info.modAcerto + 2);
+  });
 });
 
 describe('ataqueDesarmado — dado-ataque-desarmado (Valentão de Taverna)', () => {

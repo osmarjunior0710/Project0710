@@ -98,7 +98,12 @@ export type EfeitoMecanicoTalento =
    * rolagem de d20, este efeito só precisa acompanhar a pool em si
    * (ver `FichaShell.tsx`/`CombatTab.tsx`, sem cálculo automático de
    * bônus como Sorte do Tenebroso). */
-  | { tipo: 'pontos-de-sorte' };
+  | { tipo: 'pontos-de-sorte' }
+  /** Concede proficiência com TODAS as armas Marciais (Treinamento com
+   * Armas Marciais) — soma o Bônus de Proficiência em ataques com
+   * arma Marcial mesmo que a classe não seja proficiente sozinha. Ver
+   * `core/proficienciaArma.ts` (`classeProficienteComArma`). */
+  | { tipo: 'proficiencia-armas-marciais' };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -729,6 +734,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'DES'], maximo: 20 },
+    efeitoMecanico: { tipo: 'proficiencia-armas-marciais' },
     beneficios: "Proficiência com armas Marciais.",
     pagina: 209,
     fonte: "PHB 2024",

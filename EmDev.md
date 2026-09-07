@@ -112,10 +112,20 @@ Grupos propostos e aprovados pelo Osmar:
       também. Verificado: `tsc -b`/`npm test` (223)/`npm run build`
       limpos (só texto, nada plugado em cálculo ainda — `[PH]`
       continua até B.4).
-- [ ] **B.2 — Proficiências simples**: Especialista em Armaduras
-      Leves/Médias/Pesadas, Treinamento com Armas Marciais —
-      reaproveita o padrão de leitura de talento já usado pra CA/
-      Iniciativa (`efeitoMecanicoDoTalento`).
+- [x] **B.2 — Proficiências simples**: escopo corrigido no caminho —
+      Especialista em Armaduras Leves/Médias/Pesadas não têm nada pra
+      calcular hoje (a Ficha não modela penalidade por armadura sem
+      treinamento em lugar nenhum), então foram pro Backlog.md em vez
+      de ganhar um `efeitoMecanico` de mentirinha. Só **Treinamento
+      com Armas Marciais** entrou: novo tipo
+      `proficiencia-armas-marciais`, lido em
+      `classeProficienteComArma` (`core/proficienciaArma.ts`) — arma
+      Marcial conta como proficiente mesmo se a classe só é Simples.
+      Propagado por `ataqueComArma`/`ataqueAtual`/
+      `ataqueBonusMaoSecundaria` até `FichaShell.tsx`. Verificado:
+      `tsc -b`/`npm test` (226)/`npm run build` limpos (testes novos:
+      Bardo com o talento soma Bônus de Proficiência numa Espada
+      Longa, que sem o talento não somaria).
 - [ ] **B.3 — Bônus numérico direto**: Velocista (Deslocamento),
       Líder Inspirador/Chef (PV temporário) — mesmo padrão de
       `bonus-pv-por-nivel`/`bonus-ca-com-armadura`.

@@ -72,3 +72,17 @@ não tem — registrado aqui pra não redescobrir do zero.
   "empurrar 1,5m ao acertar Desarmado" — não é isso, é um "ataque de
   investida" que vale pra qualquer arma corpo a corpo, com a escolha
   entre dano extra OU empurrão. Ver livro Cap. 5, p.201.
+
+## Talentos Gerais — proficiência de armadura sem cálculo pra aplicar (auditoria 2026-09, foco B.2)
+
+- **Especialista em Armaduras Leves/Médias/Pesadas** (Cap. 5, p.205-206)
+  — o benefício inteiro é "adquire treinamento com Armadura X". Hoje
+  a Ficha não modela NENHUMA penalidade por vestir armadura sem
+  proficiência (sem desvantagem em testes, sem travar conjuração) —
+  `calcularCAEquipado` sempre calcula a CA da armadura equipada, com
+  ou sem proficiência. Diferente de Treinamento com Armas Marciais
+  (que tem consumidor real: `classeProficienteComArma` decide se soma
+  Bônus de Proficiência no ataque), esses 3 não têm nada pra plugar
+  ainda — só teria efeito de verdade se/quando a Ficha passar a
+  calcular penalidade por armadura sem treinamento. Ficam sem
+  `efeitoMecanico` (continuam `[PH]`) até essa penalidade existir.

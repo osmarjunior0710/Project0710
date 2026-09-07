@@ -97,11 +97,12 @@ export function ataqueComArma(
   estiloDeLutaEscolhido?: string | null,
   outraArmaNaMaoSecundaria = false,
   atribForcada?: number,
+  talentosAtuais?: string[],
 ): AtaqueResolvido {
   const acuidade = arma.propriedades.includes('Acuidade');
   const distancia = arma.categoria.includes('à Distância');
   const atribMod = atribForcada ?? (acuidade ? Math.max(forMod, desMod) : distancia ? desMod : forMod);
-  const prof = classeProficienteComArma(classe, arma) ? bonusProficiencia(classe, nivel) : 0;
+  const prof = classeProficienteComArma(classe, arma, talentosAtuais) ? bonusProficiencia(classe, nivel) : 0;
   const dadoVersatil = identificarEquipamento(arma.nome).dadoVersatil;
   const usaVersatil = duasMaosAtivo && dadoVersatil;
   const { quantidade, lados, tipo } = usaVersatil ? parseDano(`${dadoVersatil} ${arma.dano.replace(/^\d+d\d+\s*/, '')}`) : parseDano(arma.dano);
@@ -144,7 +145,7 @@ export function ataqueAtual(
 ): AtaqueResolvido {
   const arma = nomeArmaEquipada ? armas.find((a) => a.nome === nomeArmaEquipada) : undefined;
   return arma
-    ? ataqueComArma(arma, classe, nivel, forMod, desMod, false, duasMaosAtivo, estiloDeLutaEscolhido, outraArmaNaMaoSecundaria, atribForcada)
+    ? ataqueComArma(arma, classe, nivel, forMod, desMod, false, duasMaosAtivo, estiloDeLutaEscolhido, outraArmaNaMaoSecundaria, atribForcada, talentosAtuais)
     : ataqueDesarmado(classe, nivel, forMod, talentosAtuais);
 }
 
@@ -163,6 +164,7 @@ export function ataqueBonusMaoSecundaria(
   forMod: number,
   desMod: number,
   estiloDeLutaEscolhido?: string | null,
+  talentosAtuais?: string[],
 ): AtaqueResolvido | null {
   if (!nomeMaoPrincipal || !nomeMaoSecundaria) return null;
   const principal = armas.find((a) => a.nome === nomeMaoPrincipal);
@@ -172,5 +174,5 @@ export function ataqueBonusMaoSecundaria(
   // `outraArmaNaMaoSecundaria: true` — este ATAQUE é o de outra arma
   // na mão secundária, então Duelismo ("nenhuma outra arma") nunca se
   // aplica aqui, só potencialmente no ataque principal.
-  return ataqueComArma(secundaria, classe, nivel, forMod, desMod, true, false, estiloDeLutaEscolhido, true);
+  return ataqueComArma(secundaria, classe, nivel, forMod, desMod, true, false, estiloDeLutaEscolhido, true, undefined, talentosAtuais);
 }

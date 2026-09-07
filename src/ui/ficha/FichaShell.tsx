@@ -439,6 +439,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         forMod,
         desMod,
         personagem.estiloDeLuta,
+        talentosEfetivos,
       )
     : null;
 
