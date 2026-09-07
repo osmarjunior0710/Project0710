@@ -11,6 +11,7 @@ import {
 } from '../../../core/magiasPersonagem';
 import { classificarMagia, iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
+import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TickPips from '../../components/TickPips';
 import { useColapsavel } from '../../hooks/useColapsavel';
@@ -57,6 +58,14 @@ interface MagiasTabProps {
    * tratamento de "sempre preparada" das outras listas fixas acima.
    * Vazio pra origem sem esse talento. */
   magiasTalentoOrigemAtuais: string[];
+  /** Truque(s)/magia(s) FIXAS de Talento Geral sem escolha nenhuma
+   * (Telecinético → Mãos Mágicas, Telepático → Detectar Pensamentos) —
+   * ver `core/magiaTalentoGeral.ts`. Vazio sem nenhum desses talentos. */
+  magiasTalentoGeralAtuais: string[];
+  /** Magias de Talento Geral com "conjura grátis 1x/Descanso Longo"
+   * (hoje só Telepático) — mesmo padrão de `magiasGratisConcedidas`. */
+  magiasGratisTalentoGeral: MagiaGratisDeTalentoGeral[];
+  onUsarMagiaGratisTalentoGeral: (item: MagiaGratisDeTalentoGeral) => void;
   /** Livro das Sombras (Bruxo, Pacto do Tomo) — 3 truques + 2 magias
    * rituais sempre preparadas enquanto o livro existir, mesmo
    * tratamento de "Descobertas Mágicas" (seção própria, fora do
@@ -129,6 +138,7 @@ export default function MagiasTab({
   magiasPactoDoInferoAtuais,
   magiasEspecieAtuais,
   magiasTalentoOrigemAtuais,
+  magiasTalentoGeralAtuais,
   livroDasSombrasAtuais,
   temPactoDoTomo,
   livroDasSombrasGasto,
@@ -147,6 +157,8 @@ export default function MagiasTab({
   magiasGratisConcedidas,
   magiasGratisGastas,
   onUsarMagiaGratis,
+  magiasGratisTalentoGeral,
+  onUsarMagiaGratisTalentoGeral,
   temPactoDaLamina,
   armaDePactoAtual,
   onVincularArmaDePacto,
@@ -175,6 +187,7 @@ export default function MagiasTab({
   const pactoDoInfero = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
   const magiasEspecie = magiasPreparadasDoPersonagem(magiasEspecieAtuais);
   const magiasTalentoOrigem = magiasPreparadasDoPersonagem(magiasTalentoOrigemAtuais);
+  const magiasTalentoGeral = magiasPreparadasDoPersonagem(magiasTalentoGeralAtuais);
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
   const [espacosExpandido, setEspacosExpandido] = useColapsavel('espacos-de-magia', true);
 
@@ -537,6 +550,60 @@ export default function MagiasTab({
                   onClick={() => temAcao && usarMagia(m)}
                 >
                   {temAcao ? 'Usar' : 'Usar (pendência)'}
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+
+      {magiasTalentoGeral.length > 0 && (
+        <>
+          <div className="section-title">Magias de Talentos Gerais</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Telecinético/Telepático — sempre preparadas, não contam na conta de Magias Preparadas.
+          </div>
+          {magiasTalentoGeral.map((m) => {
+            const semEspaco = m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+            const temAcao = usarMagiaTemAcaoAutomatizada(m);
+            return (
+              <div key={m.id} className={styles.spellRow}>
+                <div className={styles.spellName}>
+                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                </div>
+                <span className={styles.spellCirculo}>{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
+                <div
+                  className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                  onClick={() => temAcao && usarMagia(m)}
+                >
+                  {temAcao ? 'Usar' : 'Usar (pendência)'}
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+
+      {magiasGratisTalentoGeral.length > 0 && (
+        <>
+          <div className="section-title">Magias Grátis de Talentos Gerais</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Conjuráveis sem gastar Espaço de Magia, 1x por Descanso Longo (ou com espaço depois disso).
+          </div>
+          {magiasGratisTalentoGeral.map((item) => {
+            const jaGasta = item.recarga === 'descansoLongo' && magiasGratisGastas.includes(`talento:${item.talentoId}:${item.magia.nome}`);
+            return (
+              <div key={`${item.talentoId}-${item.magia.nome}`} className={styles.spellRow}>
+                <div className={styles.spellName}>
+                  <MagiaComDescricao magia={item.magia} /> {iconesMagia(item.magia)}
+                  <div style={{ color: 'var(--text-faint)', fontSize: 11 }}>{item.talentoNome}</div>
+                </div>
+                <span className={styles.spellCirculo}>{item.magia.circulo}º círculo</span>
+                <div
+                  className={`${styles.usarBtn} ${jaGasta ? styles.usarBtnDesabilitado : ''}`}
+                  onClick={() => onUsarMagiaGratisTalentoGeral(item)}
+                >
+                  {jaGasta ? 'Usada' : 'Usar de graça'}
                 </div>
               </div>
             );

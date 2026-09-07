@@ -111,7 +111,17 @@ export type EfeitoMecanicoTalento =
    * diferentes ao mesmo personagem — por isso `core/
    * proficienciaArmadura.ts` (`classeProficienteComArmadura`) varre
    * TODOS os talentos com esse tipo, nunca só o primeiro achado. */
-  | { tipo: 'proficiencia-armadura'; categorias: ('Leve' | 'Média' | 'Pesada' | 'Escudos')[] };
+  | { tipo: 'proficiencia-armadura'; categorias: ('Leve' | 'Média' | 'Pesada' | 'Escudos')[] }
+  /** Concede truque(s) e/ou magia(s) FIXAS (sem escolha do jogador) —
+   * Telecinético (truque Mãos Mágicas) e Telepático (magia Detectar
+   * Pensamentos, grátis 1x/Descanso Longo). Truques nunca precisam de
+   * `recarga` (são sempre ilimitados); `magias` tem recarga própria
+   * por entrada porque um talento pode conceder mais de uma com
+   * regras diferentes no futuro. Ver `core/magiaTalentoGeral.ts` —
+   * diferente de Iniciado em Magia (`concedeMagiaIniciada`), aqui não
+   * há escolha nenhuma de lista/atributo, por isso nem precisa de
+   * tela própria no wizard/Level Up. */
+  | { tipo: 'magia-geral-concedida'; truques: string[]; magias: { nome: string; recarga: 'ilimitado' | 'descansoLongo' }[] };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -701,6 +711,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['INT', 'SAB', 'CAR'], maximo: 20 },
+    efeitoMecanico: { tipo: 'magia-geral-concedida', truques: ['Mãos Mágicas'], magias: [] },
     beneficios: "Aprende Mãos Mágicas (sem V/S, mão invisível, +9m de alcance/distância). Ação Bônus: empurra telecineticamente criatura à vista a 9m (Salv. Força CD 8+mod.+Bônus Prof. ou move 1,5m).",
     pagina: 208,
     fonte: "PHB 2024",
@@ -712,6 +723,11 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['INT', 'SAB', 'CAR'], maximo: 20 },
+    efeitoMecanico: {
+      tipo: 'magia-geral-concedida',
+      truques: [],
+      magias: [{ nome: 'Detectar Pensamentos', recarga: 'descansoLongo' }],
+    },
     beneficios: "Fala telepaticamente com quem vê a 18m (num idioma que conhece; só é entendido por quem sabe o idioma, sem resposta). Detectar Pensamentos sempre preparada, conjura grátis 1x/Descanso Longo (ou com espaço de magia depois).",
     pagina: 208,
     fonte: "PHB 2024",

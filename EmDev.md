@@ -132,10 +132,35 @@ Grupos propostos e aprovados pelo Osmar:
       motivo de Inspiração Heroica). Ficam só como texto (`[PH]`) —
       cada jogador resolve PV Temporário/Deslocamento na própria ficha
       depois de anunciar na mesa. Detalhe completo no Backlog.md.
-- [ ] **B.4 — Magia sempre-preparada**: Adepto Elemental, Atirador
-      Arcano, Conjurador Ritualista, Telecinético, Telepático, Tocado
-      pela Sombra/Fadas — reaproveita o padrão do Iniciado em Magia
-      (escolha na tela de Talento + magia(s) sempre preparada(s)).
+- **B.4 — Magia sempre-preparada** — escopo corrigido no caminho:
+      Adepto Elemental/Atirador Arcano saem (modificam magia já
+      conjurada, não concedem nenhuma — não é bem "magia sempre-
+      preparada", vão pro Backlog.md). Sobram Conjurador Ritualista,
+      Telecinético, Telepático, Tocado pela Sombra/Fadas.
+  - [x] **B.4.1 — sem escolha nenhuma** (Telecinético, Telepático):
+        novo `efeitoMecanico: 'magia-geral-concedida'` (truque(s) e/ou
+        magia(s) FIXAS, sem tela nova — `core/magiaTalentoGeral.ts`).
+        Telecinético dá o truque Mãos Mágicas; Telepático dá Detectar
+        Pensamentos sempre preparada + grátis 1x/Descanso Longo (nova
+        seção "Magias Grátis de Talentos Gerais" na aba Magias, mesmo
+        padrão de `magiasGratisDasInvocacoes`, com chave própria
+        `talento:...` na mesma lista `magiasGratisGastas` — sem criar
+        2º array). `personagemConjura` (`core/conjuracao.ts`) passou a
+        considerar esses talentos — sem isso, um Guerreiro só com
+        Telepático teria a aba Magias escondida. Verificado: `tsc -b`/
+        `npm test` (251)/`npm run build` limpos + Playwright (Guerreiro
+        nível 4 pega Telepático → aba Magias aparece com "Detectar
+        Pensamentos" grátis → usa → vira "Usada").
+  - [ ] **B.4.2 — escolha de 1 magia entre 2 escolas** (Tocado pela
+        Sombra: Ilusão/Necromancia; Tocado pelas Fadas: Adivinhação/
+        Encantamento) — precisa de sub-tela nova no passo "Talento" do
+        Level Up (o passo genérico hoje só escolhe o talento em si,
+        sem sub-escolha condicional — diferente do wizard, que já tem
+        esse mecanismo pra Iniciado em Magia).
+  - [ ] **B.4.3 — Conjurador Ritualista**: escolha de N magias
+        Rituais (N = Bônus de Proficiência, cresce por nível) da
+        lista da própria classe conjuradora do personagem — reaproveita
+        a sub-tela do B.4.2, mas com contagem variável e multi-seleção.
 - [ ] **B.5 — Escolha de perícia**: Analítico, Mente Aguçada,
       Especialista em Perícia — reaproveita o padrão do Habilidoso
       (`concedeProficiencias`).

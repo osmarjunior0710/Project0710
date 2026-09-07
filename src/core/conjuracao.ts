@@ -16,6 +16,7 @@ import type { Classe } from '../data/rulesets/dnd2024/classes';
 import type { WizardSelection } from './personagem';
 import { temMagiaDeEspecie } from './magiasEspecie';
 import { temMagiaIniciada } from './magiaTalentoOrigem';
+import { temMagiaTalentoGeral } from './magiaTalentoGeral';
 
 /** Convenção assumida pra detectar recurso de conjuração: nome do
  * `RecursoClasse` menciona "Espaços de Magia" ou "Magias Preparadas"
@@ -24,8 +25,9 @@ import { temMagiaIniciada } from './magiaTalentoOrigem';
  * (Guardião/Paladino). Ainda não validado contra dado real de nenhuma
  * classe conjuradora importada — revisar quando a 1ª (Mago ou
  * Clérigo) entrar. */
-export function personagemConjura(classe: Classe | null, selecao?: WizardSelection): boolean {
+export function personagemConjura(classe: Classe | null, selecao?: WizardSelection, talentosEfetivos?: string[]): boolean {
   const classeConjura = classe ? classe.recursos.some((r) => r.nome.includes('Espaços de Magia') || r.nome.includes('Magias Preparadas')) : false;
   if (classeConjura) return true;
-  return selecao ? temMagiaDeEspecie(selecao) || temMagiaIniciada(selecao) : false;
+  if (selecao && (temMagiaDeEspecie(selecao) || temMagiaIniciada(selecao))) return true;
+  return temMagiaTalentoGeral(talentosEfetivos);
 }

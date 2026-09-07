@@ -29,4 +29,12 @@ describe('personagemConjura', () => {
     const s = { ...criarSelecaoInicial(), especie: 'Aasimar' };
     expect(personagemConjura(guerreiro, s)).toBe(true);
   });
+
+  it('sem classe conjuradora nem espécie, mas Telecinético (Talento Geral): true', () => {
+    expect(personagemConjura(guerreiro, undefined, ['telecinetico'])).toBe(true);
+  });
+
+  it('sem classe conjuradora, sem espécie nem talento que conceda magia: false', () => {
+    expect(personagemConjura(guerreiro, undefined, ['resistente'])).toBe(false);
+  });
 });

@@ -92,3 +92,18 @@ anunciar na mesa, em vez do app calcular.
   gastar Dados de Vida em Descanso Curto, pra várias criaturas) e
   Guloseimas Revigorantes (PV Temporário = Bônus de Proficiência,
   Ação Bônus pra comer) — mesma trava de "vários aliados" acima.
+
+## Talentos Gerais — B.4 escopo corrigido (2026-09)
+
+- **Adepto Elemental** (p.202) — não concede magia nenhuma, MODIFICA
+  magias que o personagem já conjura de um tipo de dano escolhido
+  (ignora Resistência a esse dano + trata 1s como 2 em dado de dano).
+  Não é "magia sempre-preparada" (B.4), mas também não tem onde
+  plugar hoje — a Ficha não tem um motor de "modificador de dano por
+  tipo elemental" aplicado durante a rolagem de dano de magia.
+- **Atirador Arcano** (p.202) — mesmo caso: modifica ataques de magia
+  já existentes (ignora Cobertura, sem Desvantagem a queima-roupa,
+  +18m de alcance), não concede magia nova. Precisaria de um motor de
+  "modificadores de ataque de magia" que também não existe (Combat
+  ainda trata ataque de magia como 1 rolagem simples, sem hooks pra
+  Cobertura/alcance/Desvantagem condicional).

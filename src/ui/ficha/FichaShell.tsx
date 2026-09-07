@@ -55,6 +55,12 @@ import { valorBencaoDoTenebroso } from '../../core/bencaoDoTenebroso';
 import { magiasPactoDoInfero } from '../../core/magiasPactoDoInfero';
 import { truquesEspecie, magiasEspecie as magiasEspecieDoPersonagem } from '../../core/magiasEspecie';
 import { truquesMagiaIniciada, magiasMagiaIniciada } from '../../core/magiaTalentoOrigem';
+import {
+  truquesTalentoGeral,
+  magiasSempreTalentoGeral,
+  magiasGratisDosTalentosGerais,
+  type MagiaGratisDeTalentoGeral,
+} from '../../core/magiaTalentoGeral';
 import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
 import { armaduraSemTreinamentoEquipada } from '../../core/proficienciaArmadura';
 import { useRoll } from '../roll/RollContext';
@@ -320,7 +326,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const usosFalarComAnimaisGnomoMaximo =
     falarComAnimaisGnomoDisponivel && classe ? bonusProficiencia(classe, personagem.nivel) : 0;
   const usosFalarComAnimaisGnomoRestantes = Math.max(0, usosFalarComAnimaisGnomoMaximo - falarComAnimaisGnomoGasto);
-  const conjura = personagemConjura(classe, selecao);
+  const conjura = personagemConjura(classe, selecao, talentosEfetivos);
   const espacos = espacosDeMagiaAtivos(classe, personagem.nivel);
   const truques = truquesDoPersonagem(truquesAtuais);
   const magiasPreparadas = magiasPreparadasDoPersonagem(magiasPreparadasAtuais);
@@ -382,6 +388,15 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     selecao.listaMagiaIniciadaEspecieEscolhida && selecao.magiaMagiaIniciadaEspecieEscolhida
       ? { lista: selecao.listaMagiaIniciadaEspecieEscolhida, magia: selecao.magiaMagiaIniciadaEspecieEscolhida }
       : null;
+  // Talentos Gerais com magia FIXA (sem escolha) — Telecinético (Mãos
+  // Mágicas) e Telepático (Detectar Pensamentos), ver
+  // `core/magiaTalentoGeral.ts`.
+  const magiasTalentoGeralAtuais = [
+    ...truquesTalentoGeral(talentosEfetivos),
+    ...magiasSempreTalentoGeral(talentosEfetivos),
+  ];
+  const magiasTalentoGeralPreparadas = magiasPreparadasDoPersonagem(magiasTalentoGeralAtuais);
+  const magiasGratisTalentoGeral = magiasGratisDosTalentosGerais(talentosEfetivos);
   const magiasConjuraveis = [
     ...magiasPreparadas,
     ...magiasDescobertasMagicas,
@@ -389,6 +404,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ...magiasPactoDoInferoPreparadas,
     ...magiasEspeciePreparadasConjuraveis,
     ...magiasTalentoOrigemPreparadas,
+    ...magiasTalentoGeralPreparadas,
   ];
   const magiasPreparadasReacao = magiasConjuraveis.filter(ehMagiaDeReacao);
   const magiasPreparadasAcao = magiasConjuraveis.filter((m) => !ehMagiaDeReacao(m));
@@ -799,6 +815,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
     if (item.pvTemporarioConcedido !== null) {
       setPvTemporario((atual) => ganharPvTemporario(atual, item.pvTemporarioConcedido!));
+    }
+  }
+
+  /** Chave própria (`talento:...`) na MESMA lista `magiasGratisGastas`
+   * das Invocações Místicas — nunca colide com `invocacaoId` (ids de
+   * catálogos diferentes), evita criar um 2º array de "gasto" só pra
+   * isso. */
+  function chaveMagiaGratisTalento(item: MagiaGratisDeTalentoGeral): string {
+    return `talento:${item.talentoId}:${item.magia.nome}`;
+  }
+
+  function usarMagiaGratisDeTalentoGeral(item: MagiaGratisDeTalentoGeral) {
+    const chave = chaveMagiaGratisTalento(item);
+    if (item.recarga === 'descansoLongo' && !magiasGratisGastas.includes(chave)) {
+      setMagiasGratisGastas((prev) => [...prev, chave]);
     }
   }
 
@@ -1213,9 +1244,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             magiasGratisConcedidas={magiasGratisConcedidas}
             magiasGratisGastas={magiasGratisGastas}
             onUsarMagiaGratis={usarMagiaGratisDeInvocacao}
+            magiasGratisTalentoGeral={magiasGratisTalentoGeral}
+            onUsarMagiaGratisTalentoGeral={usarMagiaGratisDeTalentoGeral}
             magiasPactoDoInferoAtuais={magiasPactoDoInferoAtuais}
             magiasEspecieAtuais={magiasEspecieAtuais}
             magiasTalentoOrigemAtuais={magiasTalentoOrigemAtuais}
+            magiasTalentoGeralAtuais={magiasTalentoGeralAtuais}
             temPactoDaLamina={invocacoesMisticasAtuais.includes('pacto-da-lamina')}
             armaDePactoAtual={armaDePactoAtual(itensMochila)}
             onVincularArmaDePacto={vincularArmaDePactoHandler}
