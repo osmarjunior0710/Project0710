@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularDanoMagia } from './magiaDano';
+import { calcularDanoMagia, mecanicaDaMagia, atributoSalvaguarda } from './magiaDano';
 import { magias } from '../data/rulesets/dnd2024/magias';
 
 function magia(id: string) {
@@ -60,5 +60,33 @@ describe('calcularDanoMagia', () => {
       tipo: 'Necrótico',
       upcastNaoAutomatico: false,
     });
+  });
+});
+
+describe('mecanicaDaMagia', () => {
+  it('ataque à distância (Raio Místico) — "ataque"', () => {
+    expect(mecanicaDaMagia(magia('raiomistico'))).toBe('ataque');
+  });
+
+  it('salvaguarda de atributo fixo (Badalar Fúnebre) — "salvaguarda"', () => {
+    expect(mecanicaDaMagia(magia('badalarfunebre'))).toBe('salvaguarda');
+  });
+
+  it('salvaguarda "aleatório" (Rajada Prismática) — também "salvaguarda"', () => {
+    expect(mecanicaDaMagia(magia('rajadaprismatica'))).toBe('salvaguarda');
+  });
+
+  it('sem ataque nem salvaguarda (Luz, utilidade) — "nenhuma"', () => {
+    expect(mecanicaDaMagia(magia('luz'))).toBe('nenhuma');
+  });
+});
+
+describe('atributoSalvaguarda', () => {
+  it('extrai o nome do atributo (Badalar Fúnebre — Sabedoria)', () => {
+    expect(atributoSalvaguarda(magia('badalarfunebre'))).toBe('Sabedoria');
+  });
+
+  it('"aleatório" (Rajada Prismática) — texto explicando que varia', () => {
+    expect(atributoSalvaguarda(magia('rajadaprismatica'))).toBe('variável (sorteado pela magia, veja descrição)');
   });
 });

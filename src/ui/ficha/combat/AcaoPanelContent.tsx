@@ -3,8 +3,7 @@ import { acoesBase, type AtaqueInfo } from '../../../data/exampleCombat';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
-import { classificarMagia } from '../../../core/classificarMagia';
-import { calcularDanoMagia } from '../../../core/magiaDano';
+import { calcularDanoMagia, mecanicaDaMagia } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
@@ -21,6 +20,11 @@ export interface DanoPendente {
 interface AcaoPanelContentProps {
   onEscolher: (nome: string, desc: string, dano?: DanoPendente) => void;
   onAtacar: (nome: string, desc: string, dano: DanoPendente) => void;
+  /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
+   * de Salvaguarda (CD + atributo + sucesso/falha), que vive em
+   * CombatTab (persiste depois do painel fechar). `circuloUsado` é
+   * pro upcast (igual `conjurarMagia` já calcula). */
+  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
   gastarSlotCirculo: (circulo: number) => boolean;
   espacos: EspacoDeMagiaAtivo[];
   espacosGastosPorCirculo: Record<number, number>;
@@ -53,6 +57,7 @@ interface AcaoPanelContentProps {
 export default function AcaoPanelContent({
   onEscolher,
   onAtacar,
+  onAbrirSalvaguarda,
   gastarSlotCirculo,
   espacos,
   espacosGastosPorCirculo,
@@ -118,8 +123,8 @@ export default function AcaoPanelContent({
     }
     setTelaMagia(null);
     const circuloUsado = circulo ?? m.circulo;
-    const classificacao = classificarMagia(m);
-    if (classificacao.ataque && modAcertoConjuracao !== null) {
+    const mecanica = mecanicaDaMagia(m);
+    if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
       rolarD20({
         label: `Ataque de Magia — ${m.nome}`,
         formula: `1d20 + ${modAcertoConjuracao}`,
@@ -136,6 +141,11 @@ export default function AcaoPanelContent({
         return;
       }
       onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Veja a descrição da magia (ⓘ) pro dano.');
+      return;
+    }
+    if (mecanica === 'salvaguarda') {
+      onEscolher(`✨ ${m.nome}`, 'Alvo faz salvaguarda — veja o popup pra CD e dano.');
+      onAbrirSalvaguarda(m, circuloUsado);
       return;
     }
     onEscolher(`✨ ${m.nome}`, m.descricaoCurta ?? '');

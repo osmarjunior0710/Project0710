@@ -212,7 +212,53 @@ Jogador, "A a I" e "I a Z" — juntos cobrem as 390 magias).
       confirmado num teste de Combate ainda — não é uma mudança de
       comportamento pro Osmar. `npx tsc -b`, `npm test` (227 passando)
       e `npm run build` OK.
-- [ ] **5.3 Modal de Salvaguarda** — componente novo
-      (`MagiaSalvaguardaModal.tsx`, seguindo o padrão de
-      `AtaqueDeSoproModal`), CD calculada por `cdConjuracao` (já
-      existe), wiring nos mesmos 3 lugares do 5.2.
+- [x] **5.3 Modal de Salvaguarda — FEITA.** Componente novo
+      `MagiaSalvaguardaModal.tsx`, mesmo padrão visual/estrutural de
+      `AtaqueDeSoproModal` (popup pequeno, sem estado próprio,
+      reaproveita `TrocarArmaMaestria.module.css`) — CD via
+      `cdConjuracao` (já existia), atributo/sucesso/falha/dano vêm de
+      2 funções novas em `core/magiaDano.ts`:
+  - `mecanicaDaMagia(magia)` — deriva do campo estruturado
+        `ataqueOuSalvaguarda` se a magia é `'ataque'`, `'salvaguarda'`
+        (inclui `"aleatório"`, Rajada/Muralha Prismática) ou
+        `'nenhuma'`. **Troquei a decisão de "é ataque?" nos 3 lugares
+        de Combat de `classificarMagia(m).ataque` (regex sobre
+        `descricaoCurta`) pra essa função** — precisava de UMA fonte
+        de verdade pros 2 ramos (ataque vs. salvaguarda) senão as 2
+        heurísticas podiam discordar (regex diz "ataque" ao mesmo
+        tempo que o campo estruturado diz "Salvaguarda de X" — abriria
+        o modal errado). `classificarMagia` continua existindo, só pro
+        ícone ⚔️ da lista (não decide mais nenhuma jogada).
+  - `atributoSalvaguarda(magia)` — extrai o nome do atributo do mesmo
+        campo (`"aleatório"` vira um texto explicando que varia).
+  - **Efeito colateral bom, não gratuito:** com o Modal de
+        Salvaguarda cobrindo o caso que faltava, `usarMagiaTemAcaoAutomatizada`
+        (que travava o botão "Usar" de truque de salvaguarda sem
+        ataque, ex.: Badalar Fúnebre — achado real de quando essa
+        função foi criada) agora sempre retorna `true`: não sobra
+        nenhum truque sem ação válida (ataque → Modal de Ataque;
+        salvaguarda → Modal de Salvaguarda; nem um nem outro → "Usar"
+        sem jogada já era o comportamento certo). Teste de
+        `classificarMagia.test.ts` atualizado (Badalar Fúnebre agora
+        espera `true`).
+      Testado ao vivo em Chromium 390×844: aba Magias (Perdição —
+      salvaguarda sem dano, mostra só CD+atributo e "veja a
+      descrição"; Badalar Fúnebre — salvaguarda com dano, mostra
+      sucesso/falha e rola 1d8 Necrótico certo ao tocar "Rolar Dano")
+      e Combate → Ação (Badalar Fúnebre — Ação marcada USADA
+      imediatamente, painel fecha, popup abre por cima com CD e dano
+      corretos). `npx tsc -b`, `npm test` (235 passando) e `npm run
+      build` OK.
+- [ ] **5.4 Achado (não travante) — Escala de truque por nível de
+      personagem (5/11/17).** Descoberto testando o 5.2 ao vivo: quase
+      todo truque com dano tem "Aprimoramento de Truque" no livro
+      (dano/nº de raios aumenta nos níveis 5/11/17 do PERSONAGEM, não
+      do círculo gasto — Upcast é só pra magia preparada/espaço de
+      magia). `calcularDanoMagia` hoje NUNCA aplica isso — um Bruxo
+      nível 20 usando Toque Necrótico ainda rola só 1d10, deveria ser
+      4d10. Não é estrutural (não depende de nada que falte) —
+      resolvível dentro deste foco, análogo ao que já foi feito pro
+      Upcast (nova coluna estruturada tipo `EscalaTruque_Nivel5/11/17`
+      + campo no `.ts` + soma em `calcularDanoMagia` recebendo o nível
+      do personagem). Vira o próximo item do foco quando o Osmar
+      confirmar prioridade.

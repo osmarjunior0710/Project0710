@@ -77,3 +77,28 @@ export function calcularDanoMagia(magia: Magia, circuloUsado: number): CalculoDa
   // com dado incompatível pro Dano Base: não dá pra somar sozinho.
   return { ...resultadoBase, upcastNaoAutomatico: true };
 }
+
+export type MecanicaMagia = 'ataque' | 'salvaguarda' | 'nenhuma';
+
+/** Deriva do campo estruturado `ataqueOuSalvaguarda` (extraído do
+ * livro, ver DECISOES-DADOS.md) qual dos 2 modais de Combat mostrar ao
+ * usar a magia — não usa a heurística de regex de `classificarMagia`
+ * (essa serve só pro ícone ⚔️ da lista, não pra decidir qual jogada
+ * acontece; usar as duas fontes pra decisão levaria a discordância
+ * entre elas em alguns casos). */
+export function mecanicaDaMagia(magia: Magia): MecanicaMagia {
+  if (magia.ataqueOuSalvaguarda === 'Ataque à Distância' || magia.ataqueOuSalvaguarda === 'Ataque Corpo a Corpo') {
+    return 'ataque';
+  }
+  if (magia.ataqueOuSalvaguarda === null) return 'nenhuma';
+  return 'salvaguarda'; // "Salvaguarda de <Atributo>" ou "aleatório"
+}
+
+/** Atributo de salvaguarda pra mostrar no Modal de Salvaguarda.
+ * "aleatório" (Rajada Prismática/Muralha Prismática — o tipo é
+ * sorteado pela própria magia, 1 por raio/camada) vira um texto
+ * explicando, em vez do nome de um atributo fixo que não existe. */
+export function atributoSalvaguarda(magia: Magia): string {
+  if (magia.ataqueOuSalvaguarda === 'aleatório') return 'variável (sorteado pela magia, veja descrição)';
+  return magia.ataqueOuSalvaguarda?.replace(/^Salvaguarda de /, '') ?? '';
+}

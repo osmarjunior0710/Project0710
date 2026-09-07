@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
-import { classificarMagia, iconesMagia } from '../../../core/classificarMagia';
-import { calcularDanoMagia } from '../../../core/magiaDano';
+import { iconesMagia } from '../../../core/classificarMagia';
+import { calcularDanoMagia, mecanicaDaMagia } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TickPips from '../../components/TickPips';
@@ -10,6 +10,11 @@ import type { DanoPendente } from './AcaoPanelContent';
 
 interface ReacaoPanelContentProps {
   onEscolher: (nome: string, desc: string, dano?: DanoPendente) => void;
+  /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
+   * de Salvaguarda (CD + atributo + sucesso/falha), que vive em
+   * CombatTab. Reação nunca faz upcast, então `circuloUsado` é sempre
+   * `magia.circulo`. */
+  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
   gastarSlotCirculo: (circulo: number) => boolean;
   conjura: boolean;
   magiasReacao: Magia[];
@@ -33,6 +38,7 @@ interface ReacaoPanelContentProps {
 
 export default function ReacaoPanelContent({
   onEscolher,
+  onAbrirSalvaguarda,
   gastarSlotCirculo,
   conjura,
   magiasReacao,
@@ -63,8 +69,8 @@ export default function ReacaoPanelContent({
       }
     }
     setAviso(null);
-    const classificacao = classificarMagia(m);
-    if (classificacao.ataque && modAcertoConjuracao !== null) {
+    const mecanica = mecanicaDaMagia(m);
+    if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
       rolarD20({
         label: `Ataque de Magia — ${m.nome}`,
         formula: `1d20 + ${modAcertoConjuracao}`,
@@ -81,6 +87,11 @@ export default function ReacaoPanelContent({
         return;
       }
       onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Veja a descrição da magia (ⓘ) pro dano.');
+      return;
+    }
+    if (mecanica === 'salvaguarda') {
+      onEscolher(`✨ ${m.nome}`, 'Alvo faz salvaguarda — veja o popup pra CD e dano.');
+      onAbrirSalvaguarda(m, m.circulo);
       return;
     }
     onEscolher(`✨ ${m.nome}`, m.descricaoCurta ?? '');

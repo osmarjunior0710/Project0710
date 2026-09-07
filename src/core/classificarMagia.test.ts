@@ -25,8 +25,8 @@ describe('usarMagiaTemAcaoAutomatizada', () => {
     expect(usarMagiaTemAcaoAutomatizada(magia('raiomistico'))).toBe(true);
   });
 
-  it('truque de salvaguarda sem ataque (Badalar Fúnebre) — SEM ação automatizada ainda (achado real, marcar "pendência" na UI)', () => {
-    expect(usarMagiaTemAcaoAutomatizada(magia('badalarfunebre'))).toBe(false);
+  it('truque de salvaguarda sem ataque (Badalar Fúnebre) — tem ação (Modal de Salvaguarda)', () => {
+    expect(usarMagiaTemAcaoAutomatizada(magia('badalarfunebre'))).toBe(true);
   });
 
   it('truque utilitário sem salvaguarda nem ataque (Prestidigitação Arcana) — tem ação (não precisa de jogada, "Usar" sem efeito é o certo)', () => {
