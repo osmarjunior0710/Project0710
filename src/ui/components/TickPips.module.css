@@ -23,3 +23,7 @@
 .pipUsado {
   background: var(--line-soft);
 }
+
+.pipEspecial {
+  background: var(--accent-especial);
+}

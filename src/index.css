@@ -9,6 +9,12 @@
   --text-faint: #6b6c72;
   --accent: #4a5fd9;
   --accent-dim: #dde1fb;
+  /* Cor especial pra recurso "extra"/pool compartilhado que não é o
+     recurso base (ex.: Ritual Rápido do Conjurador Ritualista) — pip
+     diferente do azul padrão pra não confundir com Espaços de Magia.
+     Ver TickPips.tsx (`variante="especial"`). */
+  --accent-especial: #8a5fd9;
+  --accent-especial-dim: #e8e1fb;
   --good: #2f8f52;
   --warn: #a3690f;
   --danger: #b3261e;

@@ -185,15 +185,40 @@ Grupos propostos e aprovados pelo Osmar:
         `PersonagemSalvo.escolhaMagiaTalentoGeral` mudou de
         `Record<string,string>` pra `Record<string,string[]>` pra
         suportar N magias (Tocado pela Sombra/Fadas continuam com 1
-        item na lista). Sem seção "grátis" nova — Ritual Rápido
-        (conjurar sem gastar espaço) e o crescimento automático da
-        contagem em níveis futuros (5/9/13/17) ficaram fora do escopo,
-        registrados em `Backlog.md`. Verificado: `tsc -b`/`npm test`
-        (287)/`npm run build` limpos + Playwright (Guerreiro nível 4
-        pega Conjurador Ritualista → tela mostra as 12 magias Rituais
-        reais de 1º círculo → escolhe exatamente 2 (limite do Bônus de
+        item na lista). Verificado: `tsc -b`/`npm test` (287)/`npm run
+        build` limpos + Playwright (Guerreiro nível 4 pega Conjurador
+        Ritualista → tela mostra as 12 magias Rituais reais de 1º
+        círculo → escolhe exatamente 2 (limite do Bônus de
         Proficiência) → confirma → aba Magias mostra as 2 como
-        "sempre preparadas", sem botão de uso grátis).
+        "sempre preparadas").
+  - [x] **B.4.3.1 — Ritual Rápido + crescimento automático** (os 2
+        pedaços que tinham ficado de fora, ver `Backlog.md` até
+        2026-09): Ritual Rápido é 1 uso ÚNICO COMPARTILHADO entre
+        todas as magias Rituais conhecidas — reaproveita a mesma lista
+        `magiasGratisGastas`, só com 1 chave FIXA por talento
+        (`CHAVE_RITUAL_RAPIDO`) em vez de 1 chave por magia; UI nova
+        na aba Magias ("Ritual Rápido"), com pip de cor diferente
+        (roxo/lavanda, `TickPips`/`ContadorUsos` ganharam
+        `variante="especial"`, nova var `--accent-especial`) pra não
+        confundir com Espaço de Magia normal — reaproveitável por
+        qualquer recurso "extra"/pool compartilhado futuro. Crescimento
+        automático: o passo `talentoMagia` do Level Up agora também
+        dispara pra quem JÁ TEM Conjurador Ritualista, sempre que o
+        Bônus de Proficiência sobe de novo (níveis 5/9/13/17 — fora do
+        calendário de ASI, empurrado pra fora daquele bloco condicional
+        no `LevelUpShell`) e o novo total (`quantidadeMagiasRituais`) é
+        maior que quantas já foram escolhidas — as antigas ficam
+        pré-marcadas e travadas ("já escolhida"), só dá pra completar
+        até o novo limite. Verificado: `tsc -b`/`npm test` (290)/`npm
+        run build` limpos + Playwright (Guerreiro nível 4 com
+        Conjurador Ritualista + 2 magias já escolhidas → aba Magias
+        mostra "Ritual Rápido" com pip roxo → usa → pip fica cinza,
+        botão trava até Descanso Longo → level up pra nível 5 → passo
+        "Magia do Talento" reaparece sozinho, fora de qualquer tela de
+        ASI, mostrando "Bônus de Proficiência aumentou — escolha 3
+        (2/3)" com Alarme/Identificar travadas como "já escolhida" →
+        escolhe Detectar Magia → confirma → aba Magias mostra as 3
+        magias sempre preparadas).
 - [ ] **B.5 — Escolha de perícia**: Analítico, Mente Aguçada,
       Especialista em Perícia — reaproveita o padrão do Habilidoso
       (`concedeProficiencias`).

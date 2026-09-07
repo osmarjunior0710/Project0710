@@ -59,6 +59,8 @@ import {
   truquesTalentoGeral,
   magiasSempreTalentoGeral,
   magiasGratisDosTalentosGerais,
+  temRitualRapido,
+  CHAVE_RITUAL_RAPIDO,
   type MagiaGratisDeTalentoGeral,
 } from '../../core/magiaTalentoGeral';
 import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
@@ -402,6 +404,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   ];
   const magiasTalentoGeralPreparadas = magiasPreparadasDoPersonagem(magiasTalentoGeralAtuais);
   const magiasGratisTalentoGeral = magiasGratisDosTalentosGerais(talentosEfetivos, escolhaMagiaTalentoGeral);
+  const ritualRapidoDisponivel = temRitualRapido(talentosEfetivos);
+  const ritualRapidoGasto = magiasGratisGastas.includes(CHAVE_RITUAL_RAPIDO);
   const magiasConjuraveis = [
     ...magiasPreparadas,
     ...magiasDescobertasMagicas,
@@ -840,6 +844,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
   }
 
+  /** Ritual Rápido (Conjurador Ritualista) — 1 uso ÚNICO COMPARTILHADO
+   * entre TODAS as magias Rituais conhecidas (não 1 por magia, ver
+   * `CHAVE_RITUAL_RAPIDO`). Mesma lista `magiasGratisGastas`, reseta
+   * junto no Descanso Longo sem precisar de tratamento especial. */
+  function usarRitualRapido() {
+    if (!magiasGratisGastas.includes(CHAVE_RITUAL_RAPIDO)) {
+      setMagiasGratisGastas((prev) => [...prev, CHAVE_RITUAL_RAPIDO]);
+    }
+  }
+
   function trocarArmaMaestria(armaAntiga: string, armaNova: string) {
     setMaestriaArma((prev) => prev.map((a) => (a === armaAntiga ? armaNova : a)));
   }
@@ -1080,6 +1094,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         atributosAtuais={selecao.atributos}
         atributosFinaisAtuais={atributosFinaisAtuais}
         talentosGeraisAtuais={talentosGeraisAtuais}
+        escolhaMagiaTalentoGeralAtuais={escolhaMagiaTalentoGeral}
         talentosFavoritosAtuais={talentosFavoritos}
         onToggleFavoritoTalento={toggleFavoritoTalento}
       />
@@ -1257,6 +1272,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onUsarMagiaGratis={usarMagiaGratisDeInvocacao}
             magiasGratisTalentoGeral={magiasGratisTalentoGeral}
             onUsarMagiaGratisTalentoGeral={usarMagiaGratisDeTalentoGeral}
+            ritualRapidoDisponivel={ritualRapidoDisponivel}
+            ritualRapidoGasto={ritualRapidoGasto}
+            onUsarRitualRapido={usarRitualRapido}
             magiasPactoDoInferoAtuais={magiasPactoDoInferoAtuais}
             magiasEspecieAtuais={magiasEspecieAtuais}
             magiasTalentoOrigemAtuais={magiasTalentoOrigemAtuais}

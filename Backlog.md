@@ -120,20 +120,3 @@ anunciar na mesa, em vez do app calcular.
   ainda trata ataque de magia como 1 rolagem simples, sem hooks pra
   Cobertura/alcance/Desvantagem condicional).
 
-## Conjurador Ritualista — 2 pedaços do B.4.3 não implementados (2026-09)
-
-- **Ritual Rápido** — conjurar 1 das magias Rituais conhecidas no
-  tempo normal (não o de Ritual), sem gastar espaço, 1x por Descanso
-  Longo. Diferente do padrão "grátis 1x" já usado (Telepático, Tocado
-  pela Sombra/Fadas — cada magia com seu PRÓPRIO contador): aqui é 1
-  uso ÚNICO COMPARTILHADO entre TODAS as magias Rituais conhecidas
-  (usar em qualquer uma delas gasta o mesmo 1 uso) — formato novo, não
-  reaproveita `magiasGratisDosTalentosGerais` como está.
-- **Crescimento automático** — "sempre que seu Bônus de Proficiência
-  aumentar depois, pode adicionar mais 1 magia de 1º círculo com
-  Ritual às sempre preparadas". Hoje a contagem (`quantidadeMagiasRituais`)
-  fica fixa no valor de quando o talento foi escolhido — não há
-  gatilho no Level Up pra detectar "seu Bônus de Proficiência subiu
-  desde a última vez, você pode escolher mais 1 magia Ritual" (níveis
-  5/9/13/17). Precisaria de um passo condicional novo no `LevelUpShell`,
-  parecido com o que já existe pra Arcana Mística (Bruxo).

@@ -6,6 +6,9 @@ interface ContadorUsosProps {
   /** Quanto já foi gasto/usado. */
   usados: number;
   tamanho?: 'sm' | 'lg';
+  /** Repassado pro `TickPips` — `'especial'` = pip roxo/lavanda (ver
+   * `TickPips.tsx`). */
+  variante?: 'padrao' | 'especial';
 }
 
 /** Pips + "restantes/total", pra colocar ao lado do NOME de qualquer
@@ -15,11 +18,11 @@ interface ContadorUsosProps {
  * meio de um texto corrido ("...({restantes}/{maximo} usos)..."),
  * difícil de ler rápido — todo contador de usos novo já nasce assim,
  * ao lado do título. */
-export default function ContadorUsos({ total, usados, tamanho = 'sm' }: ContadorUsosProps) {
+export default function ContadorUsos({ total, usados, tamanho = 'sm', variante = 'padrao' }: ContadorUsosProps) {
   const restantes = total - usados;
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, textTransform: 'none', letterSpacing: 'normal' }}>
-      <TickPips total={total} usados={usados} tamanho={tamanho} />
+      <TickPips total={total} usados={usados} tamanho={tamanho} variante={variante} />
       <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>
         {restantes}/{total}
       </span>

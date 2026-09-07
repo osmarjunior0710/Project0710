@@ -880,3 +880,61 @@ outra.
    pra esse campo — não faz sentido sortear uma troca opcional.
 
 **Data/origem:** 2026-09, foco Talentos Fase 4 (Grupo A — Origem, A.3).
+
+## Talento com contagem que CRESCE por Bônus de Proficiência (não escolha nova) — passo de "completar escolha", fora do calendário de ASI
+
+**Diferente de "troca de escolha fixa" (seção acima) e de Arcana
+Mística (N slots independentes, cada um só desbloqueia 1 vez): aqui é
+1 MESMA coleção que fica maior sozinha** — Conjurador Ritualista
+(Talento Geral) deixa escolher N magias Rituais, N = Bônus de
+Proficiência ATUAL; sempre que o Bônus de Proficiência sobe de novo
+(níveis 5/9/13/17, calendário PRÓPRIO — não coincide com os níveis de
+ASI/Talento, 4/8/12/16/19), o jogador pode completar a coleção com
+mais 1, sem perder as já escolhidas.
+
+**Padrão pra qualquer futura "coleção que cresce sozinha por nível"
+parecida:**
+1. Função pura já existente calcula o tamanho ATUAL da coleção pro
+   nível dado (aqui, `quantidadeMagiasRituais(classe, nivel)` — já
+   existia desde a escolha inicial, sem mudança).
+2. No `LevelUpShell`: comparar esse tamanho no `novoNivel` contra
+   quantas já foram escolhidas (`escolhaMagiaTalentoGeralAtuais`) — se
+   o novo total for maior, o passo de escolha entra de novo em
+   `luSteps`, **fora de qualquer bloco condicionado a nível de ASI**
+   (o gatilho real é o próprio recurso que cresceu, não o calendário
+   de Talentos).
+3. O `useState` do passo é pré-semeado com as escolhas JÁ FEITAS (não
+   começa vazio) — cada opção já escolhida fica travada (não
+   dá pra desmarcar, só completar até o novo total).
+4. `onConfirmar` manda a coleção COMPLETA (antigas + novas) pra mesma
+   chave de sempre — o pai (`FichaShell`) só faz merge/overwrite, sem
+   precisar saber se foi escolha inicial ou crescimento.
+5. Nada disso depende de saber QUAL nível concede QUAL Bônus de
+   Proficiência na tela — só a função pura (`bonusProficiencia`) sabe
+   disso, mesmo espírito do item 3 da Arcana Mística acima.
+
+**Data/origem:** 2026-09, foco Talentos Fase 4 (Grupo B, B.4.3 —
+Conjurador Ritualista, pedaço "crescimento automático").
+
+## "Grátis 1x" com 1 uso COMPARTILHADO entre vários itens (não 1 por item) — mesma lista de gasto, chave fixa
+
+Todo "grátis 1x/Descanso Longo" implementado até aqui (Telepático,
+Tocado pela Sombra/Fadas, magias das Invocações) trata cada magia como
+um uso INDEPENDENTE — cada uma com sua própria chave em
+`magiasGratisGastas`. Ritual Rápido (Conjurador Ritualista) é
+diferente: 1 uso ÚNICO, compartilhado entre TODAS as magias Rituais
+conhecidas — usar em qualquer uma delas gasta o mesmo uso.
+
+**Modelagem:** não precisou de estado novo — mesma lista
+`magiasGratisGastas` (reseta sozinha no Descanso Longo), só com 1
+chave FIXA por talento (`talento:<id>:ritual-rapido`, ver
+`CHAVE_RITUAL_RAPIDO` em `core/magiaTalentoGeral.ts`) em vez de 1 chave
+por `magia.nome`. UI mostra 1 pip só (não 1 por magia conhecida) — cor
+diferente da padrão (`variante="especial"`, ver DECISOES-DESIGN.md
+"Ticks/pips padronizados") pra deixar claro que não é o mesmo Espaço de
+Magia. Qualquer futura característica "N itens conhecidos, mas só 1 uso
+grátis compartilhado entre eles" reaproveita essa chave fixa em vez de
+criar array de estado novo.
+
+**Data/origem:** 2026-09, foco Talentos Fase 4 (Grupo B, B.4.3 —
+Conjurador Ritualista, pedaço "Ritual Rápido").

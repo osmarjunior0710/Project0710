@@ -7,6 +7,8 @@ import {
   opcoesMagiasRituais,
   quantidadeMagiasRituais,
   talentosComEscolhaDeMagiaPendente,
+  temRitualRapido,
+  CHAVE_RITUAL_RAPIDO,
 } from './magiaTalentoGeral';
 import { classes } from '../data/rulesets/dnd2024/classes';
 
@@ -146,6 +148,21 @@ describe('magiasSempreTalentoGeral — magias-rituais-por-proficiencia', () => {
       'conjurador-ritualista': ['Alarme', 'Identificar'],
     });
     expect(resultado.sort()).toEqual(['Alarme', 'Identificar'].sort());
+  });
+});
+
+describe('temRitualRapido', () => {
+  it('Conjurador Ritualista: true', () => {
+    expect(temRitualRapido(['conjurador-ritualista'])).toBe(true);
+  });
+
+  it('sem o talento: false', () => {
+    expect(temRitualRapido(['telepatico'])).toBe(false);
+    expect(temRitualRapido(undefined)).toBe(false);
+  });
+
+  it('CHAVE_RITUAL_RAPIDO é fixa e não colide com nomes de magia', () => {
+    expect(CHAVE_RITUAL_RAPIDO).toBe('talento:conjurador-ritualista:ritual-rapido');
   });
 });
 

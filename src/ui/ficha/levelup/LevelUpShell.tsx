@@ -156,6 +156,11 @@ interface LevelUpShellProps {
   /** Talentos Gerais já escolhidos em Level Ups anteriores — Fase 3 do
    * plano de Talentos (ver DECISOES-DESIGN.md/PENDENCIAS.md). */
   talentosGeraisAtuais: string[];
+  /** Magia(s) já escolhida(s) por Talento Geral em Level Ups anteriores
+   * (chave = id do talento) — usado só pra detectar o crescimento do
+   * Conjurador Ritualista (Bônus de Proficiência subiu, pode escolher
+   * mais 1 magia Ritual) sem duplicar/perder as já escolhidas antes. */
+  escolhaMagiaTalentoGeralAtuais: Record<string, string[]>;
   /** IDs de talentos marcados com 📌 (planejamento pra escolher num
    * level up futuro) — persistido por personagem. */
   talentosFavoritosAtuais: string[];
@@ -210,6 +215,7 @@ export default function LevelUpShell({
   atributosAtuais,
   atributosFinaisAtuais,
   talentosGeraisAtuais,
+  escolhaMagiaTalentoGeralAtuais,
   talentosFavoritosAtuais,
   onToggleFavoritoTalento,
 }: LevelUpShellProps) {
@@ -298,18 +304,41 @@ export default function LevelUpShell({
   // (mesmo padrão de `precisaEscolherAtributoDoTalento`, não retroage
   // sobre talentos já escolhidos em level-ups anteriores).
   const tipoEfeitoTalentoEscolhido = talentoObjEscolhido?.efeitoMecanico?.tipo;
-  const precisaEscolherMagiaDoTalento =
+  const precisaEscolherMagiaDoTalentoNovo =
     tipoEfeitoTalentoEscolhido === 'magia-escolhida-por-escola' || tipoEfeitoTalentoEscolhido === 'magias-rituais-por-proficiencia';
-  const opcoesMagiaTalento = !talentoObjEscolhido
+  // Crescimento do Conjurador Ritualista: mesmo passo `talentoMagia`,
+  // mas disparado num level-up POSTERIOR ao que concedeu o talento —
+  // sempre que o Bônus de Proficiência sobe, o total de magias Rituais
+  // permitido cresce junto (regra real: "pode adicionar mais 1"). Não
+  // depende de nível de ASI (Bônus de Proficiência sobe em 5/9/13/17,
+  // ASI em 4/8/12/16/19 — calendários diferentes).
+  const talentoConjuradorRitualista = talentos.find((t) => t.id === 'conjurador-ritualista') ?? null;
+  const magiasRituaisJaEscolhidas = escolhaMagiaTalentoGeralAtuais['conjurador-ritualista'] ?? [];
+  const maxMagiasRituaisAgora = quantidadeMagiasRituais(classe, novoNivel);
+  const precisaCrescerMagiaRitual =
+    tipoEfeitoTalentoEscolhido !== 'magias-rituais-por-proficiencia' &&
+    talentosGeraisAtuais.includes('conjurador-ritualista') &&
+    talentoConjuradorRitualista !== null &&
+    maxMagiasRituaisAgora > magiasRituaisJaEscolhidas.length;
+  const talentoMagiaAlvo = precisaEscolherMagiaDoTalentoNovo
+    ? talentoObjEscolhido
+    : precisaCrescerMagiaRitual
+      ? talentoConjuradorRitualista
+      : null;
+  const opcoesMagiaTalento = !talentoMagiaAlvo
     ? []
-    : tipoEfeitoTalentoEscolhido === 'magia-escolhida-por-escola'
-      ? opcoesMagiaEscolhidaPorEscola(talentoObjEscolhido.id)
-      : tipoEfeitoTalentoEscolhido === 'magias-rituais-por-proficiencia'
-        ? opcoesMagiasRituais(talentoObjEscolhido.id)
+    : talentoMagiaAlvo.efeitoMecanico?.tipo === 'magia-escolhida-por-escola'
+      ? opcoesMagiaEscolhidaPorEscola(talentoMagiaAlvo.id)
+      : talentoMagiaAlvo.efeitoMecanico?.tipo === 'magias-rituais-por-proficiencia'
+        ? opcoesMagiasRituais(talentoMagiaAlvo.id)
         : [];
   const maxMagiasTalento =
-    tipoEfeitoTalentoEscolhido === 'magias-rituais-por-proficiencia' ? quantidadeMagiasRituais(classe, novoNivel) : 1;
-  const [magiasEscolhidasTalento, setMagiasEscolhidasTalento] = useState<string[]>([]);
+    talentoMagiaAlvo?.efeitoMecanico?.tipo === 'magias-rituais-por-proficiencia' ? maxMagiasRituaisAgora : 1;
+  // Crescimento pré-marca as já escolhidas antes (não perde nem deixa
+  // trocar as antigas, só permite ADICIONAR até o novo máximo).
+  const [magiasEscolhidasTalento, setMagiasEscolhidasTalento] = useState<string[]>(
+    precisaCrescerMagiaRitual ? magiasRituaisJaEscolhidas : [],
+  );
 
   const luSteps: LuStep[] = ['pv', 'features'];
   if (classe.nivelSubclasse === novoNivel && !personagem.subclasse) luSteps.push('subclasse');
@@ -340,8 +369,11 @@ export default function LevelUpShell({
     // pede escolha de atributo — mesma lista, mesma bolinha de
     // progresso, mesmo padrão de "Avançar" de todo o resto do wizard.
     if (precisaEscolherAtributoDoTalento) luSteps.push('asiAtributo');
-    if (precisaEscolherMagiaDoTalento) luSteps.push('talentoMagia');
+    if (precisaEscolherMagiaDoTalentoNovo) luSteps.push('talentoMagia');
   }
+  // Fora do bloco de ASI — o crescimento de magias Rituais acompanha o
+  // Bônus de Proficiência, não os níveis de Aumento de Atributo.
+  if (precisaCrescerMagiaRitual) luSteps.push('talentoMagia');
   if (niveisComDadivaEpica(classe).includes(novoNivel)) luSteps.push('dadivaEpica');
   // Também aparece em qualquer level-up seguinte (não só quando um
   // círculo novo desbloqueia) se o personagem já tiver pelo menos 1
@@ -697,8 +729,8 @@ export default function LevelUpShell({
             ? magiaIniciadaAlteracoesPendentes
             : null,
         escolhaMagiaTalentoGeral:
-          luSteps.includes('talentoMagia') && talentoObjEscolhido && magiasEscolhidasTalento.length > 0
-            ? { [talentoObjEscolhido.id]: magiasEscolhidasTalento }
+          luSteps.includes('talentoMagia') && talentoMagiaAlvo && magiasEscolhidasTalento.length > 0
+            ? { [talentoMagiaAlvo.id]: magiasEscolhidasTalento }
             : null,
       });
       return;
@@ -1220,24 +1252,33 @@ export default function LevelUpShell({
           </>
         )}
 
-        {step === 'talentoMagia' && talentoObjEscolhido && (
+        {step === 'talentoMagia' && talentoMagiaAlvo && (
           <>
             <div className="section-title">
-              {talentoObjEscolhido.nome} — escolha {maxMagiasTalento} ({magiasEscolhidasTalento.length}/
-              {maxMagiasTalento})
+              {talentoMagiaAlvo.nome}
+              {precisaCrescerMagiaRitual ? ' — Bônus de Proficiência aumentou' : ''} — escolha {maxMagiasTalento} (
+              {magiasEscolhidasTalento.length}/{maxMagiasTalento})
             </div>
             <div className="label" style={{ marginBottom: 10 }}>
-              {talentoObjEscolhido.beneficios}
+              {precisaCrescerMagiaRitual
+                ? `Seu Bônus de Proficiência subiu — pode escolher mais ${maxMagiasRituaisAgora - magiasRituaisJaEscolhidas.length} magia(s) de 1º círculo com Ritual às sempre preparadas.`
+                : talentoMagiaAlvo.beneficios}
             </div>
             {opcoesMagiaTalento.map((m) => {
+              const jaEraEscolhida = precisaCrescerMagiaRitual && magiasRituaisJaEscolhidas.includes(m.nome);
               const selecionada = magiasEscolhidasTalento.includes(m.nome);
               const cheioSemSelecionar = !selecionada && magiasEscolhidasTalento.length >= maxMagiasTalento;
               return (
                 <div
                   key={m.id}
                   className={`opt-card ${selecionada ? 'selected' : ''}`}
-                  style={{ padding: '10px 12px', cursor: cheioSemSelecionar ? 'default' : 'pointer', opacity: cheioSemSelecionar ? 0.5 : 1 }}
+                  style={{
+                    padding: '10px 12px',
+                    cursor: jaEraEscolhida || cheioSemSelecionar ? 'default' : 'pointer',
+                    opacity: cheioSemSelecionar && !jaEraEscolhida ? 0.5 : 1,
+                  }}
                   onClick={() => {
+                    if (jaEraEscolhida) return;
                     if (selecionada) {
                       setMagiasEscolhidasTalento((prev) => prev.filter((n) => n !== m.nome));
                     } else if (!cheioSemSelecionar) {
@@ -1245,7 +1286,10 @@ export default function LevelUpShell({
                     }
                   }}
                 >
-                  <div className="opt-card-name">{m.nome}</div>
+                  <div className="opt-card-name">
+                    {m.nome}
+                    {jaEraEscolhida ? ' (já escolhida)' : ''}
+                  </div>
                   <div className="opt-card-desc">{m.descricaoCurta ?? m.descricaoCompleta}</div>
                 </div>
               );

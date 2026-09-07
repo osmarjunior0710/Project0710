@@ -128,14 +128,28 @@ export function opcoesMagiasRituais(talentoId: string): Magia[] {
 }
 
 /** Quantas magias Rituais o Conjurador Ritualista pode escolher —
- * igual ao Bônus de Proficiência ATUAL (regra real: cresce depois,
- * mais 1 a cada vez que o Bônus de Proficiência aumenta — esse
- * crescimento automático ainda não está implementado, ver
- * Backlog.md; a escolha fica fixa no valor de quando o talento foi
- * pego, até o jogador reabrir essa entrega). */
+ * igual ao Bônus de Proficiência ATUAL. Cresce automaticamente com o
+ * nível (o `LevelUpShell` compara este valor com quantas já foram
+ * escolhidas e, se crescer, oferece o passo extra pra completar até
+ * aqui — ver "crescimento" em `LevelUpShell.tsx`). */
 export function quantidadeMagiasRituais(classe: Classe, nivel: number): number {
   return bonusProficiencia(classe, nivel);
 }
+
+/** `true` só quando o personagem tem Conjurador Ritualista — controla
+ * se a seção "Ritual Rápido" aparece na aba Magias. */
+export function temRitualRapido(talentosAtuais: string[] | undefined): boolean {
+  return !!talentosAtuais?.includes('conjurador-ritualista');
+}
+
+/** Chave própria pra marcar o uso do Ritual Rápido gasto — vive na
+ * MESMA lista `magiasGratisGastas` das outras magias grátis (ver
+ * `chaveMagiaGratisTalento` no `FichaShell.tsx`), mas é 1 chave FIXA
+ * compartilhada entre TODAS as magias Rituais conhecidas (não 1 por
+ * magia) — usar o Ritual Rápido em qualquer uma delas gasta o mesmo
+ * único uso, diferente do padrão "grátis por magia" de
+ * `magiasGratisDosTalentosGerais`. */
+export const CHAVE_RITUAL_RAPIDO = 'talento:conjurador-ritualista:ritual-rapido';
 
 export interface MagiaGratisDeTalentoGeral {
   talentoId: string;
@@ -158,7 +172,9 @@ export interface MagiaGratisDeTalentoGeral {
  * separados, não um pool só). Conjurador Ritualista NÃO entra aqui —
  * a regra dele ("Ritual Rápido") é 1 uso COMPARTILHADO entre todas as
  * magias Rituais conhecidas, formato diferente do "grátis por magia"
- * daqui — ver Backlog.md. */
+ * daqui — ver `temRitualRapido`/`CHAVE_RITUAL_RAPIDO` acima, usados
+ * direto pelo `FichaShell`/`MagiasTab` (não precisam entrar nesta
+ * lista). */
 export function magiasGratisDosTalentosGerais(
   talentosAtuais: string[] | undefined,
   escolhas?: Record<string, string[]>,

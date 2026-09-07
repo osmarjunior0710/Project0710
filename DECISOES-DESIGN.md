@@ -836,6 +836,18 @@ removidas — CSS morto). Também usado na Tela 3 do fluxo de upcast
 espaços disponíveis" — agora mostra os ticks, mais fácil de bater o
 olho.
 
+**Extensão (2026-09, Ritual Rápido):** quando um recurso "extra"/pool
+compartilhado aparece na MESMA tela de um recurso base (ex.: Ritual
+Rápido — 1 uso compartilhado entre magias Rituais — ao lado de Magias
+de Talentos Gerais), o pip desse recurso extra usa
+`variante="especial"` (roxo/lavanda, `--accent-especial`) em vez do
+azul padrão — só o "disponível" muda de cor, o "já gasto" continua
+cinza nos 2 casos. Objetivo: o jogador bate o olho e sabe que aquele
+contador não é o mesmo Espaço de Magia normal, sem precisar ler o
+texto. `TickPips`/`ContadorUsos` aceitam essa prop — qualquer recurso
+futuro do mesmo formato (uso extra/compartilhado que não é o recurso
+base) reaproveita, não cria variante de cor nova.
+
 ## Ajuste visual — chips mais compactos, "Ferramenta" renomeado, fontes 1px menores em todo o app
 
 **Contexto:** feedback direto do Osmar depois de ver o card de Origem

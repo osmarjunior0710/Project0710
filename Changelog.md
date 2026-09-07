@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1737
+
+Conjurador Ritualista completo: novo "Ritual Rápido" na aba Magias
+(conjura 1 magia Ritual sem gastar Espaço, 1x por Descanso Longo — pip
+roxo pra diferenciar do Espaço de Magia normal) e crescimento
+automático — quando o Bônus de Proficiência sobe (níveis 5/9/13/17), o
+Level Up oferece escolher mais 1 magia Ritual, mantendo as já
+escolhidas.
+
 ## v202609_1433
 
 Talentos Gerais — Conjurador Ritualista agora funciona de verdade: ao

@@ -69,6 +69,14 @@ interface MagiasTabProps {
    * (hoje só Telepático) — mesmo padrão de `magiasGratisConcedidas`. */
   magiasGratisTalentoGeral: MagiaGratisDeTalentoGeral[];
   onUsarMagiaGratisTalentoGeral: (item: MagiaGratisDeTalentoGeral) => void;
+  /** `true` só quando o personagem tem Conjurador Ritualista — controla
+   * se a seção "Ritual Rápido" aparece. */
+  ritualRapidoDisponivel: boolean;
+  /** `true` = já usado desde o último Descanso Longo — 1 uso ÚNICO
+   * COMPARTILHADO entre TODAS as magias Rituais conhecidas (não 1 por
+   * magia, diferente de `magiasGratisTalentoGeral`). */
+  ritualRapidoGasto: boolean;
+  onUsarRitualRapido: () => void;
   /** Livro das Sombras (Bruxo, Pacto do Tomo) — 3 truques + 2 magias
    * rituais sempre preparadas enquanto o livro existir, mesmo
    * tratamento de "Descobertas Mágicas" (seção própria, fora do
@@ -162,6 +170,9 @@ export default function MagiasTab({
   onUsarMagiaGratis,
   magiasGratisTalentoGeral,
   onUsarMagiaGratisTalentoGeral,
+  ritualRapidoDisponivel,
+  ritualRapidoGasto,
+  onUsarRitualRapido,
   temPactoDaLamina,
   armaDePactoAtual,
   onVincularArmaDePacto,
@@ -656,6 +667,24 @@ export default function MagiasTab({
               </div>
             );
           })}
+        </>
+      )}
+
+      {ritualRapidoDisponivel && (
+        <>
+          <div className="section-title">Ritual Rápido</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Conjure 1 das suas Magias Rituais no tempo normal (não o de Ritual), sem gastar Espaço — 1 uso
+            COMPARTILHADO entre todas elas, 1x por Descanso Longo.
+          </div>
+          <div
+            className={`${styles.reconjurarBtn} ${ritualRapidoGasto ? styles.reconjurarBtnGasto : ''}`}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}
+            onClick={onUsarRitualRapido}
+          >
+            <span>🔮 {ritualRapidoGasto ? 'Ritual Rápido já usado — disponível de novo após Descanso Longo' : 'Usar Ritual Rápido'}</span>
+            <TickPips total={1} usados={ritualRapidoGasto ? 1 : 0} tamanho="sm" variante="especial" />
+          </div>
         </>
       )}
 
