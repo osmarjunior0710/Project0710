@@ -189,7 +189,7 @@ export default function MagiasTab({
         formula: `1d20 + ${modAcertoConjuracao}`,
         mod: modAcertoConjuracao,
       });
-      const dano = calcularDanoMagia(m, circuloUsado);
+      const dano = calcularDanoMagia(m, circuloUsado, nivel);
       setDanoPendenteMagia(
         dano ? { label: `Dano — ✨ ${m.nome}`, quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod } : null,
       );
@@ -216,7 +216,7 @@ export default function MagiasTab({
 
   function rolarDanoSalvaguarda() {
     if (!telaSalvaguarda) return;
-    const dano = calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado);
+    const dano = calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel);
     setTelaSalvaguarda(null);
     if (!dano) return;
     rolarDados({
@@ -279,7 +279,7 @@ export default function MagiasTab({
           cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
           textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
           textoFalha={telaSalvaguarda.magia.salvaguardaFalha}
-          dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado)}
+          dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}
           upcastTexto={telaSalvaguarda.magia.upcastTexto}
           onRolarDano={rolarDanoSalvaguarda}
           onFechar={() => setTelaSalvaguarda(null)}

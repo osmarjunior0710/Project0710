@@ -16,6 +16,9 @@ interface ReacaoPanelContentProps {
    * `magia.circulo`. */
   onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
   gastarSlotCirculo: (circulo: number) => boolean;
+  /** Nível do personagem — pro Aprimoramento de Truque (dano escala
+   * nos níveis 5/11/17, ver `calcularDanoMagia`). */
+  nivel: number;
   conjura: boolean;
   magiasReacao: Magia[];
   modAcertoConjuracao: number | null;
@@ -40,6 +43,7 @@ export default function ReacaoPanelContent({
   onEscolher,
   onAbrirSalvaguarda,
   gastarSlotCirculo,
+  nivel,
   conjura,
   magiasReacao,
   modAcertoConjuracao,
@@ -76,7 +80,7 @@ export default function ReacaoPanelContent({
         formula: `1d20 + ${modAcertoConjuracao}`,
         mod: modAcertoConjuracao,
       });
-      const dano = calcularDanoMagia(m, m.circulo);
+      const dano = calcularDanoMagia(m, m.circulo, nivel);
       if (dano) {
         onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano.', {
           label: `Dano — ✨ ${m.nome}`,

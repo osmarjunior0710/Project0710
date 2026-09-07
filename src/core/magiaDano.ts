@@ -27,18 +27,39 @@ function parsearDado(dado: string): DadoParseado | null {
   return { quantidade: Number(m[1]), lados: Number(m[2]), mod: m[3] ? Number(m[3]) : 0 };
 }
 
+/** Nº de "Aprimoramento de Truque" já alcançados pelo nível do
+ * PERSONAGEM (0-3, nos níveis 5/11/17) — mesma tabela pra toda magia
+ * com `escalaTruqueTipo: "dado"`, ver comentário desse campo em
+ * `data/rulesets/dnd2024/magias.ts`. */
+function tiersDeAprimoramentoTruque(nivelPersonagem: number): number {
+  if (nivelPersonagem >= 17) return 3;
+  if (nivelPersonagem >= 11) return 2;
+  if (nivelPersonagem >= 5) return 1;
+  return 0;
+}
+
 /** Combina `danoBaseDado`/`danoBaseTipo` da magia com o Upcast
  * estruturado (`upcastTipo`/`upcastCirculoBase`/`upcastDado`/
- * `upcastFlat`) pro círculo de espaço de magia usado — ver
- * PENDENCIAS.md "Motor de rolagem de dano de Magia". `null` quando a
- * magia não causa dano direto num alvo (`danoBaseDado` ausente) ou o
- * texto do dado não segue o formato "NdM" / "NdM + F" esperado. */
-export function calcularDanoMagia(magia: Magia, circuloUsado: number): CalculoDanoMagia | null {
+ * `upcastFlat`) pro círculo de espaço de magia usado, e com
+ * "Aprimoramento de Truque" (`escalaTruqueTipo`) pro nível do
+ * personagem — ver PENDENCIAS.md "Motor de rolagem de dano de Magia".
+ * `null` quando a magia não causa dano direto num alvo (`danoBaseDado`
+ * ausente) ou o texto do dado não segue o formato "NdM" / "NdM + F"
+ * esperado. Upcast (círculo) e Aprimoramento de Truque (nível) nunca
+ * coexistem na mesma magia hoje (truque nunca tem `upcastTipo`), mas a
+ * ordem abaixo — truque primeiro, upcast depois — deixa o resultado
+ * certo mesmo se isso mudar. */
+export function calcularDanoMagia(magia: Magia, circuloUsado: number, nivelPersonagem: number): CalculoDanoMagia | null {
   if (!magia.danoBaseDado) return null;
   const base = parsearDado(magia.danoBaseDado);
   if (!base) return null;
 
-  const resultadoBase: CalculoDanoMagia = { ...base, tipo: magia.danoBaseTipo, upcastNaoAutomatico: false };
+  const baseEscalada: DadoParseado =
+    magia.escalaTruqueTipo === 'dado'
+      ? { ...base, quantidade: base.quantidade + tiersDeAprimoramentoTruque(nivelPersonagem) }
+      : base;
+
+  const resultadoBase: CalculoDanoMagia = { ...baseEscalada, tipo: magia.danoBaseTipo, upcastNaoAutomatico: false };
 
   if (!magia.upcastTipo) return resultadoBase;
 
@@ -48,11 +69,11 @@ export function calcularDanoMagia(magia: Magia, circuloUsado: number): CalculoDa
 
   if (magia.upcastTipo === 'dado-por-circulo' && magia.upcastDado) {
     const extra = parsearDado(magia.upcastDado);
-    if (extra && extra.lados === base.lados) {
+    if (extra && extra.lados === baseEscalada.lados) {
       return {
-        quantidade: base.quantidade + extra.quantidade * niveisAcima,
-        lados: base.lados,
-        mod: base.mod + extra.mod * niveisAcima,
+        quantidade: baseEscalada.quantidade + extra.quantidade * niveisAcima,
+        lados: baseEscalada.lados,
+        mod: baseEscalada.mod + extra.mod * niveisAcima,
         tipo: magia.danoBaseTipo,
         upcastNaoAutomatico: false,
       };
@@ -61,16 +82,17 @@ export function calcularDanoMagia(magia: Magia, circuloUsado: number): CalculoDa
 
   if (magia.upcastTipo === 'flat-por-circulo' && magia.upcastFlat != null) {
     return {
-      quantidade: base.quantidade,
-      lados: base.lados,
-      mod: base.mod + magia.upcastFlat * niveisAcima,
+      quantidade: baseEscalada.quantidade,
+      lados: baseEscalada.lados,
+      mod: baseEscalada.mod + magia.upcastFlat * niveisAcima,
       tipo: magia.danoBaseTipo,
       upcastNaoAutomatico: false,
     };
   }
 
   // 'alvo-por-circulo' só aumenta o nº de alvos atingidos — o dado por
-  // alvo não muda, então o Dano Base já é o resultado final.
+  // alvo não muda, então o Dano Base (já escalado por truque, se for o
+  // caso) já é o resultado final.
   if (magia.upcastTipo === 'alvo-por-circulo') return resultadoBase;
 
   // 'formula-propria' | 'outro', ou 'dado-por-circulo'/'flat-por-circulo'

@@ -249,16 +249,41 @@ Jogador, "A a I" e "I a Z" — juntos cobrem as 390 magias).
       imediatamente, painel fecha, popup abre por cima com CD e dano
       corretos). `npx tsc -b`, `npm test` (235 passando) e `npm run
       build` OK.
-- [ ] **5.4 Achado (não travante) — Escala de truque por nível de
-      personagem (5/11/17).** Descoberto testando o 5.2 ao vivo: quase
-      todo truque com dano tem "Aprimoramento de Truque" no livro
-      (dano/nº de raios aumenta nos níveis 5/11/17 do PERSONAGEM, não
-      do círculo gasto — Upcast é só pra magia preparada/espaço de
-      magia). `calcularDanoMagia` hoje NUNCA aplica isso — um Bruxo
-      nível 20 usando Toque Necrótico ainda rola só 1d10, deveria ser
-      4d10. Não é estrutural (não depende de nada que falte) —
-      resolvível dentro deste foco, análogo ao que já foi feito pro
-      Upcast (nova coluna estruturada tipo `EscalaTruque_Nivel5/11/17`
-      + campo no `.ts` + soma em `calcularDanoMagia` recebendo o nível
-      do personagem). Vira o próximo item do foco quando o Osmar
-      confirmar prioridade.
+- [x] **5.4 Escala de truque por nível de personagem (5/11/17) —
+      FEITA.** Lido direto de `descricaoCompleta` (já importado, sem
+      reler PDF): 34 truques têm círculo 0, 20 têm "Aprimoramento de
+      Truque"; desses, 16 seguem um padrão uniforme e simples — soma 1
+      dado do MESMO tamanho de `danoBaseDado` por nível 5/11/17 do
+      PERSONAGEM (nunca do círculo, que truque não tem). Os outros 4
+      são exceções que NÃO entram nesse mecanismo (verificadas 1 a 1,
+      texto na cabeça do `magias.ts`):
+  - **Acudir os Moribundos** — escala é alcance, não dano (não tem
+        `danoBaseDado`, nada a fazer).
+  - **Bordão Místico** — o TIPO de dado muda (1d6→1d10→1d12→2d6), não
+        soma quantidade — já tinha `danoBaseDado: null` de uma
+        auditoria anterior, continua fora.
+  - **Golpe Certeiro** — soma dado Radiante a um ataque de ARMA, não
+        ao dado da própria magia — já tinha `danoBaseDado: null`,
+        continua fora (não é dano de magia, é bônus de arma).
+  - **Raio Místico** — cria FEIXES extras (jogadas de ataque
+        separadas), não soma dado numa rolagem só — mecânica diferente
+        (múltiplos ataques, como "Ataque Extra" de arma), não modelada
+        ainda. Registrado no cabeçalho do `magias.ts` e aqui; se o
+        Osmar quiser isso automatizado, é um foco novo (UI de
+        "ataque 2/3/4", não um campo de dado).
+      Campo novo `escalaTruqueTipo: 'dado' | null` na interface
+      `Magia` + planilha (`EscalaTruque_Tipo`, preenchida por Nome,
+      igual todo o resto), 16/391 com `"dado"`. `calcularDanoMagia`
+      ganhou 3º parâmetro obrigatório `nivelPersonagem` — soma os
+      dados de truque ANTES de aplicar Upcast (as 2 mecânicas nunca
+      coexistem hoje, mas a ordem já deixa certo se um dia coexistirem).
+      Os 4 pontos que chamam a função (`MagiasTab`, `AcaoPanelContent`,
+      `ReacaoPanelContent`, `CombatTab`) passaram a receber/propagar
+      `nivel`. Testado ao vivo (Chromium 390×844): Bruxo nível 20
+      usando Rajada de Veneno (truque, base 1d12) — dano rolado
+      corretamente em 4d12 (era 1d12 antes da correção). 6 testes
+      novos em `magiaDano.test.ts` cobrindo os 4 patamares (nível
+      1-4/5-10/11-16/17+) e confirmando que Raio Místico (sem
+      `escalaTruqueTipo`) e magia preparada (círculo > 0) não escalam
+      por nível. `npx tsc -b`, `npm test` (241 passando) e `npm run
+      build` OK.

@@ -308,7 +308,7 @@ export default function CombatTab({
 
   function rolarDanoSalvaguarda() {
     if (!telaSalvaguarda) return;
-    const dano = calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado);
+    const dano = calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel);
     setTelaSalvaguarda(null);
     if (!dano) return;
     rolarDados({
@@ -848,6 +848,7 @@ export default function CombatTab({
             onAtacar={registrarAtaque}
             onAbrirSalvaguarda={abrirSalvaguarda}
             gastarSlotCirculo={onGastarSlotCirculo}
+            nivel={nivel}
             espacos={espacos}
             espacosGastosPorCirculo={espacosGastosPorCirculo}
             conjura={conjura}
@@ -919,6 +920,7 @@ export default function CombatTab({
             onEscolher={(nome, desc, dano) => escolherNoPainel('reacao', nome, desc, dano)}
             onAbrirSalvaguarda={abrirSalvaguarda}
             gastarSlotCirculo={onGastarSlotCirculo}
+            nivel={nivel}
             conjura={conjura}
             magiasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
@@ -961,7 +963,7 @@ export default function CombatTab({
           cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
           textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
           textoFalha={telaSalvaguarda.magia.salvaguardaFalha}
-          dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado)}
+          dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}
           upcastTexto={telaSalvaguarda.magia.upcastTexto}
           onRolarDano={rolarDanoSalvaguarda}
           onFechar={() => setTelaSalvaguarda(null)}

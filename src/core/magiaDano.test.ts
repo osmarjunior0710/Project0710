@@ -10,11 +10,11 @@ function magia(id: string) {
 
 describe('calcularDanoMagia', () => {
   it('magia sem danoBaseDado (não causa dano direto) — null', () => {
-    expect(calcularDanoMagia(magia('luz'), 0)).toBeNull();
+    expect(calcularDanoMagia(magia('luz'), 0, 1)).toBeNull();
   });
 
-  it('magia sem upcast, conjurada no próprio círculo (Chama Sagrada, truque) — Dano Base sem alteração', () => {
-    expect(calcularDanoMagia(magia('chamasagrada'), 0)).toEqual({
+  it('magia sem upcast, conjurada no próprio círculo (Chama Sagrada, truque, nível 1) — Dano Base sem alteração', () => {
+    expect(calcularDanoMagia(magia('chamasagrada'), 0, 1)).toEqual({
       quantidade: 1,
       lados: 8,
       mod: 0,
@@ -24,7 +24,7 @@ describe('calcularDanoMagia', () => {
   });
 
   it('upcast "Dado por Círculo" acima do círculo base (Bola de Fogo, 3º círculo base, +1d6/círculo) — soma corretamente', () => {
-    expect(calcularDanoMagia(magia('boladefogo'), 5)).toEqual({
+    expect(calcularDanoMagia(magia('boladefogo'), 5, 1)).toEqual({
       quantidade: 10,
       lados: 6,
       mod: 0,
@@ -34,7 +34,7 @@ describe('calcularDanoMagia', () => {
   });
 
   it('upcast "Dado por Círculo" conjurada no próprio círculo base — sem bônus (níveisAcima = 0)', () => {
-    expect(calcularDanoMagia(magia('boladefogo'), 3)).toEqual({
+    expect(calcularDanoMagia(magia('boladefogo'), 3, 1)).toEqual({
       quantidade: 8,
       lados: 6,
       mod: 0,
@@ -44,7 +44,7 @@ describe('calcularDanoMagia', () => {
   });
 
   it('upcast tipo "outro" (Danação/Hex) acima do círculo base — não soma sozinho, avisa upcastNaoAutomatico', () => {
-    const resultado = calcularDanoMagia(magia('danacao'), 3);
+    const resultado = calcularDanoMagia(magia('danacao'), 3, 1);
     expect(resultado).not.toBeNull();
     expect(resultado?.upcastNaoAutomatico).toBe(true);
     expect(resultado?.quantidade).toBe(1);
@@ -52,13 +52,54 @@ describe('calcularDanoMagia', () => {
   });
 
   it('upcast tipo "outro", conjurada no próprio círculo base — Dano Base normal, sem aviso', () => {
-    const resultado = calcularDanoMagia(magia('danacao'), 1);
+    const resultado = calcularDanoMagia(magia('danacao'), 1, 1);
     expect(resultado).toEqual({
       quantidade: 1,
       lados: 6,
       mod: 0,
       tipo: 'Necrótico',
       upcastNaoAutomatico: false,
+    });
+  });
+
+  describe('Aprimoramento de Truque (escalaTruqueTipo "dado", por nível do personagem)', () => {
+    it('nível 1-4 (abaixo do 1º patamar) — Dano Base sem alteração (Chama Sagrada)', () => {
+      expect(calcularDanoMagia(magia('chamasagrada'), 0, 4)?.quantidade).toBe(1);
+    });
+
+    it('nível 5-10 (1º patamar) — +1 dado (Chama Sagrada, 1d8 → 2d8)', () => {
+      expect(calcularDanoMagia(magia('chamasagrada'), 0, 5)).toEqual({
+        quantidade: 2,
+        lados: 8,
+        mod: 0,
+        tipo: 'Radiante',
+        upcastNaoAutomatico: false,
+      });
+      expect(calcularDanoMagia(magia('chamasagrada'), 0, 10)?.quantidade).toBe(2);
+    });
+
+    it('nível 11-16 (2º patamar) — +2 dados (Chama Sagrada, 1d8 → 3d8)', () => {
+      expect(calcularDanoMagia(magia('chamasagrada'), 0, 11)?.quantidade).toBe(3);
+      expect(calcularDanoMagia(magia('chamasagrada'), 0, 16)?.quantidade).toBe(3);
+    });
+
+    it('nível 17+ (3º patamar, teto) — +3 dados (Chama Sagrada, 1d8 → 4d8)', () => {
+      expect(calcularDanoMagia(magia('chamasagrada'), 0, 17)?.quantidade).toBe(4);
+      expect(calcularDanoMagia(magia('chamasagrada'), 0, 20)?.quantidade).toBe(4);
+    });
+
+    it('truque SEM escalaTruqueTipo (Raio Místico cria feixes extras, não soma dado) — nível alto não altera o dado', () => {
+      expect(calcularDanoMagia(magia('raiomistico'), 0, 20)).toEqual({
+        quantidade: 1,
+        lados: 10,
+        mod: 0,
+        tipo: 'Energético',
+        upcastNaoAutomatico: false,
+      });
+    });
+
+    it('magia preparada (círculo > 0) nunca escala por nível — só Upcast por círculo (Bola de Fogo, nível 20)', () => {
+      expect(calcularDanoMagia(magia('boladefogo'), 3, 20)?.quantidade).toBe(8);
     });
   });
 });
