@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1859
+
+Corrigido: quem tem Conjurador Ritualista E Espaços de Magia de
+verdade (não só Guerreiro) não fica mais travado depois de usar o
+Ritual Rápido — a magia Ritual agora mostra os 2 botões lado a lado
+("Grátis" e "Usar"), e gastar o grátis não bloqueia conjurar de novo
+pagando um Espaço.
+
 ## v202609_1832
 
 Aba Magias — as magias Rituais do Conjurador Ritualista (Alarme/

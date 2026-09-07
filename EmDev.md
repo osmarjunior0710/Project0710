@@ -219,21 +219,26 @@ Grupos propostos e aprovados pelo Osmar:
         (2/3)" com Alarme/Identificar travadas como "já escolhida" →
         escolhe Detectar Magia → confirma → aba Magias mostra as 3
         magias sempre preparadas).
-  - [x] **B.4.3.2 — Botão "Usar grátis" nas magias Rituais elegíveis**
-        (pedido do Osmar ao ver o Ritual Rápido pronto, evoluído em 2
-        rodadas): na seção "Magias de Talentos Gerais", a magia com
-        tag Ritual (`elegivelRitualRapido = ritualRapidoDisponivel &&
-        m.tempoConjuracao?.includes('Ritual')`) ganha botão PRÓPRIO
-        "Usar grátis" (mesma cor roxa do pip do Ritual Rápido,
-        `usarBtnRitual`) que ATIVA direto o Ritual Rápido pra aquela
-        magia (`onUsarRitualRapido`) — não precisa mais descer até o
-        botão genérico da seção dedicada. Como é o MESMO uso
-        compartilhado (`ritualRapidoGasto`), usar em qualquer uma trava
-        as outras E o botão genérico junto (mesmo estado, sem
-        duplicar). Verificado: `tsc -b`/`npm test` (290)/`npm run
-        build` limpos + Playwright (Alarme e Identificar mostram "Usar
-        grátis" roxo → toca em Alarme → os 2 viram "Usada" e o botão
-        "Usar Ritual Rápido" logo abaixo desativa junto).
+  - [x] **B.4.3.2 — Botão "Grátis" nas magias Rituais elegíveis, sem
+        perder o "Usar" normal** (pedido do Osmar ao ver o Ritual
+        Rápido pronto, evoluído em 3 rodadas — a 2ª versão tinha
+        REMOVIDO sem querer o jeito de conjurar gastando Espaço pra
+        quem tem Espaços de verdade, ex.: um conjurador de verdade com
+        esse talento, não só Guerreiro): na seção "Magias de Talentos
+        Gerais", a magia com tag Ritual
+        (`elegivelRitualRapido = ritualRapidoDisponivel &&
+        m.tempoConjuracao?.includes('Ritual')`) mostra os DOIS botões
+        lado a lado — "Grátis" (roxo, `usarBtnRitual`, ativa o Ritual
+        Rápido pra essa magia, `onUsarRitualRapido`) e "Usar" (segue
+        gastando Espaço normal, `usarMagia`) — independentes: gastar o
+        grátis não trava o "Usar" de quem tem Espaço sobrando. "Grátis"
+        e o botão genérico da seção "Ritual Rápido" continuam
+        compartilhando o mesmo estado (`ritualRapidoGasto`). Verificado:
+        `tsc -b`/`npm test` (290)/`npm run build` limpos + Playwright
+        (Bardo com Conjurador Ritualista e Espaços de 1º círculo
+        sobrando → Alarme mostra "Grátis"+"Usar" lado a lado → toca
+        "Grátis" → vira "Usada" (cinza) mas "Usar" continua ativo,
+        pronto pra gastar Espaço de verdade).
 - [ ] **B.5 — Escolha de perícia**: Analítico, Mente Aguçada,
       Especialista em Perícia — reaproveita o padrão do Habilidoso
       (`concedeProficiencias`).
