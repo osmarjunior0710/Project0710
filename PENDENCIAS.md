@@ -1102,11 +1102,13 @@ Subclasse no step do Level Up em `LevelUpShell.tsx`, Origem em
 `OrigemStep.tsx`, Espécie em `EspecieStep.tsx`) reimplementam cada uma
 por conta própria o mesmo miolo — `.opt-card` com `.opt-card-row`
 (ícone + `.opt-card-info` com nome/descrição) — mas com pequenas
-diferenças bobas entre elas (Classe/Subclasse usam `IconeClasse` com
-arte real; Origem/Espécie ainda usam um placeholder `🖼` genérico
-porque não têm arte própria; cada uma trata "(em breve)"/duplicidade/
-tags à sua moda). Ele quer um componente/padrão único de "cartão de
-seleção" que sirva pras 4 (e futuras, tipo Talentos), com:
+diferenças bobas entre elas (Classe/Subclasse usam `IconeClasse` e
+Espécie usa `IconeEspecie` — ambas com arte real, ver
+DECISOES-DESIGN.md "Ícones de Classe completos + Espécie ganha o
+mesmo padrão"; só Origem ainda usa um placeholder `🖼` genérico,
+sem arte própria; cada uma trata "(em breve)"/duplicidade/tags à sua
+moda). Ele quer um componente/padrão único de "cartão de seleção" que
+sirva pras 4 (e futuras, tipo Talentos), com:
 - **Destaque maior pro ícone** (hoje é pequeno e não é o foco visual
   do cartão).
 - **Texto que caiba e faça sentido** por contexto — nome sempre,

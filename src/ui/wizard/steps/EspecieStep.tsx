@@ -1,4 +1,5 @@
 import { especies } from '../../../data/rulesets/dnd2024/especies';
+import IconeEspecie from '../../components/IconeEspecie';
 import type { StepProps } from './StepProps';
 
 const especiesOrdenadas = [...especies].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
@@ -14,7 +15,7 @@ export default function EspecieStep({ selection, update }: StepProps) {
           onClick={() => e.disponivel && update({ especie: e.nome })}
         >
           <div className="opt-card-row">
-            <div className="opt-card-img">🖼</div>
+            <IconeEspecie id={e.id} />
             <div className="opt-card-info">
               <div className="opt-card-name">
                 {e.nome}

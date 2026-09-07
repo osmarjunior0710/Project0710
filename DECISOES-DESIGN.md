@@ -771,6 +771,47 @@ troca de formato; confirmado pelo próprio Osmar.
 
 **Data/origem:** 2026-08.
 
+## Ícones de Classe completos + Espécie ganha o mesmo padrão (`IconeEspecie`)
+
+**O que é:** o Osmar mandou arte própria (512×512, fundo transparente,
+mesmo estilo emblema-redondo) pras 10 Classes do livro (as 3 já
+implementadas — Guerreiro/Bardo/Bruxo — mais as 7 "em breve") e pras
+10 Espécies do livro (todas ainda placeholder `🖼` genérico, nenhuma
+tinha arte própria até aqui).
+
+**Classes — substituição, não adição:** as 7 classes "em breve"
+(`CLASSES_EM_BREVE` em `ClasseStep.tsx`) usavam uma CÓPIA física do
+arquivo do Guerreiro como placeholder de arte (ver "Ícones de
+classe/subclasse viram WebP" acima, "Achado no processo") — não o
+emoji 🖼. Substituir o arquivo `{id}-banner.webp` de cada uma pelo
+arquivo novo bastou; zero mudança de código, `IconeClasse.tsx` já lia
+por esse nome. Também recebeu arte um `psionico-banner.webp` — salvo
+no mesmo padrão, mas **NÃO ligado a nenhuma tela**: Psiônico é
+conteúdo Unearthed Arcana (não-oficial), fora do escopo do produto
+(CLAUDE.md seção 9 "só D&D 5e regras 2024", mesmo motivo que já
+excluiu a aba "Magias — UA Psion" da importação) — o arquivo fica
+pronto caso o escopo mude um dia, sem criar uma entrada "(em breve)"
+que sugeriria suporte futuro à classe.
+
+**Espécie — padrão novo, mesmo molde de Classe:** `IconeEspecie.tsx`
+(componente novo, `ui/components/`) é uma cópia estrutural exata de
+`IconeClasse.tsx` — mesmo glob (`import.meta.glob` eager), mesma
+convenção de nome (`{id}-banner.webp`), mesma classe CSS
+`opt-card-img-emblema`, mesmo fallback `🖼` quando não há arte — só
+aponta pra pasta própria (`assets/icones-especies/`) em vez de
+reaproveitar a de Classe (categorias diferentes, mesmo padrão
+visual). Ligado em `EspecieStep.tsx` (única tela que mostra Espécie
+com ícone hoje). Todas as 10 espécies do livro ganharam arte de uma
+vez (Aasimar, Anão, Draconato, Elfo, Gnomo, Golias, Humano, Orc,
+Pequenino, Tiferino) — não sobrou nenhuma com `🖼` genérico.
+
+**Reaproveitável pra Origem quando ganhar arte própria:** mesmo passo
+a passo — pasta `assets/icones-origens/`, componente `IconeOrigem.tsx`
+cópia do molde, plugar em `OrigemStep.tsx` (ainda usa `🖼` hoje, ver
+PENDENCIAS.md/Backlog.md se houver entrada).
+
+**Data/origem:** 2026-09.
+
 ## Ticks/pips padronizados: sempre esvazia de trás pra frente ("tanque de combustível")
 
 **Regra única pedida pelo Osmar, pra todo lugar que mostra "N usos,
