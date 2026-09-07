@@ -16,7 +16,7 @@
 
 ---
 
-## Foco: Mago (classe base) + Necromante (subclasse homebrew)
+## Foco: Mago (classe base) + Motor de Pets/Familiar + Necromante (subclasse homebrew)
 
 **Pedido do Osmar:** implementar a classe Mago inteira primeiro, depois
 a subclasse homebrew Necromante (ainda não é regra oficial — tudo dela
@@ -83,19 +83,29 @@ características (nv 3, 3, 6, 6, 10, 14):**
   controlados; Reação de explosão necrótica (dano em área + CD) quando
   um Morto-Vivo controlado é reduzido a 0 PV.
 
-**Bloqueio estrutural já identificado (avisar antes de chegar na Fase
-B, não é surpresa de última hora):** a maioria das características do
-Necromante depende de "criatura convocada/controlada pelo personagem"
-existir no app (Familiar, Mortos-Vivos de Animar Mortos) — esse
-conceito **não existe** hoje (mesmo bloqueio já registrado em
-`PENDENCIAS.md` pro Familiar do Pacto da Corrente do Bruxo). Só dá pra
-implementar de verdade, sem esse sistema: Perito em Necromancia
-(magia grátis no grimório) e Resistência Necrótica (passiva simples).
-O resto (Colheita Macabra, Familiar Morto-Vivo, Poder Funesto inteiro
-menos a parte de Exaustão, Legião dos Mortos, Colheita dos Mortos,
-Mestre da Morte) trava estruturalmente até existir noção de "criatura
-sob controle do personagem" — vai virar pendência registrada quando a
-Fase B abrir, não bloqueia a Fase A (Mago base).
+**Pedido novo do Osmar (2026-09) — muda o plano, generaliza um bloqueio
+que já existia:** a maioria das características do Necromante depende
+de "criatura convocada/controlada pelo personagem" existir no app —
+mesmo conceito que já travava uma pendência do Bruxo (Pacto da
+Corrente/Familiar, registrada em `PENDENCIAS.md`). Em vez de resolver
+isso só pro Necromante, o Osmar pediu uma aba nova **"Pets"** (depois
+de Combate na barra de abas) como motor genérico de "Familiar e outras
+criaturas sob controle", pra servir Bruxo, Mago/Necromante e qualquer
+classe futura que conceda algo parecido — não é mais uma entrega
+isolada de uma subclasse. Vira uma fase própria (Fase P abaixo), entre
+a Fase A (Mago base, não depende disso) e a Fase B (Necromante, que
+passa a USAR o motor da Fase P em vez de reinventar).
+
+**Verificado na planilha — isso NÃO é mais bloqueio de dado, só de
+motor/UI:** a aba "Estatísticas de Criaturas" já tem **51 criaturas
+com stat block completo** (CA, Iniciativa, PV, Deslocamento, os 6
+atributos, Perícias, Resistências/Imunidades/Vulnerabilidades,
+Sentidos, ND, Traços, Ações, Ações Bônus, Reações, Fonte) — inclui as
+13 formas padrão de Encontrar Familiar (Morcego, Gato, Corvo, Coruja,
+Doninha, Rato, Aranha, Rã, Lagarto, Polvo, Caranguejo, Cobra
+Peçonhenta, Gavião) **e** as 2 formas especiais do Necromante
+(Esqueleto, Zumbi — stat block completo, conferido acima). Só falta
+construir o motor/UI que usa esse dado.
 
 ---
 
@@ -150,7 +160,42 @@ Fase B abrir, não bloqueia a Fase A (Mago base).
     fade-out. Personagem sem essa característica (ex: Bardo/Bruxo)
     não vê o prompt, só o fade normal.
 
-### FASE B — Necromante (subclasse homebrew, só depois da Fase A fechada)
+### FASE P — Motor de Familiar/Pet (genérico — Bruxo, Mago, qualquer
+classe futura), entre a Fase A e a Fase B
+
+**Por que entra aqui e não dentro do Necromante:** não depende de Mago
+pra existir (Bruxo já tem uma pendência real esperando por isso desde
+antes deste foco) — fazendo agora, a Fase B (Necromante) já nasce
+usando o motor pronto em vez de reinventar.
+
+- [ ] **P0 — decisões de escopo a confirmar com o Osmar antes de
+  codar** (característica nova com interação ativa — seção 6 do
+  CLAUDE.md pede perguntar onde fica/como ativa antes; o "onde" já
+  está decidido — aba Pets, depois de Combate — falta confirmar):
+  quantos pets simultâneos por personagem (proposta: schema em array
+  desde o início — hoje Bruxo usa só 1 posição, mas Legião dos Mortos
+  do Necromante permite vários Mortos-Vivos ao mesmo tempo, não vale a
+  pena fechar em "1 só" cedo); PV/CA do pet rastreável de verdade
+  (dano/cura, mesmo padrão -5/-1/+1/+5 já usado no personagem) — proposta:
+  sim, porque Colheita dos Mortos/Explosão Cadavérica do Necromante
+  (Fase B) só funcionam de verdade se o pet tiver PV de verdade que
+  chega a 0.
+- [ ] **P1 — Dados.** Importar a aba "Estatísticas de Criaturas" (51
+  criaturas) pra `data/rulesets/dnd2024/criaturas.ts`, mesmo padrão
+  1:1 dos outros imports (zero lógica aqui).
+- [ ] **P2 — Aba nova "Pets".** Entra em `FichaShell.tsx` (`TABS`,
+  depois de `combat`) — lista de pets do personagem, 1 card por pet
+  (nome escolhido pelo jogador + forma/criatura + CA/PV com barra +
+  atributos + ações reais, vindo de `criaturas.ts`).
+- [ ] **P3 — Fluxo de "ganhar"/remover um pet.** Escolher a forma
+  dentre as elegíveis pra aquela fonte (ex.: lista padrão de Encontrar
+  Familiar pro Bruxo) e desfazer o vínculo.
+- [ ] **P4 — Ligar ao Bruxo.** Pacto da Corrente (Invocação Mística já
+  existe no catálogo, hoje travada) passa a conceder Encontrar
+  Familiar de verdade pela aba Pets — fecha a pendência já registrada
+  em `PENDENCIAS.md`.
+
+### FASE B — Necromante (subclasse homebrew, só depois das Fases A e P fechadas)
 
 - [ ] **B0 — Convenção de marcação "homebrew".** Proposta a confirmar
   com o Osmar antes de codar (mesmo espírito do `[PH]`, seção 12 do
@@ -165,19 +210,28 @@ Fase B abrir, não bloqueia a Fase A (Mago base).
 - [ ] **B1 — Dados.** `subclasses.ts` (Necromante, `homebrew: true`);
   `caracteristicasSubclasse.ts` (6 características reais, extraídas
   do PDF homebrew — texto já lido e transcrito acima).
-- [ ] **B2 — Mecânica possível hoje.** Perito em Necromancia (2 magias
-  de Necromancia grátis no grimório ao pegar a subclasse + 1 a cada
-  novo círculo de espaço) e Resistência Necrótica (passiva simples).
-- [ ] **B3 — Registrar bloqueio estrutural em PENDENCIAS.md.** O resto
-  das características do Necromante (Colheita Macabra, Familiar
-  Morto-Vivo, Poder Funesto/Necrose Avassaladora, Legião dos Mortos,
-  Colheita dos Mortos, Mestre da Morte) trava em "criatura sob
-  controle do personagem" não existir no app — mover pra
-  `PENDENCIAS.md` no fechamento desta fase, junto com o bloqueio
-  gêmeo já registrado lá pro Familiar do Bruxo (mesma trava, unificar
-  se fizer sentido).
+- [ ] **B2 — Mecânica simples (sem depender da Fase P).** Perito em
+  Necromancia (2 magias de Necromancia grátis no grimório ao pegar a
+  subclasse + 1 a cada novo círculo de espaço) e Resistência Necrótica
+  (passiva simples).
+- [ ] **B3 — Mecânica que usa o motor de Pets (Fase P já fechada).**
+  Familiar Morto-Vivo (Encontrar Familiar com formas especiais
+  Esqueleto/Zumbi), Colheita Macabra (cura o pet ao conjurar magia de
+  Necromancia com espaço), Legião dos Mortos (Animar Mortos, múltiplos
+  Mortos-Vivos simultâneos com bônus), Colheita dos Mortos (Reação,
+  zera PV do pet e cura o personagem), Mestre da Morte (PV Temp em
+  massa + explosão ao pet chegar a 0 PV) — todas viram possíveis assim
+  que a Fase P existir, sem bloqueio estrutural novo.
+- [ ] **B4 — Poder Funesto, parte sem motor novo.** Recuperação
+  Arcana também reduz Exaustão em 1 (reaproveita o campo de Exaustão
+  já existente, se houver) e Necrose Avassaladora (dano de Necromancia
+  ignora resistência — depende do motor de dano de magia por tipo,
+  registrar em `PENDENCIAS.md` se não existir ainda, mesma trava já
+  conhecida do talento Adepto Elemental no `Backlog.md`).
 
 ---
 
 **Próximo passo:** aguardando o Osmar confirmar este plano (ou pedir
 ajuste) antes de começar a escrever qualquer código, começando por A1.
+Sequência das 3 fases: **A (Mago base) → P (Pets/Familiar, genérico)
+→ B (Necromante, usando o motor da P)**.
