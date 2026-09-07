@@ -111,15 +111,23 @@ construir o motor/UI que usa esse dado.
 
 ### FASE A — Mago, classe base (fazer primeiro, sequência pedida pelo Osmar)
 
-- [ ] **A1 — Dados.** `classes.ts` (núcleo + progressão + recursos:
+- [x] **A1 — Dados.** `classes.ts` (núcleo + progressão + recursos:
   Truques/Magias Preparadas/9 Espaços de Magia por círculo, mesmo
   padrão de array-por-círculo do Bardo); `caracteristicasClasse.ts`
-  (8 características reais acima); `classesProficienciasIniciais.ts`
-  (2 perícias de 7 opções + equipamento A/B). Schema NOVO: Livro de
-  Magias — provável novo array `livroDeMagiasAtual: string[]` (mesmo
-  padrão de "coleção que cresce sozinha" já usado no Conjurador
-  Ritualista) + novo `core/livroDeMagias.ts` com
-  `tamanhoLivroDeMagias(nivel)` (6 no nv1, +2 por nível depois).
+  (10 linhas de característica — 8 nomes distintos, 3 no nível 1);
+  `classesProficienciasIniciais.ts` (2 perícias de 7 opções +
+  equipamento A/B). **Ajuste em cima do plano:** o "Livro de Magias"
+  não precisou de `core/` novo — virou só mais um `RecursoClasse`
+  ("Livro de Magias (quantidade)", 6 no nv1 + 2 por nível depois),
+  lido pelo `valorRecursoClasse` genérico que já existe (mesmo usado
+  por Truques Conhecidos/Magias Preparadas) — nenhum motor novo
+  necessário ainda (só quando a Ficha precisar de fato separar "no
+  grimório" de "preparada", na A3+). `mago.disponivel = false` por
+  enquanto (Wizard/Ficha ainda não usam esse dado — ativa no fim da
+  A2). `npx tsc --noEmit`, `npm test -- --run` (290 passando) e
+  `npm run build` verdes. **Não é testável na tela ainda** (Mago
+  continua fora da lista de classes do wizard até a A2) — só dado
+  puro importado.
 - [ ] **A2 — Wizard.** Criação de Mago nível 1: 2 perícias, 3 truques,
   escolher 6 magias de 1º círculo pro grimório, depois escolher 4
   dessas 6 como preparadas hoje, equipamento A/B.

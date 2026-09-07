@@ -313,4 +313,146 @@ export const classes: Classe[] = [
     disponivel: true,
     fonte: FONTE,
   },
+  {
+    id: 'mago',
+    nome: 'Mago',
+    atributoPrimario: 'Inteligência',
+    dadoDeVida: 'd6',
+    salvaguardas: ['INT', 'SAB'],
+    nivelSubclasse: 3,
+    recursos: [
+      {
+        // Camada nova — pool de magias CONHECIDAS (grimório), maior que
+        // as Magias Preparadas do dia a dia (ver DECISOES-CLASSES.md
+        // "Casters", Padrão C). Começa com 6 no nível 1, +2 por nível
+        // depois — lido pelo mesmo `valorRecursoClasse` genérico já
+        // usado por Truques Conhecidos/Magias Preparadas, sem precisar
+        // de core module novo.
+        nome: 'Livro de Magias (quantidade)',
+        recuperaEm: null,
+        valorPorNivel: {
+          1: 6, 2: 8, 3: 10, 4: 12, 5: 14, 6: 16, 7: 18, 8: 20, 9: 22, 10: 24,
+          11: 26, 12: 28, 13: 30, 14: 32, 15: 34, 16: 36, 17: 38, 18: 40, 19: 42, 20: 44,
+        },
+      },
+      {
+        nome: 'Truques Conhecidos',
+        recuperaEm: null,
+        valorPorNivel: {
+          1: 3, 2: 3, 3: 3, 4: 4, 5: 4, 6: 4, 7: 4, 8: 4, 9: 4, 10: 5,
+          11: 5, 12: 5, 13: 5, 14: 5, 15: 5, 16: 5, 17: 5, 18: 5, 19: 5, 20: 5,
+        },
+      },
+      {
+        nome: 'Magias Preparadas',
+        recuperaEm: null,
+        valorPorNivel: {
+          1: 4, 2: 5, 3: 6, 4: 7, 5: 9, 6: 10, 7: 11, 8: 12, 9: 14, 10: 15,
+          11: 16, 12: 16, 13: 17, 14: 18, 15: 19, 16: 21, 17: 22, 18: 23, 19: 24, 20: 25,
+        },
+      },
+      {
+        // Tabela de Espaços de Magia por círculo idêntica à do Bardo
+        // (progressão universal de conjurador completo em D&D 5e 2024)
+        // — mesmos valores, só copiados pra cá.
+        nome: 'Espaços de Magia — 1º Círculo',
+        recuperaEm: 'Descanso Longo',
+        valorPorNivel: {
+          1: 2, 2: 3, 3: 4, 4: 4, 5: 4, 6: 4, 7: 4, 8: 4, 9: 4, 10: 4,
+          11: 4, 12: 4, 13: 4, 14: 4, 15: 4, 16: 4, 17: 4, 18: 4, 19: 4, 20: 4,
+        },
+      },
+      {
+        nome: 'Espaços de Magia — 2º Círculo',
+        recuperaEm: 'Descanso Longo',
+        valorPorNivel: {
+          1: 0, 2: 0, 3: 2, 4: 3, 5: 3, 6: 3, 7: 3, 8: 3, 9: 3, 10: 3,
+          11: 3, 12: 3, 13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3, 19: 3, 20: 3,
+        },
+      },
+      {
+        nome: 'Espaços de Magia — 3º Círculo',
+        recuperaEm: 'Descanso Longo',
+        valorPorNivel: {
+          1: 0, 2: 0, 3: 0, 4: 0, 5: 2, 6: 3, 7: 3, 8: 3, 9: 3, 10: 3,
+          11: 3, 12: 3, 13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3, 19: 3, 20: 3,
+        },
+      },
+      {
+        nome: 'Espaços de Magia — 4º Círculo',
+        recuperaEm: 'Descanso Longo',
+        valorPorNivel: {
+          1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 1, 8: 2, 9: 3, 10: 3,
+          11: 3, 12: 3, 13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3, 19: 3, 20: 3,
+        },
+      },
+      {
+        nome: 'Espaços de Magia — 5º Círculo',
+        recuperaEm: 'Descanso Longo',
+        valorPorNivel: {
+          1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 1, 10: 2,
+          11: 2, 12: 2, 13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 3, 19: 3, 20: 3,
+        },
+      },
+      {
+        nome: 'Espaços de Magia — 6º Círculo',
+        recuperaEm: 'Descanso Longo',
+        valorPorNivel: {
+          1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0,
+          11: 1, 12: 1, 13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1, 19: 2, 20: 2,
+        },
+      },
+      {
+        nome: 'Espaços de Magia — 7º Círculo',
+        recuperaEm: 'Descanso Longo',
+        valorPorNivel: {
+          1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0,
+          11: 0, 12: 0, 13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1, 19: 1, 20: 2,
+        },
+      },
+      {
+        nome: 'Espaços de Magia — 8º Círculo',
+        recuperaEm: 'Descanso Longo',
+        valorPorNivel: {
+          1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0,
+          11: 0, 12: 0, 13: 0, 14: 0, 15: 1, 16: 1, 17: 1, 18: 1, 19: 1, 20: 1,
+        },
+      },
+      {
+        nome: 'Espaços de Magia — 9º Círculo',
+        recuperaEm: 'Descanso Longo',
+        valorPorNivel: {
+          1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0,
+          11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 1, 18: 1, 19: 1, 20: 1,
+        },
+      },
+    ],
+    progressao: [
+      { nivel: 1, bonusProficiencia: '+2', caracteristicas: ['Adepto de Ritual', 'Conjuração', 'Recuperação Arcana'] },
+      { nivel: 2, bonusProficiencia: '+2', caracteristicas: ['Acadêmico'] },
+      { nivel: 3, bonusProficiencia: '+2', caracteristicas: ['Subclasse de Mago'] },
+      { nivel: 4, bonusProficiencia: '+2', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 5, bonusProficiencia: '+3', caracteristicas: ['Memorizar Magia'] },
+      { nivel: 6, bonusProficiencia: '+3', caracteristicas: ['Característica de Subclasse'] },
+      { nivel: 7, bonusProficiencia: '+3', caracteristicas: [] },
+      { nivel: 8, bonusProficiencia: '+3', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 9, bonusProficiencia: '+4', caracteristicas: [] },
+      { nivel: 10, bonusProficiencia: '+4', caracteristicas: ['Característica de Subclasse'] },
+      { nivel: 11, bonusProficiencia: '+4', caracteristicas: [] },
+      { nivel: 12, bonusProficiencia: '+4', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 13, bonusProficiencia: '+5', caracteristicas: [] },
+      { nivel: 14, bonusProficiencia: '+5', caracteristicas: ['Característica de Subclasse'] },
+      { nivel: 15, bonusProficiencia: '+5', caracteristicas: [] },
+      { nivel: 16, bonusProficiencia: '+5', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 17, bonusProficiencia: '+6', caracteristicas: [] },
+      { nivel: 18, bonusProficiencia: '+6', caracteristicas: ['Maestria de Magias'] },
+      { nivel: 19, bonusProficiencia: '+6', caracteristicas: ['Dádiva Épica'] },
+      { nivel: 20, bonusProficiencia: '+6', caracteristicas: ['Assinatura Mágica'] },
+    ],
+    // A1 feito — dados da classe base importados (planilha + PDF oficial
+    // Cap. 3, conferidos linha a linha, zero divergência). Wizard/Ficha/
+    // Combat/Level Up ainda não usam esses dados (A2+, ver EmDevB.md).
+    disponivel: false,
+    fonte: FONTE,
+  },
 ];
