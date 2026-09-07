@@ -126,9 +126,12 @@ Grupos propostos e aprovados pelo Osmar:
       `tsc -b`/`npm test` (226)/`npm run build` limpos (testes novos:
       Bardo com o talento soma Bônus de Proficiência numa Espada
       Longa, que sem o talento não somaria).
-- [ ] **B.3 — Bônus numérico direto** (retomado — Grupo C fechado):
-      Velocista (Deslocamento), Líder Inspirador/Chef (PV temporário)
-      — mesmo padrão de `bonus-pv-por-nivel`/`bonus-ca-com-armadura`.
+- [x] **B.3 — Bônus numérico direto** — Osmar decidiu NÃO implementar:
+      Velocista trava sem métrica de Deslocamento em lugar nenhum da
+      Ficha; Líder Inspirador/Chef travam em "vários aliados" (mesmo
+      motivo de Inspiração Heroica). Ficam só como texto (`[PH]`) —
+      cada jogador resolve PV Temporário/Deslocamento na própria ficha
+      depois de anunciar na mesa. Detalhe completo no Backlog.md.
 - [ ] **B.4 — Magia sempre-preparada**: Adepto Elemental, Atirador
       Arcano, Conjurador Ritualista, Telecinético, Telepático, Tocado
       pela Sombra/Fadas — reaproveita o padrão do Iniciado em Magia
