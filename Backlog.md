@@ -26,6 +26,18 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
   manualmente representando qualquer concessão (Mestre, talento,
   subclasse).
 
+## Tela 3 de "Usar Magia" (Combat/Magias) — prévia numérica por círculo
+
+`EscolherCirculoShell.tsx` mostra só o TEXTO da magia (`descricaoCurta`,
+ex. "Upcast: +1d6 por círculo") em vez de um número já calculado por
+opção de círculo (ex. "10d6" na opção de 5º círculo, "8d6" na de 3º) —
+jogador lê o texto e faz a conta de cabeça. Isso era bloqueado por
+falta de dado estruturado (ver `PENDENCIAS.md`, histórico), mas
+`core/magiaDano.ts` (`calcularDanoMagia`) já resolve exatamente essa
+conta hoje — só falta chamar essa função uma vez por círculo
+disponível e mostrar o resultado no card de cada opção, sem
+recalcular nada novo.
+
 ## Talentos de Origem — pedaços implementáveis (auditoria 2026-09, foco Origens Grupo C)
 
 Auditoria dos 6 Talentos de Origem que ainda não têm `efeitoMecanico`

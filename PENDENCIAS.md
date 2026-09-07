@@ -513,7 +513,7 @@ ponta (wizard completo → Salvar → aparece na Lista → abre a Ficha real
 com PV/CA/atributos/perícias/itens da Mochila calculados, não mais
 fixture).
 
-## Aba Magias e "Usar Magia" — personagemConjura() implementada, dado de magia real ainda falta
+## Aba Magias e "Usar Magia" — personagemConjura() implementada
 
 **O que é:** `MagiasTab.tsx` e o acordeão "Usar Magia" do painel de
 Ação (Combat) mostram hoje dado de `data/exampleCombat.ts` — truques e
@@ -557,12 +557,13 @@ pra Guerreiro depois do fix acima, que só cobriu o painel de Ação.
 `ReacaoPanelContent.tsx` agora recebe `conjura` também e esconde
 Escudo Arcano do mesmo jeito.
 
+**Resolvido:** Bruxo (1ª classe conjuradora importada) já usa dado
+real em `MagiasTab.tsx`/"Usar Magia" (truques, magias preparadas,
+espaços por círculo) — sem fixture, ver DECISOES-DADOS.md "Magias —
+motor de dano completo" e DECISOES-COMBATE.md pros 2 modais que
+rodam a jogada de verdade em cima desse dado.
+
 **Falta implementar:**
-- Quando a 1ª classe conjuradora for importada, trocar o fixture de
-  `MagiasTab.tsx`/"Usar Magia" por dado real (truques, magias
-  preparadas, espaços por círculo) — hoje quem passa em
-  `personagemConjura()` ainda vê o mesmo fixture de antes, só quem
-  não passa que ganhou o estado vazio.
 - Multiclasse e itens mágicos continuam de fora de
   `personagemConjura()` (gancho pronto, sem efeito ainda) até essas
   duas coisas existirem de verdade no app.
@@ -1052,39 +1053,6 @@ Bônus, onde deveriam por regra. Simplificação aceita por ora (ver
 DECISOES-CLASSES.md "Etapa 3.2"); resolver quando o painel de Bônus
 ganhar suporte a magia de verdade.
 
-## Dano de magia não rola automaticamente — planilha não tem dado estruturado
-
-Diferente do ataque de arma (`core/ataque.ts`, dado/dano numérico
-estruturado), as 390 magias da planilha só têm o dano descrito em
-texto livre (`descricaoCurta`/`descricaoCompleta`, ex. "1d8 dano
-Radiante"). O painel "Usar Magia" do Combat (Etapa 3.2) já rola o
-acerto de magias de ataque automaticamente (1d20 + bônus de
-conjuração), mas o dano o jogador lê no card (ⓘ) e rola manualmente —
-diferente da arma, que tem o botão "🎲 Rolar Dano" automático. Resolver
-exigiria extrair e estruturar o dado de dano de cada magia da
-planilha/descrição — trabalho grande, não escopado ainda.
-
-## Upcast — efeito calculado por círculo (Fase B do fluxo "Usar Magia")
-
-**Contexto:** o fluxo "Usar Magia" do Combat (Ação) ganhou upcast de
-verdade — Tela 2 lista Truques/Magias Preparadas agrupadas por círculo
-com disponibilidade real (`core/magiasPersonagem.ts`'s
-`circulosDisponiveisParaConjurar` — uma magia nunca cabe num espaço
-menor que o dela, mas cabe no dela ou em qualquer um maior, até
-círculo 9 pras classes que chegam lá), e Tela 3 deixa escolher em qual
-círculo gastar quando há mais de 1 opção.
-
-**O que falta (Fase B, decisão consciente do Osmar de adiar):** a Tela
-3 mostra hoje só o texto livre da magia (`descricaoCurta`, que já traz
-"Upcast: +Xd8 por círculo" pras ~131 magias que escalam — confirmado
-na planilha) — não um número calculado por círculo (ex. "2d8" na
-opção de 1º círculo, "4d8" na de 2º). Pra isso funcionar de verdade
-precisa mapear, magia por magia, a fórmula de upcast estruturada (não
-só o texto) — trabalho de planilha grande, correlato ao já registrado
-"Dano de magia não rola automaticamente" (mesma cesta de dado
-faltando). **Fica pra depois — o Osmar quer resolver Talentos antes
-de voltar nisso.**
-
 ## Painel de Reação ainda usa a lista plana antiga de magias (não ganhou o picker novo)
 
 `ReacaoPanelContent.tsx` continua com a lista simples de magias de
@@ -1233,66 +1201,20 @@ ponto de partida (não é a lista final):
   o aviso de "[PH]" na tela de Subclasse foi ajustado na última
   entrega, vale conferir se sobrou algo parecido em outra tela).
 
-## Motor de rolagem de dano de Magia (Dano Base + Upcast)
+## Magias de salvaguarda SEM dano — Modal de Salvaguarda não tem texto de sucesso/falha
 
-**O que é:** o Osmar pediu pra estruturar o Upcast de magias
-(quanto aumenta por círculo acima do círculo base) e depois ligar
-isso a uma rolagem de dado de verdade na Ficha — "jogador vê o
-resultado final (mais dados)" e "a gente precisa rodar os dados
-direito". Ver decisão "Magias — Upcast estruturado" no
-`DECISOES-DADOS.md`: só a parte de Upcast (planilha, aba "Magias",
-colunas N-S) foi feita nesta entrega.
-
-**Por que foi adiado:** o Upcast sozinho não é suficiente pra rodar
-o dado completo — falta o **Dano Base** de cada magia (quanto dano
-a magia já causa no círculo mínimo dela, ex: Bola de Fogo = 8d6 no
-3º círculo), que hoje só existe dentro do texto livre de
-`descricaoCompleta`/`descricaoCurta`, não estruturado. Extrair isso
-de ~130+ magias de dano é um trabalho equivalente ao que já foi
-feito pro Upcast, e o Osmar confirmou (via pergunta direta) separar
-em duas entregas em vez de fazer tudo de uma vez.
-
-**Progresso (ver `EmDevB.md` e `DECISOES-DADOS.md` pro detalhe de cada
-entrega):**
-1. ✅ Dano Base (`danoBaseDado`/`danoBaseTipo`) extraído — 122/390
-   magias têm dano direto num alvo.
-2. ✅ `AtaqueOuSalvaguarda` extraído (390/390, `null` = nem ataque nem
-   salvaguarda) e `salvaguardaFalha`/`salvaguardaSucesso` (texto curto
-   padronizado do resultado, 85 magias — as que são de salvaguarda E
-   têm dano; as de salvaguarda SEM dano, tipo Enfeitiçar Pessoa, ainda
-   não têm esse texto — ver item **novo** abaixo).
-3. ✅ `core/magiaDano.ts` (`calcularDanoMagia`) combina Dano Base +
-   Upcast Estruturado — devolve `{quantidade, lados, mod, tipo,
-   upcastNaoAutomatico}`, o `upcastNaoAutomatico: true` já cobre o
-   caso das magias `Upcast_Tipo = "Outro"`/"Fórmula Própria" (não soma
-   sozinho, avisa que precisa mostrar `upcastTexto`).
-4. **Ainda falta**: UI na Ficha (2 modais — Ataque de Magia e
-   Salvaguarda de Magia, ver `EmDevB.md` foco atual) disparando a
-   rolagem via `RollContext`. Entrando em desenvolvimento agora.
-
-**Achados durante a extração de `salvaguardaFalha`/`salvaguardaSucesso`
-(imprecisões conhecidas, não bloqueantes):**
-- **"Rogar Maldição"** — o dano (1d8 Necrótico) não acontece no
-  momento da salvaguarda inicial, só depois, quando o conjurador
-  acerta o alvo amaldiçoado com outro ataque/magia. O texto
-  "Sucesso/Falha" ficou registrado como se fosse dano imediato (mesmo
-  padrão das outras 84), mas na prática o botão "Rolar Dano" dessa
-  magia só faz sentido usar mais tarde, não junto da salvaguarda
-  inicial — avaliar na hora de ligar a UI se precisa de tratamento
-  especial ou se fica como está (jogador aciona quando for a hora
-  certa).
-- **Rajada Prismática / Muralha Prismática** — `danoBaseTipo:
-  "aleatório"` (tipo sorteado por raio/camada) e o texto de
-  sucesso/falha é aproximado (a condição junto do dano no texto pode
-  não bater com QUALQUER raio sorteado, só o mais comum/primeiro
-  encontrado no livro) — aceitável dado que são as 2 magias mais
-  complexas do jogo (múltiplos efeitos por camada), não vale
-  estruturar tabela completa agora.
-- **Magias de salvaguarda SEM dano** (75 magias, ex.: Enfeitiçar
-  Pessoa — Sabedoria ou fica Enfeitiçado) ainda não têm
-  `salvaguardaFalha`/`salvaguardaSucesso` — fora do escopo desta
-  entrega (focada em rodar dano), mas se o Modal de Salvaguarda um dia
-  precisar mostrar essas também (não só as com dano), falta extrair.
+O motor de dano de magia (Dano Base + Upcast + Escala de Truque + os
+2 modais de Combat/Magias) está completo — ver DECISOES-DADOS.md
+"Magias — motor de dano completo" e DECISOES-COMBATE.md "Magia de
+ataque/salvaguarda — 2 modais". Ficou de fora só isto: 75 das 390
+magias são de salvaguarda mas NÃO causam dano (ex.: Enfeitiçar
+Pessoa — Sabedoria ou fica Enfeitiçado; efeito é condição, não
+número) — `salvaguardaFalha`/`salvaguardaSucesso` ficam `null` pra
+elas, então o Modal de Salvaguarda mostra só CD + atributo + "veja a
+descrição da magia (ⓘ)", sem o texto separado de sucesso/falha que as
+85 magias com dano já têm. Se o Osmar quiser esse texto também pras
+75 sem dano, é o mesmo processo de extração já usado pras outras (ler
+`descricaoCompleta`, já importado, sem reler PDF).
 
 ## Revisão de abas da planilha mestra (possível consolidação)
 

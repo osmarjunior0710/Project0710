@@ -566,12 +566,84 @@ gera o próprio `id` a partir do nome (slug), nunca leu essa coluna da
 planilha — mas fica registrado caso vire problema em outro uso futuro
 da planilha.
 
-**Fora de escopo desta entrega (ver `PENDENCIAS.md`):** Dano Base de
-cada magia (pra somar com o Upcast e rodar o dado completo) e o
-motor/UI que realmente executa a rolagem na Ficha.
+**Continuação (entrega separada, concluída):** Dano Base de cada
+magia + o motor/UI que executa a rolagem — ver "Magias — motor de
+dano completo" logo abaixo.
 
 **Data/origem:** 2026-09.
 
+## Magias — motor de dano completo (Dano Base + Upcast + Escala de Truque)
+
+**O que é:** continuação de "Magias — Upcast estruturado" (acima) —
+fecha o motor de rolagem de dano de magia de ponta a ponta: extrai o
+Dano Base de cada magia, classifica Ataque vs. Salvaguarda, extrai o
+texto de sucesso/falha, e resolve a escala por NÍVEL DO PERSONAGEM
+(Aprimoramento de Truque) que o Upcast estruturado não cobria (Upcast
+é só por CÍRCULO, truque não tem círculo pra escalar).
+
+**Padrão de extração reaproveitado 4x nesta entrega** (Dano Base,
+AtaqueOuSalvaguarda, Salvaguarda_Falha/Sucesso, Escala de Truque): ler
+o texto já importado em `descricaoCompleta` (não reler os PDFs de
+novo a cada campo novo — o corpus de parágrafo por magia já extraído
+serve pra qualquer campo estruturado subsequente) e casar contra
+frases fixas do livro ("ataque mágico à distância/corpo a corpo",
+"salvaguarda de \<atributo\>", "Aprimoramento de Truque. O dano aumenta
+em NdM..."). Regex + revisão manual das exceções (nunca assume 100%
+de acerto automático) — cada campo novo custa cada vez menos porque
+reaproveita o mesmo corpus.
+
+**Colunas novas na aba "Magias" (planilha) + campos no `.ts`:**
+- `DanoBase_Dado`/`DanoBase_Tipo` — dado+tipo no círculo/nível mínimo
+  da magia. `null` = magia sem dano direto num alvo (inclui dano que
+  só atinge o PRÓPRIO conjurador, e dano condicional futuro sem
+  ataque/salvaguarda no momento — ver exemplos no cabeçalho do
+  `magias.ts`). Magia com 2+ efeitos de dano distintos guarda só o
+  valor que o Upcast realmente escala (conferido contra
+  `upcastTexto`); `danoBaseTipo: "escolhido"` = tipo por escolha do
+  jogador, `"aleatório"` = tipo sorteado pela própria magia (Rajada/
+  Muralha Prismática).
+- `AtaqueOuSalvaguarda` — "Ataque à Distância" | "Ataque Corpo a
+  Corpo" | "Salvaguarda de \<Atributo\>" | "aleatório" | `null`. Única
+  fonte de verdade pra decidir qual dos 2 modais abrir (ver
+  DECISOES-COMBATE.md) — não usar a heurística de regex de
+  `classificarMagia` (essa é só pro ícone ⚔️ da lista).
+- `Salvaguarda_Falha`/`Salvaguarda_Sucesso` — texto curto padronizado
+  (não reaproveita `descricaoCurta`) só pras magias de salvaguarda E
+  com dano (85/390) — as de salvaguarda sem dano (75, ex.: Enfeitiçar
+  Pessoa) ficam `null` (ver PENDENCIAS.md se o Modal de Salvaguarda
+  precisar cobrir essas também no futuro).
+- `EscalaTruque_Tipo` (campo `escalaTruqueTipo` no `.ts`) — `"dado"` =
+  o truque soma 1 dado do MESMO tamanho de `DanoBase_Dado` por nível
+  5/11/17 do PERSONAGEM (17/391 magias, todas truque; nunca por
+  círculo, que truque não tem — diferente do Upcast). Inclui Raio
+  Místico: RAW cria feixes extras com jogada de ataque separada por
+  feixe, mas o resultado numérico (base + 1 dado por patamar) é
+  idêntico ao padrão comum, então reaproveita o mesmo campo em vez de
+  um mecanismo de "múltiplos ataques" — ver DECISOES-COMBATE.md pro
+  raciocínio geral (vale pra qualquer característica futura parecida).
+
+**`core/magiaDano.ts` combina os 3 (`calcularDanoMagia(magia,
+circuloUsado, nivelPersonagem)`):** soma a Escala de Truque primeiro
+(nível do personagem), depois o Upcast (círculo do espaço usado) —
+hoje as 2 mecânicas nunca coexistem na mesma magia (truque nunca tem
+Upcast), mas a ordem já fica certa se um dia coexistirem. Upcast
+"Dado por Círculo"/"Flat por Círculo" só soma automático quando o
+dado do upcast bate no tamanho do Dano Base; "Fórmula Própria"/
+"Outro" (ou tamanho incompatível) devolve `upcastNaoAutomatico: true`
+— a UI avisa e mostra `upcastTexto` em vez de somar sozinha.
+
+**Imprecisões conhecidas, aceitas (não bloqueantes):** "Rogar
+Maldição" tem o texto de sucesso/falha registrado como se o dano
+fosse imediato, mas na regra real o dano só acontece depois, no
+próximo ataque/magia contra o alvo amaldiçoado — o Modal de
+Salvaguarda funciona normal, só cabe ao jogador tocar "Rolar Dano" na
+hora certa (mais tarde), não junto da salvaguarda inicial. Rajada/
+Muralha Prismática têm texto de sucesso/falha aproximado (a condição
+junto do dano pode não bater com QUALQUER raio/camada sorteado, só o
+mais comum) — aceitável dado que são as 2 magias mais complexas do
+jogo; não vale estruturar tabela completa.
+
+**Data/origem:** 2026-09.
 
 ## Idioma extra concedido por característica de Classe nível 1 — Druida/Ladino
 
