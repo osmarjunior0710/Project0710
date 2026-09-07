@@ -775,10 +775,9 @@ troca de formato; confirmado pelo próprio Osmar.
 
 **O que é:** o Osmar mandou arte própria (512×512, fundo transparente,
 mesmo estilo emblema-redondo) pras 12 Classes do livro, 10 Espécies e
-15 das 16 Origens (só Artesão ficou sem, de propósito — ver abaixo) —
-nenhuma das 3 categorias tinha conjunto completo antes disso (Classe
-tinha só Guerreiro/Bardo/Bruxo reais + cópias do Guerreiro como
-placeholder nas "em breve"; Espécie e Origem usavam só o emoji 🖼).
+16 Origens — conjunto completo nas 3 categorias (Classe tinha só
+Guerreiro/Bardo/Bruxo reais + cópias do Guerreiro como placeholder nas
+"em breve"; Espécie e Origem usavam só o emoji 🖼).
 
 **Classes — substituição, não adição:** as 9 classes "em breve"
 (`CLASSES_EM_BREVE` em `ClasseStep.tsx`) usavam uma CÓPIA física do
@@ -807,9 +806,10 @@ reaproveitar a de Classe (categorias diferentes, mesmo padrão
 visual). Ligados em `EspecieStep.tsx`/`OrigemStep.tsx` (únicas telas
 que mostram cada categoria com ícone hoje). Todas as 10 espécies do
 livro ganharam arte (Aasimar, Anão, Draconato, Elfo, Gnomo, Golias,
-Humano, Orc, Pequenino, Tiferino); 15 das 16 origens (todas menos
-Artesão, que fica com `🖼` até o Osmar mandar arte — não é bug, é a
-mesma peça faltando de propósito).
+Humano, Orc, Pequenino, Tiferino) e todas as 16 origens (Acólito,
+Andarilho, Artesão, Artista, Charlatão, Criminoso, Eremita, Escriba,
+Fazendeiro, Guarda, Guia, Marinheiro, Mercador, Nobre, Sábio,
+Soldado) — não sobrou nenhum `🖼` genérico nas 3 categorias.
 
 **Data/origem:** 2026-09.
 
