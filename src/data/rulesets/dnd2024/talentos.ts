@@ -133,7 +133,17 @@ export type EfeitoMecanicoTalento =
    * `PersonagemSalvo.escolhaMagiaTalentoGeral` (chave = id do
    * talento), preenchida por uma sub-tela nova no passo "Talento" do
    * Level Up. Ver `core/magiaTalentoGeral.ts`. */
-  | { tipo: 'magia-escolhida-por-escola'; escolas: string[]; magiaFixa: string };
+  | { tipo: 'magia-escolhida-por-escola'; escolas: string[]; magiaFixa: string }
+  /** Concede N magias de 1º círculo com tag Ritual, ESCOLHIDAS pelo
+   * jogador (Conjurador Ritualista) — N = Bônus de Proficiência no
+   * momento da escolha (ver `core/magiaTalentoGeral.ts`,
+   * `quantidadeMagiasRituais`). Diferente de `magia-escolhida-por-
+   * escola`: sem magia fixa, e "Ritual Rápido" (1 uso grátis
+   * COMPARTILHADO entre todas, não por-magia) ainda não implementado
+   * — ver Backlog.md. Crescimento automático quando o Bônus de
+   * Proficiência sobe de novo (regra real) também não implementado —
+   * a contagem fica fixa no valor de quando o talento foi pego. */
+  | { tipo: 'magias-rituais-por-proficiencia' };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -420,8 +430,9 @@ export const talentos: Talento[] = [
     nome: "Conjurador Ritualista",
     categoria: "Geral",
     repetivel: false,
-    prerequisitos: { nivelMinimo: 4, atributosMinimos: ['INT', 'SAB', 'CAR'], outro: null },
+    prerequisitos: { nivelMinimo: 4, atributosMinimos: ['INT', 'SAB', 'CAR'], outro: "Característica Conjuração ou Magia de Pacto" },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['INT', 'SAB', 'CAR'], maximo: 20 },
+    efeitoMecanico: { tipo: 'magias-rituais-por-proficiencia' },
     beneficios: "Escolhe magias de 1º círculo com tag Ritual = seu Bônus de Proficiência: sempre preparadas, conjuráveis com qualquer espaço (atributo de conjuração = o atributo aumentado por este talento). Sempre que seu Bônus de Proficiência aumentar depois, pode adicionar mais 1 magia de 1º círculo com Ritual às sempre preparadas. Ritual Rápido: conjura 1 delas no tempo normal (não o de ritual), sem espaço, 1x/Descanso Longo.",
     pagina: 204,
     fonte: "PHB 2024",

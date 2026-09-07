@@ -173,10 +173,27 @@ Grupos propostos e aprovados pelo Osmar:
         Ilusão/Necromancia 1º círculo → escolhe Destruição Colérica →
         confirma → aba Magias mostra as 2 magias, cada uma com botão
         "Usar de graça" próprio).
-  - [ ] **B.4.3 — Conjurador Ritualista**: escolha de N magias
-        Rituais (N = Bônus de Proficiência, cresce por nível) da
-        lista da própria classe conjuradora do personagem — reaproveita
-        a sub-tela do B.4.2, mas com contagem variável e multi-seleção.
+  - [x] **B.4.3 — Conjurador Ritualista**: novo `efeitoMecanico:
+        'magias-rituais-por-proficiencia'`. Reaproveita o passo
+        `talentoMagia` do B.4.2, mas com contagem variável
+        (`quantidadeMagiasRituais` = Bônus de Proficiência no momento
+        da escolha) e multi-seleção até esse limite (em vez de 1 só).
+        Opções vêm de `opcoesMagiasRituais`: magias de 1º círculo com
+        "Ritual" no campo `tempoConjuracao` (não existe coluna
+        dedicada de Ritual na planilha, mas a tag já está codificada
+        nesse texto — confirmado com 12 magias reais de 1º círculo).
+        `PersonagemSalvo.escolhaMagiaTalentoGeral` mudou de
+        `Record<string,string>` pra `Record<string,string[]>` pra
+        suportar N magias (Tocado pela Sombra/Fadas continuam com 1
+        item na lista). Sem seção "grátis" nova — Ritual Rápido
+        (conjurar sem gastar espaço) e o crescimento automático da
+        contagem em níveis futuros (5/9/13/17) ficaram fora do escopo,
+        registrados em `Backlog.md`. Verificado: `tsc -b`/`npm test`
+        (287)/`npm run build` limpos + Playwright (Guerreiro nível 4
+        pega Conjurador Ritualista → tela mostra as 12 magias Rituais
+        reais de 1º círculo → escolhe exatamente 2 (limite do Bônus de
+        Proficiência) → confirma → aba Magias mostra as 2 como
+        "sempre preparadas", sem botão de uso grátis).
 - [ ] **B.5 — Escolha de perícia**: Analítico, Mente Aguçada,
       Especialista em Perícia — reaproveita o padrão do Habilidoso
       (`concedeProficiencias`).

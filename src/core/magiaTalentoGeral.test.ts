@@ -4,8 +4,13 @@ import {
   magiasSempreTalentoGeral,
   magiasGratisDosTalentosGerais,
   opcoesMagiaEscolhidaPorEscola,
+  opcoesMagiasRituais,
+  quantidadeMagiasRituais,
   talentosComEscolhaDeMagiaPendente,
 } from './magiaTalentoGeral';
+import { classes } from '../data/rulesets/dnd2024/classes';
+
+const bardo = classes.find((c) => c.nome === 'Bardo')!;
 
 describe('truquesTalentoGeral', () => {
   it('Telecinético concede o truque Mãos Mágicas', () => {
@@ -76,7 +81,7 @@ describe('talentosComEscolhaDeMagiaPendente', () => {
   });
 
   it('Tocado pela Sombra já com escolha feita: não aparece mais', () => {
-    const pendentes = talentosComEscolhaDeMagiaPendente(['tocado-pela-sombra'], { 'tocado-pela-sombra': 'Sono' });
+    const pendentes = talentosComEscolhaDeMagiaPendente(['tocado-pela-sombra'], { 'tocado-pela-sombra': ['Sono'] });
     expect(pendentes).toEqual([]);
   });
 
@@ -91,7 +96,7 @@ describe('magiasSempreTalentoGeral — magia-escolhida-por-escola', () => {
   });
 
   it('Tocado pela Sombra com escolha feita: fixa + escolhida', () => {
-    const resultado = magiasSempreTalentoGeral(['tocado-pela-sombra'], { 'tocado-pela-sombra': 'Disfarçar-se' });
+    const resultado = magiasSempreTalentoGeral(['tocado-pela-sombra'], { 'tocado-pela-sombra': ['Disfarçar-se'] });
     expect(resultado.sort()).toEqual(['Disfarçar-se', 'Invisibilidade'].sort());
   });
 });
@@ -104,7 +109,56 @@ describe('magiasGratisDosTalentosGerais — magia-escolhida-por-escola', () => {
   });
 
   it('Tocado pelas Fadas com escolha feita: as 2 magias grátis, independentes', () => {
-    const resultado = magiasGratisDosTalentosGerais(['tocado-pelas-fadas'], { 'tocado-pelas-fadas': 'Sono' });
+    const resultado = magiasGratisDosTalentosGerais(['tocado-pelas-fadas'], { 'tocado-pelas-fadas': ['Sono'] });
     expect(resultado.map((r) => r.magia.nome).sort()).toEqual(['Passo Nebuloso', 'Sono'].sort());
+  });
+});
+
+describe('opcoesMagiasRituais', () => {
+  it('Conjurador Ritualista: só magias de 1º círculo com tag Ritual (tempoConjuracao inclui "Ritual")', () => {
+    const opcoes = opcoesMagiasRituais('conjurador-ritualista');
+    expect(opcoes.length).toBeGreaterThan(0);
+    expect(opcoes.every((m) => m.circulo === 1 && m.tempoConjuracao?.includes('Ritual'))).toBe(true);
+  });
+
+  it('talento sem esse tipo de efeito: lista vazia', () => {
+    expect(opcoesMagiasRituais('telepatico')).toEqual([]);
+  });
+});
+
+describe('quantidadeMagiasRituais', () => {
+  it('nível 4 (Bônus de Proficiência +2): 2 magias', () => {
+    expect(quantidadeMagiasRituais(bardo, 4)).toBe(2);
+  });
+
+  it('nível 9 (Bônus de Proficiência +4): 4 magias', () => {
+    expect(quantidadeMagiasRituais(bardo, 9)).toBe(4);
+  });
+});
+
+describe('magiasSempreTalentoGeral — magias-rituais-por-proficiencia', () => {
+  it('Conjurador Ritualista sem escolha ainda: nenhuma magia', () => {
+    expect(magiasSempreTalentoGeral(['conjurador-ritualista'])).toEqual([]);
+  });
+
+  it('Conjurador Ritualista com 2 escolhidas: as 2 aparecem', () => {
+    const resultado = magiasSempreTalentoGeral(['conjurador-ritualista'], {
+      'conjurador-ritualista': ['Alarme', 'Identificar'],
+    });
+    expect(resultado.sort()).toEqual(['Alarme', 'Identificar'].sort());
+  });
+});
+
+describe('talentosComEscolhaDeMagiaPendente — magias-rituais-por-proficiencia', () => {
+  it('Conjurador Ritualista sem escolha: pendente', () => {
+    const pendentes = talentosComEscolhaDeMagiaPendente(['conjurador-ritualista'], undefined);
+    expect(pendentes.map((t) => t.id)).toEqual(['conjurador-ritualista']);
+  });
+
+  it('Conjurador Ritualista já com escolha: não aparece mais', () => {
+    const pendentes = talentosComEscolhaDeMagiaPendente(['conjurador-ritualista'], {
+      'conjurador-ritualista': ['Alarme', 'Identificar'],
+    });
+    expect(pendentes).toEqual([]);
   });
 });

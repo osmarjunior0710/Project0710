@@ -83,7 +83,7 @@ export interface ResultadoLevelUpRapido {
    * talento sorteado for um desses, o personagem fica só com a magia
    * FIXA (Invisibilidade/Passo Nebuloso) até escolher a outra
    * manualmente num level-up de verdade. */
-  escolhaMagiaTalentoGeral: Record<string, string> | null;
+  escolhaMagiaTalentoGeral: Record<string, string[]> | null;
 }
 
 /** Escolhe Invocações Místicas respeitando pré-requisito (uma pode

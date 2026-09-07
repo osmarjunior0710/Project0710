@@ -193,7 +193,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [talentosGeraisAtuais, setTalentosGeraisAtuais] = useState<string[]>(personagemSalvo.talentosGeraisAtual ?? []);
   // Escolha de magia por escola restrita (Tocado pela Sombra/Fadas) —
   // ver `core/magiaTalentoGeral.ts`.
-  const [escolhaMagiaTalentoGeral, setEscolhaMagiaTalentoGeral] = useState<Record<string, string>>(
+  const [escolhaMagiaTalentoGeral, setEscolhaMagiaTalentoGeral] = useState<Record<string, string[]>>(
     personagemSalvo.escolhaMagiaTalentoGeral ?? {},
   );
   const [talentosFavoritos, setTalentosFavoritos] = useState<string[]>(personagemSalvo.talentosFavoritosAtual ?? []);
@@ -983,7 +983,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     dadivaEpicaEscolhida: string | null;
     arcanaMisticaAlteracoes: Record<number, string> | null;
     magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
-    escolhaMagiaTalentoGeral: Record<string, string> | null;
+    escolhaMagiaTalentoGeral: Record<string, string[]> | null;
   }) {
     const novosAtributos = resultado.atributosAumentados
       ? aumentarAtributos(selecao.atributos, resultado.atributosAumentados)

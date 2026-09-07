@@ -148,13 +148,14 @@ export interface PersonagemSalvo {
    * DECISOES-DESIGN.md/PENDENCIAS.md): só salva e mostra o talento,
    * `[PH]` — nenhum efeito mecânico de verdade ainda (Fase 4). */
   talentosGeraisAtual?: string[];
-  /** Escolha extra de magia de Talento Geral que pede 1 magia de uma
-   * escola restrita (Tocado pela Sombra/Fadas — ver `core/
-   * magiaTalentoGeral.ts`) — chave é o `id` do talento, valor é o
-   * `nome` da magia escolhida. Ausente/vazio = nenhuma escolha desse
-   * tipo feita ainda (talento ainda não pego, ou pego antes dessa
-   * entrega existir). */
-  escolhaMagiaTalentoGeral?: Record<string, string>;
+  /** Escolha extra de magia de Talento Geral que pede 1+ magias
+   * (Tocado pela Sombra/Fadas — 1 magia; Conjurador Ritualista — N
+   * magias, N = Bônus de Proficiência no momento da escolha — ver
+   * `core/magiaTalentoGeral.ts`) — chave é o `id` do talento, valor é
+   * a lista de `nome`s escolhidos (1 item pros dois primeiros).
+   * Ausente/vazio = nenhuma escolha desse tipo feita ainda (talento
+   * ainda não pego, ou pego antes dessa entrega existir). */
+  escolhaMagiaTalentoGeral?: Record<string, string[]>;
   /** IDs de talentos marcados com 📌 na tela de escolha do Level Up —
    * planejamento de build ("quero pegar isso num level up futuro"),
    * não afeta nenhuma regra. Ausente/vazio = nenhum favoritado. */

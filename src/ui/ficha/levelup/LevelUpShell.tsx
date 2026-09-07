@@ -36,7 +36,7 @@ import IconeClasse from '../../components/IconeClasse';
 import DistribuirPontosAtributo from '../../components/DistribuirPontosAtributo';
 import { useAvisoTemporario } from '../../hooks/useAvisoTemporario';
 import { talentos } from '../../../data/rulesets/dnd2024/talentos';
-import { opcoesMagiaEscolhidaPorEscola } from '../../../core/magiaTalentoGeral';
+import { opcoesMagiaEscolhidaPorEscola, opcoesMagiasRituais, quantidadeMagiasRituais } from '../../../core/magiaTalentoGeral';
 import TelaEscolherTalento from './TelaEscolherTalento';
 import TrocarValorSimples from '../../components/TrocarValorSimples';
 import styles from './LevelUpShell.module.css';
@@ -85,10 +85,11 @@ interface LevelUpShellProps {
      * essa gaveta não trocou (ou não existe pro personagem). */
     magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
     /** Só preenchido quando o Talento Geral escolhido NESTE level-up
-     * pede magia por escola restrita (Tocado pela Sombra/Fadas) — 1
-     * entrada `{ [talentoId]: magiaEscolhida }`. `null` = nenhuma
+     * pede magia(s) escolhida(s) — por escola restrita (Tocado pela
+     * Sombra/Fadas, 1 magia) ou Rituais (Conjurador Ritualista, N) —
+     * 1 entrada `{ [talentoId]: magiasEscolhidas }`. `null` = nenhuma
      * escolha desse tipo nesse level-up. */
-    escolhaMagiaTalentoGeral: Record<string, string> | null;
+    escolhaMagiaTalentoGeral: Record<string, string[]> | null;
   }) => void;
   /** Controlado pelo `FichaShell` (persistido junto com o resto do
    * progresso) em vez de estado local — uma vez rolado o dado de
@@ -290,14 +291,25 @@ export default function LevelUpShell({
     talentoObjEscolhido !== null &&
     talentoObjEscolhido.concedeAsi.tipo !== 'nenhum' &&
     (talentoObjEscolhido.concedeAsi.tipo === 'distribuir-dois' || talentoObjEscolhido.concedeAsi.atributos.length > 1);
-  // Talento Geral com magia ESCOLHIDA por escola restrita (Tocado
-  // pela Sombra/Fadas) — passo extra só entra quando o talento
-  // ESCOLHIDO NESTE level-up pede essa sub-escolha (mesmo padrão de
-  // `precisaEscolherAtributoDoTalento`, não retroage sobre talentos
-  // já escolhidos em level-ups anteriores).
-  const precisaEscolherMagiaDoTalento = talentoObjEscolhido?.efeitoMecanico?.tipo === 'magia-escolhida-por-escola';
-  const opcoesMagiaTalento = talentoObjEscolhido ? opcoesMagiaEscolhidaPorEscola(talentoObjEscolhido.id) : [];
-  const [magiaEscolhidaTalento, setMagiaEscolhidaTalento] = useState<string | null>(null);
+  // Talento Geral com magia(s) ESCOLHIDA(S) — por escola restrita
+  // (Tocado pela Sombra/Fadas, 1 magia) ou Rituais (Conjurador
+  // Ritualista, N = Bônus de Proficiência) — passo extra só entra
+  // quando o talento ESCOLHIDO NESTE level-up pede essa sub-escolha
+  // (mesmo padrão de `precisaEscolherAtributoDoTalento`, não retroage
+  // sobre talentos já escolhidos em level-ups anteriores).
+  const tipoEfeitoTalentoEscolhido = talentoObjEscolhido?.efeitoMecanico?.tipo;
+  const precisaEscolherMagiaDoTalento =
+    tipoEfeitoTalentoEscolhido === 'magia-escolhida-por-escola' || tipoEfeitoTalentoEscolhido === 'magias-rituais-por-proficiencia';
+  const opcoesMagiaTalento = !talentoObjEscolhido
+    ? []
+    : tipoEfeitoTalentoEscolhido === 'magia-escolhida-por-escola'
+      ? opcoesMagiaEscolhidaPorEscola(talentoObjEscolhido.id)
+      : tipoEfeitoTalentoEscolhido === 'magias-rituais-por-proficiencia'
+        ? opcoesMagiasRituais(talentoObjEscolhido.id)
+        : [];
+  const maxMagiasTalento =
+    tipoEfeitoTalentoEscolhido === 'magias-rituais-por-proficiencia' ? quantidadeMagiasRituais(classe, novoNivel) : 1;
+  const [magiasEscolhidasTalento, setMagiasEscolhidasTalento] = useState<string[]>([]);
 
   const luSteps: LuStep[] = ['pv', 'features'];
   if (classe.nivelSubclasse === novoNivel && !personagem.subclasse) luSteps.push('subclasse');
@@ -651,8 +663,12 @@ export default function LevelUpShell({
         return;
       }
     }
-    if (step === 'talentoMagia' && magiaEscolhidaTalento === null) {
-      setAviso('Escolha a magia do talento antes de avançar.');
+    if (step === 'talentoMagia' && magiasEscolhidasTalento.length < maxMagiasTalento) {
+      setAviso(
+        maxMagiasTalento > 1
+          ? `Escolha ${maxMagiasTalento} magias antes de avançar (${magiasEscolhidasTalento.length}/${maxMagiasTalento}).`
+          : 'Escolha a magia do talento antes de avançar.',
+      );
       return;
     }
     setAviso(null);
@@ -681,8 +697,8 @@ export default function LevelUpShell({
             ? magiaIniciadaAlteracoesPendentes
             : null,
         escolhaMagiaTalentoGeral:
-          luSteps.includes('talentoMagia') && talentoObjEscolhido && magiaEscolhidaTalento
-            ? { [talentoObjEscolhido.id]: magiaEscolhidaTalento }
+          luSteps.includes('talentoMagia') && talentoObjEscolhido && magiasEscolhidasTalento.length > 0
+            ? { [talentoObjEscolhido.id]: magiasEscolhidasTalento }
             : null,
       });
       return;
@@ -1206,21 +1222,34 @@ export default function LevelUpShell({
 
         {step === 'talentoMagia' && talentoObjEscolhido && (
           <>
-            <div className="section-title">{talentoObjEscolhido.nome} — escolha 1 magia</div>
+            <div className="section-title">
+              {talentoObjEscolhido.nome} — escolha {maxMagiasTalento} ({magiasEscolhidasTalento.length}/
+              {maxMagiasTalento})
+            </div>
             <div className="label" style={{ marginBottom: 10 }}>
               {talentoObjEscolhido.beneficios}
             </div>
-            {opcoesMagiaTalento.map((m) => (
-              <div
-                key={m.id}
-                className={`opt-card ${magiaEscolhidaTalento === m.nome ? 'selected' : ''}`}
-                style={{ padding: '10px 12px', cursor: 'pointer' }}
-                onClick={() => setMagiaEscolhidaTalento(m.nome)}
-              >
-                <div className="opt-card-name">{m.nome}</div>
-                <div className="opt-card-desc">{m.descricaoCurta ?? m.descricaoCompleta}</div>
-              </div>
-            ))}
+            {opcoesMagiaTalento.map((m) => {
+              const selecionada = magiasEscolhidasTalento.includes(m.nome);
+              const cheioSemSelecionar = !selecionada && magiasEscolhidasTalento.length >= maxMagiasTalento;
+              return (
+                <div
+                  key={m.id}
+                  className={`opt-card ${selecionada ? 'selected' : ''}`}
+                  style={{ padding: '10px 12px', cursor: cheioSemSelecionar ? 'default' : 'pointer', opacity: cheioSemSelecionar ? 0.5 : 1 }}
+                  onClick={() => {
+                    if (selecionada) {
+                      setMagiasEscolhidasTalento((prev) => prev.filter((n) => n !== m.nome));
+                    } else if (!cheioSemSelecionar) {
+                      setMagiasEscolhidasTalento((prev) => [...prev, m.nome]);
+                    }
+                  }}
+                >
+                  <div className="opt-card-name">{m.nome}</div>
+                  <div className="opt-card-desc">{m.descricaoCurta ?? m.descricaoCompleta}</div>
+                </div>
+              );
+            })}
           </>
         )}
 
@@ -1444,8 +1473,8 @@ export default function LevelUpShell({
             )}
             {luSteps.includes('talentoMagia') && (
               <div className="summary-row">
-                <span>Magia do Talento</span>
-                <span>{magiaEscolhidaTalento ?? 'nenhuma escolhida'}</span>
+                <span>{maxMagiasTalento > 1 ? 'Magias do Talento' : 'Magia do Talento'}</span>
+                <span>{magiasEscolhidasTalento.length > 0 ? magiasEscolhidasTalento.join(', ') : 'nenhuma escolhida'}</span>
               </div>
             )}
             {luSteps.includes('asi') && (

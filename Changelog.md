@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1433
+
+Talentos Gerais — Conjurador Ritualista agora funciona de verdade: ao
+escolher esse talento no Level Up, o jogador vê a lista real de magias
+Rituais de 1º círculo e escolhe quantas o Bônus de Proficiência
+permitir (2 no nível 4); elas aparecem na aba Magias como sempre
+preparadas.
+
 ## v202609_0952
 
 Atualização de ícones — arte própria pras 12 Classes, 16 Origens e 10
