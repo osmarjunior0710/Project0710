@@ -605,3 +605,49 @@ que eu testei", sem precisar ler código nem commit.
 - Se uma publicação juntar trabalho de mais de 1 foco/conta (merge de
   `EmDev.md` + `EmDevB.md` no mesmo push, por exemplo), 1 entrada só
   cobrindo tudo que subiu nessa publicação — não 1 entrada por foco.
+- Publicação que só mexe em arquivo de processo/decisão (`CLAUDE.md`,
+  `DECISOES-*.md`, `PENDENCIAS.md`, `Backlog.md`, etc.) sem tocar em
+  nada dentro de `src/` **não precisa de entrada** — não tem nada pro
+  Osmar ver/testar na tela. Só publicações que mudam o app de verdade
+  entram no Changelog.
+
+## 20. Publicar na branch principal — autorizado por padrão, sem perguntar antes
+
+O Osmar autorizou os 2 Claude Code (esta conta e a principal) a
+mesclar trabalho já validado na branch principal e dar push — **sem
+perguntar "posso publicar?" a cada vez**. Essa autorização é durável
+(vale pra qualquer sessão futura, não só a que recebeu o pedido) —
+é exatamente por isso que fica escrita aqui, não só na conversa.
+
+**Faça isso automaticamente ao terminar uma entrega, não só quando
+pedido — condição pra publicar:**
+- A entrega está completa e validada: checklist verde (`npx tsc -b`,
+  `npm test -- --run`, `npm run build`, ver seção 13); testada em
+  largura de celular quando for mudança de UI (seção 1/5).
+- `src/version.ts` atualizado com o horário de Brasília do momento do
+  push (seção 10).
+- `Changelog.md` ganhou a entrada da publicação, quando for o caso
+  (seção 19).
+
+**Ordem obrigatória, sempre a mesma, nunca pulando passo:**
+1. Sincronize com a branch principal de novo, mesmo que a sessão já
+   tenha sincronizado no início (seção 18) — a outra conta pode ter
+   publicado enquanto você trabalhava.
+2. Resolva qualquer conflito de merge pelas regras já existentes
+   (seção 14.1/18) — leia os 2 lados antes de combinar, nunca
+   adivinhe qual ganha.
+3. Rode o checklist completo de novo DEPOIS do merge — um merge
+   limpo não significa que compila ou passa nos testes.
+4. Só então mescle na branch principal e dê push.
+
+**Continua exigindo perguntar antes (isso NÃO virou automático):**
+- Force-push, `git reset --hard`/`git clean` na branch principal, ou
+  qualquer reescrita de histórico — regra geral de segurança do
+  Claude Code, não é algo que este projeto pode liberar.
+- Publicar algo que você sabe que ficou incompleto ou quebrou o
+  checklist "só pra não perder o commit" — nunca pule a validação pra
+  publicar mais rápido.
+- Conflito de merge que exige JULGAMENTO (os 2 lados mudaram a MESMA
+  regra/lógica de forma incompatível — não é só adição em paralelo,
+  como a maioria dos conflitos já vistos) — aí pare e pergunte ao
+  Osmar antes de decidir sozinho qual lado vale.
