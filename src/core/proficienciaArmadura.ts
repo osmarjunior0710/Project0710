@@ -5,6 +5,7 @@
 // só que pra `treinamentoArmadura` em vez de `proficienciaArmas`.
 
 import type { Classe } from '../data/rulesets/dnd2024/classes';
+import type { Armadura } from '../data/rulesets/dnd2024/armaduras';
 import { proficienciasArmaArmaduraClasse } from '../data/rulesets/dnd2024/proficienciasArmaArmaduraClasse';
 import { talentos } from '../data/rulesets/dnd2024/talentos';
 
@@ -45,4 +46,32 @@ export function classeProficienteComArmadura(
   const entrada = proficienciasArmaArmaduraClasse.find((p) => p.classe === classe.nome);
   if (!entrada) return false;
   return entrada.treinamentoArmadura.includes(categoria);
+}
+
+/** Categoria de Armadura (Leve/Média/Pesada) da armadura equipada —
+ * `null` sem armadura (a categoria "Escudo" nunca aparece aqui, ela é
+ * tratada à parte por `classeProficienteComArmadura(..., 'Escudos')`,
+ * ver `core/calculoPersonagem.ts`). */
+export function categoriaArmaduraEquipada(armaduraCatalogo: Armadura | undefined): 'Leve' | 'Média' | 'Pesada' | null {
+  if (!armaduraCatalogo) return null;
+  if (armaduraCatalogo.categoria.startsWith('Armadura Leve')) return 'Leve';
+  if (armaduraCatalogo.categoria.startsWith('Armadura Média')) return 'Média';
+  if (armaduraCatalogo.categoria.startsWith('Armadura Pesada')) return 'Pesada';
+  return null;
+}
+
+/** `true` = personagem está vestindo Armadura (Leve/Média/Pesada) sem
+ * treinamento com ela agora — gatilho das 2 penalidades do SDD:
+ * Desvantagem em D20 de Força/Destreza (`core/ataque.ts`,
+ * `AtributosTab`, Iniciativa) e bloqueio de conjuração
+ * (`AcaoPanelContent.conjurarMagia`). Sem armadura equipada = `false`
+ * (a regra só existe enquanto a armadura errada estiver no corpo). */
+export function armaduraSemTreinamentoEquipada(
+  classe: Classe | null,
+  armaduraCatalogo: Armadura | undefined,
+  talentosAtuais?: string[],
+): boolean {
+  const categoria = categoriaArmaduraEquipada(armaduraCatalogo);
+  if (categoria === null || !classe) return false;
+  return !classeProficienteComArmadura(classe, categoria, talentosAtuais);
 }

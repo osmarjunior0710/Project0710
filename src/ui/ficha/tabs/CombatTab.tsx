@@ -22,6 +22,12 @@ export type RecursoTurno = 'acao' | 'bonus' | 'reacao';
 export type EstadoRecurso = 'disponivel' | 'usada';
 
 interface CombatTabProps {
+  /** `true` = Armadura equipada (Leve/Média/Pesada) sem treinamento —
+   * Desvantagem em D20 de Força ou Destreza (SDD "Penalidades por
+   * Falta de Proficiência", ver `core/proficienciaArmadura.ts`).
+   * Afeta Iniciativa e qualquer rolagem de ataque (todo ataque com
+   * arma/desarmado usa Força ou Destreza). */
+  desvantagemForcaDestreza: boolean;
   pvAtual: number;
   pvMax: number;
   /** PV Temporário atual (ex: Vigor Ínfero/Vitalidade Vazia) — absorve
@@ -150,6 +156,7 @@ const LABELS: Record<RecursoTurno, { icone: string; nome: string }> = {
 };
 
 export default function CombatTab({
+  desvantagemForcaDestreza,
   pvAtual,
   pvMax,
   pvTemporario,
@@ -269,6 +276,7 @@ export default function CombatTab({
       label: 'Iniciativa',
       formula: `1d20 + ${iniciativaMod}`,
       mod: iniciativaMod,
+      vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
       onResultado: (total) => setIniciativaValor(total),
     });
     onRolarIniciativa?.();
@@ -394,6 +402,7 @@ export default function CombatTab({
       label: `Ataque — ${ataqueBonus.nome} (Mão Secundária)`,
       formula: `1d20 + ${ataqueBonus.info.modAcerto}`,
       mod: ataqueBonus.info.modAcerto,
+      vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
     });
     onMarcarUsado('bonus');
     setPainelAberto(null);
@@ -823,6 +832,7 @@ export default function CombatTab({
       >
         {painelAberto === 'acao' && (
           <AcaoPanelContent
+            desvantagemForcaDestreza={desvantagemForcaDestreza}
             onEscolher={(nome, desc, dano) => escolherNoPainel('acao', nome, desc, dano)}
             onAtacar={registrarAtaque}
             gastarSlotCirculo={onGastarSlotCirculo}
@@ -894,6 +904,7 @@ export default function CombatTab({
         )}
         {painelAberto === 'reacao' && (
           <ReacaoPanelContent
+            desvantagemForcaDestreza={desvantagemForcaDestreza}
             onEscolher={(nome, desc) => escolherNoPainel('reacao', nome, desc)}
             gastarSlotCirculo={onGastarSlotCirculo}
             conjura={conjura}

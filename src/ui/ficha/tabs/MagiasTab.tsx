@@ -27,6 +27,12 @@ interface MagiasTabProps {
   espacosGastosPorCirculo: Record<number, number>;
   onGastarSlotCirculo: (circulo: number) => boolean;
   modAcertoConjuracao: number | null;
+  /** `true` = Armadura equipada sem treinamento — bloqueia qualquer
+   * conjuração feita direto por aqui (SDD "Penalidades por Falta de
+   * Proficiência", ver `core/proficienciaArmadura.ts`). O bloqueio de
+   * verdade é no Combat (Ação/Reação); aqui é reforço + aviso, já que
+   * esta aba também deixa conjurar truque/magia direto. */
+  desvantagemForcaDestreza: boolean;
   conjura: boolean;
   truquesAtuais: string[];
   magiasPreparadasAtuais: string[];
@@ -115,6 +121,7 @@ export default function MagiasTab({
   espacosGastosPorCirculo,
   onGastarSlotCirculo,
   modAcertoConjuracao,
+  desvantagemForcaDestreza,
   conjura,
   truquesAtuais,
   magiasPreparadasAtuais,
@@ -182,6 +189,7 @@ export default function MagiasTab({
   }
 
   function usarMagiaGratis(item: MagiaGratisDeInvocacao) {
+    if (desvantagemForcaDestreza) return;
     const jaGasta = item.recarga === 'descansoLongo' && magiasGratisGastas.includes(item.invocacaoId);
     if (jaGasta) return;
     onUsarMagiaGratis(item);
@@ -189,6 +197,7 @@ export default function MagiasTab({
   }
 
   function usarMagia(m: Magia) {
+    if (desvantagemForcaDestreza) return;
     if (m.circulo === 0) {
       rolarAtaqueSeForMagiaDeAtaque(m);
       return;
@@ -225,6 +234,11 @@ export default function MagiasTab({
 
   return (
     <>
+      {desvantagemForcaDestreza && (
+        <div className="label" style={{ color: 'var(--danger)', marginBottom: 10 }}>
+          🚫 Armadura equipada sem treinamento — conjuração bloqueada até trocar ou tirar a armadura.
+        </div>
+      )}
       {espacos.length > 0 && (
         <>
           <div className={styles.grupoHeader} onClick={() => setEspacosExpandido(!espacosExpandido)}>

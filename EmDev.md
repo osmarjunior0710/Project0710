@@ -126,11 +126,9 @@ Grupos propostos e aprovados pelo Osmar:
       `tsc -b`/`npm test` (226)/`npm run build` limpos (testes novos:
       Bardo com o talento soma Bônus de Proficiência numa Espada
       Longa, que sem o talento não somaria).
-- [ ] **B.3 — Bônus numérico direto** (PAUSADO — ver Grupo C abaixo,
-      Osmar pediu pra resolver a penalidade de proficiência primeiro
-      antes de esquecer): Velocista (Deslocamento), Líder
-      Inspirador/Chef (PV temporário) — mesmo padrão de
-      `bonus-pv-por-nivel`/`bonus-ca-com-armadura`.
+- [ ] **B.3 — Bônus numérico direto** (retomado — Grupo C fechado):
+      Velocista (Deslocamento), Líder Inspirador/Chef (PV temporário)
+      — mesmo padrão de `bonus-pv-por-nivel`/`bonus-ca-com-armadura`.
 - [ ] **B.4 — Magia sempre-preparada**: Adepto Elemental, Atirador
       Arcano, Conjurador Ritualista, Telecinético, Telepático, Tocado
       pela Sombra/Fadas — reaproveita o padrão do Iniciado em Magia
@@ -183,14 +181,29 @@ Grupos aprovados pelo Osmar (do mais isolado pro mais espalhado):
       `tsc -b`/`npm test`/`npm run build` limpos + Playwright (Bardo
       com Couro Batido + Escudo → CA 12, sem os +2 do escudo; popup
       mostra a linha "sem treinamento").
-- [ ] **C.3 — Desvantagem em D20 de Força/Destreza sem treinamento de
-      armadura**: o pedaço mais espalhado — atributo FOR/DES, perícias
-      de FOR/DES, Iniciativa, ataques, salvaguardas. Precisa de um
-      sinal único ("armadura sem treinamento ativa") calculado 1x em
-      `FichaShell.tsx` e passado pra cada chamada de `rolarD20`
-      (parâmetro `vantagem: 'desvantagem'` já existe no RollContext,
-      só falta decidir quando forçar).
-- [ ] **C.4 — Bloqueio de conjuração com armadura errada**: trava
-      `conjurarMagia` (`AcaoPanelContent.tsx`, ponto único por onde
-      toda conjuração passa) quando a armadura sem treinamento
-      estiver equipada.
+- [x] **C.3 — Desvantagem em D20 de Força/Destreza sem treinamento de
+      armadura**: sinal único `desvantagemForcaDestreza` calculado 1x
+      em `FichaShell.tsx` (`armaduraSemTreinamentoEquipada`) e passado
+      pra `AtributosTab` (atributo FOR/DES, perícias de FOR/DES,
+      Iniciativa), `CombatTab` (Iniciativa do painel, ataque Mão
+      Secundária) e `AcaoPanelContent` (ataque principal) — cada
+      chamada de `rolarD20` correspondente ganha `vantagem:
+      'desvantagem'` condicional. Não fixa Vantagem/Desvantagem
+      escolhida manualmente — só força quando o jogador ainda não
+      escolheu nenhuma. Verificado: `tsc -b`/`npm test`/`npm run
+      build` limpos + Playwright (Bardo com Cota de Malha — FOR e
+      ataque com Espada Longa saem em Desvantagem automática; CAR
+      continua rolagem normal, com os botões de Vantagem/Desvantagem
+      livres pro jogador escolher).
+- [x] **C.4 — Bloqueio de conjuração com armadura errada**: trava
+      `conjurarMagia` em `AcaoPanelContent.tsx` (Ação) E
+      `ReacaoPanelContent.tsx` (Reação) — os 2 pontos únicos por onde
+      toda conjuração de combate passa — mais um reforço em
+      `MagiasTab.tsx` (`usarMagia`/`usarMagiaGratis`), que também
+      deixa conjurar direto fora do Combat. Linha "✨ Usar Magia" fica
+      acinzentada com aviso "Bloqueado — Armadura equipada sem
+      treinamento impede conjurar magias." Verificado: `tsc -b`/`npm
+      test`/`npm run build` limpos + Playwright (painel de Ação com
+      Cota de Malha equipada mostra a linha bloqueada).
+
+Grupo C fechado — volta o B.3 (pausado acima).

@@ -365,3 +365,45 @@ Comparação exata (`===`) falha silenciosamente aqui — use
 `.endsWith(...)` ou `.includes(...)` pra detectar o nome do ataque
 dentro do label sempre que precisar comparar por nome de novo.
 
+## Penalidade de proficiência de Armadura/Escudo/Arma — 3 regras independentes, sinal único calculado 1x
+
+Regra real (Cap. 6): armadura, escudo e arma têm penalidades
+DIFERENTES por falta de proficiência, nunca a mesma regra reaproveitada
+— arma só perde o Bônus de Proficiência no ataque (`core/
+proficienciaArma.ts`, já existia); escudo só não soma o bônus de CA
+(`core/calculoPersonagem.ts`, `calcularCAEquipado`); armadura (Leve/
+Média/Pesada) dá Desvantagem em QUALQUER D20 de Força/Destreza +
+bloqueia conjuração inteira, enquanto estiver vestida.
+
+**Padrão usado pra "Desvantagem em toda rolagem de X":** calcular o
+sinal booleano UMA VEZ em `FichaShell.tsx`
+(`armaduraSemTreinamentoEquipada`, `core/proficienciaArmadura.ts`) e
+passar como prop simples (`desvantagemForcaDestreza`) pra cada tela
+que faz uma rolagem afetada — nunca recalcular o sinal dentro de cada
+componente. Em cada chamada de `rolarD20`, o sinal vira `vantagem:
+'desvantagem'` só quando a rolagem ainda não tem Vantagem/Desvantagem
+decidida por outro motivo — nunca sobrescreve uma escolha explícita.
+Pontos que hoje leem o sinal: `AtributosTab` (atributo FOR/DES,
+perícias de FOR/DES, Iniciativa), `CombatTab` (Iniciativa do painel,
+ataque de Mão Secundária), `AcaoPanelContent` (ataque principal).
+Ataques com magia (`modAcertoConjuracao`) NÃO usam esse sinal — usam o
+atributo de conjuração, nunca Força/Destreza.
+
+**Bloqueio de conjuração:** trava em 3 pontos — `conjurarMagia` em
+`AcaoPanelContent.tsx` (Ação) e em `ReacaoPanelContent.tsx` (Reação),
+mais reforço em `MagiasTab.tsx` (única outra tela que deixa conjurar
+direto, fora do Combat). Cada ponto é bloqueio de verdade (`return`
+cedo, sem gastar Espaço de Magia nem rolar), não só aviso — a regra
+real diz "impede conjurar", não "desconta something".
+
+**Proficiência de Armadura/Escudo por talento** (Especialista em
+Armaduras Leves/Médias/Pesadas) usa o mesmo desenho de "somar
+categorias de vários talentos" já visto — como mais de 1 talento pode
+contribuir categorias diferentes ao mesmo personagem, a leitura varre
+TODOS os talentos com esse `tipo`, nunca só o primeiro achado
+(`efeitoMecanicoDoTalento` do `calculoPersonagem.ts` não serve aqui —
+ele já para no primeiro match).
+
+**Data/origem:** 2026-09, SDD fornecido pelo Osmar durante o foco de
+Talentos Fase 4 (Grupo C, entre B.2 e B.3).
+

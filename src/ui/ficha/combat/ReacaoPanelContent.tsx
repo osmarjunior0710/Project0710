@@ -7,6 +7,10 @@ import TickPips from '../../components/TickPips';
 import styles from './PanelRows.module.css';
 
 interface ReacaoPanelContentProps {
+  /** `true` = Armadura equipada sem treinamento — bloqueia conjurar
+   * magia de Reação (SDD "Penalidades por Falta de Proficiência", ver
+   * `core/proficienciaArmadura.ts`). */
+  desvantagemForcaDestreza: boolean;
   onEscolher: (nome: string, desc: string) => void;
   gastarSlotCirculo: (circulo: number) => boolean;
   conjura: boolean;
@@ -30,6 +34,7 @@ interface ReacaoPanelContentProps {
 }
 
 export default function ReacaoPanelContent({
+  desvantagemForcaDestreza,
   onEscolher,
   gastarSlotCirculo,
   conjura,
@@ -53,6 +58,7 @@ export default function ReacaoPanelContent({
   const { rolarD20, rolarDados } = useRoll();
 
   function conjurarMagia(m: Magia) {
+    if (desvantagemForcaDestreza) return;
     if (m.circulo > 0) {
       const ok = gastarSlotCirculo(m.circulo);
       if (!ok) {
@@ -195,8 +201,18 @@ export default function ReacaoPanelContent({
       )}
       {conjura && magiasReacao.length > 0 && (
         <>
+          {desvantagemForcaDestreza && (
+            <div className="label" style={{ color: 'var(--danger)', marginBottom: 8 }}>
+              Bloqueado — Armadura equipada sem treinamento impede conjurar magias.
+            </div>
+          )}
           {magiasReacao.map((m) => (
-            <div key={m.id} className={styles.spellMiniRow} onClick={() => conjurarMagia(m)}>
+            <div
+              key={m.id}
+              className={styles.spellMiniRow}
+              style={desvantagemForcaDestreza ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+              onClick={() => conjurarMagia(m)}
+            >
               <span>
                 <MagiaComDescricao magia={m} /> {iconesMagia(m)}
               </span>

@@ -26,6 +26,12 @@ interface AtributosTabProps {
   explicacaoPercepcaoPassiva: ExplicacaoCalculo;
   atributos: AtributoFinal[];
   pericias: PericiaFinal[];
+  /** `true` = Armadura equipada (Leve/Média/Pesada) sem treinamento —
+   * Desvantagem em D20 de Força ou Destreza (SDD "Penalidades por
+   * Falta de Proficiência", ver `core/proficienciaArmadura.ts`).
+   * Afeta o box de atributo FOR/DES, perícias de FOR/DES e Iniciativa
+   * — não afeta INT/SAB/CAR nem outras perícias. */
+  desvantagemForcaDestreza: boolean;
   proficienciasFerramenta: FerramentaFinal[];
   onDescansoLongo: () => void;
   onDescansoCurto: () => void;
@@ -76,6 +82,7 @@ export default function AtributosTab({
   explicacaoPercepcaoPassiva,
   atributos,
   pericias,
+  desvantagemForcaDestreza,
   proficienciasFerramenta,
   onDescansoLongo,
   onDescansoCurto,
@@ -176,7 +183,12 @@ export default function AtributosTab({
           className={`box ${styles.hpBox} ${styles.hpBoxAccent}`}
           onClick={() => {
             if (iniciativa === null) return;
-            rolarD20({ label: 'Iniciativa', formula: `1d20 + ${iniciativa}`, mod: iniciativa });
+            rolarD20({
+              label: 'Iniciativa',
+              formula: `1d20 + ${iniciativa}`,
+              mod: iniciativa,
+              vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
+            });
             onRolarIniciativa?.();
           }}
         >
@@ -198,6 +210,8 @@ export default function AtributosTab({
                 formula: `1d20 ${a.mod >= 0 ? '+' : '-'} ${Math.abs(a.mod)}`,
                 mod: a.mod,
                 categoria: 'atributoOuSalvaguarda',
+                vantagem:
+                  desvantagemForcaDestreza && (a.atributo === 'FOR' || a.atributo === 'DES') ? 'desvantagem' : undefined,
               })
             }
           >
@@ -222,6 +236,8 @@ export default function AtributosTab({
               formula: `1d20 ${p.mod >= 0 ? '+' : '-'} ${Math.abs(p.mod)}`,
               mod: p.mod,
               categoria: 'atributoOuSalvaguarda',
+              vantagem:
+                desvantagemForcaDestreza && (p.atributo === 'FOR' || p.atributo === 'DES') ? 'desvantagem' : undefined,
             })
           }
         >

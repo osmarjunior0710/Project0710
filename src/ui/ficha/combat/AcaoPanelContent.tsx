@@ -18,6 +18,12 @@ export interface DanoPendente {
 }
 
 interface AcaoPanelContentProps {
+  /** `true` = Armadura equipada sem treinamento — Desvantagem em
+   * qualquer ataque com arma/desarmado (SDD "Penalidades por Falta de
+   * Proficiência", ver `core/proficienciaArmadura.ts`). Ataque com
+   * magia (`modAcertoConjuracao`) não é afetado — usa o atributo de
+   * conjuração, não Força/Destreza. */
+  desvantagemForcaDestreza: boolean;
   onEscolher: (nome: string, desc: string, dano?: DanoPendente) => void;
   onAtacar: (nome: string, desc: string, dano: DanoPendente) => void;
   gastarSlotCirculo: (circulo: number) => boolean;
@@ -50,6 +56,7 @@ interface AcaoPanelContentProps {
 }
 
 export default function AcaoPanelContent({
+  desvantagemForcaDestreza,
   onEscolher,
   onAtacar,
   gastarSlotCirculo,
@@ -98,6 +105,7 @@ export default function AcaoPanelContent({
       label: `Ataque — ${nome}`,
       formula: `1d20 + ${ataque.modAcerto}`,
       mod: ataque.modAcerto,
+      vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
     });
     finalizar(`🗡 ${nome}`, `Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano ${ataque.danoTipo}.`, {
       label: `Dano — ${nome}`,
@@ -111,6 +119,12 @@ export default function AcaoPanelContent({
    * (upcast, ver `EscolherCirculoShell`); truque passa `null` (não
    * gasta espaço nenhum). */
   function conjurarMagia(m: Magia, circulo: number | null) {
+    // Trava dupla — a linha "Usar Magia" já fica desabilitada quando
+    // `desvantagemForcaDestreza` é true, mas essa checagem aqui é o
+    // ponto único de verdade (SDD "Penalidades por Falta de
+    // Proficiência": bloqueio de conjuração é pra impedir de verdade,
+    // não só avisar).
+    if (desvantagemForcaDestreza) return;
     if (circulo !== null) {
       const ok = gastarSlotCirculo(circulo);
       if (!ok) return;
@@ -201,9 +215,19 @@ export default function AcaoPanelContent({
       )}
 
       {conjura && (
-        <div className={styles.row} onClick={() => setTelaMagia('lista')}>
+        <div
+          className={styles.row}
+          style={desvantagemForcaDestreza ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+          onClick={() => setTelaMagia('lista')}
+        >
           <div className={styles.rowName}>✨ Usar Magia</div>
-          {detalhesAtivo && <div className={styles.rowDesc}>Conjurar Truque ou Magia Preparada</div>}
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              {desvantagemForcaDestreza
+                ? 'Bloqueado — Armadura equipada sem treinamento impede conjurar magias.'
+                : 'Conjurar Truque ou Magia Preparada'}
+            </div>
+          )}
         </div>
       )}
 
