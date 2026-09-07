@@ -9,7 +9,9 @@ import {
   magiasPreparadasDoPersonagem,
   circulosDisponiveisParaConjurar,
 } from '../../../core/magiasPersonagem';
-import { classificarMagia, iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
+import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
+import { calcularDanoMagia, mecanicaDaMagia, atributoSalvaguarda } from '../../../core/magiaDano';
+import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
@@ -17,6 +19,7 @@ import TickPips from '../../components/TickPips';
 import { useColapsavel } from '../../hooks/useColapsavel';
 import { useRoll } from '../../roll/RollContext';
 import EscolherCirculoShell from '../combat/EscolherCirculoShell';
+import MagiaSalvaguardaModal from '../combat/MagiaSalvaguardaModal';
 import styles from './MagiasTab.module.css';
 
 const armasSimples = armas.filter((a) => a.categoria.includes('Simples'));
@@ -168,9 +171,16 @@ export default function MagiasTab({
   onCompletarTruques,
   onCompletarMagiasPreparadas,
 }: MagiasTabProps) {
-  const { rolarD20 } = useRoll();
+  const { rolarD20, rolarDados } = useRoll();
   const [telaCirculo, setTelaCirculo] = useState<{ magia: Magia; circulos: number[] } | null>(null);
   const [armaDePactoEscolhida, setArmaDePactoEscolhida] = useState('');
+  const [danoPendenteMagia, setDanoPendenteMagia] = useState<{
+    label: string;
+    quantidade: number;
+    lados: number;
+    mod: number;
+  } | null>(null);
+  const [telaSalvaguarda, setTelaSalvaguarda] = useState<{ magia: Magia; circuloUsado: number } | null>(null);
 
   if (!conjura) {
     return (
@@ -191,14 +201,51 @@ export default function MagiasTab({
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
   const [espacosExpandido, setEspacosExpandido] = useColapsavel('espacos-de-magia', true);
 
-  function rolarAtaqueSeForMagiaDeAtaque(m: Magia) {
-    if (classificarMagia(m).ataque && modAcertoConjuracao !== null) {
+  function processarMagiaAoUsar(m: Magia, circuloUsado: number) {
+    const mecanica = mecanicaDaMagia(m);
+    if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
       rolarD20({
         label: `Ataque de Magia — ${m.nome}`,
         formula: `1d20 + ${modAcertoConjuracao}`,
         mod: modAcertoConjuracao,
       });
+      const dano = calcularDanoMagia(m, circuloUsado, nivel);
+      setDanoPendenteMagia(
+        dano ? { label: `Dano — ✨ ${m.nome}`, quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod } : null,
+      );
+      return;
     }
+    setDanoPendenteMagia(null);
+    if (mecanica === 'salvaguarda') {
+      setTelaSalvaguarda({ magia: m, circuloUsado });
+      return;
+    }
+  }
+
+  function rolarDanoPendenteMagia() {
+    if (!danoPendenteMagia) return;
+    rolarDados({
+      label: danoPendenteMagia.label,
+      formula: `${danoPendenteMagia.quantidade}d${danoPendenteMagia.lados}${danoPendenteMagia.mod ? ` + ${danoPendenteMagia.mod}` : ''}`,
+      quantidade: danoPendenteMagia.quantidade,
+      lados: danoPendenteMagia.lados,
+      mod: danoPendenteMagia.mod,
+    });
+    setDanoPendenteMagia(null);
+  }
+
+  function rolarDanoSalvaguarda() {
+    if (!telaSalvaguarda) return;
+    const dano = calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel);
+    setTelaSalvaguarda(null);
+    if (!dano) return;
+    rolarDados({
+      label: `Dano — ✨ ${telaSalvaguarda.magia.nome}`,
+      formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+      quantidade: dano.quantidade,
+      lados: dano.lados,
+      mod: dano.mod,
+    });
   }
 
   function usarMagiaGratis(item: MagiaGratisDeInvocacao) {
@@ -206,13 +253,13 @@ export default function MagiasTab({
     const jaGasta = item.recarga === 'descansoLongo' && magiasGratisGastas.includes(item.invocacaoId);
     if (jaGasta) return;
     onUsarMagiaGratis(item);
-    rolarAtaqueSeForMagiaDeAtaque(item.magia);
+    processarMagiaAoUsar(item.magia, item.magia.circulo);
   }
 
   function usarMagia(m: Magia) {
     if (desvantagemForcaDestreza) return;
     if (m.circulo === 0) {
-      rolarAtaqueSeForMagiaDeAtaque(m);
+      processarMagiaAoUsar(m, 0);
       return;
     }
     const circulosDisponiveis = circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo);
@@ -231,7 +278,7 @@ export default function MagiasTab({
         onConjurar={(circulo) => {
           const ok = onGastarSlotCirculo(circulo);
           setTelaCirculo(null);
-          if (ok) rolarAtaqueSeForMagiaDeAtaque(telaCirculo.magia);
+          if (ok) processarMagiaAoUsar(telaCirculo.magia, circulo);
         }}
       />
     );
@@ -252,6 +299,34 @@ export default function MagiasTab({
           🚫 Armadura equipada sem treinamento — conjuração bloqueada até trocar ou tirar a armadura.
         </div>
       )}
+
+      {telaSalvaguarda && (
+        <MagiaSalvaguardaModal
+          nomeMagia={telaSalvaguarda.magia.nome}
+          atributo={atributoSalvaguarda(telaSalvaguarda.magia)}
+          cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
+          textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
+          textoFalha={telaSalvaguarda.magia.salvaguardaFalha}
+          dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}
+          upcastTexto={telaSalvaguarda.magia.upcastTexto}
+          onRolarDano={rolarDanoSalvaguarda}
+          onFechar={() => setTelaSalvaguarda(null)}
+        />
+      )}
+
+      {danoPendenteMagia && (
+        <div className="label" style={{ marginBottom: 12, padding: 10, background: 'var(--panel)', borderRadius: 'var(--shape-md)' }}>
+          Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano.
+          <div
+            className="btn btn-primary"
+            style={{ marginTop: 10, padding: '10px 14px', display: 'inline-block' }}
+            onClick={rolarDanoPendenteMagia}
+          >
+            🎲 Rolar Dano
+          </div>
+        </div>
+      )}
+
       {espacos.length > 0 && (
         <>
           <div className={styles.grupoHeader} onClick={() => setEspacosExpandido(!espacosExpandido)}>

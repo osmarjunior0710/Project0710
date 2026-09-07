@@ -6,6 +6,7 @@ import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
+import { calcularDanoMagia, atributoSalvaguarda } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import InfoChip from '../../components/InfoChip';
 import LinearProgressBar from '../../components/LinearProgressBar';
@@ -16,6 +17,7 @@ import BonusPanelContent from '../combat/BonusPanelContent';
 import ReacaoPanelContent from '../combat/ReacaoPanelContent';
 import LancarNoInfernoModal from '../combat/LancarNoInfernoModal';
 import AtaqueDeSoproModal from '../combat/AtaqueDeSoproModal';
+import MagiaSalvaguardaModal from '../combat/MagiaSalvaguardaModal';
 import styles from './CombatTab.module.css';
 
 export type RecursoTurno = 'acao' | 'bonus' | 'reacao';
@@ -257,6 +259,7 @@ export default function CombatTab({
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [danoPendente, setDanoPendente] = useState<DanoPendente | null>(null);
+  const [telaSalvaguarda, setTelaSalvaguarda] = useState<{ magia: Magia; circuloUsado: number } | null>(null);
   const [ataquesFeitos, setAtaquesFeitos] = useState(0);
   const [iniciativaValor, setIniciativaValor] = useState<number | null>(null);
   const [periciaInigualavelPendente, setPericiaInigualavelPendente] = useState(false);
@@ -305,6 +308,24 @@ export default function CombatTab({
     setPainelAberto(null);
     setFeedback(`${nome} — ${desc}`);
     setDanoPendente(dano ?? null);
+  }
+
+  function abrirSalvaguarda(magia: Magia, circuloUsado: number) {
+    setTelaSalvaguarda({ magia, circuloUsado });
+  }
+
+  function rolarDanoSalvaguarda() {
+    if (!telaSalvaguarda) return;
+    const dano = calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel);
+    setTelaSalvaguarda(null);
+    if (!dano) return;
+    rolarDados({
+      label: `Dano — ✨ ${telaSalvaguarda.magia.nome}`,
+      formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+      quantidade: dano.quantidade,
+      lados: dano.lados,
+      mod: dano.mod,
+    });
   }
 
   function usarConhecimentoDePedras() {
@@ -835,7 +856,9 @@ export default function CombatTab({
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             onEscolher={(nome, desc, dano) => escolherNoPainel('acao', nome, desc, dano)}
             onAtacar={registrarAtaque}
+            onAbrirSalvaguarda={abrirSalvaguarda}
             gastarSlotCirculo={onGastarSlotCirculo}
+            nivel={nivel}
             espacos={espacos}
             espacosGastosPorCirculo={espacosGastosPorCirculo}
             conjura={conjura}
@@ -905,8 +928,10 @@ export default function CombatTab({
         {painelAberto === 'reacao' && (
           <ReacaoPanelContent
             desvantagemForcaDestreza={desvantagemForcaDestreza}
-            onEscolher={(nome, desc) => escolherNoPainel('reacao', nome, desc)}
+            onEscolher={(nome, desc, dano) => escolherNoPainel('reacao', nome, desc, dano)}
+            onAbrirSalvaguarda={abrirSalvaguarda}
             gastarSlotCirculo={onGastarSlotCirculo}
+            nivel={nivel}
             conjura={conjura}
             magiasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
@@ -940,6 +965,19 @@ export default function CombatTab({
           numDados={numDadosAtaqueDeSopro}
           onRolarDano={rolarDanoAtaqueDeSopro}
           onFechar={() => setAtaqueDeSoproAberto(false)}
+        />
+      )}
+      {telaSalvaguarda && (
+        <MagiaSalvaguardaModal
+          nomeMagia={telaSalvaguarda.magia.nome}
+          atributo={atributoSalvaguarda(telaSalvaguarda.magia)}
+          cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
+          textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
+          textoFalha={telaSalvaguarda.magia.salvaguardaFalha}
+          dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}
+          upcastTexto={telaSalvaguarda.magia.upcastTexto}
+          onRolarDano={rolarDanoSalvaguarda}
+          onFechar={() => setTelaSalvaguarda(null)}
         />
       )}
     </>

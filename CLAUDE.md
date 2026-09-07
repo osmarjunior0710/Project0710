@@ -18,9 +18,14 @@
 > Coisas adiadas de propósito (ainda não resolvidas) ficam em
 > `PENDENCIAS.md` — leia esse também, e **atualize-o** sempre que adiar
 > algo ou resolver algo que estava lá (ver seção 11).
-> O plano do foco que está em andamento AGORA mesmo fica em
-> `EmDev.md` — leia esse antes de continuar um trabalho em progresso, e
-> **mantenha atualizado** enquanto trabalha (ver seção 6 e 14).
+> O plano do foco que está em andamento AGORA mesmo fica em `EmDev.md`
+> (conta principal/branch padrão) ou `EmDevB.md` (esta conta/branch
+> `claude/read-claude-md-c75hsf`) — cada conta só lê e escreve no seu
+> próprio arquivo, pra não misturar plano de trabalho em progresso de
+> uma sessão com o da outra (ver seção 14). Leia o seu antes de
+> continuar um trabalho em progresso, e **mantenha atualizado** enquanto
+> trabalha (ver seção 6 e 14). **No início de toda sessão**, sincronize
+> com a branch principal antes de propor qualquer plano (ver seção 18).
 > Observação pequena e recorrente de UI/UX/processo (ainda sem virar
 > regra permanente) fica em `LICOES-RAPIDAS.md` — na 3ª repetição,
 > vira decisão de verdade num `DECISOES-*.md` (ver seção 16). Bug/
@@ -30,6 +35,9 @@
 > tecnicamente possível, mas que a gente decide não fazer agora por
 > prioridade (diferente de `PENDENCIAS.md`, que é o que trava
 > estruturalmente) fica em `Backlog.md` (ver seção 17).
+> Toda publicação na branch principal (a que dispara o deploy) ganha
+> uma entrada nova no topo de `Changelog.md` — resumo do que subiu,
+> pro Osmar acompanhar sem precisar ler commit (ver seção 19).
 
 ## 1. Quem está do outro lado
 
@@ -414,18 +422,44 @@ conforme o motor de cálculo cresce:
   nome migram aos poucos, sob demanda — não é preciso migrar tudo de
   uma vez, mas todo código **novo** já nasce usando ID.
 
-## 14. Regra de atualização do EmDev.md
+## 14. Regra de atualização do EmDev.md / EmDevB.md
 
-`EmDev.md` é o plano do foco **em andamento agora** (ver ciclo de foco,
-seção 6) — diferente da família `DECISOES-*.md` (o que já foi
-decidido, permanente) e de `PENDENCIAS.md` (adiado de propósito ou
-travado estruturalmente), este é só o checklist de passos sendo
-executados neste momento, pra não perder o fio se a conversa for
-interrompida/retomada depois.
+`EmDev.md` (e seu par `EmDevB.md`) é o plano do foco **em andamento
+agora** (ver ciclo de foco, seção 6) — diferente da família
+`DECISOES-*.md` (o que já foi decidido, permanente) e de
+`PENDENCIAS.md` (adiado de propósito ou travado estruturalmente), este
+é só o checklist de passos sendo executados neste momento, pra não
+perder o fio se a conversa for interrompida/retomada depois.
+
+### 14.1 Dois arquivos, um por conta — pra não misturar produção
+
+O Osmar roda 2 contas/sessões do Claude Code em paralelo, cada uma
+tipicamente numa branch diferente. Se as duas escrevessem no mesmo
+`EmDev.md`, toda sincronização de branch (seção 18) viraria conflito
+de merge no meio de um foco em andamento — foi exatamente o que
+aconteceu antes desta regra existir. Por isso:
+
+- **`EmDev.md`** — conta principal / branch padrão do repositório
+  (a que o `git remote show origin` aponta como `HEAD branch`).
+- **`EmDevB.md`** — esta conta (branch `claude/read-claude-md-c75hsf`).
+- Cada sessão só lê e escreve no arquivo que é seu — nunca no do
+  outro, mesmo que ele apareça na branch depois de um merge (ele
+  chegou ali só porque as branches se juntaram, continua sendo
+  conteúdo da outra conta).
+- Os dois arquivos seguem exatamente a mesma regra abaixo (abrir/
+  marcar/fechar foco) — a única diferença entre eles é de quem escreve
+  em qual, não de formato ou de processo.
+- Todo o resto (`DECISOES-*.md`, `PENDENCIAS.md`, `DND-Regras.md`,
+  `Backlog.md`, `Feedback.md`, `LICOES-RAPIDAS.md`, código) continua
+  compartilhado entre as 2 contas — só o plano de foco em progresso é
+  separado. Isso só funciona se a sincronização da seção 18 acontecer
+  de verdade a cada sessão; sem isso, o resto também diverge.
+
+### 14.2 Regra de conteúdo (vale pros 2 arquivos)
 
 - **Ao abrir um foco** (seção 6, antes de escrever qualquer código) e
-  o Osmar aprovar o plano, escreva os passos em `EmDev.md` como
-  checklist (`- [ ]` / `- [x]`), não só na resposta do chat.
+  o Osmar aprovar o plano, escreva os passos no seu `EmDev`/`EmDevB`
+  como checklist (`- [ ]` / `- [x]`), não só na resposta do chat.
 - **Marque cada passo como `[x]` assim que ele for concluído** —
   durante o trabalho, não só no final.
 - **Achado no caminho que dá pra resolver dentro do MESMO foco vira
@@ -436,16 +470,16 @@ interrompida/retomada depois.
   certo (seção 7), mova o que sobrou de propósito pro `PENDENCIAS.md`
   agrupado (seção 11), aproveite pra limpar do `PENDENCIAS.md` o que
   foi resolvido no caminho (mesmo de outro foco), e só DEPOIS esvazie
-  este arquivo. `EmDev.md` nunca é o lugar definitivo pra nada, só o
+  o seu arquivo. Nenhum dos dois é o lugar definitivo pra nada, só o
   rascunho de trabalho.
 - Se o Osmar pedir pra trocar de assunto no meio de um plano ainda não
   concluído (pausa temporária, não fechamento de foco), deixe o
   conteúdo como está (não apague plano incompleto) — ele continua ali
   pra retomar depois.
-- Um plano recém-aprovado **substitui** o conteúdo anterior se o
-  anterior já estava 100% `[x]` (aí já deveria ter sido fechado); não
-  deveria haver 2 planos diferentes simultâneos aqui — se acontecer,
-  pergunte ao Osmar qual está valendo.
+- Um plano recém-aprovado **substitui** o conteúdo anterior do MESMO
+  arquivo se o anterior já estava 100% `[x]` (aí já deveria ter sido
+  fechado); não deveria haver 2 planos diferentes simultâneos no mesmo
+  arquivo — se acontecer, pergunte ao Osmar qual está valendo.
 
 ## 15. Regra de atualização do Feedback.md
 
@@ -508,3 +542,112 @@ dá pra fazer sem outra coisa acontecer primeiro".
   com o foco que a criou não importa tanto quanto o que falta fazer.
 - Diferente de `PENDENCIAS.md` (trabalho ainda não feito) — isso aqui
   é só observação de padrão de comportamento/processo, não uma tarefa.
+
+## 18. Sincronizar com a branch principal no início de toda sessão
+
+O Osmar roda 2 contas/sessões em paralelo (ver seção 14.1), cada uma
+tipicamente numa branch própria. Sem sincronizar, uma sessão relata
+progresso baseado num estado do projeto que já mudou por fora — já
+aconteceu de um foco inteiro (Espécies) aparecer como "não começado"
+numa sessão quando já estava 100% concluído e substituído por outro
+foco na branch principal.
+
+- **No início de toda sessão, antes de propor ou continuar qualquer
+  plano**, rode `git fetch` da branch principal (`HEAD branch` do
+  `git remote show origin`) e compare com a branch atual. Se houver
+  commits novos por lá, faça o merge pra dentro da branch desta sessão
+  antes de continuar — não trabalhe em cima de um estado
+  desatualizado.
+- Resolva conflitos de merge seguindo a regra da seção 14.1 (o
+  `EmDev.md`/`EmDevB.md` da OUTRA conta sempre vence num conflito,
+  nunca o desta sessão) — os demais arquivos (`PENDENCIAS.md`,
+  `DECISOES-*.md`, código) resolvem pelo conteúdo real de cada lado,
+  sem regra automática de "quem vence".
+- Depois do merge, rode `npx tsc --noEmit`, `npm test -- --run` e
+  `npm run build` antes de considerar a sincronização concluída — um
+  merge limpo não significa que o resultado compila ou passa nos
+  testes.
+- Isso substitui esperar o Osmar pedir "faz um sync" — a sincronização
+  é automática e acontece antes de qualquer trabalho novo, não uma
+  ação sob demanda.
+
+## 19. Regra de atualização do Changelog.md
+
+`Changelog.md` é o histórico do que foi publicado de verdade — cada
+entrada é 1 publicação na branch principal (o push que dispara o
+deploy do GitHub Pages, ver seção 18), não 1 commit nem 1 entrega
+interna. Existe pro Osmar acompanhar "o que mudou desde a última vez
+que eu testei", sem precisar ler código nem commit.
+
+- **Sempre que um push chegar na branch principal**, adicione uma
+  entrada nova no `Changelog.md`, formato:
+
+  ```
+  ## {APP_VERSION}
+
+  Resumo curto (1-3 frases) do que mudou nessa publicação.
+  ```
+
+- `{APP_VERSION}` é o valor exato de `src/version.ts` no momento
+  desse push (já com o "v" na frente, ver seção 10) — não reformatar,
+  não abreviar.
+- O resumo é sobre o que o Osmar **vê ou pode testar** na tela — não
+  detalhe de implementação (arquivo tocado, função nova). Detalhe
+  técnico já fica no commit e, se for decisão de design durável, no
+  `DECISOES-*.md` certo (seção 7) — não duplicar aqui.
+- **Regra fixa de ordem, não negociável:** a entrada mais nova é
+  **sempre a primeira** do arquivo (logo abaixo do título/aviso do
+  topo) — nunca embaixo, nunca reordenar entradas antigas depois de
+  escritas. O arquivo cresce por cima; a entrada mais antiga vai
+  ficando mais pra baixo com o tempo.
+- **Sempre pelo menos 1 linha em branco** entre 2 entradas (e entre o
+  aviso do topo e a primeira entrada).
+- Se uma publicação juntar trabalho de mais de 1 foco/conta (merge de
+  `EmDev.md` + `EmDevB.md` no mesmo push, por exemplo), 1 entrada só
+  cobrindo tudo que subiu nessa publicação — não 1 entrada por foco.
+- Publicação que só mexe em arquivo de processo/decisão (`CLAUDE.md`,
+  `DECISOES-*.md`, `PENDENCIAS.md`, `Backlog.md`, etc.) sem tocar em
+  nada dentro de `src/` **não precisa de entrada** — não tem nada pro
+  Osmar ver/testar na tela. Só publicações que mudam o app de verdade
+  entram no Changelog.
+
+## 20. Publicar na branch principal — autorizado por padrão, sem perguntar antes
+
+O Osmar autorizou os 2 Claude Code (esta conta e a principal) a
+mesclar trabalho já validado na branch principal e dar push — **sem
+perguntar "posso publicar?" a cada vez**. Essa autorização é durável
+(vale pra qualquer sessão futura, não só a que recebeu o pedido) —
+é exatamente por isso que fica escrita aqui, não só na conversa.
+
+**Faça isso automaticamente ao terminar uma entrega, não só quando
+pedido — condição pra publicar:**
+- A entrega está completa e validada: checklist verde (`npx tsc -b`,
+  `npm test -- --run`, `npm run build`, ver seção 13); testada em
+  largura de celular quando for mudança de UI (seção 1/5).
+- `src/version.ts` atualizado com o horário de Brasília do momento do
+  push (seção 10).
+- `Changelog.md` ganhou a entrada da publicação, quando for o caso
+  (seção 19).
+
+**Ordem obrigatória, sempre a mesma, nunca pulando passo:**
+1. Sincronize com a branch principal de novo, mesmo que a sessão já
+   tenha sincronizado no início (seção 18) — a outra conta pode ter
+   publicado enquanto você trabalhava.
+2. Resolva qualquer conflito de merge pelas regras já existentes
+   (seção 14.1/18) — leia os 2 lados antes de combinar, nunca
+   adivinhe qual ganha.
+3. Rode o checklist completo de novo DEPOIS do merge — um merge
+   limpo não significa que compila ou passa nos testes.
+4. Só então mescle na branch principal e dê push.
+
+**Continua exigindo perguntar antes (isso NÃO virou automático):**
+- Force-push, `git reset --hard`/`git clean` na branch principal, ou
+  qualquer reescrita de histórico — regra geral de segurança do
+  Claude Code, não é algo que este projeto pode liberar.
+- Publicar algo que você sabe que ficou incompleto ou quebrou o
+  checklist "só pra não perder o commit" — nunca pule a validação pra
+  publicar mais rápido.
+- Conflito de merge que exige JULGAMENTO (os 2 lados mudaram a MESMA
+  regra/lógica de forma incompatível — não é só adição em paralelo,
+  como a maioria dos conflitos já vistos) — aí pare e pergunte ao
+  Osmar antes de decidir sozinho qual lado vale.

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
-import { buscarDescricaoItem } from '../../../data/rulesets/dnd2024/buscarDescricaoItem';
+import { buscarDescricaoItem, buscarDescricaoCompletaItem } from '../../../data/rulesets/dnd2024/buscarDescricaoItem';
 import { calcularCargaTotal, pesoDaLinha, type ItemMochila } from '../../../core/mochila';
 import {
   identificarEquipamento,
@@ -117,6 +117,7 @@ function Linha({
   sintonizadosAtual: number;
 }) {
   const descricao = buscarDescricaoItem(item.nome);
+  const descricaoCompleta = buscarDescricaoCompletaItem(item.nome);
   const [confirmandoRemocao, setConfirmandoRemocao] = useState(false);
 
   function tocarTrash() {
@@ -135,7 +136,13 @@ function Linha({
           {itensDetalhados ? (
             item.nome
           ) : (
-            <ItemComDescricao nome={item.nome} descricao={descricao} rotulo={item.nome} variante="icone" />
+            <ItemComDescricao
+              nome={item.nome}
+              descricao={descricao}
+              descricaoCompleta={descricaoCompleta}
+              rotulo={item.nome}
+              variante="icone"
+            />
           )}
         </span>
         <span

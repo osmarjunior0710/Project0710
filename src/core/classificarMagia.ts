@@ -18,9 +18,8 @@ export interface ClassificacaoMagia {
   ataque: boolean;
   cura: boolean;
   custoComponente: boolean;
-  /** Pede salvaguarda do alvo — usado só pra saber se falta mecânica
-   * automatizável no Combat (ver `usarMagiaTemAcaoAutomatizada`), não
-   * é uma categoria mostrada como ícone. */
+  /** Pede salvaguarda do alvo — não é uma categoria mostrada como
+   * ícone, só ajuda a achar magia de interesse ao ler a lista. */
   salvaguarda: boolean;
 }
 
@@ -35,20 +34,18 @@ export function classificarMagia(magia: Magia): ClassificacaoMagia {
   };
 }
 
-/** `false` = truque (círculo 0) sem NENHUMA jogada que o Combat sabe
- * automatizar hoje — só pede salvaguarda do ALVO (não do conjurador),
- * mecânica de teste de resistência de terceiro que ainda não existe
- * no app (mesma lacuna do Ataque Desarmado — Empurrar/Imobilizar, ver
- * PENDENCIAS.md "Magia/truque de salvaguarda sem jogada automatizável").
- * `true` pra tudo que já tem algum caminho (ataque rola d20; cura e
- * utilidade em geral não precisam de jogada nenhuma, "Usar" sem fazer
- * nada é o comportamento certo pra elas). Só vale pra truque — magia
- * preparada sempre "faz algo" ao usar (gasta o espaço), mesmo sendo
- * de salvaguarda. */
-export function usarMagiaTemAcaoAutomatizada(magia: Magia): boolean {
-  if (magia.circulo !== 0) return true;
-  const c = classificarMagia(magia);
-  return c.ataque || !c.salvaguarda;
+/** Historicamente truque (círculo 0) de salvaguarda sem ataque (ex.:
+ * Badalar Fúnebre) não tinha NENHUMA jogada que o Combat sabia
+ * automatizar, então "Usar" ficava travado. Desde o Modal de
+ * Salvaguarda (ver DECISOES-COMBATE.md) toda magia com
+ * `ataqueOuSalvaguarda` preenchido tem um modal — Ataque ou
+ * Salvaguarda; as sem mecânica (`null`, cura/utilidade) já
+ * "funcionam" sem jogada nenhuma ("Usar" sem efeito é o comportamento
+ * certo pra elas). Não sobra nenhum truque sem ação válida — função
+ * mantida (não removida dos 6 call-sites em MagiasTab.tsx) caso
+ * apareça um caso futuro sem cobertura. */
+export function usarMagiaTemAcaoAutomatizada(_magia: Magia): boolean {
+  return true;
 }
 
 export const ICONE_ATAQUE = '⚔️';

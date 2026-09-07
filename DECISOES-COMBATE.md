@@ -180,11 +180,14 @@ novo pro esqueleto):**
 
 **Decisão consciente de escopo — Fase A vs B:** por enquanto a Tela 3
 mostra só o TEXTO da magia (já suficiente, o jogador lê e calcula),
-não um número calculado por círculo escolhido — isso viraria "Cura
-1d8" na opção de 1º círculo, "2d8" na de 2º, etc., mas exigiria mapear
-a fórmula de upcast estruturada de cada magia (trabalho de planilha
-grande). Registrado em PENDENCIAS.md "Upcast — efeito calculado por
-círculo" — Osmar quer fechar Talentos antes de voltar nisso.
+não um número calculado por círculo escolhido. **Fase B concluída
+depois** (foco "Auditoria de Magias", ver DECISOES-DADOS.md "Magias —
+motor de dano completo") — `core/magiaDano.ts` hoje calcula o dado
+certo (Dano Base + Upcast + Escala de Truque) e já é usado pra rodar o
+dano de verdade depois de conjurar. A ÚNICA coisa que ainda não existe
+é mostrar esse número PRÉVIO em cada opção de círculo da própria Tela
+3 (antes de escolher) — trivial de fazer agora que o motor existe, só
+não foi pedido ainda (ver Backlog.md).
 
 **Também decidido não fazer agora:** o "empilhar telas com offset
 lateral" que o Osmar sugeriu como visual fica pra quando ele decidir
@@ -207,6 +210,40 @@ caminho de 1 círculo só (Bardo nível 1): clicar na magia conjura
 direto, sem passar pela Tela 3.
 
 **Data/origem:** 2026-08.
+
+## Magia de ataque/salvaguarda — 2 modais, mesmos 2 pontos de acesso (Magias + Combat)
+
+**Pedido do Osmar:** os 2 pontos onde o jogador já usa magia (aba
+Magias — direto da lista; aba Combat — Ação/Ação Bônus/Reação)
+precisam dos mesmos 2 modais novos, disparados pela mesma lógica —
+nunca comportamento diferente entre os 2 lugares.
+
+- **Modal de Ataque** (magia tipo Raio Místico) — rola 1d20 de ataque
+  à distância/corpo a corpo (igual arma), depois oferece "🎲 Rolar
+  Dano" — reaproveita 100% o padrão `DanoPendente` que arma já usava
+  (banner + botão, não um popup próprio). O app nunca modela CA do
+  inimigo (igual arma, sempre foi assim) — o jogador decide na mesa se
+  acertou.
+- **Modal de Salvaguarda** (novo componente, `MagiaSalvaguardaModal.tsx`)
+  — quem rola a salvaguarda é o ALVO, fora do app; o modal só mostra
+  CD + atributo exigido + o que acontece no sucesso/falha (textos
+  SEPARADOS, um por resultado — sucesso pode ser dano nenhum, metade,
+  ou completo dependendo da magia) + botão "Rolar Dano" sempre com
+  dano cheio (jogador ajusta na mesa se soube que o alvo passou —
+  mesma filosofia do Ataque de Sopro/Lançar no Inferno, nunca tenta
+  rastrear sucesso/falha sozinho). Popup pequeno sem estado próprio,
+  reaproveita `TrocarArmaMaestria.module.css` (mesmo molde visual de
+  `AtaqueDeSoproModal`).
+
+**Qual modal abrir é decidido por UMA fonte só:** o campo estruturado
+`ataqueOuSalvaguarda` (ver DECISOES-DADOS.md), nunca a heurística de
+regex de `classificarMagia` (usada só pro ícone ⚔️ da lista) — usar 2
+fontes pra essa decisão arriscaria elas discordarem e abrir o modal
+errado. Efeito colateral bom: truque de salvaguarda sem ataque (ex.
+Badalar Fúnebre) que antes ficava com "Usar" travado (nenhuma jogada
+automatizável existia) agora sempre tem uma ação válida.
+
+**Data/origem:** 2026-09.
 
 ## Tela 3 do upcast sempre aparece, mesmo com 1 círculo só disponível
 
@@ -364,6 +401,40 @@ emoji (`` `🗡 ${ataqueAtual.nome}` ``), então `DanoPendente.label` fica
 Comparação exata (`===`) falha silenciosamente aqui — use
 `.endsWith(...)` ou `.includes(...)` pra detectar o nome do ataque
 dentro do label sempre que precisar comparar por nome de novo.
+
+## Magia/característica com múltiplos ataques discretos (feixes,
+## rajadas) — simplificada pra 1 ataque + N dados de dano
+
+**Problema:** algumas magias (Raio Místico) e, no futuro, talentos
+como Ataque Extra de arma já concedem N jogadas de ataque separadas
+por turno (RAW: cada feixe/ataque rola seu próprio d20, acerta ou erra
+independente). O app nunca modela a CA do inimigo (o jogador decide
+"acertei" sozinho, na mesa) — simular N ataques independentes exigiria
+rastrear resultado individual de cada um, sem ganho real pro jogador.
+
+**Decisão:** sempre que uma característica conceder múltiplos ataques
+que RAW seriam jogadas separadas, mas o app já trata "acertar" como
+decisão do jogador (não calculada), simplificar pra **1 rolagem de
+ataque única + N dados de dano somados numa rolagem só** — não simular
+N jogadas de ataque independentes. Reaproveita 100% o mecanismo que já
+existe pra "N cópias do mesmo dado de dano" (Aprimoramento de Truque,
+Upcast "dado-por-círculo") em vez de criar um sistema de "múltiplos
+ataques" novo. Primeiro caso: Raio Místico (Bruxo) — RAW cria 2/3/4
+feixes com jogada de ataque separada cada nos níveis 5/11/17;
+`magias.ts` marca `escalaTruqueTipo: "dado"` (mesmo campo do
+Aprimoramento de Truque comum) em vez de um campo próprio, porque o
+resultado numérico é idêntico (base 1d10 + 1 dado por patamar = 2/3/4
+dados, mesma coisa que "N feixes de 1d10"). Ver `core/magiaDano.ts`
+`calcularDanoMagia`.
+
+**Ao encontrar um caso novo parecido** (outra magia com "feixes"/
+"raios"/"ataques separados", ou um talento de arma com Ataque Extra
+que precise de tratamento especial): primeiro confira se o valor final
+bate com "dado base + 1 dado por [o que quer que escale]" — se bater,
+reaproveita `escalaTruqueTipo`/Upcast, sem mecanismo novo. Só crie
+estrutura nova se o valor não seguir essa fórmula simples (ex.: dados
+de tamanhos diferentes por ataque, ou nº de ataques que não cresce em
+degraus fixos).
 
 ## Penalidade de proficiência de Armadura/Escudo/Arma — 3 regras independentes, sinal único calculado 1x
 

@@ -5,6 +5,10 @@ import styles from './ItemComDescricao.module.css';
 interface ItemComDescricaoProps {
   nome: string;
   descricao: string | null;
+  /** Versão completa (mais longa) da descrição, se existir — quando
+   * presente e diferente de `descricao`, o popup ganha um toggle
+   * "Desc. curta/longa" (mesmo padrão do `MagiaComDescricao`). */
+  descricaoCompleta?: string | null;
   /** texto a mostrar (ex: "2× Adaga") — se omitido, usa `nome` */
   rotulo?: string;
   /** 'sublinhado' (padrão): o texto inteiro fica sublinhado e clicável —
@@ -21,14 +25,19 @@ interface ItemComDescricaoProps {
 /** Termo tocável que abre um popup com nome + descrição, sem trocar de
  * tela. Padrão registrado no DECISOES-DESIGN.md ("tooltip em texto
  * sublinhado"). Se não houver descrição, renderiza só texto simples. */
-export default function ItemComDescricao({ nome, descricao, rotulo, variante = 'sublinhado' }: ItemComDescricaoProps) {
+export default function ItemComDescricao({ nome, descricao, descricaoCompleta, rotulo, variante = 'sublinhado' }: ItemComDescricaoProps) {
   const [aberto, setAberto] = useState(false);
+  const [descLonga, setDescLonga] = useState(false);
   useLockBodyScroll(aberto);
 
   if (!descricao) return <>{rotulo ?? nome}</>;
 
+  const temAmbasDescricoes = !!descricaoCompleta && descricaoCompleta !== descricao;
+  const descricaoAtual = descLonga && descricaoCompleta ? descricaoCompleta : descricao;
+
   const abrir = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setDescLonga(false);
     setAberto(true);
   };
 
@@ -56,7 +65,17 @@ export default function ItemComDescricao({ nome, descricao, rotulo, variante = '
         >
           <div className={styles.card} onClick={(e) => e.stopPropagation()}>
             <div className={styles.title}>{nome}</div>
-            <div className={styles.desc}>{descricao}</div>
+            {temAmbasDescricoes && (
+              <div className={styles.toggleRow}>
+                <div className={`${styles.toggleBtn} ${!descLonga ? styles.toggleBtnAtivo : ''}`} onClick={() => setDescLonga(false)}>
+                  Desc. curta
+                </div>
+                <div className={`${styles.toggleBtn} ${descLonga ? styles.toggleBtnAtivo : ''}`} onClick={() => setDescLonga(true)}>
+                  Desc. longa
+                </div>
+              </div>
+            )}
+            <div className={styles.desc}>{descricaoAtual}</div>
             <div
               className={styles.close}
               onClick={(e) => {

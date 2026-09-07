@@ -6,21 +6,25 @@ import { gruposFerramenta } from './ferramentas';
 import { itensMagicos } from './itensMagicos';
 
 const indiceDescricao = new Map<string, string>();
+const indiceDescricaoCompleta = new Map<string, string>();
 const indicePeso = new Map<string, string>();
 
 for (const it of equipamentoAventura) {
-  if (it.descricao) indiceDescricao.set(it.nome.toLowerCase(), it.descricao);
+  if (it.descricaoCurta) indiceDescricao.set(it.nome.toLowerCase(), it.descricaoCurta);
+  indiceDescricaoCompleta.set(it.nome.toLowerCase(), it.descricaoCompleta);
   if (it.peso) indicePeso.set(it.nome.toLowerCase(), it.peso);
 }
 for (const it of montariasVeiculos) {
   if (it.descricao) indiceDescricao.set(it.nome.toLowerCase(), it.descricao);
 }
 for (const it of armas) {
-  if (it.descricao) indiceDescricao.set(it.nome.toLowerCase(), it.descricao);
+  indiceDescricao.set(it.nome.toLowerCase(), it.descricaoCurta);
+  indiceDescricaoCompleta.set(it.nome.toLowerCase(), it.descricaoCompleta);
   if (it.peso) indicePeso.set(it.nome.toLowerCase(), it.peso);
 }
 for (const it of armaduras) {
-  if (it.descricao) indiceDescricao.set(it.nome.toLowerCase(), it.descricao);
+  indiceDescricao.set(it.nome.toLowerCase(), it.descricaoCurta);
+  indiceDescricaoCompleta.set(it.nome.toLowerCase(), it.descricaoCompleta);
   if (it.peso) indicePeso.set(it.nome.toLowerCase(), it.peso);
 }
 for (const grupo of Object.values(gruposFerramenta)) {
@@ -34,6 +38,7 @@ for (const it of itensMagicos) {
     it.nome.toLowerCase(),
     `${it.categoria} · ${it.raridade}${it.requerSintonizacao ? ' · exige Sintonização' : ''}. ${it.efeitoResumido}`,
   );
+  if (it.descricaoCompleta) indiceDescricaoCompleta.set(it.nome.toLowerCase(), it.descricaoCompleta);
 }
 
 /** Busca a descrição de um item pelo nome (case-insensitive). Cobre
@@ -42,6 +47,14 @@ for (const it of itensMagicos) {
  * Raridade · Efeito Resumido). */
 export function buscarDescricaoItem(nome: string): string | null {
   return indiceDescricao.get(nome.toLowerCase().trim()) ?? null;
+}
+
+/** Busca a descrição completa de um item pelo nome (case-insensitive).
+ * Só preenchida pra categorias que já ganharam o campo `descricaoCompleta`
+ * (Armaduras primeiro — ver AUDITORIA-CONTEUDO.md); `null` pras demais até
+ * chegar a vez delas. */
+export function buscarDescricaoCompletaItem(nome: string): string | null {
+  return indiceDescricaoCompleta.get(nome.toLowerCase().trim()) ?? null;
 }
 
 /** Busca o peso de um item pelo nome (case-insensitive). `null` quando

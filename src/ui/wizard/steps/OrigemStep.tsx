@@ -5,6 +5,7 @@ import { pericias } from '../../../data/rulesets/dnd2024/pericias';
 import { buscarDescricaoFerramenta } from '../../../data/rulesets/dnd2024/buscarDescricaoFerramenta';
 import { nomesDuplicados } from '../../../core/duplicidadeSelecao';
 import InfoChip from '../../components/InfoChip';
+import IconeOrigem from '../../components/IconeOrigem';
 import type { StepProps } from './StepProps';
 
 function descricaoPericia(nome: string): string | null {
@@ -38,7 +39,7 @@ export default function OrigemStep({ selection, update }: StepProps) {
             }
           >
             <div className="opt-card-row">
-              <div className="opt-card-img">🖼</div>
+              <IconeOrigem id={o.id} />
               <div className="opt-card-info">
                 <div className="opt-card-name">
                   {o.nome}

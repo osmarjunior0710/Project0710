@@ -1,5 +1,15 @@
 // Gerado a partir de dnd-master-referencia.xlsx, aba "Armas". Não editar
 // valores à mão. Linhas de cabeçalho de categoria (sem nome de arma) filtradas.
+// Corrigidas 2 vírgulas sobrando na extração original (Espada Curta "Dano",
+// Dardo "Propriedades") — sem efeito de regra, só limpeza de texto.
+//
+// `descricaoCompleta` NÃO é texto literal do livro — mesmo caso de Armaduras
+// (ver armaduras.ts): o Livro do Jogador (Cap.6 Equipamento) não tem parágrafo
+// próprio por arma, só a tabela + as seções "Propriedades" e "Propriedades de
+// Maestria" que valem pra qualquer arma com aquela propriedade/maestria. Cada
+// `descricaoCompleta` aqui é texto PRÓPRIO que junta a linha da tabela com a
+// explicação de cada propriedade/maestria específica daquela arma — conferido
+// contra o Cap.6 do Livro do Jogador em 2026-09. Ver AUDITORIA-CONTEUDO.md.
 
 export interface Arma {
   id: string;
@@ -10,7 +20,8 @@ export interface Arma {
   maestria: string;
   peso: string;
   custo: string;
-  descricao: string;
+  descricaoCurta: string;
+  descricaoCompleta: string;
   fonte: string;
 }
 
@@ -24,7 +35,8 @@ export const armas: Arma[] = [
     maestria: "Ágil",
     peso: "0,5 kg",
     custo: "2 PO",
-    descricao: "Armas Simples Corpo a Corpo. Causa 1d4 Perfurante ao acertar. Propriedades: Acuidade, Arremesso (Alcance 6/18), Leve. Maestria: Ágil.",
+    descricaoCurta: "Armas Simples Corpo a Corpo. Causa 1d4 Perfurante ao acertar. Propriedades: Acuidade, Arremesso (Alcance 6/18), Leve. Maestria: Ágil.",
+    descricaoCompleta: "Arma Simples de combate corpo a corpo — causa 1d4 Perfurante ao acertar. Propriedades: Arremesso (alcance normal 6m, máximo 18m — pode ser arremessada como ataque à distância, sacar e arremessar contam como o mesmo ataque); Acuidade (pode usar Força ou Destreza, à sua escolha, pra jogada de ataque e de dano — a mesma nas duas); Leve (permite um ataque adicional com outra arma Leve como Ação Bônus, sem somar modificador de atributo ao dano extra a menos que seja negativo). Maestria Ágil: o ataque adicional da propriedade Leve pode ser feito dentro da própria ação Atacar, sem precisar de Ação Bônus (só 1x por turno). Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -36,7 +48,8 @@ export const armas: Arma[] = [
     maestria: "Lentidão",
     peso: "1 kg",
     custo: "5 PP",
-    descricao: "Armas Simples Corpo a Corpo. Causa 1d6 Perfurante ao acertar. Propriedades: Arremesso (Alcance 9/36). Maestria: Lentidão.",
+    descricaoCurta: "Armas Simples Corpo a Corpo. Causa 1d6 Perfurante ao acertar. Propriedades: Arremesso (Alcance 9/36). Maestria: Lentidão.",
+    descricaoCompleta: "Arma Simples de combate corpo a corpo — causa 1d6 Perfurante ao acertar. Propriedades: Arremesso (alcance normal 9m, máximo 36m — pode ser arremessada como ataque à distância, sacar e arremessar contam como o mesmo ataque). Maestria Lentidão: acertando e causando dano, você reduz o Deslocamento do alvo em 3 metros até o início do seu próximo turno (não acumula com outra arma Lentidão). Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -48,7 +61,8 @@ export const armas: Arma[] = [
     maestria: "Derrubar",
     peso: "2 kg",
     custo: "2 PP",
-    descricao: "Armas Simples Corpo a Corpo. Causa 1d6 Contundente ao acertar. Propriedades: Versátil (1d8). Maestria: Derrubar.",
+    descricaoCurta: "Armas Simples Corpo a Corpo. Causa 1d6 Contundente ao acertar. Propriedades: Versátil (1d8). Maestria: Derrubar.",
+    descricaoCompleta: "Arma Simples de combate corpo a corpo — causa 1d6 Contundente ao acertar. Propriedades: Versátil (pode ser usada com uma ou duas mãos — com as duas, o dano sobe pra 1d8). Maestria Derrubar: acertando, você pode forçar uma salvaguarda de Constituição (CD 8 + seu modificador de atributo do ataque + Bônus de Proficiência) — se falhar, o alvo fica com a condição Caído. Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -60,7 +74,8 @@ export const armas: Arma[] = [
     maestria: "Lentidão",
     peso: "1 kg",
     custo: "1 PP",
-    descricao: "Armas Simples Corpo a Corpo. Causa 1d4 Contundente ao acertar. Propriedades: Leve. Maestria: Lentidão.",
+    descricaoCurta: "Armas Simples Corpo a Corpo. Causa 1d4 Contundente ao acertar. Propriedades: Leve. Maestria: Lentidão.",
+    descricaoCompleta: "Arma Simples de combate corpo a corpo — causa 1d4 Contundente ao acertar. Propriedades: Leve (permite um ataque adicional com outra arma Leve como Ação Bônus, sem somar modificador de atributo ao dano extra a menos que seja negativo). Maestria Lentidão: acertando e causando dano, você reduz o Deslocamento do alvo em 3 metros até o início do seu próximo turno (não acumula com outra arma Lentidão). Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -72,7 +87,8 @@ export const armas: Arma[] = [
     maestria: "Empurrar",
     peso: "5 kg",
     custo: "2 PP",
-    descricao: "Armas Simples Corpo a Corpo. Causa 1d8 Contundente ao acertar. Propriedades: Duas Mãos. Maestria: Empurrar.",
+    descricaoCurta: "Armas Simples Corpo a Corpo. Causa 1d8 Contundente ao acertar. Propriedades: Duas Mãos. Maestria: Empurrar.",
+    descricaoCompleta: "Arma Simples de combate corpo a corpo — causa 1d8 Contundente ao acertar. Propriedades: Duas Mãos (exige as duas mãos pra atacar). Maestria Empurrar: acertando, você pode empurrar o alvo até 3 metros pra longe de você, se ele for Grande ou menor. Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -84,7 +100,8 @@ export const armas: Arma[] = [
     maestria: "Ágil",
     peso: "1 kg",
     custo: "1 PO",
-    descricao: "Armas Simples Corpo a Corpo. Causa 1d4 Cortante ao acertar. Propriedades: Leve. Maestria: Ágil.",
+    descricaoCurta: "Armas Simples Corpo a Corpo. Causa 1d4 Cortante ao acertar. Propriedades: Leve. Maestria: Ágil.",
+    descricaoCompleta: "Arma Simples de combate corpo a corpo — causa 1d4 Cortante ao acertar. Propriedades: Leve (permite um ataque adicional com outra arma Leve como Ação Bônus, sem somar modificador de atributo ao dano extra a menos que seja negativo). Maestria Ágil: o ataque adicional da propriedade Leve pode ser feito dentro da própria ação Atacar, sem precisar de Ação Bônus (só 1x por turno). Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -96,7 +113,8 @@ export const armas: Arma[] = [
     maestria: "Drenar",
     peso: "1,5 kg",
     custo: "1 PO",
-    descricao: "Armas Simples Corpo a Corpo. Causa 1d6 Perfurante ao acertar. Propriedades: Arremesso (Alcance 6/18), Versátil (1d8). Maestria: Drenar.",
+    descricaoCurta: "Armas Simples Corpo a Corpo. Causa 1d6 Perfurante ao acertar. Propriedades: Arremesso (Alcance 6/18), Versátil (1d8). Maestria: Drenar.",
+    descricaoCompleta: "Arma Simples de combate corpo a corpo — causa 1d6 Perfurante ao acertar. Propriedades: Arremesso (alcance normal 6m, máximo 18m — pode ser arremessada como ataque à distância, sacar e arremessar contam como o mesmo ataque); Versátil (pode ser usada com uma ou duas mãos — com as duas, o dano sobe pra 1d8). Maestria Drenar: acertando e causando dano, o alvo fica com Desvantagem na própria próxima jogada de ataque até o início do seu próximo turno. Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -108,7 +126,8 @@ export const armas: Arma[] = [
     maestria: "Drenar",
     peso: "2 kg",
     custo: "5 PO",
-    descricao: "Armas Simples Corpo a Corpo. Causa 1d6 Contundente ao acertar. Maestria: Drenar.",
+    descricaoCurta: "Armas Simples Corpo a Corpo. Causa 1d6 Contundente ao acertar. Maestria: Drenar.",
+    descricaoCompleta: "Arma Simples de combate corpo a corpo — causa 1d6 Contundente ao acertar. Maestria Drenar: acertando e causando dano, o alvo fica com Desvantagem na própria próxima jogada de ataque até o início do seu próximo turno. Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -120,7 +139,8 @@ export const armas: Arma[] = [
     maestria: "Afligir",
     peso: "1 kg",
     custo: "5 PO",
-    descricao: "Armas Simples Corpo a Corpo. Causa 1d6 Cortante ao acertar. Propriedades: Arremesso (Alcance 6/18), Leve. Maestria: Afligir.",
+    descricaoCurta: "Armas Simples Corpo a Corpo. Causa 1d6 Cortante ao acertar. Propriedades: Arremesso (Alcance 6/18), Leve. Maestria: Afligir.",
+    descricaoCompleta: "Arma Simples de combate corpo a corpo — causa 1d6 Cortante ao acertar. Propriedades: Arremesso (alcance normal 6m, máximo 18m — pode ser arremessada como ataque à distância, sacar e arremessar contam como o mesmo ataque); Leve (permite um ataque adicional com outra arma Leve como Ação Bônus, sem somar modificador de atributo ao dano extra a menos que seja negativo). Maestria Afligir: acertando e causando dano, você ganha Vantagem na sua próxima jogada de ataque contra esse alvo até o final do seu próximo turno. Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -132,7 +152,8 @@ export const armas: Arma[] = [
     maestria: "Ágil",
     peso: "1 kg",
     custo: "2 PO",
-    descricao: "Armas Simples Corpo a Corpo. Causa 1d4 Contundente ao acertar. Propriedades: Arremesso (Alcance 6/18), Leve. Maestria: Ágil.",
+    descricaoCurta: "Armas Simples Corpo a Corpo. Causa 1d4 Contundente ao acertar. Propriedades: Arremesso (Alcance 6/18), Leve. Maestria: Ágil.",
+    descricaoCompleta: "Arma Simples de combate corpo a corpo — causa 1d4 Contundente ao acertar. Propriedades: Arremesso (alcance normal 6m, máximo 18m — pode ser arremessada como ataque à distância, sacar e arremessar contam como o mesmo ataque); Leve (permite um ataque adicional com outra arma Leve como Ação Bônus, sem somar modificador de atributo ao dano extra a menos que seja negativo). Maestria Ágil: o ataque adicional da propriedade Leve pode ser feito dentro da própria ação Atacar, sem precisar de Ação Bônus (só 1x por turno). Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -144,7 +165,8 @@ export const armas: Arma[] = [
     maestria: "Afligir",
     peso: "1 kg",
     custo: "25 PO",
-    descricao: "Armas Simples à Distância. Causa 1d6 Perfurante ao acertar. Propriedades: Duas Mãos, Munição (Alcance 24/96; Flecha). Maestria: Afligir.",
+    descricaoCurta: "Armas Simples à Distância. Causa 1d6 Perfurante ao acertar. Propriedades: Duas Mãos, Munição (Alcance 24/96; Flecha). Maestria: Afligir.",
+    descricaoCompleta: "Arma Simples à distância — causa 1d6 Perfurante ao acertar. Propriedades: Munição (alcance normal 24m, máximo 96m, usa Flecha — só ataca à distância com munição disponível, cada ataque gasta 1 peça); Duas Mãos (exige as duas mãos pra atacar). Maestria Afligir: acertando e causando dano, você ganha Vantagem na sua próxima jogada de ataque contra esse alvo até o final do seu próximo turno. Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -156,7 +178,8 @@ export const armas: Arma[] = [
     maestria: "Lentidão",
     peso: "2,5 kg",
     custo: "25 PO",
-    descricao: "Armas Simples à Distância. Causa 1d8 Perfurante ao acertar. Propriedades: Duas Mãos, Munição (Alcance 24/96; Virote), Recarga. Maestria: Lentidão.",
+    descricaoCurta: "Armas Simples à Distância. Causa 1d8 Perfurante ao acertar. Propriedades: Duas Mãos, Munição (Alcance 24/96; Virote), Recarga. Maestria: Lentidão.",
+    descricaoCompleta: "Arma Simples à distância — causa 1d8 Perfurante ao acertar. Propriedades: Munição (alcance normal 24m, máximo 96m, usa Virote — só ataca à distância com munição disponível, cada ataque gasta 1 peça); Duas Mãos (exige as duas mãos pra atacar); Recarga (só dispara 1 munição por ação, Ação Bônus ou Reação usada pra atacar, não importa quantos ataques você faria normalmente). Maestria Lentidão: acertando e causando dano, você reduz o Deslocamento do alvo em 3 metros até o início do seu próximo turno (não acumula com outra arma Lentidão). Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -164,11 +187,12 @@ export const armas: Arma[] = [
     categoria: "Armas Simples à Distância",
     nome: "Dardo",
     dano: "1d4 Perfurante",
-    propriedades: "Acuidade, Arremesso (Alcance 6/18),",
+    propriedades: "Acuidade, Arremesso (Alcance 6/18)",
     maestria: "Afligir",
     peso: "150 g",
     custo: "5 PC",
-    descricao: "Armas Simples à Distância. Causa 1d4 Perfurante ao acertar. Propriedades: Acuidade, Arremesso (Alcance 6/18),. Maestria: Afligir.",
+    descricaoCurta: "Armas Simples à Distância. Causa 1d4 Perfurante ao acertar. Propriedades: Acuidade, Arremesso (Alcance 6/18). Maestria: Afligir.",
+    descricaoCompleta: "Arma Simples à distância — causa 1d4 Perfurante ao acertar. Propriedades: Arremesso (alcance normal 6m, máximo 18m — pode ser arremessada como ataque à distância, sacar e arremessar contam como o mesmo ataque); Acuidade (pode usar Força ou Destreza, à sua escolha, pra jogada de ataque e de dano — a mesma nas duas). Maestria Afligir: acertando e causando dano, você ganha Vantagem na sua próxima jogada de ataque contra esse alvo até o final do seu próximo turno. Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -180,7 +204,8 @@ export const armas: Arma[] = [
     maestria: "Lentidão",
     peso: "—",
     custo: "1 PP",
-    descricao: "Armas Simples à Distância. Causa 1d4 Contundente ao acertar. Propriedades: Munição (Alcance 9/36; Bala). Maestria: Lentidão.",
+    descricaoCurta: "Armas Simples à Distância. Causa 1d4 Contundente ao acertar. Propriedades: Munição (Alcance 9/36; Bala). Maestria: Lentidão.",
+    descricaoCompleta: "Arma Simples à distância — causa 1d4 Contundente ao acertar. Propriedades: Munição (alcance normal 9m, máximo 36m, usa Bala — só ataca à distância com munição disponível, cada ataque gasta 1 peça). Maestria Lentidão: acertando e causando dano, você reduz o Deslocamento do alvo em 3 metros até o início do seu próximo turno (não acumula com outra arma Lentidão). Requer proficiência com armas Simples pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -192,7 +217,8 @@ export const armas: Arma[] = [
     maestria: "Trespassar",
     peso: "3 kg",
     custo: "20 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d10 Cortante ao acertar. Propriedades: Duas Mãos, Extensão, Pesada. Maestria: Trespassar.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d10 Cortante ao acertar. Propriedades: Duas Mãos, Extensão, Pesada. Maestria: Trespassar.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d10 Cortante ao acertar. Propriedades: Duas Mãos (exige as duas mãos pra atacar); Extensão (seu alcance de ataque, inclusive pra Ataque de Oportunidade, aumenta 1,5 metro); Pesada (Desvantagem na jogada de ataque se sua Força — corpo a corpo — ou Destreza — à distância — for menor que 13). Maestria Trespassar: acertando corpo a corpo, você pode atacar uma segunda criatura a até 1,5 metro da primeira e dentro do seu alcance, sem somar modificador de atributo ao dano dela a menos que seja negativo (só 1x por turno). Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -204,7 +230,8 @@ export const armas: Arma[] = [
     maestria: "Lentidão",
     peso: "1,5 kg",
     custo: "2 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d4 Cortante ao acertar. Propriedades: Acuidade, Extensão. Maestria: Lentidão.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d4 Cortante ao acertar. Propriedades: Acuidade, Extensão. Maestria: Lentidão.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d4 Cortante ao acertar. Propriedades: Acuidade (pode usar Força ou Destreza, à sua escolha, pra jogada de ataque e de dano — a mesma nas duas); Extensão (seu alcance de ataque, inclusive pra Ataque de Oportunidade, aumenta 1,5 metro). Maestria Lentidão: acertando e causando dano, você reduz o Deslocamento do alvo em 3 metros até o início do seu próximo turno (não acumula com outra arma Lentidão). Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -216,19 +243,21 @@ export const armas: Arma[] = [
     maestria: "Ágil",
     peso: "1,5 kg",
     custo: "25 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d6 Cortante ao acertar. Propriedades: Acuidade, Leve. Maestria: Ágil.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d6 Cortante ao acertar. Propriedades: Acuidade, Leve. Maestria: Ágil.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d6 Cortante ao acertar. Propriedades: Acuidade (pode usar Força ou Destreza, à sua escolha, pra jogada de ataque e de dano — a mesma nas duas); Leve (permite um ataque adicional com outra arma Leve como Ação Bônus, sem somar modificador de atributo ao dano extra a menos que seja negativo). Maestria Ágil: o ataque adicional da propriedade Leve pode ser feito dentro da própria ação Atacar, sem precisar de Ação Bônus (só 1x por turno). Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
     id: "espadacurta",
     categoria: "Armas Marciais Corpo a Corpo",
     nome: "Espada Curta",
-    dano: "1d6 Perfurante,",
+    dano: "1d6 Perfurante",
     propriedades: "Acuidade, Leve",
     maestria: "Afligir",
     peso: "1 kg",
     custo: "10 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d6 Perfurante, ao acertar. Propriedades: Acuidade, Leve. Maestria: Afligir.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d6 Perfurante ao acertar. Propriedades: Acuidade, Leve. Maestria: Afligir.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d6 Perfurante ao acertar. Propriedades: Acuidade (pode usar Força ou Destreza, à sua escolha, pra jogada de ataque e de dano — a mesma nas duas); Leve (permite um ataque adicional com outra arma Leve como Ação Bônus, sem somar modificador de atributo ao dano extra a menos que seja negativo). Maestria Afligir: acertando e causando dano, você ganha Vantagem na sua próxima jogada de ataque contra esse alvo até o final do seu próximo turno. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -240,7 +269,8 @@ export const armas: Arma[] = [
     maestria: "Garantido",
     peso: "3 kg",
     custo: "50 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 2d6 Cortante ao acertar. Propriedades: Duas Mãos, Pesada. Maestria: Garantido.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 2d6 Cortante ao acertar. Propriedades: Duas Mãos, Pesada. Maestria: Garantido.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 2d6 Cortante ao acertar. Propriedades: Duas Mãos (exige as duas mãos pra atacar); Pesada (Desvantagem na jogada de ataque se sua Força — corpo a corpo — ou Destreza — à distância — for menor que 13). Maestria Garantido: se sua jogada de ataque errar, você ainda causa dano ao alvo igual ao modificador de atributo usado na jogada (mesmo tipo de dano da arma). Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -252,7 +282,8 @@ export const armas: Arma[] = [
     maestria: "Drenar",
     peso: "1,5 kg",
     custo: "15 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d8 Cortante ao acertar. Propriedades: Versátil (1d10). Maestria: Drenar.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d8 Cortante ao acertar. Propriedades: Versátil (1d10). Maestria: Drenar.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d8 Cortante ao acertar. Propriedades: Versátil (pode ser usada com uma ou duas mãos — com as duas, o dano sobe pra 1d10). Maestria Drenar: acertando e causando dano, o alvo fica com Desvantagem na própria próxima jogada de ataque até o início do seu próximo turno. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -264,7 +295,8 @@ export const armas: Arma[] = [
     maestria: "Garantido",
     peso: "3 kg",
     custo: "20 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d10 Cortante ao acertar. Propriedades: Duas Mãos, Extensão, Pesada. Maestria: Garantido.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d10 Cortante ao acertar. Propriedades: Duas Mãos, Extensão, Pesada. Maestria: Garantido.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d10 Cortante ao acertar. Propriedades: Duas Mãos (exige as duas mãos pra atacar); Extensão (seu alcance de ataque, inclusive pra Ataque de Oportunidade, aumenta 1,5 metro); Pesada (Desvantagem na jogada de ataque se sua Força — corpo a corpo — ou Destreza — à distância — for menor que 13). Maestria Garantido: se sua jogada de ataque errar, você ainda causa dano ao alvo igual ao modificador de atributo usado na jogada (mesmo tipo de dano da arma). Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -276,7 +308,8 @@ export const armas: Arma[] = [
     maestria: "Derrubar",
     peso: "3 kg",
     custo: "10 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d10 Perfurante ao acertar. Propriedades: Duas Mãos (a menos que montado), Extensão, Pesada. Maestria: Derrubar.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d10 Perfurante ao acertar. Propriedades: Duas Mãos (a menos que montado), Extensão, Pesada. Maestria: Derrubar.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d10 Perfurante ao acertar. Propriedades: Duas Mãos a menos que você esteja montado (aí pode ser usada com uma mão só); Extensão (seu alcance de ataque, inclusive pra Ataque de Oportunidade, aumenta 1,5 metro); Pesada (Desvantagem na jogada de ataque se sua Força — corpo a corpo — ou Destreza — à distância — for menor que 13). Maestria Derrubar: acertando, você pode forçar uma salvaguarda de Constituição (CD 8 + seu modificador de atributo do ataque + Bônus de Proficiência) — se falhar, o alvo fica com a condição Caído. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -288,7 +321,8 @@ export const armas: Arma[] = [
     maestria: "Empurrar",
     peso: "9 kg",
     custo: "5 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d10 Perfurante ao acertar. Propriedades: Duas Mãos, Extensão, Pesada. Maestria: Empurrar.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d10 Perfurante ao acertar. Propriedades: Duas Mãos, Extensão, Pesada. Maestria: Empurrar.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d10 Perfurante ao acertar. Propriedades: Duas Mãos (exige as duas mãos pra atacar); Extensão (seu alcance de ataque, inclusive pra Ataque de Oportunidade, aumenta 1,5 metro); Pesada (Desvantagem na jogada de ataque se sua Força — corpo a corpo — ou Destreza — à distância — for menor que 13). Maestria Empurrar: acertando, você pode empurrar o alvo até 3 metros pra longe de você, se ele for Grande ou menor. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -300,7 +334,8 @@ export const armas: Arma[] = [
     maestria: "Drenar",
     peso: "2 kg",
     custo: "15 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d8 Perfurante ao acertar. Maestria: Drenar.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d8 Perfurante ao acertar. Maestria: Drenar.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d8 Perfurante ao acertar. Maestria Drenar: acertando e causando dano, o alvo fica com Desvantagem na própria próxima jogada de ataque até o início do seu próximo turno. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -312,7 +347,8 @@ export const armas: Arma[] = [
     maestria: "Derrubar",
     peso: "2,5 kg",
     custo: "10 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d8 Cortante ao acertar. Propriedades: Versátil (1d10). Maestria: Derrubar.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d8 Cortante ao acertar. Propriedades: Versátil (1d10). Maestria: Derrubar.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d8 Cortante ao acertar. Propriedades: Versátil (pode ser usada com uma ou duas mãos — com as duas, o dano sobe pra 1d10). Maestria Derrubar: acertando, você pode forçar uma salvaguarda de Constituição (CD 8 + seu modificador de atributo do ataque + Bônus de Proficiência) — se falhar, o alvo fica com a condição Caído. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -324,7 +360,8 @@ export const armas: Arma[] = [
     maestria: "Trespassar",
     peso: "3,5 kg",
     custo: "30 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d12 Cortante ao acertar. Propriedades: Duas Mãos, Pesada. Maestria: Trespassar.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d12 Cortante ao acertar. Propriedades: Duas Mãos, Pesada. Maestria: Trespassar.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d12 Cortante ao acertar. Propriedades: Duas Mãos (exige as duas mãos pra atacar); Pesada (Desvantagem na jogada de ataque se sua Força — corpo a corpo — ou Destreza — à distância — for menor que 13). Maestria Trespassar: acertando corpo a corpo, você pode atacar uma segunda criatura a até 1,5 metro da primeira e dentro do seu alcance, sem somar modificador de atributo ao dano dela a menos que seja negativo (só 1x por turno). Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -336,7 +373,8 @@ export const armas: Arma[] = [
     maestria: "Derrubar",
     peso: "5 kg",
     custo: "10 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 2d6 Contundente ao acertar. Propriedades: Duas Mãos, Pesada. Maestria: Derrubar.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 2d6 Contundente ao acertar. Propriedades: Duas Mãos, Pesada. Maestria: Derrubar.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 2d6 Contundente ao acertar. Propriedades: Duas Mãos (exige as duas mãos pra atacar); Pesada (Desvantagem na jogada de ataque se sua Força — corpo a corpo — ou Destreza — à distância — for menor que 13). Maestria Derrubar: acertando, você pode forçar uma salvaguarda de Constituição (CD 8 + seu modificador de atributo do ataque + Bônus de Proficiência) — se falhar, o alvo fica com a condição Caído. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -348,7 +386,8 @@ export const armas: Arma[] = [
     maestria: "Drenar",
     peso: "1 kg",
     custo: "10 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d8 Contundente ao acertar. Maestria: Drenar.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d8 Contundente ao acertar. Maestria: Drenar.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d8 Contundente ao acertar. Maestria Drenar: acertando e causando dano, o alvo fica com Desvantagem na própria próxima jogada de ataque até o início do seu próximo turno. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -360,7 +399,8 @@ export const armas: Arma[] = [
     maestria: "Empurrar",
     peso: "1 kg",
     custo: "15 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d8 Contundente ao acertar. Propriedades: Versátil (1d10). Maestria: Empurrar.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d8 Contundente ao acertar. Propriedades: Versátil (1d10). Maestria: Empurrar.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d8 Contundente ao acertar. Propriedades: Versátil (pode ser usada com uma ou duas mãos — com as duas, o dano sobe pra 1d10). Maestria Empurrar: acertando, você pode empurrar o alvo até 3 metros pra longe de você, se ele for Grande ou menor. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -372,7 +412,8 @@ export const armas: Arma[] = [
     maestria: "Drenar",
     peso: "1 kg",
     custo: "5 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d8 Perfurante ao acertar. Propriedades: Versátil (1d10). Maestria: Drenar.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d8 Perfurante ao acertar. Propriedades: Versátil (1d10). Maestria: Drenar.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d8 Perfurante ao acertar. Propriedades: Versátil (pode ser usada com uma ou duas mãos — com as duas, o dano sobe pra 1d10). Maestria Drenar: acertando e causando dano, o alvo fica com Desvantagem na própria próxima jogada de ataque até o início do seu próximo turno. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -384,7 +425,8 @@ export const armas: Arma[] = [
     maestria: "Afligir",
     peso: "1 kg",
     custo: "25 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d8 Perfurante ao acertar. Propriedades: Acuidade. Maestria: Afligir.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d8 Perfurante ao acertar. Propriedades: Acuidade. Maestria: Afligir.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d8 Perfurante ao acertar. Propriedades: Acuidade (pode usar Força ou Destreza, à sua escolha, pra jogada de ataque e de dano — a mesma nas duas). Maestria Afligir: acertando e causando dano, você ganha Vantagem na sua próxima jogada de ataque contra esse alvo até o final do seu próximo turno. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -396,7 +438,8 @@ export const armas: Arma[] = [
     maestria: "Derrubar",
     peso: "2 kg",
     custo: "5 PO",
-    descricao: "Armas Marciais Corpo a Corpo. Causa 1d8 Perfurante ao acertar. Propriedades: Arremesso (Alcance 6/18), Versátil (1d10). Maestria: Derrubar.",
+    descricaoCurta: "Armas Marciais Corpo a Corpo. Causa 1d8 Perfurante ao acertar. Propriedades: Arremesso (Alcance 6/18), Versátil (1d10). Maestria: Derrubar.",
+    descricaoCompleta: "Arma Marcial de combate corpo a corpo — causa 1d8 Perfurante ao acertar. Propriedades: Arremesso (alcance normal 6m, máximo 18m — pode ser arremessada como ataque à distância, sacar e arremessar contam como o mesmo ataque); Versátil (pode ser usada com uma ou duas mãos — com as duas, o dano sobe pra 1d10). Maestria Derrubar: acertando, você pode forçar uma salvaguarda de Constituição (CD 8 + seu modificador de atributo do ataque + Bônus de Proficiência) — se falhar, o alvo fica com a condição Caído. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -408,7 +451,8 @@ export const armas: Arma[] = [
     maestria: "Lentidão",
     peso: "1 kg",
     custo: "50 PO",
-    descricao: "Armas Marciais à Distância. Causa 1d8 Perfurante ao acertar. Propriedades: Duas Mãos, Munição (Alcance 45/180; Flecha), Pesada. Maestria: Lentidão.",
+    descricaoCurta: "Armas Marciais à Distância. Causa 1d8 Perfurante ao acertar. Propriedades: Duas Mãos, Munição (Alcance 45/180; Flecha), Pesada. Maestria: Lentidão.",
+    descricaoCompleta: "Arma Marcial à distância — causa 1d8 Perfurante ao acertar. Propriedades: Munição (alcance normal 45m, máximo 180m, usa Flecha — só ataca à distância com munição disponível, cada ataque gasta 1 peça); Duas Mãos (exige as duas mãos pra atacar); Pesada (Desvantagem na jogada de ataque se sua Força — corpo a corpo — ou Destreza — à distância — for menor que 13). Maestria Lentidão: acertando e causando dano, você reduz o Deslocamento do alvo em 3 metros até o início do seu próximo turno (não acumula com outra arma Lentidão). Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -420,7 +464,8 @@ export const armas: Arma[] = [
     maestria: "Afligir",
     peso: "1,5 kg",
     custo: "75 PO",
-    descricao: "Armas Marciais à Distância. Causa 1d6 Perfurante ao acertar. Propriedades: Leve, Munição (Alcance 9/36; Virote), Recarga. Maestria: Afligir.",
+    descricaoCurta: "Armas Marciais à Distância. Causa 1d6 Perfurante ao acertar. Propriedades: Leve, Munição (Alcance 9/36; Virote), Recarga. Maestria: Afligir.",
+    descricaoCompleta: "Arma Marcial à distância — causa 1d6 Perfurante ao acertar. Propriedades: Munição (alcance normal 9m, máximo 36m, usa Virote — só ataca à distância com munição disponível, cada ataque gasta 1 peça); Leve (permite um ataque adicional com outra arma Leve como Ação Bônus, sem somar modificador de atributo ao dano extra a menos que seja negativo); Recarga (só dispara 1 munição por ação, Ação Bônus ou Reação usada pra atacar, não importa quantos ataques você faria normalmente). Maestria Afligir: acertando e causando dano, você ganha Vantagem na sua próxima jogada de ataque contra esse alvo até o final do seu próximo turno. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -432,7 +477,8 @@ export const armas: Arma[] = [
     maestria: "Empurrar",
     peso: "9 kg",
     custo: "50 PO",
-    descricao: "Armas Marciais à Distância. Causa 1d10 Perfurante ao acertar. Propriedades: Duas Mãos, Munição (Alcance 30/120; Virote), Pesada, Recarga. Maestria: Empurrar.",
+    descricaoCurta: "Armas Marciais à Distância. Causa 1d10 Perfurante ao acertar. Propriedades: Duas Mãos, Munição (Alcance 30/120; Virote), Pesada, Recarga. Maestria: Empurrar.",
+    descricaoCompleta: "Arma Marcial à distância — causa 1d10 Perfurante ao acertar. Propriedades: Munição (alcance normal 30m, máximo 120m, usa Virote — só ataca à distância com munição disponível, cada ataque gasta 1 peça); Duas Mãos (exige as duas mãos pra atacar); Pesada (Desvantagem na jogada de ataque se sua Força — corpo a corpo — ou Destreza — à distância — for menor que 13); Recarga (só dispara 1 munição por ação, Ação Bônus ou Reação usada pra atacar, não importa quantos ataques você faria normalmente). Maestria Empurrar: acertando, você pode empurrar o alvo até 3 metros pra longe de você, se ele for Grande ou menor. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -444,7 +490,8 @@ export const armas: Arma[] = [
     maestria: "Lentidão",
     peso: "5 kg",
     custo: "500 PO",
-    descricao: "Armas Marciais à Distância. Causa 1d12 Perfurante ao acertar. Propriedades: Duas Mãos, Munição (Alcance 12/36; Bala), Recarga. Maestria: Lentidão.",
+    descricaoCurta: "Armas Marciais à Distância. Causa 1d12 Perfurante ao acertar. Propriedades: Duas Mãos, Munição (Alcance 12/36; Bala), Recarga. Maestria: Lentidão.",
+    descricaoCompleta: "Arma Marcial à distância — causa 1d12 Perfurante ao acertar. Propriedades: Munição (alcance normal 12m, máximo 36m, usa Bala — só ataca à distância com munição disponível, cada ataque gasta 1 peça); Duas Mãos (exige as duas mãos pra atacar); Recarga (só dispara 1 munição por ação, Ação Bônus ou Reação usada pra atacar, não importa quantos ataques você faria normalmente). Maestria Lentidão: acertando e causando dano, você reduz o Deslocamento do alvo em 3 metros até o início do seu próximo turno (não acumula com outra arma Lentidão). Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -456,7 +503,8 @@ export const armas: Arma[] = [
     maestria: "Afligir",
     peso: "1,5 kg",
     custo: "250 PO",
-    descricao: "Armas Marciais à Distância. Causa 1d10 Perfurante ao acertar. Propriedades: Munição (Alcance 9/27; Bala), Recarga. Maestria: Afligir.",
+    descricaoCurta: "Armas Marciais à Distância. Causa 1d10 Perfurante ao acertar. Propriedades: Munição (Alcance 9/27; Bala), Recarga. Maestria: Afligir.",
+    descricaoCompleta: "Arma Marcial à distância — causa 1d10 Perfurante ao acertar. Propriedades: Munição (alcance normal 9m, máximo 27m, usa Bala — só ataca à distância com munição disponível, cada ataque gasta 1 peça); Recarga (só dispara 1 munição por ação, Ação Bônus ou Reação usada pra atacar, não importa quantos ataques você faria normalmente). Maestria Afligir: acertando e causando dano, você ganha Vantagem na sua próxima jogada de ataque contra esse alvo até o final do seu próximo turno. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
   {
@@ -468,7 +516,8 @@ export const armas: Arma[] = [
     maestria: "Afligir",
     peso: "0,5 kg",
     custo: "10 PO",
-    descricao: "Armas Marciais à Distância. Causa 1 Perfurante ao acertar. Propriedades: Munição (Alcance 7,5/30; Agulha), Recarga. Maestria: Afligir.",
+    descricaoCurta: "Armas Marciais à Distância. Causa 1 Perfurante ao acertar. Propriedades: Munição (Alcance 7,5/30; Agulha), Recarga. Maestria: Afligir.",
+    descricaoCompleta: "Arma Marcial à distância — causa 1 Perfurante ao acertar. Propriedades: Munição (alcance normal 7,5m, máximo 30m, usa Agulha — só ataca à distância com munição disponível, cada ataque gasta 1 peça); Recarga (só dispara 1 munição por ação, Ação Bônus ou Reação usada pra atacar, não importa quantos ataques você faria normalmente). Maestria Afligir: acertando e causando dano, você ganha Vantagem na sua próxima jogada de ataque contra esse alvo até o final do seu próximo turno. Requer proficiência com armas Marciais pra somar seu Bônus de Proficiência na jogada de ataque.",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
 ];

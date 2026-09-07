@@ -162,7 +162,7 @@ export function construirCatalogoLoja(): GrupoLoja[] {
       custoTexto: it.custo ?? '—',
       custoPO: parseCustoPO(it.custo),
       peso: it.peso,
-      efeito: it.descricao ?? undefined,
+      efeito: it.descricaoCurta ?? undefined,
     });
   }
 

@@ -3,7 +3,7 @@ import { acoesBase, type AtaqueInfo } from '../../../data/exampleCombat';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
-import { classificarMagia } from '../../../core/classificarMagia';
+import { calcularDanoMagia, mecanicaDaMagia } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
@@ -26,7 +26,15 @@ interface AcaoPanelContentProps {
   desvantagemForcaDestreza: boolean;
   onEscolher: (nome: string, desc: string, dano?: DanoPendente) => void;
   onAtacar: (nome: string, desc: string, dano: DanoPendente) => void;
+  /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
+   * de Salvaguarda (CD + atributo + sucesso/falha), que vive em
+   * CombatTab (persiste depois do painel fechar). `circuloUsado` é
+   * pro upcast (igual `conjurarMagia` já calcula). */
+  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
   gastarSlotCirculo: (circulo: number) => boolean;
+  /** Nível do personagem — pro Aprimoramento de Truque (dano escala
+   * nos níveis 5/11/17, ver `calcularDanoMagia`). */
+  nivel: number;
   espacos: EspacoDeMagiaAtivo[];
   espacosGastosPorCirculo: Record<number, number>;
   conjura: boolean;
@@ -59,7 +67,9 @@ export default function AcaoPanelContent({
   desvantagemForcaDestreza,
   onEscolher,
   onAtacar,
+  onAbrirSalvaguarda,
   gastarSlotCirculo,
+  nivel,
   espacos,
   espacosGastosPorCirculo,
   conjura,
@@ -130,14 +140,30 @@ export default function AcaoPanelContent({
       if (!ok) return;
     }
     setTelaMagia(null);
-    const classificacao = classificarMagia(m);
-    if (classificacao.ataque && modAcertoConjuracao !== null) {
+    const circuloUsado = circulo ?? m.circulo;
+    const mecanica = mecanicaDaMagia(m);
+    if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
       rolarD20({
         label: `Ataque de Magia — ${m.nome}`,
         formula: `1d20 + ${modAcertoConjuracao}`,
         mod: modAcertoConjuracao,
       });
+      const dano = calcularDanoMagia(m, circuloUsado, nivel);
+      if (dano) {
+        onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano.', {
+          label: `Dano — ✨ ${m.nome}`,
+          quantidade: dano.quantidade,
+          lados: dano.lados,
+          mod: dano.mod,
+        });
+        return;
+      }
       onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Veja a descrição da magia (ⓘ) pro dano.');
+      return;
+    }
+    if (mecanica === 'salvaguarda') {
+      onEscolher(`✨ ${m.nome}`, 'Alvo faz salvaguarda — veja o popup pra CD e dano.');
+      onAbrirSalvaguarda(m, circuloUsado);
       return;
     }
     onEscolher(`✨ ${m.nome}`, m.descricaoCurta ?? '');

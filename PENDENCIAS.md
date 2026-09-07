@@ -513,7 +513,7 @@ ponta (wizard completo → Salvar → aparece na Lista → abre a Ficha real
 com PV/CA/atributos/perícias/itens da Mochila calculados, não mais
 fixture).
 
-## Aba Magias e "Usar Magia" — personagemConjura() implementada, dado de magia real ainda falta
+## Aba Magias e "Usar Magia" — personagemConjura() implementada
 
 **O que é:** `MagiasTab.tsx` e o acordeão "Usar Magia" do painel de
 Ação (Combat) mostram hoje dado de `data/exampleCombat.ts` — truques e
@@ -557,12 +557,13 @@ pra Guerreiro depois do fix acima, que só cobriu o painel de Ação.
 `ReacaoPanelContent.tsx` agora recebe `conjura` também e esconde
 Escudo Arcano do mesmo jeito.
 
+**Resolvido:** Bruxo (1ª classe conjuradora importada) já usa dado
+real em `MagiasTab.tsx`/"Usar Magia" (truques, magias preparadas,
+espaços por círculo) — sem fixture, ver DECISOES-DADOS.md "Magias —
+motor de dano completo" e DECISOES-COMBATE.md pros 2 modais que
+rodam a jogada de verdade em cima desse dado.
+
 **Falta implementar:**
-- Quando a 1ª classe conjuradora for importada, trocar o fixture de
-  `MagiasTab.tsx`/"Usar Magia" por dado real (truques, magias
-  preparadas, espaços por círculo) — hoje quem passa em
-  `personagemConjura()` ainda vê o mesmo fixture de antes, só quem
-  não passa que ganhou o estado vazio.
 - Multiclasse e itens mágicos continuam de fora de
   `personagemConjura()` (gancho pronto, sem efeito ainda) até essas
   duas coisas existirem de verdade no app.
@@ -1052,39 +1053,6 @@ Bônus, onde deveriam por regra. Simplificação aceita por ora (ver
 DECISOES-CLASSES.md "Etapa 3.2"); resolver quando o painel de Bônus
 ganhar suporte a magia de verdade.
 
-## Dano de magia não rola automaticamente — planilha não tem dado estruturado
-
-Diferente do ataque de arma (`core/ataque.ts`, dado/dano numérico
-estruturado), as 390 magias da planilha só têm o dano descrito em
-texto livre (`descricaoCurta`/`descricaoCompleta`, ex. "1d8 dano
-Radiante"). O painel "Usar Magia" do Combat (Etapa 3.2) já rola o
-acerto de magias de ataque automaticamente (1d20 + bônus de
-conjuração), mas o dano o jogador lê no card (ⓘ) e rola manualmente —
-diferente da arma, que tem o botão "🎲 Rolar Dano" automático. Resolver
-exigiria extrair e estruturar o dado de dano de cada magia da
-planilha/descrição — trabalho grande, não escopado ainda.
-
-## Upcast — efeito calculado por círculo (Fase B do fluxo "Usar Magia")
-
-**Contexto:** o fluxo "Usar Magia" do Combat (Ação) ganhou upcast de
-verdade — Tela 2 lista Truques/Magias Preparadas agrupadas por círculo
-com disponibilidade real (`core/magiasPersonagem.ts`'s
-`circulosDisponiveisParaConjurar` — uma magia nunca cabe num espaço
-menor que o dela, mas cabe no dela ou em qualquer um maior, até
-círculo 9 pras classes que chegam lá), e Tela 3 deixa escolher em qual
-círculo gastar quando há mais de 1 opção.
-
-**O que falta (Fase B, decisão consciente do Osmar de adiar):** a Tela
-3 mostra hoje só o texto livre da magia (`descricaoCurta`, que já traz
-"Upcast: +Xd8 por círculo" pras ~131 magias que escalam — confirmado
-na planilha) — não um número calculado por círculo (ex. "2d8" na
-opção de 1º círculo, "4d8" na de 2º). Pra isso funcionar de verdade
-precisa mapear, magia por magia, a fórmula de upcast estruturada (não
-só o texto) — trabalho de planilha grande, correlato ao já registrado
-"Dano de magia não rola automaticamente" (mesma cesta de dado
-faltando). **Fica pra depois — o Osmar quer resolver Talentos antes
-de voltar nisso.**
-
 ## Painel de Reação ainda usa a lista plana antiga de magias (não ganhou o picker novo)
 
 `ReacaoPanelContent.tsx` continua com a lista simples de magias de
@@ -1134,11 +1102,12 @@ Subclasse no step do Level Up em `LevelUpShell.tsx`, Origem em
 `OrigemStep.tsx`, Espécie em `EspecieStep.tsx`) reimplementam cada uma
 por conta própria o mesmo miolo — `.opt-card` com `.opt-card-row`
 (ícone + `.opt-card-info` com nome/descrição) — mas com pequenas
-diferenças bobas entre elas (Classe/Subclasse usam `IconeClasse` com
-arte real; Origem/Espécie ainda usam um placeholder `🖼` genérico
-porque não têm arte própria; cada uma trata "(em breve)"/duplicidade/
-tags à sua moda). Ele quer um componente/padrão único de "cartão de
-seleção" que sirva pras 4 (e futuras, tipo Talentos), com:
+diferenças bobas entre elas (Classe/Subclasse usam `IconeClasse`,
+Espécie usa `IconeEspecie` e Origem usa `IconeOrigem` — as 3 com arte
+real, ver DECISOES-DESIGN.md "Ícones de Classe/Espécie/Origem"; cada
+uma trata "(em breve)"/duplicidade/tags à sua moda). Ele quer um
+componente/padrão único de "cartão de seleção" que sirva pras 4
+(e futuras, tipo Talentos), com:
 - **Destaque maior pro ícone** (hoje é pequeno e não é o foco visual
   do cartão).
 - **Texto que caiba e faça sentido** por contexto — nome sempre,
@@ -1233,45 +1202,20 @@ ponto de partida (não é a lista final):
   o aviso de "[PH]" na tela de Subclasse foi ajustado na última
   entrega, vale conferir se sobrou algo parecido em outra tela).
 
-## Motor de rolagem de dano de Magia (Dano Base + Upcast)
+## Magias de salvaguarda SEM dano — Modal de Salvaguarda não tem texto de sucesso/falha
 
-**O que é:** o Osmar pediu pra estruturar o Upcast de magias
-(quanto aumenta por círculo acima do círculo base) e depois ligar
-isso a uma rolagem de dado de verdade na Ficha — "jogador vê o
-resultado final (mais dados)" e "a gente precisa rodar os dados
-direito". Ver decisão "Magias — Upcast estruturado" no
-`DECISOES-DADOS.md`: só a parte de Upcast (planilha, aba "Magias",
-colunas N-S) foi feita nesta entrega.
-
-**Por que foi adiado:** o Upcast sozinho não é suficiente pra rodar
-o dado completo — falta o **Dano Base** de cada magia (quanto dano
-a magia já causa no círculo mínimo dela, ex: Bola de Fogo = 8d6 no
-3º círculo), que hoje só existe dentro do texto livre de
-`descricaoCompleta`/`descricaoCurta`, não estruturado. Extrair isso
-de ~130+ magias de dano é um trabalho equivalente ao que já foi
-feito pro Upcast, e o Osmar confirmou (via pergunta direta) separar
-em duas entregas em vez de fazer tudo de uma vez.
-
-**O que falta pra resolver:**
-1. Extrair o Dano Base estruturado (dado + tipo de dano) de cada
-   magia com dano, mesmo processo de cruzar PDF + planilha já usado
-   pro Upcast (colunas novas na aba "Magias", ex:
-   `DanoBase_Dado`/`DanoBase_Tipo`).
-2. Função nova em `core/` que combina Dano Base + Upcast Estruturado
-   dado o círculo do espaço usado (`core/magiaDano.ts` ou nome
-   parecido) — precisa de teste Vitest (ver seção 13 do
-   `CLAUDE.md`), cobrindo pelo menos: magia sem upcast, magia com
-   upcast tipo "Dado por Círculo" em círculo acima do base, e o
-   caso "Fórmula Própria"/"Outro" (não soma nada automático, só
-   mostra o texto).
-3. UI na Ficha (provavelmente na aba Magias, ao escolher o círculo
-   pra conjurar) mostrando o total de dados que vai rolar antes de
-   confirmar, e disparando a rolagem de verdade via `RollContext`
-   (mesmo sistema de overlay de rolagem já usado em Combat).
-4. As 18 magias marcadas `Upcast_Tipo = "Outro"` na planilha (regra
-   não-linear, ex: duração em degraus por círculo específico) não
-   têm fórmula — o motor deve simplesmente NÃO tentar somar dado
-   automático pra elas, só mostrar `Upcast_Texto`.
+O motor de dano de magia (Dano Base + Upcast + Escala de Truque + os
+2 modais de Combat/Magias) está completo — ver DECISOES-DADOS.md
+"Magias — motor de dano completo" e DECISOES-COMBATE.md "Magia de
+ataque/salvaguarda — 2 modais". Ficou de fora só isto: 75 das 390
+magias são de salvaguarda mas NÃO causam dano (ex.: Enfeitiçar
+Pessoa — Sabedoria ou fica Enfeitiçado; efeito é condição, não
+número) — `salvaguardaFalha`/`salvaguardaSucesso` ficam `null` pra
+elas, então o Modal de Salvaguarda mostra só CD + atributo + "veja a
+descrição da magia (ⓘ)", sem o texto separado de sucesso/falha que as
+85 magias com dano já têm. Se o Osmar quiser esse texto também pras
+75 sem dano, é o mesmo processo de extração já usado pras outras (ler
+`descricaoCompleta`, já importado, sem reler PDF).
 
 ## Revisão de abas da planilha mestra (possível consolidação)
 
@@ -1297,3 +1241,86 @@ planilha) junto com o Osmar, apontando candidatas óbvias a fundir
 Aquáticos") e decidir se a fusão é só na planilha (organização) ou
 também exige tocar em algum `data/rulesets/dnd2024/*.ts` já gerado a
 partir de uma dessas abas.
+
+## Itens Mágicos — 5 itens do Lote 1 sem `tipoItem` (taxonomia de 6 categorias não cobre tudo)
+
+**O que é:** classificando o Lote 1 (50 itens) de `tipoItem`
+(`arma`/`armadura`/`escudo`/`consumivel`/`passivo`/`ativo-com-carga`
+— `AUDITORIA-CONTEUDO.md` seção 4.1), 5 itens não se encaixaram bem
+em nenhuma das 6 categorias: **Baralho das Ilusões** (efeito por
+carta, narrativo demais), **Bastão Imóvel** e **Corda de Escalada**
+(ação ativa sem carga numérica, mas a Corda tem CA/PV próprios — mais
+parecido com uma criatura/objeto rastreável que um "item ativo"
+simples), **Cajado da Píton** e **Cajado da Víbora** (transformam em
+criatura controlada com bloco de estatística próprio — Manual dos
+Monstros). No Lote 2, mais um: **Robe dos Itens Úteis** (remendos
+consumíveis em quantidade variável — 2 de cada item fixo + 4d4
+aleatórios — não dá pra representar como `cargas.max` fixo). No Lote
+3, mais dois: **Bodes de Marfim** (3 sub-bodes com mecânicas e
+recargas diferentes dentro do mesmo item — não dá pra resumir num só
+`cargas`) e **Corda de Estrangulamento** (mesmo caso da Corda de
+Escalada — tem CA/PV próprios, mais parecido com objeto rastreável
+que item ativo simples). No Lote 4, mais um: **Penas de Quaal** (5
+tipos de pena com mecânicas completamente diferentes dentro do mesmo
+item). No Lote 5, mais três: **Elmo Brilhante** (concede uma magia
+por dia dentre uma lista fixa — mais parecido com "passivo com magia
+diária" que qualquer categoria das 6), **Espelho do Aprisionamento**
+(prisão de criaturas com várias células e regras próprias, não é um
+item "usado" pelo personagem) e **Garrafa do Efreeti** (convoca e
+aprisiona um efreeti — narrativo demais). No Lote 6 (último lote,
+288/288 concluído), mais sete: **Baralho das Surpresas** (mesmo caso
+do Baralho das Ilusões — efeito por carta, narrativo demais),
+**Dispositivo de Kwalish** (veículo com CA/PV próprios, mesmo padrão
+da Corda de Escalada/Estrangulamento), **Esfera de Aniquilação** e
+**Frasco de Ferro** (perigo ambiental/ferramenta narrativa, não é algo
+que o personagem "usa" em combate), **Instrumento dos Bardos** (7
+variantes com magias diferentes cada — mesmo caso de "molde que varia
+por exemplar" do "Arma +1, +2 ou +3", ver achado abaixo), **Pedra
+Iônica (geral)** e **Estátua de Poderes Incríveis (geral)** (linhas
+"introdução da família" na planilha — descrevem só a mecânica
+genérica de como a pedra/estátua funciona, sem efeito próprio; quem
+carrega o efeito de verdade são as variantes nomeadas, já
+classificadas). Ficaram com `tipoItem: null` em vez de forçar uma
+categoria errada.
+
+**Achado novo do Lote 4 — `bonusItem` não cobre item "genérico" com
+bônus variável por raridade.** "Arma +1, +2 ou +3", "Armadura +1, +2
+ou +3" e "Bastão Guardião de Pactos" não são um item específico — são
+um molde onde o bônus depende de qual exemplar (raridade) o jogador
+tem. No Lote 5, mais dois do mesmo padrão: "Escudo +1, +2 ou +3" e
+"Munição +1, +2 ou +3". No Lote 6, "Instrumento dos Bardos" (7 tipos,
+cada um com raridade e lista de magias própria) também entra nesse
+balde. `bonusItem`/`tipoItem` ficaram `null` nesses 6 em vez de
+chutar um valor. Se algum jogador vier a usar um desses em mesa, vai
+precisar de uma pergunta manual ("qual variante você tem?") antes de
+qualquer cálculo automático usar o bônus certo — não é um bug, é
+limite do campo único pra este caso específico.
+
+**Achado do Lote 6 — `cargas.max` não cobre carga variável por
+exemplar.** "Lâmina da Sorte" tem uma propriedade (Desejo) com 1d4-1
+cargas — determinado por sorteio quando o item é criado, não um valor
+fixo conhecido igual aos outros itens com carga (que sempre tinham um
+número fixo, ex: 20, 50, 5, 3). `cargas` ficou `null` (`tipoItem:
+"ativo-com-carga"` e `bonusItem: 1` mantidos, já que o bônus fixo de
++1 arma esse sim é conhecido). Mesmo lote, "Manto de Invisibilidade"
+tem um recurso de DURAÇÃO acumulada (2 horas totais, recarrega 1h a
+cada 12h sem uso) em vez de cargas discretas — `cargas` também ficou
+`null` por não caber no formato `{max, recarga}` pensado pra
+contagem de usos, não pra minutos/horas de duração.
+
+**Por que importa:** se algum dos itens `null` acima vier a precisar
+de UI própria na Mochila/Combat (ex: o Osmar quiser equipar um deles
+em mesa), a classificação atual (`null`) não vai disparar nenhum
+componente — precisa de decisão explícita.
+
+**Estado atual (auditoria de Itens Mágicos concluída, 289 itens):**
+essa é a lista final de itens `tipoItem: null` — não há mais lotes
+pendentes. "Tapete Voador" (item real do livro, achado faltando na
+planilha durante o Lote 6, adicionado com confirmação do Osmar — ver
+`DECISOES-DADOS.md`) entra na mesma lista: não é arma/armadura/
+consumível/passivo nem tem carga própria, é mais parecido com uma
+montaria/veículo convocável (categoria "Montarias e Veículos" do app,
+não Itens Mágicos comum). Falta perguntar ao Osmar se vale criar uma
+7ª categoria (ex: `ativo-sem-carga`, pra Bastão Imóvel/Cajados que
+viram criatura) ou se esses casos ficam fora do "20%" da seção 4.1 até
+aparecer pedido real de um jogador pra usar um desses itens em mesa.

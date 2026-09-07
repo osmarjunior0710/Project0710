@@ -50,6 +50,32 @@
   margin-bottom: var(--space-3);
 }
 
+.toggleRow {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.toggleBtn {
+  flex: 1;
+  text-align: center;
+  padding: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--shape-sm);
+  font-size: 11px;
+  cursor: pointer;
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggleBtnAtivo {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  font-weight: bold;
+}
+
 .desc {
   font-size: 13px;
   line-height: 1.6;

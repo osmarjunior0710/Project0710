@@ -771,6 +771,48 @@ troca de formato; confirmado pelo próprio Osmar.
 
 **Data/origem:** 2026-08.
 
+## Ícones de Classe/Espécie/Origem — arte própria completa, mesmo padrão nas 3 categorias
+
+**O que é:** o Osmar mandou arte própria (512×512, fundo transparente,
+mesmo estilo emblema-redondo) pras 12 Classes do livro, 10 Espécies e
+16 Origens — conjunto completo nas 3 categorias (Classe tinha só
+Guerreiro/Bardo/Bruxo reais + cópias do Guerreiro como placeholder nas
+"em breve"; Espécie e Origem usavam só o emoji 🖼).
+
+**Classes — substituição, não adição:** as 9 classes "em breve"
+(`CLASSES_EM_BREVE` em `ClasseStep.tsx`) usavam uma CÓPIA física do
+arquivo do Guerreiro como placeholder de arte (ver "Ícones de
+classe/subclasse viram WebP" acima, "Achado no processo") — não o
+emoji 🖼. Substituir o arquivo `{id}-banner.webp` de cada uma pelo
+arquivo novo bastou; zero mudança de código, `IconeClasse.tsx` já lia
+por esse nome. Guerreiro/Bardo/Bruxo (já prontos, com arte própria
+antes desta entrega) também foram substituídos, pra manter o conjunto
+das 12 visualmente coerente. Também recebeu arte um
+`psionico-banner.webp` — salvo no mesmo padrão, mas **NÃO ligado a
+nenhuma tela**: Psiônico é conteúdo Unearthed Arcana (não-oficial),
+fora do escopo do produto (CLAUDE.md seção 9 "só D&D 5e regras 2024",
+mesmo motivo que já excluiu a aba "Magias — UA Psion" da importação)
+— o arquivo fica pronto caso o escopo mude um dia, sem criar uma
+entrada "(em breve)" que sugeriria suporte futuro à classe.
+
+**Espécie e Origem — padrão novo, mesmo molde de Classe:**
+`IconeEspecie.tsx` e `IconeOrigem.tsx` (componentes novos,
+`ui/components/`) são cópias estruturais exatas de `IconeClasse.tsx`
+— mesmo glob (`import.meta.glob` eager), mesma convenção de nome
+(`{id}-banner.webp`), mesma classe CSS `opt-card-img-emblema`, mesmo
+fallback `🖼` quando não há arte — só apontam pra pasta própria
+(`assets/icones-especies/`, `assets/icones-origens/`) em vez de
+reaproveitar a de Classe (categorias diferentes, mesmo padrão
+visual). Ligados em `EspecieStep.tsx`/`OrigemStep.tsx` (únicas telas
+que mostram cada categoria com ícone hoje). Todas as 10 espécies do
+livro ganharam arte (Aasimar, Anão, Draconato, Elfo, Gnomo, Golias,
+Humano, Orc, Pequenino, Tiferino) e todas as 16 origens (Acólito,
+Andarilho, Artesão, Artista, Charlatão, Criminoso, Eremita, Escriba,
+Fazendeiro, Guarda, Guia, Marinheiro, Mercador, Nobre, Sábio,
+Soldado) — não sobrou nenhum `🖼` genérico nas 3 categorias.
+
+**Data/origem:** 2026-09.
+
 ## Ticks/pips padronizados: sempre esvazia de trás pra frente ("tanque de combustível")
 
 **Regra única pedida pelo Osmar, pra todo lugar que mostra "N usos,
