@@ -387,7 +387,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: ['INT', 'SAB', 'CAR'], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['INT', 'SAB', 'CAR'], maximo: 20 },
-    beneficios: "Escolhe magias de 1º círculo com tag Ritual = seu Bônus de Proficiência: sempre preparadas, conjuráveis com qualquer espaço. Ritual Rápido: conjura 1 delas no tempo normal (não o de ritual), sem espaço, 1x/Descanso Longo.",
+    beneficios: "Escolhe magias de 1º círculo com tag Ritual = seu Bônus de Proficiência: sempre preparadas, conjuráveis com qualquer espaço (atributo de conjuração = o atributo aumentado por este talento). Sempre que seu Bônus de Proficiência aumentar depois, pode adicionar mais 1 magia de 1º círculo com Ritual às sempre preparadas. Ritual Rápido: conjura 1 delas no tempo normal (não o de ritual), sem espaço, 1x/Descanso Longo.",
     pagina: 204,
     fonte: "PHB 2024",
   },

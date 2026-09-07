@@ -80,6 +80,9 @@ interface LevelUpShellProps {
      * um círculo novo, e/ou 1 troca de um círculo já conhecido (regra
      * real permite os dois no mesmo level-up). `null` = nada mudou. */
     arcanaMisticaAlteracoes: Record<number, string> | null;
+    /** Só as gavetas que MUDARAM nesse level-up — `null` num campo =
+     * essa gaveta não trocou (ou não existe pro personagem). */
+    magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
   }) => void;
   /** Controlado pelo `FichaShell` (persistido junto com o resto do
    * progresso) em vez de estado local — uma vez rolado o dado de
@@ -103,6 +106,16 @@ interface LevelUpShellProps {
    * magia já escolhida pra ele. Só a escolha inicial é feita aqui
    * (trocar depois fica pra outra entrega, ver PENDENCIAS.md). */
   arcanaMisticaAtuais: Record<number, string>;
+  /** Talento "Iniciado em Magia" pego pela Origem (Acólito/Guia/Sábio)
+   * — `null` quando o personagem não tem esse talento por essa fonte.
+   * Regra real (Cap. 5, p.201, "Substituição de Magia"): a cada
+   * level-up pode trocar a magia de 1º círculo por outra da MESMA
+   * lista — os truques não são trocáveis. */
+  magiaIniciadaOrigemAtual: { lista: string; magia: string } | null;
+  /** Mesmo talento, só que pego avulso pelo traço Versátil (Humano) —
+   * gaveta independente da de cima (ver `core/personagem.ts`), por
+   * isso trocado separadamente. */
+  magiaIniciadaEspecieAtual: { lista: string; magia: string } | null;
   /** Catálogo de magias de círculo > 0 da classe (todos os círculos —
    * filtrado por círculo ativo no nível novo aqui dentro). */
   magiasDaClasseDisponiveis: Magia[];
@@ -157,6 +170,7 @@ type LuStep =
   | 'asiAtributo'
   | 'dadivaEpica'
   | 'arcanaMistica'
+  | 'iniciadoEmMagia'
   | 'resumo';
 type FaseDramatica = 'idle' | 'rolando' | 'resultado';
 
@@ -178,6 +192,8 @@ export default function LevelUpShell({
   magiasDaClasseDisponiveis,
   invocacoesMisticasAtuais,
   arcanaMisticaAtuais,
+  magiaIniciadaOrigemAtual,
+  magiaIniciadaEspecieAtual,
   periciasEspecialistaAtuais,
   periciasProficientesDoPersonagem,
   periciasSubclasseBonusAtuais,
@@ -240,6 +256,26 @@ export default function LevelUpShell({
   const arcanaMisticaAlteracoesPendentes = Object.fromEntries(
     Object.entries(arcanaMisticaEscolhidas).filter(([circulo, magia]) => arcanaMisticaAtuais[Number(circulo)] !== magia),
   );
+  // Iniciado em Magia (Origem e/ou Versátil) — "Substituição de Magia"
+  // (Cap. 5, p.201): a cada level-up pode trocar a magia de 1º círculo
+  // por outra da mesma lista, sem limite de 1 troca (diferente de
+  // Arcana Mística, que trava em 1 por level-up).
+  const [magiaIniciadaOrigemEscolhida, setMagiaIniciadaOrigemEscolhida] = useState<string | null>(
+    magiaIniciadaOrigemAtual?.magia ?? null,
+  );
+  const [magiaIniciadaEspecieEscolhida, setMagiaIniciadaEspecieEscolhida] = useState<string | null>(
+    magiaIniciadaEspecieAtual?.magia ?? null,
+  );
+  const magiaIniciadaAlteracoesPendentes = {
+    origem:
+      magiaIniciadaOrigemAtual && magiaIniciadaOrigemEscolhida !== magiaIniciadaOrigemAtual.magia
+        ? magiaIniciadaOrigemEscolhida
+        : null,
+    especie:
+      magiaIniciadaEspecieAtual && magiaIniciadaEspecieEscolhida !== magiaIniciadaEspecieAtual.magia
+        ? magiaIniciadaEspecieEscolhida
+        : null,
+  };
   /** Talento escolhido pede uma escolha de atributo real (não é
    * `'nenhum'`, nem `escolha-unica` com 1 atributo só, que já aplica
    * direto sem passo extra). */
@@ -283,6 +319,7 @@ export default function LevelUpShell({
   // círculo novo desbloqueia) se o personagem já tiver pelo menos 1
   // arcanum escolhido — regra real permite trocar a qualquer momento.
   if (novoCirculoArcanaMistica !== null || Object.keys(arcanaMisticaAtuais).length > 0) luSteps.push('arcanaMistica');
+  if (magiaIniciadaOrigemAtual || magiaIniciadaEspecieAtual) luSteps.push('iniciadoEmMagia');
   luSteps.push('resumo');
 
   // Características que já ganham uma tela própria mais adiante nesse
@@ -509,6 +546,7 @@ export default function LevelUpShell({
     asiAtributo: 'Atributo do Talento',
     dadivaEpica: 'Dádiva Épica',
     arcanaMistica: 'Arcana Mística',
+    iniciadoEmMagia: 'Iniciado em Magia',
     resumo: 'Resumo',
   };
 
@@ -615,6 +653,11 @@ export default function LevelUpShell({
         arcanaMisticaAlteracoes:
           luSteps.includes('arcanaMistica') && Object.keys(arcanaMisticaAlteracoesPendentes).length > 0
             ? arcanaMisticaAlteracoesPendentes
+            : null,
+        magiaIniciadaAlteracoes:
+          luSteps.includes('iniciadoEmMagia') &&
+          (magiaIniciadaAlteracoesPendentes.origem !== null || magiaIniciadaAlteracoesPendentes.especie !== null)
+            ? magiaIniciadaAlteracoesPendentes
             : null,
       });
       return;
@@ -1230,6 +1273,47 @@ export default function LevelUpShell({
           </>
         )}
 
+        {step === 'iniciadoEmMagia' && (
+          <>
+            <div className="section-title">Iniciado em Magia — Substituição de Magia</div>
+            <div className="label" style={{ marginBottom: 8 }}>
+              Opcional — a cada level-up pode trocar a magia de 1º círculo por outra da mesma lista. Os truques não
+              são trocáveis.
+            </div>
+            {[
+              { rotulo: 'Iniciado em Magia (Origem)', atual: magiaIniciadaOrigemAtual, escolhida: magiaIniciadaOrigemEscolhida, onTrocar: setMagiaIniciadaOrigemEscolhida },
+              { rotulo: 'Iniciado em Magia (Versátil)', atual: magiaIniciadaEspecieAtual, escolhida: magiaIniciadaEspecieEscolhida, onTrocar: setMagiaIniciadaEspecieEscolhida },
+            ]
+              .filter((slot): slot is typeof slot & { atual: { lista: string; magia: string } } => slot.atual !== null)
+              .map((slot) => {
+                const trocado = slot.escolhida !== slot.atual.magia;
+                const magiaAtualObj = magiasDaClasse(slot.atual.lista, 1).find((m) => m.nome === slot.escolhida);
+                return (
+                  <div key={slot.rotulo} className="opt-card" style={{ padding: '10px 12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                      <div className="opt-card-name">
+                        {slot.rotulo} ({slot.atual.lista}) —
+                        <br />
+                        {magiaAtualObj ? <MagiaComDescricao magia={magiaAtualObj} /> : slot.escolhida}
+                        {trocado && <span style={{ color: 'var(--danger)', fontSize: 11 }}> · trocado</span>}
+                      </div>
+                      <TrocarValorSimples
+                        titulo={`Trocar magia de ${slot.rotulo}`}
+                        valorAtual={slot.escolhida ?? ''}
+                        opcoes={magiasDaClasse(slot.atual.lista, 1).map((m) => m.nome)}
+                        onTrocar={slot.onTrocar}
+                        renderOpcao={(nome) => {
+                          const m = magiasDaClasse(slot.atual!.lista, 1).find((mm) => mm.nome === nome);
+                          return m ? <MagiaComDescricao magia={m} /> : nome;
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+          </>
+        )}
+
         {step === 'resumo' && (
           <>
             <div className="section-title">Resumo do Level Up</div>
@@ -1299,6 +1383,16 @@ export default function LevelUpShell({
                 <span>
                   {Object.keys(arcanaMisticaAlteracoesPendentes).length > 0
                     ? `${Object.keys(arcanaMisticaAlteracoesPendentes).length} círculo(s) alterado(s)`
+                    : 'sem troca'}
+                </span>
+              </div>
+            )}
+            {luSteps.includes('iniciadoEmMagia') && (
+              <div className="summary-row">
+                <span>Iniciado em Magia</span>
+                <span>
+                  {magiaIniciadaAlteracoesPendentes.origem || magiaIniciadaAlteracoesPendentes.especie
+                    ? 'magia trocada'
                     : 'sem troca'}
                 </span>
               </div>

@@ -129,7 +129,10 @@ export default function PerfilTab({
             {talento.nome}
             {origem?.talentoOrigemVariante ? ` (${origem.talentoOrigemVariante})` : ''}
           </div>
-          <div className="opt-card-desc">{talento.beneficios}</div>
+          <div className="opt-card-desc">
+            {talentoTemPlaceholder(talento) ? '[PH] sem efeito mecânico ainda — ' : ''}
+            {talento.beneficios}
+          </div>
         </div>
       ) : (
         <div className="label" style={{ marginBottom: 12 }}>
@@ -165,7 +168,9 @@ export default function PerfilTab({
                 {talentoVersatil && (
                   <>
                     {' '}
-                    — escolhido: <strong>{talentoVersatil.nome}</strong>. {talentoVersatil.beneficios}
+                    — escolhido: <strong>{talentoVersatil.nome}</strong>.{' '}
+                    {talentoTemPlaceholder(talentoVersatil) ? '[PH] sem efeito mecânico ainda — ' : ''}
+                    {talentoVersatil.beneficios}
                   </>
                 )}
               </div>

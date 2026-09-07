@@ -12,4 +12,14 @@ describe('talentoTemPlaceholder', () => {
     const t = talentos.find((x) => x.efeitoMecanico === undefined)!;
     expect(talentoTemPlaceholder(t)).toBe(true);
   });
+
+  it('Habilidoso (coberto por concedeProficiencias, sem efeitoMecanico): sem [PH]', () => {
+    const t = talentos.find((x) => x.id === 'habilidoso')!;
+    expect(talentoTemPlaceholder(t)).toBe(false);
+  });
+
+  it('Músico (concedeFerramentaGrupo cobre só parte do benefício): mantém [PH]', () => {
+    const t = talentos.find((x) => x.id === 'musico')!;
+    expect(talentoTemPlaceholder(t)).toBe(true);
+  });
 });

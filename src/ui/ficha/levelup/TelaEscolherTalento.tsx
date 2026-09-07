@@ -1,5 +1,6 @@
 import type { Atributo } from '../../../data/wizardFixtures';
 import { talentos, type CategoriaTalento, type Talento } from '../../../data/rulesets/dnd2024/talentos';
+import { talentoTemPlaceholder } from '../../../core/classificarTalento';
 
 interface TelaEscolherTalentoProps {
   nivelAtual: number;
@@ -93,7 +94,10 @@ function CardTalento({
         </div>
       </div>
       {asi && <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 2 }}>{asi}</div>}
-      <div className="opt-card-desc">{t.beneficios}</div>
+      <div className="opt-card-desc">
+        {talentoTemPlaceholder(t) ? '[PH] sem efeito mecânico ainda — ' : ''}
+        {t.beneficios}
+      </div>
       {t.prerequisitos.outro && (
         <div style={{ color: 'var(--text-faint)', fontSize: 11, marginTop: 4 }}>
           ⚠️ Requer: {t.prerequisitos.outro} — confirme que seu personagem atende

@@ -43,10 +43,21 @@ export function classificarBeneficios(beneficios: string): EfeitoTalento[] {
     .map((texto) => ({ texto, tipo: classificarFrase(texto) }));
 }
 
+/** Talentos cujo benefício INTEIRO já é coberto por um mecanismo
+ * próprio de wizard/level-up (`concedeProficiencias`/
+ * `concedeMagiaIniciada`) em vez do campo genérico `efeitoMecanico` —
+ * não contam como `[PH]` mesmo sem esse campo. Músico NÃO entra aqui:
+ * `concedeFerramentaGrupo` só cobre a proficiência com instrumentos,
+ * a Canção Encorajadora ainda falta (ver Backlog.md) — então Músico
+ * continua `[PH]` até o benefício inteiro estar coberto. */
+const IDS_COBERTOS_POR_MECANISMO_PROPRIO = new Set(['habilidoso', 'iniciado-em-magia']);
+
 /** `true` quando a Ficha ainda deve mostrar `[PH] sem efeito mecânico
- * ainda` pro talento — a Fase 4 ainda não chegou nele. `efeitoMecanico`
- * ausente = `[PH]`; presente (só 5 hoje: Alerta, Defensivo, Arquearia,
- * Duelismo, Mestre em Armaduras Médias) = sem `[PH]`. */
+ * ainda` pro talento — a Fase 4 ainda não chegou nele (ou só cobriu
+ * parte do benefício). `efeitoMecanico` ausente = `[PH]`, exceto os
+ * talentos em `IDS_COBERTOS_POR_MECANISMO_PROPRIO` (cobertos por outro
+ * caminho, mas por inteiro). */
 export function talentoTemPlaceholder(t: Talento): boolean {
+  if (IDS_COBERTOS_POR_MECANISMO_PROPRIO.has(t.id)) return false;
   return t.efeitoMecanico === undefined;
 }

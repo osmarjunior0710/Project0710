@@ -359,6 +359,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // desde a criação, ver `core/magiaTalentoOrigem.ts`.
   const magiasTalentoOrigemAtuais = [...truquesMagiaIniciada(selecao), ...magiasMagiaIniciada(selecao)];
   const magiasTalentoOrigemPreparadas = magiasPreparadasDoPersonagem(magiasTalentoOrigemAtuais);
+  // Pra Substituição de Magia no Level Up (ver LevelUpShell) — só
+  // preenchido quando a gaveta correspondente realmente tem algo
+  // escolhido (a lista e a magia sempre são preenchidas juntas).
+  const magiaIniciadaOrigemAtual =
+    origemPersonagem?.talentoOrigemVariante && selecao.magiaMagiaIniciadaEscolhida
+      ? { lista: origemPersonagem.talentoOrigemVariante, magia: selecao.magiaMagiaIniciadaEscolhida }
+      : null;
+  const magiaIniciadaEspecieAtual =
+    selecao.listaMagiaIniciadaEspecieEscolhida && selecao.magiaMagiaIniciadaEspecieEscolhida
+      ? { lista: selecao.listaMagiaIniciadaEspecieEscolhida, magia: selecao.magiaMagiaIniciadaEspecieEscolhida }
+      : null;
   const magiasConjuraveis = [
     ...magiasPreparadas,
     ...magiasDescobertasMagicas,
@@ -920,6 +931,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     talentoGeralEscolhido: string | null;
     dadivaEpicaEscolhida: string | null;
     arcanaMisticaAlteracoes: Record<number, string> | null;
+    magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
   }) {
     const novosAtributos = resultado.atributosAumentados
       ? aumentarAtributos(selecao.atributos, resultado.atributosAumentados)
@@ -953,6 +965,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
     if (resultado.arcanaMisticaAlteracoes) {
       setArcanaMisticaAtuais((prev) => ({ ...prev, ...resultado.arcanaMisticaAlteracoes }));
+    }
+    if (resultado.magiaIniciadaAlteracoes) {
+      const { origem, especie } = resultado.magiaIniciadaAlteracoes;
+      setSelecao((prev) => ({
+        ...prev,
+        magiaMagiaIniciadaEscolhida: origem ?? prev.magiaMagiaIniciadaEscolhida,
+        magiaMagiaIniciadaEspecieEscolhida: especie ?? prev.magiaMagiaIniciadaEspecieEscolhida,
+      }));
     }
     setLevelUpHpModo(null);
     setLevelUpHpRolado(null);
@@ -995,6 +1015,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         magiasDaClasseDisponiveis={magiasDisponiveisParaPreparar(classe, personagem.nivel + 1)}
         invocacoesMisticasAtuais={invocacoesMisticasAtuais}
         arcanaMisticaAtuais={arcanaMisticaAtuais}
+        magiaIniciadaOrigemAtual={magiaIniciadaOrigemAtual}
+        magiaIniciadaEspecieAtual={magiaIniciadaEspecieAtual}
         periciasEspecialistaAtuais={periciasEspecialistaAtuais}
         periciasProficientesDoPersonagem={[...periciasProficientes(selecao), ...periciasSubclasseBonusAtuais]}
         periciasSubclasseBonusAtuais={periciasSubclasseBonusAtuais}
