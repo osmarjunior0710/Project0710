@@ -35,6 +35,9 @@
 > tecnicamente possível, mas que a gente decide não fazer agora por
 > prioridade (diferente de `PENDENCIAS.md`, que é o que trava
 > estruturalmente) fica em `Backlog.md` (ver seção 17).
+> Toda publicação na branch principal (a que dispara o deploy) ganha
+> uma entrada nova no topo de `Changelog.md` — resumo do que subiu,
+> pro Osmar acompanhar sem precisar ler commit (ver seção 19).
 
 ## 1. Quem está do outro lado
 
@@ -567,3 +570,38 @@ foco na branch principal.
 - Isso substitui esperar o Osmar pedir "faz um sync" — a sincronização
   é automática e acontece antes de qualquer trabalho novo, não uma
   ação sob demanda.
+
+## 19. Regra de atualização do Changelog.md
+
+`Changelog.md` é o histórico do que foi publicado de verdade — cada
+entrada é 1 publicação na branch principal (o push que dispara o
+deploy do GitHub Pages, ver seção 18), não 1 commit nem 1 entrega
+interna. Existe pro Osmar acompanhar "o que mudou desde a última vez
+que eu testei", sem precisar ler código nem commit.
+
+- **Sempre que um push chegar na branch principal**, adicione uma
+  entrada nova no `Changelog.md`, formato:
+
+  ```
+  ## {APP_VERSION}
+
+  Resumo curto (1-3 frases) do que mudou nessa publicação.
+  ```
+
+- `{APP_VERSION}` é o valor exato de `src/version.ts` no momento
+  desse push (já com o "v" na frente, ver seção 10) — não reformatar,
+  não abreviar.
+- O resumo é sobre o que o Osmar **vê ou pode testar** na tela — não
+  detalhe de implementação (arquivo tocado, função nova). Detalhe
+  técnico já fica no commit e, se for decisão de design durável, no
+  `DECISOES-*.md` certo (seção 7) — não duplicar aqui.
+- **Regra fixa de ordem, não negociável:** a entrada mais nova é
+  **sempre a primeira** do arquivo (logo abaixo do título/aviso do
+  topo) — nunca embaixo, nunca reordenar entradas antigas depois de
+  escritas. O arquivo cresce por cima; a entrada mais antiga vai
+  ficando mais pra baixo com o tempo.
+- **Sempre pelo menos 1 linha em branco** entre 2 entradas (e entre o
+  aviso do topo e a primeira entrada).
+- Se uma publicação juntar trabalho de mais de 1 foco/conta (merge de
+  `EmDev.md` + `EmDevB.md` no mesmo push, por exemplo), 1 entrada só
+  cobrindo tudo que subiu nessa publicação — não 1 entrada por foco.
