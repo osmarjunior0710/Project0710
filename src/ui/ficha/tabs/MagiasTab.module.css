@@ -80,6 +80,17 @@
   cursor: not-allowed;
 }
 
+/* Magia Ritual elegível pro Ritual Rápido (Conjurador Ritualista) —
+ * mesma cor do pip "especial" (ver TickPips.tsx), só pra avisar o
+ * jogador que essa magia é uma das que o pool compartilhado cobre.
+ * Continua conjurando normal (gasta Espaço) se tocada aqui — o uso
+ * de graça em si só acontece no botão "Usar Ritual Rápido". */
+.usarBtnRitual {
+  border-color: var(--accent-especial);
+  background: var(--accent-especial-dim);
+  color: var(--accent-especial);
+}
+
 .avisoFaltando {
   padding: var(--space-3);
   margin-bottom: var(--space-2);

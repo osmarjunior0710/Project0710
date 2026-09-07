@@ -647,11 +647,17 @@ export default function MagiasTab({
         <>
           <div className="section-title">Magias de Talentos Gerais</div>
           <div className="label" style={{ marginBottom: 4 }}>
-            Telecinético/Telepático — sempre preparadas, não contam na conta de Magias Preparadas.
+            Sempre preparadas, não contam na conta de Magias Preparadas.
+            {ritualRapidoDisponivel && ' Botão roxo = elegível pro Ritual Rápido (veja a seção abaixo).'}
           </div>
           {magiasTalentoGeral.map((m) => {
             const semEspaco = m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
+            // Elegível pro pool do Ritual Rápido (Conjurador Ritualista) —
+            // só as magias com tag Ritual, e só quando o personagem tem
+            // o talento. Continua conjurando normal (gasta Espaço) se
+            // tocada aqui — o uso de graça em si é o botão dedicado.
+            const elegivelRitualRapido = ritualRapidoDisponivel && m.tempoConjuracao?.includes('Ritual');
             return (
               <div key={m.id} className={styles.spellRow}>
                 <div className={styles.spellName}>
@@ -659,7 +665,13 @@ export default function MagiasTab({
                 </div>
                 <span className={styles.spellCirculo}>{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
                 <div
-                  className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                  className={[
+                    styles.usarBtn,
+                    !temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : '',
+                    elegivelRitualRapido ? styles.usarBtnRitual : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                   onClick={() => temAcao && usarMagia(m)}
                 >
                   {temAcao ? 'Usar' : 'Usar (pendência)'}

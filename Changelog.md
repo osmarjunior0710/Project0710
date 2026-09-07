@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1828
+
+Aba Magias — o botão "Usar" das magias de Talento Geral fica roxo
+quando a magia é uma das Rituais do Conjurador Ritualista, mesma cor
+do "Ritual Rápido" logo abaixo, pra facilitar identificar quais dá pra
+usar ali.
+
 ## v202609_1737
 
 Conjurador Ritualista completo: novo "Ritual Rápido" na aba Magias

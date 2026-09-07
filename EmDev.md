@@ -219,6 +219,17 @@ Grupos propostos e aprovados pelo Osmar:
         (2/3)" com Alarme/Identificar travadas como "já escolhida" →
         escolhe Detectar Magia → confirma → aba Magias mostra as 3
         magias sempre preparadas).
+  - [x] **B.4.3.2 — Botão "Usar" roxo nas magias Rituais** (pedido do
+        Osmar ao ver o Ritual Rápido pronto): na seção "Magias de
+        Talentos Gerais", a magia com tag Ritual ganha a mesma cor do
+        pip do Ritual Rápido (`usarBtnRitual`, nova classe CSS) — só
+        avisa visualmente quais são elegíveis pro pool compartilhado,
+        o botão continua conjurando normal (gasta Espaço) se tocado
+        ali. `elegivelRitualRapido = ritualRapidoDisponivel &&
+        m.tempoConjuracao?.includes('Ritual')`. Verificado: `tsc -b`/
+        `npm test` (290)/`npm run build` limpos + Playwright (Alarme/
+        Identificar aparecem com borda/fundo roxo, mesma cor do botão
+        "Usar Ritual Rápido" logo abaixo).
 - [ ] **B.5 — Escolha de perícia**: Analítico, Mente Aguçada,
       Especialista em Perícia — reaproveita o padrão do Habilidoso
       (`concedeProficiencias`).
