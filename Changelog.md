@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1832
+
+Aba Magias — as magias Rituais do Conjurador Ritualista (Alarme/
+Identificar, por exemplo) ganharam botão próprio "Usar grátis" (roxo):
+tocar nele já ativa o Ritual Rápido pra aquela magia, sem precisar
+descer até o botão genérico — usar em qualquer uma trava as outras e o
+botão de baixo até o próximo Descanso Longo.
+
 ## v202609_1828
 
 Aba Magias — o botão "Usar" das magias de Talento Geral fica roxo

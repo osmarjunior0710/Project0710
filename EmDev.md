@@ -219,17 +219,21 @@ Grupos propostos e aprovados pelo Osmar:
         (2/3)" com Alarme/Identificar travadas como "já escolhida" →
         escolhe Detectar Magia → confirma → aba Magias mostra as 3
         magias sempre preparadas).
-  - [x] **B.4.3.2 — Botão "Usar" roxo nas magias Rituais** (pedido do
-        Osmar ao ver o Ritual Rápido pronto): na seção "Magias de
-        Talentos Gerais", a magia com tag Ritual ganha a mesma cor do
-        pip do Ritual Rápido (`usarBtnRitual`, nova classe CSS) — só
-        avisa visualmente quais são elegíveis pro pool compartilhado,
-        o botão continua conjurando normal (gasta Espaço) se tocado
-        ali. `elegivelRitualRapido = ritualRapidoDisponivel &&
-        m.tempoConjuracao?.includes('Ritual')`. Verificado: `tsc -b`/
-        `npm test` (290)/`npm run build` limpos + Playwright (Alarme/
-        Identificar aparecem com borda/fundo roxo, mesma cor do botão
-        "Usar Ritual Rápido" logo abaixo).
+  - [x] **B.4.3.2 — Botão "Usar grátis" nas magias Rituais elegíveis**
+        (pedido do Osmar ao ver o Ritual Rápido pronto, evoluído em 2
+        rodadas): na seção "Magias de Talentos Gerais", a magia com
+        tag Ritual (`elegivelRitualRapido = ritualRapidoDisponivel &&
+        m.tempoConjuracao?.includes('Ritual')`) ganha botão PRÓPRIO
+        "Usar grátis" (mesma cor roxa do pip do Ritual Rápido,
+        `usarBtnRitual`) que ATIVA direto o Ritual Rápido pra aquela
+        magia (`onUsarRitualRapido`) — não precisa mais descer até o
+        botão genérico da seção dedicada. Como é o MESMO uso
+        compartilhado (`ritualRapidoGasto`), usar em qualquer uma trava
+        as outras E o botão genérico junto (mesmo estado, sem
+        duplicar). Verificado: `tsc -b`/`npm test` (290)/`npm run
+        build` limpos + Playwright (Alarme e Identificar mostram "Usar
+        grátis" roxo → toca em Alarme → os 2 viram "Usada" e o botão
+        "Usar Ritual Rápido" logo abaixo desativa junto).
 - [ ] **B.5 — Escolha de perícia**: Analítico, Mente Aguçada,
       Especialista em Perícia — reaproveita o padrão do Habilidoso
       (`concedeProficiencias`).
