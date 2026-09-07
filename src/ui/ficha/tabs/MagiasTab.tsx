@@ -10,6 +10,7 @@ import {
   circulosDisponiveisParaConjurar,
 } from '../../../core/magiasPersonagem';
 import { classificarMagia, iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
+import { calcularDanoMagia } from '../../../core/magiaDano';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TickPips from '../../components/TickPips';
@@ -149,9 +150,15 @@ export default function MagiasTab({
   onCompletarTruques,
   onCompletarMagiasPreparadas,
 }: MagiasTabProps) {
-  const { rolarD20 } = useRoll();
+  const { rolarD20, rolarDados } = useRoll();
   const [telaCirculo, setTelaCirculo] = useState<{ magia: Magia; circulos: number[] } | null>(null);
   const [armaDePactoEscolhida, setArmaDePactoEscolhida] = useState('');
+  const [danoPendenteMagia, setDanoPendenteMagia] = useState<{
+    label: string;
+    quantidade: number;
+    lados: number;
+    mod: number;
+  } | null>(null);
 
   if (!conjura) {
     return (
@@ -171,26 +178,44 @@ export default function MagiasTab({
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
   const [espacosExpandido, setEspacosExpandido] = useColapsavel('espacos-de-magia', true);
 
-  function rolarAtaqueSeForMagiaDeAtaque(m: Magia) {
+  function rolarAtaqueSeForMagiaDeAtaque(m: Magia, circuloUsado: number) {
     if (classificarMagia(m).ataque && modAcertoConjuracao !== null) {
       rolarD20({
         label: `Ataque de Magia — ${m.nome}`,
         formula: `1d20 + ${modAcertoConjuracao}`,
         mod: modAcertoConjuracao,
       });
+      const dano = calcularDanoMagia(m, circuloUsado);
+      setDanoPendenteMagia(
+        dano ? { label: `Dano — ✨ ${m.nome}`, quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod } : null,
+      );
+      return;
     }
+    setDanoPendenteMagia(null);
+  }
+
+  function rolarDanoPendenteMagia() {
+    if (!danoPendenteMagia) return;
+    rolarDados({
+      label: danoPendenteMagia.label,
+      formula: `${danoPendenteMagia.quantidade}d${danoPendenteMagia.lados}${danoPendenteMagia.mod ? ` + ${danoPendenteMagia.mod}` : ''}`,
+      quantidade: danoPendenteMagia.quantidade,
+      lados: danoPendenteMagia.lados,
+      mod: danoPendenteMagia.mod,
+    });
+    setDanoPendenteMagia(null);
   }
 
   function usarMagiaGratis(item: MagiaGratisDeInvocacao) {
     const jaGasta = item.recarga === 'descansoLongo' && magiasGratisGastas.includes(item.invocacaoId);
     if (jaGasta) return;
     onUsarMagiaGratis(item);
-    rolarAtaqueSeForMagiaDeAtaque(item.magia);
+    rolarAtaqueSeForMagiaDeAtaque(item.magia, item.magia.circulo);
   }
 
   function usarMagia(m: Magia) {
     if (m.circulo === 0) {
-      rolarAtaqueSeForMagiaDeAtaque(m);
+      rolarAtaqueSeForMagiaDeAtaque(m, 0);
       return;
     }
     const circulosDisponiveis = circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo);
@@ -209,7 +234,7 @@ export default function MagiasTab({
         onConjurar={(circulo) => {
           const ok = onGastarSlotCirculo(circulo);
           setTelaCirculo(null);
-          if (ok) rolarAtaqueSeForMagiaDeAtaque(telaCirculo.magia);
+          if (ok) rolarAtaqueSeForMagiaDeAtaque(telaCirculo.magia, circulo);
         }}
       />
     );
@@ -225,6 +250,19 @@ export default function MagiasTab({
 
   return (
     <>
+      {danoPendenteMagia && (
+        <div className="label" style={{ marginBottom: 12, padding: 10, background: 'var(--panel)', borderRadius: 'var(--shape-md)' }}>
+          Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano.
+          <div
+            className="btn btn-primary"
+            style={{ marginTop: 10, padding: '10px 14px', display: 'inline-block' }}
+            onClick={rolarDanoPendenteMagia}
+          >
+            🎲 Rolar Dano
+          </div>
+        </div>
+      )}
+
       {espacos.length > 0 && (
         <>
           <div className={styles.grupoHeader} onClick={() => setEspacosExpandido(!espacosExpandido)}>

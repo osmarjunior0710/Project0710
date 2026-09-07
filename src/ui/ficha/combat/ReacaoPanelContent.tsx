@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { classificarMagia, iconesMagia } from '../../../core/classificarMagia';
+import { calcularDanoMagia } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TickPips from '../../components/TickPips';
 import styles from './PanelRows.module.css';
+import type { DanoPendente } from './AcaoPanelContent';
 
 interface ReacaoPanelContentProps {
-  onEscolher: (nome: string, desc: string) => void;
+  onEscolher: (nome: string, desc: string, dano?: DanoPendente) => void;
   gastarSlotCirculo: (circulo: number) => boolean;
   conjura: boolean;
   magiasReacao: Magia[];
@@ -68,6 +70,16 @@ export default function ReacaoPanelContent({
         formula: `1d20 + ${modAcertoConjuracao}`,
         mod: modAcertoConjuracao,
       });
+      const dano = calcularDanoMagia(m, m.circulo);
+      if (dano) {
+        onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano.', {
+          label: `Dano — ✨ ${m.nome}`,
+          quantidade: dano.quantidade,
+          lados: dano.lados,
+          mod: dano.mod,
+        });
+        return;
+      }
       onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Veja a descrição da magia (ⓘ) pro dano.');
       return;
     }

@@ -894,7 +894,7 @@ export default function CombatTab({
         )}
         {painelAberto === 'reacao' && (
           <ReacaoPanelContent
-            onEscolher={(nome, desc) => escolherNoPainel('reacao', nome, desc)}
+            onEscolher={(nome, desc, dano) => escolherNoPainel('reacao', nome, desc, dano)}
             gastarSlotCirculo={onGastarSlotCirculo}
             conjura={conjura}
             magiasReacao={magiasPreparadasReacao}

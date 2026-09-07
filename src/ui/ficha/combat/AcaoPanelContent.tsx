@@ -4,6 +4,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
 import { classificarMagia } from '../../../core/classificarMagia';
+import { calcularDanoMagia } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
@@ -116,6 +117,7 @@ export default function AcaoPanelContent({
       if (!ok) return;
     }
     setTelaMagia(null);
+    const circuloUsado = circulo ?? m.circulo;
     const classificacao = classificarMagia(m);
     if (classificacao.ataque && modAcertoConjuracao !== null) {
       rolarD20({
@@ -123,6 +125,16 @@ export default function AcaoPanelContent({
         formula: `1d20 + ${modAcertoConjuracao}`,
         mod: modAcertoConjuracao,
       });
+      const dano = calcularDanoMagia(m, circuloUsado);
+      if (dano) {
+        onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano.', {
+          label: `Dano — ✨ ${m.nome}`,
+          quantidade: dano.quantidade,
+          lados: dano.lados,
+          mod: dano.mod,
+        });
+        return;
+      }
       onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Veja a descrição da magia (ⓘ) pro dano.');
       return;
     }

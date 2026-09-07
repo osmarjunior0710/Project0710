@@ -190,9 +190,28 @@ Jogador, "A a I" e "I a Z" — juntos cobrem as 390 magias).
       `nome` igual todo o resto — fácil de corrigir depois (pedido do
       Osmar). `npx tsc -b`, `npm test` (227 passando) e `npm run
       build` OK.
-- [ ] **5.2 Modal de Ataque** — wiring em MagiasTab/AcaoPanelContent/
-      ReacaoPanelContent: depois do d20 de ataque de magia, oferecer
-      "🎲 Rolar Dano" via `calcularDanoMagia`, igual arma já faz hoje.
+- [x] **5.2 Modal de Ataque — FEITA.** Wiring em MagiasTab/
+      AcaoPanelContent/ReacaoPanelContent: depois do d20 de ataque de
+      magia, oferece "🎲 Rolar Dano" via `calcularDanoMagia`, igual
+      arma já faz hoje — mesmo `DanoPendente` reaproveitado (nenhuma
+      estrutura nova). `AcaoPanelContent`/`ReacaoPanelContent` já
+      recebiam `dano?` opcional no `onEscolher` (usado por arma); só
+      `ReacaoPanelContent`/`CombatTab` precisaram propagar esse 4º
+      parâmetro até `escolherNoPainel`, que já sabia lidar com ele.
+      Testado ao vivo em Chromium 390×844 (Playwright): aba Magias
+      (Rajada de Veneno, truque, 1d12 Venenoso rolado certo) e aba
+      Combate → Ação (Toque Necrótico, 1d20+7 de ataque seguido de
+      1d10 Necrótico de dano, valores batendo com a regra). **Achado
+      de teste, não de produto:** o `.pill` de `MagiaComDescricao`
+      (nome + ⓘ) cobre a linha inteira e sempre para a propagação do
+      clique (é o botão de abrir a descrição) — pra clicar a LINHA em
+      vez do nome, o teste precisa mirar o `.check-row`/`spellMiniRow`
+      diretamente, não um elemento de texto dentro dele. Isso já era
+      verdade antes desta entrega (comportamento do componente
+      reaproveitado em toda tela de magia), só não tinha sido
+      confirmado num teste de Combate ainda — não é uma mudança de
+      comportamento pro Osmar. `npx tsc -b`, `npm test` (227 passando)
+      e `npm run build` OK.
 - [ ] **5.3 Modal de Salvaguarda** — componente novo
       (`MagiaSalvaguardaModal.tsx`, seguindo o padrão de
       `AtaqueDeSoproModal`), CD calculada por `cdConjuracao` (já
