@@ -191,6 +191,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagemSalvo.magiasGratisInvocacoesGastas ?? [],
   );
   const [talentosGeraisAtuais, setTalentosGeraisAtuais] = useState<string[]>(personagemSalvo.talentosGeraisAtual ?? []);
+  // Escolha de magia por escola restrita (Tocado pela Sombra/Fadas) —
+  // ver `core/magiaTalentoGeral.ts`.
+  const [escolhaMagiaTalentoGeral, setEscolhaMagiaTalentoGeral] = useState<Record<string, string>>(
+    personagemSalvo.escolhaMagiaTalentoGeral ?? {},
+  );
   const [talentosFavoritos, setTalentosFavoritos] = useState<string[]>(personagemSalvo.talentosFavoritosAtual ?? []);
   const [folegoGasto, setFolegoGasto] = useState(personagemSalvo.folegoGasto ?? 0);
   const [vigorImplacavelGasto, setVigorImplacavelGasto] = useState(personagemSalvo.vigorImplacavelGasto ?? false);
@@ -388,15 +393,15 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     selecao.listaMagiaIniciadaEspecieEscolhida && selecao.magiaMagiaIniciadaEspecieEscolhida
       ? { lista: selecao.listaMagiaIniciadaEspecieEscolhida, magia: selecao.magiaMagiaIniciadaEspecieEscolhida }
       : null;
-  // Talentos Gerais com magia FIXA (sem escolha) — Telecinético (Mãos
-  // Mágicas) e Telepático (Detectar Pensamentos), ver
-  // `core/magiaTalentoGeral.ts`.
+  // Talentos Gerais com magia FIXA (sem escolha, Telecinético/
+  // Telepático) e/ou escolhida por escola (Tocado pela Sombra/Fadas)
+  // — ver `core/magiaTalentoGeral.ts`.
   const magiasTalentoGeralAtuais = [
     ...truquesTalentoGeral(talentosEfetivos),
-    ...magiasSempreTalentoGeral(talentosEfetivos),
+    ...magiasSempreTalentoGeral(talentosEfetivos, escolhaMagiaTalentoGeral),
   ];
   const magiasTalentoGeralPreparadas = magiasPreparadasDoPersonagem(magiasTalentoGeralAtuais);
-  const magiasGratisTalentoGeral = magiasGratisDosTalentosGerais(talentosEfetivos);
+  const magiasGratisTalentoGeral = magiasGratisDosTalentosGerais(talentosEfetivos, escolhaMagiaTalentoGeral);
   const magiasConjuraveis = [
     ...magiasPreparadas,
     ...magiasDescobertasMagicas,
@@ -526,6 +531,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       arcanaMisticaGastos,
       magiasGratisInvocacoesGastas: magiasGratisGastas,
       talentosGeraisAtual: talentosGeraisAtuais,
+      escolhaMagiaTalentoGeral,
       talentosFavoritosAtual: talentosFavoritos,
       itensMochilaAtual: itensMochila,
       levelUpHpModo,
@@ -578,6 +584,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     arcanaMisticaGastos,
     magiasGratisGastas,
     talentosGeraisAtuais,
+    escolhaMagiaTalentoGeral,
     talentosFavoritos,
     itensMochila,
     levelUpHpModo,
@@ -976,6 +983,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     dadivaEpicaEscolhida: string | null;
     arcanaMisticaAlteracoes: Record<number, string> | null;
     magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
+    escolhaMagiaTalentoGeral: Record<string, string> | null;
   }) {
     const novosAtributos = resultado.atributosAumentados
       ? aumentarAtributos(selecao.atributos, resultado.atributosAumentados)
@@ -1017,6 +1025,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         magiaMagiaIniciadaEscolhida: origem ?? prev.magiaMagiaIniciadaEscolhida,
         magiaMagiaIniciadaEspecieEscolhida: especie ?? prev.magiaMagiaIniciadaEspecieEscolhida,
       }));
+    }
+    if (resultado.escolhaMagiaTalentoGeral) {
+      setEscolhaMagiaTalentoGeral((prev) => ({ ...prev, ...resultado.escolhaMagiaTalentoGeral }));
     }
     setLevelUpHpModo(null);
     setLevelUpHpRolado(null);

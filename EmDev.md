@@ -155,12 +155,24 @@ Grupos propostos e aprovados pelo Osmar:
         `npm test` (251)/`npm run build` limpos + Playwright (Guerreiro
         nível 4 pega Telepático → aba Magias aparece com "Detectar
         Pensamentos" grátis → usa → vira "Usada").
-  - [ ] **B.4.2 — escolha de 1 magia entre 2 escolas** (Tocado pela
+  - [x] **B.4.2 — escolha de 1 magia entre 2 escolas** (Tocado pela
         Sombra: Ilusão/Necromancia; Tocado pelas Fadas: Adivinhação/
-        Encantamento) — precisa de sub-tela nova no passo "Talento" do
-        Level Up (o passo genérico hoje só escolhe o talento em si,
-        sem sub-escolha condicional — diferente do wizard, que já tem
-        esse mecanismo pra Iniciado em Magia).
+        Encantamento): novo `efeitoMecanico: 'magia-escolhida-por-
+        escola'` + novo passo `talentoMagia` no `LevelUpShell` (entra
+        na sequência só quando o Talento Geral ESCOLHIDO NESTE
+        level-up pede essa sub-escolha — mesmo padrão condicional de
+        `asiAtributo`). Escolha salva em `PersonagemSalvo.
+        escolhaMagiaTalentoGeral` (chave = id do talento). A magia
+        FIXA (Invisibilidade/Passo Nebuloso) e a ESCOLHIDA ficam cada
+        uma com seu próprio "grátis 1x/Descanso Longo" independente —
+        regra real trata como 2 usos separados, não 1 pool. Level Up
+        Rápido nunca sorteia essa sub-escolha (fica só com a fixa até
+        o jogador escolher manualmente). Verificado: `tsc -b`/`npm
+        test` (279)/`npm run build` limpos + Playwright (Guerreiro
+        pega Tocado pela Sombra → tela mostra as 8 magias reais de
+        Ilusão/Necromancia 1º círculo → escolhe Destruição Colérica →
+        confirma → aba Magias mostra as 2 magias, cada uma com botão
+        "Usar de graça" próprio).
   - [ ] **B.4.3 — Conjurador Ritualista**: escolha de N magias
         Rituais (N = Bônus de Proficiência, cresce por nível) da
         lista da própria classe conjuradora do personagem — reaproveita

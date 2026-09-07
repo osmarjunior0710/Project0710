@@ -121,7 +121,19 @@ export type EfeitoMecanicoTalento =
    * diferente de Iniciado em Magia (`concedeMagiaIniciada`), aqui não
    * há escolha nenhuma de lista/atributo, por isso nem precisa de
    * tela própria no wizard/Level Up. */
-  | { tipo: 'magia-geral-concedida'; truques: string[]; magias: { nome: string; recarga: 'ilimitado' | 'descansoLongo' }[] };
+  | { tipo: 'magia-geral-concedida'; truques: string[]; magias: { nome: string; recarga: 'ilimitado' | 'descansoLongo' }[] }
+  /** Concede 1 magia de 1º círculo ESCOLHIDA pelo jogador dentro de
+   * `escolas` restritas (Tocado pela Sombra: Ilusão/Necromancia;
+   * Tocado pelas Fadas: Adivinhação/Encantamento), mais `magiaFixa`
+   * (sem escolha) — as duas ficam sempre preparadas, cada uma com seu
+   * próprio "grátis 1x/Descanso Longo" independente. Diferente de
+   * Iniciado em Magia: o pool é TODAS as magias do circulo/escola
+   * (qualquer classe), não uma lista de classe fixa — não exige que o
+   * personagem já seja conjurador. A escolha em si fica em
+   * `PersonagemSalvo.escolhaMagiaTalentoGeral` (chave = id do
+   * talento), preenchida por uma sub-tela nova no passo "Talento" do
+   * Level Up. Ver `core/magiaTalentoGeral.ts`. */
+  | { tipo: 'magia-escolhida-por-escola'; escolas: string[]; magiaFixa: string };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -739,6 +751,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['INT', 'SAB', 'CAR'], maximo: 20 },
+    efeitoMecanico: { tipo: 'magia-escolhida-por-escola', escolas: ['Ilusão', 'Necromancia'], magiaFixa: 'Invisibilidade' },
     beneficios: "Escolhe 1 magia de 1º círculo (Ilusão ou Necromancia): ela + Invisibilidade ficam sempre preparadas, conjuráveis grátis 1x/Descanso Longo cada (ou com espaço depois).",
     pagina: 208,
     fonte: "PHB 2024",
@@ -750,6 +763,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['INT', 'SAB', 'CAR'], maximo: 20 },
+    efeitoMecanico: { tipo: 'magia-escolhida-por-escola', escolas: ['Adivinhação', 'Encantamento'], magiaFixa: 'Passo Nebuloso' },
     beneficios: "Escolhe 1 magia de 1º círculo (Adivinhação ou Encantamento): ela + Passo Nebuloso ficam sempre preparadas, conjuráveis grátis 1x/Descanso Longo cada (ou com espaço depois).",
     pagina: 208,
     fonte: "PHB 2024",

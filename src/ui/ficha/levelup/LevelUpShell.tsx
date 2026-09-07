@@ -36,6 +36,7 @@ import IconeClasse from '../../components/IconeClasse';
 import DistribuirPontosAtributo from '../../components/DistribuirPontosAtributo';
 import { useAvisoTemporario } from '../../hooks/useAvisoTemporario';
 import { talentos } from '../../../data/rulesets/dnd2024/talentos';
+import { opcoesMagiaEscolhidaPorEscola } from '../../../core/magiaTalentoGeral';
 import TelaEscolherTalento from './TelaEscolherTalento';
 import TrocarValorSimples from '../../components/TrocarValorSimples';
 import styles from './LevelUpShell.module.css';
@@ -83,6 +84,11 @@ interface LevelUpShellProps {
     /** Só as gavetas que MUDARAM nesse level-up — `null` num campo =
      * essa gaveta não trocou (ou não existe pro personagem). */
     magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
+    /** Só preenchido quando o Talento Geral escolhido NESTE level-up
+     * pede magia por escola restrita (Tocado pela Sombra/Fadas) — 1
+     * entrada `{ [talentoId]: magiaEscolhida }`. `null` = nenhuma
+     * escolha desse tipo nesse level-up. */
+    escolhaMagiaTalentoGeral: Record<string, string> | null;
   }) => void;
   /** Controlado pelo `FichaShell` (persistido junto com o resto do
    * progresso) em vez de estado local — uma vez rolado o dado de
@@ -168,6 +174,7 @@ type LuStep =
   | 'especialista'
   | 'asi'
   | 'asiAtributo'
+  | 'talentoMagia'
   | 'dadivaEpica'
   | 'arcanaMistica'
   | 'iniciadoEmMagia'
@@ -283,6 +290,14 @@ export default function LevelUpShell({
     talentoObjEscolhido !== null &&
     talentoObjEscolhido.concedeAsi.tipo !== 'nenhum' &&
     (talentoObjEscolhido.concedeAsi.tipo === 'distribuir-dois' || talentoObjEscolhido.concedeAsi.atributos.length > 1);
+  // Talento Geral com magia ESCOLHIDA por escola restrita (Tocado
+  // pela Sombra/Fadas) — passo extra só entra quando o talento
+  // ESCOLHIDO NESTE level-up pede essa sub-escolha (mesmo padrão de
+  // `precisaEscolherAtributoDoTalento`, não retroage sobre talentos
+  // já escolhidos em level-ups anteriores).
+  const precisaEscolherMagiaDoTalento = talentoObjEscolhido?.efeitoMecanico?.tipo === 'magia-escolhida-por-escola';
+  const opcoesMagiaTalento = talentoObjEscolhido ? opcoesMagiaEscolhidaPorEscola(talentoObjEscolhido.id) : [];
+  const [magiaEscolhidaTalento, setMagiaEscolhidaTalento] = useState<string | null>(null);
 
   const luSteps: LuStep[] = ['pv', 'features'];
   if (classe.nivelSubclasse === novoNivel && !personagem.subclasse) luSteps.push('subclasse');
@@ -313,6 +328,7 @@ export default function LevelUpShell({
     // pede escolha de atributo — mesma lista, mesma bolinha de
     // progresso, mesmo padrão de "Avançar" de todo o resto do wizard.
     if (precisaEscolherAtributoDoTalento) luSteps.push('asiAtributo');
+    if (precisaEscolherMagiaDoTalento) luSteps.push('talentoMagia');
   }
   if (niveisComDadivaEpica(classe).includes(novoNivel)) luSteps.push('dadivaEpica');
   // Também aparece em qualquer level-up seguinte (não só quando um
@@ -544,6 +560,7 @@ export default function LevelUpShell({
     especialista: 'Especialista',
     asi: 'Atributo ou Talento',
     asiAtributo: 'Atributo do Talento',
+    talentoMagia: 'Magia do Talento',
     dadivaEpica: 'Dádiva Épica',
     arcanaMistica: 'Arcana Mística',
     iniciadoEmMagia: 'Iniciado em Magia',
@@ -634,6 +651,10 @@ export default function LevelUpShell({
         return;
       }
     }
+    if (step === 'talentoMagia' && magiaEscolhidaTalento === null) {
+      setAviso('Escolha a magia do talento antes de avançar.');
+      return;
+    }
     setAviso(null);
     if (step === 'resumo') {
       onConfirmar({
@@ -658,6 +679,10 @@ export default function LevelUpShell({
           luSteps.includes('iniciadoEmMagia') &&
           (magiaIniciadaAlteracoesPendentes.origem !== null || magiaIniciadaAlteracoesPendentes.especie !== null)
             ? magiaIniciadaAlteracoesPendentes
+            : null,
+        escolhaMagiaTalentoGeral:
+          luSteps.includes('talentoMagia') && talentoObjEscolhido && magiaEscolhidaTalento
+            ? { [talentoObjEscolhido.id]: magiaEscolhidaTalento }
             : null,
       });
       return;
@@ -1179,6 +1204,26 @@ export default function LevelUpShell({
           </>
         )}
 
+        {step === 'talentoMagia' && talentoObjEscolhido && (
+          <>
+            <div className="section-title">{talentoObjEscolhido.nome} — escolha 1 magia</div>
+            <div className="label" style={{ marginBottom: 10 }}>
+              {talentoObjEscolhido.beneficios}
+            </div>
+            {opcoesMagiaTalento.map((m) => (
+              <div
+                key={m.id}
+                className={`opt-card ${magiaEscolhidaTalento === m.nome ? 'selected' : ''}`}
+                style={{ padding: '10px 12px', cursor: 'pointer' }}
+                onClick={() => setMagiaEscolhidaTalento(m.nome)}
+              >
+                <div className="opt-card-name">{m.nome}</div>
+                <div className="opt-card-desc">{m.descricaoCurta ?? m.descricaoCompleta}</div>
+              </div>
+            ))}
+          </>
+        )}
+
         {step === 'dadivaEpica' && (
           <>
             <div className="section-title">Dádiva Épica</div>
@@ -1395,6 +1440,12 @@ export default function LevelUpShell({
                     ? 'magia trocada'
                     : 'sem troca'}
                 </span>
+              </div>
+            )}
+            {luSteps.includes('talentoMagia') && (
+              <div className="summary-row">
+                <span>Magia do Talento</span>
+                <span>{magiaEscolhidaTalento ?? 'nenhuma escolhida'}</span>
               </div>
             )}
             {luSteps.includes('asi') && (

@@ -78,6 +78,12 @@ export interface ResultadoLevelUpRapido {
   /** Level Up Rápido nunca troca a magia de Iniciado em Magia (não faz
    * sentido sortear uma troca opcional) — sempre `null` aqui. */
   magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
+  /** Level Up Rápido nunca sorteia a Talentos Gerais como Tocado pela
+   * Sombra/Fadas com sub-escolha de magia — sempre `null` aqui. Se o
+   * talento sorteado for um desses, o personagem fica só com a magia
+   * FIXA (Invisibilidade/Passo Nebuloso) até escolher a outra
+   * manualmente num level-up de verdade. */
+  escolhaMagiaTalentoGeral: Record<string, string> | null;
 }
 
 /** Escolhe Invocações Místicas respeitando pré-requisito (uma pode
@@ -240,5 +246,6 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     dadivaEpicaEscolhida,
     arcanaMisticaAlteracoes,
     magiaIniciadaAlteracoes: null,
+    escolhaMagiaTalentoGeral: null,
   };
 }
