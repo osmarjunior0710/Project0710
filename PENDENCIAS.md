@@ -1252,26 +1252,47 @@ de ~130+ magias de dano é um trabalho equivalente ao que já foi
 feito pro Upcast, e o Osmar confirmou (via pergunta direta) separar
 em duas entregas em vez de fazer tudo de uma vez.
 
-**O que falta pra resolver:**
-1. Extrair o Dano Base estruturado (dado + tipo de dano) de cada
-   magia com dano, mesmo processo de cruzar PDF + planilha já usado
-   pro Upcast (colunas novas na aba "Magias", ex:
-   `DanoBase_Dado`/`DanoBase_Tipo`).
-2. Função nova em `core/` que combina Dano Base + Upcast Estruturado
-   dado o círculo do espaço usado (`core/magiaDano.ts` ou nome
-   parecido) — precisa de teste Vitest (ver seção 13 do
-   `CLAUDE.md`), cobrindo pelo menos: magia sem upcast, magia com
-   upcast tipo "Dado por Círculo" em círculo acima do base, e o
-   caso "Fórmula Própria"/"Outro" (não soma nada automático, só
-   mostra o texto).
-3. UI na Ficha (provavelmente na aba Magias, ao escolher o círculo
-   pra conjurar) mostrando o total de dados que vai rolar antes de
-   confirmar, e disparando a rolagem de verdade via `RollContext`
-   (mesmo sistema de overlay de rolagem já usado em Combat).
-4. As 18 magias marcadas `Upcast_Tipo = "Outro"` na planilha (regra
-   não-linear, ex: duração em degraus por círculo específico) não
-   têm fórmula — o motor deve simplesmente NÃO tentar somar dado
-   automático pra elas, só mostrar `Upcast_Texto`.
+**Progresso (ver `EmDevB.md` e `DECISOES-DADOS.md` pro detalhe de cada
+entrega):**
+1. ✅ Dano Base (`danoBaseDado`/`danoBaseTipo`) extraído — 122/390
+   magias têm dano direto num alvo.
+2. ✅ `AtaqueOuSalvaguarda` extraído (390/390, `null` = nem ataque nem
+   salvaguarda) e `salvaguardaFalha`/`salvaguardaSucesso` (texto curto
+   padronizado do resultado, 85 magias — as que são de salvaguarda E
+   têm dano; as de salvaguarda SEM dano, tipo Enfeitiçar Pessoa, ainda
+   não têm esse texto — ver item **novo** abaixo).
+3. ✅ `core/magiaDano.ts` (`calcularDanoMagia`) combina Dano Base +
+   Upcast Estruturado — devolve `{quantidade, lados, mod, tipo,
+   upcastNaoAutomatico}`, o `upcastNaoAutomatico: true` já cobre o
+   caso das magias `Upcast_Tipo = "Outro"`/"Fórmula Própria" (não soma
+   sozinho, avisa que precisa mostrar `upcastTexto`).
+4. **Ainda falta**: UI na Ficha (2 modais — Ataque de Magia e
+   Salvaguarda de Magia, ver `EmDevB.md` foco atual) disparando a
+   rolagem via `RollContext`. Entrando em desenvolvimento agora.
+
+**Achados durante a extração de `salvaguardaFalha`/`salvaguardaSucesso`
+(imprecisões conhecidas, não bloqueantes):**
+- **"Rogar Maldição"** — o dano (1d8 Necrótico) não acontece no
+  momento da salvaguarda inicial, só depois, quando o conjurador
+  acerta o alvo amaldiçoado com outro ataque/magia. O texto
+  "Sucesso/Falha" ficou registrado como se fosse dano imediato (mesmo
+  padrão das outras 84), mas na prática o botão "Rolar Dano" dessa
+  magia só faz sentido usar mais tarde, não junto da salvaguarda
+  inicial — avaliar na hora de ligar a UI se precisa de tratamento
+  especial ou se fica como está (jogador aciona quando for a hora
+  certa).
+- **Rajada Prismática / Muralha Prismática** — `danoBaseTipo:
+  "aleatório"` (tipo sorteado por raio/camada) e o texto de
+  sucesso/falha é aproximado (a condição junto do dano no texto pode
+  não bater com QUALQUER raio sorteado, só o mais comum/primeiro
+  encontrado no livro) — aceitável dado que são as 2 magias mais
+  complexas do jogo (múltiplos efeitos por camada), não vale
+  estruturar tabela completa agora.
+- **Magias de salvaguarda SEM dano** (75 magias, ex.: Enfeitiçar
+  Pessoa — Sabedoria ou fica Enfeitiçado) ainda não têm
+  `salvaguardaFalha`/`salvaguardaSucesso` — fora do escopo desta
+  entrega (focada em rodar dano), mas se o Modal de Salvaguarda um dia
+  precisar mostrar essas também (não só as com dano), falta extrair.
 
 ## Revisão de abas da planilha mestra (possível consolidação)
 

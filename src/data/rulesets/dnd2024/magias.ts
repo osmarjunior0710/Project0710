@@ -65,6 +65,25 @@
 // nova na planilha (avaliado e confirmado como confiável — só 8 das
 // 390 magias precisaram de decisão manual por ter 2+ mecânicas
 // distintas no mesmo lançamento).
+//
+// `salvaguardaFalha`/`salvaguardaSucesso` são o texto curto e
+// padronizado (estilo `AtaqueDeSoproModal`) do que acontece em cada
+// resultado da salvaguarda — só preenchido nas magias que têm
+// `ataqueOuSalvaguarda` do tipo Salvaguarda E `danoBaseDado` (85 das
+// 390; as outras ficam `null`, incluindo magias de salvaguarda sem
+// dano — ver PENDENCIAS.md). Categorias usadas: a maioria segue
+// "Falha: Dano completo" + "Sucesso: Metade do dano" (padrão de
+// resistência clássico) ou "Sucesso: Nenhum efeito" (quando o livro
+// não menciona metade nenhuma vez pro efeito) — texto NÃO inclui o
+// dado (isso já vem de `danoBaseDado`/`calcularDanoMagia`, exibido
+// separado na UI, ver `core/magiaDano.ts`), só a categoria do
+// resultado + condição extra quando o livro menciona uma junto do
+// dano na falha (ex.: "Dano completo + Cego"). Exceção: "Esquentar
+// Metal" tem dano incondicional (a salvaguarda só decide se solta o
+// item), guardado com texto próprio nos 2 campos. Magias com efeito
+// que varia por raio/camada sorteada (Rajada/Muralha Prismática) têm
+// texto aproximado (a condição junto do dano pode não bater com TODO
+// raio possível, só o mais comum) — ver PENDENCIAS.md.
 
 export type UpcastTipo =
   | 'dado-por-circulo'
@@ -95,6 +114,8 @@ export interface Magia {
   danoBaseDado: string | null;
   danoBaseTipo: string | null;
   ataqueOuSalvaguarda: string | null;
+  salvaguardaFalha: string | null;
+  salvaguardaSucesso: string | null;
 }
 
 export const magias: Magia[] = [
@@ -120,6 +141,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "amigos",
@@ -143,6 +166,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "artedruidica",
@@ -166,6 +191,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "badalarfunebre",
@@ -189,6 +216,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d8",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "bolhaacida",
@@ -212,6 +241,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d6",
     danoBaseTipo: "Ácido",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "bordaomistico",
@@ -235,6 +266,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "chamasagrada",
@@ -258,6 +291,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d8",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "chicotedeespinhos",
@@ -281,6 +316,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d6",
     danoBaseTipo: "Perfurante",
     ataqueOuSalvaguarda: "Ataque Corpo a Corpo",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "criarchamas",
@@ -304,6 +341,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d8",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Ataque à Distância",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "elementalismo",
@@ -327,6 +366,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "explosaoelemental",
@@ -350,6 +391,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d8",
     danoBaseTipo: "escolhido",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "fagulhaestelar",
@@ -373,6 +416,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d8",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: "Ataque à Distância",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "golpecerteiro",
@@ -396,6 +441,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "ilusaomenor",
@@ -419,6 +466,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "luz",
@@ -442,6 +491,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "luzesdancantes",
@@ -465,6 +516,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "mensagem",
@@ -488,6 +541,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "maosmagicas",
@@ -511,6 +566,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "orientacao",
@@ -534,6 +591,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "palavraderadiancia",
@@ -557,6 +616,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d6",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "prestidigitacaoarcana",
@@ -580,6 +641,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "protecaocontralaminas",
@@ -603,6 +666,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "raiomistico",
@@ -626,6 +691,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d10",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: "Ataque à Distância",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "raiodefogo",
@@ -649,6 +716,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d10",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Ataque à Distância",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "raiodegelo",
@@ -672,6 +741,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d8",
     danoBaseTipo: "Gélido",
     ataqueOuSalvaguarda: "Ataque à Distância",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "rajadadeveneno",
@@ -695,6 +766,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d12",
     danoBaseTipo: "Veneno",
     ataqueOuSalvaguarda: "Ataque à Distância",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "reparar",
@@ -718,6 +791,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "resistencia",
@@ -741,6 +816,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "talhomental",
@@ -764,6 +841,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d6",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Salvaguarda de Inteligência",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "taumaturgia",
@@ -787,6 +866,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "toquechocante",
@@ -810,6 +891,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d8",
     danoBaseTipo: "Elétrico",
     ataqueOuSalvaguarda: "Ataque Corpo a Corpo",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "toquenecrotico",
@@ -833,6 +916,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d10",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Ataque Corpo a Corpo",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "trovao",
@@ -856,6 +941,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d6",
     danoBaseTipo: "Trovejante",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "zombariaperversa",
@@ -879,6 +966,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d6",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "alarme",
@@ -902,6 +991,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "amizadeanimal",
@@ -925,6 +1016,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "armaduraarcana",
@@ -948,6 +1041,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "armaduradeagathys",
@@ -971,6 +1066,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "bomfruto",
@@ -994,6 +1091,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "bracosdehadar",
@@ -1017,6 +1116,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d6",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Salvaguarda de Força",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "bencao",
@@ -1040,6 +1141,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "comando",
@@ -1063,6 +1166,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "compreenderidiomas",
@@ -1086,6 +1191,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "convocarfamiliar",
@@ -1109,6 +1216,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "criaroudestruiragua",
@@ -1132,6 +1241,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "curarferimentos",
@@ -1155,6 +1266,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "danacao",
@@ -1178,6 +1291,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d6",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "destruicaocauterizante",
@@ -1201,6 +1316,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d6",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "destruicaocolerica",
@@ -1224,6 +1341,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d6",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo + Amedrontado",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "destruicaodivina",
@@ -1247,6 +1366,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d8",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "destruicaoestrondosa",
@@ -1270,6 +1391,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d6",
     danoBaseTipo: "Trovejante",
     ataqueOuSalvaguarda: "Salvaguarda de Força",
+    salvaguardaFalha: "Dano completo + Caído",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "detectarmagia",
@@ -1293,6 +1416,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "detectarvenenoedoenca",
@@ -1316,6 +1441,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "detectarobemeomal",
@@ -1339,6 +1466,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "discoflutuantedetenser",
@@ -1362,6 +1491,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "disfarcarse",
@@ -1385,6 +1516,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "duelocompelido",
@@ -1408,6 +1541,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "emaranhar",
@@ -1431,6 +1566,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Força",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "enfeiticarpessoa",
@@ -1454,6 +1591,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "escritailusoria",
@@ -1477,6 +1616,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "escudoarcano",
@@ -1500,6 +1641,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "escudodafe",
@@ -1523,6 +1666,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "facadegelo",
@@ -1546,6 +1691,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d6",
     danoBaseTipo: "Gélido",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "falarcomanimais",
@@ -1569,6 +1716,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     // Mesma magia de "Falar com Animais" (id "falarcomanimais"), mas
@@ -1599,6 +1748,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "favordivino",
@@ -1622,6 +1773,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d4",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "fogodasfadas",
@@ -1645,6 +1798,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "gargalhadanefastadetasha",
@@ -1668,6 +1823,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "golpeconstritor",
@@ -1691,6 +1848,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d6",
     danoBaseTipo: "Perfurante",
     ataqueOuSalvaguarda: "Salvaguarda de Força",
+    salvaguardaFalha: "Dano completo + Contido",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "graxa",
@@ -1714,6 +1873,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "heroismo",
@@ -1737,6 +1898,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "identificar",
@@ -1760,6 +1923,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "imagemsilenciosa",
@@ -1783,6 +1948,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "infligirferimentos",
@@ -1806,6 +1973,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d10",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "lequecromatico",
@@ -1829,6 +1998,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "marcadopredador",
@@ -1852,6 +2023,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d6",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "maosflamejantes",
@@ -1875,6 +2048,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d6",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "misseismagicos",
@@ -1898,6 +2073,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d4 + 1",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "nevoaobscurecente",
@@ -1921,6 +2098,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "ondatrovejante",
@@ -1944,6 +2123,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d8",
     danoBaseTipo: "Trovejante",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "orbecromatico",
@@ -1967,6 +2148,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d8",
     danoBaseTipo: "escolhido",
     ataqueOuSalvaguarda: "Ataque à Distância",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "palavracurativa",
@@ -1990,6 +2173,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "passoslargos",
@@ -2013,6 +2198,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "perdicao",
@@ -2036,6 +2223,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "protecaocontraobemeomal",
@@ -2059,6 +2248,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "purificaralimentosebebidas",
@@ -2082,6 +2273,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "quedasuave",
@@ -2105,6 +2298,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "raioguia",
@@ -2128,6 +2323,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d6",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: "Ataque à Distância",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "raionauseante",
@@ -2151,6 +2348,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d8",
     danoBaseTipo: "Veneno",
     ataqueOuSalvaguarda: "Ataque à Distância",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "raiodebruxa",
@@ -2174,6 +2373,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d12",
     danoBaseTipo: "Elétrico",
     ataqueOuSalvaguarda: "Ataque à Distância",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "repreensaodiabolica",
@@ -2197,6 +2398,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d10",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "retiradaacelerada",
@@ -2220,6 +2423,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "salto",
@@ -2243,6 +2448,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "santuario",
@@ -2266,6 +2473,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "saraivadadeespinhos",
@@ -2289,6 +2498,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d10",
     danoBaseTipo: "Perfurante",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "servoinvisivel",
@@ -2312,6 +2523,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "sono",
@@ -2335,6 +2548,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "sussurrosdissonantes",
@@ -2358,6 +2573,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d6",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "vitalidadevazia",
@@ -2381,6 +2598,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "acalmaremocoes",
@@ -2404,6 +2623,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "alterarse",
@@ -2427,6 +2648,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "aprimoraratributo",
@@ -2450,6 +2673,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "armaespiritual",
@@ -2473,6 +2698,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d8",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: "Ataque Corpo a Corpo",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "armamagica",
@@ -2496,6 +2723,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "arrombar",
@@ -2519,6 +2748,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "augurio",
@@ -2542,6 +2773,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "aumentarreduzir",
@@ -2565,6 +2798,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "auramagicadenystul",
@@ -2588,6 +2823,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "auxilio",
@@ -2611,6 +2848,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "bocaencantada",
@@ -2634,6 +2873,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "cativar",
@@ -2657,6 +2898,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "cegueirasurdez",
@@ -2680,6 +2923,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "chamacontinua",
@@ -2703,6 +2948,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "convocarmontaria",
@@ -2726,6 +2973,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "cordaextradimensional",
@@ -2749,6 +2998,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "cordaodeflechas",
@@ -2772,6 +3023,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d4",
     danoBaseTipo: "Perfurante",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "coroadaloucura",
@@ -2795,6 +3048,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "crescerespinhos",
@@ -2818,6 +3073,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d4",
     danoBaseTipo: "Perfurante",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "despedacar",
@@ -2841,6 +3098,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d8",
     danoBaseTipo: "Trovejante",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "destruicaoradiante",
@@ -2864,6 +3123,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d6",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "detectarpensamentos",
@@ -2887,6 +3148,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "encontrararmadilhas",
@@ -2910,6 +3173,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "escaladadearanha",
@@ -2933,6 +3198,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "escuridao",
@@ -2956,6 +3223,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "esferaflamejante",
@@ -2979,6 +3248,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d6",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "espinhomental",
@@ -3002,6 +3273,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d8",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo + Invisível",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "esquentarmetal",
@@ -3025,6 +3298,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d8",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo (mantém o item, com Desvantagem)",
+    salvaguardaSucesso: "Dano completo (pode soltar o item, sem penalidade)",
   },
   {
     id: "flechaacidademelf",
@@ -3048,6 +3323,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d4",
     danoBaseTipo: "Ácido",
     ataqueOuSalvaguarda: "Ataque à Distância",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "forcaespectral",
@@ -3071,6 +3348,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d8",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Salvaguarda de Inteligência",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "invisibilidade",
@@ -3094,6 +3373,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocarfera",
@@ -3117,6 +3398,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "levitacao",
@@ -3140,6 +3423,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "localizaranimaisouplantas",
@@ -3163,6 +3448,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "localizarobjeto",
@@ -3186,6 +3473,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "lufadadevento",
@@ -3209,6 +3498,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Força",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "laminaflamejante",
@@ -3232,6 +3523,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d6",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Ataque Corpo a Corpo",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "mensageiroanimal",
@@ -3255,6 +3548,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "nuvemdeadagas",
@@ -3278,6 +3573,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d4",
     danoBaseTipo: "Cortante",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "oracaodecura",
@@ -3301,6 +3598,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "paralisarpessoa",
@@ -3324,6 +3623,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "passonebuloso",
@@ -3347,6 +3648,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "passosemrastro",
@@ -3370,6 +3673,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "pelecasca",
@@ -3393,6 +3698,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "protecaocontraveneno",
@@ -3416,6 +3723,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "raioardente",
@@ -3439,6 +3748,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d6",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Ataque à Distância",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "raiolunar",
@@ -3462,6 +3773,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d10",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "raiodoenfraquecimento",
@@ -3485,6 +3798,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "reflexos",
@@ -3508,6 +3823,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "repousotranquilo",
@@ -3531,6 +3848,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "restauracaomenor",
@@ -3554,6 +3873,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "sentidoferal",
@@ -3577,6 +3898,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "silencio",
@@ -3600,6 +3923,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "soprodedragao",
@@ -3623,6 +3948,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d6",
     danoBaseTipo: "escolhido",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "sugestao",
@@ -3646,6 +3973,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "teia",
@@ -3669,6 +3998,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d4",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo + Contido",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "trancaarcana",
@@ -3692,6 +4023,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "turvar",
@@ -3715,6 +4048,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "veroinvisivel",
@@ -3738,6 +4073,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "vigorarcano",
@@ -3761,6 +4098,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "visaonoescuro",
@@ -3784,6 +4123,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "vinculodeprotecao",
@@ -3807,6 +4148,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "zonadaverdade",
@@ -3830,6 +4173,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "armaelemental",
@@ -3853,6 +4198,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "auradevitalidade",
@@ -3876,6 +4223,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "boladefogo",
@@ -3899,6 +4248,8 @@ export const magias: Magia[] = [
     danoBaseDado: "8d6",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "caminharsobreasaguas",
@@ -3922,6 +4273,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "celeridade",
@@ -3945,6 +4298,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "clarividencia",
@@ -3968,6 +4323,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "contramagia",
@@ -3991,6 +4348,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "convocarfeerico",
@@ -4014,6 +4373,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "convocarrelampagos",
@@ -4037,6 +4398,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d10",
     danoBaseTipo: "Elétrico",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "crescimentodeplantas",
@@ -4060,6 +4423,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "criarcomidaeagua",
@@ -4083,6 +4448,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "circulomagico",
@@ -4106,6 +4473,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "destruicaocegante",
@@ -4129,6 +4498,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d8",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo + Cego",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "dissiparmagia",
@@ -4152,6 +4523,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "falarcommortos",
@@ -4175,6 +4548,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "falarcomplantas",
@@ -4198,6 +4573,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "flecharelampago",
@@ -4221,6 +4598,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d8",
     danoBaseTipo: "Elétrico",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "fomedehadar",
@@ -4244,6 +4623,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d6",
     danoBaseTipo: "Gélido",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo + Cego",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "formagasosa",
@@ -4267,6 +4648,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "glifodeprotecao",
@@ -4290,6 +4673,8 @@ export const magias: Magia[] = [
     danoBaseDado: "5d8",
     danoBaseTipo: "Ácido",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "guardioesespirituais",
@@ -4313,6 +4698,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d8",
     danoBaseTipo: "escolhido",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "imagemmaior",
@@ -4336,6 +4723,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "indetectavel",
@@ -4359,6 +4748,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocaranimais",
@@ -4382,6 +4773,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d10",
     danoBaseTipo: "Cortante",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "invocarbarragem",
@@ -4405,6 +4798,8 @@ export const magias: Magia[] = [
     danoBaseDado: "5d8",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo + Incapacitado",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "invocarmortovivo",
@@ -4428,6 +4823,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "lentidao",
@@ -4451,6 +4848,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "luzdodia",
@@ -4474,6 +4873,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "linguas",
@@ -4497,6 +4898,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "mantodocruzado",
@@ -4520,6 +4923,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d4",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "medo",
@@ -4543,6 +4948,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "mesclarseasrochas",
@@ -4566,6 +4973,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "montariafantasmagorica",
@@ -4589,6 +4998,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "muralhadevento",
@@ -4612,6 +5023,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d8",
     danoBaseTipo: "Contundente",
     ataqueOuSalvaguarda: "Salvaguarda de Força",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "nevasca",
@@ -4635,6 +5048,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "nuvemfetida",
@@ -4658,6 +5073,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "padraohipnotico",
@@ -4681,6 +5098,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "palavracurativaemmassa",
@@ -4704,6 +5123,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "pequenorefugiodeleomund",
@@ -4727,6 +5148,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "piscar",
@@ -4750,6 +5173,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "protecaocontraenergia",
@@ -4773,6 +5198,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "relampago",
@@ -4796,6 +5223,8 @@ export const magias: Magia[] = [
     danoBaseDado: "8d6",
     danoBaseTipo: "Elétrico",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "remeter",
@@ -4819,6 +5248,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "removermaldicao",
@@ -4842,6 +5273,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "respirarnaagua",
@@ -4865,6 +5298,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "revivificar",
@@ -4888,6 +5323,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "rogarmaldicao",
@@ -4911,6 +5348,8 @@ export const magias: Magia[] = [
     danoBaseDado: "1d8",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "simularmorte",
@@ -4934,6 +5373,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "sinaldeesperanca",
@@ -4957,6 +5398,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "toquevampirico",
@@ -4980,6 +5423,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d6",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Ataque Corpo a Corpo",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "voo",
@@ -5003,6 +5448,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "arcasecretadeleomund",
@@ -5026,6 +5473,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "assassinofantasmagorico",
@@ -5049,6 +5498,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d10",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "auradepureza",
@@ -5072,6 +5523,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "auradevida",
@@ -5095,6 +5548,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "banimento",
@@ -5118,6 +5573,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "compulsao",
@@ -5141,6 +5598,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "confusao",
@@ -5164,6 +5623,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "controlaragua",
@@ -5187,6 +5648,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d8",
     danoBaseTipo: "Contundente",
     ataqueOuSalvaguarda: "Salvaguarda de Força",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "convocarelemental",
@@ -5210,6 +5673,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "caofieldemordenkainen",
@@ -5233,6 +5698,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d8",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "defensordafe",
@@ -5256,6 +5723,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "destruicaoatordoante",
@@ -5279,6 +5748,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d6",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo + Atordoado",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "dominarfera",
@@ -5302,6 +5773,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "enfeiticarmonstro",
@@ -5325,6 +5798,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "escudoardente",
@@ -5348,6 +5823,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d8",
     danoBaseTipo: "escolhido",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "esferaresilientedeotiluke",
@@ -5371,6 +5848,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "esferavitriolica",
@@ -5394,6 +5873,8 @@ export const magias: Magia[] = [
     danoBaseDado: "10d4",
     danoBaseTipo: "Ácido",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "fabricar",
@@ -5417,6 +5898,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "fontedoluar",
@@ -5440,6 +5923,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d6",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo + Cego",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "insetogigante",
@@ -5463,6 +5948,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invisibilidademaior",
@@ -5486,6 +5973,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocaraberracao",
@@ -5509,6 +5998,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocarconstructo",
@@ -5532,6 +6023,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocarelementaismenores",
@@ -5555,6 +6048,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocarseresdafloresta",
@@ -5578,6 +6073,8 @@ export const magias: Magia[] = [
     danoBaseDado: "5d8",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "localizarcriatura",
@@ -5601,6 +6098,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "malogro",
@@ -5624,6 +6123,8 @@ export const magias: Magia[] = [
     danoBaseDado: "8d8",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "moldarrochas",
@@ -5647,6 +6148,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "movimentacaolivre",
@@ -5670,6 +6173,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "muralhadefogo",
@@ -5693,6 +6198,8 @@ export const magias: Magia[] = [
     danoBaseDado: "5d8",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "olhoarcano",
@@ -5716,6 +6223,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "pelerocha",
@@ -5739,6 +6248,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "polimorfia",
@@ -5762,6 +6273,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "portadimensional",
@@ -5785,6 +6298,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d6",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "pressagio",
@@ -5808,6 +6323,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "protecaocontraamorte",
@@ -5831,6 +6348,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "santuarioparticulardemordenkainen",
@@ -5854,6 +6373,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "tempestadeglacial",
@@ -5877,6 +6398,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d10",
     danoBaseTipo: "Contundente",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "tentaculosnegrosdeevard",
@@ -5900,6 +6423,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d6",
     danoBaseTipo: "Contundente",
     ataqueOuSalvaguarda: "Salvaguarda de Força",
+    salvaguardaFalha: "Dano completo + Contido",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "terrenoalucinatorio",
@@ -5923,6 +6448,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "vinhaagarradora",
@@ -5946,6 +6473,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d8",
     danoBaseTipo: "Contundente",
     ataqueOuSalvaguarda: "Ataque Corpo a Corpo",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "aljavaveloz",
@@ -5969,6 +6498,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "animarobjetos",
@@ -5992,6 +6523,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "colunadechamas",
@@ -6015,6 +6548,8 @@ export const magias: Magia[] = [
     danoBaseDado: "5d6",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "comunhao",
@@ -6038,6 +6573,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "comunhaocomanatureza",
@@ -6061,6 +6598,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "conedefrio",
@@ -6084,6 +6623,8 @@ export const magias: Magia[] = [
     danoBaseDado: "8d8",
     danoBaseTipo: "Gélido",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "consagrar",
@@ -6107,6 +6648,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "contatoextraplanar",
@@ -6130,6 +6673,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Inteligência",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "contagio",
@@ -6153,6 +6698,8 @@ export const magias: Magia[] = [
     danoBaseDado: "11d8",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo + Envenenado",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "convocarcelestial",
@@ -6176,6 +6723,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "criarpassagem",
@@ -6199,6 +6748,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "criacao",
@@ -6222,6 +6773,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "curarferimentosemmassa",
@@ -6245,6 +6798,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "circulodepoder",
@@ -6268,6 +6823,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "circulodeteleporte",
@@ -6291,6 +6848,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "cupulaantivida",
@@ -6314,6 +6873,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "despertar",
@@ -6337,6 +6898,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "despistar",
@@ -6360,6 +6923,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "destruicaobanidora",
@@ -6383,6 +6948,8 @@ export const magias: Magia[] = [
     danoBaseDado: "5d10",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: "Dano completo + Incapacitado",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "dissiparobemeomal",
@@ -6406,6 +6973,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "dominarpessoa",
@@ -6429,6 +6998,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "estaticasinaptica",
@@ -6452,6 +7023,8 @@ export const magias: Magia[] = [
     danoBaseDado: "8d6",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Salvaguarda de Inteligência",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "golpedearco",
@@ -6475,6 +7048,8 @@ export const magias: Magia[] = [
     danoBaseDado: "6d10",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: "Ataque Corpo a Corpo",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocardragao",
@@ -6498,6 +7073,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocarelemental",
@@ -6521,6 +7098,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocarsaraivada",
@@ -6544,6 +7123,8 @@ export const magias: Magia[] = [
     danoBaseDado: "8d8",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "lendasehistorias",
@@ -6567,6 +7148,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "ligacaotelepaticaderary",
@@ -6590,6 +7173,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "missao",
@@ -6613,6 +7198,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "modificarmemoria",
@@ -6636,6 +7223,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "muralhadeenergia",
@@ -6659,6 +7248,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "muralhadepedra",
@@ -6682,6 +7273,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "maodebigby",
@@ -6705,6 +7298,8 @@ export const magias: Magia[] = [
     danoBaseDado: "5d8",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: "Ataque Corpo a Corpo",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "nevoamortal",
@@ -6728,6 +7323,8 @@ export const magias: Magia[] = [
     danoBaseDado: "5d8",
     danoBaseTipo: "Veneno",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "ondadestrutiva",
@@ -6751,6 +7348,8 @@ export const magias: Magia[] = [
     danoBaseDado: "5d6",
     danoBaseTipo: "Trovejante",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo + Caído",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "paralisarmonstro",
@@ -6774,6 +7373,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "passoarboreo",
@@ -6797,6 +7398,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "pragadeinsetos",
@@ -6820,6 +7423,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d10",
     danoBaseTipo: "Perfurante",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "presencaregiadeyolande",
@@ -6843,6 +7448,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d6",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo + Caído",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "reencarnar",
@@ -6866,6 +7473,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "restauracaomaior",
@@ -6889,6 +7498,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "reviverosmortos",
@@ -6912,6 +7523,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "similaridade",
@@ -6935,6 +7548,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "sonho",
@@ -6958,6 +7573,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d6",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "telecinese",
@@ -6981,6 +7598,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Força",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "tempestaderadiantedejallarzi",
@@ -7004,6 +7623,8 @@ export const magias: Magia[] = [
     danoBaseDado: "2d10",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "videncia",
@@ -7027,6 +7648,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "ancoraplanar",
@@ -7050,6 +7673,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "aliadoextraplanar",
@@ -7073,6 +7698,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "banquetedeherois",
@@ -7096,6 +7723,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "barreiradelaminas",
@@ -7119,6 +7748,8 @@ export const magias: Magia[] = [
     danoBaseDado: "6d10",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "caldeiraoborbulhantedetasha",
@@ -7142,6 +7773,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "caminharnovento",
@@ -7165,6 +7798,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "contingencia",
@@ -7188,6 +7823,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "correntederelampagos",
@@ -7211,6 +7848,8 @@ export const magias: Magia[] = [
     danoBaseDado: "10d8",
     danoBaseTipo: "Elétrico",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "criarmortosvivos",
@@ -7234,6 +7873,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "curacompleta",
@@ -7257,6 +7898,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "circulodamorte",
@@ -7280,6 +7923,8 @@ export const magias: Magia[] = [
     danoBaseDado: "8d8",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "dancairresistiveldeotto",
@@ -7303,6 +7948,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "decarneparapedra",
@@ -7326,6 +7973,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "desintegrar",
@@ -7349,6 +7998,8 @@ export const magias: Magia[] = [
     danoBaseDado: "10d6 + 40",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Nenhum efeito",
   },
   {
     id: "encontrarocaminho",
@@ -7372,6 +8023,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "esferacongelantedeotiluke",
@@ -7395,6 +8048,8 @@ export const magias: Magia[] = [
     danoBaseDado: "10d6",
     danoBaseTipo: "Gélido",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo + Contido",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "globodeinvulnerabilidade",
@@ -7418,6 +8073,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "ilusaoprogramada",
@@ -7441,6 +8098,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocarfeerico",
@@ -7464,6 +8123,8 @@ export const magias: Magia[] = [
     danoBaseDado: "3d12",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Ataque Corpo a Corpo",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocarinfero",
@@ -7487,6 +8148,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocacaoinstantaneadedrawmij",
@@ -7510,6 +8173,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "mauolhado",
@@ -7533,6 +8198,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "molestia",
@@ -7556,6 +8223,8 @@ export const magias: Magia[] = [
     danoBaseDado: "14d6",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "moverterra",
@@ -7579,6 +8248,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "muralhadeespinhos",
@@ -7602,6 +8273,8 @@ export const magias: Magia[] = [
     danoBaseDado: "7d8",
     danoBaseTipo: "Perfurante",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "muralhadegelo",
@@ -7625,6 +8298,8 @@ export const magias: Magia[] = [
     danoBaseDado: "10d6",
     danoBaseTipo: "Gélido",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "palavraderegresso",
@@ -7648,6 +8323,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "portaisarcanos",
@@ -7671,6 +8348,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "proibicao",
@@ -7694,6 +8373,8 @@ export const magias: Magia[] = [
     danoBaseDado: "5d10",
     danoBaseTipo: "escolhido",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "protegerfortaleza",
@@ -7717,6 +8398,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "raiosolar",
@@ -7740,6 +8423,8 @@ export const magias: Magia[] = [
     danoBaseDado: "6d8",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo + Cego",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "receptaculoarcano",
@@ -7763,6 +8448,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "sugestaoemmassa",
@@ -7786,6 +8473,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "transporteviaplantas",
@@ -7809,6 +8498,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "visaodaverdade",
@@ -7832,6 +8523,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "boladefogoadiavel",
@@ -7855,6 +8548,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "carceredeenergia",
@@ -7878,6 +8573,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "dedodamorte",
@@ -7901,6 +8598,8 @@ export const magias: Magia[] = [
     danoBaseDado: "7d8 + 30",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "espadademordenkainen",
@@ -7924,6 +8623,8 @@ export const magias: Magia[] = [
     danoBaseDado: "4d12",
     danoBaseTipo: "Energético",
     ataqueOuSalvaguarda: "Ataque Corpo a Corpo",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "formaeterea",
@@ -7947,6 +8648,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "inverteragravidade",
@@ -7970,6 +8673,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "invocarcelestial",
@@ -7993,6 +8698,8 @@ export const magias: Magia[] = [
     danoBaseDado: "6d12",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "mansaomagnificademordenkainen",
@@ -8016,6 +8723,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "miragemarcana",
@@ -8039,6 +8748,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "palavrasagrada",
@@ -8062,6 +8773,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Carisma",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "palavradepoderfortificar",
@@ -8085,6 +8798,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "projetarimagem",
@@ -8108,6 +8823,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "rajadaprismatica",
@@ -8131,6 +8848,8 @@ export const magias: Magia[] = [
     danoBaseDado: "12d6",
     danoBaseTipo: "aleatório",
     ataqueOuSalvaguarda: "aleatório",
+    salvaguardaFalha: "Dano completo + Contido",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "refugiar",
@@ -8154,6 +8873,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "regeneracao",
@@ -8177,6 +8898,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "ressurreicao",
@@ -8200,6 +8923,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "simulacro",
@@ -8223,6 +8948,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "simbolo",
@@ -8246,6 +8973,8 @@ export const magias: Magia[] = [
     danoBaseDado: "10d10",
     danoBaseTipo: "Necrótico",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo + Atordoado",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "teleporte",
@@ -8269,6 +8998,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "tempestadedefogo",
@@ -8292,6 +9023,8 @@ export const magias: Magia[] = [
     danoBaseDado: "7d10",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "transicaoplanar",
@@ -8315,6 +9048,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "antipatiasimpatia",
@@ -8338,6 +9073,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "aurasagrada",
@@ -8361,6 +9098,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "campoantimagia",
@@ -8384,6 +9123,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "clone",
@@ -8407,6 +9148,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "controlaroclima",
@@ -8430,6 +9173,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "dominarmonstro",
@@ -8453,6 +9198,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "explosaosolar",
@@ -8476,6 +9223,8 @@ export const magias: Magia[] = [
     danoBaseDado: "12d6",
     danoBaseTipo: "Radiante",
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: "Dano completo + Cego",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "formasanimais",
@@ -8499,6 +9248,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "labirinto",
@@ -8522,6 +9273,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "limparamente",
@@ -8545,6 +9298,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "loquacidade",
@@ -8568,6 +9323,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "nuvemincendiaria",
@@ -8591,6 +9348,8 @@ export const magias: Magia[] = [
     danoBaseDado: "10d8",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "palavradepoderatordoar",
@@ -8614,6 +9373,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Constituição",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "semiplano",
@@ -8637,6 +9398,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "suplicio",
@@ -8660,6 +9423,8 @@ export const magias: Magia[] = [
     danoBaseDado: "10d12",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Salvaguarda de Inteligência",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "telepatia",
@@ -8683,6 +9448,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "terremoto",
@@ -8706,6 +9473,8 @@ export const magias: Magia[] = [
     danoBaseDado: "12d6",
     danoBaseTipo: "Contundente",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo + Caído",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "tsunami",
@@ -8729,6 +9498,8 @@ export const magias: Magia[] = [
     danoBaseDado: "6d10",
     danoBaseTipo: "Contundente",
     ataqueOuSalvaguarda: "Salvaguarda de Força",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "aprisionamento",
@@ -8752,6 +9523,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "chuvademeteoros",
@@ -8775,6 +9548,8 @@ export const magias: Magia[] = [
     danoBaseDado: "20d6",
     danoBaseTipo: "Ígneo",
     ataqueOuSalvaguarda: "Salvaguarda de Destreza",
+    salvaguardaFalha: "Dano completo",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "curacompletaemmassa",
@@ -8798,6 +9573,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "desejo",
@@ -8821,6 +9598,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "encarnacaofantasmagorica",
@@ -8844,6 +9623,8 @@ export const magias: Magia[] = [
     danoBaseDado: "10d10",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: "Dano completo + Amedrontado",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "metamorfose",
@@ -8867,6 +9648,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "muralhaprismatica",
@@ -8890,6 +9673,8 @@ export const magias: Magia[] = [
     danoBaseDado: "12d6",
     danoBaseTipo: "aleatório",
     ataqueOuSalvaguarda: "aleatório",
+    salvaguardaFalha: "Dano completo + Cego",
+    salvaguardaSucesso: "Metade do dano",
   },
   {
     id: "palavradepodermatar",
@@ -8913,6 +9698,8 @@ export const magias: Magia[] = [
     danoBaseDado: "12d12",
     danoBaseTipo: "Psíquico",
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "palavradepodersalvar",
@@ -8936,6 +9723,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "pararotempo",
@@ -8959,6 +9748,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "polimorfiatotal",
@@ -8982,6 +9773,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: "Salvaguarda de Sabedoria",
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "portal",
@@ -9005,6 +9798,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "projecaoastral",
@@ -9028,6 +9823,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "ressurreicaoverdadeira",
@@ -9051,6 +9848,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "sextosentido",
@@ -9074,6 +9873,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
   {
     id: "tempestadedavinganca",
@@ -9097,6 +9898,8 @@ export const magias: Magia[] = [
     danoBaseDado: null,
     danoBaseTipo: null,
     ataqueOuSalvaguarda: null,
+    salvaguardaFalha: null,
+    salvaguardaSucesso: null,
   },
 ];
 

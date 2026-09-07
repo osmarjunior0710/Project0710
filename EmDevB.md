@@ -147,9 +147,53 @@ Jogador, "A a I" e "I a Z" — juntos cobrem as 390 magias).
       upcast, Bola de Fogo com/sem upcast aplicado, Danação/Hex com
       upcast "outro" com/sem aviso). `npx tsc -b`, `npm test` (227
       passando) e `npm run build` OK.
-- [ ] **5. UI na Ficha** (aba Magias, ao escolher círculo pra
-      conjurar) mostrando o total de dados antes de confirmar e
-      disparando a rolagem via `RollContext`. **Perguntar ao Osmar
-      onde fica e como o jogador ativa antes de codar** (regra do
-      `LICOES-RAPIDAS.md`) — ainda não perguntado, fazer antes de
-      começar este item.
+- [x] **5.0 Pergunta feita — respondida.** O Osmar confirmou: 2 pontos
+      de acesso já existentes (aba Magias — usar direto da lista; aba
+      Combate — Ação/Ação Bônus/Reação), ambos precisam dos MESMOS 2
+      modais novos:
+  - **Modal de Ataque** (magia tipo Raio Místico — rola ataque à
+        distância, se bate a CA rola dano). Achado explorando o código
+        antes de propor: hoje isso é MENOS pronto do que parece — nem
+        arma nem magia rolam CA automaticamente (o app nunca modela CA
+        do inimigo, o jogador decide na mesa se acertou, igual sempre
+        foi), mas magia de ataque hoje só rola o d20 e manda "veja a
+        descrição pro dano" — nem chega a oferecer o botão "Rolar
+        Dano" que arma já tem. Este modal fecha esse gap, reaproveitando
+        100% o padrão de arma (`DanoPendente` + botão "🎲 Rolar Dano").
+  - **Modal de Salvaguarda** (novo) — mostra CD + atributo (de
+        `ataqueOuSalvaguarda`) + texto de sucesso/falha (separados,
+        formato padronizado tipo `AtaqueDeSoproModal`/
+        `LancarNoInfernoModal` — popup pequeno sem estado próprio,
+        reaproveitando `TrocarArmaMaestria.module.css`) + botão "Rolar
+        Dano" (sempre dano cheio, jogador ajusta na mesa se soube que
+        o alvo passou — mesma filosofia do Ataque de Sopro, não tenta
+        rastrear sucesso/falha sozinho).
+- [x] **5.1 Extrair `Salvaguarda_Falha`/`Salvaguarda_Sucesso` — FEITA.**
+      Texto curto padronizado (Osmar escolheu esse formato, não
+      reaproveitar `descricaoCurta` como estava) pras 85 magias que são
+      de salvaguarda E têm dano — reaproveita o mesmo corpus de
+      parágrafo do PDF já extraído (sem reler os livros). Categorias:
+      "Dano completo"/"Metade do dano" (padrão clássico de resistência,
+      57 magias), "Dano completo"/"Nenhum efeito" (livro nunca
+      menciona metade, 27 magias — incluindo "Destruição *", a família
+      de smites do Guardião, onde o dano acontece no acerto de arma e
+      a salvaguarda só decide se uma condição continua), "Esquentar
+      Metal" com texto próprio (dano incondicional, salvaguarda só
+      decide se solta o item). Quando o livro menciona uma condição
+      junto do dano na falha, ela entra no texto (ex.: "Dano completo +
+      Cego", 23 magias). 2 imprecisões conhecidas registradas em
+      `PENDENCIAS.md` (Rogar Maldição — dano é futuro, não imediato;
+      Rajada/Muralha Prismática — texto aproximado, efeito real varia
+      por raio sorteado). Novas colunas na planilha
+      (`Salvaguarda_Falha`/`Salvaguarda_Sucesso`) + campos no `.ts`
+      (`salvaguardaFalha`/`salvaguardaSucesso`), preenchidos por
+      `nome` igual todo o resto — fácil de corrigir depois (pedido do
+      Osmar). `npx tsc -b`, `npm test` (227 passando) e `npm run
+      build` OK.
+- [ ] **5.2 Modal de Ataque** — wiring em MagiasTab/AcaoPanelContent/
+      ReacaoPanelContent: depois do d20 de ataque de magia, oferecer
+      "🎲 Rolar Dano" via `calcularDanoMagia`, igual arma já faz hoje.
+- [ ] **5.3 Modal de Salvaguarda** — componente novo
+      (`MagiaSalvaguardaModal.tsx`, seguindo o padrão de
+      `AtaqueDeSoproModal`), CD calculada por `cdConjuracao` (já
+      existe), wiring nos mesmos 3 lugares do 5.2.
