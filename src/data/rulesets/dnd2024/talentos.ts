@@ -103,7 +103,15 @@ export type EfeitoMecanicoTalento =
    * Armas Marciais) — soma o Bônus de Proficiência em ataques com
    * arma Marcial mesmo que a classe não seja proficiente sozinha. Ver
    * `core/proficienciaArma.ts` (`classeProficienteComArma`). */
-  | { tipo: 'proficiencia-armas-marciais' };
+  | { tipo: 'proficiencia-armas-marciais' }
+  /** Concede treinamento com 1+ categoria de Armadura/Escudo
+   * (Especialista em Armaduras Leves/Médias/Pesadas) — Leves concede
+   * `['Leve', 'Escudos']` junto (livro, p.205); Médias/Pesadas só a
+   * própria categoria. Mais de 1 talento pode contribuir categorias
+   * diferentes ao mesmo personagem — por isso `core/
+   * proficienciaArmadura.ts` (`classeProficienteComArmadura`) varre
+   * TODOS os talentos com esse tipo, nunca só o primeiro achado. */
+  | { tipo: 'proficiencia-armadura'; categorias: ('Leve' | 'Média' | 'Pesada' | 'Escudos')[] };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -447,6 +455,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'DES'], maximo: 20 },
+    efeitoMecanico: { tipo: 'proficiencia-armadura', categorias: ['Leve', 'Escudos'] },
     beneficios: "Treinamento com Armadura Leve e Escudos.",
     pagina: 205,
     fonte: "PHB 2024",
@@ -458,6 +467,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Armadura Leve" },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'DES'], maximo: 20 },
+    efeitoMecanico: { tipo: 'proficiencia-armadura', categorias: ['Média'] },
     beneficios: "Treinamento com Armadura Média.",
     pagina: 205,
     fonte: "PHB 2024",
@@ -469,6 +479,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Armadura Média" },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'CON'], maximo: 20 },
+    efeitoMecanico: { tipo: 'proficiencia-armadura', categorias: ['Pesada'] },
     beneficios: "Treinamento com Armadura Pesada.",
     pagina: 206,
     fonte: "PHB 2024",

@@ -257,7 +257,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ...(origemPersonagem ? [origemPersonagem.talentoOrigemId] : []),
     ...(selecao.talentoEspecieEscolhido ? [selecao.talentoEspecieEscolhido] : []),
   ];
-  const ca = calcularCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos);
+  const ca = calcularCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos, classe);
   const iniciativa = calcularIniciativa(selecao, classe, personagem.nivel, talentosEfetivos);
   const percepcaoPassiva = calcularPercepcaoPassiva(selecao, personagem.nivel);
   const atributos = calcularAtributosFinais(selecao);
@@ -270,7 +270,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva);
   const explicacaoCapacidadeMaxima = explicarCapacidadeMaxima(selecao, formaGrandeAtiva);
   const explicacaoPv = explicarPvMaximo(selecao, personagem.pvMax);
-  const explicacaoCa = explicarCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos);
+  const explicacaoCa = explicarCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos, classe);
   const explicacaoIniciativa = explicarIniciativa(selecao, classe, personagem.nivel, talentosEfetivos);
   const explicacaoPercepcaoPassiva = explicarPercepcaoPassiva(selecao, personagem.nivel);
   const estiloDeLuta = estilosDeLuta.find((e) => e.nome === personagem.estiloDeLuta) ?? null;

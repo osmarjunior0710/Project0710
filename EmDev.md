@@ -126,8 +126,10 @@ Grupos propostos e aprovados pelo Osmar:
       `tsc -b`/`npm test` (226)/`npm run build` limpos (testes novos:
       Bardo com o talento soma Bônus de Proficiência numa Espada
       Longa, que sem o talento não somaria).
-- [ ] **B.3 — Bônus numérico direto**: Velocista (Deslocamento),
-      Líder Inspirador/Chef (PV temporário) — mesmo padrão de
+- [ ] **B.3 — Bônus numérico direto** (PAUSADO — ver Grupo C abaixo,
+      Osmar pediu pra resolver a penalidade de proficiência primeiro
+      antes de esquecer): Velocista (Deslocamento), Líder
+      Inspirador/Chef (PV temporário) — mesmo padrão de
       `bonus-pv-por-nivel`/`bonus-ca-com-armadura`.
 - [ ] **B.4 — Magia sempre-preparada**: Adepto Elemental, Atirador
       Arcano, Conjurador Ritualista, Telecinético, Telepático, Tocado
@@ -140,3 +142,55 @@ Grupos propostos e aprovados pelo Osmar:
   fica bloqueado no Backlog.md — depende de um motor de combate com
   tipo de dano/arma/posição que a Ficha ainda não modela (mesmo motivo
   já registrado pro Atacante Selvagem em Backlog.md).
+
+### C. Penalidades por falta de proficiência (Armadura/Escudo/Arma)
+
+Achado durante o B.2 (Especialista em Armaduras ficou sem consumidor)
+— o Osmar trouxe o SDD completo (`sdd-penalidade-proficiencia-
+equipamento.md`) e pediu pra resolver ANTES de continuar o B.3, pra
+não esquecer. Regra real (Cap. 6, "Treinamento com Armadura"/
+"Proficiência em Armas"): 3 penalidades independentes, nunca a mesma
+regra reaproveitada —
+- **Armadura** (Leve/Média/Pesada) sem treinamento: Desvantagem em
+  QUALQUER Teste de D20 de Força ou Destreza (testes, perícias,
+  iniciativa, ataques, salvaguardas) + não pode conjurar magias.
+- **Escudo** sem treinamento: só não soma o bônus de CA do escudo —
+  sem Desvantagem, sem trava de magia.
+- **Arma** sem proficiência: só não soma o Bônus de Proficiência no
+  ataque — já implementado (`classeProficienteComArma`), nada a fazer
+  aqui além de manter.
+
+Grupos aprovados pelo Osmar (do mais isolado pro mais espalhado):
+
+- [x] **C.1 — Motor de proficiência de Armadura/Escudo**: novo arquivo
+      `core/proficienciaArmadura.ts` (`classeProficienteComArmadura`),
+      mesmo padrão de `classeProficienteComArma`, lendo
+      `treinamentoArmadura` da planilha. Especialista em Armaduras
+      Leves/Médias/Pesadas ganharam `efeitoMecanico: 'proficiencia-
+      armadura'` (Leves concede `['Leve','Escudos']` junto, conforme o
+      livro) — fecha o item do Backlog.md aberto no B.2. Varre TODOS
+      os talentos do personagem (não só o primeiro achado), porque
+      2 talentos diferentes podem contribuir categorias diferentes ao
+      mesmo tempo. Verificado: `tsc -b`/`npm test` (234)/`npm run
+      build` limpos.
+- [x] **C.2 — CA sem bônus de escudo sem treinamento**:
+      `calcularCAEquipado`/`explicarCAEquipado` ganharam parâmetro
+      `classe` opcional — só somam `bonusEscudo` se
+      `classeProficienteComArmadura(classe, 'Escudos', talentos)` for
+      `true`; sem `classe` passada (chamadas antigas, ex. resumo do
+      wizard), comportamento antigo preservado. Popup do "ⓘ" mostra
+      "Escudo (sem treinamento) +0" quando aplicável. Verificado:
+      `tsc -b`/`npm test`/`npm run build` limpos + Playwright (Bardo
+      com Couro Batido + Escudo → CA 12, sem os +2 do escudo; popup
+      mostra a linha "sem treinamento").
+- [ ] **C.3 — Desvantagem em D20 de Força/Destreza sem treinamento de
+      armadura**: o pedaço mais espalhado — atributo FOR/DES, perícias
+      de FOR/DES, Iniciativa, ataques, salvaguardas. Precisa de um
+      sinal único ("armadura sem treinamento ativa") calculado 1x em
+      `FichaShell.tsx` e passado pra cada chamada de `rolarD20`
+      (parâmetro `vantagem: 'desvantagem'` já existe no RollContext,
+      só falta decidir quando forçar).
+- [ ] **C.4 — Bloqueio de conjuração com armadura errada**: trava
+      `conjurarMagia` (`AcaoPanelContent.tsx`, ponto único por onde
+      toda conjuração passa) quando a armadura sem treinamento
+      estiver equipada.

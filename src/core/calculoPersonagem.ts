@@ -15,6 +15,7 @@ import { modificador, valorFinalAtributo, type WizardSelection } from './persona
 import { resumoEquipado } from './equipamento';
 import { caracteristicaDesbloqueada } from './levelUp';
 import type { ItemMochila } from './mochila';
+import { classeProficienteComArmadura } from './proficienciaArmadura';
 
 const ATRIBUTO_POR_NOME_COMPLETO: Record<string, Atributo> = {
   Força: 'FOR',
@@ -207,11 +208,22 @@ function bonusCaFase4(
   return { defensivoBonus, tetoDesOverride: usaTetoMestre ? mestreArmadurasMedias.tetoDes : undefined };
 }
 
+/** `true` = soma o bônus de CA do escudo — só quando `classe` não é
+ * passada (chamadas antigas, ex.: resumo do wizard antes de terminar a
+ * criação) OU quando a classe realmente tem treinamento com Escudos
+ * (SDD "Penalidades por Falta de Proficiência" — sem isso, o número de
+ * CA não muda, só não soma o bônus do escudo). */
+function proficienteComEscudo(classe: Classe | null | undefined, talentosAtuais: string[] | undefined): boolean {
+  if (!classe) return true;
+  return classeProficienteComArmadura(classe, 'Escudos', talentosAtuais);
+}
+
 export function calcularCAEquipado(
   itensMochila: ItemMochila[],
   desValor: number,
   estiloDeLutaEscolhido?: string | null,
   talentosAtuais?: string[],
+  classe?: Classe | null,
 ): number {
   const desMod = modificador(desValor);
   const { armadura, escudo } = resumoEquipado(itensMochila);
@@ -219,7 +231,7 @@ export function calcularCAEquipado(
   const { defensivoBonus, tetoDesOverride } = bonusCaFase4(armaduraCatalogo, desValor, estiloDeLutaEscolhido, talentosAtuais);
   const base = armaduraCatalogo ? caPelaArmadura(armaduraCatalogo.classeArmadura, desMod, tetoDesOverride) : 10 + desMod;
   const escudoCatalogo = escudo ? armaduras.find((a) => a.nome === escudo.nome) : undefined;
-  const bonus = escudoCatalogo ? bonusEscudo(escudoCatalogo.classeArmadura) : 0;
+  const bonus = escudoCatalogo && proficienteComEscudo(classe, talentosAtuais) ? bonusEscudo(escudoCatalogo.classeArmadura) : 0;
   return base + bonus + defensivoBonus;
 }
 
@@ -229,12 +241,14 @@ export function explicarCAEquipado(
   desValor: number,
   estiloDeLutaEscolhido?: string | null,
   talentosAtuais?: string[],
+  classe?: Classe | null,
 ): ExplicacaoCalculo {
   const desMod = modificador(desValor);
   const { armadura, escudo } = resumoEquipado(itensMochila);
   const armaduraCatalogo = armadura ? armaduras.find((a) => a.nome === armadura.nome) : undefined;
   const escudoCatalogo = escudo ? armaduras.find((a) => a.nome === escudo.nome) : undefined;
-  const bonus = escudoCatalogo ? bonusEscudo(escudoCatalogo.classeArmadura) : 0;
+  const escudoProficiente = proficienteComEscudo(classe, talentosAtuais);
+  const bonus = escudoCatalogo && escudoProficiente ? bonusEscudo(escudoCatalogo.classeArmadura) : 0;
   const { defensivoBonus, tetoDesOverride } = bonusCaFase4(armaduraCatalogo, desValor, estiloDeLutaEscolhido, talentosAtuais);
 
   const linhas: LinhaExplicacao[] = [];
@@ -258,7 +272,10 @@ export function explicarCAEquipado(
     base = ca;
   }
   if (escudoCatalogo) {
-    linhas.push({ label: `${escudoCatalogo.nome} equipado`, valor: fmtMod(bonus) });
+    linhas.push({
+      label: escudoProficiente ? `${escudoCatalogo.nome} equipado` : `${escudoCatalogo.nome} (sem treinamento)`,
+      valor: escudoProficiente ? fmtMod(bonus) : '+0',
+    });
   }
   if (defensivoBonus > 0) {
     linhas.push({ label: 'Estilo de Luta: Defensivo', valor: fmtMod(defensivoBonus) });
