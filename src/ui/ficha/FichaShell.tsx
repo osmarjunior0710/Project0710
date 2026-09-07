@@ -56,6 +56,7 @@ import { magiasPactoDoInfero } from '../../core/magiasPactoDoInfero';
 import { truquesEspecie, magiasEspecie as magiasEspecieDoPersonagem } from '../../core/magiasEspecie';
 import { truquesMagiaIniciada, magiasMagiaIniciada } from '../../core/magiaTalentoOrigem';
 import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
+import { armaduraSemTreinamentoEquipada } from '../../core/proficienciaArmadura';
 import { useRoll } from '../roll/RollContext';
 import { sortearLevelUpRapido } from '../../core/levelUpAleatorio';
 import { espacosARecuperar } from '../../core/astuciaMagica';
@@ -78,6 +79,7 @@ import {
   numeroDeAtaques,
 } from '../../core/levelUp';
 import { estilosDeLuta } from '../../data/rulesets/dnd2024/estilosDeLuta';
+import { armaduras } from '../../data/rulesets/dnd2024/armaduras';
 import { origens } from '../../data/rulesets/dnd2024/origens';
 import { especies } from '../../data/rulesets/dnd2024/especies';
 import { magias, magiasDaClasse, type Magia } from '../../data/rulesets/dnd2024/magias';
@@ -257,7 +259,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ...(origemPersonagem ? [origemPersonagem.talentoOrigemId] : []),
     ...(selecao.talentoEspecieEscolhido ? [selecao.talentoEspecieEscolhido] : []),
   ];
-  const ca = calcularCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos);
+  const ca = calcularCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos, classe);
+  // Penalidade de proficiência de Armadura (SDD "Penalidades por Falta
+  // de Proficiência") — Desvantagem em D20 de Força/Destreza sempre
+  // que a armadura equipada (Leve/Média/Pesada) não tiver treinamento;
+  // consumido por AtributosTab (atributo/perícia/Iniciativa) e
+  // CombatTab/AcaoPanelContent (ataques, Iniciativa do painel).
+  const itemArmaduraEquipada = itensMochila.find((it) => it.slot === 'armadura');
+  const armaduraEquipadaCatalogo = itemArmaduraEquipada
+    ? armaduras.find((a) => a.nome === itemArmaduraEquipada.nome)
+    : undefined;
+  const desvantagemForcaDestreza = armaduraSemTreinamentoEquipada(classe, armaduraEquipadaCatalogo, talentosEfetivos);
   const iniciativa = calcularIniciativa(selecao, classe, personagem.nivel, talentosEfetivos);
   const percepcaoPassiva = calcularPercepcaoPassiva(selecao, personagem.nivel);
   const atributos = calcularAtributosFinais(selecao);
@@ -270,7 +282,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva);
   const explicacaoCapacidadeMaxima = explicarCapacidadeMaxima(selecao, formaGrandeAtiva);
   const explicacaoPv = explicarPvMaximo(selecao, personagem.pvMax);
-  const explicacaoCa = explicarCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos);
+  const explicacaoCa = explicarCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos, classe);
   const explicacaoIniciativa = explicarIniciativa(selecao, classe, personagem.nivel, talentosEfetivos);
   const explicacaoPercepcaoPassiva = explicarPercepcaoPassiva(selecao, personagem.nivel);
   const estiloDeLuta = estilosDeLuta.find((e) => e.nome === personagem.estiloDeLuta) ?? null;
@@ -439,6 +451,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         forMod,
         desMod,
         personagem.estiloDeLuta,
+        talentosEfetivos,
       )
     : null;
 
@@ -1119,6 +1132,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             explicacaoPercepcaoPassiva={explicacaoPercepcaoPassiva}
             atributos={atributos}
             pericias={pericias}
+            desvantagemForcaDestreza={desvantagemForcaDestreza}
             proficienciasFerramenta={proficienciasFerramenta}
             onDescansoLongo={descansoLongo}
             onDescansoCurto={descansoCurto}
@@ -1176,6 +1190,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             espacosGastosPorCirculo={espacosGastosPorCirculo}
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}
+            desvantagemForcaDestreza={desvantagemForcaDestreza}
             conjura={conjura}
             truquesAtuais={truquesAtuais}
             magiasPreparadasAtuais={magiasPreparadasAtuais}
@@ -1213,6 +1228,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         )}
         {tab === 'combat' && (
           <CombatTab
+            desvantagemForcaDestreza={desvantagemForcaDestreza}
             pvAtual={pvAtual}
             pvMax={personagem.pvMax}
             pvTemporario={pvTemporario}

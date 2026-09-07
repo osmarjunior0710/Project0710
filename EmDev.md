@@ -116,13 +116,26 @@ Grupos propostos e aprovados pelo Osmar:
       também. Verificado: `tsc -b`/`npm test` (223)/`npm run build`
       limpos (só texto, nada plugado em cálculo ainda — `[PH]`
       continua até B.4).
-- [ ] **B.2 — Proficiências simples**: Especialista em Armaduras
-      Leves/Médias/Pesadas, Treinamento com Armas Marciais —
-      reaproveita o padrão de leitura de talento já usado pra CA/
-      Iniciativa (`efeitoMecanicoDoTalento`).
-- [ ] **B.3 — Bônus numérico direto**: Velocista (Deslocamento),
-      Líder Inspirador/Chef (PV temporário) — mesmo padrão de
-      `bonus-pv-por-nivel`/`bonus-ca-com-armadura`.
+- [x] **B.2 — Proficiências simples**: escopo corrigido no caminho —
+      Especialista em Armaduras Leves/Médias/Pesadas não têm nada pra
+      calcular hoje (a Ficha não modela penalidade por armadura sem
+      treinamento em lugar nenhum), então foram pro Backlog.md em vez
+      de ganhar um `efeitoMecanico` de mentirinha. Só **Treinamento
+      com Armas Marciais** entrou: novo tipo
+      `proficiencia-armas-marciais`, lido em
+      `classeProficienteComArma` (`core/proficienciaArma.ts`) — arma
+      Marcial conta como proficiente mesmo se a classe só é Simples.
+      Propagado por `ataqueComArma`/`ataqueAtual`/
+      `ataqueBonusMaoSecundaria` até `FichaShell.tsx`. Verificado:
+      `tsc -b`/`npm test` (226)/`npm run build` limpos (testes novos:
+      Bardo com o talento soma Bônus de Proficiência numa Espada
+      Longa, que sem o talento não somaria).
+- [x] **B.3 — Bônus numérico direto** — Osmar decidiu NÃO implementar:
+      Velocista trava sem métrica de Deslocamento em lugar nenhum da
+      Ficha; Líder Inspirador/Chef travam em "vários aliados" (mesmo
+      motivo de Inspiração Heroica). Ficam só como texto (`[PH]`) —
+      cada jogador resolve PV Temporário/Deslocamento na própria ficha
+      depois de anunciar na mesa. Detalhe completo no Backlog.md.
 - [ ] **B.4 — Magia sempre-preparada**: Adepto Elemental, Atirador
       Arcano, Conjurador Ritualista, Telecinético, Telepático, Tocado
       pela Sombra/Fadas — reaproveita o padrão do Iniciado em Magia
@@ -134,3 +147,70 @@ Grupos propostos e aprovados pelo Osmar:
   fica bloqueado no Backlog.md — depende de um motor de combate com
   tipo de dano/arma/posição que a Ficha ainda não modela (mesmo motivo
   já registrado pro Atacante Selvagem em Backlog.md).
+
+### C. Penalidades por falta de proficiência (Armadura/Escudo/Arma)
+
+Achado durante o B.2 (Especialista em Armaduras ficou sem consumidor)
+— o Osmar trouxe o SDD completo (`sdd-penalidade-proficiencia-
+equipamento.md`) e pediu pra resolver ANTES de continuar o B.3, pra
+não esquecer. Regra real (Cap. 6, "Treinamento com Armadura"/
+"Proficiência em Armas"): 3 penalidades independentes, nunca a mesma
+regra reaproveitada —
+- **Armadura** (Leve/Média/Pesada) sem treinamento: Desvantagem em
+  QUALQUER Teste de D20 de Força ou Destreza (testes, perícias,
+  iniciativa, ataques, salvaguardas) + não pode conjurar magias.
+- **Escudo** sem treinamento: só não soma o bônus de CA do escudo —
+  sem Desvantagem, sem trava de magia.
+- **Arma** sem proficiência: só não soma o Bônus de Proficiência no
+  ataque — já implementado (`classeProficienteComArma`), nada a fazer
+  aqui além de manter.
+
+Grupos aprovados pelo Osmar (do mais isolado pro mais espalhado):
+
+- [x] **C.1 — Motor de proficiência de Armadura/Escudo**: novo arquivo
+      `core/proficienciaArmadura.ts` (`classeProficienteComArmadura`),
+      mesmo padrão de `classeProficienteComArma`, lendo
+      `treinamentoArmadura` da planilha. Especialista em Armaduras
+      Leves/Médias/Pesadas ganharam `efeitoMecanico: 'proficiencia-
+      armadura'` (Leves concede `['Leve','Escudos']` junto, conforme o
+      livro) — fecha o item do Backlog.md aberto no B.2. Varre TODOS
+      os talentos do personagem (não só o primeiro achado), porque
+      2 talentos diferentes podem contribuir categorias diferentes ao
+      mesmo tempo. Verificado: `tsc -b`/`npm test` (234)/`npm run
+      build` limpos.
+- [x] **C.2 — CA sem bônus de escudo sem treinamento**:
+      `calcularCAEquipado`/`explicarCAEquipado` ganharam parâmetro
+      `classe` opcional — só somam `bonusEscudo` se
+      `classeProficienteComArmadura(classe, 'Escudos', talentos)` for
+      `true`; sem `classe` passada (chamadas antigas, ex. resumo do
+      wizard), comportamento antigo preservado. Popup do "ⓘ" mostra
+      "Escudo (sem treinamento) +0" quando aplicável. Verificado:
+      `tsc -b`/`npm test`/`npm run build` limpos + Playwright (Bardo
+      com Couro Batido + Escudo → CA 12, sem os +2 do escudo; popup
+      mostra a linha "sem treinamento").
+- [x] **C.3 — Desvantagem em D20 de Força/Destreza sem treinamento de
+      armadura**: sinal único `desvantagemForcaDestreza` calculado 1x
+      em `FichaShell.tsx` (`armaduraSemTreinamentoEquipada`) e passado
+      pra `AtributosTab` (atributo FOR/DES, perícias de FOR/DES,
+      Iniciativa), `CombatTab` (Iniciativa do painel, ataque Mão
+      Secundária) e `AcaoPanelContent` (ataque principal) — cada
+      chamada de `rolarD20` correspondente ganha `vantagem:
+      'desvantagem'` condicional. Não fixa Vantagem/Desvantagem
+      escolhida manualmente — só força quando o jogador ainda não
+      escolheu nenhuma. Verificado: `tsc -b`/`npm test`/`npm run
+      build` limpos + Playwright (Bardo com Cota de Malha — FOR e
+      ataque com Espada Longa saem em Desvantagem automática; CAR
+      continua rolagem normal, com os botões de Vantagem/Desvantagem
+      livres pro jogador escolher).
+- [x] **C.4 — Bloqueio de conjuração com armadura errada**: trava
+      `conjurarMagia` em `AcaoPanelContent.tsx` (Ação) E
+      `ReacaoPanelContent.tsx` (Reação) — os 2 pontos únicos por onde
+      toda conjuração de combate passa — mais um reforço em
+      `MagiasTab.tsx` (`usarMagia`/`usarMagiaGratis`), que também
+      deixa conjurar direto fora do Combat. Linha "✨ Usar Magia" fica
+      acinzentada com aviso "Bloqueado — Armadura equipada sem
+      treinamento impede conjurar magias." Verificado: `tsc -b`/`npm
+      test`/`npm run build` limpos + Playwright (painel de Ação com
+      Cota de Malha equipada mostra a linha bloqueada).
+
+Grupo C fechado — volta o B.3 (pausado acima).

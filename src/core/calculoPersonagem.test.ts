@@ -19,6 +19,8 @@ import type { ItemMochila } from './mochila';
 
 const guerreiro = classes.find((c) => c.nome === 'Guerreiro');
 if (!guerreiro) throw new Error('Fixture "Guerreiro" não encontrada em data/rulesets/dnd2024/classes.ts');
+const bardo = classes.find((c) => c.nome === 'Bardo');
+if (!bardo) throw new Error('Fixture "Bardo" não encontrada em data/rulesets/dnd2024/classes.ts');
 
 describe('bonusProficiencia', () => {
   it('nível 1 é sempre +2 (regra oficial pra qualquer classe)', () => {
@@ -132,6 +134,26 @@ describe('calcularCAEquipado (Ficha, pós-criação)', () => {
   it('Mestre em Armaduras Médias não faz efeito se a Destreza for menor que 16', () => {
     const itens = [itemEquipado('Gibão de Peles', 'armadura')];
     expect(calcularCAEquipado(itens, 14, null, ['mestre-em-armaduras-medias'])).toBe(12 + 2); // continua no teto normal
+  });
+
+  it('sem `classe` passada (ex.: resumo do wizard): Escudo sempre soma, sem checar proficiência', () => {
+    const itens = [itemEquipado('Couro Batido', 'armadura'), itemEquipado('Escudo', 'escudo')];
+    expect(calcularCAEquipado(itens, 14)).toBe(12 + 2 + 2);
+  });
+
+  it('Bardo (sem treinamento com Escudos): CA não soma o bônus do Escudo', () => {
+    const itens = [itemEquipado('Couro Batido', 'armadura'), itemEquipado('Escudo', 'escudo')];
+    expect(calcularCAEquipado(itens, 14, null, [], bardo)).toBe(12 + 2); // sem os +2 do escudo
+  });
+
+  it('Bardo + Especialista em Armaduras Leves (concede Escudos também): volta a somar', () => {
+    const itens = [itemEquipado('Couro Batido', 'armadura'), itemEquipado('Escudo', 'escudo')];
+    expect(calcularCAEquipado(itens, 14, null, ['especialista-em-armaduras-leves'], bardo)).toBe(12 + 2 + 2);
+  });
+
+  it('Guerreiro (com treinamento com Escudos): CA soma o bônus normalmente', () => {
+    const itens = [itemEquipado('Couro Batido', 'armadura'), itemEquipado('Escudo', 'escudo')];
+    expect(calcularCAEquipado(itens, 14, null, [], guerreiro)).toBe(12 + 2 + 2);
   });
 });
 

@@ -30,4 +30,15 @@ describe('classeProficienteComArma', () => {
     const semEntrada = { ...classe('Guerreiro'), nome: 'Classe Inexistente' };
     expect(classeProficienteComArma(semEntrada, arma('Adaga'))).toBe(false);
   });
+
+  it('Treinamento com Armas Marciais: Bardo (só Simples) vira proficiente com arma Marcial', () => {
+    expect(classeProficienteComArma(classe('Bardo'), arma('Espada Longa'), ['treinamento-com-armas-marciais'])).toBe(
+      true,
+    );
+  });
+
+  it('Treinamento com Armas Marciais não afeta arma Simples nem some sem o talento', () => {
+    expect(classeProficienteComArma(classe('Bardo'), arma('Espada Longa'), [])).toBe(false);
+    expect(classeProficienteComArma(classe('Bardo'), arma('Adaga'), ['treinamento-com-armas-marciais'])).toBe(true);
+  });
 });

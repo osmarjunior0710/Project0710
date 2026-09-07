@@ -12,15 +12,23 @@
 import type { Arma } from '../data/rulesets/dnd2024/armas';
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { proficienciasArmaArmaduraClasse } from '../data/rulesets/dnd2024/proficienciasArmaArmaduraClasse';
+import { efeitoMecanicoDoTalento } from './calculoPersonagem';
 
-/** `true` se a classe é proficiente com a arma — lê o texto livre da
- * coluna "Proficiência com Armas" da planilha e resolve contra a
- * categoria/propriedades reais da arma. Cobre os padrões confirmados
- * até aqui: "Simples e Marciais" (tudo), "Simples" sozinho, e as 2
- * exceções por propriedade (Ladino: Acuidade OU Leve em qualquer
- * Marcial; Monge: Leve só em Marcial Corpo a Corpo). Sem entrada pra
- * classe = não proficiente (nunca assume). */
-export function classeProficienteComArma(classe: Classe, arma: Arma): boolean {
+/** `true` se a classe (ou um talento como Treinamento com Armas
+ * Marciais) torna o personagem proficiente com a arma — lê o texto
+ * livre da coluna "Proficiência com Armas" da planilha e resolve
+ * contra a categoria/propriedades reais da arma. Cobre os padrões
+ * confirmados até aqui: "Simples e Marciais" (tudo), "Simples"
+ * sozinho, e as 2 exceções por propriedade (Ladino: Acuidade OU Leve
+ * em qualquer Marcial; Monge: Leve só em Marcial Corpo a Corpo). Sem
+ * entrada de classe nem talento = não proficiente (nunca assume).
+ * `talentosAtuais` é opcional — chamadas que não têm o talento
+ * calculado ainda (ex.: telas que só mostram a classe) continuam
+ * funcionando, só sem essa fonte extra. */
+export function classeProficienteComArma(classe: Classe, arma: Arma, talentosAtuais?: string[]): boolean {
+  const marcial = arma.categoria.includes('Marciais');
+  if (marcial && efeitoMecanicoDoTalento(talentosAtuais, 'proficiencia-armas-marciais') !== null) return true;
+
   const entrada = proficienciasArmaArmaduraClasse.find((p) => p.classe === classe.nome);
   if (!entrada) return false;
   const texto = entrada.proficienciaArmas;
@@ -30,7 +38,6 @@ export function classeProficienteComArma(classe: Classe, arma: Arma): boolean {
   const simples = arma.categoria.includes('Simples');
   if (simples && texto.includes('Simples')) return true;
 
-  const marcial = arma.categoria.includes('Marciais');
   if (!marcial) return false;
 
   if (texto.includes('Acuidade') && arma.propriedades.includes('Acuidade')) return true;

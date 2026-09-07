@@ -84,3 +84,23 @@ não tem — registrado aqui pra não redescobrir do zero.
   "empurrar 1,5m ao acertar Desarmado" — não é isso, é um "ataque de
   investida" que vale pra qualquer arma corpo a corpo, com a escolha
   entre dano extra OU empurrão. Ver livro Cap. 5, p.201.
+
+## Talentos Gerais — B.3 decidido não implementar (2026-09)
+
+Osmar decidiu deixar esses 3 só como texto (`[PH]`) — cada jogador
+resolve o PV Temporário/Deslocamento na própria ficha depois de
+anunciar na mesa, em vez do app calcular.
+
+- **Velocista** (Cap. 5, p.208) — Deslocamento +3m. A Ficha não tem
+  campo de Deslocamento em lugar nenhum hoje (nem espécie define um
+  valor base) — não é só esse talento faltando, é a métrica inteira
+  que não existe ainda.
+- **Líder Inspirador** (p.206) — Atuação Encorajadora concede PV
+  Temporário a até 6 aliados ao completar Descanso Curto/Longo. Trava
+  dupla: sem conceito de "outros personagens da mesa" (mesmo motivo já
+  registrado em Inspiração Heroica) e sem campo de "atributo aumentado
+  por este talento" rastreado pro talento em si.
+- **Chef** (p.204) — Refeição Satisfatória (bônus de cura ligado a
+  gastar Dados de Vida em Descanso Curto, pra várias criaturas) e
+  Guloseimas Revigorantes (PV Temporário = Bônus de Proficiência,
+  Ação Bônus pra comer) — mesma trava de "vários aliados" acima.
