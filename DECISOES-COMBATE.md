@@ -365,3 +365,37 @@ Comparação exata (`===`) falha silenciosamente aqui — use
 `.endsWith(...)` ou `.includes(...)` pra detectar o nome do ataque
 dentro do label sempre que precisar comparar por nome de novo.
 
+## Magia/característica com múltiplos ataques discretos (feixes,
+## rajadas) — simplificada pra 1 ataque + N dados de dano
+
+**Problema:** algumas magias (Raio Místico) e, no futuro, talentos
+como Ataque Extra de arma já concedem N jogadas de ataque separadas
+por turno (RAW: cada feixe/ataque rola seu próprio d20, acerta ou erra
+independente). O app nunca modela a CA do inimigo (o jogador decide
+"acertei" sozinho, na mesa) — simular N ataques independentes exigiria
+rastrear resultado individual de cada um, sem ganho real pro jogador.
+
+**Decisão:** sempre que uma característica conceder múltiplos ataques
+que RAW seriam jogadas separadas, mas o app já trata "acertar" como
+decisão do jogador (não calculada), simplificar pra **1 rolagem de
+ataque única + N dados de dano somados numa rolagem só** — não simular
+N jogadas de ataque independentes. Reaproveita 100% o mecanismo que já
+existe pra "N cópias do mesmo dado de dano" (Aprimoramento de Truque,
+Upcast "dado-por-círculo") em vez de criar um sistema de "múltiplos
+ataques" novo. Primeiro caso: Raio Místico (Bruxo) — RAW cria 2/3/4
+feixes com jogada de ataque separada cada nos níveis 5/11/17;
+`magias.ts` marca `escalaTruqueTipo: "dado"` (mesmo campo do
+Aprimoramento de Truque comum) em vez de um campo próprio, porque o
+resultado numérico é idêntico (base 1d10 + 1 dado por patamar = 2/3/4
+dados, mesma coisa que "N feixes de 1d10"). Ver `core/magiaDano.ts`
+`calcularDanoMagia`.
+
+**Ao encontrar um caso novo parecido** (outra magia com "feixes"/
+"raios"/"ataques separados", ou um talento de arma com Ataque Extra
+que precise de tratamento especial): primeiro confira se o valor final
+bate com "dado base + 1 dado por [o que quer que escale]" — se bater,
+reaproveita `escalaTruqueTipo`/Upcast, sem mecanismo novo. Só crie
+estrutura nova se o valor não seguir essa fórmula simples (ex.: dados
+de tamanhos diferentes por ataque, ou nº de ataques que não cresce em
+degraus fixos).
+

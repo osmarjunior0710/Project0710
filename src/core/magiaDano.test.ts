@@ -88,9 +88,12 @@ describe('calcularDanoMagia', () => {
       expect(calcularDanoMagia(magia('chamasagrada'), 0, 20)?.quantidade).toBe(4);
     });
 
-    it('truque SEM escalaTruqueTipo (Raio Místico cria feixes extras, não soma dado) — nível alto não altera o dado', () => {
-      expect(calcularDanoMagia(magia('raiomistico'), 0, 20)).toEqual({
-        quantidade: 1,
+    it('Raio Místico (feixes extras simplificados como dados extras na mesma rolagem) — 1d10 → 4d10 no nível 17+', () => {
+      expect(calcularDanoMagia(magia('raiomistico'), 0, 1)?.quantidade).toBe(1);
+      expect(calcularDanoMagia(magia('raiomistico'), 0, 5)?.quantidade).toBe(2);
+      expect(calcularDanoMagia(magia('raiomistico'), 0, 11)?.quantidade).toBe(3);
+      expect(calcularDanoMagia(magia('raiomistico'), 0, 17)).toEqual({
+        quantidade: 4,
         lados: 10,
         mod: 0,
         tipo: 'Energético',

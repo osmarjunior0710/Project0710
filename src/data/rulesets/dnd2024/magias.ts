@@ -58,17 +58,23 @@
 // truque com dano ganha +1 dado do MESMO tamanho de `danoBaseDado`
 // nos níveis 5/11/17 do PERSONAGEM (não do círculo gasto, que truque
 // não tem — diferente do Upcast). `"dado"` = esse padrão uniforme se
-// aplica (16/390 magias, todas truque; extraído direto do texto
+// aplica (17/390 magias, todas truque; extraído direto do texto
 // "Aprimoramento de Truque. O dano aumenta em NdM..." já presente em
 // `descricaoCompleta`, sem precisar reler os PDFs); `null` = não se
 // aplica — inclui truque sem dano (Acudir os Moribundos, só aumenta
-// alcance), truque cujo "Aprimoramento" muda o TIPO de dado em vez de
+// alcance) e truque cujo "Aprimoramento" muda o TIPO de dado em vez de
 // somar (Bordão Místico: 1d6→1d10→1d12→2d6, já tinha `danoBaseDado:
-// null` de uma auditoria anterior) e Raio Místico (cria FEIXES extras
-// — jogadas de ataque separadas — em vez de somar dado numa rolagem
-// só; não modelado ainda, ver PENDENCIAS.md). Toda magia preparada
-// (círculo > 0) é sempre `null` aqui (essa mecânica só existe pra
-// truque).
+// null` de uma auditoria anterior). Toda magia preparada (círculo > 0)
+// é sempre `null` aqui (essa mecânica só existe pra truque).
+//
+// Caso especial incluído em `"dado"`: Raio Místico ganha FEIXES extras
+// por nível (RAW = 1 jogada de ataque separada por feixe), mas o
+// Osmar decidiu simplificar pra 1 ataque só (representa "acertou ou
+// não" no geral) + os dados de dano dos feixes somados numa rolagem
+// só — matematicamente idêntico à fórmula "+1 dado por patamar" já
+// usada nos outros 16 truques (base 1d10, 2/3/4 feixes = 2/3/4 dados),
+// então reaproveita o mesmo campo sem mecanismo novo. Ver
+// DECISOES-COMBATE.md.
 //
 // `ataqueOuSalvaguarda` é um de: "Ataque à Distância" | "Ataque Corpo
 // a Corpo" | "Salvaguarda de <Atributo>" | "aleatório" (tipo de
@@ -734,7 +740,7 @@ export const magias: Magia[] = [
     upcastTexto: null,
     danoBaseDado: "1d10",
     danoBaseTipo: "Energético",
-    escalaTruqueTipo: null,
+    escalaTruqueTipo: "dado",
     ataqueOuSalvaguarda: "Ataque à Distância",
     salvaguardaFalha: null,
     salvaguardaSucesso: null,

@@ -283,7 +283,21 @@ Jogador, "A a I" e "I a Z" — juntos cobrem as 390 magias).
       usando Rajada de Veneno (truque, base 1d12) — dano rolado
       corretamente em 4d12 (era 1d12 antes da correção). 6 testes
       novos em `magiaDano.test.ts` cobrindo os 4 patamares (nível
-      1-4/5-10/11-16/17+) e confirmando que Raio Místico (sem
-      `escalaTruqueTipo`) e magia preparada (círculo > 0) não escalam
-      por nível. `npx tsc -b`, `npm test` (241 passando) e `npm run
-      build` OK.
+      1-4/5-10/11-16/17+) e confirmando que magia preparada
+      (círculo > 0) não escala por nível. `npx tsc -b`, `npm test`
+      (241 passando) e `npm run build` OK.
+- [x] **5.5 Raio Místico (feixes extras) — decisão do Osmar: FEITA.**
+      RAW pede 1 jogada de ataque SEPARADA por feixe (2/3/4 feixes nos
+      níveis 5/11/17); Osmar decidiu simplificar pra 1 ataque só (o
+      app nunca modela CA do inimigo mesmo, então "acertou" já é uma
+      decisão só do jogador na mesa) + os dados de dano dos feixes
+      somados numa rolagem só — matematicamente idêntico à fórmula
+      "+1 dado por patamar" do item 5.4 (base 1d10, 2/3/4 feixes =
+      2/3/4 dados). Reaproveitou 100% o mecanismo já existente: só
+      mudou `escalaTruqueTipo` de `null` pra `"dado"` na planilha e no
+      `.ts` (17/391 magias agora, era 16) — nenhum código novo.
+      Comentário de cabeçalho do `magias.ts` atualizado (não é mais
+      "exceção não modelada"). Teste de `magiaDano.test.ts` que
+      confirmava "Raio Místico não escala" virou o oposto (confirma
+      1d10→4d10 no nível 17+). `npx tsc -b`, `npm test` (241
+      passando) e `npm run build` OK.
