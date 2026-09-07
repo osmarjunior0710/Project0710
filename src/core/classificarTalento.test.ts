@@ -22,4 +22,13 @@ describe('talentoTemPlaceholder', () => {
     const t = talentos.find((x) => x.id === 'musico')!;
     expect(talentoTemPlaceholder(t)).toBe(true);
   });
+
+  it('Analítico/Mente Aguçada (pericia-restrita-ou-especializacao): sem [PH]', () => {
+    expect(talentoTemPlaceholder(talentos.find((x) => x.id === 'analitico')!)).toBe(false);
+    expect(talentoTemPlaceholder(talentos.find((x) => x.id === 'mente-agucada')!)).toBe(false);
+  });
+
+  it('Especialista em Perícia (pericia-livre-mais-especializacao): sem [PH]', () => {
+    expect(talentoTemPlaceholder(talentos.find((x) => x.id === 'especialista-em-pericia')!)).toBe(false);
+  });
 });

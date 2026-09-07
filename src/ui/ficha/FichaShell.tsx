@@ -63,6 +63,8 @@ import {
   CHAVE_RITUAL_RAPIDO,
   type MagiaGratisDeTalentoGeral,
 } from '../../core/magiaTalentoGeral';
+import { acoesConvertidasEmBonus } from '../../core/periciaTalentoGeral';
+import { acoesBase } from '../../data/exampleCombat';
 import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
 import { armaduraSemTreinamentoEquipada } from '../../core/proficienciaArmadura';
 import { useRoll } from '../roll/RollContext';
@@ -182,6 +184,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [periciasSubclasseBonusAtuais, setPericiasSubclasseBonusAtuais] = useState<string[]>(
     personagemSalvo.periciasSubclasseBonusAtual ?? [],
   );
+  const [periciasTalentoGeralAtuais, setPericiasTalentoGeralAtuais] = useState<string[]>(
+    personagemSalvo.periciasTalentoGeralAtual ?? [],
+  );
   const [magiasDescobertasMagicasAtuais, setMagiasDescobertasMagicasAtuais] = useState<string[]>(
     personagemSalvo.magiasDescobertasMagicasAtual ?? [],
   );
@@ -289,7 +294,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const atributosFinaisAtuais = Object.fromEntries(
     atributosOrdem.map((a) => [a, valorFinalAtributo(selecao, a) ?? 10]),
   ) as Record<Atributo, number>;
-  const pericias = calcularPericias(selecao, personagem.nivel, periciasEspecialistaAtuais, periciasSubclasseBonusAtuais);
+  const pericias = calcularPericias(selecao, personagem.nivel, periciasEspecialistaAtuais, [
+    ...periciasSubclasseBonusAtuais,
+    ...periciasTalentoGeralAtuais,
+  ]);
   const proficienciasFerramenta = calcularProficienciasFerramenta(selecao, personagem.nivel);
   const bonusProficienciaAtual = classe ? bonusProficiencia(classe, personagem.nivel) : 0;
   const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva);
@@ -406,6 +414,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const magiasGratisTalentoGeral = magiasGratisDosTalentosGerais(talentosEfetivos, escolhaMagiaTalentoGeral);
   const ritualRapidoDisponivel = temRitualRapido(talentosEfetivos);
   const ritualRapidoGasto = magiasGratisGastas.includes(CHAVE_RITUAL_RAPIDO);
+  const nomesAcoesBonusExtras = acoesConvertidasEmBonus(talentosEfetivos);
+  const acoesGenericasBonus = acoesBase.filter((a) => nomesAcoesBonusExtras.includes(a.nome));
   const magiasConjuraveis = [
     ...magiasPreparadas,
     ...magiasDescobertasMagicas,
@@ -526,6 +536,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       invocacoesMisticasAtual: invocacoesMisticasAtuais,
       periciasEspecialistaAtual: periciasEspecialistaAtuais,
       periciasSubclasseBonusAtual: periciasSubclasseBonusAtuais,
+      periciasTalentoGeralAtual: periciasTalentoGeralAtuais,
       magiasDescobertasMagicasAtual: magiasDescobertasMagicasAtuais,
       livroDasSombrasAtual: livroDasSombrasAtuais,
       livroDasSombrasGasto,
@@ -579,6 +590,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     invocacoesMisticasAtuais,
     periciasEspecialistaAtuais,
     periciasSubclasseBonusAtuais,
+    periciasTalentoGeralAtuais,
     magiasDescobertasMagicasAtuais,
     livroDasSombrasAtuais,
     livroDasSombrasGasto,
@@ -998,6 +1010,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     arcanaMisticaAlteracoes: Record<number, string> | null;
     magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
     escolhaMagiaTalentoGeral: Record<string, string[]> | null;
+    periciaLivreTalentoEscolhida: string | null;
+    periciaRestritaTalentoEscolhida: string | null;
   }) {
     const novosAtributos = resultado.atributosAumentados
       ? aumentarAtributos(selecao.atributos, resultado.atributosAumentados)
@@ -1043,6 +1057,25 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (resultado.escolhaMagiaTalentoGeral) {
       setEscolhaMagiaTalentoGeral((prev) => ({ ...prev, ...resultado.escolhaMagiaTalentoGeral }));
     }
+    if (resultado.periciaLivreTalentoEscolhida) {
+      setPericiasTalentoGeralAtuais((prev) => [...prev, resultado.periciaLivreTalentoEscolhida!]);
+    }
+    if (resultado.periciaRestritaTalentoEscolhida) {
+      // Decide proficiência vs. Especialização comparando com o que o
+      // personagem já tinha ANTES desse level-up (fechamento captura o
+      // estado atual, antes dos `set*` acima aplicarem) — ver
+      // `core/periciaTalentoGeral.ts`.
+      const jaEraProficiente = [
+        ...periciasProficientes(selecao),
+        ...periciasSubclasseBonusAtuais,
+        ...periciasTalentoGeralAtuais,
+      ].includes(resultado.periciaRestritaTalentoEscolhida);
+      if (jaEraProficiente) {
+        setPericiasEspecialistaAtuais((prev) => [...prev, resultado.periciaRestritaTalentoEscolhida!]);
+      } else {
+        setPericiasTalentoGeralAtuais((prev) => [...prev, resultado.periciaRestritaTalentoEscolhida!]);
+      }
+    }
     setLevelUpHpModo(null);
     setLevelUpHpRolado(null);
     setLevelUpAberto(false);
@@ -1058,7 +1091,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       invocacoesMisticasAtuais,
       arcanaMisticaAtuais,
       periciasEspecialistaAtuais,
-      periciasProficientesDoPersonagem: [...periciasProficientes(selecao), ...periciasSubclasseBonusAtuais],
+      periciasProficientesDoPersonagem: [
+        ...periciasProficientes(selecao),
+        ...periciasSubclasseBonusAtuais,
+        ...periciasTalentoGeralAtuais,
+      ],
       periciasSubclasseBonusAtuais,
       magiasDescobertasMagicasAtuais,
       atributosFinaisAtuais,
@@ -1087,7 +1124,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         magiaIniciadaOrigemAtual={magiaIniciadaOrigemAtual}
         magiaIniciadaEspecieAtual={magiaIniciadaEspecieAtual}
         periciasEspecialistaAtuais={periciasEspecialistaAtuais}
-        periciasProficientesDoPersonagem={[...periciasProficientes(selecao), ...periciasSubclasseBonusAtuais]}
+        periciasProficientesDoPersonagem={[
+          ...periciasProficientes(selecao),
+          ...periciasSubclasseBonusAtuais,
+          ...periciasTalentoGeralAtuais,
+        ]}
         periciasSubclasseBonusAtuais={periciasSubclasseBonusAtuais}
         magiasDescobertasMagicasAtuais={magiasDescobertasMagicasAtuais}
         poolDescobertasMagicas={poolDescobertasMagicas(9)}
@@ -1292,6 +1333,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         {tab === 'combat' && (
           <CombatTab
             desvantagemForcaDestreza={desvantagemForcaDestreza}
+            acoesGenericasBonus={acoesGenericasBonus}
             pvAtual={pvAtual}
             pvMax={personagem.pvMax}
             pvTemporario={pvTemporario}

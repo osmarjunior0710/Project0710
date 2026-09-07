@@ -84,6 +84,11 @@ export interface ResultadoLevelUpRapido {
    * FIXA (Invisibilidade/Passo Nebuloso) até escolher a outra
    * manualmente num level-up de verdade. */
   escolhaMagiaTalentoGeral: Record<string, string[]> | null;
+  /** Level Up Rápido nunca sorteia a perícia livre/restrita de
+   * Especialista em Perícia/Analítico/Mente Aguçada (mesma lógica de
+   * `escolhaMagiaTalentoGeral` acima) — sempre `null` aqui. */
+  periciaLivreTalentoEscolhida: string | null;
+  periciaRestritaTalentoEscolhida: string | null;
 }
 
 /** Escolhe Invocações Místicas respeitando pré-requisito (uma pode
@@ -247,5 +252,7 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     arcanaMisticaAlteracoes,
     magiaIniciadaAlteracoes: null,
     escolhaMagiaTalentoGeral: null,
+    periciaLivreTalentoEscolhida: null,
+    periciaRestritaTalentoEscolhida: null,
   };
 }

@@ -239,9 +239,44 @@ Grupos propostos e aprovados pelo Osmar:
         sobrando → Alarme mostra "Grátis"+"Usar" lado a lado → toca
         "Grátis" → vira "Usada" (cinza) mas "Usar" continua ativo,
         pronto pra gastar Espaço de verdade).
-- [ ] **B.5 — Escolha de perícia**: Analítico, Mente Aguçada,
-      Especialista em Perícia — reaproveita o padrão do Habilidoso
-      (`concedeProficiencias`).
+- [x] **B.5 — Escolha de perícia**: Analítico, Mente Aguçada,
+      Especialista em Perícia. 2 `efeitoMecanico` novos:
+      `pericia-restrita-ou-especializacao` (Analítico/Mente Aguçada —
+      1 perícia de lista fixa, vira proficiência ou Especialização
+      dependendo se o personagem já era proficiente nela — decidido no
+      `FichaShell`, comparando com o estado ANTES do level-up) e
+      `pericia-livre-mais-especializacao` (Especialista em Perícia — 1
+      perícia LIVRE via `concedeProficiencias` do próprio talento,
+      ligado agora também no Level Up além do Wizard, MAIS 1
+      Especialização independente, reaproveitando a MESMA vaga do
+      "Especialista" de classe do Bardo, só soma +1 quando o talento é
+      escolhido). Novo campo `PersonagemSalvo.periciasTalentoGeralAtual`
+      (mesmo tratamento de `periciasSubclasseBonusAtual`, junta no
+      mesmo `periciasBonusExtras` de `calcularPericias`). 2 passos
+      novos no `LevelUpShell` (`periciaLivreTalento`/
+      `periciaRestritaTalento`), sempre DEPOIS do passo `asi` no array
+      (nunca antes — bug real encontrado e corrigido: empurrar
+      `especialista` pra antes de `asi` quando o talento concede vaga
+      extra fazia o `luIndex` "pular" de passo no instante em que o
+      talento era escolhido, porque o array mudava de tamanho ANTES do
+      índice de `asi`; corrigido movendo o push de `especialista` pra
+      DEPOIS do bloco de ASI, mesmo padrão já usado por
+      `precisaCrescerMagiaRitual`). "Ação vira Ação Bônus" (Procurar/
+      Analisar): pedido do Osmar foi manter nas DUAS listas (Ação
+      normal E Ação Bônus, jogador escolhe qual gasta a cada turno) —
+      nova função `acoesConvertidasEmBonus` (`core/
+      periciaTalentoGeral.ts`) filtra `acoesBase` (Cap. 1) e
+      `BonusPanelContent` ganhou seção própria pra elas, com
+      `onEscolher` ligado ao MESMO `escolherNoPainel('bonus', ...)`
+      que a Ação/Reação já usavam (antes só a Ação/Reação marcavam o
+      recurso do turno como usado; Ação Bônus não tinha esse fio
+      ligado pra nenhum item — agora tem, só pras ações genéricas).
+      Verificado: `tsc -b`/`npm test` (301)/`npm run build` limpos +
+      Playwright (Guerreiro pega Especialista em Perícia → escolhe
+      Furtividade como perícia livre + Intuição como Especialização →
+      aba Atributos mostra Furtividade proficiente e Intuição com ⭐;
+      Guerreiro com Analítico → aba Combat mostra "Procurar" tanto no
+      painel de Ação quanto no de Ação Bônus).
 - Resto (Agressor, Esmagador, Sentinela, Perfurador, Talhador, etc.)
   fica bloqueado no Backlog.md — depende de um motor de combate com
   tipo de dano/arma/posição que a Ficha ainda não modela (mesmo motivo

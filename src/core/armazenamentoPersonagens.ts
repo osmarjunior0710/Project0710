@@ -135,6 +135,16 @@ export interface PersonagemSalvo {
    * escolha única de 3, feita 1 vez só. Ausente/vazio = personagem
    * ainda não passou por esse nível com essa subclasse. */
   periciasSubclasseBonusAtual?: string[];
+  /** Perícias com proficiência de verdade (não Especialização) ganhas
+   * por Talento Geral — Especialista em Perícia (1 livre, qualquer
+   * perícia) ou Analítico/Mente Aguçada (1 da lista restrita, só
+   * quando o personagem AINDA NÃO era proficiente nela; se já era, a
+   * escolha vai pra `periciasEspecialistaAtual` em vez desta — ver
+   * `core/periciaTalentoGeral.ts`). Mesmo tratamento de
+   * `periciasSubclasseBonusAtual`, junta no mesmo `periciasBonusExtras`
+   * de `calcularPericias`. Ausente/vazio = nenhuma escolha desse tipo
+   * feita ainda. */
+  periciasTalentoGeralAtual?: string[];
   /** "Descobertas Mágicas" (Colégio do Conhecimento, nível 6) — 2
    * magias SEMPRE preparadas, de Clérigo/Druida/Mago, fora da conta
    * normal de Magias Preparadas. Trocável 1 por level-up (mesmo

@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2018
+
+Talentos Gerais — Analítico, Mente Aguçada e Especialista em Perícia
+agora funcionam de verdade: no Level Up, dão proficiência ou
+Especialização numa perícia (perícia livre ou de uma lista fixa,
+dependendo do talento), e Analítico/Mente Aguçada também liberam
+Procurar/Analisar como Ação Bônus na aba Combate — sem sumir da lista
+de Ação normal, você escolhe qual usar a cada turno.
+
 ## v202609_1859
 
 Corrigido: quem tem Conjurador Ritualista E Espaços de Magia de
