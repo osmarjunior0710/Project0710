@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0912
+
+Tela "Usar Magia" (Combate) — o resumo de Espaços de Magia, que ficava
+espremido em texto corrido no topo, virou um painel do lado direito da
+lista de magias (pips grandes, 1 linha por círculo), só nessa tela.
+
 ## v202609_0102
 
 Rolagem de dados ficou mais completa: dano com 2+ dados agora mostra

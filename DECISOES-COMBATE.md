@@ -525,3 +525,27 @@ ele já para no primeiro match).
 **Data/origem:** 2026-09, SDD fornecido pelo Osmar durante o foco de
 Talentos Fase 4 (Grupo C, entre B.2 e B.3).
 
+## "Usar Magia" (Combat) ganha painel de Espaços de Magia ao lado da lista — só nessa tela
+
+**Pedido do Osmar** ao ver a Tela 2 do fluxo "Usar Magia" (lista de
+Truques/Magias Preparadas) num Mago de nível alto: o resumo de
+Espaços ficava espremido em 1-2 linhas de texto corrido no topo
+("1º: 4/4 2º: 3/3..."), enquanto a aba Magias já tinha uma versão boa
+disso (pips grandes, 1 linha por círculo, seção "Espaços de Magia").
+Pedido: mostrar essa MESMA informação, só que num painel à DIREITA da
+lista, exclusivamente na Tela 2 do "Usar Magia" (não na aba Magias
+normal) — desaparece junto com a lista ao voltar/mudar de ideia.
+
+**Implementação:** `SelecionarMagiaShell.tsx` ganhou CSS próprio
+(`SelecionarMagiaShell.module.css`, não mexe no `LevelUpShell.module.css`
+compartilhado) — `.contentRow` (flex row) com `.listCol` (a lista de
+sempre, `flex:1`) e `.painelEspacos` (coluna fixa de 76px, 1 linha por
+círculo com `TickPips tamanho="sm"`, que já quebra linha sozinho
+dentro da coluna estreita). Os dois scrollam juntos dentro do mesmo
+`.body` — sem posição fixa/sticky, mantém simples. Testado com Mago
+nível 17 (9 círculos simultâneos) e nível 1 (1 círculo só) — cabe nos
+dois casos em ~390px sem cortar a lista.
+
+**Data/origem:** 2026-09, revisão pedida pelo Osmar depois do foco
+Mago (outra conta/branch) chegar na Combat.
+
