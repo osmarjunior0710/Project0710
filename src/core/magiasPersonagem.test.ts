@@ -1,6 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { espacosDeMagiaAtivos, magiasDisponiveisParaPreparar, poolDescobertasMagicas, cdConjuracao, modAcertoConjuracao } from './magiasPersonagem';
+import {
+  espacosDeMagiaAtivos,
+  magiasDisponiveisParaPreparar,
+  poolDescobertasMagicas,
+  cdConjuracao,
+  modAcertoConjuracao,
+  usaRedefinicaoPorDescanso,
+  completarListaDeMagias,
+} from './magiasPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
+import { magiasDaClasse } from '../data/rulesets/dnd2024/magias';
 import { criarSelecaoInicial } from './personagem';
 
 const bardo = classes.find((c) => c.nome === 'Bardo');
@@ -83,6 +92,36 @@ describe('modAcertoConjuracao', () => {
     const guerreiro = classes.find((c) => c.nome === 'Guerreiro');
     if (!guerreiro) throw new Error('Fixture "Guerreiro" não encontrada em data/rulesets/dnd2024/classes.ts');
     expect(modAcertoConjuracao(selecao, guerreiro, 1)).toBeNull();
+  });
+});
+
+describe('usaRedefinicaoPorDescanso', () => {
+  it('Mago (tem Livro de Magias): true', () => {
+    expect(usaRedefinicaoPorDescanso(mago)).toBe(true);
+  });
+
+  it('Bardo/Bruxo (sem Livro de Magias) e classe null: false', () => {
+    expect(usaRedefinicaoPorDescanso(bardo)).toBe(false);
+    expect(usaRedefinicaoPorDescanso(bruxo)).toBe(false);
+    expect(usaRedefinicaoPorDescanso(null)).toBe(false);
+  });
+});
+
+describe('completarListaDeMagias', () => {
+  const catalogo = magiasDaClasse('Mago', 1);
+
+  it('cresce até o máximo, mantendo as que já tinha e sem repetir', () => {
+    const atuais = [catalogo[0].nome, catalogo[1].nome];
+    const resultado = completarListaDeMagias(atuais, catalogo, 4);
+    expect(resultado).toHaveLength(4);
+    expect(resultado).toEqual(expect.arrayContaining(atuais));
+    expect(new Set(resultado).size).toBe(4);
+  });
+
+  it('borda: já tem max ou mais — corta em max, nunca soma mais', () => {
+    const atuais = catalogo.slice(0, 5).map((m) => m.nome);
+    expect(completarListaDeMagias(atuais, catalogo, 3)).toEqual(atuais.slice(0, 3));
+    expect(completarListaDeMagias(atuais, catalogo, 5)).toEqual(atuais);
   });
 });
 

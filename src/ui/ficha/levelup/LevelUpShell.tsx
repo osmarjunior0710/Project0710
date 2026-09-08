@@ -20,7 +20,12 @@ import {
 } from '../../../core/levelUp';
 import { pericias } from '../../../data/rulesets/dnd2024/pericias';
 import { valorRecursoClasse } from '../../../core/recursosClasse';
-import { agruparMagiasPorCirculo, contarTrocas, espacosDeMagiaAtivos } from '../../../core/magiasPersonagem';
+import {
+  agruparMagiasPorCirculo,
+  contarTrocas,
+  espacosDeMagiaAtivos,
+  usaRedefinicaoPorDescanso,
+} from '../../../core/magiasPersonagem';
 import {
   invocacoesElegiveisAteNivel,
   invocacaoRequeridaDe,
@@ -70,6 +75,12 @@ interface LevelUpShellProps {
     subclasseEscolhida: string | null;
     estiloDeLutaEscolhido: string | null;
     truquesEscolhidos: string[] | null;
+    /** Livro de Magias (Mago) — lista COMPLETA (antigas + novas), mesmo
+     * padrão de `truquesEscolhidos`/`magiasPreparadasEscolhidas`. O
+     * grimório nunca perde magia nesse passo (ver
+     * `usaRedefinicaoPorDescanso`) — só cresce. `null` = classe sem
+     * essa característica. */
+    livroDeMagiasEscolhidas: string[] | null;
     magiasPreparadasEscolhidas: string[] | null;
     invocacoesMisticasEscolhidas: string[] | null;
     periciasEspecialistaEscolhidas: string[] | null;
@@ -119,6 +130,10 @@ interface LevelUpShellProps {
   truquesDaClasse: Magia[];
   /** Magias Preparadas que o personagem já tem (Etapa 4.3). */
   magiasPreparadasAtuais: string[];
+  /** Livro de Magias (grimório) do Mago — pool de magias CONHECIDAS,
+   * maior que `magiasPreparadasAtuais` (ver DECISOES-CLASSES.md
+   * "Casters", Padrão C). `[]` pra quem não tem essa característica. */
+  livroDeMagiasAtuais: string[];
   /** Invocações Místicas (Bruxo) que o personagem já tem — Etapa 4.3
    * do Bruxo, mesmo padrão de troca de Truques (1 por level-up). */
   invocacoesMisticasAtuais: string[];
@@ -187,6 +202,7 @@ type LuStep =
   | 'proficienciasBonus'
   | 'estiloDeLuta'
   | 'truques'
+  | 'livroDeMagias'
   | 'magiasPreparadas'
   | 'invocacoes'
   | 'descobertasMagicas'
@@ -217,6 +233,7 @@ export default function LevelUpShell({
   truquesAtuais,
   truquesDaClasse,
   magiasPreparadasAtuais,
+  livroDeMagiasAtuais,
   magiasDaClasseDisponiveis,
   invocacoesMisticasAtuais,
   arcanaMisticaAtuais,
@@ -237,6 +254,13 @@ export default function LevelUpShell({
   const novoNivel = personagem.nivel + 1;
   const maxTruques = valorRecursoClasse(classe, 'Truques Conhecidos', novoNivel);
   const maxMagiasPreparadas = valorRecursoClasse(classe, 'Magias Preparadas', novoNivel);
+  const maxLivroDeMagias = valorRecursoClasse(classe, 'Livro de Magias', novoNivel);
+  const temLivroDeMagias = maxLivroDeMagias > 0;
+  // Mago (e futuras classes com o mesmo Padrão C, ver DECISOES-CLASSES.md
+  // "Casters"): Truques/Magias Preparadas só trocam no Descanso Longo,
+  // NUNCA no Level Up — aqui é só crescimento (0 trocas permitidas).
+  // Bardo/Bruxo continuam com a regra de sempre (0 ou 1 troca).
+  const usaRedefPorDescanso = usaRedefinicaoPorDescanso(classe);
   const maxInvocacoes = valorRecursoClasse(classe, 'Invocações Místicas', novoNivel);
   const invocacoesCatalogo = invocacoesElegiveisAteNivel(novoNivel);
   const circuloMaximoNovoNivel = Math.max(0, ...espacosDeMagiaAtivos(classe, novoNivel).map((e) => e.circulo));
@@ -390,6 +414,7 @@ export default function LevelUpShell({
   }
   if (temEstiloDeLutaTrocavel(classe, novoNivel)) luSteps.push('estiloDeLuta');
   if (maxTruques > 0) luSteps.push('truques');
+  if (temLivroDeMagias) luSteps.push('livroDeMagias');
   if (maxMagiasPreparadas > 0) luSteps.push('magiasPreparadas');
   if (maxInvocacoes > 0) luSteps.push('invocacoes');
   // Descobertas Mágicas aparece TODA vez que já estiver desbloqueada
@@ -453,6 +478,7 @@ export default function LevelUpShell({
   const [valorDadoAnimado, setValorDadoAnimado] = useState<number | null>(null);
   const [estiloDeLutaEscolhido, setEstiloDeLutaEscolhido] = useState<string | null>(personagem.estiloDeLuta);
   const [truquesEscolhidos, setTruquesEscolhidos] = useState<string[]>(truquesAtuais);
+  const [livroDeMagiasEscolhido, setLivroDeMagiasEscolhido] = useState<string[]>(livroDeMagiasAtuais);
   const [magiasPreparadasEscolhidas, setMagiasPreparadasEscolhidas] = useState<string[]>(magiasPreparadasAtuais);
   const [invocacoesEscolhidas, setInvocacoesEscolhidas] = useState<string[]>(invocacoesMisticasAtuais);
   const [especialistaEscolhidas, setEspecialistaEscolhidas] = useState<string[]>(periciasEspecialistaAtuais);
@@ -497,6 +523,9 @@ export default function LevelUpShell({
   }
 
   function toggleTruque(nome: string) {
+    // Mago (usaRedefPorDescanso): truque já conhecido é travado aqui —
+    // a troca dele é só no Descanso Longo, não no Level Up.
+    if (usaRedefPorDescanso && truquesAtuais.includes(nome)) return;
     const i = truquesEscolhidos.indexOf(nome);
     if (i > -1) {
       setTruquesEscolhidos((prev) => prev.filter((x) => x !== nome));
@@ -506,7 +535,23 @@ export default function LevelUpShell({
   }
 
   const trocasDeTruque = contarTrocas(truquesAtuais, truquesEscolhidos);
-  const truquesValido = truquesEscolhidos.length === maxTruques && trocasDeTruque <= 1;
+  const truquesValido =
+    truquesEscolhidos.length === maxTruques && trocasDeTruque <= (usaRedefPorDescanso ? 0 : 1);
+
+  function toggleLivroDeMagias(nome: string) {
+    // Grimório nunca perde magia — item já conhecido fica travado.
+    if (livroDeMagiasAtuais.includes(nome)) return;
+    const i = livroDeMagiasEscolhido.indexOf(nome);
+    if (i > -1) {
+      setLivroDeMagiasEscolhido((prev) => prev.filter((x) => x !== nome));
+      return;
+    }
+    if (livroDeMagiasEscolhido.length < maxLivroDeMagias) {
+      setLivroDeMagiasEscolhido((prev) => [...prev, nome]);
+    }
+  }
+
+  const livroDeMagiasValido = livroDeMagiasEscolhido.length === maxLivroDeMagias;
 
   function toggleInvocacao(id: string) {
     const i = invocacoesEscolhidas.indexOf(id);
@@ -545,6 +590,9 @@ export default function LevelUpShell({
     descobertasMagicasEscolhidas.length === MAX_DESCOBERTAS_MAGICAS && trocasDeDescobertaMagica <= 1;
 
   function toggleMagiaPreparada(nome: string) {
+    // Mago (usaRedefPorDescanso): magia já preparada é travada aqui —
+    // a redefinição livre é só no Descanso Longo, não no Level Up.
+    if (usaRedefPorDescanso && magiasPreparadasAtuais.includes(nome)) return;
     const i = magiasPreparadasEscolhidas.indexOf(nome);
     if (i > -1) {
       setMagiasPreparadasEscolhidas((prev) => prev.filter((x) => x !== nome));
@@ -556,7 +604,14 @@ export default function LevelUpShell({
   }
 
   const trocasDeMagia = contarTrocas(magiasPreparadasAtuais, magiasPreparadasEscolhidas);
-  const magiasPreparadasValido = magiasPreparadasEscolhidas.length === maxMagiasPreparadas && trocasDeMagia <= 1;
+  const magiasPreparadasValido =
+    magiasPreparadasEscolhidas.length === maxMagiasPreparadas && trocasDeMagia <= (usaRedefPorDescanso ? 0 : 1);
+  // Mago só pode preparar o que já está no grimório (escolhido no passo
+  // anterior, "livroDeMagias") — outras classes continuam vendo a lista
+  // inteira da classe, igual sempre foi.
+  const magiasPreparadasPool = temLivroDeMagias
+    ? magiasPreparadasDaClasse.filter((m) => livroDeMagiasEscolhido.includes(m.nome))
+    : magiasPreparadasDaClasse;
 
   // Especialista é só ADIÇÃO — nunca substitui uma perícia já
   // especializada (diferente de Truques/Magias Preparadas, que podem
@@ -645,6 +700,7 @@ export default function LevelUpShell({
     proficienciasBonus: 'Proficiências Bônus',
     estiloDeLuta: 'Estilo de Luta',
     truques: 'Truques',
+    livroDeMagias: 'Livro de Magias',
     magiasPreparadas: 'Magias Preparadas',
     invocacoes: 'Invocações Místicas',
     descobertasMagicas: 'Descobertas Mágicas',
@@ -681,17 +737,27 @@ export default function LevelUpShell({
       return;
     }
     if (step === 'truques' && !truquesValido) {
+      const trocouAlgumJaTinha = trocasDeTruque > (usaRedefPorDescanso ? 0 : 1);
       setAviso(
-        trocasDeTruque > 1
-          ? 'Você só pode trocar 1 truque por level-up — desmarque menos truques que já tinha.'
+        trocouAlgumJaTinha
+          ? usaRedefPorDescanso
+            ? 'A troca de truques é só no Descanso Longo, não no Level Up — desmarque o(s) que já tinha.'
+            : 'Você só pode trocar 1 truque por level-up — desmarque menos truques que já tinha.'
           : `Escolha exatamente ${maxTruques} truques antes de avançar.`,
       );
       return;
     }
+    if (step === 'livroDeMagias' && !livroDeMagiasValido) {
+      setAviso(`Escolha exatamente ${maxLivroDeMagias} magias pro Livro de Magias antes de avançar.`);
+      return;
+    }
     if (step === 'magiasPreparadas' && !magiasPreparadasValido) {
+      const trocouAlgumaJaTinha = trocasDeMagia > (usaRedefPorDescanso ? 0 : 1);
       setAviso(
-        trocasDeMagia > 1
-          ? 'Você só pode trocar 1 magia preparada por level-up — desmarque menos magias que já tinha.'
+        trocouAlgumaJaTinha
+          ? usaRedefPorDescanso
+            ? 'A redefinição livre de Magias Preparadas é só no Descanso Longo, não no Level Up — desmarque a(s) que já tinha.'
+            : 'Você só pode trocar 1 magia preparada por level-up — desmarque menos magias que já tinha.'
           : `Escolha exatamente ${maxMagiasPreparadas} magias preparadas antes de avançar.`,
       );
       return;
@@ -768,6 +834,7 @@ export default function LevelUpShell({
         subclasseEscolhida,
         estiloDeLutaEscolhido,
         truquesEscolhidos: luSteps.includes('truques') ? truquesEscolhidos : null,
+        livroDeMagiasEscolhidas: luSteps.includes('livroDeMagias') ? livroDeMagiasEscolhido : null,
         magiasPreparadasEscolhidas: luSteps.includes('magiasPreparadas') ? magiasPreparadasEscolhidas : null,
         invocacoesMisticasEscolhidas: luSteps.includes('invocacoes') ? invocacoesEscolhidas : null,
         periciasEspecialistaEscolhidas: luSteps.includes('especialista') ? especialistaEscolhidas : null,
@@ -875,14 +942,27 @@ export default function LevelUpShell({
         </div>
       </div>
 
+      {step === 'livroDeMagias' && (
+        <div className={styles.subHeader}>
+          <div className="section-title" style={{ marginBottom: 4 }}>
+            Livro de Magias — escolha {maxLivroDeMagias} ({livroDeMagiasEscolhido.length}/{maxLivroDeMagias})
+          </div>
+          <div className="label">
+            Regra oficial: a cada nível, seu grimório ganha 2 magias novas — as que já tinha nunca saem daqui. A
+            troca de Magias Preparadas acontece só no Descanso Longo, não neste passo.
+          </div>
+        </div>
+      )}
+
       {step === 'magiasPreparadas' && (
         <div className={styles.subHeader}>
           <div className="section-title" style={{ marginBottom: 4 }}>
             Magias Preparadas — escolha {maxMagiasPreparadas} ({magiasPreparadasEscolhidas.length}/{maxMagiasPreparadas})
           </div>
           <div className="label">
-            Regra oficial: a cada nível, você pode substituir 1 das magias que já tem preparada por outra da lista
-            (de qualquer círculo pro qual você tenha espaço).
+            {usaRedefPorDescanso
+              ? 'Escolha dentre as magias do seu Livro de Magias (passo anterior) — a troca da lista completa acontece só no Descanso Longo, não aqui.'
+              : 'Regra oficial: a cada nível, você pode substituir 1 das magias que já tem preparada por outra da lista (de qualquer círculo pro qual você tenha espaço).'}
           </div>
         </div>
       )}
@@ -1033,8 +1113,9 @@ export default function LevelUpShell({
               Truques — escolha {maxTruques} ({truquesEscolhidos.length}/{maxTruques})
             </div>
             <div className="label" style={{ marginBottom: 8 }}>
-              Regra oficial: a cada nível, você pode substituir 1 dos truques que já conhece por outro da lista —
-              não precisa mexer se não quiser.
+              {usaRedefPorDescanso
+                ? 'Só cresce aqui — a troca de um truque que já conhece é só no Descanso Longo, não no Level Up.'
+                : 'Regra oficial: a cada nível, você pode substituir 1 dos truques que já conhece por outro da lista — não precisa mexer se não quiser.'}
             </div>
             {agruparMagiasPorCirculo(truquesDaClasse).map((grupo) => (
               <GrupoMagiaColapsavel key={grupo.circulo} label={grupo.label} magias={grupo.magias}>
@@ -1061,11 +1142,40 @@ export default function LevelUpShell({
                 }}
               </GrupoMagiaColapsavel>
             ))}
-            {trocasDeTruque > 1 && (
+            {trocasDeTruque > (usaRedefPorDescanso ? 0 : 1) && (
               <div className="label" style={{ color: 'var(--danger)', marginTop: 6 }}>
-                ⚠️ {trocasDeTruque} truques trocados — só pode trocar 1 por level-up.
+                ⚠️ {trocasDeTruque} truques trocados —{' '}
+                {usaRedefPorDescanso ? 'a troca é só no Descanso Longo.' : 'só pode trocar 1 por level-up.'}
               </div>
             )}
+          </>
+        )}
+
+        {step === 'livroDeMagias' && (
+          <>
+            {agruparMagiasPorCirculo(magiasPreparadasDaClasse).map((grupo) => (
+              <GrupoMagiaColapsavel key={grupo.circulo} label={grupo.label} magias={grupo.magias}>
+                {(m) => {
+                  const jaTinha = livroDeMagiasAtuais.includes(m.nome);
+                  const marcado = livroDeMagiasEscolhido.includes(m.nome);
+                  return (
+                    <div
+                      key={m.id}
+                      className={`check-row ${jaTinha ? styles.truqueAtual : ''}`}
+                      onClick={() => toggleLivroDeMagias(m.nome)}
+                    >
+                      <div className={`check-box ${marcado ? 'checked' : ''}`} />
+                      <span className="check-label">
+                        <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                        {' '}<span style={{ color: 'var(--text-faint)', fontSize: 11 }}>
+                          ({m.circulo}º círculo{jaTinha ? ' · já tinha' : ''})
+                        </span>
+                      </span>
+                    </div>
+                  );
+                }}
+              </GrupoMagiaColapsavel>
+            ))}
           </>
         )}
 
@@ -1129,7 +1239,7 @@ export default function LevelUpShell({
 
         {step === 'magiasPreparadas' && (
           <>
-            {agruparMagiasPorCirculo(magiasPreparadasDaClasse).map((grupo) => (
+            {agruparMagiasPorCirculo(magiasPreparadasPool).map((grupo) => (
               <GrupoMagiaColapsavel key={grupo.circulo} label={grupo.label} magias={grupo.magias}>
                 {(m) => {
                   const jaTinha = magiasPreparadasAtuais.includes(m.nome);
@@ -1156,9 +1266,10 @@ export default function LevelUpShell({
                 }}
               </GrupoMagiaColapsavel>
             ))}
-            {trocasDeMagia > 1 && (
+            {trocasDeMagia > (usaRedefPorDescanso ? 0 : 1) && (
               <div className="label" style={{ color: 'var(--danger)', marginTop: 6 }}>
-                ⚠️ {trocasDeMagia} magias trocadas — só pode trocar 1 por level-up.
+                ⚠️ {trocasDeMagia} magias trocadas —{' '}
+                {usaRedefPorDescanso ? 'a redefinição livre é só no Descanso Longo.' : 'só pode trocar 1 por level-up.'}
               </div>
             )}
           </>
@@ -1562,13 +1673,39 @@ export default function LevelUpShell({
             {luSteps.includes('truques') && (
               <div className="summary-row">
                 <span>Truques</span>
-                <span>{trocasDeTruque > 0 ? `${trocasDeTruque} trocado(s)` : 'sem troca'}</span>
+                <span>
+                  {usaRedefPorDescanso
+                    ? truquesEscolhidos.length > truquesAtuais.length
+                      ? `+${truquesEscolhidos.length - truquesAtuais.length} novo(s)`
+                      : 'sem alteração'
+                    : trocasDeTruque > 0
+                      ? `${trocasDeTruque} trocado(s)`
+                      : 'sem troca'}
+                </span>
+              </div>
+            )}
+            {luSteps.includes('livroDeMagias') && (
+              <div className="summary-row">
+                <span>Livro de Magias</span>
+                <span>
+                  {livroDeMagiasEscolhido.length > livroDeMagiasAtuais.length
+                    ? `+${livroDeMagiasEscolhido.length - livroDeMagiasAtuais.length} nova(s)`
+                    : 'sem alteração'}
+                </span>
               </div>
             )}
             {luSteps.includes('magiasPreparadas') && (
               <div className="summary-row">
                 <span>Magias Preparadas</span>
-                <span>{trocasDeMagia > 0 ? `${trocasDeMagia} trocada(s)` : 'sem troca'}</span>
+                <span>
+                  {usaRedefPorDescanso
+                    ? magiasPreparadasEscolhidas.length > magiasPreparadasAtuais.length
+                      ? `+${magiasPreparadasEscolhidas.length - magiasPreparadasAtuais.length} nova(s)`
+                      : 'sem alteração'
+                    : trocasDeMagia > 0
+                      ? `${trocasDeMagia} trocada(s)`
+                      : 'sem troca'}
+                </span>
               </div>
             )}
             {luSteps.includes('invocacoes') && (

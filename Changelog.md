@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1042
+
+Level Up do Mago agora usa o Livro de Magias de verdade: a cada nível,
+o grimório ganha 2 magias novas (nunca perde as antigas), e as Magias
+Preparadas só podem vir de dentro dele. Truques e Magias Preparadas do
+Mago ficam travados no Level Up — a troca de verdade só acontece no
+Descanso Longo (próxima entrega).
+
 ## v202609_2248
 
 Aba Magias do Mago — Truques, Magias Preparadas e Livro de Magias

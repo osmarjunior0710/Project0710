@@ -25,7 +25,12 @@ import {
   subclasseImplementada,
 } from './levelUp';
 import { valorRecursoClasse } from './recursosClasse';
-import { espacosDeMagiaAtivos, poolDescobertasMagicas } from './magiasPersonagem';
+import {
+  completarListaDeMagias,
+  espacosDeMagiaAtivos,
+  poolDescobertasMagicas,
+  usaRedefinicaoPorDescanso,
+} from './magiasPersonagem';
 import { invocacoesElegiveisAteNivel, invocacaoBloqueadaPorRequisitoAusente } from './invocacoesMisticas';
 import { circulosArcanaMisticaDesbloqueados, magiasElegiveisArcanaMistica } from './arcanaMistica';
 import { embaralhar, sorteiaUm } from './sorteio';
@@ -50,6 +55,7 @@ export interface ParamsLevelUpRapido {
   personagem: PersonagemParaLevelUpRapido;
   truquesAtuais: string[];
   magiasPreparadasAtuais: string[];
+  livroDeMagiasAtuais: string[];
   invocacoesMisticasAtuais: string[];
   arcanaMisticaAtuais: Record<number, string>;
   periciasEspecialistaAtuais: string[];
@@ -66,6 +72,7 @@ export interface ResultadoLevelUpRapido {
   subclasseEscolhida: string | null;
   estiloDeLutaEscolhido: string | null;
   truquesEscolhidos: string[] | null;
+  livroDeMagiasEscolhidas: string[] | null;
   magiasPreparadasEscolhidas: string[] | null;
   invocacoesMisticasEscolhidas: string[] | null;
   periciasEspecialistaEscolhidas: string[] | null;
@@ -147,22 +154,43 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     ? (sorteiaUm(estilosDeLuta)?.nome ?? personagem.estiloDeLuta)
     : personagem.estiloDeLuta;
 
+  // Mago (e futuras classes com o mesmo Padrão C, ver DECISOES-CLASSES.md
+  // "Casters"): Truques/Magias Preparadas só trocam no Descanso Longo —
+  // aqui é só crescimento, nunca substitui o que já tinha.
+  const usaRedefPorDescanso = usaRedefinicaoPorDescanso(classe);
+
   const maxTruques = valorRecursoClasse(classe, 'Truques Conhecidos', novoNivel);
   const truquesEscolhidos =
     maxTruques > 0
-      ? embaralhar(magiasDaClasse(classe.nome, 0))
-          .slice(0, maxTruques)
-          .map((m) => m.nome)
+      ? usaRedefPorDescanso
+        ? completarListaDeMagias(params.truquesAtuais, embaralhar(magiasDaClasse(classe.nome, 0)), maxTruques)
+        : embaralhar(magiasDaClasse(classe.nome, 0))
+            .slice(0, maxTruques)
+            .map((m) => m.nome)
       : null;
 
   const circuloMaximoNovoNivel = Math.max(0, ...espacosDeMagiaAtivos(classe, novoNivel).map((e) => e.circulo));
+  const poolMagiasDeCirculo = magiasDaClasse(classe.nome).filter(
+    (m) => m.circulo > 0 && m.circulo <= circuloMaximoNovoNivel,
+  );
+
+  const maxLivroDeMagias = valorRecursoClasse(classe, 'Livro de Magias', novoNivel);
+  const livroDeMagiasEscolhidas =
+    maxLivroDeMagias > 0
+      ? completarListaDeMagias(params.livroDeMagiasAtuais, embaralhar(poolMagiasDeCirculo), maxLivroDeMagias)
+      : null;
 
   const maxMagiasPreparadas = valorRecursoClasse(classe, 'Magias Preparadas', novoNivel);
+  const poolMagiasPreparadas = livroDeMagiasEscolhidas
+    ? poolMagiasDeCirculo.filter((m) => livroDeMagiasEscolhidas.includes(m.nome))
+    : poolMagiasDeCirculo;
   const magiasPreparadasEscolhidas =
     maxMagiasPreparadas > 0
-      ? embaralhar(magiasDaClasse(classe.nome).filter((m) => m.circulo > 0 && m.circulo <= circuloMaximoNovoNivel))
-          .slice(0, maxMagiasPreparadas)
-          .map((m) => m.nome)
+      ? usaRedefPorDescanso
+        ? completarListaDeMagias(params.magiasPreparadasAtuais, embaralhar(poolMagiasPreparadas), maxMagiasPreparadas)
+        : embaralhar(poolMagiasPreparadas)
+            .slice(0, maxMagiasPreparadas)
+            .map((m) => m.nome)
       : null;
 
   const maxInvocacoes = valorRecursoClasse(classe, 'Invocações Místicas', novoNivel);
@@ -241,6 +269,7 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     subclasseEscolhida,
     estiloDeLutaEscolhido,
     truquesEscolhidos,
+    livroDeMagiasEscolhidas,
     magiasPreparadasEscolhidas,
     invocacoesMisticasEscolhidas,
     periciasEspecialistaEscolhidas,

@@ -191,13 +191,48 @@ construir o motor/UI que usa esse dado.
   conjurar gasta o Espaço de verdade, marca a Ação como usada, mostra
   o texto da magia — sem erro de console, sem NaN/undefined. Confirma
   que o motor genérico (Bardo/Bruxo) já cobria Mago de graça.
-- [ ] **A5 — Level Up.** +2 magias no grimório por nível (nunca
-  remove); Magias Preparadas cresce E permite redefinição livre a
-  cada Descanso Longo (não é level-up — ver A7); Truques cresce
-  (nv4/10); ASI (nv4/8/12/16); Memorizar Magia (nv5+, card na Combat,
-  1x por Descanso Curto, troca 1 preparada). Maior entrega da fase —
-  primeira vez que o motor precisa de "escolher magia de um pool maior
-  (grimório)" em vez de só crescer/trocar 1 na lista de conhecidas.
+- [x] **A5a — Level Up: crescimento (feito).** Novo passo
+  `'livroDeMagias'` no `LevelUpShell.tsx` (entre Truques e Magias
+  Preparadas) — "coleção que só cresce", mesmo padrão do Especialista
+  (item já marcado fica travado, sem opção de desmarcar). Novo par de
+  funções genéricas em `core/magiasPersonagem.ts`:
+  `usaRedefinicaoPorDescanso(classe)` (true só quando a classe tem
+  "Livro de Magias" — hoje só Mago) e `completarListaDeMagias(atuais,
+  catalogo, max)` (cresce até `max` sem nunca remover). Truques e
+  Magias Preparadas do Mago agora ficam travados no Level Up
+  (`trocasDeTruque`/`trocasDeMagia` precisam ser 0, não `<=1` como
+  Bardo/Bruxo) — a troca de verdade só acontece no Descanso Longo
+  (A7). Magias Preparadas passa a escolher só dentre o que está no
+  Livro de Magias (`magiasPreparadasPool`). Resumo do Level Up ganhou
+  linha "Livro de Magias" e trocou o texto de Truques/Preparadas pra
+  "+N nova(s)" quando for classe de redefinição-por-descanso (em vez
+  de "sem troca", que ficaria enganoso pra crescimento puro).
+  ASI (4/8/12/16) já funcionava de graça (mesma leitura genérica de
+  `niveisComASI` que Guerreiro/Bardo/Bruxo usam).
+  **Também atualizado (consistência, mesmo bug pra qualquer level-up
+  em lote de um Mago):** `core/levelUpAleatorio.ts` (Level Up Rápido
+  ⚡) e `core/geradorPersonagemTeste.ts`'s `aplicarLevelUpsAleatorios`
+  (Personagem de Teste em nível 2+) — ambos respeitam agora
+  `usaRedefinicaoPorDescanso` e crescem o grimório antes de escolher
+  preparadas, com teste novo em cada um.
+  **Testado no navegador** (Playwright, 390px, Level Up de verdade —
+  não só o Rápido): truque "já tinha" trava de verdade (clique não
+  desmarca); "Livro de Magias — escolha 8 (6/8)" mostra certo;
+  completar o livro libera exatamente essas 8 opções (não a lista
+  inteira da classe) na tela de Magias Preparadas seguinte; Resumo
+  mostra "+2 nova(s)"/"+1 nova(s)"; após confirmar, ficha mostra
+  Nível 2, Espaços de Magia 3 pips, Preparadas crescidas — sem erro de
+  console. tsc/testes(309)/build verdes.
+  **Fora do escopo desta entrega, vira A5b:** Memorizar Magia (nível
+  5+, card na Combat, 1x por Descanso Curto, troca 1 preparada) — é
+  um mecanismo GATILHADO POR DESCANSO CURTO, mais parecido com
+  Astúcia Mágica do Bruxo do que com Level Up; fica pra sua própria
+  entrega pequena, junto ou logo depois da A7 (que já mexe na mesma
+  área de Descanso).
+- [ ] **A5b — Memorizar Magia (nível 5+).** Card na aba Combat (mesmo
+  padrão de Astúcia Mágica do Bruxo — botão que trava até o próximo
+  Descanso Curto): troca 1 magia preparada por outra do Livro de
+  Magias, disponível 1x por Descanso Curto.
 - [ ] **A6 — Subclasse placeholder.** Abjurador/Adivinhador/Evocador/
   Ilusionista em `subclasses.ts`, sem mecânica (mesmo padrão já usado
   em Bardo/Bruxo — reaproveite 100%, deve ser rápido).

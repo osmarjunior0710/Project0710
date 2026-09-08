@@ -32,7 +32,7 @@ import {
 import { bonusPvPorNivelDaEspecie, bonusPvPorNivelDoTalento, calcularPvMaximoNivel1, periciasProficientes } from './calculoPersonagem';
 import { armasParaMaestria, quantidadeMaestriaEmArma } from './maestriaArma';
 import { valorRecursoClasse } from './recursosClasse';
-import { espacosDeMagiaAtivos } from './magiasPersonagem';
+import { completarListaDeMagias, espacosDeMagiaAtivos, usaRedefinicaoPorDescanso } from './magiasPersonagem';
 import { niveisComASI, niveisComEspecialista, temEstiloDeLutaTrocavel, subclasseImplementada } from './levelUp';
 import { opcoesSubescolhaNoWizard, tracoComEscolhaDePericia } from './especieSubescolha';
 import { gerarIdPersonagem, type PersonagemSalvo } from './armazenamentoPersonagens';
@@ -207,6 +207,7 @@ function aplicarLevelUpsAleatorios(
   subclasseAtual: string | null;
   estiloDeLutaAtual: string | null;
   truquesAtual: string[];
+  livroDeMagiasAtual: string[];
   magiasPreparadasAtual: string[];
   periciasEspecialistaAtual: string[];
   talentosGeraisAtual: string[];
@@ -216,6 +217,7 @@ function aplicarLevelUpsAleatorios(
   let subclasseAtual: string | null = null;
   let estiloDeLutaAtual: string | null = selecao.estiloDeLutaEscolhido;
   let truquesAtual = [...selecao.truquesEscolhidos];
+  let livroDeMagiasAtual = [...selecao.livroDeMagiasEscolhido];
   let magiasPreparadasAtual = [...selecao.magiasPreparadasEscolhidas];
   let periciasEspecialistaAtual: string[] = [];
   let talentosGeraisAtual: string[] = [];
@@ -224,6 +226,10 @@ function aplicarLevelUpsAleatorios(
   const mediaPvPorNivel =
     dadoVidaValor[classe.dadoDeVida] + modificador(conValor) + bonusPvPorNivelDaEspecie(selecao) + bonusPvPorNivelDoTalento(selecao);
   const subclassesDaClasse = subclasses.filter((s) => s.classeId === classe.id);
+  // Mago (e futuras classes com o mesmo Padrão C, ver DECISOES-CLASSES.md
+  // "Casters"): Truques/Magias Preparadas só trocam no Descanso Longo —
+  // aqui é só crescimento, nunca substitui o que já tinha.
+  const usaRedefPorDescanso = usaRedefinicaoPorDescanso(classe);
 
   for (let nivel = 2; nivel <= nivelAlvo; nivel++) {
     pvMax += mediaPvPorNivel;
@@ -238,19 +244,29 @@ function aplicarLevelUpsAleatorios(
 
     const maxTruques = valorRecursoClasse(classe, 'Truques Conhecidos', nivel);
     if (maxTruques > 0) {
-      truquesAtual = embaralhar(magiasDaClasse(classe.nome, 0))
-        .slice(0, maxTruques)
-        .map((m) => m.nome);
+      truquesAtual = usaRedefPorDescanso
+        ? completarListaDeMagias(truquesAtual, embaralhar(magiasDaClasse(classe.nome, 0)), maxTruques)
+        : embaralhar(magiasDaClasse(classe.nome, 0))
+            .slice(0, maxTruques)
+            .map((m) => m.nome);
+    }
+
+    const circuloMaximo = Math.max(0, ...espacosDeMagiaAtivos(classe, nivel).map((e) => e.circulo));
+    const disponiveis = magiasDaClasse(classe.nome).filter((m) => m.circulo > 0 && m.circulo <= circuloMaximo);
+
+    const maxLivroDeMagias = valorRecursoClasse(classe, 'Livro de Magias', nivel);
+    if (maxLivroDeMagias > 0) {
+      livroDeMagiasAtual = completarListaDeMagias(livroDeMagiasAtual, embaralhar(disponiveis), maxLivroDeMagias);
     }
 
     const maxMagias = valorRecursoClasse(classe, 'Magias Preparadas', nivel);
     if (maxMagias > 0) {
-      const circuloMaximo = Math.max(0, ...espacosDeMagiaAtivos(classe, nivel).map((e) => e.circulo));
-      const disponiveis = magiasDaClasse(classe.nome)
-        .filter((m) => m.circulo > 0 && m.circulo <= circuloMaximo);
-      magiasPreparadasAtual = embaralhar(disponiveis)
-        .slice(0, maxMagias)
-        .map((m) => m.nome);
+      const poolPreparadas = maxLivroDeMagias > 0 ? disponiveis.filter((m) => livroDeMagiasAtual.includes(m.nome)) : disponiveis;
+      magiasPreparadasAtual = usaRedefPorDescanso
+        ? completarListaDeMagias(magiasPreparadasAtual, embaralhar(poolPreparadas), maxMagias)
+        : embaralhar(poolPreparadas)
+            .slice(0, maxMagias)
+            .map((m) => m.nome);
     }
 
     if (niveisComEspecialista(classe).includes(nivel)) {
@@ -292,6 +308,7 @@ function aplicarLevelUpsAleatorios(
     subclasseAtual,
     estiloDeLutaAtual,
     truquesAtual,
+    livroDeMagiasAtual,
     magiasPreparadasAtual,
     periciasEspecialistaAtual,
     talentosGeraisAtual,
@@ -377,6 +394,7 @@ export function gerarPersonagemTeste(params: {
     subclasseAtual: resultado.subclasseAtual,
     estiloDeLutaAtual: resultado.estiloDeLutaAtual,
     truquesAtual: resultado.truquesAtual,
+    livroDeMagiasAtual: resultado.livroDeMagiasAtual,
     magiasPreparadasAtual: resultado.magiasPreparadasAtual,
     periciasEspecialistaAtual: resultado.periciasEspecialistaAtual,
     talentosGeraisAtual: resultado.talentosGeraisAtual,

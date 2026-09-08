@@ -120,6 +120,33 @@ export function contarTrocas(originais: string[], finais: string[]): number {
   return originais.filter((nome) => !finais.includes(nome)).length;
 }
 
+/** `true` quando a classe tem o recurso "Livro de Magias" (grimório) —
+ * Padrão C "redefinição livre por Descanso Longo" (ver
+ * DECISOES-CLASSES.md "Casters"): truques e magias preparadas só
+ * trocam ao completar um Descanso, NUNCA no Level Up — o Level Up é
+ * só crescimento (nunca remove o que já tinha). `false` = padrão
+ * restritivo/flexível de Bardo/Bruxo, onde o Level Up já permite
+ * trocar 1. Hoje só o Mago tem essa característica. */
+export function usaRedefinicaoPorDescanso(classe: Classe | null): boolean {
+  if (!classe) return false;
+  return classe.recursos.some((r) => r.nome.startsWith('Livro de Magias'));
+}
+
+/** Cresce uma lista de magias conhecidas SEM NUNCA remover o que já
+ * tinha — completa até `max` sorteando (`catalogo` já deve vir
+ * embaralhado, ver `embaralhar`) magias do catálogo que ainda não
+ * estão em `atuais`. Se `atuais` já tiver `max` ou mais, devolve só os
+ * primeiros `max` de `atuais` (nunca corta pelo catálogo). Usado pelo
+ * Livro de Magias do Mago e, pra qualquer classe com
+ * `usaRedefinicaoPorDescanso`, também por Truques/Magias Preparadas —
+ * mesmo padrão de "coleção que só cresce" já usado no Especialista. */
+export function completarListaDeMagias(atuais: string[], catalogoEmbaralhado: Magia[], max: number): string[] {
+  if (atuais.length >= max) return atuais.slice(0, max);
+  const faltam = max - atuais.length;
+  const novas = catalogoEmbaralhado.filter((m) => !atuais.includes(m.nome)).slice(0, faltam).map((m) => m.nome);
+  return [...atuais, ...novas];
+}
+
 /** Quantos Truques/Magias Preparadas estão faltando pro nível atual —
  * "deveria ter" (tabela real da classe) menos "tem de verdade". Nunca
  * negativo. Detecta personagem "atrasado" (ex: Level Up que passou

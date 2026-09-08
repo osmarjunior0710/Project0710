@@ -175,10 +175,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [magiasPreparadasAtuais, setMagiasPreparadasAtuais] = useState<string[]>(
     personagemSalvo.magiasPreparadasAtual ?? selecao.magiasPreparadasEscolhidas,
   );
-  // Sem setter ainda — crescimento/troca do grimório entra na A5 (Level
-  // Up), ver EmDevB.md. Por ora só leitura (retrato da criação, ou o
-  // que a A5 tiver salvo quando ela existir).
-  const [livroDeMagiasAtuais] = useState<string[]>(personagemSalvo.livroDeMagiasAtual ?? selecao.livroDeMagiasEscolhido);
+  const [livroDeMagiasAtuais, setLivroDeMagiasAtuais] = useState<string[]>(
+    personagemSalvo.livroDeMagiasAtual ?? selecao.livroDeMagiasEscolhido,
+  );
   const [invocacoesMisticasAtuais, setInvocacoesMisticasAtuais] = useState<string[]>(
     personagemSalvo.invocacoesMisticasAtual ?? selecao.invocacoesMisticasEscolhidas,
   );
@@ -1005,6 +1004,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     subclasseEscolhida: string | null;
     estiloDeLutaEscolhido: string | null;
     truquesEscolhidos: string[] | null;
+    livroDeMagiasEscolhidas: string[] | null;
     magiasPreparadasEscolhidas: string[] | null;
     invocacoesMisticasEscolhidas: string[] | null;
     periciasEspecialistaEscolhidas: string[] | null;
@@ -1034,6 +1034,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }));
     setPvAtual((v) => v + resultado.pvGanho);
     if (resultado.truquesEscolhidos) setTruquesAtuais(resultado.truquesEscolhidos);
+    if (resultado.livroDeMagiasEscolhidas) setLivroDeMagiasAtuais(resultado.livroDeMagiasEscolhidas);
     if (resultado.magiasPreparadasEscolhidas) setMagiasPreparadasAtuais(resultado.magiasPreparadasEscolhidas);
     if (resultado.invocacoesMisticasEscolhidas) setInvocacoesMisticasAtuais(resultado.invocacoesMisticasEscolhidas);
     if (resultado.periciasEspecialistaEscolhidas) setPericiasEspecialistaAtuais(resultado.periciasEspecialistaEscolhidas);
@@ -1094,6 +1095,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       personagem,
       truquesAtuais,
       magiasPreparadasAtuais,
+      livroDeMagiasAtuais,
       invocacoesMisticasAtuais,
       arcanaMisticaAtuais,
       periciasEspecialistaAtuais,
@@ -1124,6 +1126,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         truquesAtuais={truquesAtuais}
         truquesDaClasse={magiasDaClasse(classe.nome, 0)}
         magiasPreparadasAtuais={magiasPreparadasAtuais}
+        livroDeMagiasAtuais={livroDeMagiasAtuais}
         magiasDaClasseDisponiveis={magiasDisponiveisParaPreparar(classe, personagem.nivel + 1)}
         invocacoesMisticasAtuais={invocacoesMisticasAtuais}
         arcanaMisticaAtuais={arcanaMisticaAtuais}
