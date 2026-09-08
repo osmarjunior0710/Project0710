@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
@@ -32,7 +33,12 @@ export default function EscolherCirculoShell({
   onVoltar,
   onConjurar,
 }: EscolherCirculoShellProps) {
-  return (
+  // Portal pro <body>: quando aberta de dentro do drawer "Ação"
+  // (Combat), essa tela fica presa à largura do drawer sem isso — ver
+  // o mesmo comentário em `SelecionarMagiaShell.tsx`. Aberta da aba
+  // Magias (fora de qualquer drawer) o portal não muda nada visível,
+  // só a localização no DOM.
+  return createPortal(
     <div className={styles.screen}>
       <div className={styles.header}>
         <div className={styles.titleRow}>
@@ -72,6 +78,7 @@ export default function EscolherCirculoShell({
           ← Voltar
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

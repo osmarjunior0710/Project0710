@@ -603,28 +603,34 @@ drawer "Ação":** a tela "Usar Magia" abre de dentro do drawer lateral
 `transform` (`SidePanel.module.css`, `.panelLeft`/`.panelRight`) pra
 animar o slide-in. Qualquer ancestral com `transform` vira o
 "containing block" de todo `position:fixed` descendente (regra do
-CSS, não bug do navegador) — por isso o `.screen` da tela "Usar
-Magia" (e tudo `fixed` dentro dela, como o `.painelEspacos`) fica
-preso à largura do drawer (~84% da tela), não à tela inteira. É
-exatamente o "gutter cinza" que aparecia à direita no celular do
-Osmar, mostrando um pedaço da Ficha por baixo. **Correção aplicada
-só no painel:** `createPortal(..., document.body)` — renderiza o
-`.painelEspacos` direto no `<body>`, fora da árvore do drawer, então
-`position:fixed` nele passa a valer contra a tela de verdade. O resto
-da tela "Usar Magia" (a lista de magias) continua preso à largura do
-drawer — não foi corrigido aqui porque o pedido do Osmar era só sobre
-o painel; se algum dia a lista também precisar ocupar a tela inteira,
-o mesmo `createPortal` resolve.
-**Padrão a reaproveitar:** qualquer elemento `position:fixed` que
-precise cobrir a tela inteira, mas que more (mesmo que indiretamente)
-dentro de um `SidePanel`/drawer com `transform`, precisa de
-`createPortal(..., document.body)` — não basta `position:fixed`
-sozinho.
+CSS, não bug do navegador) — por isso o `.screen` INTEIRO dessas 2
+telas (não só o `.painelEspacos`) ficava preso à largura do drawer
+(~84% da tela), sobrando uma faixa da Ficha visível à direita. **1ª
+correção (painel só)** resolveu o pedido original do Osmar, mas
+deixou a lista de magias em si (e a tela "Escolher Círculo" inteira)
+ainda presas a ~84% — o Osmar reportou de volta ("as magias não estão
+indo até o final do painel branco") depois de ver no celular de
+verdade. **Correção final:** `SelecionarMagiaShell` e
+`EscolherCirculoShell` inteiros (não só o painel) usam
+`createPortal(..., document.body)` no `return` — a tela toda sai da
+árvore do drawer, `position:fixed` passa a valer contra a viewport de
+verdade. Rodar o portal também quando a tela é aberta de fora de
+qualquer drawer (ex.: `EscolherCirculoShell` a partir da aba Magias)
+não muda nada visível — só a localização no DOM, sempre seguro
+aplicar.
+
+**Padrão a reaproveitar:** qualquer tela cheia (`.screen` fixed) que
+possa abrir de dentro de um `SidePanel`/drawer com `transform` —
+mesmo que hoje só 1 dos lugares que a abre seja um drawer — precisa
+de `createPortal(..., document.body)` no componente inteiro, não só
+num elemento fixed específico dentro dela. Aplicar sempre no
+componente da tela cheia (não em cada usuário dela) evita esquecer um
+caller.
 
 **Data/origem:** 2026-09, revisão pedida pelo Osmar depois do foco
-Mago (outra conta/branch) chegar na Combat — 1ª versão (painel dentro
-do flex row, rolando junto com a lista) foi corrigida pro fixed depois
-que o Osmar testou no celular; 2ª correção (portal pro `<body>`) saiu
-de uma investigação de por que o fixed ainda ficava preso a ~84% da
-largura mesmo ancorado — achado documentado acima.
+Mago (outra conta/branch) chegar na Combat — 3 rodadas até o estado
+final: (1) painel dentro do flex row, rolando junto com a lista; (2)
+painel fixo mas só ele portado, tela ainda presa a ~84%; (3) tela
+inteira (as 2 shells) portada — cada rodada corrigida depois do Osmar
+testar no celular de verdade e reportar o que ainda estava errado.
 

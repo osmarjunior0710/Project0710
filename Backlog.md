@@ -7,21 +7,6 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
-## Telas "Usar Magia"/"Escolher Círculo" (Combat) presas a ~84% da largura (2026-09)
-
-Achado ao corrigir o painel de Espaços de Magia (ver
-DECISOES-COMBATE.md, "Usar Magia ganha painel..."): essas 2 telas
-cheias abrem de dentro do drawer "Ação" (`SidePanel`, que usa
-`transform` pra animar o slide-in), e qualquer ancestral com
-`transform` vira o "containing block" de todo `position:fixed`
-descendente — por isso o `.screen` dessas telas fica preso à largura
-do drawer (~84%), não à tela inteira, sobrando uma faixa da Ficha
-visível (meio transparente) à direita. Só o painel de Espaços foi
-corrigido (via `createPortal` pro `<body>`) porque foi o que o Osmar
-pediu; a lista de magias em si (e a tela de Escolher Círculo inteira)
-continua com esse gutter. Se algum dia isso incomodar visualmente,
-o mesmo `createPortal(..., document.body)` resolve pras 2 telas.
-
 ## Dano em crítico não dobra (geral) + "+1 dado extra" do Perfurador (2026-09)
 
 Descoberto ao implementar o Perfurador: nenhum ataque do app dobra os

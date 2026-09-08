@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2032
+
+Corrigido: as telas "Usar Magia" e "Escolher Círculo" (Combate) agora
+ocupam a tela toda de verdade — antes ficavam presas a ~84% da
+largura, sobrando uma faixa cinza à direita com pedaço da Ficha
+aparecendo (mesmo bug do painel de Espaços corrigido antes, só que
+afetando a tela inteira dessa vez).
+
 ## v202609_1948
 
 Rolagem de dados ganhou mais suspense: o dado agora dá 2 voltas
