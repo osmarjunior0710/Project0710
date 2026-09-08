@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1629
+
+Magia de cura agora rola dado de verdade: Palavra Curativa, Curar
+Ferimentos, Oração de Cura, Palavra Curativa em Massa, Curar
+Ferimentos em Massa, Aura de Vitalidade e Regeneração já mostram a
+rolagem (com upcast, quando aplicável) na aba Magias e no "Usar
+Magia" do Combate — antes não faziam nada. Você aplica o PV
+manualmente no alvo depois de ver o total.
+
 ## v202609_1136
 
 2 ajustes na arte dos dados: o emoji 🎲 que ficava girando por cima da

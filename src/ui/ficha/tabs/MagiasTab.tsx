@@ -10,7 +10,7 @@ import {
   circulosDisponiveisParaConjurar,
 } from '../../../core/magiasPersonagem';
 import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
-import { calcularDanoMagia, mecanicaDaMagia, atributoSalvaguarda } from '../../../core/magiaDano';
+import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia, atributoSalvaguarda } from '../../../core/magiaDano';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
@@ -240,6 +240,19 @@ export default function MagiasTab({
     setDanoPendenteMagia(null);
     if (mecanica === 'salvaguarda') {
       setTelaSalvaguarda({ magia: m, circuloUsado });
+      return;
+    }
+    if (mecanica === 'cura') {
+      const cura = calcularCuraMagia(m, circuloUsado, nivel);
+      if (cura) {
+        rolarDados({
+          label: `Cura — ✨ ${m.nome}`,
+          formula: `${cura.quantidade}d${cura.lados}${cura.mod ? ` + ${cura.mod}` : ''}`,
+          quantidade: cura.quantidade,
+          lados: cura.lados,
+          mod: cura.mod,
+        });
+      }
       return;
     }
   }
