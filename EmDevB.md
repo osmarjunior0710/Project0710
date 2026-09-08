@@ -180,9 +180,17 @@ construir o motor/UI que usa esse dado.
   "Usar" numa preparada gasta o Espaço de verdade (pip mudou de
   2/2 pra 1/2); sem erro de console em nenhum passo. tsc/testes(304)/
   build verdes.
-- [ ] **A4 — Combat.** "Usar Magia" com truques/preparadas reais do
-  Mago (reaproveita o picker já existente, `SelecionarMagiaShell`/
-  `EscolherCirculoShell` — zero componente novo esperado aqui).
+- [x] **A4 — Combat.** Zero linha de código precisou mudar — o painel
+  de Ação/Reação já lê `truques`/`magiasPreparadasAcao`/
+  `magiasPreparadasReacao`/`modAcertoConjuracao` de `FichaShell.tsx`,
+  todos genéricos e já corretos pro Mago desde a A1-A3 (nenhum
+  `CombatTab.tsx`/`AcaoPanelContent.tsx`/`SelecionarMagiaShell.tsx` tem
+  comparação hardcoded por nome de classe). **Testado no navegador**
+  (Playwright, 390px, gerador de Personagem de Teste nível 1): painel
+  de Ação → "Usar Magia" mostra Truques (4) e 1º Círculo (4) reais;
+  conjurar gasta o Espaço de verdade, marca a Ação como usada, mostra
+  o texto da magia — sem erro de console, sem NaN/undefined. Confirma
+  que o motor genérico (Bardo/Bruxo) já cobria Mago de graça.
 - [ ] **A5 — Level Up.** +2 magias no grimório por nível (nunca
   remove); Magias Preparadas cresce E permite redefinição livre a
   cada Descanso Longo (não é level-up — ver A7); Truques cresce
