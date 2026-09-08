@@ -13,6 +13,35 @@ Preparadas só podem vir de dentro dele. Truques e Magias Preparadas do
 Mago ficam travados no Level Up — a troca de verdade só acontece no
 Descanso Longo (próxima entrega).
 
+## v202609_1015
+
+Corrigido de novo: o painel de Espaços de Magia da tela "Usar Magia"
+(Combate) estava ficando preso dentro da área da tela de magias
+(escondendo texto ou grudado no canto errado). Agora ele fica de
+verdade ancorado na tela toda, fora do container de magias.
+
+## v202609_0948
+
+Corrigido: o painel de Espaços de Magia da tela "Usar Magia" (Combate)
+agora fica fixo, ancorado à direita e centralizado na tela — antes ele
+rolava junto com a lista de magias, o que ficava ruim no celular.
+Também ficou maior (cabe 4 pips por linha).
+
+## v202609_0912
+
+Tela "Usar Magia" (Combate) — o resumo de Espaços de Magia, que ficava
+espremido em texto corrido no topo, virou um painel do lado direito da
+lista de magias (pips grandes, 1 linha por círculo), só nessa tela.
+
+## v202609_0102
+
+Rolagem de dados ficou mais completa: dano com 2+ dados agora mostra
+CADA dado individualmente (não só a soma). Talento Perfurador
+funciona de verdade — quem tem ele pode rerolar 1 dado de dano
+Perfurante à escolha (toca no dado, ou usa o botão quando é 1 dado
+só). Agressor, Esmagador, Sentinela e Talhador ficaram definidos como
+só texto (não vão ganhar cálculo automático).
+
 ## v202609_2248
 
 Aba Magias do Mago — Truques, Magias Preparadas e Livro de Magias

@@ -53,6 +53,49 @@
   opacity: 0.35;
 }
 
+/* Grid adaptável pra rolagem de 2+ dados (ver RollContext.tsx,
+   DadoIndividual) — SEMPRE 4 colunas, preenche esquerda→direita,
+   quebra linha sozinho quando passa de 4 (grid-auto-flow padrão).
+   Rolagem de 1 dado só continua usando .diceRow (sem grid), pra não
+   mudar a aparência de nada que já funciona. */
+.diceGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  max-width: 280px;
+}
+
+.dieGrid {
+  width: 56px;
+  height: 56px;
+  font-size: 19px;
+  margin: 0 auto;
+}
+
+.dieRerolavel {
+  cursor: pointer;
+  border-style: dashed;
+}
+
+.dieRerolavel:active {
+  opacity: 0.7;
+}
+
+/* 1 classe por tipo de dado suportado (d4/d6/d8/d10/d12/d20/d100) —
+   hoje todas com o mesmo visual (herdado de .die), só existem
+   separadas já prontas pra receber 1 arte própria por tipo depois
+   (background-image específico), sem precisar mexer na estrutura. */
+.dieTipo4,
+.dieTipo6,
+.dieTipo8,
+.dieTipo10,
+.dieTipo12,
+.dieTipo20,
+.dieTipo100 {
+  background: var(--panel2);
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg) scale(0.7);

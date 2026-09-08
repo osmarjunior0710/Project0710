@@ -4,6 +4,28 @@ type CritTipo = 'sucesso' | 'falha' | null;
 
 export type Vantagem = 'vantagem' | 'desvantagem';
 
+/** Tipos de dado suportados pelo grid de dados individuais (ver
+ * `RollState.dadosIndividuais`). d100 aqui é 1 rolagem de 1 a 100
+ * (na mesa costuma ser 2xd10 — "dado percentual" — mas o app rola
+ * direto, sem precisar de 2 dados físicos). */
+export type LadosDado = 4 | 6 | 8 | 10 | 12 | 20 | 100;
+
+/** 1 dado individual dentro de uma rolagem 'dados' com 2+ dados no
+ * total (mistura de tipos permitida — ex.: 1d20 + 1d4 + 1d6 na mesma
+ * rolagem, cada grupo com seu próprio `lados`). Só existe quando a
+ * rolagem tem 2+ dados; rolagem de 1 dado só continua usando
+ * `RollState.valorDado` direto (sem grid), pra não mexer no que já
+ * funciona. Ver `RollOverlay.tsx` — grid de 4 colunas, preenche
+ * esquerda→direita, quebra linha a cada 4. */
+export interface DadoIndividual {
+  /** Único dentro da rolagem — usado pra localizar o dado ao rerolar
+   * (ver `rerollDadoEscolhido`). Não precisa ser estável entre
+   * rolagens diferentes. */
+  id: string;
+  lados: LadosDado;
+  valor: number | '🎲';
+}
+
 /** Categoria da rolagem 'd20' — hoje só usada pra decidir se um bônus
  * extra registrado (ver `BonusExtraProvider`) pode aparecer nela.
  * "Teste de atributo" cobre perícia também (perícia É um teste de
@@ -90,6 +112,19 @@ export interface RollState {
   /** `true` = o jogador já usou o `rerollSe1` desta rolagem — só 1x,
    * mesmo que o novo resultado também seja 1. */
   rerollSe1Usado?: boolean;
+  /** Preenchido só quando a rolagem 'dados' tem 2+ dados no total —
+   * ver `DadoIndividual`. `undefined`/ausente = rolagem de 1 dado só
+   * (ou rolagem 'd20'), sem grid. */
+  dadosIndividuais?: DadoIndividual[];
+  /** Perfurador (Talento Geral) — rerolar 1 dado À ESCOLHA do
+   * jogador, independente do valor que saiu (diferente de
+   * `rerollSe1`, que só habilita quando saiu 1). Só faz sentido com
+   * `dadosIndividuais` presente (2+ dados) — com 1 dado só não teria
+   * "qual escolher", usa `rerollSe1` nesse caso. */
+  rerollEscolhido?: { rotulo: string } | null;
+  /** `true` = o jogador já usou o `rerollEscolhido` desta rolagem —
+   * só 1x, em QUALQUER um dos dados. */
+  rerollEscolhidoUsado?: boolean;
 }
 
 /** Inspiração Heroica — flag booleano por personagem (nunca contador,
@@ -126,9 +161,19 @@ interface RollDadosOptions {
   quantidade: number;
   lados: number;
   mod: number;
+  /** Grupos de dado de OUTROS tipos na MESMA rolagem — ex.: dano
+   * 1d20 + 1d4 + 1d6 vira `{ quantidade: 1, lados: 20 }` (principal)
+   * + `gruposExtras: [{ quantidade: 1, lados: 4 }, { quantidade: 1,
+   * lados: 6 }]`. Cada grupo aparece com seus próprios dados no grid
+   * (ver `DadoIndividual`/`RollOverlay.tsx`), sem misturar contagem
+   * com o grupo principal. Omitido = só o grupo principal. */
+  gruposExtras?: { quantidade: number; lados: LadosDado }[];
   /** Ver `RollState.rerollSe1` — só tem efeito quando `quantidade`
-   * é 1. */
+   * é 1 (e sem `gruposExtras`). */
   rerollSe1?: { rotulo: string };
+  /** Ver `RollState.rerollEscolhido` — só tem efeito com 2+ dados no
+   * total (`quantidade` + soma de `gruposExtras`). */
+  rerollEscolhido?: { rotulo: string };
   onResultado?: (total: number) => void;
 }
 
@@ -171,6 +216,15 @@ interface RollContextValue {
    * sair 1 (mesma regra do `usarSorte`, só que pra dano/cura em vez
    * de d20). */
   usarRerollSe1: () => void;
+  /** Joga de novo 1 dado À ESCOLHA do jogador (ver
+   * `RollState.rerollEscolhido`) — passe o `id` do `DadoIndividual`
+   * tocado (rolagem com grid, 2+ dados) ou omita (rolagem de 1 dado
+   * só, sem grid — mesmo botão do `rerollSe1`, sem exigir que o valor
+   * seja 1). Só tem efeito com reroll disponível, ainda não usado
+   * nesta rolagem, e o dado apontado com valor numérico (não durante
+   * a animação). Substitui o valor desse dado e recalcula o total —
+   * os outros dados (se houver) não mudam. */
+  rerollDadoEscolhido: (id?: string) => void;
   /** `true` só quando o personagem da tela atual tem Inspiração
    * Heroica agora — controla se o botão de reroll aparece em QUALQUER
    * d20 concluído (sem Vantagem/Desvantagem em jogo). */
@@ -301,40 +355,128 @@ export function RollProvider({ children }: { children: ReactNode }) {
     }, DURACAO_ANIMACAO_MS);
   }, []);
 
-  const rolarDados = useCallback(({ label, formula, quantidade, lados, mod, rerollSe1, onResultado }: RollDadosOptions) => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setEstado({
-      label,
-      formula,
-      fase: 'rolando',
-      tipo: 'dados',
-      valorDado: '🎲',
-      total: null,
-      critico: null,
-      podeEscolherVantagem: false,
-    });
-    timeoutRef.current = setTimeout(() => {
-      let soma = 0;
-      for (let i = 0; i < quantidade; i++) soma += 1 + Math.floor(Math.random() * lados);
-      const total = soma + mod;
-      // "reroll se 1" só faz sentido sabendo o valor de UM dado só —
-      // com mais de 1 dado, `soma` não diz qual deles saiu 1.
-      const umDadoSo = quantidade === 1;
+  const rolarDados = useCallback(
+    ({ label, formula, quantidade, lados, mod, gruposExtras, rerollSe1, rerollEscolhido, onResultado }: RollDadosOptions) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      // "reroll se 1"/reroll de 1 dado só fazem sentido sabendo o
+      // valor de UM dado só — com mais de 1 dado (ou grupos extras),
+      // vira o grid de `dadosIndividuais` (ver `DadoIndividual`).
+      const umDadoSo = quantidade === 1 && (!gruposExtras || gruposExtras.length === 0);
+      // Ordem: grupo principal primeiro, depois cada grupo extra na
+      // ordem passada — é a ordem em que aparecem no grid (esquerda→
+      // direita, 4 por linha).
+      const especificacaoDados: { lados: LadosDado }[] = umDadoSo
+        ? []
+        : [
+            ...Array.from({ length: quantidade }, () => ({ lados: lados as LadosDado })),
+            ...(gruposExtras ?? []).flatMap((g) => Array.from({ length: g.quantidade }, () => ({ lados: g.lados }))),
+          ];
       setEstado({
         label,
         formula,
-        fase: 'concluido',
+        fase: 'rolando',
         tipo: 'dados',
-        valorDado: umDadoSo ? soma : '💥',
-        total,
+        valorDado: '🎲',
+        total: null,
         critico: null,
         podeEscolherVantagem: false,
-        lados: umDadoSo ? lados : undefined,
-        mod: umDadoSo ? mod : undefined,
-        rerollSe1: umDadoSo ? (rerollSe1 ?? null) : null,
-        rerollSe1Usado: false,
+        dadosIndividuais: umDadoSo
+          ? undefined
+          : especificacaoDados.map((d, i) => ({ id: `d${i}`, lados: d.lados, valor: '🎲' })),
       });
-      onResultado?.(total);
+      timeoutRef.current = setTimeout(() => {
+        if (umDadoSo) {
+          const soma = 1 + Math.floor(Math.random() * lados);
+          const total = soma + mod;
+          setEstado({
+            label,
+            formula,
+            fase: 'concluido',
+            tipo: 'dados',
+            valorDado: soma,
+            total,
+            critico: null,
+            podeEscolherVantagem: false,
+            lados,
+            mod,
+            rerollSe1: rerollSe1 ?? null,
+            rerollSe1Usado: false,
+            // Perfurador com 1 dado só (arma comum em níveis baixos)
+            // reaproveita o botão de reroll de baixo — sem grid,
+            // sem exigir toque no dado (não tem ambiguidade de "qual
+            // dado" com 1 só). Ver `rerollDadoEscolhido`.
+            rerollEscolhido: rerollEscolhido ?? null,
+            rerollEscolhidoUsado: false,
+          });
+          onResultado?.(total);
+          return;
+        }
+        const dadosIndividuais: DadoIndividual[] = especificacaoDados.map((d, i) => ({
+          id: `d${i}`,
+          lados: d.lados,
+          valor: 1 + Math.floor(Math.random() * d.lados),
+        }));
+        const soma = dadosIndividuais.reduce((acc, d) => acc + (typeof d.valor === 'number' ? d.valor : 0), 0);
+        const total = soma + mod;
+        setEstado({
+          label,
+          formula,
+          fase: 'concluido',
+          tipo: 'dados',
+          valorDado: soma,
+          total,
+          critico: null,
+          podeEscolherVantagem: false,
+          mod,
+          dadosIndividuais,
+          rerollEscolhido: rerollEscolhido ?? null,
+          rerollEscolhidoUsado: false,
+        });
+        onResultado?.(total);
+      }, DURACAO_ANIMACAO_MS);
+    },
+    [],
+  );
+
+  /** `id` presente = rolagem com grid (2+ dados), reroleta só o dado
+   * apontado. `id` ausente = rolagem de 1 dado só (sem grid — ver
+   * `rolarDados`, ramo `umDadoSo`), reroleta o único dado
+   * (`valorDado`/`lados` no nível raiz do estado) — mesmo botão que
+   * já existe pro `rerollSe1`, só sem exigir que o valor seja 1. */
+  const rerollDadoEscolhido = useCallback((id?: string) => {
+    setEstado((prev) => {
+      if (!prev || prev.fase !== 'concluido' || prev.tipo !== 'dados') return prev;
+      if (!prev.rerollEscolhido || prev.rerollEscolhidoUsado) return prev;
+      if (id && prev.dadosIndividuais) {
+        const dado = prev.dadosIndividuais.find((d) => d.id === id);
+        if (!dado || typeof dado.valor !== 'number') return prev;
+        return {
+          ...prev,
+          dadosIndividuais: prev.dadosIndividuais.map((d) => (d.id === id ? { ...d, valor: '🎲' } : d)),
+          rerollEscolhidoUsado: true,
+        };
+      }
+      if (typeof prev.valorDado !== 'number') return prev;
+      return { ...prev, valorDado: '🎲', rerollEscolhidoUsado: true };
+    });
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setEstado((prev) => {
+        if (!prev || prev.tipo !== 'dados') return prev;
+        if (id && prev.dadosIndividuais) {
+          const dado = prev.dadosIndividuais.find((d) => d.id === id);
+          if (!dado) return prev;
+          const novoValor = 1 + Math.floor(Math.random() * dado.lados);
+          const novosDados = prev.dadosIndividuais.map((d) => (d.id === id ? { ...d, valor: novoValor } : d));
+          const soma = novosDados.reduce((acc, d) => acc + (typeof d.valor === 'number' ? d.valor : 0), 0);
+          const total = soma + (prev.mod ?? 0);
+          return { ...prev, dadosIndividuais: novosDados, total };
+        }
+        if (prev.lados === undefined) return prev;
+        const novoValor = 1 + Math.floor(Math.random() * prev.lados);
+        const total = novoValor + (prev.mod ?? 0);
+        return { ...prev, valorDado: novoValor, total };
+      });
     }, DURACAO_ANIMACAO_MS);
   }, []);
 
@@ -450,6 +592,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         registrarSorte,
         usarSorte,
         usarRerollSe1,
+        rerollDadoEscolhido,
         inspiracaoHeroicaDisponivel: inspiracaoHeroicaProvider?.disponivel ?? false,
         registrarInspiracaoHeroica,
         usarInspiracaoHeroica,

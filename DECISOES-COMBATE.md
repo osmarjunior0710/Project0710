@@ -379,11 +379,12 @@ nem guardava o valor de cada dado — só a soma total, mostrando sempre
 aceita `rerollSe1: { rotulo }` — se o resultado sair 1, o
 `RollOverlay` mostra um botão "🎲 {rotulo} — jogar de novo"
 (`usarRerollSe1` no contexto), mesmo padrão visual do botão de Sorte.
-Só funciona com 1 dado só de propósito: com `quantidade > 1` não dá
-pra saber qual dos dados saiu 1 sem guardar cada resultado
-individual, que não existe hoje (só a soma) — nenhum caso real do
-projeto ainda precisa disso (Ataque Desarmado e Cura Garantida são
-sempre 1 dado).
+Continua só com 1 dado só de propósito (não precisa saber "qual dado
+saiu 1" com mais de um) — mas o grid de `dadosIndividuais` (ver
+entrada abaixo, "Grid de dados individuais") resolveu a limitação
+geral de "só a soma, sem saber cada dado" pra quem precisar, então
+esse não é mais um teto técnico, só a escolha certa pra ESSE caso
+específico (reroll condicionado ao valor sair exatamente 1).
 
 **Como plugar num talento novo:** no `rolarDados({...})` da ação,
 passar `rerollSe1: { rotulo: 'Nome do Benefício' }` só quando o
@@ -401,6 +402,52 @@ emoji (`` `🗡 ${ataqueAtual.nome}` ``), então `DanoPendente.label` fica
 Comparação exata (`===`) falha silenciosamente aqui — use
 `.endsWith(...)` ou `.includes(...)` pra detectar o nome do ataque
 dentro do label sempre que precisar comparar por nome de novo.
+
+## Grid de dados individuais — rolagem de 2+ dados mostra cada um, não só a soma (2026-09)
+
+**Motivo:** pedido do Osmar pra "aprofundar a rolagem de dados" —
+rolagem de dano com 2+ dados só mostrava "💥" decorativo + a soma; sem
+saber o valor de CADA dado, não dá pra implementar nada que dependa de
+1 dado específico (reroll à escolha, futuras regras "maior/menor
+dado", etc.). Também pedido: suportar MISTURA de tipos na mesma
+rolagem (ex.: 1d20 + 1d4 + 1d6) e deixar definidos os 7 tipos de dado
+do jogo (d4/d6/d8/d10/d12/d20/d100 — d100 aqui é 1 rolagem direta de
+1-100, a mesa usa 2xd10 físicos, o app não precisa).
+
+**Mecanismo:** `RollState.dadosIndividuais?: DadoIndividual[]`
+(`{ id, lados, valor }`) — só existe quando a rolagem `'dados'` tem 2+
+dados no TOTAL (`quantidade` do grupo principal + soma dos
+`gruposExtras`, ver `RollDadosOptions.gruposExtras` pra misturar
+tipos). Rolagem de 1 dado só **não** ganha esse campo — continua
+exatamente como antes (`.diceRow` de sempre), decisão explícita do
+Osmar pra não mudar a aparência do que já funciona. `RollOverlay.tsx`
+escolhe o layout pelo campo: `dadosIndividuais` presente → grid
+(`.diceGrid`, CSS `grid-template-columns: repeat(4, 1fr)` — SEMPRE 4
+colunas, quebra linha sozinha via `grid-auto-flow` do CSS, sem lógica
+de quebra manual); ausente → `.diceRow` de sempre.
+
+**Arte por tipo de dado:** 1 classe CSS por `lados`
+(`.dieTipo4`...`.dieTipo100`), todas com o MESMO visual por enquanto
+(`CLASSE_POR_LADOS` em `RollOverlay.tsx`) — só existem separadas já
+prontas pra receber 1 `background-image` própria por tipo quando o
+Osmar desenhar a arte, sem precisar mexer na estrutura de novo.
+
+**Reroll de 1 dado À ESCOLHA (Perfurador)** — generaliza o
+`rerollSe1` acima pra "reroll de qualquer dado, independente do
+valor": `RollState.rerollEscolhido`/`rerollEscolhidoUsado` +
+`rerollDadoEscolhido(id?)` no contexto. Com grid (2+ dados), o
+jogador TOCA no dado que quer rerolar (`id` do `DadoIndividual`); com
+1 dado só, reaproveita o MESMO botão do `rerollSe1` (sem exigir que o
+valor seja 1) — Perfurador funciona nos 2 casos, já que a maioria das
+armas de nível baixo rola 1 dado só. `core/rerollDanoTalento.ts`
+(`temPerfurador`) + `AtaqueInfo.danoTipo` (já existia, só não
+chegava até o dado de dano) propagado através de `DanoPendente.tipoDano`
+até `CombatTab.rolarDanoPendente`, que só passa `rerollEscolhido`
+quando o dano é Perfurante.
+
+**Fora do escopo, registrado em Backlog.md:** "+1 dado extra no
+crítico" do Perfurador — depende de dano em crítico geral (dobrar os
+dados), que o app ainda não modela pra ataque nenhum.
 
 ## Magia/característica com múltiplos ataques discretos (feixes,
 ## rajadas) — simplificada pra 1 ataque + N dados de dano
@@ -477,4 +524,60 @@ ele já para no primeiro match).
 
 **Data/origem:** 2026-09, SDD fornecido pelo Osmar durante o foco de
 Talentos Fase 4 (Grupo C, entre B.2 e B.3).
+
+## "Usar Magia" (Combat) ganha painel de Espaços de Magia ancorado à direita — só nessa tela
+
+**Pedido do Osmar** ao ver a Tela 2 do fluxo "Usar Magia" (lista de
+Truques/Magias Preparadas) num Mago de nível alto: o resumo de
+Espaços ficava espremido em 1-2 linhas de texto corrido no topo
+("1º: 4/4 2º: 3/3..."), enquanto a aba Magias já tinha uma versão boa
+disso (pips grandes, 1 linha por círculo, seção "Espaços de Magia").
+Pedido: mostrar essa MESMA informação, só que num painel à DIREITA da
+lista, exclusivamente na Tela 2 do "Usar Magia" (não na aba Magias
+normal) — desaparece junto com a lista ao voltar/mudar de ideia.
+
+**Implementação:** `SelecionarMagiaShell.tsx` ganhou CSS próprio
+(`SelecionarMagiaShell.module.css`, não mexe no `LevelUpShell.module.css`
+compartilhado). O painel (`.painelEspacos`) usa `position: fixed`
+(mesma técnica do `.navLayer`/botão "Avançar" do Level Up) — ancorado
+à direita da tela, centralizado verticalmente (`top:50%` +
+`translateY(-50%)`), pra ficar sempre visível mesmo com a lista de
+magias rolando por baixo, em vez de rolar junto no fluxo normal do
+documento. Largo o suficiente pra caber 4 pips de `TickPips
+tamanho="sm"` por linha antes de quebrar. `.listCol` ganha
+`padding-right` pra nenhum texto da lista ficar embaixo do painel
+fixo. Testado com Mago nível 17 (9 círculos simultâneos) e nível 1 (1
+círculo só) — cabe nos dois casos em ~390px sem cortar a lista, e o
+painel se mantém parado na tela mesmo rolando a lista.
+
+**Achado técnico durante a correção — `position:fixed` preso ao
+drawer "Ação":** a tela "Usar Magia" abre de dentro do drawer lateral
+`SidePanel` (o painel que desliza ao tocar "Ação" na Combat), que usa
+`transform` (`SidePanel.module.css`, `.panelLeft`/`.panelRight`) pra
+animar o slide-in. Qualquer ancestral com `transform` vira o
+"containing block" de todo `position:fixed` descendente (regra do
+CSS, não bug do navegador) — por isso o `.screen` da tela "Usar
+Magia" (e tudo `fixed` dentro dela, como o `.painelEspacos`) fica
+preso à largura do drawer (~84% da tela), não à tela inteira. É
+exatamente o "gutter cinza" que aparecia à direita no celular do
+Osmar, mostrando um pedaço da Ficha por baixo. **Correção aplicada
+só no painel:** `createPortal(..., document.body)` — renderiza o
+`.painelEspacos` direto no `<body>`, fora da árvore do drawer, então
+`position:fixed` nele passa a valer contra a tela de verdade. O resto
+da tela "Usar Magia" (a lista de magias) continua preso à largura do
+drawer — não foi corrigido aqui porque o pedido do Osmar era só sobre
+o painel; se algum dia a lista também precisar ocupar a tela inteira,
+o mesmo `createPortal` resolve.
+**Padrão a reaproveitar:** qualquer elemento `position:fixed` que
+precise cobrir a tela inteira, mas que more (mesmo que indiretamente)
+dentro de um `SidePanel`/drawer com `transform`, precisa de
+`createPortal(..., document.body)` — não basta `position:fixed`
+sozinho.
+
+**Data/origem:** 2026-09, revisão pedida pelo Osmar depois do foco
+Mago (outra conta/branch) chegar na Combat — 1ª versão (painel dentro
+do flex row, rolando junto com a lista) foi corrigida pro fixed depois
+que o Osmar testou no celular; 2ª correção (portal pro `<body>`) saiu
+de uma investigação de por que o fixed ainda ficava preso a ~84% da
+largura mesmo ancorado — achado documentado acima.
 

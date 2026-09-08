@@ -277,10 +277,27 @@ Grupos propostos e aprovados pelo Osmar:
       aba Atributos mostra Furtividade proficiente e Intuição com ⭐;
       Guerreiro com Analítico → aba Combat mostra "Procurar" tanto no
       painel de Ação quanto no de Ação Bônus).
-- Resto (Agressor, Esmagador, Sentinela, Perfurador, Talhador, etc.)
-  fica bloqueado no Backlog.md — depende de um motor de combate com
-  tipo de dano/arma/posição que a Ficha ainda não modela (mesmo motivo
-  já registrado pro Atacante Selvagem em Backlog.md).
+- Agressor/Esmagador/Sentinela/Talhador — decidido NÃO implementar
+  (2026-09, mesmo espírito do B.3): ficam só como texto, o jogador
+  lembra sozinho na mesa. Motivo de cada um registrado em Backlog.md.
+- [x] **B.6 — Perfurador + grid de dados individuais**: pedido do
+      Osmar de "aprofundar a rolagem de dados" antes de arrumar o
+      Perfurador. Novo `RollState.dadosIndividuais` (`core`/ver
+      DECISOES-COMBATE.md "Grid de dados individuais") — rolagem de
+      dano com 2+ dados agora mostra cada dado (grid 4 colunas,
+      suporta mistura de tipos d4/d6/d8/d10/d12/d20/d100 na mesma
+      rolagem via `gruposExtras`), 1 dado só continua igual
+      (`.diceRow`, sem grid). Perfurador ganhou `efeitoMecanico:
+      'reroll-um-dado-de-dano'` — reroll de 1 dado à escolha (toca no
+      dado com 2+; botão direto com 1 só) quando o dano é Perfurante
+      (`AtaqueInfo.danoTipo` propagado até `DanoPendente.tipoDano`).
+      "+1 dado extra no crítico" (Perfurador) e "dano dobra em
+      crítico" (geral) ficaram de fora — app ainda não modela dano em
+      crítico nenhum, ver Backlog.md. Verificado: `tsc -b`/`npm test`
+      (304)/`npm run build` limpos + Playwright (Adaga 1d4 Perfurante
+      com Perfurador → botão "Perfurador — jogar de novo" aparece e
+      substitui o valor; Espada Grande 2d6 Cortante → grid mostra os
+      2 dados individuais, soma bate com o total).
 
 ### C. Penalidades por falta de proficiência (Armadura/Escudo/Arma)
 

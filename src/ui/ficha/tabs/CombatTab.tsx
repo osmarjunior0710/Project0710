@@ -135,6 +135,9 @@ interface CombatTabProps {
   /** Valentão de Taverna (Dano Garantido) — `true` = pode rerolar 1 no
    * dano do Ataque Desarmado. */
   danoDesarmadoRerollDisponivel: boolean;
+  /** Perfurador — `true` = pode rerolar 1 dado à escolha quando o dano
+   * causado for Perfurante (ver `core/rerollDanoTalento.ts`). */
+  perfuradorDisponivel: boolean;
   surtoMaximo: number;
   surtoRestantes: number;
   surtoUsadoTurno: boolean;
@@ -241,6 +244,7 @@ export default function CombatTab({
   pontosDeSorteRestantes,
   onUsarPontoDeSorte,
   danoDesarmadoRerollDisponivel,
+  perfuradorDisponivel,
   surtoMaximo,
   surtoRestantes,
   surtoUsadoTurno,
@@ -441,6 +445,7 @@ export default function CombatTab({
       quantidade: ataqueBonus.info.danoQuantidade,
       lados: ataqueBonus.info.danoLados,
       mod: ataqueBonus.info.danoMod,
+      tipoDano: ataqueBonus.info.danoTipo,
     });
   }
 
@@ -520,6 +525,7 @@ export default function CombatTab({
       lados: danoPendente.lados,
       mod: danoPendente.mod,
       rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
+      rerollEscolhido: perfuradorDisponivel && danoPendente.tipoDano === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
     });
   }
 
