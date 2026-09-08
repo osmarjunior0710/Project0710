@@ -35,6 +35,7 @@
 }
 
 .die {
+  position: relative;
   width: 64px;
   height: 64px;
   flex-shrink: 0;
@@ -47,6 +48,37 @@
   animation: spin var(--motion-emphasized) ease-out;
   background: var(--panel2);
   transition: opacity 0.2s ease;
+  overflow: hidden;
+}
+
+/* Arte de fundo do dado (ver DadoVisual em RollOverlay.tsx) — a
+   moldura genérica (borda/fundo sólido) some porque a arte já vem com
+   contorno próprio; o valor fica por cima com contraste garantido por
+   text-shadow, já que o fundo varia de cor por tipo de dado. */
+.die.dieComArte {
+  border: none;
+  background: transparent;
+}
+
+.dieArtImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.dieValue {
+  position: relative;
+  z-index: 1;
+}
+
+.dieComArte .dieValue {
+  color: #fff;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 5px rgba(0, 0, 0, 0.7);
 }
 
 .dieDescartado {
@@ -75,25 +107,14 @@
 
 .dieRerolavel {
   cursor: pointer;
-  border-style: dashed;
+  /* `outline` em vez de `border-style` — precisa aparecer mesmo com
+     `.dieComArte` (que zera o `border` pra não brigar com a arte). */
+  outline: 2px dashed var(--accent);
+  outline-offset: 2px;
 }
 
 .dieRerolavel:active {
   opacity: 0.7;
-}
-
-/* 1 classe por tipo de dado suportado (d4/d6/d8/d10/d12/d20/d100) —
-   hoje todas com o mesmo visual (herdado de .die), só existem
-   separadas já prontas pra receber 1 arte própria por tipo depois
-   (background-image específico), sem precisar mexer na estrutura. */
-.dieTipo4,
-.dieTipo6,
-.dieTipo8,
-.dieTipo10,
-.dieTipo12,
-.dieTipo20,
-.dieTipo100 {
-  background: var(--panel2);
 }
 
 @keyframes spin {
@@ -118,6 +139,16 @@
 .dieCritSuccess {
   border-color: #c9a13f;
   background: #f7ecd0;
+}
+
+/* Com arte de fundo, a moldura vira anel colorido em vez de
+   borda/fundo sólido (que já foi zerado por `.dieComArte`). */
+.die.dieComArte.dieCritFail {
+  box-shadow: 0 0 0 3px #c94f4f;
+}
+
+.die.dieComArte.dieCritSuccess {
+  box-shadow: 0 0 0 3px #c9a13f;
 }
 
 .formula {

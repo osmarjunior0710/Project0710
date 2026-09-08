@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1105
+
+Rolagem de dados ganhou arte de verdade: cada tipo (d4, d6, d8, d10,
+d12, d20 e d100) agora aparece com seu próprio "dado" desenhado, em
+vez do quadradinho genérico de antes — vale pra ataque, dano (dado
+único ou vários juntos) e qualquer outra rolagem.
+
 ## v202609_1042
 
 Level Up do Mago agora usa o Livro de Magias de verdade: a cada nível,

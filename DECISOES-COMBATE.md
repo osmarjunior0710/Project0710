@@ -426,11 +426,25 @@ escolhe o layout pelo campo: `dadosIndividuais` presente → grid
 colunas, quebra linha sozinha via `grid-auto-flow` do CSS, sem lógica
 de quebra manual); ausente → `.diceRow` de sempre.
 
-**Arte por tipo de dado:** 1 classe CSS por `lados`
-(`.dieTipo4`...`.dieTipo100`), todas com o MESMO visual por enquanto
-(`CLASSE_POR_LADOS` em `RollOverlay.tsx`) — só existem separadas já
-prontas pra receber 1 `background-image` própria por tipo quando o
-Osmar desenhar a arte, sem precisar mexer na estrutura de novo.
+**Arte por tipo de dado:** cada `lados` (4/6/8/10/12/20/100) tem sua
+própria arte (`src/assets/icones-dados/dado-dN.webp`, mesmo padrão
+WebP já usado pros emblemas de Classe/Origem/Espécie — PNG original
+convertido e redimensionado pra ~240×240, ~6-10 KB cada). `d100` usa
+a MESMA arte de "2×d10" (na mesa física seriam 2 d10; aqui o app rola
+1-100 direto numa jogada só, mas a arte mantém a referência visual do
+par). `IMG_POR_LADOS` (`RollOverlay.tsx`) mapeia `lados → import` e
+`DadoVisual` (componente interno) renderiza a arte como `<img>`
+absoluto atrás do valor (`.dieArtImg`), com o número por cima em texto
+branco + `text-shadow` (contraste garante legibilidade em qualquer cor
+de fundo). Molduras antigas (borda sólida, fundo cinza) somem quando
+há arte (`.dieComArte`); acerto/falha crítica e o contorno tracejado
+de "dá pra rerolar" (Perfurador) viram anel (`box-shadow`/`outline`)
+em vez de cor de fundo, pra não brigar visualmente com a arte. Vale
+pro grid (2+ dados) E pra rolagem de 1 dado só (`.diceRow`) — inclusive
+d20 de ataque/perícia/salvaguarda e o "bônus extra" (Inspiração
+Divina, Ajuda Duplicada etc.). Um `lados` fora da lista (ex.: Ataque
+Desarmado é "1d1", sem dado físico de verdade) simplesmente não ganha
+arte — cai de volta na moldura genérica antiga, sem quebrar nada.
 
 **Reroll de 1 dado À ESCOLHA (Perfurador)** — generaliza o
 `rerollSe1` acima pra "reroll de qualquer dado, independente do

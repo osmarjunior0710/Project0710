@@ -1,19 +1,46 @@
 import { useRoll, type LadosDado } from './RollContext';
 import styles from './RollOverlay.module.css';
+import dadoD4 from '../../assets/icones-dados/dado-d4.webp';
+import dadoD6 from '../../assets/icones-dados/dado-d6.webp';
+import dadoD8 from '../../assets/icones-dados/dado-d8.webp';
+import dadoD10 from '../../assets/icones-dados/dado-d10.webp';
+import dadoD12 from '../../assets/icones-dados/dado-d12.webp';
+import dadoD20 from '../../assets/icones-dados/dado-d20.webp';
+import dadoD100 from '../../assets/icones-dados/dado-d100.webp';
 
-/** Classe CSS por tipo de dado — hoje todas apontam pro mesmo visual
- * (`.dieTipo`), só existem separadas já prontas pra receber 1 arte
- * própria por tipo depois (o Osmar vai desenhar), sem precisar mexer
- * na estrutura de novo. */
-const CLASSE_POR_LADOS: Record<LadosDado, string> = {
-  4: styles.dieTipo4,
-  6: styles.dieTipo6,
-  8: styles.dieTipo8,
-  10: styles.dieTipo10,
-  12: styles.dieTipo12,
-  20: styles.dieTipo20,
-  100: styles.dieTipo100,
+/** Arte por tipo de dado — d100 usa a mesma arte de "2×d10" (na mesa
+ * real seria 2 d10 físicos; aqui rolamos 1-100 direto, mas a arte
+ * representa o par). */
+const IMG_POR_LADOS: Record<LadosDado, string> = {
+  4: dadoD4,
+  6: dadoD6,
+  8: dadoD8,
+  10: dadoD10,
+  12: dadoD12,
+  20: dadoD20,
+  100: dadoD100,
 };
+
+function artePorLados(lados: number | undefined): string | undefined {
+  return lados !== undefined && lados in IMG_POR_LADOS ? IMG_POR_LADOS[lados as LadosDado] : undefined;
+}
+
+interface DadoVisualProps {
+  valor: number | string;
+  lados?: number;
+  className?: string;
+  onClick?: () => void;
+}
+
+function DadoVisual({ valor, lados, className, onClick }: DadoVisualProps) {
+  const arte = artePorLados(lados);
+  return (
+    <div className={`${styles.die} ${arte ? styles.dieComArte : ''} ${className ?? ''}`} onClick={onClick}>
+      {arte && <img src={arte} alt="" className={styles.dieArtImg} />}
+      <span className={styles.dieValue}>{valor}</span>
+    </div>
+  );
+}
 
 export default function RollOverlay() {
   const {
@@ -45,6 +72,9 @@ export default function RollOverlay() {
     dado1Descartado = dado1Num !== usado;
     dado2Descartado = dado2Num !== usado;
   }
+  // Só 'd20' tem par de dados (Vantagem/Desvantagem) — o 2º dado é
+  // sempre outro d20, nunca guardado à parte no estado.
+  const ladosDadoPrincipal = estado.tipo === 'd20' ? 20 : estado.lados;
 
   return (
     <div className={styles.overlay} onClick={fechar}>
@@ -59,25 +89,25 @@ export default function RollOverlay() {
                 !estado.rerollEscolhidoUsado &&
                 typeof d.valor === 'number';
               return (
-                <div
+                <DadoVisual
                   key={d.id}
-                  className={`${styles.die} ${styles.dieGrid} ${CLASSE_POR_LADOS[d.lados]} ${podeRerolar ? styles.dieRerolavel : ''}`}
+                  valor={d.valor}
+                  lados={d.lados}
+                  className={`${styles.dieGrid} ${podeRerolar ? styles.dieRerolavel : ''}`}
                   onClick={podeRerolar ? () => rerollDadoEscolhido(d.id) : undefined}
-                >
-                  {d.valor}
-                </div>
+                />
               );
             })}
           </div>
         ) : (
           <div className={styles.diceRow}>
-            <div className={`${styles.die} ${dado1Descartado ? styles.dieDescartado : critClass}`}>
-              {estado.valorDado}
-            </div>
+            <DadoVisual
+              valor={estado.valorDado}
+              lados={ladosDadoPrincipal}
+              className={dado1Descartado ? styles.dieDescartado : critClass}
+            />
             {temSegundoDado && (
-              <div className={`${styles.die} ${dado2Descartado ? styles.dieDescartado : critClass}`}>
-                {estado.dado2}
-              </div>
+              <DadoVisual valor={estado.dado2 ?? ''} lados={20} className={dado2Descartado ? styles.dieDescartado : critClass} />
             )}
           </div>
         )}
@@ -161,7 +191,7 @@ export default function RollOverlay() {
               +1d{estado.bonusExtra.lados} ({estado.bonusExtra.rotulo})
             </div>
             <div className={styles.diceRow}>
-              <div className={`${styles.die} ${styles.dieBonusExtra}`}>{estado.bonusExtra.valor}</div>
+              <DadoVisual valor={estado.bonusExtra.valor} lados={estado.bonusExtra.lados} className={styles.dieBonusExtra} />
             </div>
           </>
         )}
