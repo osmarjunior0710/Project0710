@@ -13,6 +13,23 @@ Mago, maior que as magias do dia a dia): escolhe 6 magias de 1º
 círculo pro livro e depois só 4 delas ficam preparadas. Ainda não dá
 pra jogar com ele na Ficha/Combate — isso vem numa próxima entrega.
 
+## v202609_2018
+
+Talentos Gerais — Analítico, Mente Aguçada e Especialista em Perícia
+agora funcionam de verdade: no Level Up, dão proficiência ou
+Especialização numa perícia (perícia livre ou de uma lista fixa,
+dependendo do talento), e Analítico/Mente Aguçada também liberam
+Procurar/Analisar como Ação Bônus na aba Combate — sem sumir da lista
+de Ação normal, você escolhe qual usar a cada turno.
+
+## v202609_1859
+
+Corrigido: quem tem Conjurador Ritualista E Espaços de Magia de
+verdade (não só Guerreiro) não fica mais travado depois de usar o
+Ritual Rápido — a magia Ritual agora mostra os 2 botões lado a lado
+("Grátis" e "Usar"), e gastar o grátis não bloqueia conjurar de novo
+pagando um Espaço.
+
 ## v202609_1832
 
 Aba Magias — as magias Rituais do Conjurador Ritualista (Alarme/

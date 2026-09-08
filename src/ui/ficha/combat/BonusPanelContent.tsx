@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
+import type { AcaoBase } from '../../../data/exampleCombat';
 import TickPips from '../../components/TickPips';
 import styles from './PanelRows.module.css';
 
@@ -61,6 +62,12 @@ interface BonusPanelContentProps {
   danoBonusRevelacaoCelestial: number;
   cdMantoNecrotico: number;
   onUsarRevelacaoCelestial: (formaEscolhida: string) => void;
+  /** Ações genéricas do Cap. 1 (ex.: Procurar/Analisar) que algum
+   * Talento Geral (Analítico/Mente Aguçada) também libera como Ação
+   * Bônus — não substituem a lista de Ação normal, o jogador escolhe
+   * qual usar a cada turno. Vazio = nenhum talento desse tipo. */
+  acoesGenericasBonus: AcaoBase[];
+  onEscolher: (nome: string, desc: string) => void;
 }
 
 export default function BonusPanelContent({
@@ -102,6 +109,8 @@ export default function BonusPanelContent({
   danoBonusRevelacaoCelestial,
   cdMantoNecrotico,
   onUsarRevelacaoCelestial,
+  acoesGenericasBonus,
+  onEscolher,
 }: BonusPanelContentProps) {
   const [escolhendoFormaRevelacao, setEscolhendoFormaRevelacao] = useState(false);
 
@@ -114,7 +123,8 @@ export default function BonusPanelContent({
     !saltoDaNuvemDisponivel &&
     !formaGrandeDisponivel &&
     !revelacaoCelestialDisponivel &&
-    !ataqueBonus
+    !ataqueBonus &&
+    acoesGenericasBonus.length === 0
   ) {
     return (
       <div className="box" style={{ padding: 14, color: 'var(--text-faint)', fontSize: 12, textAlign: 'center' }}>
@@ -422,6 +432,14 @@ export default function BonusPanelContent({
           )}
         </>
       )}
+      {acoesGenericasBonus.map((a) => (
+        <div key={a.nome} className={styles.row} onClick={() => onEscolher(`${a.icone} ${a.nome}`, a.desc)}>
+          <div className={styles.rowName}>
+            {a.icone} {a.nome}
+          </div>
+          {detalhesAtivo && <div className={styles.rowDesc}>{a.desc}</div>}
+        </div>
+      ))}
     </>
   );
 }

@@ -135,15 +135,32 @@ export type EfeitoMecanicoTalento =
    * Level Up. Ver `core/magiaTalentoGeral.ts`. */
   | { tipo: 'magia-escolhida-por-escola'; escolas: string[]; magiaFixa: string }
   /** Concede N magias de 1º círculo com tag Ritual, ESCOLHIDAS pelo
-   * jogador (Conjurador Ritualista) — N = Bônus de Proficiência no
-   * momento da escolha (ver `core/magiaTalentoGeral.ts`,
-   * `quantidadeMagiasRituais`). Diferente de `magia-escolhida-por-
-   * escola`: sem magia fixa, e "Ritual Rápido" (1 uso grátis
-   * COMPARTILHADO entre todas, não por-magia) ainda não implementado
-   * — ver Backlog.md. Crescimento automático quando o Bônus de
-   * Proficiência sobe de novo (regra real) também não implementado —
-   * a contagem fica fixa no valor de quando o talento foi pego. */
-  | { tipo: 'magias-rituais-por-proficiencia' };
+   * jogador (Conjurador Ritualista) — N = Bônus de Proficiência ATUAL,
+   * cresce sozinho quando ele sobe de novo (ver `core/
+   * magiaTalentoGeral.ts`, `quantidadeMagiasRituais`, e o passo
+   * `talentoMagia` do `LevelUpShell` — reoferece a escolha em
+   * qualquer level-up futuro onde o total crescer). "Ritual Rápido" (1
+   * uso grátis COMPARTILHADO entre todas, não por-magia) é
+   * `temRitualRapido`/`CHAVE_RITUAL_RAPIDO`, também em
+   * `core/magiaTalentoGeral.ts`. */
+  | { tipo: 'magias-rituais-por-proficiencia' }
+  /** Escolhe 1 perícia de uma lista RESTRITA (Analítico: Intuição/
+   * Investigação/Percepção; Mente Aguçada: Arcanismo/História/
+   * Investigação/Natureza/Religião) — vira proficiência se o
+   * personagem ainda não é proficiente nela, ou Especialização
+   * (dobra o Bônus de Proficiência) se já era. Além disso, a ação
+   * genérica `acaoVirouBonus` (Cap. 1) passa a estar disponível TAMBÉM
+   * como Ação Bônus, sem sumir da lista de Ação normal — o jogador
+   * escolhe qual usar a cada turno. Ver `core/periciaTalentoGeral.ts`. */
+  | { tipo: 'pericia-restrita-ou-especializacao'; pericias: string[]; acaoVirouBonus: string }
+  /** Especialista em Perícia: 1 perícia LIVRE (qualquer uma, vira
+   * proficiência — reaproveita o mesmo `concedeProficiencias` do
+   * Habilidoso, só que escolhido no Level Up em vez do Wizard) MAIS 1
+   * Especialização numa perícia que já seja proficiente (reaproveita a
+   * MESMA vaga do "Especialista" de classe, ver `periciasEspecialistaAtual`
+   * — só soma +1 vaga quando esse talento é escolhido). As duas
+   * escolhas são independentes entre si. Ver `core/periciaTalentoGeral.ts`. */
+  | { tipo: 'pericia-livre-mais-especializacao' };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -344,6 +361,11 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: ['INT', 'SAB'], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['SAB', 'CAR'], maximo: 20 },
+    efeitoMecanico: {
+      tipo: 'pericia-restrita-ou-especializacao',
+      pericias: ['Intuição', 'Investigação', 'Percepção'],
+      acaoVirouBonus: 'Procurar',
+    },
     beneficios: "Escolhe Intuição/Investigação/Percepção: ganha proficiência ou Especialização. Ação Procurar vira Ação Bônus.",
     pagina: 203,
     fonte: "PHB 2024",
@@ -535,6 +557,8 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'DES', 'CON', 'INT', 'SAB', 'CAR'], maximo: 20 },
+    concedeProficiencias: { quantidade: 1, tipos: ['pericia'] },
+    efeitoMecanico: { tipo: 'pericia-livre-mais-especializacao' },
     beneficios: "+1 em qualquer atributo. Proficiência em 1 perícia à escolha. Especialização numa perícia que já tenha proficiência.",
     pagina: 206,
     fonte: "PHB 2024",
@@ -579,6 +603,11 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: ['INT'], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['INT'], maximo: 20 },
+    efeitoMecanico: {
+      tipo: 'pericia-restrita-ou-especializacao',
+      pericias: ['Arcanismo', 'História', 'Investigação', 'Natureza', 'Religião'],
+      acaoVirouBonus: 'Analisar',
+    },
     beneficios: "Escolhe Arcanismo/História/Investigação/Natureza/Religião: proficiência ou Especialização. Ação Analisar vira Ação Bônus.",
     pagina: 206,
     fonte: "PHB 2024",

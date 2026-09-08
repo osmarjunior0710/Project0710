@@ -5,6 +5,7 @@ import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
+import type { AcaoBase } from '../../../data/exampleCombat';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import { calcularDanoMagia, atributoSalvaguarda } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
@@ -107,6 +108,12 @@ interface CombatTabProps {
   danoBonusRevelacaoCelestial: number;
   cdMantoNecrotico: number;
   onUsarRevelacaoCelestial: (formaEscolhida: string) => boolean;
+  /** Ações genéricas do Cap. 1 (ex.: Procurar/Analisar) que algum
+   * Talento Geral (Analítico/Mente Aguçada) também libera como Ação
+   * Bônus — continuam disponíveis na lista de Ação normal também, o
+   * jogador escolhe qual usar a cada turno. Vazio = nenhum talento
+   * desse tipo. */
+  acoesGenericasBonus: AcaoBase[];
   /** Falar com Animais - Traço de Gnomo (Gnomo do Bosque) — `false` =
    * não é essa sub-escolha. */
   falarComAnimaisGnomoDisponivel: boolean;
@@ -216,6 +223,7 @@ export default function CombatTab({
   danoBonusRevelacaoCelestial,
   cdMantoNecrotico,
   onUsarRevelacaoCelestial,
+  acoesGenericasBonus,
   falarComAnimaisGnomoDisponivel,
   usosFalarComAnimaisGnomoMaximo,
   usosFalarComAnimaisGnomoRestantes,
@@ -912,6 +920,8 @@ export default function CombatTab({
             danoBonusRevelacaoCelestial={danoBonusRevelacaoCelestial}
             cdMantoNecrotico={cdMantoNecrotico}
             onUsarRevelacaoCelestial={usarRevelacaoCelestial}
+            acoesGenericasBonus={acoesGenericasBonus}
+            onEscolher={(nome, desc) => escolherNoPainel('bonus', nome, desc)}
             ataqueBonus={ataqueBonus}
             onUsarAtaqueBonus={usarAtaqueMaoSecundaria}
             usosInspiracaoMaximo={usosInspiracaoMaximo}

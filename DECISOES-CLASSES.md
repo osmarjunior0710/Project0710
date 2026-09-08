@@ -938,3 +938,56 @@ criar array de estado novo.
 
 **Data/origem:** 2026-09, foco Talentos Fase 4 (Grupo B, B.4.3 —
 Conjurador Ritualista, pedaço "Ritual Rápido").
+
+## `LevelUpShell` — passo cuja existência depende do talento ESCOLHIDO NESTE level-up nunca pode entrar ANTES de `asi` no array `luSteps`
+
+**Bug real encontrado no B.5** (Especialista em Perícia): o passo
+`especialista` ganhou uma condição extra pra aparecer quando esse
+talento é escolhido (`concedeEspecializacaoExtra`), e foi colocado no
+topo do array (antes do bloco de `asi`, junto de
+`especialistaDisparaAgora`). Resultado: no instante em que o jogador
+tocava no talento (ainda DENTRO do passo `asi`), o array mudava de
+tamanho ANTES do índice de `asi` — como `luIndex` é só um número fixo,
+o passo exibido "pulava" sozinho pra `especialista` no meio da
+escolha, sem o jogador clicar "Avançar".
+
+**Regra permanente:** qualquer passo cuja presença no array depende do
+talento escolhido NESTE MESMO level-up (`talentoObjEscolhido`/
+`tipoEfeitoTalentoEscolhido`) só pode ser empurrado DEPOIS do passo
+`asi` — nunca antes, mesmo que o passo já existisse por outro motivo
+(ex.: característica de classe). Padrão já certo antes disso:
+`asiAtributo`/`talentoMagia` (Grupo B.4) e `precisaCrescerMagiaRitual`
+ficando fora do bloco de ASI de propósito. Ao adicionar uma condição
+nova a um passo que já existe por outro gatilho (ex.: `especialista`
+por classe), mover o push pra depois do bloco de `asi` em vez de só
+adicionar `|| condicaoDoTalento` na linha antiga.
+
+**Data/origem:** 2026-09, foco Talentos Fase 4 (Grupo B, B.5 —
+Especialista em Perícia).
+
+## Ação genérica (Cap. 1) "vira Ação Bônus" — mantém nas DUAS listas, jogador escolhe qual gasta
+
+Analítico/Mente Aguçada dizem "Ação Procurar/Analisar vira Ação
+Bônus" — decisão do Osmar: a ação NÃO desaparece da lista de Ação
+normal, só passa a aparecer TAMBÉM na lista de Ação Bônus (o jogador
+escolhe qual recurso do turno gastar a cada vez, ex.: usar a Ação
+Bônus pra Recuperar Fôlego e ainda assim fazer Procurar como Ação).
+
+**Implementação:** `core/periciaTalentoGeral.ts`
+(`acoesConvertidasEmBonus`) varre os Talentos Gerais atuais e retorna
+os nomes das ações do Cap. 1 liberadas; `FichaShell` filtra
+`data/exampleCombat.ts` (`acoesBase`) por esses nomes e passa pro
+`BonusPanelContent`, que reaproveita o MESMO formato de linha já usado
+em `AcaoPanelContent`/`ReacaoPanelContent` pras 9 ações genéricas.
+
+**Achado no caminho:** `BonusPanelContent` nunca tinha um `onEscolher`
+ligado a `escolherNoPainel` (diferente de `AcaoPanelContent`/
+`ReacaoPanelContent`) — cada item de Ação Bônus tinha seu PRÓPRIO
+handler de estado (`onUsarRecuperarFolego` etc.), sem marcar o recurso
+"Ação Bônus" do turno como usado. Pra essas ações genéricas ligar o
+`onEscolher={(nome, desc) => escolherNoPainel('bonus', nome, desc)}`
+foi necessário adicionar o prop novo — os outros itens da Ação Bônus
+continuam com seus handlers próprios, sem mudança de comportamento.
+
+**Data/origem:** 2026-09, foco Talentos Fase 4 (Grupo B, B.5 —
+Analítico/Mente Aguçada).

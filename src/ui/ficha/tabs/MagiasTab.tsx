@@ -648,17 +648,20 @@ export default function MagiasTab({
           <div className="section-title">Magias de Talentos Gerais</div>
           <div className="label" style={{ marginBottom: 4 }}>
             Sempre preparadas, não contam na conta de Magias Preparadas.
-            {ritualRapidoDisponivel && ' Botão roxo = usa o Ritual Rápido (grátis, 1 uso compartilhado).'}
+            {ritualRapidoDisponivel &&
+              ' Botão roxo "Grátis" = usa o Ritual Rápido (1 uso compartilhado); "Usar" continua gastando Espaço normal.'}
           </div>
           {magiasTalentoGeral.map((m) => {
             const semEspaco = m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             // Elegível pro pool do Ritual Rápido (Conjurador Ritualista) —
             // só as magias com tag Ritual, e só quando o personagem tem
-            // o talento. Aqui o botão passa a SER a ativação do Ritual
-            // Rápido pra essa magia (não conjura mais gastando Espaço) —
-            // gasta o mesmo 1 uso compartilhado da seção dedicada logo
-            // abaixo (mesmo estado, `ritualRapidoGasto`).
+            // o talento. Mostra os DOIS botões lado a lado: "Grátis"
+            // ativa o Ritual Rápido (1 uso compartilhado, ver
+            // `onUsarRitualRapido`); "Usar" continua conjurando normal
+            // gastando Espaço — quem tem Espaço sobrando (ex.: um
+            // conjurador de verdade com esse talento, não só um
+            // Guerreiro) não fica travado depois de gastar o grátis.
             const elegivelRitualRapido = ritualRapidoDisponivel && m.tempoConjuracao?.includes('Ritual');
             return (
               <div key={m.id} className={styles.spellRow}>
@@ -667,11 +670,21 @@ export default function MagiasTab({
                 </div>
                 <span className={styles.spellCirculo}>{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
                 {elegivelRitualRapido ? (
-                  <div
-                    className={`${styles.usarBtn} ${styles.usarBtnRitual} ${ritualRapidoGasto ? styles.usarBtnDesabilitado : ''}`}
-                    onClick={() => !ritualRapidoGasto && onUsarRitualRapido()}
-                  >
-                    {ritualRapidoGasto ? 'Usada' : 'Usar grátis'}
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <div
+                      className={`${styles.usarBtn} ${styles.usarBtnRitual} ${ritualRapidoGasto ? styles.usarBtnDesabilitado : ''}`}
+                      style={{ minWidth: 0, padding: '0 var(--space-2)' }}
+                      onClick={() => !ritualRapidoGasto && onUsarRitualRapido()}
+                    >
+                      {ritualRapidoGasto ? 'Usada' : 'Grátis'}
+                    </div>
+                    <div
+                      className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                      style={{ minWidth: 0, padding: '0 var(--space-2)' }}
+                      onClick={() => temAcao && usarMagia(m)}
+                    >
+                      {temAcao ? 'Usar' : 'Pendência'}
+                    </div>
                   </div>
                 ) : (
                   <div

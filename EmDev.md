@@ -219,24 +219,64 @@ Grupos propostos e aprovados pelo Osmar:
         (2/3)" com Alarme/Identificar travadas como "já escolhida" →
         escolhe Detectar Magia → confirma → aba Magias mostra as 3
         magias sempre preparadas).
-  - [x] **B.4.3.2 — Botão "Usar grátis" nas magias Rituais elegíveis**
-        (pedido do Osmar ao ver o Ritual Rápido pronto, evoluído em 2
-        rodadas): na seção "Magias de Talentos Gerais", a magia com
-        tag Ritual (`elegivelRitualRapido = ritualRapidoDisponivel &&
-        m.tempoConjuracao?.includes('Ritual')`) ganha botão PRÓPRIO
-        "Usar grátis" (mesma cor roxa do pip do Ritual Rápido,
-        `usarBtnRitual`) que ATIVA direto o Ritual Rápido pra aquela
-        magia (`onUsarRitualRapido`) — não precisa mais descer até o
-        botão genérico da seção dedicada. Como é o MESMO uso
-        compartilhado (`ritualRapidoGasto`), usar em qualquer uma trava
-        as outras E o botão genérico junto (mesmo estado, sem
-        duplicar). Verificado: `tsc -b`/`npm test` (290)/`npm run
-        build` limpos + Playwright (Alarme e Identificar mostram "Usar
-        grátis" roxo → toca em Alarme → os 2 viram "Usada" e o botão
-        "Usar Ritual Rápido" logo abaixo desativa junto).
-- [ ] **B.5 — Escolha de perícia**: Analítico, Mente Aguçada,
-      Especialista em Perícia — reaproveita o padrão do Habilidoso
-      (`concedeProficiencias`).
+  - [x] **B.4.3.2 — Botão "Grátis" nas magias Rituais elegíveis, sem
+        perder o "Usar" normal** (pedido do Osmar ao ver o Ritual
+        Rápido pronto, evoluído em 3 rodadas — a 2ª versão tinha
+        REMOVIDO sem querer o jeito de conjurar gastando Espaço pra
+        quem tem Espaços de verdade, ex.: um conjurador de verdade com
+        esse talento, não só Guerreiro): na seção "Magias de Talentos
+        Gerais", a magia com tag Ritual
+        (`elegivelRitualRapido = ritualRapidoDisponivel &&
+        m.tempoConjuracao?.includes('Ritual')`) mostra os DOIS botões
+        lado a lado — "Grátis" (roxo, `usarBtnRitual`, ativa o Ritual
+        Rápido pra essa magia, `onUsarRitualRapido`) e "Usar" (segue
+        gastando Espaço normal, `usarMagia`) — independentes: gastar o
+        grátis não trava o "Usar" de quem tem Espaço sobrando. "Grátis"
+        e o botão genérico da seção "Ritual Rápido" continuam
+        compartilhando o mesmo estado (`ritualRapidoGasto`). Verificado:
+        `tsc -b`/`npm test` (290)/`npm run build` limpos + Playwright
+        (Bardo com Conjurador Ritualista e Espaços de 1º círculo
+        sobrando → Alarme mostra "Grátis"+"Usar" lado a lado → toca
+        "Grátis" → vira "Usada" (cinza) mas "Usar" continua ativo,
+        pronto pra gastar Espaço de verdade).
+- [x] **B.5 — Escolha de perícia**: Analítico, Mente Aguçada,
+      Especialista em Perícia. 2 `efeitoMecanico` novos:
+      `pericia-restrita-ou-especializacao` (Analítico/Mente Aguçada —
+      1 perícia de lista fixa, vira proficiência ou Especialização
+      dependendo se o personagem já era proficiente nela — decidido no
+      `FichaShell`, comparando com o estado ANTES do level-up) e
+      `pericia-livre-mais-especializacao` (Especialista em Perícia — 1
+      perícia LIVRE via `concedeProficiencias` do próprio talento,
+      ligado agora também no Level Up além do Wizard, MAIS 1
+      Especialização independente, reaproveitando a MESMA vaga do
+      "Especialista" de classe do Bardo, só soma +1 quando o talento é
+      escolhido). Novo campo `PersonagemSalvo.periciasTalentoGeralAtual`
+      (mesmo tratamento de `periciasSubclasseBonusAtual`, junta no
+      mesmo `periciasBonusExtras` de `calcularPericias`). 2 passos
+      novos no `LevelUpShell` (`periciaLivreTalento`/
+      `periciaRestritaTalento`), sempre DEPOIS do passo `asi` no array
+      (nunca antes — bug real encontrado e corrigido: empurrar
+      `especialista` pra antes de `asi` quando o talento concede vaga
+      extra fazia o `luIndex` "pular" de passo no instante em que o
+      talento era escolhido, porque o array mudava de tamanho ANTES do
+      índice de `asi`; corrigido movendo o push de `especialista` pra
+      DEPOIS do bloco de ASI, mesmo padrão já usado por
+      `precisaCrescerMagiaRitual`). "Ação vira Ação Bônus" (Procurar/
+      Analisar): pedido do Osmar foi manter nas DUAS listas (Ação
+      normal E Ação Bônus, jogador escolhe qual gasta a cada turno) —
+      nova função `acoesConvertidasEmBonus` (`core/
+      periciaTalentoGeral.ts`) filtra `acoesBase` (Cap. 1) e
+      `BonusPanelContent` ganhou seção própria pra elas, com
+      `onEscolher` ligado ao MESMO `escolherNoPainel('bonus', ...)`
+      que a Ação/Reação já usavam (antes só a Ação/Reação marcavam o
+      recurso do turno como usado; Ação Bônus não tinha esse fio
+      ligado pra nenhum item — agora tem, só pras ações genéricas).
+      Verificado: `tsc -b`/`npm test` (301)/`npm run build` limpos +
+      Playwright (Guerreiro pega Especialista em Perícia → escolhe
+      Furtividade como perícia livre + Intuição como Especialização →
+      aba Atributos mostra Furtividade proficiente e Intuição com ⭐;
+      Guerreiro com Analítico → aba Combat mostra "Procurar" tanto no
+      painel de Ação quanto no de Ação Bônus).
 - Resto (Agressor, Esmagador, Sentinela, Perfurador, Talhador, etc.)
   fica bloqueado no Backlog.md — depende de um motor de combate com
   tipo de dano/arma/posição que a Ficha ainda não modela (mesmo motivo

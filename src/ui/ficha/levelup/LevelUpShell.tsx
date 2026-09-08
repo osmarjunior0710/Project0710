@@ -37,6 +37,7 @@ import DistribuirPontosAtributo from '../../components/DistribuirPontosAtributo'
 import { useAvisoTemporario } from '../../hooks/useAvisoTemporario';
 import { talentos } from '../../../data/rulesets/dnd2024/talentos';
 import { opcoesMagiaEscolhidaPorEscola, opcoesMagiasRituais, quantidadeMagiasRituais } from '../../../core/magiaTalentoGeral';
+import { opcoesPericiaRestrita } from '../../../core/periciaTalentoGeral';
 import TelaEscolherTalento from './TelaEscolherTalento';
 import TrocarValorSimples from '../../components/TrocarValorSimples';
 import styles from './LevelUpShell.module.css';
@@ -90,6 +91,18 @@ interface LevelUpShellProps {
      * 1 entrada `{ [talentoId]: magiasEscolhidas }`. `null` = nenhuma
      * escolha desse tipo nesse level-up. */
     escolhaMagiaTalentoGeral: Record<string, string[]> | null;
+    /** Só preenchido quando o Talento Geral ESCOLHIDO NESTE level-up
+     * for Especialista em Perícia — 1 perícia LIVRE (qualquer uma,
+     * ainda não proficiente) que vira proficiência de verdade. `null`
+     * = talento não escolhido nesse level-up. */
+    periciaLivreTalentoEscolhida: string | null;
+    /** Só preenchido quando o Talento Geral ESCOLHIDO NESTE level-up
+     * for Analítico/Mente Aguçada — 1 perícia da lista restrita do
+     * talento (nome bruto; o `FichaShell` decide se vira proficiência
+     * ou Especialização, comparando com o que o personagem já tinha
+     * ANTES desse level-up). `null` = talento não escolhido nesse
+     * level-up. */
+    periciaRestritaTalentoEscolhida: string | null;
   }) => void;
   /** Controlado pelo `FichaShell` (persistido junto com o resto do
    * progresso) em vez de estado local — uma vez rolado o dado de
@@ -181,6 +194,8 @@ type LuStep =
   | 'asi'
   | 'asiAtributo'
   | 'talentoMagia'
+  | 'periciaLivreTalento'
+  | 'periciaRestritaTalento'
   | 'dadivaEpica'
   | 'arcanaMistica'
   | 'iniciadoEmMagia'
@@ -235,7 +250,6 @@ export default function LevelUpShell({
   // fixo em vez de ler de `recursos`.
   const especialistaDisparaAgora = niveisComEspecialista(classe).includes(novoNivel);
   const subclassesDaClasse = subclasses.filter((s) => s.classeId === classe.id);
-  const maxEspecialista = periciasEspecialistaAtuais.length + (especialistaDisparaAgora ? 2 : 0);
 
   // Precisa vir antes da montagem de `luSteps` — decide se o passo
   // "proficienciasBonus" entra na sequência quando a subclasse
@@ -248,6 +262,13 @@ export default function LevelUpShell({
   // extra "asiAtributo" entra na sequência (ver mais abaixo).
   const [talentoEscolhido, setTalentoEscolhido] = useState<string | null>(null);
   const talentoObjEscolhido = talentoEscolhido ? (talentos.find((t) => t.id === talentoEscolhido) ?? null) : null;
+  // Especialista em Perícia soma +1 vaga na MESMA mecânica de
+  // Especialista de classe (ver `maxEspecialista` abaixo) — precisa
+  // vir depois de `talentoObjEscolhido` existir.
+  const maxEspecialista =
+    periciasEspecialistaAtuais.length +
+    (especialistaDisparaAgora ? 2 : 0) +
+    (talentoObjEscolhido?.efeitoMecanico?.tipo === 'pericia-livre-mais-especializacao' ? 1 : 0);
   // Dádiva Épica (nível 19) — mesma mecânica de "Talento Geral" do
   // passo `asi`, só filtrada por categoria, sem aplicar ASI (Dádivas
   // Épicas não concedem Aumento de Atributo).
@@ -340,6 +361,21 @@ export default function LevelUpShell({
     precisaCrescerMagiaRitual ? magiasRituaisJaEscolhidas : [],
   );
 
+  // Especialista em Perícia: 2 escolhas independentes no MESMO
+  // level-up em que o talento é escolhido — 1 perícia LIVRE (vira
+  // proficiência, reaproveita `concedeProficiencias` do próprio
+  // talento) + 1 Especialização (reaproveita a MESMA vaga do passo
+  // `especialista` de classe, só soma +1 quando esse talento entra).
+  const concedeEspecializacaoExtra = tipoEfeitoTalentoEscolhido === 'pericia-livre-mais-especializacao';
+  const [periciaLivreEscolhida, setPericiaLivreEscolhida] = useState<string | null>(null);
+
+  // Analítico/Mente Aguçada: 1 perícia de uma lista RESTRITA — vira
+  // proficiência ou Especialização dependendo se o personagem já era
+  // proficiente nela (decidido no `FichaShell`, que sabe o estado
+  // ANTES desse level-up).
+  const opcoesPericiaRestritaAtual = talentoObjEscolhido ? opcoesPericiaRestrita(talentoObjEscolhido.id) : [];
+  const [periciaRestritaEscolhida, setPericiaRestritaEscolhida] = useState<string | null>(null);
+
   const luSteps: LuStep[] = ['pv', 'features'];
   if (classe.nivelSubclasse === novoNivel && !personagem.subclasse) luSteps.push('subclasse');
   // Subclasse do PRÓPRIO level-up (se acabou de ser escolhida no passo
@@ -362,7 +398,15 @@ export default function LevelUpShell({
   if (caracteristicaSubclasseDesbloqueada(subclasseEscolhida, 'Descobertas Mágicas', novoNivel)) {
     luSteps.push('descobertasMagicas');
   }
-  if (especialistaDisparaAgora) luSteps.push('especialista');
+  // `especialista` só pode depender do talento ESCOLHIDO NESTE
+  // level-up (`concedeEspecializacaoExtra`) se for empurrado pra
+  // DEPOIS do passo `asi` — senão, escolher o talento na hora muda o
+  // tamanho do array ANTES do índice de 'asi', deslocando o próprio
+  // passo 'asi' e fazendo o `luIndex` (que não muda nesse instante)
+  // "pular" pro passo errado no meio da escolha. Mesmo motivo de
+  // `precisaCrescerMagiaRitual` ficar fora do bloco de ASI: qualquer
+  // passo cuja existência depende do talento ESCOLHIDO NESTE level-up
+  // só pode entrar DEPOIS de 'asi' no array, nunca antes.
   if (niveisComASI(classe).includes(novoNivel)) {
     luSteps.push('asi');
     // Passo extra só entra na sequência quando o talento escolhido
@@ -370,7 +414,10 @@ export default function LevelUpShell({
     // progresso, mesmo padrão de "Avançar" de todo o resto do wizard.
     if (precisaEscolherAtributoDoTalento) luSteps.push('asiAtributo');
     if (precisaEscolherMagiaDoTalentoNovo) luSteps.push('talentoMagia');
+    if (concedeEspecializacaoExtra) luSteps.push('periciaLivreTalento');
+    if (opcoesPericiaRestritaAtual.length > 0) luSteps.push('periciaRestritaTalento');
   }
+  if (especialistaDisparaAgora || concedeEspecializacaoExtra) luSteps.push('especialista');
   // Fora do bloco de ASI — o crescimento de magias Rituais acompanha o
   // Bônus de Proficiência, não os níveis de Aumento de Atributo.
   if (precisaCrescerMagiaRitual) luSteps.push('talentoMagia');
@@ -605,6 +652,8 @@ export default function LevelUpShell({
     asi: 'Atributo ou Talento',
     asiAtributo: 'Atributo do Talento',
     talentoMagia: 'Magia do Talento',
+    periciaLivreTalento: 'Perícia do Talento',
+    periciaRestritaTalento: 'Perícia do Talento',
     dadivaEpica: 'Dádiva Épica',
     arcanaMistica: 'Arcana Mística',
     iniciadoEmMagia: 'Iniciado em Magia',
@@ -703,6 +752,14 @@ export default function LevelUpShell({
       );
       return;
     }
+    if (step === 'periciaLivreTalento' && periciaLivreEscolhida === null) {
+      setAviso('Escolha a perícia livre do talento antes de avançar.');
+      return;
+    }
+    if (step === 'periciaRestritaTalento' && periciaRestritaEscolhida === null) {
+      setAviso('Escolha a perícia do talento antes de avançar.');
+      return;
+    }
     setAviso(null);
     if (step === 'resumo') {
       onConfirmar({
@@ -732,6 +789,8 @@ export default function LevelUpShell({
           luSteps.includes('talentoMagia') && talentoMagiaAlvo && magiasEscolhidasTalento.length > 0
             ? { [talentoMagiaAlvo.id]: magiasEscolhidasTalento }
             : null,
+        periciaLivreTalentoEscolhida: luSteps.includes('periciaLivreTalento') ? periciaLivreEscolhida : null,
+        periciaRestritaTalentoEscolhida: luSteps.includes('periciaRestritaTalento') ? periciaRestritaEscolhida : null,
       });
       return;
     }
@@ -1297,6 +1356,47 @@ export default function LevelUpShell({
           </>
         )}
 
+        {step === 'periciaLivreTalento' && (
+          <>
+            <div className="section-title">Especialista em Perícia — perícia livre</div>
+            <div className="label" style={{ marginBottom: 8 }}>
+              Proficiência em 1 perícia à sua escolha, entre as que você ainda não é proficiente.
+            </div>
+            {periciasNaoProficientes.map((nome) => (
+              <div
+                key={nome}
+                className={`opt-card ${periciaLivreEscolhida === nome ? 'selected' : ''}`}
+                onClick={() => setPericiaLivreEscolhida(nome)}
+              >
+                <div className="opt-card-name">{nome}</div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {step === 'periciaRestritaTalento' && talentoObjEscolhido && (
+          <>
+            <div className="section-title">{talentoObjEscolhido.nome} — escolha 1 perícia</div>
+            <div className="label" style={{ marginBottom: 8 }}>
+              Vira proficiência se você ainda não for proficiente nela, ou Especialização (dobra o Bônus de
+              Proficiência) se já for.
+            </div>
+            {opcoesPericiaRestritaAtual.map((nome) => {
+              const jaProficiente = periciasProficientesDoPersonagem.includes(nome);
+              return (
+                <div
+                  key={nome}
+                  className={`opt-card ${periciaRestritaEscolhida === nome ? 'selected' : ''}`}
+                  onClick={() => setPericiaRestritaEscolhida(nome)}
+                >
+                  <div className="opt-card-name">{nome}</div>
+                  <div className="opt-card-desc">{jaProficiente ? 'Já proficiente → vira Especialização' : 'Vira proficiência'}</div>
+                </div>
+              );
+            })}
+          </>
+        )}
+
         {step === 'dadivaEpica' && (
           <>
             <div className="section-title">Dádiva Épica</div>
@@ -1519,6 +1619,18 @@ export default function LevelUpShell({
               <div className="summary-row">
                 <span>{maxMagiasTalento > 1 ? 'Magias do Talento' : 'Magia do Talento'}</span>
                 <span>{magiasEscolhidasTalento.length > 0 ? magiasEscolhidasTalento.join(', ') : 'nenhuma escolhida'}</span>
+              </div>
+            )}
+            {luSteps.includes('periciaLivreTalento') && (
+              <div className="summary-row">
+                <span>Perícia livre (talento)</span>
+                <span>{periciaLivreEscolhida ?? 'nenhuma escolhida'}</span>
+              </div>
+            )}
+            {luSteps.includes('periciaRestritaTalento') && (
+              <div className="summary-row">
+                <span>Perícia do talento</span>
+                <span>{periciaRestritaEscolhida ?? 'nenhuma escolhida'}</span>
               </div>
             )}
             {luSteps.includes('asi') && (
