@@ -525,7 +525,7 @@ ele já para no primeiro match).
 **Data/origem:** 2026-09, SDD fornecido pelo Osmar durante o foco de
 Talentos Fase 4 (Grupo C, entre B.2 e B.3).
 
-## "Usar Magia" (Combat) ganha painel de Espaços de Magia ao lado da lista — só nessa tela
+## "Usar Magia" (Combat) ganha painel de Espaços de Magia ancorado à direita — só nessa tela
 
 **Pedido do Osmar** ao ver a Tela 2 do fluxo "Usar Magia" (lista de
 Truques/Magias Preparadas) num Mago de nível alto: o resumo de
@@ -538,14 +538,20 @@ normal) — desaparece junto com a lista ao voltar/mudar de ideia.
 
 **Implementação:** `SelecionarMagiaShell.tsx` ganhou CSS próprio
 (`SelecionarMagiaShell.module.css`, não mexe no `LevelUpShell.module.css`
-compartilhado) — `.contentRow` (flex row) com `.listCol` (a lista de
-sempre, `flex:1`) e `.painelEspacos` (coluna fixa de 76px, 1 linha por
-círculo com `TickPips tamanho="sm"`, que já quebra linha sozinho
-dentro da coluna estreita). Os dois scrollam juntos dentro do mesmo
-`.body` — sem posição fixa/sticky, mantém simples. Testado com Mago
-nível 17 (9 círculos simultâneos) e nível 1 (1 círculo só) — cabe nos
-dois casos em ~390px sem cortar a lista.
+compartilhado). O painel (`.painelEspacos`) usa `position: fixed`
+(mesma técnica do `.navLayer`/botão "Avançar" do Level Up) — ancorado
+à direita da tela, centralizado verticalmente (`top:50%` +
+`translateY(-50%)`), pra ficar sempre visível mesmo com a lista de
+magias rolando por baixo, em vez de rolar junto no fluxo normal do
+documento. Largo o suficiente pra caber 4 pips de `TickPips
+tamanho="sm"` por linha antes de quebrar. `.listCol` ganha
+`padding-right` pra nenhum texto da lista ficar embaixo do painel
+fixo. Testado com Mago nível 17 (9 círculos simultâneos) e nível 1 (1
+círculo só) — cabe nos dois casos em ~390px sem cortar a lista, e o
+painel se mantém parado na tela mesmo rolando a lista.
 
 **Data/origem:** 2026-09, revisão pedida pelo Osmar depois do foco
-Mago (outra conta/branch) chegar na Combat.
+Mago (outra conta/branch) chegar na Combat — 1ª versão (painel dentro
+do flex row, rolando junto com a lista) foi corrigida depois que o
+Osmar testou no celular de verdade e pediu pra ancorar fixo.
 

@@ -47,49 +47,48 @@ export default function SelecionarMagiaShell({
       </div>
 
       <div className={styles.body}>
-        <div className={localStyles.contentRow}>
-          <div className={localStyles.listCol}>
-            {grupos.map((grupo) => (
-              <GrupoMagiaColapsavel key={grupo.circulo} label={grupo.label} magias={grupo.magias}>
-                {(m) => {
-                  const truque = m.circulo === 0;
-                  const circulosDisponiveis = truque ? [] : circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo);
-                  const disponivel = truque || circulosDisponiveis.length > 0;
-                  return (
-                    <div
-                      key={m.id}
-                      className="check-row"
-                      style={disponivel ? undefined : { opacity: 0.45, pointerEvents: 'none' }}
-                      onClick={() => (truque ? onEscolherTruque(m) : onEscolherMagia(m, circulosDisponiveis))}
-                    >
-                      <span className="check-label">
-                        <MagiaComDescricao magia={m} /> {iconesMagia(m)}
-                        {!disponivel && (
-                          <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · sem espaço disponível</span>
-                        )}
-                      </span>
-                    </div>
-                  );
-                }}
-              </GrupoMagiaColapsavel>
-            ))}
-          </div>
-          {espacos.length > 0 && (
-            <div className={localStyles.painelEspacos}>
-              <div className={localStyles.painelEspacosTitulo}>Espaços</div>
-              {espacos.map((e) => {
-                const gasto = espacosGastosPorCirculo[e.circulo] ?? 0;
+        <div className={localStyles.listCol}>
+          {grupos.map((grupo) => (
+            <GrupoMagiaColapsavel key={grupo.circulo} label={grupo.label} magias={grupo.magias}>
+              {(m) => {
+                const truque = m.circulo === 0;
+                const circulosDisponiveis = truque ? [] : circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo);
+                const disponivel = truque || circulosDisponiveis.length > 0;
                 return (
-                  <div key={e.circulo} className={localStyles.painelEspacosRow}>
-                    <span className={localStyles.painelEspacosLabel}>{e.circulo}º</span>
-                    <TickPips total={e.maximo} usados={gasto} tamanho="sm" />
+                  <div
+                    key={m.id}
+                    className="check-row"
+                    style={disponivel ? undefined : { opacity: 0.45, pointerEvents: 'none' }}
+                    onClick={() => (truque ? onEscolherTruque(m) : onEscolherMagia(m, circulosDisponiveis))}
+                  >
+                    <span className="check-label">
+                      <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                      {!disponivel && (
+                        <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · sem espaço disponível</span>
+                      )}
+                    </span>
                   </div>
                 );
-              })}
-            </div>
-          )}
+              }}
+            </GrupoMagiaColapsavel>
+          ))}
         </div>
       </div>
+
+      {espacos.length > 0 && (
+        <div className={localStyles.painelEspacos}>
+          <div className={localStyles.painelEspacosTitulo}>Espaços</div>
+          {espacos.map((e) => {
+            const gasto = espacosGastosPorCirculo[e.circulo] ?? 0;
+            return (
+              <div key={e.circulo} className={localStyles.painelEspacosRow}>
+                <span className={localStyles.painelEspacosLabel}>{e.circulo}º</span>
+                <TickPips total={e.maximo} usados={gasto} tamanho="sm" />
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className={styles.navLayer}>
         <div className={`btn ${styles.pill}`} onClick={onFechar}>

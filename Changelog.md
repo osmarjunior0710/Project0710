@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0948
+
+Corrigido: o painel de Espaços de Magia da tela "Usar Magia" (Combate)
+agora fica fixo, ancorado à direita e centralizado na tela — antes ele
+rolava junto com a lista de magias, o que ficava ruim no celular.
+Também ficou maior (cabe 4 pips por linha).
+
 ## v202609_0912
 
 Tela "Usar Magia" (Combate) — o resumo de Espaços de Magia, que ficava

@@ -1,46 +1,57 @@
-/* Painel de Espaços de Magia ao lado da lista (Tela 2 do "Usar
-   Magia") — só aparece nesta tela, junto com a lista; some junto ao
-   voltar. Mesmo dado de `MagiasTab.tsx` ("Espaços de Magia"), só que
-   compacto pra caber ao lado da lista em ~390px. */
-
-.contentRow {
-  display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
-}
+/* Painel de Espaços de Magia (Tela 2 do "Usar Magia") — só aparece
+   nesta tela; some junto ao voltar. Mesmo dado de `MagiasTab.tsx`
+   ("Espaços de Magia"), só que ancorado com `position: fixed` (mesma
+   técnica do `.navLayer`/botão "Avançar" do Level Up) pra ficar
+   sempre visível na tela mesmo com a lista rolando por baixo — não
+   faz parte do fluxo normal do documento. */
 
 .listCol {
-  flex: 1;
   min-width: 0;
+  /* espaço reservado à direita pra texto da lista nunca ficar embaixo
+     do painel fixo */
+  padding-right: 108px;
 }
 
 .painelEspacos {
-  width: 76px;
-  flex-shrink: 0;
+  position: fixed;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 51;
+  width: 96px;
   background: var(--panel);
   border: 1px solid var(--line-soft);
   border-radius: var(--shape-md);
-  padding: var(--space-2) var(--space-1);
+  padding: var(--space-3) var(--space-2);
 }
 
 .painelEspacosTitulo {
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--text-faint);
   text-align: center;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 .painelEspacosRow {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   margin-bottom: var(--space-3);
 }
 
+.painelEspacosRow:last-child {
+  margin-bottom: 0;
+}
+
 .painelEspacosLabel {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-dim);
+}
+
+.painelEspacosRow :global(.row) {
+  justify-content: center;
+  max-width: 84px;
 }
