@@ -7,6 +7,23 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
+## Dano em crítico não dobra (geral) + "+1 dado extra" do Perfurador (2026-09)
+
+Descoberto ao implementar o Perfurador: nenhum ataque do app dobra os
+dados de dano num acerto crítico hoje — "Rolar Dano" sempre rola a
+quantidade normal, sem saber se o "Rolar Ataque" anterior foi crítico.
+Decisão do Osmar: implementar só o reroll de 1 dado do Perfurador por
+enquanto (já funciona, ver DECISOES-COMBATE.md "Grid de dados
+individuais"), deixando de fora:
+
+- **Dano dobra em crítico (regra geral)** — qualquer ataque com arma
+  deveria rolar o dobro de dados de dano num acerto crítico. Precisa
+  de um jeito de "Rolar Dano" saber que o "Rolar Ataque" anterior
+  daquele mesmo ataque foi crítico (hoje são 2 rolagens separadas, sem
+  vínculo entre elas).
+- **Perfurador — "+1 dado extra no crítico"** — depende do item acima
+  pra fazer sentido (some ENCIMA do dobro já esperado, não sozinho).
+
 ## Inspiração Heroica
 
 - **Reroll não cobre dano/outras rolagens fora do D20** — a regra real
@@ -104,6 +121,32 @@ anunciar na mesa, em vez do app calcular.
   gastar Dados de Vida em Descanso Curto, pra várias criaturas) e
   Guloseimas Revigorantes (PV Temporário = Bônus de Proficiência,
   Ação Bônus pra comer) — mesma trava de "vários aliados" acima.
+
+## Talentos Gerais — Agressor/Esmagador/Sentinela/Talhador decidido não implementar (2026-09)
+
+Osmar decidiu deixar esses 4 só como texto (`[PH]`) — mesmo espírito
+do B.3 acima, nenhum vai ganhar mecânica de verdade; o jogador lembra
+sozinho na mesa quando o gatilho acontecer. Diferente de Perfurador
+(mesma "família" das 5 magias de dano por tipo — Cortante/Contundente/
+Perfurante — mas esse SIM vai ser implementado, ver EmDev.md B.6).
+
+- **Agressor** (p.203) — trava dupla: a ação Correr no Combat só dá o
+  Deslocamento padrão, sem lugar pra somar bônus condicional de
+  talento; e precisa saber que o personagem "se moveu 3m+ em linha
+  reta antes de acertar" — o app não rastreia movimento/distância
+  percorrida no turno.
+- **Esmagador** (p.205) — dispara "ao causar dano Contundente": a
+  ficha ainda não sabe qual é o TIPO de dano do ataque que acabou de
+  acontecer (dano é só um número calculado, sem essa tag). Além disso,
+  o efeito em si (empurrar o alvo 1,5m) depende de posição/grade, que
+  o app não modela.
+- **Sentinela** (p.207) — depende de saber quando OUTRA criatura
+  (não o próprio personagem) é atacada ou Desengaja a 1,5m dele — isso
+  é posição relativa entre vários combatentes; a ficha é individual,
+  sem noção de "mapa" de quem está perto de quem.
+- **Talhador** (p.208) — mesma trava de tipo de dano do Esmagador (dano
+  Cortante), mais o efeito em si (reduzir o Deslocamento do alvo) exigir
+  uma ficha de status do INIMIGO, que também não existe no app.
 
 ## Talentos Gerais — B.4 escopo corrigido (2026-09)
 

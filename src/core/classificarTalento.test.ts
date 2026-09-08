@@ -31,4 +31,8 @@ describe('talentoTemPlaceholder', () => {
   it('Especialista em Perícia (pericia-livre-mais-especializacao): sem [PH]', () => {
     expect(talentoTemPlaceholder(talentos.find((x) => x.id === 'especialista-em-pericia')!)).toBe(false);
   });
+
+  it('Perfurador (reroll-um-dado-de-dano): sem [PH]', () => {
+    expect(talentoTemPlaceholder(talentos.find((x) => x.id === 'perfurador')!)).toBe(false);
+  });
 });

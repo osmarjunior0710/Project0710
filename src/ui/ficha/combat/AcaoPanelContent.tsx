@@ -15,6 +15,11 @@ export interface DanoPendente {
   quantidade: number;
   lados: number;
   mod: number;
+  /** Tipo de dano (ex.: "Perfurante") — ausente quando a fonte não é
+   * um ataque com arma real (ex.: magia/característica sem tipo
+   * definido aqui). Usado só pra habilitar o reroll do Perfurador
+   * (ver `core/rerollDanoTalento.ts`). */
+  tipoDano?: string;
 }
 
 interface AcaoPanelContentProps {
@@ -122,6 +127,7 @@ export default function AcaoPanelContent({
       quantidade: ataque.danoQuantidade,
       lados: ataque.danoLados,
       mod: ataque.danoMod,
+      tipoDano: ataque.danoTipo,
     });
   }
 

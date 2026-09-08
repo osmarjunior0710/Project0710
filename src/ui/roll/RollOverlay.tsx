@@ -1,5 +1,19 @@
-import { useRoll } from './RollContext';
+import { useRoll, type LadosDado } from './RollContext';
 import styles from './RollOverlay.module.css';
+
+/** Classe CSS por tipo de dado — hoje todas apontam pro mesmo visual
+ * (`.dieTipo`), só existem separadas já prontas pra receber 1 arte
+ * própria por tipo depois (o Osmar vai desenhar), sem precisar mexer
+ * na estrutura de novo. */
+const CLASSE_POR_LADOS: Record<LadosDado, string> = {
+  4: styles.dieTipo4,
+  6: styles.dieTipo6,
+  8: styles.dieTipo8,
+  10: styles.dieTipo10,
+  12: styles.dieTipo12,
+  20: styles.dieTipo20,
+  100: styles.dieTipo100,
+};
 
 export default function RollOverlay() {
   const {
@@ -11,6 +25,7 @@ export default function RollOverlay() {
     sorteDisponivel,
     usarSorte,
     usarRerollSe1,
+    rerollDadoEscolhido,
     inspiracaoHeroicaDisponivel,
     usarInspiracaoHeroica,
   } = useRoll();
@@ -35,16 +50,37 @@ export default function RollOverlay() {
     <div className={styles.overlay} onClick={fechar}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
         <div className={styles.label}>{estado.label}</div>
-        <div className={styles.diceRow}>
-          <div className={`${styles.die} ${dado1Descartado ? styles.dieDescartado : critClass}`}>
-            {estado.valorDado}
+        {estado.dadosIndividuais ? (
+          <div className={styles.diceGrid}>
+            {estado.dadosIndividuais.map((d) => {
+              const podeRerolar =
+                estado.fase === 'concluido' &&
+                !!estado.rerollEscolhido &&
+                !estado.rerollEscolhidoUsado &&
+                typeof d.valor === 'number';
+              return (
+                <div
+                  key={d.id}
+                  className={`${styles.die} ${styles.dieGrid} ${CLASSE_POR_LADOS[d.lados]} ${podeRerolar ? styles.dieRerolavel : ''}`}
+                  onClick={podeRerolar ? () => rerollDadoEscolhido(d.id) : undefined}
+                >
+                  {d.valor}
+                </div>
+              );
+            })}
           </div>
-          {temSegundoDado && (
-            <div className={`${styles.die} ${dado2Descartado ? styles.dieDescartado : critClass}`}>
-              {estado.dado2}
+        ) : (
+          <div className={styles.diceRow}>
+            <div className={`${styles.die} ${dado1Descartado ? styles.dieDescartado : critClass}`}>
+              {estado.valorDado}
             </div>
-          )}
-        </div>
+            {temSegundoDado && (
+              <div className={`${styles.die} ${dado2Descartado ? styles.dieDescartado : critClass}`}>
+                {estado.dado2}
+              </div>
+            )}
+          </div>
+        )}
         {estado.vantagem && (
           <div className={styles.formula}>{estado.vantagem === 'vantagem' ? 'Vantagem' : 'Desvantagem'}</div>
         )}
@@ -85,6 +121,25 @@ export default function RollOverlay() {
           !estado.rerollSe1Usado && (
             <div className={styles.bonusExtraBtn} onClick={usarRerollSe1}>
               🎲 {estado.rerollSe1.rotulo} — jogar de novo
+            </div>
+          )}
+        {/* Rolagem com grid (2+ dados) — toca no dado, sem botão próprio. */}
+        {estado.fase === 'concluido' && estado.tipo === 'dados' && estado.dadosIndividuais && estado.rerollEscolhido && (
+          <div className={styles.formula}>
+            {estado.rerollEscolhidoUsado
+              ? `${estado.rerollEscolhido.rotulo} já usado nesta rolagem`
+              : `🎲 ${estado.rerollEscolhido.rotulo} — toque num dado pra rerolar`}
+          </div>
+        )}
+        {/* Rolagem de 1 dado só — sem ambiguidade de "qual dado", botão
+            direto (mesmo padrão do rerollSe1, sem exigir valor 1). */}
+        {estado.fase === 'concluido' &&
+          estado.tipo === 'dados' &&
+          !estado.dadosIndividuais &&
+          estado.rerollEscolhido &&
+          !estado.rerollEscolhidoUsado && (
+            <div className={styles.bonusExtraBtn} onClick={() => rerollDadoEscolhido()}>
+              🎲 {estado.rerollEscolhido.rotulo} — jogar de novo
             </div>
           )}
         {inspiracaoHeroicaDisponivel &&

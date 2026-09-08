@@ -64,6 +64,7 @@ import {
   type MagiaGratisDeTalentoGeral,
 } from '../../core/magiaTalentoGeral';
 import { acoesConvertidasEmBonus } from '../../core/periciaTalentoGeral';
+import { temPerfurador } from '../../core/rerollDanoTalento';
 import { acoesBase } from '../../data/exampleCombat';
 import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
 import { armaduraSemTreinamentoEquipada } from '../../core/proficienciaArmadura';
@@ -437,6 +438,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const indomavelRestantes = Math.max(0, indomavelMaximo - indomavelGasto);
   const pontosDeSorteDisponivel = efeitoMecanicoDoTalento(talentosEfetivos, 'pontos-de-sorte') !== null;
   const danoDesarmadoRerollDisponivel = efeitoMecanicoDoTalento(talentosEfetivos, 'dado-ataque-desarmado') !== null;
+  const perfuradorDisponivel = temPerfurador(talentosEfetivos);
   const pontosDeSorteMaximo = pontosDeSorteDisponivel ? bonusProficienciaAtual : 0;
   const pontosDeSorteRestantes = Math.max(0, pontosDeSorteMaximo - pontosDeSorteGasto);
   const surtoMaximo = classe ? contarRepeticoesCaracteristica(classe, 'Surto de Ação', personagem.nivel) : 0;
@@ -1408,6 +1410,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             pontosDeSorteRestantes={pontosDeSorteRestantes}
             onUsarPontoDeSorte={usarPontoDeSorte}
             danoDesarmadoRerollDisponivel={danoDesarmadoRerollDisponivel}
+            perfuradorDisponivel={perfuradorDisponivel}
             surtoMaximo={surtoMaximo}
             surtoRestantes={surtoRestantes}
             surtoUsadoTurno={surtoUsadoTurno}

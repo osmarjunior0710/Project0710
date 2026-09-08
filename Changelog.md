@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0101
+
+Rolagem de dados ficou mais completa: dano com 2+ dados agora mostra
+CADA dado individualmente (não só a soma). Talento Perfurador
+funciona de verdade — quem tem ele pode rerolar 1 dado de dano
+Perfurante à escolha (toca no dado, ou usa o botão quando é 1 dado
+só). Agressor, Esmagador, Sentinela e Talhador ficaram definidos como
+só texto (não vão ganhar cálculo automático).
+
 ## v202609_2018
 
 Talentos Gerais — Analítico, Mente Aguçada e Especialista em Perícia

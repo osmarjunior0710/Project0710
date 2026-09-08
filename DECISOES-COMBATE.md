@@ -379,11 +379,12 @@ nem guardava o valor de cada dado — só a soma total, mostrando sempre
 aceita `rerollSe1: { rotulo }` — se o resultado sair 1, o
 `RollOverlay` mostra um botão "🎲 {rotulo} — jogar de novo"
 (`usarRerollSe1` no contexto), mesmo padrão visual do botão de Sorte.
-Só funciona com 1 dado só de propósito: com `quantidade > 1` não dá
-pra saber qual dos dados saiu 1 sem guardar cada resultado
-individual, que não existe hoje (só a soma) — nenhum caso real do
-projeto ainda precisa disso (Ataque Desarmado e Cura Garantida são
-sempre 1 dado).
+Continua só com 1 dado só de propósito (não precisa saber "qual dado
+saiu 1" com mais de um) — mas o grid de `dadosIndividuais` (ver
+entrada abaixo, "Grid de dados individuais") resolveu a limitação
+geral de "só a soma, sem saber cada dado" pra quem precisar, então
+esse não é mais um teto técnico, só a escolha certa pra ESSE caso
+específico (reroll condicionado ao valor sair exatamente 1).
 
 **Como plugar num talento novo:** no `rolarDados({...})` da ação,
 passar `rerollSe1: { rotulo: 'Nome do Benefício' }` só quando o
@@ -401,6 +402,52 @@ emoji (`` `🗡 ${ataqueAtual.nome}` ``), então `DanoPendente.label` fica
 Comparação exata (`===`) falha silenciosamente aqui — use
 `.endsWith(...)` ou `.includes(...)` pra detectar o nome do ataque
 dentro do label sempre que precisar comparar por nome de novo.
+
+## Grid de dados individuais — rolagem de 2+ dados mostra cada um, não só a soma (2026-09)
+
+**Motivo:** pedido do Osmar pra "aprofundar a rolagem de dados" —
+rolagem de dano com 2+ dados só mostrava "💥" decorativo + a soma; sem
+saber o valor de CADA dado, não dá pra implementar nada que dependa de
+1 dado específico (reroll à escolha, futuras regras "maior/menor
+dado", etc.). Também pedido: suportar MISTURA de tipos na mesma
+rolagem (ex.: 1d20 + 1d4 + 1d6) e deixar definidos os 7 tipos de dado
+do jogo (d4/d6/d8/d10/d12/d20/d100 — d100 aqui é 1 rolagem direta de
+1-100, a mesa usa 2xd10 físicos, o app não precisa).
+
+**Mecanismo:** `RollState.dadosIndividuais?: DadoIndividual[]`
+(`{ id, lados, valor }`) — só existe quando a rolagem `'dados'` tem 2+
+dados no TOTAL (`quantidade` do grupo principal + soma dos
+`gruposExtras`, ver `RollDadosOptions.gruposExtras` pra misturar
+tipos). Rolagem de 1 dado só **não** ganha esse campo — continua
+exatamente como antes (`.diceRow` de sempre), decisão explícita do
+Osmar pra não mudar a aparência do que já funciona. `RollOverlay.tsx`
+escolhe o layout pelo campo: `dadosIndividuais` presente → grid
+(`.diceGrid`, CSS `grid-template-columns: repeat(4, 1fr)` — SEMPRE 4
+colunas, quebra linha sozinha via `grid-auto-flow` do CSS, sem lógica
+de quebra manual); ausente → `.diceRow` de sempre.
+
+**Arte por tipo de dado:** 1 classe CSS por `lados`
+(`.dieTipo4`...`.dieTipo100`), todas com o MESMO visual por enquanto
+(`CLASSE_POR_LADOS` em `RollOverlay.tsx`) — só existem separadas já
+prontas pra receber 1 `background-image` própria por tipo quando o
+Osmar desenhar a arte, sem precisar mexer na estrutura de novo.
+
+**Reroll de 1 dado À ESCOLHA (Perfurador)** — generaliza o
+`rerollSe1` acima pra "reroll de qualquer dado, independente do
+valor": `RollState.rerollEscolhido`/`rerollEscolhidoUsado` +
+`rerollDadoEscolhido(id?)` no contexto. Com grid (2+ dados), o
+jogador TOCA no dado que quer rerolar (`id` do `DadoIndividual`); com
+1 dado só, reaproveita o MESMO botão do `rerollSe1` (sem exigir que o
+valor seja 1) — Perfurador funciona nos 2 casos, já que a maioria das
+armas de nível baixo rola 1 dado só. `core/rerollDanoTalento.ts`
+(`temPerfurador`) + `AtaqueInfo.danoTipo` (já existia, só não
+chegava até o dado de dano) propagado através de `DanoPendente.tipoDano`
+até `CombatTab.rolarDanoPendente`, que só passa `rerollEscolhido`
+quando o dano é Perfurante.
+
+**Fora do escopo, registrado em Backlog.md:** "+1 dado extra no
+crítico" do Perfurador — depende de dano em crítico geral (dobrar os
+dados), que o app ainda não modela pra ataque nenhum.
 
 ## Magia/característica com múltiplos ataques discretos (feixes,
 ## rajadas) — simplificada pra 1 ataque + N dados de dano

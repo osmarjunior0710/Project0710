@@ -160,7 +160,16 @@ export type EfeitoMecanicoTalento =
    * MESMA vaga do "Especialista" de classe, ver `periciasEspecialistaAtual`
    * — só soma +1 vaga quando esse talento é escolhido). As duas
    * escolhas são independentes entre si. Ver `core/periciaTalentoGeral.ts`. */
-  | { tipo: 'pericia-livre-mais-especializacao' };
+  | { tipo: 'pericia-livre-mais-especializacao' }
+  /** Perfurador: 1x/rolagem, rerolar 1 dado de dano À ESCOLHA do
+   * jogador (não precisa ter saído baixo) quando o dano causado for
+   * do `tipoDano` indicado — ver `core/rerollDanoTalento.ts` e o novo
+   * grid de dados individuais em `RollContext.tsx`
+   * (`RollState.rerollEscolhido`/`rerollDadoEscolhido`). Só cobre essa
+   * parte do talento — "+1 dado extra no crítico" fica de fora
+   * (depende de dano em crítico geral, que o app ainda não modela —
+   * ver Backlog.md). */
+  | { tipo: 'reroll-um-dado-de-dano'; tipoDano: string };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -697,6 +706,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'DES'], maximo: 20 },
+    efeitoMecanico: { tipo: 'reroll-um-dado-de-dano', tipoDano: 'Perfurante' },
     beneficios: "1x/turno, ao causar dano Perfurante, rerola 1 dado de dano (usa o novo). Crítico com dano Perfurante: rola 1 dado extra de dano.",
     pagina: 207,
     fonte: "PHB 2024",
