@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2248
+
+Aba Magias do Mago — Truques, Magias Preparadas e Livro de Magias
+agora são grupos que fecham/abrem tocando no título (▾/▸), igual já
+funcionava com Espaços de Magia — ajuda a não ficar rolando a tela
+toda pra achar o que precisa.
+
 ## v202609_2221
 
 Aba Magias do Mago — ordem das seções trocada: "Magias Preparadas"
