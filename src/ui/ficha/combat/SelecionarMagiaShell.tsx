@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { agruparMagiasPorCirculo, circulosDisponiveisParaConjurar, type EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
 import { iconesMagia } from '../../../core/classificarMagia';
@@ -75,26 +76,33 @@ export default function SelecionarMagiaShell({
         </div>
       </div>
 
-      {espacos.length > 0 && (
-        <div className={localStyles.painelEspacos}>
-          <div className={localStyles.painelEspacosTitulo}>Espaços</div>
-          {espacos.map((e) => {
-            const gasto = espacosGastosPorCirculo[e.circulo] ?? 0;
-            return (
-              <div key={e.circulo} className={localStyles.painelEspacosRow}>
-                <span className={localStyles.painelEspacosLabel}>{e.circulo}º</span>
-                <TickPips total={e.maximo} usados={gasto} tamanho="sm" />
-              </div>
-            );
-          })}
-        </div>
-      )}
-
       <div className={styles.navLayer}>
         <div className={`btn ${styles.pill}`} onClick={onFechar}>
           ← Voltar
         </div>
       </div>
+
+      {/* Portal pro <body>: esta tela abre dentro do drawer "Ação" (SidePanel),
+          que tem `transform` pra animar o slide-in — isso vira containing
+          block pra qualquer `position: fixed` descendente, então sem o
+          portal o painel ficaria preso à largura do drawer (~84%), não à
+          tela inteira. */}
+      {espacos.length > 0 &&
+        createPortal(
+          <div className={localStyles.painelEspacos}>
+            <div className={localStyles.painelEspacosTitulo}>Espaços</div>
+            {espacos.map((e) => {
+              const gasto = espacosGastosPorCirculo[e.circulo] ?? 0;
+              return (
+                <div key={e.circulo} className={localStyles.painelEspacosRow}>
+                  <span className={localStyles.painelEspacosLabel}>{e.circulo}º</span>
+                  <TickPips total={e.maximo} usados={gasto} tamanho="sm" />
+                </div>
+              );
+            })}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

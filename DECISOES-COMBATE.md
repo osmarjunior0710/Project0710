@@ -550,8 +550,34 @@ fixo. Testado com Mago nível 17 (9 círculos simultâneos) e nível 1 (1
 círculo só) — cabe nos dois casos em ~390px sem cortar a lista, e o
 painel se mantém parado na tela mesmo rolando a lista.
 
+**Achado técnico durante a correção — `position:fixed` preso ao
+drawer "Ação":** a tela "Usar Magia" abre de dentro do drawer lateral
+`SidePanel` (o painel que desliza ao tocar "Ação" na Combat), que usa
+`transform` (`SidePanel.module.css`, `.panelLeft`/`.panelRight`) pra
+animar o slide-in. Qualquer ancestral com `transform` vira o
+"containing block" de todo `position:fixed` descendente (regra do
+CSS, não bug do navegador) — por isso o `.screen` da tela "Usar
+Magia" (e tudo `fixed` dentro dela, como o `.painelEspacos`) fica
+preso à largura do drawer (~84% da tela), não à tela inteira. É
+exatamente o "gutter cinza" que aparecia à direita no celular do
+Osmar, mostrando um pedaço da Ficha por baixo. **Correção aplicada
+só no painel:** `createPortal(..., document.body)` — renderiza o
+`.painelEspacos` direto no `<body>`, fora da árvore do drawer, então
+`position:fixed` nele passa a valer contra a tela de verdade. O resto
+da tela "Usar Magia" (a lista de magias) continua preso à largura do
+drawer — não foi corrigido aqui porque o pedido do Osmar era só sobre
+o painel; se algum dia a lista também precisar ocupar a tela inteira,
+o mesmo `createPortal` resolve.
+**Padrão a reaproveitar:** qualquer elemento `position:fixed` que
+precise cobrir a tela inteira, mas que more (mesmo que indiretamente)
+dentro de um `SidePanel`/drawer com `transform`, precisa de
+`createPortal(..., document.body)` — não basta `position:fixed`
+sozinho.
+
 **Data/origem:** 2026-09, revisão pedida pelo Osmar depois do foco
 Mago (outra conta/branch) chegar na Combat — 1ª versão (painel dentro
-do flex row, rolando junto com a lista) foi corrigida depois que o
-Osmar testou no celular de verdade e pediu pra ancorar fixo.
+do flex row, rolando junto com a lista) foi corrigida pro fixed depois
+que o Osmar testou no celular; 2ª correção (portal pro `<body>`) saiu
+de uma investigação de por que o fixed ainda ficava preso a ~84% da
+largura mesmo ancorado — achado documentado acima.
 

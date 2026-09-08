@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1015
+
+Corrigido de novo: o painel de Espaços de Magia da tela "Usar Magia"
+(Combate) estava ficando preso dentro da área da tela de magias
+(escondendo texto ou grudado no canto errado). Agora ele fica de
+verdade ancorado na tela toda, fora do container de magias.
+
 ## v202609_0948
 
 Corrigido: o painel de Espaços de Magia da tela "Usar Magia" (Combate)
