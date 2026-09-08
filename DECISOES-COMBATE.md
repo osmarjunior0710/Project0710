@@ -421,10 +421,13 @@ dados no TOTAL (`quantidade` do grupo principal + soma dos
 tipos). Rolagem de 1 dado só **não** ganha esse campo — continua
 exatamente como antes (`.diceRow` de sempre), decisão explícita do
 Osmar pra não mudar a aparência do que já funciona. `RollOverlay.tsx`
-escolhe o layout pelo campo: `dadosIndividuais` presente → grid
-(`.diceGrid`, CSS `grid-template-columns: repeat(4, 1fr)` — SEMPRE 4
-colunas, quebra linha sozinha via `grid-auto-flow` do CSS, sem lógica
-de quebra manual); ausente → `.diceRow` de sempre.
+escolhe o layout pelo campo: `dadosIndividuais` presente → quebrado em
+linhas de até 4 (`agruparEmLinhas`, esquerda→direita, JS — não CSS
+grid), cada linha um `flex` próprio com `justify-content: center`
+(`.diceGridRow`) — linha com 4 preenche tudo (visualmente igual a um
+grid comum), linha com 1-3 (só pode ser a ÚLTIMA) fica centralizada
+em vez de grudada à esquerda com espaço vazio sobrando; ausente →
+`.diceRow` de sempre.
 
 **Arte por tipo de dado:** cada `lados` (4/6/8/10/12/20/100) tem sua
 própria arte (`src/assets/icones-dados/dado-dN.webp`, mesmo padrão
@@ -452,6 +455,16 @@ de rolagem, não existe d1 físico) simplesmente não ganha arte — cai de
 volta na moldura genérica antiga, sem quebrar nada. Isso é o
 comportamento CORRETO, não um bug: só dado que existe de verdade
 ganha arte.
+
+**Suspense da rolagem — 1s, 2 voltas completas antes do resultado
+(pedido do Osmar, 2026-09):** `DURACAO_ANIMACAO_MS` (`RollContext.tsx`)
+controla quanto tempo a rolagem fica em `fase: 'rolando'` antes de
+`'concluido'` revelar o valor/total — usado por TODA rolagem
+(`rolarD20`, `rolarDados`, reroll de qualquer tipo), não só a com
+arte. O keyframe `spin` (`RollOverlay.module.css`, aplicado em `.die`)
+tem que durar exatamente o mesmo tempo — os 2 ficam citados um no
+comentário do outro pra não dessincronizar se alguém mudar só 1 lado.
+2 voltas = `rotate(720deg)` no keyframe (não 360deg).
 
 **Reaproveitado também na tela dramática de PV do Level Up
 (`LevelUpShell.tsx`)** — essa tela tem seu PRÓPRIO mecanismo de

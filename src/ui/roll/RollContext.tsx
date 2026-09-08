@@ -245,7 +245,11 @@ interface RollContextValue {
 
 const RollContext = createContext<RollContextValue | null>(null);
 
-const DURACAO_ANIMACAO_MS = 480;
+/** 1s = tempo pro dado dar 2 voltas completas (ver `.die`/`.dieGrid`
+ * em `RollOverlay.module.css`) antes do valor/total aparecer — pedido
+ * do Osmar, suspense proposital. Os 2 têm que ficar em sincronia: se
+ * mudar aqui, mude a duração do keyframe `spin` também. */
+const DURACAO_ANIMACAO_MS = 1000;
 
 /** Modo de Teste (ver `AvatarMenu`): em vez de rolar de verdade, todo
  * d20 sai dessa sequência fixa, em ordem, dando a volta quando chega

@@ -22,6 +22,20 @@ function DadoVisual({ valor, lados, className, onClick }: DadoVisualProps) {
   );
 }
 
+/** Quebra em grupos de 4 (esquerda→direita, mesma regra de sempre do
+ * grid) — cada grupo vira sua própria linha `flex`, centralizada
+ * (`justify-content: center`), pra um grupo de 1-3 dados no final
+ * ficar centralizado em vez de grudado à esquerda com espaço vazio à
+ * direita. Grupo de 4 preenche a linha toda, visualmente idêntico ao
+ * grid antigo. */
+function agruparEmLinhas<T>(itens: T[], porLinha: number): T[][] {
+  const linhas: T[][] = [];
+  for (let i = 0; i < itens.length; i += porLinha) {
+    linhas.push(itens.slice(i, i + porLinha));
+  }
+  return linhas;
+}
+
 export default function RollOverlay() {
   const {
     estado,
@@ -61,23 +75,27 @@ export default function RollOverlay() {
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
         <div className={styles.label}>{estado.label}</div>
         {estado.dadosIndividuais ? (
-          <div className={styles.diceGrid}>
-            {estado.dadosIndividuais.map((d) => {
-              const podeRerolar =
-                estado.fase === 'concluido' &&
-                !!estado.rerollEscolhido &&
-                !estado.rerollEscolhidoUsado &&
-                typeof d.valor === 'number';
-              return (
-                <DadoVisual
-                  key={d.id}
-                  valor={d.valor}
-                  lados={d.lados}
-                  className={`${styles.dieGrid} ${podeRerolar ? styles.dieRerolavel : ''}`}
-                  onClick={podeRerolar ? () => rerollDadoEscolhido(d.id) : undefined}
-                />
-              );
-            })}
+          <div className={styles.diceGridWrap}>
+            {agruparEmLinhas(estado.dadosIndividuais, 4).map((linha, i) => (
+              <div key={i} className={styles.diceGridRow}>
+                {linha.map((d) => {
+                  const podeRerolar =
+                    estado.fase === 'concluido' &&
+                    !!estado.rerollEscolhido &&
+                    !estado.rerollEscolhidoUsado &&
+                    typeof d.valor === 'number';
+                  return (
+                    <DadoVisual
+                      key={d.id}
+                      valor={d.valor}
+                      lados={d.lados}
+                      className={`${styles.dieGrid} ${podeRerolar ? styles.dieRerolavel : ''}`}
+                      onClick={podeRerolar ? () => rerollDadoEscolhido(d.id) : undefined}
+                    />
+                  );
+                })}
+              </div>
+            ))}
           </div>
         ) : (
           <div className={styles.diceRow}>

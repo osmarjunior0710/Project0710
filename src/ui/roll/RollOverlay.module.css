@@ -45,7 +45,9 @@
   align-items: center;
   justify-content: center;
   font-size: 25px;
-  animation: spin var(--motion-emphasized) ease-out;
+  /* Duração precisa bater com `DURACAO_ANIMACAO_MS` (RollContext.tsx)
+     — o valor/total só aparece quando o spin termina. */
+  animation: spin 1000ms ease-out;
   background: var(--panel2);
   transition: opacity 0.2s ease;
   overflow: hidden;
@@ -90,19 +92,32 @@
    quebra linha sozinho quando passa de 4 (grid-auto-flow padrão).
    Rolagem de 1 dado só continua usando .diceRow (sem grid), pra não
    mudar a aparência de nada que já funciona. */
-.diceGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-2);
+/* Cada linha (até 4 dados, esquerda→direita) é seu próprio flex row
+   centralizado — uma linha com menos de 4 fica centralizada em vez de
+   grudada à esquerda com espaço vazio sobrando (linha de 4 preenche
+   tudo, visualmente igual a um grid comum). */
+.diceGridWrap {
   margin-bottom: var(--space-3);
   max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.diceGridRow {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.diceGridRow:last-child {
+  margin-bottom: 0;
 }
 
 .dieGrid {
   width: 56px;
   height: 56px;
   font-size: 19px;
-  margin: 0 auto;
 }
 
 .dieRerolavel {
@@ -117,16 +132,21 @@
   opacity: 0.7;
 }
 
+/* 2 voltas completas (720deg) no pivô central antes de acomodar —
+   suspense proposital, ver `DURACAO_ANIMACAO_MS`. */
 @keyframes spin {
   0% {
     transform: rotate(0deg) scale(0.7);
     opacity: 0;
   }
-  60% {
-    transform: rotate(300deg) scale(1.1);
+  15% {
+    opacity: 1;
+  }
+  85% {
+    transform: rotate(690deg) scale(1.1);
   }
   100% {
-    transform: rotate(360deg) scale(1);
+    transform: rotate(720deg) scale(1);
     opacity: 1;
   }
 }

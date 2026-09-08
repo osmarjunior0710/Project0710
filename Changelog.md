@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1948
+
+Rolagem de dados ganhou mais suspense: o dado agora dá 2 voltas
+completas (1 segundo) antes de mostrar o valor e o total — antes era
+quase instantâneo. Quando a rolagem tem menos de 4 dados numa linha
+(1, 2 ou 3), eles ficam centralizados em vez de grudados à esquerda.
+
 ## v202609_1629
 
 Magia de cura agora rola dado de verdade: Palavra Curativa, Curar
