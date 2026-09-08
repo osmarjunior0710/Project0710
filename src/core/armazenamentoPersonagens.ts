@@ -60,6 +60,13 @@ export interface PersonagemSalvo {
    * ainda; `FichaShell.tsx` cai pra `selecao.magiasPreparadasEscolhidas`
    * (retrato da criação) nesse caso. */
   magiasPreparadasAtual?: string[];
+  /** Livro de Magias (grimório) do Mago — pool de magias CONHECIDAS,
+   * maior que `magiasPreparadasAtual` (ver DECISOES-CLASSES.md
+   * "Casters", Padrão C). Cresce +2 por nível, nunca troca/diminui.
+   * Ausente = cai pra `selecao.livroDeMagiasEscolhido` (retrato da
+   * criação) — mesmo padrão de `truquesAtual`. `[]` pra quem não tem
+   * essa característica (hoje, todo mundo além do Mago). */
+  livroDeMagiasAtual?: string[];
   /** Invocações Místicas (Bruxo) conhecidas DEPOIS da criação — cresce/
    * troca no Level Up (Etapa 4.3 do Bruxo), mesmo padrão de
    * `truquesAtual`. Ausente = cai pra `selecao.invocacoesMisticasEscolhidas`

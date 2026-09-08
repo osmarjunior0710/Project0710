@@ -176,6 +176,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [magiasPreparadasAtuais, setMagiasPreparadasAtuais] = useState<string[]>(
     personagemSalvo.magiasPreparadasAtual ?? selecao.magiasPreparadasEscolhidas,
   );
+  // Sem setter ainda — crescimento/troca do grimório entra na A5 (Level
+  // Up), ver EmDevB.md. Por ora só leitura (retrato da criação, ou o
+  // que a A5 tiver salvo quando ela existir).
+  const [livroDeMagiasAtuais] = useState<string[]>(personagemSalvo.livroDeMagiasAtual ?? selecao.livroDeMagiasEscolhido);
   const [invocacoesMisticasAtuais, setInvocacoesMisticasAtuais] = useState<string[]>(
     personagemSalvo.invocacoesMisticasAtual ?? selecao.invocacoesMisticasEscolhidas,
   );
@@ -535,6 +539,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       inspiracaoGasto,
       truquesAtual: truquesAtuais,
       magiasPreparadasAtual: magiasPreparadasAtuais,
+      livroDeMagiasAtual: livroDeMagiasAtuais,
       invocacoesMisticasAtual: invocacoesMisticasAtuais,
       periciasEspecialistaAtual: periciasEspecialistaAtuais,
       periciasSubclasseBonusAtual: periciasSubclasseBonusAtuais,
@@ -589,6 +594,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     inspiracaoGasto,
     truquesAtuais,
     magiasPreparadasAtuais,
+    livroDeMagiasAtuais,
     invocacoesMisticasAtuais,
     periciasEspecialistaAtuais,
     periciasSubclasseBonusAtuais,
@@ -1162,11 +1168,18 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   if (completarAberto === 'magiasPreparadas' && classe) {
     const circuloMaximo = Math.max(0, ...espacosDeMagiaAtivos(classe, personagem.nivel).map((e) => e.circulo));
+    // Mago (e qualquer classe futura com Livro de Magias): só pode
+    // preparar o que já está no grimório — restringe o catálogo antes
+    // de mostrar. Sem Livro de Magias (Bardo/Bruxo), catálogo continua
+    // a lista inteira da classe, igual sempre foi.
+    const catalogoBase = magiasDisponiveisParaPreparar(classe, personagem.nivel).filter((m) => m.circulo <= circuloMaximo);
+    const catalogoMagiasPreparadas =
+      livroDeMagiasAtuais.length > 0 ? catalogoBase.filter((m) => livroDeMagiasAtuais.includes(m.nome)) : catalogoBase;
     return (
       <CompletarMagiasShell
         titulo="Magias Preparadas"
         atuais={magiasPreparadasAtuais}
-        catalogo={magiasDisponiveisParaPreparar(classe, personagem.nivel).filter((m) => m.circulo <= circuloMaximo)}
+        catalogo={catalogoMagiasPreparadas}
         classeNome={classe.nome}
         deficit={faltamMagiasPreparadas}
         onFechar={() => setCompletarAberto(null)}
@@ -1294,6 +1307,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             conjura={conjura}
             truquesAtuais={truquesAtuais}
             magiasPreparadasAtuais={magiasPreparadasAtuais}
+            livroDeMagiasAtuais={livroDeMagiasAtuais}
             magiasDescobertasMagicasAtuais={magiasDescobertasMagicasAtuais}
             livroDasSombrasAtuais={livroDasSombrasAtuais}
             temPactoDoTomo={invocacoesMisticasAtuais.includes('pacto-do-tomo')}

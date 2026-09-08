@@ -110,11 +110,17 @@ function gerarSelecaoNivel1(classe: Classe, origemNome: string, especieNome: str
       .slice(0, maxTruques)
       .map((m) => m.nome);
   }
+  // Livro de Magias (Mago) — sorteia o grimório ANTES das Preparadas,
+  // mesma ordem/motivo de `WizardShell.randomizarEscolhasClasse`.
+  const maxLivro = valorRecursoClasse(classe, 'Livro de Magias', 1);
+  const poolMagiasNivel1 = embaralhar(magiasDaClasse(classe.nome, 1));
+  if (maxLivro > 0) {
+    selection.livroDeMagiasEscolhido = poolMagiasNivel1.slice(0, maxLivro).map((m) => m.nome);
+  }
   const maxMagias = valorRecursoClasse(classe, 'Magias Preparadas', 1);
   if (maxMagias > 0) {
-    selection.magiasPreparadasEscolhidas = embaralhar(magiasDaClasse(classe.nome, 1))
-      .slice(0, maxMagias)
-      .map((m) => m.nome);
+    const pool = maxLivro > 0 ? poolMagiasNivel1.slice(0, maxLivro) : poolMagiasNivel1;
+    selection.magiasPreparadasEscolhidas = pool.slice(0, maxMagias).map((m) => m.nome);
   }
 
   // Escolhas da Origem (ferramenta, quando a Origem pede escolha; opção

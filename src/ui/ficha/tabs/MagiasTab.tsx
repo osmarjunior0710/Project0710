@@ -40,6 +40,12 @@ interface MagiasTabProps {
   conjura: boolean;
   truquesAtuais: string[];
   magiasPreparadasAtuais: string[];
+  /** Livro de Magias (grimório) do Mago — pool de magias CONHECIDAS,
+   * maior que `magiasPreparadasAtuais` (ver DECISOES-CLASSES.md
+   * "Casters", Padrão C). `[]` pra quem não tem essa característica
+   * (hoje, todo mundo além do Mago) — a seção "Livro de Magias" só
+   * aparece quando essa lista não está vazia. */
+  livroDeMagiasAtuais: string[];
   /** "Descobertas Mágicas" (Colégio do Conhecimento, nível 6) — 2
    * magias sempre preparadas, mostradas numa seção própria (não se
    * misturam com Magias Preparadas normais). */
@@ -145,6 +151,7 @@ export default function MagiasTab({
   conjura,
   truquesAtuais,
   magiasPreparadasAtuais,
+  livroDeMagiasAtuais,
   magiasDescobertasMagicasAtuais,
   magiasPactoDoInferoAtuais,
   magiasEspecieAtuais,
@@ -204,6 +211,7 @@ export default function MagiasTab({
   const espacos = espacosDeMagiaAtivos(classe, nivel);
   const truques = truquesDoPersonagem(truquesAtuais);
   const preparadas = magiasPreparadasDoPersonagem(magiasPreparadasAtuais);
+  const livroDeMagias = magiasPreparadasDoPersonagem(livroDeMagiasAtuais);
   const descobertasMagicas = magiasPreparadasDoPersonagem(magiasDescobertasMagicasAtuais);
   const pactoDoInfero = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
   const magiasEspecie = magiasPreparadasDoPersonagem(magiasEspecieAtuais);
@@ -211,6 +219,9 @@ export default function MagiasTab({
   const magiasTalentoGeral = magiasPreparadasDoPersonagem(magiasTalentoGeralAtuais);
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
   const [espacosExpandido, setEspacosExpandido] = useColapsavel('espacos-de-magia', true);
+  const [truquesExpandido, setTruquesExpandido] = useColapsavel('truques', true);
+  const [magiasPreparadasExpandido, setMagiasPreparadasExpandido] = useColapsavel('magias-preparadas', true);
+  const [livroDeMagiasExpandido, setLivroDeMagiasExpandido] = useColapsavel('livro-de-magias', true);
 
   function processarMagiaAoUsar(m: Magia, circuloUsado: number) {
     const mecanica = mecanicaDaMagia(m);
@@ -509,29 +520,36 @@ export default function MagiasTab({
 
       {(truques.length > 0 || faltamTruques > 0) && (
         <>
-          <div className="section-title">Truques</div>
-          {faltamTruques > 0 && (
-            <div className={styles.avisoFaltando} onClick={onCompletarTruques}>
-              ⚠️ Faltam {faltamTruques} truque{faltamTruques > 1 ? 's' : ''} pro seu nível — toque pra escolher
-            </div>
+          <div className={styles.grupoHeader} onClick={() => setTruquesExpandido(!truquesExpandido)}>
+            <span>Truques</span>
+            <span>{truquesExpandido ? '▾' : '▸'}</span>
+          </div>
+          {truquesExpandido && (
+            <>
+              {faltamTruques > 0 && (
+                <div className={styles.avisoFaltando} onClick={onCompletarTruques}>
+                  ⚠️ Faltam {faltamTruques} truque{faltamTruques > 1 ? 's' : ''} pro seu nível — toque pra escolher
+                </div>
+              )}
+              {truques.map((m) => {
+                const temAcao = usarMagiaTemAcaoAutomatizada(m);
+                return (
+                  <div key={m.id} className={styles.spellRow}>
+                    <div className={styles.spellName}>
+                      <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                    </div>
+                    <span className={styles.spellCirculo}>Truque</span>
+                    <div
+                      className={`${styles.usarBtn} ${temAcao ? '' : styles.usarBtnPendencia}`}
+                      onClick={() => temAcao && usarMagia(m)}
+                    >
+                      {temAcao ? 'Usar' : 'Usar (pendência)'}
+                    </div>
+                  </div>
+                );
+              })}
+            </>
           )}
-          {truques.map((m) => {
-            const temAcao = usarMagiaTemAcaoAutomatizada(m);
-            return (
-              <div key={m.id} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
-                </div>
-                <span className={styles.spellCirculo}>Truque</span>
-                <div
-                  className={`${styles.usarBtn} ${temAcao ? '' : styles.usarBtnPendencia}`}
-                  onClick={() => temAcao && usarMagia(m)}
-                >
-                  {temAcao ? 'Usar' : 'Usar (pendência)'}
-                </div>
-              </div>
-            );
-          })}
         </>
       )}
 
@@ -784,30 +802,70 @@ export default function MagiasTab({
 
       {(preparadas.length > 0 || faltamMagiasPreparadas > 0) && (
         <>
-          <div className="section-title">Magias Preparadas</div>
-          {faltamMagiasPreparadas > 0 && (
-            <div className={styles.avisoFaltando} onClick={onCompletarMagiasPreparadas}>
-              ⚠️ Faltam {faltamMagiasPreparadas} magia{faltamMagiasPreparadas > 1 ? 's' : ''} preparada
-              {faltamMagiasPreparadas > 1 ? 's' : ''} pro seu nível — toque pra escolher
-            </div>
+          <div className={styles.grupoHeader} onClick={() => setMagiasPreparadasExpandido(!magiasPreparadasExpandido)}>
+            <span>Magias Preparadas</span>
+            <span>{magiasPreparadasExpandido ? '▾' : '▸'}</span>
+          </div>
+          {magiasPreparadasExpandido && (
+            <>
+              {faltamMagiasPreparadas > 0 && (
+                <div className={styles.avisoFaltando} onClick={onCompletarMagiasPreparadas}>
+                  ⚠️ Faltam {faltamMagiasPreparadas} magia{faltamMagiasPreparadas > 1 ? 's' : ''} preparada
+                  {faltamMagiasPreparadas > 1 ? 's' : ''} pro seu nível — toque pra escolher
+                </div>
+              )}
+              {preparadas.map((m) => {
+                const semEspaco = circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+                return (
+                  <div key={m.id} className={styles.spellRow}>
+                    <div className={styles.spellName}>
+                      <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                    </div>
+                    <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
+                    <div
+                      className={`${styles.usarBtn} ${semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                      onClick={() => usarMagia(m)}
+                    >
+                      Usar
+                    </div>
+                  </div>
+                );
+              })}
+            </>
           )}
-          {preparadas.map((m) => {
-            const semEspaco = circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
-            return (
-              <div key={m.id} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
-                </div>
-                <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
-                <div
-                  className={`${styles.usarBtn} ${semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                  onClick={() => usarMagia(m)}
-                >
-                  Usar
-                </div>
+        </>
+      )}
+
+      {livroDeMagias.length > 0 && (
+        <>
+          <div className={styles.grupoHeader} onClick={() => setLivroDeMagiasExpandido(!livroDeMagiasExpandido)}>
+            <span>Livro de Magias</span>
+            <span>{livroDeMagiasExpandido ? '▾' : '▸'}</span>
+          </div>
+          {livroDeMagiasExpandido && (
+            <>
+              <div className="label" style={{ marginBottom: 4 }}>
+                Todas as magias do seu grimório — só as marcadas "preparada" podem ser conjuradas agora (aba Magias
+                Preparadas, acima). Muda a lista de preparadas ao completar um Descanso Longo.
               </div>
-            );
-          })}
+              {livroDeMagias.map((m) => {
+                const preparada = magiasPreparadasAtuais.includes(m.nome);
+                return (
+                  <div key={m.id} className={styles.spellRow}>
+                    <div className={styles.spellName}>
+                      <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                    </div>
+                    <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
+                    {preparada ? (
+                      <span className="tag">preparada</span>
+                    ) : (
+                      <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>não preparada</span>
+                    )}
+                  </div>
+                );
+              })}
+            </>
+          )}
         </>
       )}
 

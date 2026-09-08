@@ -5,7 +5,7 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
-## v202609_0101
+## v202609_0102
 
 Rolagem de dados ficou mais completa: dano com 2+ dados agora mostra
 CADA dado individualmente (não só a soma). Talento Perfurador
@@ -13,6 +13,36 @@ funciona de verdade — quem tem ele pode rerolar 1 dado de dano
 Perfurante à escolha (toca no dado, ou usa o botão quando é 1 dado
 só). Agressor, Esmagador, Sentinela e Talhador ficaram definidos como
 só texto (não vão ganhar cálculo automático).
+
+## v202609_2248
+
+Aba Magias do Mago — Truques, Magias Preparadas e Livro de Magias
+agora são grupos que fecham/abrem tocando no título (▾/▸), igual já
+funcionava com Espaços de Magia — ajuda a não ficar rolando a tela
+toda pra achar o que precisa.
+
+## v202609_2221
+
+Aba Magias do Mago — ordem das seções trocada: "Magias Preparadas"
+(o que dá pra usar agora) vem antes de "Livro de Magias" (o catálogo
+completo do grimório), que ficou por último.
+
+## v202609_2127
+
+Aba Magias do Mago mostra dado de verdade: Espaços de Magia, Truques e
+o Livro de Magias (grimório) — cada magia do livro aparece marcada
+"preparada" ou "não preparada", e usar uma preparada gasta o Espaço
+normal, com CD/bônus de ataque calculados pela Inteligência. Ainda
+falta o Combat e o Level Up (crescer o livro, trocar preparadas no
+Descanso) — próximas entregas.
+
+## v202609_2116
+
+Mago agora aparece na criação de personagem (wizard) — perícias,
+truques, equipamento inicial e o Livro de Magias (o "grimório" do
+Mago, maior que as magias do dia a dia): escolhe 6 magias de 1º
+círculo pro livro e depois só 4 delas ficam preparadas. Ainda não dá
+pra jogar com ele na Ficha/Combate — isso vem numa próxima entrega.
 
 ## v202609_2018
 

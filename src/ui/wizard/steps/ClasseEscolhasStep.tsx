@@ -68,6 +68,16 @@ export default function ClasseEscolhasStep({ selection, update }: StepProps) {
   // conforme o personagem sobe de nível, não na criação.
   const magiasNivel1 = maxMagiasPreparadas > 0 ? magiasDaClasse(classe.nome, 1) : [];
 
+  // Livro de Magias (grimório) — só o Mago tem esse recurso hoje (ver
+  // DECISOES-CLASSES.md "Casters", Padrão C). Quando existe, Magias
+  // Preparadas deixa de escolher direto da lista da classe e passa a
+  // escolher só dentre o que já está no grimório.
+  const maxLivroDeMagias = valorRecursoClasse(classe, 'Livro de Magias', 1);
+  const temLivroDeMagias = maxLivroDeMagias > 0;
+  const magiasParaPreparar = temLivroDeMagias
+    ? magiasNivel1.filter((m) => selection.livroDeMagiasEscolhido.includes(m.nome))
+    : magiasNivel1;
+
   // Invocações Místicas (Bruxo) — Fase 1 (ver PENDENCIAS.md "Bruxo —
   // Invocações Místicas Fase 2"): só catálogo + escolha, sem checar
   // dependência entre invocações nem aplicar mecânica ainda. Na
@@ -141,6 +151,21 @@ export default function ClasseEscolhasStep({ selection, update }: StepProps) {
       update({ magiasPreparadasEscolhidas: atual.filter((x) => x !== nome) });
     } else if (atual.length < maxMagiasPreparadas) {
       update({ magiasPreparadasEscolhidas: [...atual, nome] });
+    }
+  }
+
+  function toggleLivroDeMagias(nome: string) {
+    const atual = selection.livroDeMagiasEscolhido;
+    const i = atual.indexOf(nome);
+    if (i > -1) {
+      // Tirar do grimório também tira das Preparadas, se estava lá —
+      // não pode preparar magia que não está mais no livro.
+      update({
+        livroDeMagiasEscolhido: atual.filter((x) => x !== nome),
+        magiasPreparadasEscolhidas: selection.magiasPreparadasEscolhidas.filter((x) => x !== nome),
+      });
+    } else if (atual.length < maxLivroDeMagias) {
+      update({ livroDeMagiasEscolhido: [...atual, nome] });
     }
   }
 
@@ -343,6 +368,36 @@ export default function ClasseEscolhasStep({ selection, update }: StepProps) {
             </>
           )}
 
+          {temLivroDeMagias && (
+            <>
+              <div className="section-title">
+                Livro de Magias (1º círculo) — escolha {maxLivroDeMagias} (
+                {selection.livroDeMagiasEscolhido.length}/{maxLivroDeMagias})
+              </div>
+              <div className="label" style={{ marginBottom: 4 }}>
+                sugestão do livro: Armadura Arcana, Detectar Magia, Mísseis Mágicos, Onda Trovejante, Queda Suave e Sono. Só magias do seu livro podem ser preparadas abaixo.
+              </div>
+              {magiasNivel1.map((m) => {
+                const fonte = jaConcedidas.magias.get(m.nome);
+                const outraFonte = fonte && fonte !== 'Classe' ? fonte : null;
+                return (
+                  <div key={m.id} className="check-row" onClick={() => toggleLivroDeMagias(m.nome)}>
+                    <div className={`check-box ${selection.livroDeMagiasEscolhido.includes(m.nome) ? 'checked' : ''}`} />
+                    <span className="check-label">
+                      <MagiaComDescricao magia={m} rotulo={m.nome} />
+                      {' '}{iconesMagia(m)}
+                    </span>
+                    {outraFonte && (
+                      <span className="tag" style={{ marginLeft: 'auto' }}>
+                        já possui - {outraFonte.toLowerCase()}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </>
+          )}
+
           {maxMagiasPreparadas > 0 && (
             <>
               <div className="section-title">
@@ -350,9 +405,11 @@ export default function ClasseEscolhasStep({ selection, update }: StepProps) {
                 {selection.magiasPreparadasEscolhidas.length}/{maxMagiasPreparadas})
               </div>
               <div className="label" style={{ marginBottom: 4 }}>
-                sugestão do livro: Enfeitiçar Pessoa, Leque Cromático, Palavra Curativa e Sussurros Dissonantes.
+                {temLivroDeMagias
+                  ? 'escolha dentre as magias do seu Livro de Magias, acima.'
+                  : 'sugestão do livro: Enfeitiçar Pessoa, Leque Cromático, Palavra Curativa e Sussurros Dissonantes.'}
               </div>
-              {magiasNivel1.map((m) => {
+              {magiasParaPreparar.map((m) => {
                 const fonte = jaConcedidas.magias.get(m.nome);
                 const outraFonte = fonte && fonte !== 'Classe' ? fonte : null;
                 return (

@@ -152,4 +152,32 @@ export const proficienciasIniciaisClasse: Record<string, ProficienciasIniciaisCl
     ],
     fonte: 'Livro do Jogador (D&D 5e 2024), Cap. 3, pág. 69',
   },
+  mago: {
+    classeId: 'mago',
+    periciasEscolha: {
+      quantidade: 2,
+      opcoes: ['Arcanismo', 'História', 'Intuição', 'Investigação', 'Medicina', 'Natureza', 'Religião'],
+    },
+    // Sem ferramentasEscolha — Mago não tem proficiência de ferramenta
+    // na criação.
+    equipamentoInicial: [
+      {
+        rotulo: 'A',
+        itens: [
+          { nome: 'Adaga', quantidade: 2, unidade: null },
+          { nome: 'Foco Arcano (Cajado)', quantidade: 1, unidade: null },
+          { nome: 'Kit de Erudito', quantidade: 1, unidade: null },
+          { nome: 'Livro de Magias', quantidade: 1, unidade: null },
+          { nome: 'Túnica', quantidade: 1, unidade: null },
+        ],
+        ouro: 5,
+      },
+      {
+        rotulo: 'B',
+        itens: [],
+        ouro: 55,
+      },
+    ],
+    fonte: 'Livro do Jogador (D&D 5e 2024), Cap. 3, pág. 147',
+  },
 };

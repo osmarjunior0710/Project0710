@@ -35,6 +35,7 @@ export const personagemDemo: PersonagemSalvo = {
     ferramentasClasseEscolhidas: ['Xilofone', 'Flauta', 'Flauta de Pan'],
     invocacoesMisticasEscolhidas: [],
     truquesEscolhidos: ['Amigos', 'Mensagem'],
+    livroDeMagiasEscolhido: [],
     magiasPreparadasEscolhidas: ['Fogo das Fadas', 'Heroísmo', 'Perdição', 'Escrita Ilusória'],
     livroDasSombrasTruques: [],
     livroDasSombrasMagias: [],
