@@ -17,6 +17,7 @@ import { valorRecursoClasse } from './recursosClasse';
  * não conjura, então não precisa de atributo de conjuração. */
 const ATRIBUTO_POR_NOME: Record<string, Atributo> = {
   Carisma: 'CAR',
+  Inteligência: 'INT',
 };
 
 export interface EspacoDeMagiaAtivo {

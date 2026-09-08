@@ -1,11 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { espacosDeMagiaAtivos, magiasDisponiveisParaPreparar, poolDescobertasMagicas, cdConjuracao } from './magiasPersonagem';
+import { espacosDeMagiaAtivos, magiasDisponiveisParaPreparar, poolDescobertasMagicas, cdConjuracao, modAcertoConjuracao } from './magiasPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
+import { criarSelecaoInicial } from './personagem';
 
 const bardo = classes.find((c) => c.nome === 'Bardo');
 if (!bardo) throw new Error('Fixture "Bardo" não encontrada em data/rulesets/dnd2024/classes.ts');
 const bruxo = classes.find((c) => c.nome === 'Bruxo');
 if (!bruxo) throw new Error('Fixture "Bruxo" não encontrada em data/rulesets/dnd2024/classes.ts');
+const mago = classes.find((c) => c.nome === 'Mago');
+if (!mago) throw new Error('Fixture "Mago" não encontrada em data/rulesets/dnd2024/classes.ts');
 
 describe('espacosDeMagiaAtivos', () => {
   it('Bardo (1 recurso por círculo): nível 3 tem 1º E 2º círculo simultâneos', () => {
@@ -58,6 +61,28 @@ describe('poolDescobertasMagicas', () => {
     expect(pool.every((m) => m.circulo <= 3)).toBe(true);
     const ids = pool.map((m) => m.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('modAcertoConjuracao', () => {
+  it('Mago (Inteligência): mod. de INT + Bônus de Proficiência do nível', () => {
+    const selecao = { ...criarSelecaoInicial(), atributos: { ...criarSelecaoInicial().atributos, INT: 16 } };
+    // INT 16 = +3; nível 1 Mago = Bônus de Proficiência +2 → total +5.
+    expect(modAcertoConjuracao(selecao, mago, 1)).toBe(5);
+  });
+
+  it('Bruxo (Carisma, atributo já mapeado antes do Mago): continua funcionando', () => {
+    const selecao = { ...criarSelecaoInicial(), atributos: { ...criarSelecaoInicial().atributos, CAR: 14 } };
+    // CAR 14 = +2; nível 1 Bruxo = Bônus de Proficiência +2 → total +4.
+    expect(modAcertoConjuracao(selecao, bruxo, 1)).toBe(4);
+  });
+
+  it('borda: classe null, ou atributo primário sem mapeamento (Guerreiro), devolve null', () => {
+    const selecao = criarSelecaoInicial();
+    expect(modAcertoConjuracao(selecao, null, 1)).toBeNull();
+    const guerreiro = classes.find((c) => c.nome === 'Guerreiro');
+    if (!guerreiro) throw new Error('Fixture "Guerreiro" não encontrada em data/rulesets/dnd2024/classes.ts');
+    expect(modAcertoConjuracao(selecao, guerreiro, 1)).toBeNull();
   });
 });
 

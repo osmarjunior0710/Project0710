@@ -151,10 +151,35 @@ construir o motor/UI que usa esse dado.
   níveis 2+) ainda re-sorteia Magias Preparadas direto da lista da
   classe, sem respeitar o grimório — só afeta o gerador de teste em
   nível alto, não o wizard normal.
-- [ ] **A3 — Ficha (aba Magias).** Truques/Preparadas/Espaços reais do
-  Mago (reaproveita o que já existe) + seção NOVA "Livro de Magias"
-  (mostra as conhecidas, distingue visualmente preparada vs. só no
-  grimório).
+- [x] **A3 — Ficha (aba Magias).** `MagiasTab.tsx` ganhou seção nova
+  "Livro de Magias" (logo antes de "Magias Preparadas") — mostra TODAS
+  as magias do grimório, cada uma com tag "preparada" (verde/normal) ou
+  "não preparada" (cinza), derivado comparando com
+  `magiasPreparadasAtuais`. Só aparece quando `livroDeMagiasAtuais.length
+  > 0` (hoje só Mago). Novo estado `livroDeMagiasAtuais` em
+  `FichaShell.tsx` (mesmo padrão `personagemSalvo.campoAtual ??
+  selecao.campoEscolhido` de Truques/Preparadas — sem setter ainda, só
+  leitura, cresce/troca na A5) + novo campo `livroDeMagiasAtual?` em
+  `PersonagemSalvo`.
+  **Achado corrigido no caminho:** `ATRIBUTO_POR_NOME` (usado por
+  `modAcertoConjuracao` — bônus de ataque/CD de conjuração) só tinha
+  Carisma mapeado; Mago (Inteligência) não estava lá — sem isso, CD/
+  ataque de magia do Mago voltaria `null` (número desaparecendo da
+  tela) mesmo com Espaço de Magia funcionando. Corrigido, com teste
+  novo (`modAcertoConjuracao`, 3 casos: Mago/INT, Bruxo/CAR ainda
+  funcionando, borda classe-null/sem-mapeamento).
+  **Achado corrigido no caminho (invariante):** a tela "Completar
+  Magias Preparadas" (`completarAberto === 'magiasPreparadas'`) listava
+  o catálogo inteiro da classe, sem checar o grimório — um Mago com
+  déficit conseguiria "completar" preparando uma magia que nem está no
+  livro. Catálogo agora filtra pelo grimório quando ele existe.
+  **Testado no navegador** (Playwright + gerador "🎲 Personagem de
+  Teste", nível 1): Espaços de Magia/Truques/Magias da Espécie
+  funcionando normal; "Livro de Magias" mostra as 6 magias com a tag
+  certa (4 preparada / 2 não preparada, confirmado por contagem);
+  "Usar" numa preparada gasta o Espaço de verdade (pip mudou de
+  2/2 pra 1/2); sem erro de console em nenhum passo. tsc/testes(304)/
+  build verdes.
 - [ ] **A4 — Combat.** "Usar Magia" com truques/preparadas reais do
   Mago (reaproveita o picker já existente, `SelecionarMagiaShell`/
   `EscolherCirculoShell` — zero componente novo esperado aqui).

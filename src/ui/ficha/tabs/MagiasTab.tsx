@@ -40,6 +40,12 @@ interface MagiasTabProps {
   conjura: boolean;
   truquesAtuais: string[];
   magiasPreparadasAtuais: string[];
+  /** Livro de Magias (grimório) do Mago — pool de magias CONHECIDAS,
+   * maior que `magiasPreparadasAtuais` (ver DECISOES-CLASSES.md
+   * "Casters", Padrão C). `[]` pra quem não tem essa característica
+   * (hoje, todo mundo além do Mago) — a seção "Livro de Magias" só
+   * aparece quando essa lista não está vazia. */
+  livroDeMagiasAtuais: string[];
   /** "Descobertas Mágicas" (Colégio do Conhecimento, nível 6) — 2
    * magias sempre preparadas, mostradas numa seção própria (não se
    * misturam com Magias Preparadas normais). */
@@ -145,6 +151,7 @@ export default function MagiasTab({
   conjura,
   truquesAtuais,
   magiasPreparadasAtuais,
+  livroDeMagiasAtuais,
   magiasDescobertasMagicasAtuais,
   magiasPactoDoInferoAtuais,
   magiasEspecieAtuais,
@@ -204,6 +211,7 @@ export default function MagiasTab({
   const espacos = espacosDeMagiaAtivos(classe, nivel);
   const truques = truquesDoPersonagem(truquesAtuais);
   const preparadas = magiasPreparadasDoPersonagem(magiasPreparadasAtuais);
+  const livroDeMagias = magiasPreparadasDoPersonagem(livroDeMagiasAtuais);
   const descobertasMagicas = magiasPreparadasDoPersonagem(magiasDescobertasMagicasAtuais);
   const pactoDoInfero = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
   const magiasEspecie = magiasPreparadasDoPersonagem(magiasEspecieAtuais);
@@ -776,6 +784,32 @@ export default function MagiasTab({
                 >
                   {temAcao ? 'Usar' : 'Usar (pendência)'}
                 </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+
+      {livroDeMagias.length > 0 && (
+        <>
+          <div className="section-title">Livro de Magias</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Todas as magias do seu grimório — só as marcadas "preparada" podem ser conjuradas agora (aba Magias
+            Preparadas, abaixo). Muda a lista de preparadas ao completar um Descanso Longo.
+          </div>
+          {livroDeMagias.map((m) => {
+            const preparada = magiasPreparadasAtuais.includes(m.nome);
+            return (
+              <div key={m.id} className={styles.spellRow}>
+                <div className={styles.spellName}>
+                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                </div>
+                <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
+                {preparada ? (
+                  <span className="tag">preparada</span>
+                ) : (
+                  <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>não preparada</span>
+                )}
               </div>
             );
           })}

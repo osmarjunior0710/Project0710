@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2127
+
+Aba Magias do Mago mostra dado de verdade: Espaços de Magia, Truques e
+o Livro de Magias (grimório) — cada magia do livro aparece marcada
+"preparada" ou "não preparada", e usar uma preparada gasta o Espaço
+normal, com CD/bônus de ataque calculados pela Inteligência. Ainda
+falta o Combat e o Level Up (crescer o livro, trocar preparadas no
+Descanso) — próximas entregas.
+
 ## v202609_2116
 
 Mago agora aparece na criação de personagem (wizard) — perícias,
