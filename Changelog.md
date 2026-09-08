@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2116
+
+Mago agora aparece na criação de personagem (wizard) — perícias,
+truques, equipamento inicial e o Livro de Magias (o "grimório" do
+Mago, maior que as magias do dia a dia): escolhe 6 magias de 1º
+círculo pro livro e depois só 4 delas ficam preparadas. Ainda não dá
+pra jogar com ele na Ficha/Combate — isso vem numa próxima entrega.
+
 ## v202609_1832
 
 Aba Magias — as magias Rituais do Conjurador Ritualista (Alarme/

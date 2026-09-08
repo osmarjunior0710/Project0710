@@ -20,6 +20,12 @@ export interface WizardSelection {
    * PENDENCIAS.md "Bruxo — Invocações Místicas Fase 2". */
   invocacoesMisticasEscolhidas: string[];
   truquesEscolhidos: string[];
+  /** Livro de Magias (grimório) do Mago — pool de magias CONHECIDAS,
+   * maior que `magiasPreparadasEscolhidas` (ver DECISOES-CLASSES.md
+   * "Casters", Padrão C). Só preenchido por classes com o recurso
+   * "Livro de Magias" em `classes.ts` (hoje só Mago) — `[]` nas
+   * demais. Magias Preparadas devem ser um subconjunto desta lista. */
+  livroDeMagiasEscolhido: string[];
   magiasPreparadasEscolhidas: string[];
   /** Livro das Sombras (Invocação Mística "Pacto do Tomo", ver
    * DND-Regras.md) — 3 truques + 2 magias de 1º círculo Ritual, de
@@ -98,6 +104,7 @@ export function criarSelecaoInicial(): WizardSelection {
     ferramentasClasseEscolhidas: [],
     invocacoesMisticasEscolhidas: [],
     truquesEscolhidos: [],
+    livroDeMagiasEscolhido: [],
     magiasPreparadasEscolhidas: [],
     livroDasSombrasTruques: [],
     livroDasSombrasMagias: [],

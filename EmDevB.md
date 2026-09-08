@@ -128,9 +128,29 @@ construir o motor/UI que usa esse dado.
   `npm run build` verdes. **Não é testável na tela ainda** (Mago
   continua fora da lista de classes do wizard até a A2) — só dado
   puro importado.
-- [ ] **A2 — Wizard.** Criação de Mago nível 1: 2 perícias, 3 truques,
-  escolher 6 magias de 1º círculo pro grimório, depois escolher 4
-  dessas 6 como preparadas hoje, equipamento A/B.
+- [x] **A2 — Wizard.** `WizardSelection` ganhou
+  `livroDeMagiasEscolhido: string[]`. `ClasseEscolhasStep.tsx`: nova
+  seção "Livro de Magias — escolha 6" (mesmo componente de check-row
+  de sempre) ANTES de "Magias Preparadas", que passou a listar só as
+  magias já marcadas no grimório (não mais a lista inteira da classe)
+  — desmarcar uma magia do grimório também desmarca das Preparadas se
+  estava lá (`toggleLivroDeMagias`). `WizardShell.tsx` (`isValid` +
+  `randomizarEscolhasClasse`) e `geradorPersonagemTeste.ts` (mesmo
+  ajuste pro gerador de Personagem de Teste) atualizados pra sortear o
+  grimório ANTES das preparadas e restringir o sorteio das preparadas
+  ao grimório sorteado. `mago.disponivel = true` — Mago agora aparece
+  de verdade na lista de classes do wizard.
+  **Testado no navegador** (Playwright, 390px): Mago selecionável,
+  tela "Escolhas da Classe" mostra os 2 blocos corretos, randomizar
+  preenche 6/6 no livro e 4/4 nas preparadas, e desmarcar uma magia do
+  livro que também estava preparada derruba os dois contadores juntos
+  (confirmado 6/6→5/6 e 4/4→3/4 na mesma ação) — sem erro no console.
+  tsc/testes(290)/build verdes.
+  **Fora do escopo desta entrega (fica pra A5 — Level Up):**
+  `aplicarLevelUpsAleatorios` (gerador de Personagem de Teste em
+  níveis 2+) ainda re-sorteia Magias Preparadas direto da lista da
+  classe, sem respeitar o grimório — só afeta o gerador de teste em
+  nível alto, não o wizard normal.
 - [ ] **A3 — Ficha (aba Magias).** Truques/Preparadas/Espaços reais do
   Mago (reaproveita o que já existe) + seção NOVA "Livro de Magias"
   (mostra as conhecidas, distingue visualmente preparada vs. só no

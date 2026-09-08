@@ -150,11 +150,17 @@ export default function WizardShell() {
         .slice(0, maxTruques)
         .map((m) => m.nome);
     }
+    // Livro de Magias (Mago) — sorteia o grimório ANTES das Preparadas,
+    // porque Preparadas só pode vir do que já está no livro.
+    const maxLivro = valorRecursoClasse(classeSelecionada, 'Livro de Magias', 1);
+    const poolMagiasNivel1 = embaralhar(magiasDaClasse(classeSelecionada.nome, 1));
+    if (maxLivro > 0) {
+      patch.livroDeMagiasEscolhido = poolMagiasNivel1.slice(0, maxLivro).map((m) => m.nome);
+    }
     const maxMagias = valorRecursoClasse(classeSelecionada, 'Magias Preparadas', 1);
     if (maxMagias > 0) {
-      patch.magiasPreparadasEscolhidas = embaralhar(magiasDaClasse(classeSelecionada.nome, 1))
-        .slice(0, maxMagias)
-        .map((m) => m.nome);
+      const pool = maxLivro > 0 ? poolMagiasNivel1.slice(0, maxLivro) : poolMagiasNivel1;
+      patch.magiasPreparadasEscolhidas = pool.slice(0, maxMagias).map((m) => m.nome);
     }
     update(patch);
   }
@@ -258,6 +264,8 @@ export default function WizardShell() {
         if (s.invocacoesMisticasEscolhidas.length !== maxInvocacoes) return false;
         const maxTruques = valorRecursoClasse(classeSelecionada, 'Truques Conhecidos', 1);
         if (s.truquesEscolhidos.length !== maxTruques) return false;
+        const maxLivro = valorRecursoClasse(classeSelecionada, 'Livro de Magias', 1);
+        if (s.livroDeMagiasEscolhido.length !== maxLivro) return false;
         const maxMagias = valorRecursoClasse(classeSelecionada, 'Magias Preparadas', 1);
         if (s.magiasPreparadasEscolhidas.length !== maxMagias) return false;
         if (!proficiencias) return true;

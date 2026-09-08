@@ -449,10 +449,11 @@ export const classes: Classe[] = [
       { nivel: 19, bonusProficiencia: '+6', caracteristicas: ['Dádiva Épica'] },
       { nivel: 20, bonusProficiencia: '+6', caracteristicas: ['Assinatura Mágica'] },
     ],
-    // A1 feito — dados da classe base importados (planilha + PDF oficial
-    // Cap. 3, conferidos linha a linha, zero divergência). Wizard/Ficha/
-    // Combat/Level Up ainda não usam esses dados (A2+, ver EmDevB.md).
-    disponivel: false,
+    // A2 feito — wizard sabe criar um Mago de ponta a ponta (perícias,
+    // truques, Livro de Magias + Magias Preparadas subconjunto dele,
+    // equipamento). Falta a aba Magias/Combat da Ficha e o Level Up
+    // usarem esses dados de verdade (A3+, ver EmDevB.md).
+    disponivel: true,
     fonte: FONTE,
   },
 ];
