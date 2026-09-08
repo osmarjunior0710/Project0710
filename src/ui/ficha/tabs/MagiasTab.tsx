@@ -790,32 +790,6 @@ export default function MagiasTab({
         </>
       )}
 
-      {livroDeMagias.length > 0 && (
-        <>
-          <div className="section-title">Livro de Magias</div>
-          <div className="label" style={{ marginBottom: 4 }}>
-            Todas as magias do seu grimório — só as marcadas "preparada" podem ser conjuradas agora (aba Magias
-            Preparadas, abaixo). Muda a lista de preparadas ao completar um Descanso Longo.
-          </div>
-          {livroDeMagias.map((m) => {
-            const preparada = magiasPreparadasAtuais.includes(m.nome);
-            return (
-              <div key={m.id} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
-                </div>
-                <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
-                {preparada ? (
-                  <span className="tag">preparada</span>
-                ) : (
-                  <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>não preparada</span>
-                )}
-              </div>
-            );
-          })}
-        </>
-      )}
-
       {(preparadas.length > 0 || faltamMagiasPreparadas > 0) && (
         <>
           <div className="section-title">Magias Preparadas</div>
@@ -839,6 +813,32 @@ export default function MagiasTab({
                 >
                   Usar
                 </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+
+      {livroDeMagias.length > 0 && (
+        <>
+          <div className="section-title">Livro de Magias</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Todas as magias do seu grimório — só as marcadas "preparada" podem ser conjuradas agora (aba Magias
+            Preparadas, acima). Muda a lista de preparadas ao completar um Descanso Longo.
+          </div>
+          {livroDeMagias.map((m) => {
+            const preparada = magiasPreparadasAtuais.includes(m.nome);
+            return (
+              <div key={m.id} className={styles.spellRow}>
+                <div className={styles.spellName}>
+                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                </div>
+                <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
+                {preparada ? (
+                  <span className="tag">preparada</span>
+                ) : (
+                  <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>não preparada</span>
+                )}
               </div>
             );
           })}

@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2221
+
+Aba Magias do Mago — ordem das seções trocada: "Magias Preparadas"
+(o que dá pra usar agora) vem antes de "Livro de Magias" (o catálogo
+completo do grimório), que ficou por último.
+
 ## v202609_2127
 
 Aba Magias do Mago mostra dado de verdade: Espaços de Magia, Truques e
