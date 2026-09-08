@@ -14,6 +14,47 @@
 
 ---
 
+## Magia de cura não rola dado — falta coluna de cura na planilha (Magias)
+
+**O que é:** ao usar uma magia de cura (ex.: Palavra Curativa) na aba
+Magias ou no "Usar Magia" do Combate, o app não rola dado nenhum — só
+mostra a descrição em texto. Achado numa auditoria pedida pelo Osmar
+("dar uma passada global" em tudo que rola dado, 2026-09) depois da
+entrega de arte nova nos dados.
+
+**Causa raiz:** `mecanicaDaMagia` (`core/magiaDano.ts`) só reconhece
+`'ataque'` e `'salvaguarda'` (derivados da coluna `AtaqueOuSalvaguarda`
+da planilha) — qualquer magia com essa coluna vazia cai em
+`'nenhuma'`, mesmo que cure. **A aba "Magias" da planilha mestra não
+tem nenhuma coluna estruturada de cura** — só existe
+`DanoBase_Dado`/`DanoBase_Tipo` (+ `Upcast_*`) pra dano. O dado de cura
+de cada magia hoje só existe como texto solto dentro de "Descrição
+Completa" (ex.: Palavra Curativa: "recupera... 2d8 mais seu
+modificador de atributo de conjuração"). Por regra do projeto (ver
+CLAUDE.md seção 3), dado de regra não pode ser extraído de texto livre
+por regex — só de coluna estruturada, senão uma edição futura na
+descrição quebra a rolagem sem avisar.
+
+**Decisão do Osmar (2026-09):** ele vai adicionar a(s) coluna(s) de
+cura na aba "Magias" da planilha mestra — mesmo padrão de
+`DanoBase_Dado`/`DanoBase_Tipo` (sugestão pra manter consistência:
+`CuraBase_Dado` + `Upcast_Tipo`/`Upcast_Dado`/`Upcast_Flat` já
+existentes deveriam servir pra cura também, já que o upcast de cura
+segue o mesmo formato "+NdM por círculo acima" — só falta o dado BASE
+de cura).
+
+**O que falta pra resolver:** esperar o Osmar adicionar a coluna na
+planilha. Quando existir: (1) importar pra `Magia` (`magias.ts`) um
+campo tipo `curaBaseDado: string | null`; (2) estender
+`MecanicaMagia` (`core/magiaDano.ts`) com `'cura'` (deriva de
+`curaBaseDado` presente, independente de `AtaqueOuSalvaguarda`); (3)
+criar `calcularCuraMagia` espelhando `calcularDanoMagia` (mesma lógica
+de Upcast); (4) em `MagiasTab.tsx` e `AcaoPanelContent.tsx`, quando
+`mecanica === 'cura'`, rolar via `rolarDados` (rótulo "Cura — {nome}",
+sem categoria `atributoOuSalvaguarda`) e mostrar o total — **decisão
+do Osmar: o jogador aplica o PV manualmente** (nem toda cura é em si
+mesmo, o app não tem conceito de "alvo" pra aplicar sozinho).
+
 ## Planilha mestra não tem os IDs que o app usa internamente (Magias, Opções de Classe)
 
 **O que é:** a planilha mestra já tem coluna `ID` própria em várias
