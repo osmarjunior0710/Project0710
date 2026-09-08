@@ -1,29 +1,6 @@
-import { useRoll, type LadosDado } from './RollContext';
+import { useRoll } from './RollContext';
 import styles from './RollOverlay.module.css';
-import dadoD4 from '../../assets/icones-dados/dado-d4.webp';
-import dadoD6 from '../../assets/icones-dados/dado-d6.webp';
-import dadoD8 from '../../assets/icones-dados/dado-d8.webp';
-import dadoD10 from '../../assets/icones-dados/dado-d10.webp';
-import dadoD12 from '../../assets/icones-dados/dado-d12.webp';
-import dadoD20 from '../../assets/icones-dados/dado-d20.webp';
-import dadoD100 from '../../assets/icones-dados/dado-d100.webp';
-
-/** Arte por tipo de dado — d100 usa a mesma arte de "2×d10" (na mesa
- * real seria 2 d10 físicos; aqui rolamos 1-100 direto, mas a arte
- * representa o par). */
-const IMG_POR_LADOS: Record<LadosDado, string> = {
-  4: dadoD4,
-  6: dadoD6,
-  8: dadoD8,
-  10: dadoD10,
-  12: dadoD12,
-  20: dadoD20,
-  100: dadoD100,
-};
-
-function artePorLados(lados: number | undefined): string | undefined {
-  return lados !== undefined && lados in IMG_POR_LADOS ? IMG_POR_LADOS[lados as LadosDado] : undefined;
-}
+import { artePorLados } from './dadosArte';
 
 interface DadoVisualProps {
   valor: number | string;
@@ -32,12 +9,15 @@ interface DadoVisualProps {
   onClick?: () => void;
 }
 
+/** `'🎲'` é só o placeholder de "ainda rolando" (ver RollContext) —
+ * agora que o dado tem arte própria, a animação da imagem já comunica
+ * isso sozinha, não precisa mais do emoji girando por cima. */
 function DadoVisual({ valor, lados, className, onClick }: DadoVisualProps) {
   const arte = artePorLados(lados);
   return (
     <div className={`${styles.die} ${arte ? styles.dieComArte : ''} ${className ?? ''}`} onClick={onClick}>
       {arte && <img src={arte} alt="" className={styles.dieArtImg} />}
-      <span className={styles.dieValue}>{valor}</span>
+      <span className={styles.dieValue}>{arte && valor === '🎲' ? '' : valor}</span>
     </div>
   );
 }

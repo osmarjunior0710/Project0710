@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1136
+
+2 ajustes na arte dos dados: o emoji 🎲 que ficava girando por cima da
+arte nova enquanto o dado rolava foi removido (a arte já mostra que
+está rolando, não precisa dos dois). A tela de "rolar dado de vida" do
+Level Up (PV ao subir de nível) também ganhou a arte nova — antes só
+os dados do Combate/Magias tinham.
+
 ## v202609_1105
 
 Rolagem de dados ganhou arte de verdade: cada tipo (d4, d6, d8, d10,

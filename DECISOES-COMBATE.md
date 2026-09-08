@@ -432,19 +432,39 @@ WebP já usado pros emblemas de Classe/Origem/Espécie — PNG original
 convertido e redimensionado pra ~240×240, ~6-10 KB cada). `d100` usa
 a MESMA arte de "2×d10" (na mesa física seriam 2 d10; aqui o app rola
 1-100 direto numa jogada só, mas a arte mantém a referência visual do
-par). `IMG_POR_LADOS` (`RollOverlay.tsx`) mapeia `lados → import` e
-`DadoVisual` (componente interno) renderiza a arte como `<img>`
-absoluto atrás do valor (`.dieArtImg`), com o número por cima em texto
-branco + `text-shadow` (contraste garante legibilidade em qualquer cor
-de fundo). Molduras antigas (borda sólida, fundo cinza) somem quando
-há arte (`.dieComArte`); acerto/falha crítica e o contorno tracejado
-de "dá pra rerolar" (Perfurador) viram anel (`box-shadow`/`outline`)
-em vez de cor de fundo, pra não brigar visualmente com a arte. Vale
-pro grid (2+ dados) E pra rolagem de 1 dado só (`.diceRow`) — inclusive
+par). O mapa `lados → import` e a função `artePorLados(lados)` vivem
+em `src/ui/roll/dadosArte.ts` — arquivo COMPARTILHADO, não interno do
+`RollOverlay`, porque existe mais de 1 lugar no app que desenha um
+"dado girando" (ver abaixo). `DadoVisual` (componente interno do
+`RollOverlay.tsx`) renderiza a arte como `<img>` absoluto atrás do
+valor (`.dieArtImg`), com o número por cima em texto branco +
+`text-shadow` (contraste garante legibilidade em qualquer cor de
+fundo). Molduras antigas (borda sólida, fundo cinza) somem quando há
+arte (`.dieComArte`); acerto/falha crítica e o contorno tracejado de
+"dá pra rerolar" (Perfurador) viram anel (`box-shadow`/`outline`) em
+vez de cor de fundo, pra não brigar visualmente com a arte. Vale pro
+grid (2+ dados) E pra rolagem de 1 dado só (`.diceRow`) — inclusive
 d20 de ataque/perícia/salvaguarda e o "bônus extra" (Inspiração
 Divina, Ajuda Duplicada etc.). Um `lados` fora da lista (ex.: Ataque
-Desarmado é "1d1", sem dado físico de verdade) simplesmente não ganha
-arte — cai de volta na moldura genérica antiga, sem quebrar nada.
+Desarmado é "1d1" — dano fixo "1 + mod. Força" da regra real,
+implementado como um dado de 1 lado só pra reaproveitar o mesmo cano
+de rolagem, não existe d1 físico) simplesmente não ganha arte — cai de
+volta na moldura genérica antiga, sem quebrar nada. Isso é o
+comportamento CORRETO, não um bug: só dado que existe de verdade
+ganha arte.
+
+**Reaproveitado também na tela dramática de PV do Level Up
+(`LevelUpShell.tsx`)** — essa tela tem seu PRÓPRIO mecanismo de
+"rolar dado" (`setInterval` com número aleatório, animação e
+tela preta full-screen), completamente separado do `RollContext`/
+`RollOverlay` (existia antes deles, nunca foi unificado). Em vez de
+duplicar o mapa de arte ali, ela importa `artePorLados` do mesmo
+`dadosArte.ts` e aplica a mesma técnica (`.dramaDieComArte`,
+`.dramaDieArtImg`, `.dramaDieValue` em `LevelUpShell.module.css`) —
+2 telas com HTML/CSS de moldura diferentes, mas a MESMA fonte de arte
+por tipo de dado. Se aparecer uma 3ª tela de "dado rolando" no
+futuro, repita esse padrão (importar de `dadosArte.ts`) em vez de
+copiar o mapa de novo.
 
 **Reroll de 1 dado À ESCOLHA (Perfurador)** — generaliza o
 `rerollSe1` acima pra "reroll de qualquer dado, independente do

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { artePorLados } from '../../roll/dadosArte';
 import { dadoVidaValor } from '../../../data/levelUpFixtures';
 import type { Atributo } from '../../../data/wizardFixtures';
 import type { Classe } from '../../../data/rulesets/dnd2024/classes';
@@ -901,17 +902,24 @@ export default function LevelUpShell({
   }
 
   if (faseDramatica !== 'idle') {
+    const arteDadoVida = artePorLados(parseInt(personagem.dadoVida.slice(1), 10));
     return (
       <div className={styles.dramaScreen}>
         {faseDramatica === 'rolando' ? (
           <>
             <div className={styles.dramaLabel}>rolando 1{personagem.dadoVida}...</div>
-            <div className={`${styles.dramaDie} ${styles.dramaDieSpinning}`}>{valorDadoAnimado ?? '?'}</div>
+            <div className={`${styles.dramaDie} ${styles.dramaDieSpinning} ${arteDadoVida ? styles.dramaDieComArte : ''}`}>
+              {arteDadoVida && <img src={arteDadoVida} alt="" className={styles.dramaDieArtImg} />}
+              <span className={styles.dramaDieValue}>{valorDadoAnimado ?? '?'}</span>
+            </div>
           </>
         ) : (
           <>
             <div className={styles.dramaLabel}>resultado</div>
-            <div className={styles.dramaDie}>{hpRolado}</div>
+            <div className={`${styles.dramaDie} ${arteDadoVida ? styles.dramaDieComArte : ''}`}>
+              {arteDadoVida && <img src={arteDadoVida} alt="" className={styles.dramaDieArtImg} />}
+              <span className={styles.dramaDieValue}>{hpRolado}</span>
+            </div>
             <div className={styles.dramaSub}>
               {hpRolado} + mod. CON ({personagem.conMod >= 0 ? '+' : ''}
               {personagem.conMod})
