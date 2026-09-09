@@ -421,16 +421,63 @@ dados no TOTAL (`quantidade` do grupo principal + soma dos
 tipos). Rolagem de 1 dado só **não** ganha esse campo — continua
 exatamente como antes (`.diceRow` de sempre), decisão explícita do
 Osmar pra não mudar a aparência do que já funciona. `RollOverlay.tsx`
-escolhe o layout pelo campo: `dadosIndividuais` presente → grid
-(`.diceGrid`, CSS `grid-template-columns: repeat(4, 1fr)` — SEMPRE 4
-colunas, quebra linha sozinha via `grid-auto-flow` do CSS, sem lógica
-de quebra manual); ausente → `.diceRow` de sempre.
+escolhe o layout pelo campo: `dadosIndividuais` presente → quebrado em
+linhas de até 4 (`agruparEmLinhas`, esquerda→direita, JS — não CSS
+grid), cada linha um `flex` próprio com `justify-content: center`
+(`.diceGridRow`) — linha com 4 preenche tudo (visualmente igual a um
+grid comum), linha com 1-3 (só pode ser a ÚLTIMA) fica centralizada
+em vez de grudada à esquerda com espaço vazio sobrando; ausente →
+`.diceRow` de sempre.
 
-**Arte por tipo de dado:** 1 classe CSS por `lados`
-(`.dieTipo4`...`.dieTipo100`), todas com o MESMO visual por enquanto
-(`CLASSE_POR_LADOS` em `RollOverlay.tsx`) — só existem separadas já
-prontas pra receber 1 `background-image` própria por tipo quando o
-Osmar desenhar a arte, sem precisar mexer na estrutura de novo.
+**Arte por tipo de dado:** cada `lados` (4/6/8/10/12/20/100) tem sua
+própria arte (`src/assets/icones-dados/dado-dN.webp`, mesmo padrão
+WebP já usado pros emblemas de Classe/Origem/Espécie — PNG original
+convertido e redimensionado pra ~240×240, ~6-10 KB cada). `d100` usa
+a MESMA arte de "2×d10" (na mesa física seriam 2 d10; aqui o app rola
+1-100 direto numa jogada só, mas a arte mantém a referência visual do
+par). O mapa `lados → import` e a função `artePorLados(lados)` vivem
+em `src/ui/roll/dadosArte.ts` — arquivo COMPARTILHADO, não interno do
+`RollOverlay`, porque existe mais de 1 lugar no app que desenha um
+"dado girando" (ver abaixo). `DadoVisual` (componente interno do
+`RollOverlay.tsx`) renderiza a arte como `<img>` absoluto atrás do
+valor (`.dieArtImg`), com o número por cima em texto branco +
+`text-shadow` (contraste garante legibilidade em qualquer cor de
+fundo). Molduras antigas (borda sólida, fundo cinza) somem quando há
+arte (`.dieComArte`); acerto/falha crítica e o contorno tracejado de
+"dá pra rerolar" (Perfurador) viram anel (`box-shadow`/`outline`) em
+vez de cor de fundo, pra não brigar visualmente com a arte. Vale pro
+grid (2+ dados) E pra rolagem de 1 dado só (`.diceRow`) — inclusive
+d20 de ataque/perícia/salvaguarda e o "bônus extra" (Inspiração
+Divina, Ajuda Duplicada etc.). Um `lados` fora da lista (ex.: Ataque
+Desarmado é "1d1" — dano fixo "1 + mod. Força" da regra real,
+implementado como um dado de 1 lado só pra reaproveitar o mesmo cano
+de rolagem, não existe d1 físico) simplesmente não ganha arte — cai de
+volta na moldura genérica antiga, sem quebrar nada. Isso é o
+comportamento CORRETO, não um bug: só dado que existe de verdade
+ganha arte.
+
+**Suspense da rolagem — 1s, 2 voltas completas antes do resultado
+(pedido do Osmar, 2026-09):** `DURACAO_ANIMACAO_MS` (`RollContext.tsx`)
+controla quanto tempo a rolagem fica em `fase: 'rolando'` antes de
+`'concluido'` revelar o valor/total — usado por TODA rolagem
+(`rolarD20`, `rolarDados`, reroll de qualquer tipo), não só a com
+arte. O keyframe `spin` (`RollOverlay.module.css`, aplicado em `.die`)
+tem que durar exatamente o mesmo tempo — os 2 ficam citados um no
+comentário do outro pra não dessincronizar se alguém mudar só 1 lado.
+2 voltas = `rotate(720deg)` no keyframe (não 360deg).
+
+**Reaproveitado também na tela dramática de PV do Level Up
+(`LevelUpShell.tsx`)** — essa tela tem seu PRÓPRIO mecanismo de
+"rolar dado" (`setInterval` com número aleatório, animação e
+tela preta full-screen), completamente separado do `RollContext`/
+`RollOverlay` (existia antes deles, nunca foi unificado). Em vez de
+duplicar o mapa de arte ali, ela importa `artePorLados` do mesmo
+`dadosArte.ts` e aplica a mesma técnica (`.dramaDieComArte`,
+`.dramaDieArtImg`, `.dramaDieValue` em `LevelUpShell.module.css`) —
+2 telas com HTML/CSS de moldura diferentes, mas a MESMA fonte de arte
+por tipo de dado. Se aparecer uma 3ª tela de "dado rolando" no
+futuro, repita esse padrão (importar de `dadosArte.ts`) em vez de
+copiar o mapa de novo.
 
 **Reroll de 1 dado À ESCOLHA (Perfurador)** — generaliza o
 `rerollSe1` acima pra "reroll de qualquer dado, independente do
@@ -550,34 +597,100 @@ fixo. Testado com Mago nível 17 (9 círculos simultâneos) e nível 1 (1
 círculo só) — cabe nos dois casos em ~390px sem cortar a lista, e o
 painel se mantém parado na tela mesmo rolando a lista.
 
-**Achado técnico durante a correção — `position:fixed` preso ao
-drawer "Ação":** a tela "Usar Magia" abre de dentro do drawer lateral
-`SidePanel` (o painel que desliza ao tocar "Ação" na Combat), que usa
-`transform` (`SidePanel.module.css`, `.panelLeft`/`.panelRight`) pra
-animar o slide-in. Qualquer ancestral com `transform` vira o
-"containing block" de todo `position:fixed` descendente (regra do
-CSS, não bug do navegador) — por isso o `.screen` da tela "Usar
-Magia" (e tudo `fixed` dentro dela, como o `.painelEspacos`) fica
-preso à largura do drawer (~84% da tela), não à tela inteira. É
-exatamente o "gutter cinza" que aparecia à direita no celular do
-Osmar, mostrando um pedaço da Ficha por baixo. **Correção aplicada
-só no painel:** `createPortal(..., document.body)` — renderiza o
-`.painelEspacos` direto no `<body>`, fora da árvore do drawer, então
-`position:fixed` nele passa a valer contra a tela de verdade. O resto
-da tela "Usar Magia" (a lista de magias) continua preso à largura do
-drawer — não foi corrigido aqui porque o pedido do Osmar era só sobre
-o painel; se algum dia a lista também precisar ocupar a tela inteira,
-o mesmo `createPortal` resolve.
-**Padrão a reaproveitar:** qualquer elemento `position:fixed` que
-precise cobrir a tela inteira, mas que more (mesmo que indiretamente)
-dentro de um `SidePanel`/drawer com `transform`, precisa de
-`createPortal(..., document.body)` — não basta `position:fixed`
-sozinho.
+**Achado técnico — `position:fixed` preso ao drawer "Ação":** a tela
+"Usar Magia" abre de dentro do drawer lateral `SidePanel` (o painel
+que desliza ao tocar "Ação" na Combat), que usa `transform`
+(`SidePanel.module.css`, `.panelLeft`/`.panelRight`) pra animar o
+slide-in. Qualquer ancestral com `transform` vira o "containing
+block" de todo `position:fixed` descendente (regra do CSS, não bug do
+navegador) — por isso o `.screen` dessas telas fica preso a ~84% da
+largura real (não 100%), sobrando uma faixa da Ficha visível à
+direita. **Isso é o tamanho ESPERADO da tela — não um bug a corrigir.**
+Só o `.painelEspacos` precisa escapar disso (ver acima: `createPortal`
+pro `<body>`, único elemento que precisa cobrir a tela cheia de
+verdade). Uma tentativa de portar a tela INTEIRA (`SelecionarMagiaShell`/
+`EscolherCirculoShell`) pra fazer as 2 ocuparem 100% da largura foi
+revertida — o Osmar só queria que o TEXTO da lista aproveitasse melhor
+a largura de ~84% que já existia, não que a tela cobrisse a Ficha
+toda.
+
+**Fix de verdade — `padding-right` da lista recalibrado:**
+`.listCol` reservava `padding-right: 108px` (calculado como se a
+`.screen` tivesse 100% da largura) — mas como a tela só tem ~84%, e o
+painel é `fixed` relativo à tela CHEIA (não à `.screen`), a maior
+parte da largura do painel já cai fora da área visível da tela — bem
+menos que 108px do texto realmente precisa ficar de fora. Baixado pra
+`padding-right: 56px` (calibrado pra ~390px, aproximado — não dá pra
+calcular isso em CSS puro sabendo só a % do drawer). Padrão a
+lembrar: **`padding-right`/margem reservada pra um elemento `fixed`
+relativo à tela cheia, dentro de um container que NÃO ocupa a tela
+cheia, precisa ser recalculado pela largura real do container, não
+pela largura do elemento fixed.**
 
 **Data/origem:** 2026-09, revisão pedida pelo Osmar depois do foco
-Mago (outra conta/branch) chegar na Combat — 1ª versão (painel dentro
-do flex row, rolando junto com a lista) foi corrigida pro fixed depois
-que o Osmar testou no celular; 2ª correção (portal pro `<body>`) saiu
-de uma investigação de por que o fixed ainda ficava preso a ~84% da
-largura mesmo ancorado — achado documentado acima.
+Mago (outra conta/branch) chegar na Combat.
+
+## Estado do turno (Ação/Ação Bônus/Reação, Surto de Ação) persiste — só reseta em Iniciativa nova ou "Fim do Turno"
+
+**Problema:** `turnState` (os 3 botões Ação/Ação Bônus/Reação — ativo
+ou usada) e `surtoUsadoTurno` só existiam em estado do React
+(`useState` sem persistência), diferente de quase todo o resto da
+Ficha (PV, Espaços de Magia, usos de característica — tudo salvo em
+`localStorage` a cada mudança, ver `FichaShell.tsx`). Sair da Ficha e
+voltar (Lista de Personagens, F5, trocar de aba do navegador) resetava
+os 3 botões sozinho, mesmo no meio do MESMO turno de combate — bug
+reportado pelo Osmar.
+
+**Decisão:** `turnState`/`surtoUsadoTurno` agora entram no mesmo save
+automático de tudo mais (`PersonagemSalvo.turnStateAtual`/
+`surtoUsadoTurnoAtual`, `core/armazenamentoPersonagens.ts`) — sobrevive
+a sair/voltar da Ficha. Só reseta de propósito em 2 gatilhos, ambos já
+existentes: **"Fim do Turno"** (`fimDoTurno` em `FichaShell.tsx`, sem
+mudança) e **rolar Iniciativa** (novo — `aoRolarIniciativa`, chamado
+tanto pelo botão de Iniciativa da aba Combat quanto pelo card de
+Iniciativa da aba Atributos, os 2 pontos que rolam esse dado). O
+motivo de rolar Iniciativa também resetar: RAW, cada rolagem de
+Iniciativa é o início de uma cena/combate nova — manter os 3 botões
+travados de um combate anterior não faz sentido ao começar outro.
+
+**Padrão a lembrar:** todo estado "supostamente temporário" (dura só o
+turno/a sessão) que na prática o jogador vê sumir sem querer ao trocar
+de tela precisa entrar no save automático de qualquer forma — o reset
+tem que ser um EVENTO explícito (Fim do Turno, Descanso, Iniciativa
+nova), nunca "o componente desmontou".
+
+**Data/origem:** 2026-09, bug reportado pelo Osmar.
+
+## "Fim do Turno" pisca a tela — 2 planos pretos fecham/abrem, reset acontece escondido no meio
+
+**Pedido do Osmar:** ao tocar "Fim do Turno", em vez do reset dos 3
+botões acontecer instantâneo e visível, 2 planos pretos (metade de
+cima, metade de baixo da tela) fecham vindo de fora da tela (de cima
+pra baixo / de baixo pra cima), se encontram no meio, e abrem de novo
+saindo por onde entraram — como uma piscada de olho. Analogia
+explícita do Osmar: cada turno de mesa dura no máximo 6 segundos, "fim
+de turno" é rápido como um piscar.
+
+**Implementação (`CombatTab.tsx`/`CombatTab.module.css`):**
+`fimDoTurno()` não reseta mais na hora — dispara `piscando: true`
+(mostra os 2 planos, `position:fixed` cobrindo a tela, `z-index: 90`),
+agenda o reset de verdade (`onFimDoTurno`, `setFeedback(null)` etc.)
+pro **meio exato** da animação (`DURACAO_PISCADA_MS / 2`, tela
+totalmente coberta — ninguém vê o "salto"), e agenda esconder os
+planos no final (`DURACAO_PISCADA_MS`). Duração total: 500ms — metade
+fechando, metade abrindo, 1 `@keyframes` por plano
+(`translateY(-100%→0→-100%)` pro de cima,
+`translateY(100%→0→100%)` pro de baixo). A borda de encontro dos 2
+planos usa `border-radius` elíptico bem raso (`50% 50% / 10px 10px`)
+pra não ficar 100% reto — uma leve curva complementar entre os dois,
+como pálpebras.
+
+**Padrão a lembrar:** JS (`DURACAO_PISCADA_MS`) e CSS (`@keyframes`)
+duram o MESMO tempo por construção — a duração vira uma CSS custom
+property (`--duracao-piscada`) escrita via `style` inline a partir da
+constante JS, em vez de duplicar o número em 2 lugares (mesmo cuidado
+já registrado pra `DURACAO_ANIMACAO_MS`/spin do dado, ver acima —
+"Suspense da rolagem").
+
+**Data/origem:** 2026-09, pedido do Osmar.
 

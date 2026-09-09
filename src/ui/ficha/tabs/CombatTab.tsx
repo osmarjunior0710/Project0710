@@ -21,6 +21,10 @@ import AtaqueDeSoproModal from '../combat/AtaqueDeSoproModal';
 import MagiaSalvaguardaModal from '../combat/MagiaSalvaguardaModal';
 import styles from './CombatTab.module.css';
 
+/** Duração total da "piscada" de Fim do Turno (ver `fimDoTurno`) — os
+ * 2 planos fecham na 1ª metade e abrem na 2ª. */
+const DURACAO_PISCADA_MS = 500;
+
 export type RecursoTurno = 'acao' | 'bonus' | 'reacao';
 export type EstadoRecurso = 'disponivel' | 'usada';
 
@@ -273,6 +277,7 @@ export default function CombatTab({
   const [danoPendente, setDanoPendente] = useState<DanoPendente | null>(null);
   const [telaSalvaguarda, setTelaSalvaguarda] = useState<{ magia: Magia; circuloUsado: number } | null>(null);
   const [ataquesFeitos, setAtaquesFeitos] = useState(0);
+  const [piscando, setPiscando] = useState(false);
   const [iniciativaValor, setIniciativaValor] = useState<number | null>(null);
   const [periciaInigualavelPendente, setPericiaInigualavelPendente] = useState(false);
   const [lancarNoInfernoAberto, setLancarNoInfernoAberto] = useState(false);
@@ -297,11 +302,21 @@ export default function CombatTab({
     onRolarIniciativa?.();
   }
 
+  /** "Fim do Turno" = uma piscada de olho (pedido do Osmar) — 2 planos
+   * pretos fecham por 250ms (metade da animação de 500ms), o reset de
+   * verdade acontece bem no meio (tela coberta, ninguém vê o "salto"),
+   * e os planos abrem de novo pelos mesmos 250ms restantes. Cada
+   * turno de mesa dura no máximo 6s — a ideia é que resetar pareça
+   * rápido/instantâneo assim como um piscar. */
   function fimDoTurno() {
-    onFimDoTurno();
-    setFeedback(null);
-    setDanoPendente(null);
-    setAtaquesFeitos(0);
+    setPiscando(true);
+    setTimeout(() => {
+      onFimDoTurno();
+      setFeedback(null);
+      setDanoPendente(null);
+      setAtaquesFeitos(0);
+    }, DURACAO_PISCADA_MS / 2);
+    setTimeout(() => setPiscando(false), DURACAO_PISCADA_MS);
   }
 
   function abrirPainel(categoria: RecursoTurno) {
@@ -543,6 +558,15 @@ export default function CombatTab({
 
   return (
     <>
+      {piscando && (
+        <div
+          className={styles.piscadaOverlay}
+          style={{ ['--duracao-piscada' as string]: `${DURACAO_PISCADA_MS}ms` }}
+        >
+          <div className={styles.piscadaTopo} />
+          <div className={styles.piscadaBase} />
+        </div>
+      )}
       <div className={styles.splitBtns}>
         <div
           className={`${styles.splitBtn} ${styles.splitBtnIniciativa}`}

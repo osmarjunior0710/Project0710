@@ -744,3 +744,65 @@ sozinho, confirmar com o Osmar, e ao inserir, respeitar a ordem
 Raridade→Alfabético já usada na aba, não só ordem alfabética simples.
 
 **Data/origem:** 2026-09.
+
+## Magias — coluna `CuraBase_Dado` nova, cura reaproveita o motor de Upcast do dano
+
+**Contexto:** auditoria pedida pelo Osmar ("dar uma passada global" em
+tudo que rola dado, 2026-09) achou que nenhuma magia de cura rolava
+dado — a aba "Magias" só tinha coluna estruturada pra **dano**
+(`DanoBase_Dado`/`DanoBase_Tipo`), nunca pra cura. O Upcast
+(`Upcast_Tipo`/`Upcast_Dado`/`Upcast_CirculoBase`/`Upcast_Flat`) já
+vinha preenchido pra essas magias mesmo sem dano, porque ele descreve
+COMO qualquer efeito escala (dano, cura, ou outra coisa) — foi
+extraído numa auditoria mais ampla, separada da de dano.
+
+**Decisão:** adicionar `CuraBase_Dado` (coluna Z da aba "Magias",
+mesmo formato "NdM" / "NdM + F" de `DanoBase_Dado`) e reaproveitar
+o MESMO motor de Upcast já existente pra dano — não criar um sistema
+de escalonamento próprio pra cura. `core/magiaDano.ts` ganhou
+`calcularEscalonamento` (extraído de dentro de `calcularDanoMagia`)
+como motor genérico; `calcularDanoMagia` e o novo `calcularCuraMagia`
+só chamam ele com o campo certo (`danoBaseDado`/`curaBaseDado`) e
+decoram o resultado (`tipo` de dano só existe pra dano, cura não tem
+"tipo elemental"). `MecanicaMagia` ganhou `'cura'` (checada ANTES de
+ataque/salvaguarda em `mecanicaDaMagia` — nenhuma das 7 magias de cura
+extraídas tem `AtaqueOuSalvaguarda` preenchido, mas a ordem já cobre o
+caso de uma magia futura ter os dois).
+
+**Extração (2026-09, revisão do Osmar por spell antes de aplicar):**
+só 7 das 391 magias têm cura em formato de dado único, cruzadas contra
+o Upcast já existente pra confirmar automático (mesmo `lados` entre
+base e Upcast, sem exceção nenhuma):
+
+| Magia | Cura Base | Upcast |
+|---|---|---|
+| Curar Ferimentos | 2d8 | +2d8/círculo acima de 1 |
+| Palavra Curativa | 2d4 | +2d4/círculo acima de 1 |
+| Oração de Cura | 2d8 | +1d8/círculo acima de 2 |
+| Palavra Curativa em Massa | 2d4 | +1d4/círculo acima de 3 |
+| Curar Ferimentos em Massa | 5d8 | +1d8/círculo acima de 5 |
+| Aura de Vitalidade | 2d6 | não escala |
+| Regeneração | 4d8 + 15 | não escala |
+
+**Ficaram de fora de propósito** (não cabem no formato "NdM" ou
+dependem de mecânica que o app não modela ainda — ver
+`PENDENCIAS.md`/`Backlog.md` se algum precisar entrar depois): cura de
+valor fixo sem dado (Cura Completa, Cura Completa em Massa,
+Ressurreição, Ressurreição Verdadeira, Palavra de Poder: Salvar — "cura
+todos os PV" ou "restaura N PV" fixo), cura derivada de outro efeito
+já modelado (Toque Vampírico — metade do dano causado, não um dado
+próprio), cura variável demais pra 1 campo (Vigor Arcano — usa 1-2
+Dados de Vida do PRÓPRIO personagem, tamanho varia por classe), efeito
+incidental de 1 PV fixo (Aura de Vida) e magia com escolha entre cura
+OU dano no mesmo lançamento (Invocar Celestial — já tem
+`DanoBase_Dado` preenchido pro outro efeito, mecânica de escolha não
+existe no app hoje).
+
+**UI (`MagiasTab.tsx`, `AcaoPanelContent.tsx`, `ReacaoPanelContent.tsx`
+— os 3 lugares que processam `mecanicaDaMagia`):** ao usar magia de
+cura, rola o dado (`rolarDados`, rótulo "Cura — ✨ {nome}") e mostra o
+total — **decisão do Osmar: o jogador aplica o PV manualmente**, o app
+não tem conceito de "alvo" pra aplicar sozinho (nem toda cura é no
+próprio conjurador).
+
+**Data/origem:** 2026-09.

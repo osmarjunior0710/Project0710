@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { iconesMagia } from '../../../core/classificarMagia';
-import { calcularDanoMagia, mecanicaDaMagia } from '../../../core/magiaDano';
+import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TickPips from '../../components/TickPips';
@@ -103,6 +103,20 @@ export default function ReacaoPanelContent({
       onEscolher(`✨ ${m.nome}`, 'Alvo faz salvaguarda — veja o popup pra CD e dano.');
       onAbrirSalvaguarda(m, m.circulo);
       return;
+    }
+    if (mecanica === 'cura') {
+      const cura = calcularCuraMagia(m, m.circulo, nivel);
+      if (cura) {
+        rolarDados({
+          label: `Cura — ✨ ${m.nome}`,
+          formula: `${cura.quantidade}d${cura.lados}${cura.mod ? ` + ${cura.mod}` : ''}`,
+          quantidade: cura.quantidade,
+          lados: cura.lados,
+          mod: cura.mod,
+        });
+        onEscolher(`✨ ${m.nome}`, 'Cura rolada — aplique o total no alvo.');
+        return;
+      }
     }
     onEscolher(`✨ ${m.nome}`, m.descricaoCurta ?? '');
   }

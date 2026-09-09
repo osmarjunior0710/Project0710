@@ -38,20 +38,32 @@ function tiersDeAprimoramentoTruque(nivelPersonagem: number): number {
   return 0;
 }
 
-/** Combina `danoBaseDado`/`danoBaseTipo` da magia com o Upcast
- * estruturado (`upcastTipo`/`upcastCirculoBase`/`upcastDado`/
- * `upcastFlat`) pro círculo de espaço de magia usado, e com
- * "Aprimoramento de Truque" (`escalaTruqueTipo`) pro nível do
- * personagem — ver PENDENCIAS.md "Motor de rolagem de dano de Magia".
- * `null` quando a magia não causa dano direto num alvo (`danoBaseDado`
- * ausente) ou o texto do dado não segue o formato "NdM" / "NdM + F"
- * esperado. Upcast (círculo) e Aprimoramento de Truque (nível) nunca
- * coexistem na mesma magia hoje (truque nunca tem `upcastTipo`), mas a
- * ordem abaixo — truque primeiro, upcast depois — deixa o resultado
- * certo mesmo se isso mudar. */
-export function calcularDanoMagia(magia: Magia, circuloUsado: number, nivelPersonagem: number): CalculoDanoMagia | null {
-  if (!magia.danoBaseDado) return null;
-  const base = parsearDado(magia.danoBaseDado);
+interface EscalonamentoBase {
+  quantidade: number;
+  lados: number;
+  mod: number;
+  upcastNaoAutomatico: boolean;
+}
+
+/** Motor genérico de "dado base + Upcast + Aprimoramento de Truque" —
+ * usado tanto por dano (`danoBaseDado`) quanto por cura
+ * (`curaBaseDado`), já que os dois seguem exatamente a mesma regra de
+ * escalonamento (o Upcast estruturado da planilha descreve COMO o
+ * efeito escala, não importa se é dano ou cura — ver comentário do
+ * Upcast em `magias.ts`). `null` quando `dadoBase` está ausente ou não
+ * segue o formato "NdM" / "NdM + F" esperado. Upcast (círculo) e
+ * Aprimoramento de Truque (nível) nunca coexistem na mesma magia hoje
+ * (truque nunca tem `upcastTipo`), mas a ordem abaixo — truque
+ * primeiro, upcast depois — deixa o resultado certo mesmo se isso
+ * mudar. */
+function calcularEscalonamento(
+  dadoBase: string | null,
+  magia: Magia,
+  circuloUsado: number,
+  nivelPersonagem: number,
+): EscalonamentoBase | null {
+  if (!dadoBase) return null;
+  const base = parsearDado(dadoBase);
   if (!base) return null;
 
   const baseEscalada: DadoParseado =
@@ -59,7 +71,7 @@ export function calcularDanoMagia(magia: Magia, circuloUsado: number, nivelPerso
       ? { ...base, quantidade: base.quantidade + tiersDeAprimoramentoTruque(nivelPersonagem) }
       : base;
 
-  const resultadoBase: CalculoDanoMagia = { ...baseEscalada, tipo: magia.danoBaseTipo, upcastNaoAutomatico: false };
+  const resultadoBase: EscalonamentoBase = { ...baseEscalada, upcastNaoAutomatico: false };
 
   if (!magia.upcastTipo) return resultadoBase;
 
@@ -74,7 +86,6 @@ export function calcularDanoMagia(magia: Magia, circuloUsado: number, nivelPerso
         quantidade: baseEscalada.quantidade + extra.quantidade * niveisAcima,
         lados: baseEscalada.lados,
         mod: baseEscalada.mod + extra.mod * niveisAcima,
-        tipo: magia.danoBaseTipo,
         upcastNaoAutomatico: false,
       };
     }
@@ -85,30 +96,68 @@ export function calcularDanoMagia(magia: Magia, circuloUsado: number, nivelPerso
       quantidade: baseEscalada.quantidade,
       lados: baseEscalada.lados,
       mod: baseEscalada.mod + magia.upcastFlat * niveisAcima,
-      tipo: magia.danoBaseTipo,
       upcastNaoAutomatico: false,
     };
   }
 
   // 'alvo-por-circulo' só aumenta o nº de alvos atingidos — o dado por
-  // alvo não muda, então o Dano Base (já escalado por truque, se for o
-  // caso) já é o resultado final.
+  // alvo não muda, então o Dano/Cura Base (já escalado por truque, se
+  // for o caso) já é o resultado final.
   if (magia.upcastTipo === 'alvo-por-circulo') return resultadoBase;
 
   // 'formula-propria' | 'outro', ou 'dado-por-circulo'/'flat-por-circulo'
-  // com dado incompatível pro Dano Base: não dá pra somar sozinho.
+  // com dado incompatível pro Dano/Cura Base: não dá pra somar sozinho.
   return { ...resultadoBase, upcastNaoAutomatico: true };
 }
 
-export type MecanicaMagia = 'ataque' | 'salvaguarda' | 'nenhuma';
+/** Combina `danoBaseDado`/`danoBaseTipo` da magia com o Upcast
+ * estruturado (`upcastTipo`/`upcastCirculoBase`/`upcastDado`/
+ * `upcastFlat`) pro círculo de espaço de magia usado, e com
+ * "Aprimoramento de Truque" (`escalaTruqueTipo`) pro nível do
+ * personagem — ver PENDENCIAS.md "Motor de rolagem de dano de Magia".
+ * `null` quando a magia não causa dano direto num alvo (`danoBaseDado`
+ * ausente) ou o texto do dado não segue o formato "NdM" / "NdM + F"
+ * esperado. */
+export function calcularDanoMagia(magia: Magia, circuloUsado: number, nivelPersonagem: number): CalculoDanoMagia | null {
+  const escalonamento = calcularEscalonamento(magia.danoBaseDado, magia, circuloUsado, nivelPersonagem);
+  if (!escalonamento) return null;
+  return { ...escalonamento, tipo: magia.danoBaseTipo };
+}
+
+export interface CalculoCuraMagia {
+  quantidade: number;
+  lados: number;
+  mod: number;
+  /** Ver `CalculoDanoMagia.upcastNaoAutomatico` — mesmo conceito,
+   * aplicado à cura. */
+  upcastNaoAutomatico: boolean;
+}
+
+/** Espelha `calcularDanoMagia`, mas pra `curaBaseDado` — mesmo motor
+ * de Upcast por baixo (`calcularEscalonamento`), já que as 2 mecânicas
+ * escalam do mesmo jeito. `null` quando a magia não tem cura em
+ * formato de dado único (ver comentário de `curaBaseDado` em
+ * `magias.ts`). */
+export function calcularCuraMagia(magia: Magia, circuloUsado: number, nivelPersonagem: number): CalculoCuraMagia | null {
+  return calcularEscalonamento(magia.curaBaseDado, magia, circuloUsado, nivelPersonagem);
+}
+
+export type MecanicaMagia = 'ataque' | 'salvaguarda' | 'cura' | 'nenhuma';
 
 /** Deriva do campo estruturado `ataqueOuSalvaguarda` (extraído do
  * livro, ver DECISOES-DADOS.md) qual dos 2 modais de Combat mostrar ao
  * usar a magia — não usa a heurística de regex de `classificarMagia`
  * (essa serve só pro ícone ⚔️ da lista, não pra decidir qual jogada
  * acontece; usar as duas fontes pra decisão levaria a discordância
- * entre elas em alguns casos). */
+ * entre elas em alguns casos). `'cura'` (`curaBaseDado` presente) é
+ * checado ANTES de ataque/salvaguarda — nenhuma das 7 magias de cura
+ * de hoje tem `ataqueOuSalvaguarda` preenchido, mas a ordem já deixa
+ * certo se isso mudar (ex.: uma magia que ataca E cura o conjurador,
+ * tipo Toque Vampírico, continua caindo em 'ataque' porque não tem
+ * `curaBaseDado` — só ganharia 'cura' aqui se a cura dela virasse um
+ * dado próprio simples também). */
 export function mecanicaDaMagia(magia: Magia): MecanicaMagia {
+  if (magia.curaBaseDado) return 'cura';
   if (magia.ataqueOuSalvaguarda === 'Ataque à Distância' || magia.ataqueOuSalvaguarda === 'Ataque Corpo a Corpo') {
     return 'ataque';
   }

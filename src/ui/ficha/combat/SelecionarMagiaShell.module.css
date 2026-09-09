@@ -7,9 +7,18 @@
 
 .listCol {
   min-width: 0;
-  /* espaço reservado à direita pra texto da lista nunca ficar embaixo
-     do painel fixo */
-  padding-right: 108px;
+  /* Espaço reservado à direita pra texto da lista nunca ficar embaixo
+     do painel fixo. Essa tela (`.screen`, LevelUpShell.module.css)
+     abre de dentro do drawer "Ação" e por isso ocupa só ~84% da
+     largura real (não é bug, é o tamanho esperado) — o painel, por
+     sua vez, é `position: fixed` relativo à tela INTEIRA (ver
+     `.painelEspacos` abaixo), então uma boa parte da largura dele já
+     cai fora dessa área visível (~84%), sobrando bem menos que a
+     largura do painel pra reservar aqui. Valor abaixo é aproximado
+     (não dá pra calcular em CSS puro), calibrado pra ~390px — texto
+     mais comprido pode encostar perto do painel em telas maiores, mas
+     não deveria ficar embaixo dele. */
+  padding-right: 56px;
 }
 
 .painelEspacos {

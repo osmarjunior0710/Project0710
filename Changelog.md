@@ -9,10 +9,65 @@
 
 Novo: Mago nível 5+ ganha "Memorizar Magia" na aba Magias — troca 1
 magia preparada por outra do Livro de Magias, disponível 1x por
-Descanso Curto (ou Longo). Também deixamos os grupos "Truques",
-"Magias Preparadas" e "Livro de Magias" expansíveis/colapsáveis (igual
-Espaços de Magia), e trocamos a ordem: Magias Preparadas (mais usado
-no dia a dia) agora vem antes do Livro de Magias (catálogo).
+Descanso Curto (ou Longo).
+
+## v202609_0013
+
+3 melhorias no Combate: (1) o estado dos botões Ação/Ação Bônus/Reação
+não reseta mais sozinho ao sair e voltar da Ficha — só reseta de
+verdade ao rolar nova Iniciativa ou tocar "Fim do Turno"; (2) tocar
+"Fim do Turno" agora mostra uma "piscada de olho" (2 planos pretos
+fecham e abrem rápido) em vez do reset acontecer na cara; (3)
+confirmado que os painéis de Ação/Bônus/Reação já abrem/fecham cada um
+por um lado diferente (esquerda/direita/baixo).
+
+## v202609_2220
+
+Corrigido de novo: a entrega anterior fez as telas "Usar Magia" e
+"Escolher Círculo" ocuparem a tela toda, mas não era isso — o tamanho
+menor (~84%) já era o esperado, só o texto da lista de magias não
+estava aproveitando bem esse espaço. Voltou pro tamanho de antes, com
+o texto agora cabendo melhor (menos espaço em branco desperdiçado do
+lado do painel de Espaços).
+
+## v202609_2032
+
+Corrigido: as telas "Usar Magia" e "Escolher Círculo" (Combate) agora
+ocupam a tela toda de verdade — antes ficavam presas a ~84% da
+largura, sobrando uma faixa cinza à direita com pedaço da Ficha
+aparecendo (mesmo bug do painel de Espaços corrigido antes, só que
+afetando a tela inteira dessa vez).
+
+## v202609_1948
+
+Rolagem de dados ganhou mais suspense: o dado agora dá 2 voltas
+completas (1 segundo) antes de mostrar o valor e o total — antes era
+quase instantâneo. Quando a rolagem tem menos de 4 dados numa linha
+(1, 2 ou 3), eles ficam centralizados em vez de grudados à esquerda.
+
+## v202609_1629
+
+Magia de cura agora rola dado de verdade: Palavra Curativa, Curar
+Ferimentos, Oração de Cura, Palavra Curativa em Massa, Curar
+Ferimentos em Massa, Aura de Vitalidade e Regeneração já mostram a
+rolagem (com upcast, quando aplicável) na aba Magias e no "Usar
+Magia" do Combate — antes não faziam nada. Você aplica o PV
+manualmente no alvo depois de ver o total.
+
+## v202609_1136
+
+2 ajustes na arte dos dados: o emoji 🎲 que ficava girando por cima da
+arte nova enquanto o dado rolava foi removido (a arte já mostra que
+está rolando, não precisa dos dois). A tela de "rolar dado de vida" do
+Level Up (PV ao subir de nível) também ganhou a arte nova — antes só
+os dados do Combate/Magias tinham.
+
+## v202609_1105
+
+Rolagem de dados ganhou arte de verdade: cada tipo (d4, d6, d8, d10,
+d12, d20 e d100) agora aparece com seu próprio "dado" desenhado, em
+vez do quadradinho genérico de antes — vale pra ataque, dano (dado
+único ou vários juntos) e qualquer outra rolagem.
 
 ## v202609_1042
 

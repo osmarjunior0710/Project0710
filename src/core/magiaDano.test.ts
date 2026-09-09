@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularDanoMagia, mecanicaDaMagia, atributoSalvaguarda } from './magiaDano';
+import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia, atributoSalvaguarda } from './magiaDano';
 import { magias } from '../data/rulesets/dnd2024/magias';
 
 function magia(id: string) {
@@ -107,6 +107,57 @@ describe('calcularDanoMagia', () => {
   });
 });
 
+describe('calcularCuraMagia', () => {
+  it('magia sem curaBaseDado (não cura em dado único) — null', () => {
+    expect(calcularCuraMagia(magia('luz'), 0, 1)).toBeNull();
+  });
+
+  it('sem upcast, conjurada no próprio círculo (Aura de Vitalidade, 3º círculo, sem Upcast) — Cura Base sem alteração', () => {
+    expect(calcularCuraMagia(magia('auradevitalidade'), 3, 1)).toEqual({
+      quantidade: 2,
+      lados: 6,
+      mod: 0,
+      upcastNaoAutomatico: false,
+    });
+  });
+
+  it('mod fixo somado ao dado (Regeneração, "4d8 + 15")', () => {
+    expect(calcularCuraMagia(magia('regeneracao'), 7, 1)).toEqual({
+      quantidade: 4,
+      lados: 8,
+      mod: 15,
+      upcastNaoAutomatico: false,
+    });
+  });
+
+  it('upcast "Dado por Círculo" acima do círculo base (Palavra Curativa, 1º círculo base, +2d4/círculo) — soma corretamente', () => {
+    expect(calcularCuraMagia(magia('palavracurativa'), 3, 1)).toEqual({
+      quantidade: 6,
+      lados: 4,
+      mod: 0,
+      upcastNaoAutomatico: false,
+    });
+  });
+
+  it('upcast com dado de tamanho diferente do dado base (Oração de Cura: base 2d8, upcast 1d8) — soma normalmente (mesmo lados)', () => {
+    expect(calcularCuraMagia(magia('oracaodecura'), 4, 1)).toEqual({
+      quantidade: 4,
+      lados: 8,
+      mod: 0,
+      upcastNaoAutomatico: false,
+    });
+  });
+
+  it('conjurada no próprio círculo base — sem bônus (níveisAcima = 0)', () => {
+    expect(calcularCuraMagia(magia('curarferimentos'), 1, 1)).toEqual({
+      quantidade: 2,
+      lados: 8,
+      mod: 0,
+      upcastNaoAutomatico: false,
+    });
+  });
+});
+
 describe('mecanicaDaMagia', () => {
   it('ataque à distância (Raio Místico) — "ataque"', () => {
     expect(mecanicaDaMagia(magia('raiomistico'))).toBe('ataque');
@@ -118,6 +169,10 @@ describe('mecanicaDaMagia', () => {
 
   it('salvaguarda "aleatório" (Rajada Prismática) — também "salvaguarda"', () => {
     expect(mecanicaDaMagia(magia('rajadaprismatica'))).toBe('salvaguarda');
+  });
+
+  it('cura em dado único (Palavra Curativa) — "cura"', () => {
+    expect(mecanicaDaMagia(magia('palavracurativa'))).toBe('cura');
   });
 
   it('sem ataque nem salvaguarda (Luz, utilidade) — "nenhuma"', () => {

@@ -82,11 +82,13 @@ export default function SelecionarMagiaShell({
         </div>
       </div>
 
-      {/* Portal pro <body>: esta tela abre dentro do drawer "Ação" (SidePanel),
-          que tem `transform` pra animar o slide-in — isso vira containing
-          block pra qualquer `position: fixed` descendente, então sem o
-          portal o painel ficaria preso à largura do drawer (~84%), não à
-          tela inteira. */}
+      {/* Portal pro <body>: esta tela abre dentro do drawer "Ação"
+          (SidePanel), que tem `transform` pra animar o slide-in — isso
+          vira containing block pra qualquer `position: fixed`
+          descendente, então sem o portal o painel ficaria preso à
+          largura do drawer, não à tela inteira. Só o painel sai da
+          árvore — o resto da tela (lista de magias) fica no tamanho
+          original de propósito, não é pra cobrir a tela toda. */}
       {espacos.length > 0 &&
         createPortal(
           <div className={localStyles.painelEspacos}>

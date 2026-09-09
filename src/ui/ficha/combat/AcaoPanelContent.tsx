@@ -3,7 +3,7 @@ import { acoesBase, type AtaqueInfo } from '../../../data/exampleCombat';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
-import { calcularDanoMagia, mecanicaDaMagia } from '../../../core/magiaDano';
+import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
@@ -171,6 +171,20 @@ export default function AcaoPanelContent({
       onEscolher(`✨ ${m.nome}`, 'Alvo faz salvaguarda — veja o popup pra CD e dano.');
       onAbrirSalvaguarda(m, circuloUsado);
       return;
+    }
+    if (mecanica === 'cura') {
+      const cura = calcularCuraMagia(m, circuloUsado, nivel);
+      if (cura) {
+        rolarDados({
+          label: `Cura — ✨ ${m.nome}`,
+          formula: `${cura.quantidade}d${cura.lados}${cura.mod ? ` + ${cura.mod}` : ''}`,
+          quantidade: cura.quantidade,
+          lados: cura.lados,
+          mod: cura.mod,
+        });
+        onEscolher(`✨ ${m.nome}`, 'Cura rolada — aplique o total no alvo.');
+        return;
+      }
     }
     onEscolher(`✨ ${m.nome}`, m.descricaoCurta ?? '');
   }

@@ -1,19 +1,40 @@
-import { useRoll, type LadosDado } from './RollContext';
+import { useRoll } from './RollContext';
 import styles from './RollOverlay.module.css';
+import { artePorLados } from './dadosArte';
 
-/** Classe CSS por tipo de dado — hoje todas apontam pro mesmo visual
- * (`.dieTipo`), só existem separadas já prontas pra receber 1 arte
- * própria por tipo depois (o Osmar vai desenhar), sem precisar mexer
- * na estrutura de novo. */
-const CLASSE_POR_LADOS: Record<LadosDado, string> = {
-  4: styles.dieTipo4,
-  6: styles.dieTipo6,
-  8: styles.dieTipo8,
-  10: styles.dieTipo10,
-  12: styles.dieTipo12,
-  20: styles.dieTipo20,
-  100: styles.dieTipo100,
-};
+interface DadoVisualProps {
+  valor: number | string;
+  lados?: number;
+  className?: string;
+  onClick?: () => void;
+}
+
+/** `'🎲'` é só o placeholder de "ainda rolando" (ver RollContext) —
+ * agora que o dado tem arte própria, a animação da imagem já comunica
+ * isso sozinha, não precisa mais do emoji girando por cima. */
+function DadoVisual({ valor, lados, className, onClick }: DadoVisualProps) {
+  const arte = artePorLados(lados);
+  return (
+    <div className={`${styles.die} ${arte ? styles.dieComArte : ''} ${className ?? ''}`} onClick={onClick}>
+      {arte && <img src={arte} alt="" className={styles.dieArtImg} />}
+      <span className={styles.dieValue}>{arte && valor === '🎲' ? '' : valor}</span>
+    </div>
+  );
+}
+
+/** Quebra em grupos de 4 (esquerda→direita, mesma regra de sempre do
+ * grid) — cada grupo vira sua própria linha `flex`, centralizada
+ * (`justify-content: center`), pra um grupo de 1-3 dados no final
+ * ficar centralizado em vez de grudado à esquerda com espaço vazio à
+ * direita. Grupo de 4 preenche a linha toda, visualmente idêntico ao
+ * grid antigo. */
+function agruparEmLinhas<T>(itens: T[], porLinha: number): T[][] {
+  const linhas: T[][] = [];
+  for (let i = 0; i < itens.length; i += porLinha) {
+    linhas.push(itens.slice(i, i + porLinha));
+  }
+  return linhas;
+}
 
 export default function RollOverlay() {
   const {
@@ -45,39 +66,46 @@ export default function RollOverlay() {
     dado1Descartado = dado1Num !== usado;
     dado2Descartado = dado2Num !== usado;
   }
+  // Só 'd20' tem par de dados (Vantagem/Desvantagem) — o 2º dado é
+  // sempre outro d20, nunca guardado à parte no estado.
+  const ladosDadoPrincipal = estado.tipo === 'd20' ? 20 : estado.lados;
 
   return (
     <div className={styles.overlay} onClick={fechar}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
         <div className={styles.label}>{estado.label}</div>
         {estado.dadosIndividuais ? (
-          <div className={styles.diceGrid}>
-            {estado.dadosIndividuais.map((d) => {
-              const podeRerolar =
-                estado.fase === 'concluido' &&
-                !!estado.rerollEscolhido &&
-                !estado.rerollEscolhidoUsado &&
-                typeof d.valor === 'number';
-              return (
-                <div
-                  key={d.id}
-                  className={`${styles.die} ${styles.dieGrid} ${CLASSE_POR_LADOS[d.lados]} ${podeRerolar ? styles.dieRerolavel : ''}`}
-                  onClick={podeRerolar ? () => rerollDadoEscolhido(d.id) : undefined}
-                >
-                  {d.valor}
-                </div>
-              );
-            })}
+          <div className={styles.diceGridWrap}>
+            {agruparEmLinhas(estado.dadosIndividuais, 4).map((linha, i) => (
+              <div key={i} className={styles.diceGridRow}>
+                {linha.map((d) => {
+                  const podeRerolar =
+                    estado.fase === 'concluido' &&
+                    !!estado.rerollEscolhido &&
+                    !estado.rerollEscolhidoUsado &&
+                    typeof d.valor === 'number';
+                  return (
+                    <DadoVisual
+                      key={d.id}
+                      valor={d.valor}
+                      lados={d.lados}
+                      className={`${styles.dieGrid} ${podeRerolar ? styles.dieRerolavel : ''}`}
+                      onClick={podeRerolar ? () => rerollDadoEscolhido(d.id) : undefined}
+                    />
+                  );
+                })}
+              </div>
+            ))}
           </div>
         ) : (
           <div className={styles.diceRow}>
-            <div className={`${styles.die} ${dado1Descartado ? styles.dieDescartado : critClass}`}>
-              {estado.valorDado}
-            </div>
+            <DadoVisual
+              valor={estado.valorDado}
+              lados={ladosDadoPrincipal}
+              className={dado1Descartado ? styles.dieDescartado : critClass}
+            />
             {temSegundoDado && (
-              <div className={`${styles.die} ${dado2Descartado ? styles.dieDescartado : critClass}`}>
-                {estado.dado2}
-              </div>
+              <DadoVisual valor={estado.dado2 ?? ''} lados={20} className={dado2Descartado ? styles.dieDescartado : critClass} />
             )}
           </div>
         )}
@@ -161,7 +189,7 @@ export default function RollOverlay() {
               +1d{estado.bonusExtra.lados} ({estado.bonusExtra.rotulo})
             </div>
             <div className={styles.diceRow}>
-              <div className={`${styles.die} ${styles.dieBonusExtra}`}>{estado.bonusExtra.valor}</div>
+              <DadoVisual valor={estado.bonusExtra.valor} lados={estado.bonusExtra.lados} className={styles.dieBonusExtra} />
             </div>
           </>
         )}
