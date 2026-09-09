@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0917
+
+Corrigido: os painéis de Ação Bônus e Reação (Combate) estavam saindo
+sempre pela esquerda ao fechar, mesmo tendo entrado pela direita/por
+baixo. Agora cada um sai de volta por onde entrou, como já deveria.
+
 ## v202609_0014
 
 Novo: Mago nível 5+ ganha "Memorizar Magia" na aba Magias — troca 1

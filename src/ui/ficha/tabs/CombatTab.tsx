@@ -272,6 +272,14 @@ export default function CombatTab({
   onRolarIniciativa,
 }: CombatTabProps) {
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
+  /** Qual painel foi o ÚLTIMO aberto — ao contrário de `painelAberto`,
+   * NUNCA volta a `null`. Existe só pra alimentar side/title/conteúdo
+   * do `SidePanel` mesmo DEPOIS de fechar: sem isso, fechar zera
+   * `painelAberto` na hora, o `side` cai no fallback `'left'` e o
+   * painel troca de lado NO MEIO da própria animação de saída (Bônus/
+   * Reação saem deslizando pra esquerda em vez de voltar pro lado de
+   * onde vieram) — bug visual reportado pelo Osmar. */
+  const [ultimoPainel, setUltimoPainel] = useState<RecursoTurno>('acao');
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [danoPendente, setDanoPendente] = useState<DanoPendente | null>(null);
@@ -324,6 +332,7 @@ export default function CombatTab({
     setFeedback(null);
     setDanoPendente(null);
     setPainelAberto(categoria);
+    setUltimoPainel(categoria);
   }
 
   function fecharPainel() {
@@ -883,13 +892,13 @@ export default function CombatTab({
 
       <SidePanel
         open={painelAberto !== null}
-        side={painelAberto ? ladoDoPainel(painelAberto) : 'left'}
-        title={painelAberto ? `${LABELS[painelAberto].icone} ${LABELS[painelAberto].nome}` : ''}
+        side={ladoDoPainel(ultimoPainel)}
+        title={`${LABELS[ultimoPainel].icone} ${LABELS[ultimoPainel].nome}`}
         onClose={fecharPainel}
         detalhesAtivo={detalhesAtivo}
         onToggleDetalhes={() => setDetalhesAtivo((v) => !v)}
       >
-        {painelAberto === 'acao' && (
+        {ultimoPainel === 'acao' && (
           <AcaoPanelContent
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             onEscolher={(nome, desc, dano) => escolherNoPainel('acao', nome, desc, dano)}
@@ -921,7 +930,7 @@ export default function CombatTab({
             onUsarFalarComAnimaisGnomo={onUsarFalarComAnimaisGnomo}
           />
         )}
-        {painelAberto === 'bonus' && (
+        {ultimoPainel === 'bonus' && (
           <BonusPanelContent
             usosFolegoMaximo={usosFolegoMaximo}
             usosFolegoRestantes={usosFolegoRestantes}
@@ -965,7 +974,7 @@ export default function CombatTab({
             detalhesAtivo={detalhesAtivo}
           />
         )}
-        {painelAberto === 'reacao' && (
+        {ultimoPainel === 'reacao' && (
           <ReacaoPanelContent
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             onEscolher={(nome, desc, dano) => escolherNoPainel('reacao', nome, desc, dano)}
