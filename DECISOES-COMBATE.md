@@ -694,3 +694,43 @@ já registrado pra `DURACAO_ANIMACAO_MS`/spin do dado, ver acima —
 
 **Data/origem:** 2026-09, pedido do Osmar.
 
+## Bug: painel de Ação Bônus/Reação saía sempre pela esquerda ao fechar
+
+**Sintoma:** os 3 painéis (Ação/Ação Bônus/Reação) abriam certinho
+pelo lado certo (esquerda/direita/baixo), mas ao FECHAR, o de Ação
+Bônus e o de Reação saíam deslizando pra esquerda também — só o de
+Ação (que já é esquerda) fechava "certo". Reportado pelo Osmar como
+"todos vêm da esquerda pra direita".
+
+**Causa raiz:** `SidePanel` recebe `side` calculado a partir de
+`painelAberto ? ladoDoPainel(painelAberto) : 'left'` — ao fechar,
+`painelAberto` vira `null` NO MESMO instante que o painel começa a
+sumir, então `side` cai no fallback `'left'` ENQUANTO a animação de
+saída ainda está rodando. Como o `SidePanel` nunca desmonta (só troca
+de classe CSS pra animar), a troca de `side` no meio do caminho troca
+literalmente a classe do painel de `panelRight`/`panelBottom` pra
+`panelLeft` durante a transição — o `transform` (que É animado)
+continua suave, mas o ANCHOR do painel (`left`/`right`/`top`/`bottom`,
+que NÃO é animado) pula instantaneamente pro lado esquerdo, fazendo
+todo painel "saltar" pra lá e só depois deslizar pra fora — sempre
+pela esquerda, não importa de onde veio.
+
+**Fix:** `CombatTab.tsx` ganhou `ultimoPainel` — estado separado de
+`painelAberto` que só é setado ao ABRIR (nunca reseta ao fechar).
+`side`/`title`/conteúdo do `SidePanel` usam `ultimoPainel` (nunca
+`null`); só o `open` do `SidePanel` continua vindo de `painelAberto
+!== null` (isso sim precisa resetar, é o que dispara a classe
+`panelOpen` sumir e a animação de saída rodar). Resultado: o painel
+mantém a classe/lado correto do início ao fim da transição de saída.
+
+**Padrão a lembrar:** qualquer prop de um componente que NÃO desmonta
+(anima via classe CSS) e que decide QUAL VARIANTE renderizar (lado,
+cor, layout) nunca pode derivar de um estado que já virou "fechado/
+vazio" no mesmo instante em que a animação de saída começa — guarde o
+"último valor válido" separado do estado "aberto/fechado", e só o
+`open` (booleano puro) deve resetar na hora.
+
+**Data/origem:** 2026-09, bug reportado pelo Osmar depois da entrega
+da "piscada de olho" (a checagem anterior só validou a classe no
+estado ABERTO, não durante o fechamento).
+
