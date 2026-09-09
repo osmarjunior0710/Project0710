@@ -7,6 +7,7 @@ import {
   modAcertoConjuracao,
   usaRedefinicaoPorDescanso,
   completarListaDeMagias,
+  memorizarMagiaValida,
 } from './magiasPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { magiasDaClasse } from '../data/rulesets/dnd2024/magias';
@@ -122,6 +123,22 @@ describe('completarListaDeMagias', () => {
     const atuais = catalogo.slice(0, 5).map((m) => m.nome);
     expect(completarListaDeMagias(atuais, catalogo, 3)).toEqual(atuais.slice(0, 3));
     expect(completarListaDeMagias(atuais, catalogo, 5)).toEqual(atuais);
+  });
+});
+
+describe('memorizarMagiaValida', () => {
+  it('troca exatamente 1: válido', () => {
+    expect(memorizarMagiaValida(['Alarme', 'Sono'], ['Alarme', 'Graxa'])).toBe(true);
+  });
+
+  it('0 trocas (nada mudou) ou 2+ trocas: inválido', () => {
+    expect(memorizarMagiaValida(['Alarme', 'Sono'], ['Alarme', 'Sono'])).toBe(false);
+    expect(memorizarMagiaValida(['Alarme', 'Sono'], ['Graxa', 'Luz'])).toBe(false);
+  });
+
+  it('borda: muda o tamanho total (não é troca, é crescimento/redução) — inválido mesmo com 1 "trocada"', () => {
+    expect(memorizarMagiaValida(['Alarme', 'Sono'], ['Alarme', 'Sono', 'Graxa'])).toBe(false);
+    expect(memorizarMagiaValida(['Alarme', 'Sono'], ['Alarme'])).toBe(false);
   });
 });
 

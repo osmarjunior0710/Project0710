@@ -104,6 +104,7 @@ import CombatTab, { type EstadoRecurso, type RecursoTurno } from './tabs/CombatT
 import LevelUpShell, { type PersonagemNivel } from './levelup/LevelUpShell';
 import CompletarMagiasShell from './levelup/CompletarMagiasShell';
 import LivroDasSombrasShell from './levelup/LivroDasSombrasShell';
+import MemorizarMagiaShell from './levelup/MemorizarMagiaShell';
 
 type TabName = 'atributos' | 'perfil' | 'mochila' | 'magias' | 'combat';
 
@@ -198,6 +199,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagemSalvo.livroDasSombrasAtual ?? [...selecao.livroDasSombrasTruques, ...selecao.livroDasSombrasMagias],
   );
   const [livroDasSombrasGasto, setLivroDasSombrasGasto] = useState<boolean>(personagemSalvo.livroDasSombrasGasto ?? false);
+  /** "Memorizar Magia" (Mago, nível 5+) — 1x por Descanso Curto, reseta
+   * em `descansoCurto`/`descansoLongo` (mesmo padrão de Livro das
+   * Sombras — reseta nos dois, não só num). */
+  const [memorizarMagiaGasta, setMemorizarMagiaGasta] = useState<boolean>(personagemSalvo.memorizarMagiaGasta ?? false);
   const [magiasGratisGastas, setMagiasGratisGastas] = useState<string[]>(
     personagemSalvo.magiasGratisInvocacoesGastas ?? [],
   );
@@ -264,6 +269,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [levelUpAberto, setLevelUpAberto] = useState(false);
   const [completarAberto, setCompletarAberto] = useState<'truques' | 'magiasPreparadas' | null>(null);
   const [livroDasSombrasAberto, setLivroDasSombrasAberto] = useState(false);
+  const [memorizarMagiaAberto, setMemorizarMagiaAberto] = useState(false);
   const [levelUpHpModo, setLevelUpHpModo] = useState<'media' | 'rolar' | null>(personagemSalvo.levelUpHpModo ?? null);
   const [levelUpHpRolado, setLevelUpHpRolado] = useState<number | null>(personagemSalvo.levelUpHpRolado ?? null);
   const [itensDetalhados, setItensDetalhados] = useColapsavel('itens-detalhados', false);
@@ -351,6 +357,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const magiasPreparadas = magiasPreparadasDoPersonagem(magiasPreparadasAtuais);
   const magiasDescobertasMagicas = magiasPreparadasDoPersonagem(magiasDescobertasMagicasAtuais);
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
+  const memorizarMagiaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Memorizar Magia', personagem.nivel) !== null : false;
+  const livroDeMagias = magiasPreparadasDoPersonagem(livroDeMagiasAtuais);
   const magiasGratisConcedidas = magiasGratisDasInvocacoes(invocacoesMisticasAtuais);
   const astuciaMagicaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Astúcia Mágica', personagem.nivel) !== null : false;
   const contatarPatronoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contatar Patrono', personagem.nivel) !== null : false;
@@ -546,6 +554,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       magiasDescobertasMagicasAtual: magiasDescobertasMagicasAtuais,
       livroDasSombrasAtual: livroDasSombrasAtuais,
       livroDasSombrasGasto,
+      memorizarMagiaGasta,
       astuciaMagicaGasta,
       contatarPatronoGasto,
       arcanaMisticaAtual: arcanaMisticaAtuais,
@@ -601,6 +610,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasDescobertasMagicasAtuais,
     livroDasSombrasAtuais,
     livroDasSombrasGasto,
+    memorizarMagiaGasta,
     astuciaMagicaGasta,
     contatarPatronoGasto,
     arcanaMisticaAtuais,
@@ -788,6 +798,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setSurtoGasto(0);
     setInspiracaoGasto(0);
     setLivroDasSombrasGasto(false);
+    setMemorizarMagiaGasta(false);
     setAstuciaMagicaGasta(false);
     setContatarPatronoGasto(false);
     setResistenciaInferaGasto(false);
@@ -810,6 +821,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (fonteDeInspiracao) setInspiracaoGasto(0);
     setFolegoGasto((v) => Math.max(0, v - 1));
     setLivroDasSombrasGasto(false);
+    setMemorizarMagiaGasta(false);
     setResistenciaInferaGasto(false);
     setPicoDeAdrenalinaGasto(0);
     setRestStatus(
@@ -1210,6 +1222,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
+  if (memorizarMagiaAberto) {
+    return (
+      <MemorizarMagiaShell
+        atuais={magiasPreparadasAtuais}
+        catalogo={livroDeMagias}
+        onFechar={() => setMemorizarMagiaAberto(false)}
+        onConfirmar={(novaLista) => {
+          setMagiasPreparadasAtuais(novaLista);
+          setMemorizarMagiaGasta(true);
+          setMemorizarMagiaAberto(false);
+        }}
+      />
+    );
+  }
+
   return (
     <div className={styles.screen}>
       <div className={styles.header}>
@@ -1316,6 +1343,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             temPactoDoTomo={invocacoesMisticasAtuais.includes('pacto-do-tomo')}
             livroDasSombrasGasto={livroDasSombrasGasto}
             onReconjurarLivro={() => !livroDasSombrasGasto && setLivroDasSombrasAberto(true)}
+            memorizarMagiaDisponivel={memorizarMagiaDisponivel}
+            memorizarMagiaGasta={memorizarMagiaGasta}
+            onMemorizarMagia={() => !memorizarMagiaGasta && setMemorizarMagiaAberto(true)}
             astuciaMagicaDisponivel={astuciaMagicaDisponivel}
             astuciaMagicaGasta={astuciaMagicaGasta}
             astuciaMagicaRecupera={astuciaMagicaRecupera}

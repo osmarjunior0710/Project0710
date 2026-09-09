@@ -202,7 +202,7 @@ construir o motor/UI que usa esse dado.
   Magias Preparadas do Mago agora ficam travados no Level Up
   (`trocasDeTruque`/`trocasDeMagia` precisam ser 0, não `<=1` como
   Bardo/Bruxo) — a troca de verdade só acontece no Descanso Longo
-  (A7). Magias Preparadas passa a escolher só dentre o que está no
+  (A6). Magias Preparadas passa a escolher só dentre o que está no
   Livro de Magias (`magiasPreparadasPool`). Resumo do Level Up ganhou
   linha "Livro de Magias" e trocou o texto de Truques/Preparadas pra
   "+N nova(s)" quando for classe de redefinição-por-descanso (em vez
@@ -227,34 +227,56 @@ construir o motor/UI que usa esse dado.
   5+, card na Combat, 1x por Descanso Curto, troca 1 preparada) — é
   um mecanismo GATILHADO POR DESCANSO CURTO, mais parecido com
   Astúcia Mágica do Bruxo do que com Level Up; fica pra sua própria
-  entrega pequena, junto ou logo depois da A7 (que já mexe na mesma
+  entrega pequena, junto ou logo depois da A6 (que já mexe na mesma
   área de Descanso).
-- [ ] **A5b — Memorizar Magia (nível 5+).** Card na aba Combat (mesmo
-  padrão de Astúcia Mágica do Bruxo — botão que trava até o próximo
-  Descanso Curto): troca 1 magia preparada por outra do Livro de
-  Magias, disponível 1x por Descanso Curto.
-- [ ] **A6 — Subclasse placeholder.** Abjurador/Adivinhador/Evocador/
-  Ilusionista em `subclasses.ts`, sem mecânica (mesmo padrão já usado
-  em Bardo/Bruxo — reaproveite 100%, deve ser rápido).
-- [ ] **A7 — Transição de Descanso (fade + prompt).** Pedido explícito
+- [x] **A5b — Memorizar Magia (nível 5+).** Card na aba Magias (não
+  Combat — é uma troca de preparo, mesmo lugar de "Completar Magias
+  Preparadas", não uma ação de round), mesmo padrão visual de "já
+  usada" da Astúcia Mágica do Bruxo/Livro das Sombras. Novo
+  `core/magiasPersonagem.ts`: `memorizarMagiaValida(atuais, escolhidas)`
+  (exatamente 1 troca, tamanho da lista não muda). Novo
+  `MemorizarMagiaShell.tsx` (cópia estrutural do `LivroDasSombrasShell`
+  já existente — mesma UI de check-row com grupo por círculo, item já
+  preparado trava só quando desmarcado sozinho, sem 2ª opção marcada).
+  `FichaShell.tsx` ganhou `memorizarMagiaGasta` (novo campo em
+  `PersonagemSalvo`) e o guard de render do shell.
+  **Ajuste em cima do plano:** o reset acontece nos DOIS tipos de
+  descanso (Curto E Longo), não só Curto como a frase original do
+  plano dizia — mesmo padrão já usado pelo Livro das Sombras do Bruxo
+  (faz sentido: Descanso Longo já libera a redefinição livre completa,
+  então também libera essa troca menor de graça).
+  **Testado no navegador** (Playwright, 390px, Personagem de Teste
+  Mago nível 5): card só aparece a partir do nível 5; botão Confirmar
+  fica desabilitado com 0 trocas e habilita com exatamente 1; após
+  confirmar, a magia nova aparece na seção "Magias Preparadas" e a
+  removida some de lá (confirmado lendo especificamente as linhas
+  daquela seção, não busca de texto na página inteira); card vira
+  "já usada" até o próximo descanso; Descanso Curto libera o card de
+  novo — sem erro de console em nenhum passo. tsc/testes(315)/build
+  verdes.
+- [ ] **A6 — Transição de Descanso (fade + prompt).** Pedido explícito
   do Osmar, plugado nos 2 botões já existentes de `AtributosTab.tsx`
   (`onDescansoCurto`/`onDescansoLongo`, hoje sem nenhum feedback
-  visual):
-  - [ ] A7.1 — overlay genérico de tela cheia: fade-in pro preto,
+  visual) — **invertida na ordem com a A7 (era A7, pedido do Osmar
+  2026-09) pra vir antes da subclasse placeholder:**
+  - [ ] A6.1 — overlay genérico de tela cheia: fade-in pro preto,
     texto "Descanso Curto" ou "Descanso Longo" em branco no meio,
     fade-out. Descanso Curto: 0,5s fade-in + 0,5s fade-out (1s
     total). Descanso Longo: 1s fade-in + 1s fade-out (2s total).
     Component novo (provável `DescansoOverlay.tsx`, `position: fixed`,
     mesmo padrão de overlay de tela cheia já usado por `RollOverlay`/
     `LevelUpShell` — ver DECISOES-DESIGN.md).
-  - [ ] A7.2 — só no Descanso Longo: se o personagem tiver Magias
+  - [ ] A6.2 — só no Descanso Longo: se o personagem tiver Magias
     Preparadas no padrão "redefinição livre" (hoje só Mago), a
     transição PARA no preto (sem terminar o fade-in ainda virar
     fade-out) e mostra a pergunta "quer alterar suas magias
-    preparadas?" (sim/não). Sim → abre a mesma tela de escolha da A5
+    preparadas?" (sim/não). Sim → abre a mesma tela de escolha do A5a
     (grimório → preparadas). Não/confirmar → só então roda o
     fade-out. Personagem sem essa característica (ex: Bardo/Bruxo)
     não vê o prompt, só o fade normal.
+- [ ] **A7 — Subclasse placeholder.** Abjurador/Adivinhador/Evocador/
+  Ilusionista em `subclasses.ts`, sem mecânica (mesmo padrão já usado
+  em Bardo/Bruxo — reaproveite 100%, deve ser rápido).
 
 ### FASE P — Motor de Familiar/Pet (genérico — Bruxo, Mago, qualquer
 classe futura), entre a Fase A e a Fase B

@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0014
+
+Novo: Mago nível 5+ ganha "Memorizar Magia" na aba Magias — troca 1
+magia preparada por outra do Livro de Magias, disponível 1x por
+Descanso Curto (ou Longo). Também deixamos os grupos "Truques",
+"Magias Preparadas" e "Livro de Magias" expansíveis/colapsáveis (igual
+Espaços de Magia), e trocamos a ordem: Magias Preparadas (mais usado
+no dia a dia) agora vem antes do Livro de Magias (catálogo).
+
 ## v202609_1042
 
 Level Up do Mago agora usa o Livro de Magias de verdade: a cada nível,

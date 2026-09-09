@@ -96,6 +96,13 @@ interface MagiasTabProps {
    * botão "Reconjurar" fica travado até o próximo descanso. */
   livroDasSombrasGasto: boolean;
   onReconjurarLivro: () => void;
+  /** `true` só quando o personagem já tem Memorizar Magia (Mago,
+   * nível 5+) — controla se o card aparece. */
+  memorizarMagiaDisponivel: boolean;
+  /** `true` = já usada desde o último Descanso Curto/Longo — card fica
+   * travado até o próximo descanso. */
+  memorizarMagiaGasta: boolean;
+  onMemorizarMagia: () => void;
   /** `true` só quando o personagem já tem Astúcia Mágica (Bruxo,
    * nível 2+) — controla se o botão aparece. */
   astuciaMagicaDisponivel: boolean;
@@ -161,6 +168,9 @@ export default function MagiasTab({
   temPactoDoTomo,
   livroDasSombrasGasto,
   onReconjurarLivro,
+  memorizarMagiaDisponivel,
+  memorizarMagiaGasta,
+  onMemorizarMagia,
   astuciaMagicaDisponivel,
   astuciaMagicaGasta,
   astuciaMagicaRecupera,
@@ -798,6 +808,18 @@ export default function MagiasTab({
             );
           })}
         </>
+      )}
+
+      {memorizarMagiaDisponivel && (
+        <div
+          className={`${styles.reconjurarBtn} ${memorizarMagiaGasta ? styles.reconjurarBtnGasto : ''}`}
+          onClick={() => !memorizarMagiaGasta && onMemorizarMagia()}
+        >
+          🧠{' '}
+          {memorizarMagiaGasta
+            ? 'Memorizar Magia já usada — disponível de novo após Descanso Curto ou Longo'
+            : 'Memorizar Magia — trocar 1 magia preparada por outra do Livro de Magias'}
+        </div>
       )}
 
       {(preparadas.length > 0 || faltamMagiasPreparadas > 0) && (

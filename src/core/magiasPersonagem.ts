@@ -120,6 +120,15 @@ export function contarTrocas(originais: string[], finais: string[]): number {
   return originais.filter((nome) => !finais.includes(nome)).length;
 }
 
+/** "Memorizar Magia" (Mago, nível 5+) — troca EXATAMENTE 1 magia
+ * preparada por outra do Livro de Magias, ao completar um Descanso
+ * Curto. Diferente da redefinição livre do Descanso Longo (qualquer
+ * quantidade) e do crescimento do Level Up (0 trocas, só soma) — aqui
+ * é sempre exatamente 1, nem mais nem menos, e o total nunca muda. */
+export function memorizarMagiaValida(atuais: string[], escolhidas: string[]): boolean {
+  return escolhidas.length === atuais.length && contarTrocas(atuais, escolhidas) === 1;
+}
+
 /** `true` quando a classe tem o recurso "Livro de Magias" (grimório) —
  * Padrão C "redefinição livre por Descanso Longo" (ver
  * DECISOES-CLASSES.md "Casters"): truques e magias preparadas só

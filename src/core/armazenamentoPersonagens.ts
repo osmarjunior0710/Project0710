@@ -84,6 +84,11 @@ export interface PersonagemSalvo {
    * (a regra real só permite escolher de novo ao final de um
    * descanso). Resetado pra `false` em `descansoCurto`/`descansoLongo`. */
   livroDasSombrasGasto?: boolean;
+  /** `true` = Memorizar Magia (Mago, nível 5+) já foi usada desde o
+   * último Descanso Curto ou Longo — mesmo padrão de
+   * `livroDasSombrasGasto` (reseta nos dois, não só num). Ver
+   * `core/magiasPersonagem.ts` (`memorizarMagiaValida`). */
+  memorizarMagiaGasta?: boolean;
   /** `true` = Astúcia Mágica (Bruxo, nível 2) já foi usada desde o
    * último Descanso Longo — só ele reseta (não é Descanso Curto,
    * diferente do Livro das Sombras). Ver `core/astuciaMagica.ts`. */
