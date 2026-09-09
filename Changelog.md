@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1953
+
+Ajuste: as 4 subclasses do Mago que ainda não têm emblema próprio
+(Abjurador, Adivinhador, Evocador, Ilusionista) agora mostram
+"[PH] ícone ainda não desenhado" na tela de Level Up, deixando claro
+que é arte provisória — igual já acontecia com "Ainda não
+implementada" pra mecânica.
+
 ## v202609_1012
 
 Novo: Mago agora tem as 4 subclasses oficiais pra escolher no Level Up

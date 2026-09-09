@@ -16,6 +16,15 @@ function bannerPng(id: string): string | undefined {
   return entrada?.[1];
 }
 
+/** `true` = já existe emblema próprio (arquivo `{id}-banner.webp`) pra
+ * esse id — `false` = ainda cai no fallback 🖼, ou seja, é placeholder
+ * de arte (ver seção 12 do CLAUDE.md). Usado por quem precisa marcar
+ * "[PH]" explicitamente quando falta arte própria (ex: card de escolha
+ * de subclasse), não só deixar o 🖼 falar por si. */
+export function temBannerProprio(id: string): boolean {
+  return bannerPng(id) !== undefined;
+}
+
 interface IconeClasseProps {
   id: string;
   /** classe CSS pra caixa quando não há emblema-banner (fallback ícone

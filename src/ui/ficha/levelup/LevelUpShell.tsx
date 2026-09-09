@@ -38,7 +38,7 @@ import { iconesMagia } from '../../../core/classificarMagia';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TextoComMagias from '../../components/TextoComMagias';
 import GrupoMagiaColapsavel from '../../components/GrupoMagiaColapsavel';
-import IconeClasse from '../../components/IconeClasse';
+import IconeClasse, { temBannerProprio } from '../../components/IconeClasse';
 import DistribuirPontosAtributo from '../../components/DistribuirPontosAtributo';
 import { useAvisoTemporario } from '../../hooks/useAvisoTemporario';
 import { talentos } from '../../../data/rulesets/dnd2024/talentos';
@@ -1074,6 +1074,7 @@ export default function LevelUpShell({
             )}
             {subclassesDaClasse.map((s) => {
               const implementada = subclasseImplementada(s.nome);
+              const temArte = temBannerProprio(s.id);
               return (
                 <div
                   key={s.id}
@@ -1086,6 +1087,7 @@ export default function LevelUpShell({
                     <div className="opt-card-info">
                       <div className="opt-card-name">{s.nome}</div>
                       {!implementada && <div className="opt-card-desc">Ainda não implementada</div>}
+                      {!temArte && <div className="opt-card-desc">[PH] ícone ainda não desenhado</div>}
                     </div>
                   </div>
                 </div>

@@ -313,6 +313,15 @@ construir o motor/UI que usa esse dado.
   Personagem de Teste criado direto no nível 3 mostra a subclasse
   sorteada certinha no cabeçalho ("Mago (Abjurador)"). tsc/
   testes(322)/build verdes.
+  **Ajuste pedido pelo Osmar (§12 do CLAUDE.md):** as 4 subclasses ainda
+  caem no fallback genérico 🖼 (sem emblema próprio, diferente de TODAS
+  as outras subclasses do app — Bardo/Bruxo já têm arte mesmo pras que
+  não têm mecânica) — isso precisa ficar explícito, não só implícito no
+  🖼. Novo `temBannerProprio(id)` exportado de `IconeClasse.tsx`
+  (reaproveitável por qualquer outra tela que precise da mesma checagem)
+  usado no card de escolha de subclasse pra mostrar "[PH] ícone ainda
+  não desenhado" nas 4 sem emblema — Necromante (Fase B) já tem emblema
+  de verdade, então não entra nesse aviso quando for adicionado.
 
 ### FASE P — Motor de Familiar/Pet (genérico — Bruxo, Mago, qualquer
 classe futura), entre a Fase A e a Fase B
