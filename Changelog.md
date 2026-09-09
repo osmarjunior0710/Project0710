@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0918
+
+Novo: tocar "Descanso Curto" ou "Descanso Longo" (aba Atributos) agora
+mostra uma transição — tela escurece com o nome do descanso no meio e
+volta ao normal. Pra quem tem Livro de Magias (hoje só o Mago), o
+Descanso Longo também pergunta se quer alterar as Magias Preparadas
+antes de terminar a transição.
+
 ## v202609_0014
 
 Novo: Mago nível 5+ ganha "Memorizar Magia" na aba Magias — troca 1

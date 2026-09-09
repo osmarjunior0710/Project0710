@@ -81,6 +81,7 @@ import {
   deficitMagiasPreparadas,
   magiasDisponiveisParaPreparar,
   poolDescobertasMagicas,
+  usaRedefinicaoPorDescanso,
 } from '../../core/magiasPersonagem';
 import { usosInspiracaoMaximo, dadoInspiracao, fonteDeInspiracaoDesbloqueada } from '../../core/inspiracaoBardo';
 import {
@@ -105,6 +106,7 @@ import LevelUpShell, { type PersonagemNivel } from './levelup/LevelUpShell';
 import CompletarMagiasShell from './levelup/CompletarMagiasShell';
 import LivroDasSombrasShell from './levelup/LivroDasSombrasShell';
 import MemorizarMagiaShell from './levelup/MemorizarMagiaShell';
+import DescansoOverlay, { type FaseDescanso, type TipoDescanso } from './DescansoOverlay';
 
 type TabName = 'atributos' | 'perfil' | 'mochila' | 'magias' | 'combat';
 
@@ -272,6 +274,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [completarAberto, setCompletarAberto] = useState<'truques' | 'magiasPreparadas' | null>(null);
   const [livroDasSombrasAberto, setLivroDasSombrasAberto] = useState(false);
   const [memorizarMagiaAberto, setMemorizarMagiaAberto] = useState(false);
+  /** Transição de Descanso (fade + prompt de redefinir Magias
+   * Preparadas no Descanso Longo) — ver `DescansoOverlay.tsx` e
+   * `iniciarDescanso`/`aoFadeInCompleto` abaixo. `null` = nenhuma
+   * transição em andamento (telas normais). `'escolhendoMagias'` é uma
+   * fase própria do `FichaShell` (não do overlay — ver `DescansoOverlay`),
+   * enquanto a tela de redefinição livre (`MemorizarMagiaShell`, modo
+   * `'livre'`) está aberta por cima. */
+  const [descansoEmAndamento, setDescansoEmAndamento] = useState<{
+    tipo: TipoDescanso;
+    fase: FaseDescanso | 'escolhendoMagias';
+  } | null>(null);
   const [levelUpHpModo, setLevelUpHpModo] = useState<'media' | 'rolar' | null>(personagemSalvo.levelUpHpModo ?? null);
   const [levelUpHpRolado, setLevelUpHpRolado] = useState<number | null>(personagemSalvo.levelUpHpRolado ?? null);
   const [itensDetalhados, setItensDetalhados] = useColapsavel('itens-detalhados', false);
@@ -361,6 +374,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
   const memorizarMagiaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Memorizar Magia', personagem.nivel) !== null : false;
   const livroDeMagias = magiasPreparadasDoPersonagem(livroDeMagiasAtuais);
+  const usaRedefPorDescanso = usaRedefinicaoPorDescanso(classe);
   const magiasGratisConcedidas = magiasGratisDasInvocacoes(invocacoesMisticasAtuais);
   const astuciaMagicaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Astúcia Mágica', personagem.nivel) !== null : false;
   const contatarPatronoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contatar Patrono', personagem.nivel) !== null : false;
@@ -850,6 +864,45 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
+  /** Toca em "Descanso Curto"/"Descanso Longo" (aba Atributos) — só
+   * dispara a transição visual (`DescansoOverlay`); o reset de verdade
+   * (`descansoCurto`/`descansoLongo`) só acontece com a tela já 100%
+   * preta, ver `aoFadeInCompleto`. */
+  function iniciarDescanso(tipo: TipoDescanso) {
+    setDescansoEmAndamento({ tipo, fase: 'entrando' });
+  }
+
+  function aoFadeInCompleto() {
+    if (!descansoEmAndamento) return;
+    if (descansoEmAndamento.tipo === 'curto') {
+      descansoCurto();
+    } else {
+      descansoLongo();
+    }
+    // Só pergunta se sobra alguma Magia Preparada pra redefinir — sem
+    // isso, um Mago nível 1 (0 Magias Preparadas ainda escolhidas)
+    // veria uma pergunta sem sentido.
+    const perguntaRedefinir =
+      descansoEmAndamento.tipo === 'longo' && usaRedefPorDescanso && magiasPreparadasAtuais.length > 0;
+    setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: perguntaRedefinir ? 'perguntaRedefinir' : 'saindo' } : prev));
+  }
+
+  /** Resposta ao prompt "quer alterar suas magias preparadas?" —
+   * `sim` abre a tela de escolha livre (`MemorizarMagiaShell`, modo
+   * `'livre'`); `não` já manda pro fade-out. */
+  function aoResponderRedefinir(sim: boolean) {
+    setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: sim ? 'escolhendoMagias' : 'saindo' } : prev));
+  }
+
+  function aoConfirmarRedefinicao(novaLista: string[]) {
+    setMagiasPreparadasAtuais(novaLista);
+    setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: 'saindo' } : prev));
+  }
+
+  function aoFimDaTransicaoDescanso() {
+    setDescansoEmAndamento(null);
+  }
+
   function usarAstuciaMagica() {
     if (astuciaMagicaGasta || !espacoPactoAtual || astuciaMagicaRecupera <= 0) return;
     const circulo = espacoPactoAtual.circulo;
@@ -1246,6 +1299,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   if (memorizarMagiaAberto) {
     return (
       <MemorizarMagiaShell
+        modo="unica"
         atuais={magiasPreparadasAtuais}
         catalogo={livroDeMagias}
         onFechar={() => setMemorizarMagiaAberto(false)}
@@ -1258,8 +1312,29 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
+  if (descansoEmAndamento?.fase === 'escolhendoMagias') {
+    return (
+      <MemorizarMagiaShell
+        modo="livre"
+        atuais={magiasPreparadasAtuais}
+        catalogo={livroDeMagias}
+        onFechar={() => aoResponderRedefinir(false)}
+        onConfirmar={aoConfirmarRedefinicao}
+      />
+    );
+  }
+
   return (
     <div className={styles.screen}>
+      {descansoEmAndamento && (
+        <DescansoOverlay
+          tipo={descansoEmAndamento.tipo}
+          fase={descansoEmAndamento.fase}
+          onFadeInCompleto={aoFadeInCompleto}
+          onResponderRedefinir={aoResponderRedefinir}
+          onFimAnimacao={aoFimDaTransicaoDescanso}
+        />
+      )}
       <div className={styles.header}>
         <span className="back" onClick={() => navigate('/lista')}>
           ←
@@ -1298,8 +1373,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             pericias={pericias}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             proficienciasFerramenta={proficienciasFerramenta}
-            onDescansoLongo={descansoLongo}
-            onDescansoCurto={descansoCurto}
+            onDescansoLongo={() => iniciarDescanso('longo')}
+            onDescansoCurto={() => iniciarDescanso('curto')}
             restStatus={restStatus}
             onAbrirLevelUp={() => setLevelUpAberto(true)}
             onLevelUpRapido={classe ? levelUpRapido : undefined}
