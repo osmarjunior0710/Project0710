@@ -597,40 +597,36 @@ fixo. Testado com Mago nível 17 (9 círculos simultâneos) e nível 1 (1
 círculo só) — cabe nos dois casos em ~390px sem cortar a lista, e o
 painel se mantém parado na tela mesmo rolando a lista.
 
-**Achado técnico durante a correção — `position:fixed` preso ao
-drawer "Ação":** a tela "Usar Magia" abre de dentro do drawer lateral
-`SidePanel` (o painel que desliza ao tocar "Ação" na Combat), que usa
-`transform` (`SidePanel.module.css`, `.panelLeft`/`.panelRight`) pra
-animar o slide-in. Qualquer ancestral com `transform` vira o
-"containing block" de todo `position:fixed` descendente (regra do
-CSS, não bug do navegador) — por isso o `.screen` INTEIRO dessas 2
-telas (não só o `.painelEspacos`) ficava preso à largura do drawer
-(~84% da tela), sobrando uma faixa da Ficha visível à direita. **1ª
-correção (painel só)** resolveu o pedido original do Osmar, mas
-deixou a lista de magias em si (e a tela "Escolher Círculo" inteira)
-ainda presas a ~84% — o Osmar reportou de volta ("as magias não estão
-indo até o final do painel branco") depois de ver no celular de
-verdade. **Correção final:** `SelecionarMagiaShell` e
-`EscolherCirculoShell` inteiros (não só o painel) usam
-`createPortal(..., document.body)` no `return` — a tela toda sai da
-árvore do drawer, `position:fixed` passa a valer contra a viewport de
-verdade. Rodar o portal também quando a tela é aberta de fora de
-qualquer drawer (ex.: `EscolherCirculoShell` a partir da aba Magias)
-não muda nada visível — só a localização no DOM, sempre seguro
-aplicar.
+**Achado técnico — `position:fixed` preso ao drawer "Ação":** a tela
+"Usar Magia" abre de dentro do drawer lateral `SidePanel` (o painel
+que desliza ao tocar "Ação" na Combat), que usa `transform`
+(`SidePanel.module.css`, `.panelLeft`/`.panelRight`) pra animar o
+slide-in. Qualquer ancestral com `transform` vira o "containing
+block" de todo `position:fixed` descendente (regra do CSS, não bug do
+navegador) — por isso o `.screen` dessas telas fica preso a ~84% da
+largura real (não 100%), sobrando uma faixa da Ficha visível à
+direita. **Isso é o tamanho ESPERADO da tela — não um bug a corrigir.**
+Só o `.painelEspacos` precisa escapar disso (ver acima: `createPortal`
+pro `<body>`, único elemento que precisa cobrir a tela cheia de
+verdade). Uma tentativa de portar a tela INTEIRA (`SelecionarMagiaShell`/
+`EscolherCirculoShell`) pra fazer as 2 ocuparem 100% da largura foi
+revertida — o Osmar só queria que o TEXTO da lista aproveitasse melhor
+a largura de ~84% que já existia, não que a tela cobrisse a Ficha
+toda.
 
-**Padrão a reaproveitar:** qualquer tela cheia (`.screen` fixed) que
-possa abrir de dentro de um `SidePanel`/drawer com `transform` —
-mesmo que hoje só 1 dos lugares que a abre seja um drawer — precisa
-de `createPortal(..., document.body)` no componente inteiro, não só
-num elemento fixed específico dentro dela. Aplicar sempre no
-componente da tela cheia (não em cada usuário dela) evita esquecer um
-caller.
+**Fix de verdade — `padding-right` da lista recalibrado:**
+`.listCol` reservava `padding-right: 108px` (calculado como se a
+`.screen` tivesse 100% da largura) — mas como a tela só tem ~84%, e o
+painel é `fixed` relativo à tela CHEIA (não à `.screen`), a maior
+parte da largura do painel já cai fora da área visível da tela — bem
+menos que 108px do texto realmente precisa ficar de fora. Baixado pra
+`padding-right: 56px` (calibrado pra ~390px, aproximado — não dá pra
+calcular isso em CSS puro sabendo só a % do drawer). Padrão a
+lembrar: **`padding-right`/margem reservada pra um elemento `fixed`
+relativo à tela cheia, dentro de um container que NÃO ocupa a tela
+cheia, precisa ser recalculado pela largura real do container, não
+pela largura do elemento fixed.**
 
 **Data/origem:** 2026-09, revisão pedida pelo Osmar depois do foco
-Mago (outra conta/branch) chegar na Combat — 3 rodadas até o estado
-final: (1) painel dentro do flex row, rolando junto com a lista; (2)
-painel fixo mas só ele portado, tela ainda presa a ~84%; (3) tela
-inteira (as 2 shells) portada — cada rodada corrigida depois do Osmar
-testar no celular de verdade e reportar o que ainda estava errado.
+Mago (outra conta/branch) chegar na Combat.
 

@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2220
+
+Corrigido de novo: a entrega anterior fez as telas "Usar Magia" e
+"Escolher Círculo" ocuparem a tela toda, mas não era isso — o tamanho
+menor (~84%) já era o esperado, só o texto da lista de magias não
+estava aproveitando bem esse espaço. Voltou pro tamanho de antes, com
+o texto agora cabendo melhor (menos espaço em branco desperdiçado do
+lado do painel de Espaços).
+
 ## v202609_2032
 
 Corrigido: as telas "Usar Magia" e "Escolher Círculo" (Combate) agora

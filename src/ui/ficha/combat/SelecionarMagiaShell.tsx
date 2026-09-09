@@ -39,12 +39,7 @@ export default function SelecionarMagiaShell({
 }: SelecionarMagiaShellProps) {
   const grupos = agruparMagiasPorCirculo([...truques, ...magiasPreparadas]);
 
-  // Portal pro <body>: esta tela abre dentro do drawer "Ação" (SidePanel),
-  // que tem `transform` pra animar o slide-in — isso vira containing block
-  // pra qualquer `position: fixed` descendente, então sem o portal a tela
-  // inteira (não só o painel de Espaços) ficaria presa à largura do drawer
-  // (~84%), sobrando uma faixa da Ficha visível à direita.
-  return createPortal(
+  return (
     <div className={styles.screen}>
       <div className={styles.header}>
         <div className={styles.titleRow}>
@@ -87,21 +82,29 @@ export default function SelecionarMagiaShell({
         </div>
       </div>
 
-      {espacos.length > 0 && (
-        <div className={localStyles.painelEspacos}>
-          <div className={localStyles.painelEspacosTitulo}>Espaços</div>
-          {espacos.map((e) => {
-            const gasto = espacosGastosPorCirculo[e.circulo] ?? 0;
-            return (
-              <div key={e.circulo} className={localStyles.painelEspacosRow}>
-                <span className={localStyles.painelEspacosLabel}>{e.circulo}º</span>
-                <TickPips total={e.maximo} usados={gasto} tamanho="sm" />
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>,
-    document.body,
+      {/* Portal pro <body>: esta tela abre dentro do drawer "Ação"
+          (SidePanel), que tem `transform` pra animar o slide-in — isso
+          vira containing block pra qualquer `position: fixed`
+          descendente, então sem o portal o painel ficaria preso à
+          largura do drawer, não à tela inteira. Só o painel sai da
+          árvore — o resto da tela (lista de magias) fica no tamanho
+          original de propósito, não é pra cobrir a tela toda. */}
+      {espacos.length > 0 &&
+        createPortal(
+          <div className={localStyles.painelEspacos}>
+            <div className={localStyles.painelEspacosTitulo}>Espaços</div>
+            {espacos.map((e) => {
+              const gasto = espacosGastosPorCirculo[e.circulo] ?? 0;
+              return (
+                <div key={e.circulo} className={localStyles.painelEspacosRow}>
+                  <span className={localStyles.painelEspacosLabel}>{e.circulo}º</span>
+                  <TickPips total={e.maximo} usados={gasto} tamanho="sm" />
+                </div>
+              );
+            })}
+          </div>,
+          document.body,
+        )}
+    </div>
   );
 }
