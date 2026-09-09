@@ -289,9 +289,30 @@ construir o motor/UI que usa esse dado.
   aba Magias depois), "Não" fecha a pergunta e termina o fade-out
   sozinho — sem erro de console em nenhum caminho. tsc/testes(322)/
   build verdes.
-- [ ] **A7 — Subclasse placeholder.** Abjurador/Adivinhador/Evocador/
-  Ilusionista em `subclasses.ts`, sem mecânica (mesmo padrão já usado
-  em Bardo/Bruxo — reaproveite 100%, deve ser rápido).
+- [x] **A7 — Subclasse placeholder.** Abjurador/Adivinhador/Evocador/
+  Ilusionista (nomes confirmados na planilha, aba Subclasses — sem
+  prefixo "Escola de", diferente do Livro do Jogador oficial) em
+  `subclasses.ts`, ids `mago-abjurador`/`mago-adivinhador`/
+  `mago-evocador`/`mago-ilusionista`. **Zero código novo** — a tela de
+  escolha de subclasse do Level Up já lê `subclasses.ts` filtrando por
+  `classeId` e já trava sozinha qualquer subclasse sem entrada em
+  `caracteristicasSubclasse.ts` (mesmo padrão que já trava 3 dos 4
+  colégios do Bardo e 3 dos 4 patronos do Bruxo — só adicionar as
+  linhas de dado bastou, confirma reuso 100%).
+  **Ícone recebido do Osmar, guardado pra Fase B (ainda NÃO virou
+  subclasse selecionável):** `mago-necromante-banner.webp` (convertido
+  de PNG, redimensionado pra 512×512 igual aos outros emblemas) já está
+  em `assets/icones-classes/` — quando a B0 (convenção de badge
+  homebrew) for decidida e o Necromante entrar em `subclasses.ts` com
+  `id: 'mago-necromante'`, o ícone já aparece sozinho (mesmo glob
+  automático que já pega os outros).
+  **Testado no navegador** (Playwright, 390px, Level Up manual nível
+  1→3 de um Mago): as 4 subclasses aparecem na tela "Escolha sua
+  Subclasse", travadas (opacidade reduzida, clique não faz nada) com
+  "Ainda não implementada" — igual ao padrão já visto em Bardo/Bruxo;
+  Personagem de Teste criado direto no nível 3 mostra a subclasse
+  sorteada certinha no cabeçalho ("Mago (Abjurador)"). tsc/
+  testes(322)/build verdes.
 
 ### FASE P — Motor de Familiar/Pet (genérico — Bruxo, Mago, qualquer
 classe futura), entre a Fase A e a Fase B

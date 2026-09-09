@@ -5,12 +5,19 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
-## v202609_1013
+## v202609_1015
 
 Protótipo (isolado, ainda não ligado a nada de verdade): novo botão 🎲
 flutuante na Ficha, acima do menu inferior — toca nele e um d20 3D
 rola de verdade na tela (física, não desenho). É só um teste pra ver
 se vale a pena investir nisso — não muda nenhuma rolagem existente.
+
+## v202609_1012
+
+Novo: Mago agora tem as 4 subclasses oficiais pra escolher no Level Up
+(Abjurador, Adivinhador, Evocador, Ilusionista) — aparecem travadas por
+enquanto (ainda sem as características mecânicas de cada uma), mesmo
+como já acontece com as subclasses ainda pendentes de Bardo e Bruxo.
 
 ## v202609_0918
 
