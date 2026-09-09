@@ -13,6 +13,13 @@ Ajuste: as 4 subclasses do Mago que ainda não têm emblema próprio
 que é arte provisória — igual já acontecia com "Ainda não
 implementada" pra mecânica.
 
+## v202609_1015
+
+Protótipo (isolado, ainda não ligado a nada de verdade): novo botão 🎲
+flutuante na Ficha, acima do menu inferior — toca nele e um d20 3D
+rola de verdade na tela (física, não desenho). É só um teste pra ver
+se vale a pena investir nisso — não muda nenhuma rolagem existente.
+
 ## v202609_1012
 
 Novo: Mago agora tem as 4 subclasses oficiais pra escolher no Level Up

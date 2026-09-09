@@ -1,0 +1,89 @@
+/* FAB "acima do menu, à direita" (pedido do Osmar) — mesma camada
+   fixa de sempre, ancorado acima da tabbar (que já ocupa a faixa
+   inferior, ver FichaShell.module.css .tabbarLayer, z-index 30). */
+.fab {
+  position: fixed;
+  right: var(--space-4);
+  bottom: 92px;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--shape-full);
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: var(--elevation-3);
+  cursor: pointer;
+  z-index: 35;
+}
+
+.fab:active {
+  opacity: 0.85;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+}
+
+.canvasHost {
+  flex: 1;
+  position: relative;
+}
+
+/* dice-box cria o <canvas> sem estilo próprio (só define opacity no
+   CSS que ele mesmo publica) — sem isso, fica no tamanho padrão do
+   navegador (300×150px, canto superior esquerdo), praticamente
+   invisível atrás do resto da UI. */
+.canvasHost :global(canvas) {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.status {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  padding: var(--space-3) var(--space-4);
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: var(--shape-md);
+  max-width: 80%;
+}
+
+.resultado {
+  position: absolute;
+  top: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 39px;
+  font-weight: bold;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.fechar {
+  position: absolute;
+  bottom: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 13px;
+  padding: var(--space-3) var(--space-6);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--shape-full);
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}

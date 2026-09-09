@@ -734,3 +734,54 @@ vazio" no mesmo instante em que a animação de saída começa — guarde o
 da "piscada de olho" (a checagem anterior só validou a classe no
 estado ABERTO, não durante o fechamento).
 
+## Protótipo isolado: dado 3D de verdade (física) é viável — FAB na Ficha
+
+**Pergunta do Osmar:** dá pra ter um dado 3D "bonito" (física de
+verdade, não CSS) pra qualquer tipo (d4 a d100), sem substituir a arte
+2D já aprovada? Resposta: sim, testado e funciona.
+
+**Escolha técnica:** `@3d-dice/dice-box` (BabylonJS + Ammo.js, roda a
+física num Web Worker com OffscreenCanvas) — não `dice-box-threejs`
+(irmã da mesma família, mas Three.js/cannon-es, menos madura/mantida).
+Modelos 3D de TODOS os tipos (d4/d6/d8/d10/d12/d20/d100) já vêm
+prontos num `default.json` só (156 KB) + texturas (~130 KB) + o WASM
+da física (312 KB) — total ~620 KB de assets estáticos, carregados uma
+vez em `public/assets/` (fora do bundle JS, não conta pro chunk
+principal). O JS da lib (Babylon + Ammo + workers) soma ~660 KB
+gzipado, mas só baixa quando o jogador REALMENTE toca o botão —
+`import()` dinâmico dentro do handler de clique, confirmado pelo build
+que o bundle principal (`index.js`) não cresceu nada.
+
+**2 armadilhas reais encontradas (documentar pra quem for evoluir
+isso):**
+1. **A lib não publica tipos TypeScript** — precisa de um `.d.ts`
+   próprio (`src/types/dice-box.d.ts`), só com o que for usado (não
+   tentar tipar a API inteira).
+2. **O `<canvas>` que a lib cria não vem estilizado** (o CSS que ela
+   publica só cuida de opacity) — sem `width:100%; height:100%`
+   explícito no seletor `canvas` dentro do container, ele fica no
+   tamanho padrão do navegador (300×150px, canto superior esquerdo) e
+   a rolagem "funciona" (o resultado volta certo) mas fica
+   praticamente invisível atrás do resto da UI. Isso NÃO aparece em
+   nenhum warning/erro — só percebido comparando o `getBoundingClientRect`
+   do canvas com o esperado.
+
+**Ainda NÃO resolvido (documentar antes de qualquer integração real,
+não é escopo deste protótipo):** a lib rola o dado com resultado
+determinado pela FÍSICA dela mesma (`box.roll('1d20')` sorteia
+sozinha) — não achei, na documentação pública, um jeito de dizer "esse
+d20 tem que terminar mostrando 17" (útil quando o app precisa que o
+NOSSO gerador de número, não o da lib, seja a fonte de verdade do
+resultado, pra manter consistência com bônus/vantagem/etc. já
+calculados). Precisa investigar antes de trocar a arte 2D de verdade —
+registrado aqui pra não esquecer, não é bloqueio do protótipo em si
+(que só mostra o dado rolando, sem ligar no motor de regra).
+
+**Protótipo entregue:** FAB (🎲) fixo no canto inferior direito da
+Ficha, acima da tabbar (`Dice3dFab.tsx`) — toca, abre um overlay de
+tela cheia, rola 1d20 em 3D, mostra o resultado, fecha. Isolado de
+qualquer fluxo real (Combat/Magias/Atributos) de propósito — é só pra
+avaliar peso/visual no celular antes de decidir se vale integrar.
+
+**Data/origem:** 2026-09, pedido do Osmar.
+

@@ -102,6 +102,7 @@ import PerfilTab from './tabs/PerfilTab';
 import MochilaTab from './tabs/MochilaTab';
 import MagiasTab from './tabs/MagiasTab';
 import CombatTab, { type EstadoRecurso, type RecursoTurno } from './tabs/CombatTab';
+import Dice3dFab from './dice3d/Dice3dFab';
 import LevelUpShell, { type PersonagemNivel } from './levelup/LevelUpShell';
 import CompletarMagiasShell from './levelup/CompletarMagiasShell';
 import LivroDasSombrasShell from './levelup/LivroDasSombrasShell';
@@ -1593,6 +1594,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           ))}
         </div>
       </div>
+
+      <Dice3dFab />
     </div>
   );
 }
