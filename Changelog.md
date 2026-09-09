@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1013
+
+Protótipo (isolado, ainda não ligado a nada de verdade): novo botão 🎲
+flutuante na Ficha, acima do menu inferior — toca nele e um d20 3D
+rola de verdade na tela (física, não desenho). É só um teste pra ver
+se vale a pena investir nisso — não muda nenhuma rolagem existente.
+
 ## v202609_0918
 
 Novo: tocar "Descanso Curto" ou "Descanso Longo" (aba Atributos) agora
