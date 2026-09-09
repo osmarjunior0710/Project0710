@@ -254,26 +254,41 @@ construir o motor/UI que usa esse dado.
   "já usada" até o próximo descanso; Descanso Curto libera o card de
   novo — sem erro de console em nenhum passo. tsc/testes(315)/build
   verdes.
-- [ ] **A6 — Transição de Descanso (fade + prompt).** Pedido explícito
+- [x] **A6 — Transição de Descanso (fade + prompt).** Pedido explícito
   do Osmar, plugado nos 2 botões já existentes de `AtributosTab.tsx`
-  (`onDescansoCurto`/`onDescansoLongo`, hoje sem nenhum feedback
+  (`onDescansoCurto`/`onDescansoLongo`, antes sem nenhum feedback
   visual) — **invertida na ordem com a A7 (era A7, pedido do Osmar
-  2026-09) pra vir antes da subclasse placeholder:**
-  - [ ] A6.1 — overlay genérico de tela cheia: fade-in pro preto,
-    texto "Descanso Curto" ou "Descanso Longo" em branco no meio,
-    fade-out. Descanso Curto: 0,5s fade-in + 0,5s fade-out (1s
-    total). Descanso Longo: 1s fade-in + 1s fade-out (2s total).
-    Component novo (provável `DescansoOverlay.tsx`, `position: fixed`,
-    mesmo padrão de overlay de tela cheia já usado por `RollOverlay`/
-    `LevelUpShell` — ver DECISOES-DESIGN.md).
-  - [ ] A6.2 — só no Descanso Longo: se o personagem tiver Magias
-    Preparadas no padrão "redefinição livre" (hoje só Mago), a
-    transição PARA no preto (sem terminar o fade-in ainda virar
-    fade-out) e mostra a pergunta "quer alterar suas magias
-    preparadas?" (sim/não). Sim → abre a mesma tela de escolha do A5a
-    (grimório → preparadas). Não/confirmar → só então roda o
-    fade-out. Personagem sem essa característica (ex: Bardo/Bruxo)
-    não vê o prompt, só o fade normal.
+  2026-09) pra vir antes da subclasse placeholder.**
+  - [x] A6.1 — `DescansoOverlay.tsx` novo (`position: fixed`, mesmo
+    padrão de overlay de tela cheia de `RollOverlay`/`LevelUpShell`):
+    fade-in pro preto (opacity 0→1 via CSS transition, não
+    `@keyframes` — permite pausar a meio caminho pro A6.2), texto
+    "Descanso Curto"/"Descanso Longo" em branco no meio, fade-out.
+    Curto: 0,5s+0,5s (1s total). Longo: 1s+1s (2s total). O reset de
+    verdade (`descansoCurto`/`descansoLongo`) só roda quando a tela já
+    está 100% preta (escondido atrás do overlay) — clicar no botão não
+    chama mais essas funções direto, passa por `iniciarDescanso`.
+  - [x] A6.2 — só no Descanso Longo, e só se sobrar alguma Magia
+    Preparada (evita pergunta sem sentido num Mago nível 1 recém-
+    criado): quando `usaRedefinicaoPorDescanso(classe)` é true (hoje
+    só Mago), a transição pausa 100% preta com a pergunta "Quer
+    alterar suas magias preparadas?" (Sim/Não). Sim → abre
+    `MemorizarMagiaShell` num novo modo `'livre'` (prop `modo:
+    'unica' | 'livre'`, generalizando o componente da A5b em vez de
+    duplicar — só difere na validação: `'unica'` exige exatamente 1
+    troca, `'livre'` aceita qualquer quantidade, inclusive 0). Não ou
+    Confirmar na tela de redefinir → volta pro overlay preto e roda o
+    fade-out. Classe sem essa característica (Bardo/Bruxo/Guerreiro)
+    nunca vê a pergunta, só o fade normal.
+  **Testado no navegador** (Playwright, 390px): Guerreiro (Descanso
+  Curto e Longo) mostra só o fade com o texto certo, nunca a pergunta;
+  Mago nível 5 no Descanso Curto também nunca pergunta (só o
+  "Memorizar Magia" da A5b faz isso, não a transição); Mago no
+  Descanso Longo pausa preto com a pergunta, "Sim" abre "Redefinir
+  Magias Preparadas" (troca livre confirmada, refletida certinha na
+  aba Magias depois), "Não" fecha a pergunta e termina o fade-out
+  sozinho — sem erro de console em nenhum caminho. tsc/testes(322)/
+  build verdes.
 - [ ] **A7 — Subclasse placeholder.** Abjurador/Adivinhador/Evocador/
   Ilusionista em `subclasses.ts`, sem mecânica (mesmo padrão já usado
   em Bardo/Bruxo — reaproveite 100%, deve ser rápido).

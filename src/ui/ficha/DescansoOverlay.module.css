@@ -1,0 +1,47 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition-property: opacity;
+  transition-timing-function: ease-in-out;
+}
+
+.texto {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  padding: 0 var(--space-5);
+}
+
+.pergunta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.botoes {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.botao {
+  min-width: var(--touch-target-min);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--shape-full);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+.botaoPrimario {
+  background: var(--accent);
+  color: #fff;
+}
