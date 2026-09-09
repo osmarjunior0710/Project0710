@@ -19,4 +19,8 @@ export const subclasses: Subclasse[] = [
   { id: 'bruxo-patrono-celestial', classeId: 'bruxo', nome: 'Patrono Celestial' },
   { id: 'bruxo-patrono-grande-antigo', classeId: 'bruxo', nome: 'Patrono O Grande Antigo' },
   { id: 'bruxo-patrono-infero', classeId: 'bruxo', nome: 'Patrono Ínfero' },
+  { id: 'mago-abjurador', classeId: 'mago', nome: 'Abjurador' },
+  { id: 'mago-adivinhador', classeId: 'mago', nome: 'Adivinhador' },
+  { id: 'mago-evocador', classeId: 'mago', nome: 'Evocador' },
+  { id: 'mago-ilusionista', classeId: 'mago', nome: 'Ilusionista' },
 ];
