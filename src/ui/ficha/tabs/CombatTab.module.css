@@ -159,3 +159,66 @@
   border: 1px dashed var(--accent);
   border-radius: var(--shape-sm);
 }
+
+/* "Piscada de olho" do Fim do Turno (pedido do Osmar, 2026-09) — 2
+   planos pretos cobrem a tela (fecham na 1ª metade da animação, abrem
+   na 2ª), escondendo o reset dos 3 botões no meio, como se o turno
+   "piscasse" e recomeçasse. `position: fixed` cobre a tela toda
+   independente de onde o CombatTab está montado (não precisa de
+   portal aqui — diferente das telas de magia, este componente já é
+   filho direto da Ficha, não de um drawer com `transform`). */
+.piscadaOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+}
+
+.piscadaTopo,
+.piscadaBase {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 54%;
+  background: #000;
+}
+
+.piscadaTopo {
+  top: 0;
+  transform: translateY(-100%);
+  /* Curva bem leve (não 100% reto) — as 2 bordas são complementares,
+     uma côncava e outra convexa, como as pálpebras de um olho. */
+  border-radius: 0 0 50% 50% / 0 0 10px 10px;
+  animation: piscadaTopoAnim var(--duracao-piscada, 500ms) ease-in-out;
+}
+
+.piscadaBase {
+  bottom: 0;
+  transform: translateY(100%);
+  border-radius: 50% 50% 0 0 / 10px 10px 0 0;
+  animation: piscadaBaseAnim var(--duracao-piscada, 500ms) ease-in-out;
+}
+
+@keyframes piscadaTopoAnim {
+  0% {
+    transform: translateY(-100%);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes piscadaBaseAnim {
+  0% {
+    transform: translateY(100%);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}

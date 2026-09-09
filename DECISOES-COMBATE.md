@@ -630,3 +630,67 @@ pela largura do elemento fixed.**
 **Data/origem:** 2026-09, revisão pedida pelo Osmar depois do foco
 Mago (outra conta/branch) chegar na Combat.
 
+## Estado do turno (Ação/Ação Bônus/Reação, Surto de Ação) persiste — só reseta em Iniciativa nova ou "Fim do Turno"
+
+**Problema:** `turnState` (os 3 botões Ação/Ação Bônus/Reação — ativo
+ou usada) e `surtoUsadoTurno` só existiam em estado do React
+(`useState` sem persistência), diferente de quase todo o resto da
+Ficha (PV, Espaços de Magia, usos de característica — tudo salvo em
+`localStorage` a cada mudança, ver `FichaShell.tsx`). Sair da Ficha e
+voltar (Lista de Personagens, F5, trocar de aba do navegador) resetava
+os 3 botões sozinho, mesmo no meio do MESMO turno de combate — bug
+reportado pelo Osmar.
+
+**Decisão:** `turnState`/`surtoUsadoTurno` agora entram no mesmo save
+automático de tudo mais (`PersonagemSalvo.turnStateAtual`/
+`surtoUsadoTurnoAtual`, `core/armazenamentoPersonagens.ts`) — sobrevive
+a sair/voltar da Ficha. Só reseta de propósito em 2 gatilhos, ambos já
+existentes: **"Fim do Turno"** (`fimDoTurno` em `FichaShell.tsx`, sem
+mudança) e **rolar Iniciativa** (novo — `aoRolarIniciativa`, chamado
+tanto pelo botão de Iniciativa da aba Combat quanto pelo card de
+Iniciativa da aba Atributos, os 2 pontos que rolam esse dado). O
+motivo de rolar Iniciativa também resetar: RAW, cada rolagem de
+Iniciativa é o início de uma cena/combate nova — manter os 3 botões
+travados de um combate anterior não faz sentido ao começar outro.
+
+**Padrão a lembrar:** todo estado "supostamente temporário" (dura só o
+turno/a sessão) que na prática o jogador vê sumir sem querer ao trocar
+de tela precisa entrar no save automático de qualquer forma — o reset
+tem que ser um EVENTO explícito (Fim do Turno, Descanso, Iniciativa
+nova), nunca "o componente desmontou".
+
+**Data/origem:** 2026-09, bug reportado pelo Osmar.
+
+## "Fim do Turno" pisca a tela — 2 planos pretos fecham/abrem, reset acontece escondido no meio
+
+**Pedido do Osmar:** ao tocar "Fim do Turno", em vez do reset dos 3
+botões acontecer instantâneo e visível, 2 planos pretos (metade de
+cima, metade de baixo da tela) fecham vindo de fora da tela (de cima
+pra baixo / de baixo pra cima), se encontram no meio, e abrem de novo
+saindo por onde entraram — como uma piscada de olho. Analogia
+explícita do Osmar: cada turno de mesa dura no máximo 6 segundos, "fim
+de turno" é rápido como um piscar.
+
+**Implementação (`CombatTab.tsx`/`CombatTab.module.css`):**
+`fimDoTurno()` não reseta mais na hora — dispara `piscando: true`
+(mostra os 2 planos, `position:fixed` cobrindo a tela, `z-index: 90`),
+agenda o reset de verdade (`onFimDoTurno`, `setFeedback(null)` etc.)
+pro **meio exato** da animação (`DURACAO_PISCADA_MS / 2`, tela
+totalmente coberta — ninguém vê o "salto"), e agenda esconder os
+planos no final (`DURACAO_PISCADA_MS`). Duração total: 500ms — metade
+fechando, metade abrindo, 1 `@keyframes` por plano
+(`translateY(-100%→0→-100%)` pro de cima,
+`translateY(100%→0→100%)` pro de baixo). A borda de encontro dos 2
+planos usa `border-radius` elíptico bem raso (`50% 50% / 10px 10px`)
+pra não ficar 100% reto — uma leve curva complementar entre os dois,
+como pálpebras.
+
+**Padrão a lembrar:** JS (`DURACAO_PISCADA_MS`) e CSS (`@keyframes`)
+duram o MESMO tempo por construção — a duração vira uma CSS custom
+property (`--duracao-piscada`) escrita via `style` inline a partir da
+constante JS, em vez de duplicar o número em 2 lugares (mesmo cuidado
+já registrado pra `DURACAO_ANIMACAO_MS`/spin do dado, ver acima —
+"Suspense da rolagem").
+
+**Data/origem:** 2026-09, pedido do Osmar.
+

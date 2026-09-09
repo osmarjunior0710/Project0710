@@ -189,6 +189,23 @@ export interface PersonagemSalvo {
    * Ver DECISOES-DESIGN.md "Level Up — dado de vida rolado...". */
   levelUpHpModo?: 'media' | 'rolar' | null;
   levelUpHpRolado?: number | null;
+  /** Estado do turno de Combate (Ação/Ação Bônus/Reação: cada um
+   * "disponivel" ou "usada") — pedido do Osmar (2026-09): antes só
+   * existia em estado do React, então sair da Ficha e voltar resetava
+   * sozinho (F5, trocar de personagem na Lista, etc.), mesmo no meio
+   * do MESMO turno de combate. Agora sobrevive a isso, e só reseta de
+   * propósito ao rolar nova Iniciativa ou tocar "Fim do Turno"
+   * (`FichaShell.tsx`, `aoRolarIniciativa`/`fimDoTurno`). Shape
+   * espelha `RecursoTurno`/`EstadoRecurso` de `CombatTab.tsx` sem
+   * importar de lá (core/ não depende de ui/, ver CLAUDE.md seção 4).
+   * Ausente = personagem nunca teve isso salvo ainda, cai pro padrão
+   * (todos "disponivel"). */
+  turnStateAtual?: Record<'acao' | 'bonus' | 'reacao', 'disponivel' | 'usada'>;
+  /** `true` = Surto de Ação (Guerreiro) já usado NESTE turno — reseta
+   * junto com `turnStateAtual` (Fim do Turno/nova Iniciativa), não no
+   * Descanso (isso é `surtoGasto`, contador de usos por Descanso
+   * Curto, campo diferente). Mesma motivação de persistência acima. */
+  surtoUsadoTurnoAtual?: boolean;
   /** Vigor Implacável (Orc) já disparou desde o último Descanso Longo
    * — só ele reseta. Ver `core/vigorImplacavel.ts`. */
   vigorImplacavelGasto?: boolean;

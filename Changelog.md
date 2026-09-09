@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0013
+
+3 melhorias no Combate: (1) o estado dos botões Ação/Ação Bônus/Reação
+não reseta mais sozinho ao sair e voltar da Ficha — só reseta de
+verdade ao rolar nova Iniciativa ou tocar "Fim do Turno"; (2) tocar
+"Fim do Turno" agora mostra uma "piscada de olho" (2 planos pretos
+fecham e abrem rápido) em vez do reset acontecer na cara; (3)
+confirmado que os painéis de Ação/Bônus/Reação já abrem/fecham cada um
+por um lado diferente (esquerda/direita/baixo).
+
 ## v202609_2220
 
 Corrigido de novo: a entrega anterior fez as telas "Usar Magia" e

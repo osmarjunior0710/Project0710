@@ -244,9 +244,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagemSalvo.arcanaMisticaAtual ?? {},
   );
   const [arcanaMisticaGastos, setArcanaMisticaGastos] = useState<number[]>(personagemSalvo.arcanaMisticaGastos ?? []);
-  const [surtoUsadoTurno, setSurtoUsadoTurno] = useState(false);
+  const [surtoUsadoTurno, setSurtoUsadoTurno] = useState(personagemSalvo.surtoUsadoTurnoAtual ?? false);
   const [restStatus, setRestStatus] = useState<string | null>(null);
-  const [turnState, setTurnState] = useState<Record<RecursoTurno, EstadoRecurso>>(turnoInicial);
+  const [turnState, setTurnState] = useState<Record<RecursoTurno, EstadoRecurso>>(
+    personagemSalvo.turnStateAtual ?? turnoInicial,
+  );
   const [espacosGastosPorCirculo, setEspacosGastosPorCirculo] = useState<Record<number, number>>(() => {
     if (personagemSalvo.espacosGastosPorCirculo) return personagemSalvo.espacosGastosPorCirculo;
     // Migração de personagem salvo antes da Etapa 4.2 (só existia 1
@@ -499,15 +501,20 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Up, Descanso, troca de arma de Maestria, uso de Recuperar
   // Fôlego/Indomável/Surto de Ação. Sem isso, um F5 na Ficha depois de
   // subir de nível voltava tudo pro estado da criação (só nivel/xp/
-  // pvAtual eram salvos, o resto só existia em estado do React). Não
-  // inclui turnState/surtoUsadoTurno de propósito — são "estado do
-  // turno atual", esperado resetar como qualquer app de mesa.
+  // pvAtual eram salvos, o resto só existia em estado do React).
+  // `turnState`/`surtoUsadoTurno` também entram aqui (pedido do Osmar,
+  // 2026-09) — sair da Ficha e voltar não deve resetar o turno de
+  // combate em andamento; só reseta de propósito ao rolar nova
+  // Iniciativa ou tocar "Fim do Turno" (`aoRolarIniciativa`/
+  // `fimDoTurno` abaixo).
   useEffect(() => {
     armazenamentoPersonagens.salvar({
       ...personagemSalvo,
       selecao,
       nivel: personagem.nivel,
       pvAtual,
+      turnStateAtual: turnState,
+      surtoUsadoTurnoAtual: surtoUsadoTurno,
       pvMax: personagem.pvMax,
       pvTemporarioAtual: pvTemporario,
       subclasseAtual: personagem.subclasse,
@@ -566,6 +573,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagem.subclasse,
     personagem.estiloDeLuta,
     pvAtual,
+    turnState,
+    surtoUsadoTurno,
     pvTemporario,
     maestriaArma,
     folegoGasto,
@@ -759,6 +768,18 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       if (restantesAtual >= restantesAlvo) return atual;
       return usosInspiracaoMax - restantesAlvo;
     });
+  }
+
+  /** Rolar Iniciativa = início de um novo turno de combate (regra da
+   * mesa: cada rolagem de Iniciativa começa uma cena nova) — reseta
+   * Ação/Ação Bônus/Reação e Surto de Ação do turno, mesmo padrão do
+   * "Fim do Turno" (`fimDoTurno` abaixo). Sem isso, rolar Iniciativa
+   * de novo (ex.: começando outro combate) manteria os 3 botões
+   * travados do combate anterior. */
+  function aoRolarIniciativa() {
+    setTurnState(turnoInicial);
+    setSurtoUsadoTurno(false);
+    recuperarInspiracaoAoRolarIniciativa();
   }
 
   function descansoLongo() {
@@ -1258,7 +1279,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             maestriaArma={maestriaArma}
             armasParaMaestria={classe ? listarArmasParaMaestria(classe) : []}
             onTrocarArmaMaestria={trocarArmaMaestria}
-            onRolarIniciativa={inspiracaoSuperiorDesbloqueada ? recuperarInspiracaoAoRolarIniciativa : undefined}
+            onRolarIniciativa={aoRolarIniciativa}
             sentidos={sentidos}
             resistenciaInferaDisponivel={resistenciaInferaDisponivel}
             resistenciaInferaAtual={resistenciaInferaAtual}
@@ -1448,7 +1469,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             periciaInigualavelDisponivel={periciaInigualavelDisponivel}
             onDevolverUsoInspiracao={devolverUsoInspiracao}
             iniciativaMod={iniciativa}
-            onRolarIniciativa={inspiracaoSuperiorDesbloqueada ? recuperarInspiracaoAoRolarIniciativa : undefined}
+            onRolarIniciativa={aoRolarIniciativa}
           />
         )}
       </div>
