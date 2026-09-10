@@ -836,5 +836,16 @@ limitação conhecida de raycasting em Chromium headless/software
 rendering, não um bug da integração; no celular real do Osmar (já
 testado por ele) o valor mostrado bate com a face pra cima.
 
+**Modo "Múltiplos" (rolar vários dados de tipos diferentes juntos):**
+`box.roll()` já aceita um array de notações (`['3d6', '2d4']`), não
+precisou de nenhuma lógica extra pra somar tipos — só juntar as
+contagens escolhidas num array de string antes de chamar `roll()`.
+Testado com Playwright rolando 5 dados (3d6+2d4) e 10 dados (5d10+5d6)
+juntos, sem erro e com o total certo. **Sem limite artificial de
+quantidade** (nem o app nem a lib impõem um) — não apareceu nenhum
+sinal de degradação até 10 dados simultâneos no teste; se alguém notar
+travamento/lentidão real com uma quantidade bem maior (20+, por
+exemplo), aí sim vale investigar um limite prático.
+
 **Data/origem:** 2026-09, pedido do Osmar.
 

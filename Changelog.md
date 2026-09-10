@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0100
+
+Protótipo do dado 3D — 2 melhorias: (1) todos os botões da tela do
+dado (tipos, "Múltiplos" e "fechar") agora são brancos com texto
+preto, mais fácil de ler em cima do fundo escuro; (2) novo botão
+"Múltiplos" — toca nele, depois toca em quantos dados de cada tipo
+quiser (ex: 3x d6 + 2x d4), o botão vira "Rolar (N)" e ao tocar rola
+todos juntos de uma vez, mostrando o total.
+
 ## v202609_2242
 
 Corrigido: tocar no FAB 🎲 estava rolando um d20 automaticamente antes
