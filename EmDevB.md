@@ -373,8 +373,16 @@ usando o motor pronto em vez de reinventar.
   existe no catálogo, hoje travada) passa a conceder Encontrar
   Familiar de verdade pela aba Pets — fecha a pendência já registrada
   em `PENDENCIAS.md`.
-
-### FASE B — Necromante (subclasse homebrew, só depois das Fases A e P fechadas)
+- [ ] **P5 — Criar pet avulso (fora do fluxo de magia/característica).**
+  Pedido do Osmar (2026-09): P3/P4 cobrem pet ganho por uma fonte
+  conhecida (magia/característica com forma pré-definida), mas o
+  jogador também pode adquirir um pet **por fora** disso (ex: comprar
+  uma montaria, ganhar um companheiro do mestre) — às vezes até com
+  atributos customizados, diferentes do stat block padrão de
+  `criaturas.ts`. Precisa de um jeito de criar esse pet manualmente na
+  aba Pets, sem depender de um vínculo de classe. **Ainda não
+  desenhado** — discutir com o Osmar quando chegar a vez (proposta do
+  Osmar: deixar como a última etapa da Fase P, depois do P4).
 
 - [ ] **B0 — Convenção de marcação "homebrew".** Proposta a confirmar
   com o Osmar antes de codar (mesmo espírito do `[PH]`, seção 12 do
