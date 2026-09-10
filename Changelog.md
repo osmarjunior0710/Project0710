@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1207
+
+Novo: Bruxo com Pacto da Corrente ganha o card "🔮 Convocar Familiar"
+na aba Pets — escolha entre as 8 formas especiais reais (Cobra
+Peçonhenta, Diabrete, Esfinge Maravilhosa, Esqueleto, Pseudodragão,
+Quasit, Slaad Girino, Sprite). Convocar de novo troca o familiar
+anterior (só 1 por vez); o "Adicionar Pet" genérico continua
+funcionando à parte, sem interferir.
+
 ## v202609_0937
 
 Barra de abas (rodapé da Ficha) mudou de visual: era uma "pill"

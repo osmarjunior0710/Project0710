@@ -21,6 +21,16 @@ describe('criarPet', () => {
     const b = criarPet('B', acha('gato'));
     expect(a.id).not.toBe(b.id);
   });
+
+  it('caso de borda — sem origemInvocacaoId (pet avulso/manual), fica undefined', () => {
+    const pet = criarPet('Sombra', acha('gato'));
+    expect(pet.origemInvocacaoId).toBeUndefined();
+  });
+
+  it('caso normal — origemInvocacaoId presente quando informado (ex: Pacto da Corrente)', () => {
+    const pet = criarPet('Sombra', acha('sprite'), 'pacto-da-corrente');
+    expect(pet.origemInvocacaoId).toBe('pacto-da-corrente');
+  });
 });
 
 describe('alterarPvPet', () => {

@@ -620,6 +620,42 @@ manual.
 
 **Data/origem:** 2026-09, plano "Invocações Místicas Fase 2", IM.5.
 
+## Bruxo — IM.6 feito: Pacto da Corrente concede Familiar de verdade (motor de Pets genérico)
+
+**Cada invocação que concede algo especial ganha seu próprio campo
+tipado em `InvocacaoMistica`, nunca um `efeitoMecanico` genérico.**
+Mesmo padrão de `magiaGratisConcedida`/`pvTemporarioConcedido`/
+`sentidoConcedido` — Pacto da Corrente ganhou
+`formasFamiliarConcedidas: string[] | null` (as 8 formas especiais do
+`beneficios`, nomes exatos de `criaturas.ts`), lido por
+`core/invocacoesFamiliar.ts` (`formasFamiliarDasInvocacoes`, mesmo
+formato de `magiasGratisDasInvocacoes`: sempre recalculado a partir de
+`invocacoesMisticasAtuais`, nunca persistido).
+
+**Motor de Pets (Fase P) usado como estava, zero mudança de schema.**
+A aba Pets (P2) já tinha "Adicionar Pet" genérico (qualquer criatura);
+"Convocar Familiar" (P3/P4) é o MESMO formulário
+(`AdicionarPet`/`PetsTab.tsx`) só com a lista de opções restrita às
+formas elegíveis — reaproveite 100%, sem componente novo.
+
+**"Só 1 familiar por vez" reaproveitou o padrão do Pacto da Lâmina
+(IM.4).** `Pet.origemInvocacaoId?: string` marca de qual Invocação um
+pet veio (`undefined` = avulso/manual, nunca substituído sozinho);
+convocar de novo pela MESMA fonte (`adicionarPet` em `FichaShell.tsx`)
+filtra o pet anterior dela antes de adicionar o novo — mesma regra de
+"vincular substitui a anterior" já usada pra arma de pacto, aplicada
+agora a uma criatura em vez de um item. Pets de outras origens (P5,
+avulso) nunca são afetados por essa substituição.
+
+**Fecha a pendência "Pacto da Corrente... dependem de sistemas que não
+existem: Familiar"** (`PENDENCIAS.md`) — as outras invocações
+agrupadas ali (Investimento do Mestre da Corrente, Punição
+Mística+Sorvedouro de Vida, Presente dos Protetores+Olhar de Duas
+Mentes) continuam bloqueadas por motor de dano de magia/gatilho de "0
+PV", que essa entrega não tocou.
+
+**Data/origem:** 2026-09, Fase P (Motor de Pets/Familiar), P3/P4.
+
 ## Bruxo — bug corrigido: cadeia de pré-requisito entre Invocações Místicas não era checada
 
 **O que estava errado:** o dado (`invocacaoRequeridaId` em `invocacoesMisticas.ts`) já modelava

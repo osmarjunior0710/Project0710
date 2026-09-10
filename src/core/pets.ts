@@ -15,6 +15,14 @@ export interface Pet {
    * de lá vêm CA/PV máximo/atributos/ações (nunca duplicados aqui). */
   criaturaId: string;
   pvAtual: number;
+  /** `InvocacaoMistica.id` que concedeu esse pet (ex:
+   * "pacto-da-corrente"), quando veio de uma fonte restrita — convocar
+   * de novo pela MESMA fonte substitui o pet anterior dela (mesmo
+   * padrão de "só 1 arma de pacto por vez" do Pacto da Lâmina, ver
+   * DECISOES-CLASSES.md), sem afetar pets de outras origens.
+   * `undefined` = pet avulso/manual (P5), nunca substituído
+   * automaticamente. */
+  origemInvocacaoId?: string;
 }
 
 let contadorId = 0;
@@ -23,8 +31,8 @@ function gerarIdPet(): string {
   return `pet-${Date.now()}-${contadorId}`;
 }
 
-export function criarPet(nome: string, criatura: Criatura): Pet {
-  return { id: gerarIdPet(), nome, criaturaId: criatura.id, pvAtual: pvMaxCriatura(criatura) };
+export function criarPet(nome: string, criatura: Criatura, origemInvocacaoId?: string): Pet {
+  return { id: gerarIdPet(), nome, criaturaId: criatura.id, pvAtual: pvMaxCriatura(criatura), origemInvocacaoId };
 }
 
 /** Aplica dano (`delta` negativo) ou cura (`delta` positivo) a um pet,

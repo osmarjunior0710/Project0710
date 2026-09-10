@@ -1,15 +1,26 @@
 import { useState } from 'react';
 import type { Pet } from '../../../core/pets';
 import { caCriatura, pvMaxCriatura } from '../../../core/criaturas';
-import { criaturas } from '../../../data/rulesets/dnd2024/criaturas';
+import { criaturas, type Criatura } from '../../../data/rulesets/dnd2024/criaturas';
 import LinearProgressBar from '../../components/LinearProgressBar';
 import styles from './PetsTab.module.css';
 
 const ATRIBUTOS_ORDEM = ['FOR', 'DES', 'CON', 'INT', 'SAB', 'CAR'] as const;
 
-function AdicionarPet({ onAdicionarPet }: { onAdicionarPet: (nome: string, criaturaId: string) => void }) {
+interface AdicionarPetProps {
+  titulo: string;
+  botaoLabel: string;
+  criaturasDisponiveis: Criatura[];
+  onAdicionarPet: (nome: string, criaturaId: string) => void;
+}
+
+/** Mesmo formulário serve pro "Adicionar Pet" genérico (qualquer
+ * criatura do catálogo) e pro "Convocar Familiar" restrito às formas
+ * de uma Invocação Mística atual (ver `criaturasDisponiveis`) — só
+ * muda a lista de opções e os textos, ver `PetsTab`. */
+function AdicionarPet({ titulo, botaoLabel, criaturasDisponiveis, onAdicionarPet }: AdicionarPetProps) {
   const [nome, setNome] = useState('');
-  const [criaturaId, setCriaturaId] = useState(criaturas[0]?.id ?? '');
+  const [criaturaId, setCriaturaId] = useState(criaturasDisponiveis[0]?.id ?? '');
 
   function confirmar() {
     const nomeLimpo = nome.trim();
@@ -21,7 +32,7 @@ function AdicionarPet({ onAdicionarPet }: { onAdicionarPet: (nome: string, criat
   return (
     <div className={`box ${styles.addBox}`}>
       <div className="label" style={{ marginBottom: 6 }}>
-        Ganhou um pet/companheiro? Adiciona aqui.
+        {titulo}
       </div>
       <div className={styles.addRow}>
         <input
@@ -31,7 +42,7 @@ function AdicionarPet({ onAdicionarPet }: { onAdicionarPet: (nome: string, criat
           onChange={(e) => setNome(e.target.value)}
         />
         <select className={styles.addSelect} value={criaturaId} onChange={(e) => setCriaturaId(e.target.value)}>
-          {criaturas.map((c) => (
+          {criaturasDisponiveis.map((c) => (
             <option key={c.id} value={c.id}>
               {c.nome}
             </option>
@@ -39,7 +50,7 @@ function AdicionarPet({ onAdicionarPet }: { onAdicionarPet: (nome: string, criat
         </select>
       </div>
       <div className="btn btn-primary" style={{ marginTop: 8, textAlign: 'center' }} onClick={confirmar}>
-        + Adicionar Pet
+        {botaoLabel}
       </div>
     </div>
   );
@@ -131,18 +142,31 @@ function PetCard({ pet, onRemover, onAlterarPv }: PetCardProps) {
 
 interface PetsTabProps {
   pets: Pet[];
-  onAdicionarPet: (nome: string, criaturaId: string) => void;
+  /** Formas de Familiar elegíveis pra convocar via alguma Invocação
+   * Mística atual (hoje só Pacto da Corrente do Bruxo, 8 formas) —
+   * vazio = nenhuma, esconde a caixa "Convocar Familiar" (ver P3/P4
+   * em EmDevB.md, `core/invocacoesFamiliar.ts`). */
+  formasFamiliarElegiveis: Criatura[];
+  onAdicionarPet: (nome: string, criaturaId: string, origemInvocacaoId?: string) => void;
   onRemoverPet: (id: string) => void;
   onAlterarPvPet: (id: string, delta: number) => void;
 }
 
+// Único id de Invocação que concede Familiar hoje (ver
+// `core/invocacoesFamiliar.ts`) — hardcoded aqui é seguro só porque é
+// 1 fonte só; se uma 2ª aparecer, essa caixa precisa virar uma por
+// fonte (cada uma sabendo seu próprio id) em vez de 1 genérica.
+const ID_INVOCACAO_FAMILIAR = 'pacto-da-corrente';
+
 /** Aba "Pets" — lista de pets/companheiros do personagem (Familiar,
  * montaria, Morto-Vivo do Necromante etc), em array desde o início
- * (ver EmDevB.md Fase P/P0). Por enquanto o "ganhar um pet" é sempre
- * manual (qualquer criatura do catálogo) — a P3/P4 vão restringir isso
- * a uma lista elegível quando vier de uma característica de classe
- * específica (ex: Encontrar Familiar do Bruxo). */
-export default function PetsTab({ pets, onAdicionarPet, onRemoverPet, onAlterarPvPet }: PetsTabProps) {
+ * (ver EmDevB.md Fase P/P0). "Convocar Familiar" (restrito às formas
+ * de uma Invocação Mística atual) e "Adicionar Pet" (qualquer criatura
+ * do catálogo, manual) reaproveitam o mesmo formulário
+ * (`AdicionarPet`), só com lista/textos diferentes — convocar de novo
+ * substitui o familiar anterior da MESMA fonte (`origemInvocacaoId`),
+ * nunca acumula 2 do Pacto da Corrente ao mesmo tempo. */
+export default function PetsTab({ pets, formasFamiliarElegiveis, onAdicionarPet, onRemoverPet, onAlterarPvPet }: PetsTabProps) {
   return (
     <div>
       <div className="section-title">Pets</div>
@@ -154,7 +178,20 @@ export default function PetsTab({ pets, onAdicionarPet, onRemoverPet, onAlterarP
       {pets.map((pet) => (
         <PetCard key={pet.id} pet={pet} onRemover={() => onRemoverPet(pet.id)} onAlterarPv={(delta) => onAlterarPvPet(pet.id, delta)} />
       ))}
-      <AdicionarPet onAdicionarPet={onAdicionarPet} />
+      {formasFamiliarElegiveis.length > 0 && (
+        <AdicionarPet
+          titulo="🔮 Convocar Familiar (Pacto da Corrente) — escolha a forma"
+          botaoLabel="Convocar Familiar"
+          criaturasDisponiveis={formasFamiliarElegiveis}
+          onAdicionarPet={(nome, criaturaId) => onAdicionarPet(nome, criaturaId, ID_INVOCACAO_FAMILIAR)}
+        />
+      )}
+      <AdicionarPet
+        titulo="Ganhou um pet/companheiro? Adiciona aqui."
+        botaoLabel="+ Adicionar Pet"
+        criaturasDisponiveis={criaturas}
+        onAdicionarPet={onAdicionarPet}
+      />
     </div>
   );
 }

@@ -35,6 +35,7 @@ import {
 import { criarPet, alterarPvPet as alterarPvPetPuro, type Pet } from '../../core/pets';
 import { criaturas } from '../../data/rulesets/dnd2024/criaturas';
 import { pvMaxCriatura } from '../../core/criaturas';
+import { formasFamiliarDasInvocacoes } from '../../core/invocacoesFamiliar';
 import {
   alternarDuasMaosVersatil,
   desequiparItem as desequiparItemPuro,
@@ -383,6 +384,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const livroDeMagias = magiasPreparadasDoPersonagem(livroDeMagiasAtuais);
   const usaRedefPorDescanso = usaRedefinicaoPorDescanso(classe);
   const magiasGratisConcedidas = magiasGratisDasInvocacoes(invocacoesMisticasAtuais);
+  const formasFamiliarElegiveis = formasFamiliarDasInvocacoes(invocacoesMisticasAtuais);
   const astuciaMagicaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Astúcia Mágica', personagem.nivel) !== null : false;
   const contatarPatronoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contatar Patrono', personagem.nivel) !== null : false;
   const contatoExtraplanar = magias.find((m) => m.nome === 'Contato Extraplanar') ?? null;
@@ -994,10 +996,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setItensMochila((prev) => desequiparItemPuro(prev, id));
   }
 
-  function adicionarPet(nome: string, criaturaId: string) {
+  function adicionarPet(nome: string, criaturaId: string, origemInvocacaoId?: string) {
     const criatura = criaturas.find((c) => c.id === criaturaId);
     if (!criatura) return;
-    setPets((prev) => [...prev, criarPet(nome, criatura)]);
+    setPets((prev) => {
+      // Convocar de novo pela MESMA fonte substitui o pet anterior
+      // dela (mesmo padrão de "só 1 arma de pacto por vez" do Pacto da
+      // Lâmina) — nunca afeta pets de outras origens/avulsos.
+      const semAntigoDaMesmaFonte = origemInvocacaoId ? prev.filter((p) => p.origemInvocacaoId !== origemInvocacaoId) : prev;
+      return [...semAntigoDaMesmaFonte, criarPet(nome, criatura, origemInvocacaoId)];
+    });
   }
 
   function removerPet(id: string) {
@@ -1608,7 +1616,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           />
         )}
         {tab === 'pets' && (
-          <PetsTab pets={pets} onAdicionarPet={adicionarPet} onRemoverPet={removerPet} onAlterarPvPet={alterarPvPet} />
+          <PetsTab
+            pets={pets}
+            formasFamiliarElegiveis={formasFamiliarElegiveis}
+            onAdicionarPet={adicionarPet}
+            onRemoverPet={removerPet}
+            onAlterarPvPet={alterarPvPet}
+          />
         )}
       </div>
 

@@ -390,13 +390,35 @@ usando o motor pronto em vez de reinventar.
   atributos e Traços/Ações reais; −1 leva a 1/2, +1 volta a 2/2; ✕
   remove e volta ao estado vazio — sem erro de console.
   tsc/testes(331)/build verdes.
-- [ ] **P3 — Fluxo de "ganhar"/remover um pet.** Escolher a forma
-  dentre as elegíveis pra aquela fonte (ex.: lista padrão de Encontrar
-  Familiar pro Bruxo) e desfazer o vínculo.
-- [ ] **P4 — Ligar ao Bruxo.** Pacto da Corrente (Invocação Mística já
-  existe no catálogo, hoje travada) passa a conceder Encontrar
-  Familiar de verdade pela aba Pets — fecha a pendência já registrada
-  em `PENDENCIAS.md`.
+- [x] **P3+P4 — Fluxo de "ganhar"/remover pet + ligar ao Bruxo (feitos
+  juntos — P3 sozinho não seria testável sem um caller real).**
+  `InvocacaoMistica` ganhou `formasFamiliarConcedidas: string[] | null`
+  (mesmo padrão de `magiaGratisConcedida`/`sentidoConcedido`), Pacto da
+  Corrente preenchido com as 8 formas especiais reais do texto de
+  `beneficios` (Cobra Peçonhenta, Diabrete, Esfinge Maravilhosa,
+  Esqueleto, Pseudodragão, Quasit, Slaad Girino, Sprite — todas já
+  conferidas existindo em `criaturas.ts`, sem precisar de dado novo).
+  `core/invocacoesFamiliar.ts` novo: `formasFamiliarDasInvocacoes`
+  (mesmo formato de `magiasGratisDasInvocacoes`), com testes.
+  `PetsTab.tsx`: novo card "🔮 Convocar Familiar (Pacto da Corrente)"
+  reaproveitando 100% o mesmo `AdicionarPet` do P2, só com a lista de
+  criaturas restrita — nenhum componente novo.
+  **"Desfazer o vínculo" virou "só 1 familiar por vez, convocar de
+  novo substitui":** `Pet.origemInvocacaoId?: string` marca a origem;
+  convocar de novo pela mesma fonte (`adicionarPet` em
+  `FichaShell.tsx`) remove o pet anterior DAQUELA fonte antes de
+  adicionar o novo — mesmo padrão já usado pra "só 1 arma de pacto por
+  vez" (Pacto da Lâmina). Pets avulsos (sem origem) nunca são afetados.
+  Fecha a pendência do Bruxo/Familiar em `PENDENCIAS.md` — as outras
+  invocações do mesmo grupo (Investimento do Mestre da Corrente etc)
+  continuam bloqueadas por outros motores que não existem.
+  **Testado no navegador** (Playwright, 390px, Bruxo nível 2 com Pacto
+  da Corrente): select mostra exatamente as 8 formas especiais (não as
+  51 do catálogo); convocar "Alfa" (Sprite) aparece certinho; convocar
+  de novo pela mesma caixa com "Beta" (Quasit) substitui Alfa (1 card
+  só, não 2); adicionar um pet avulso ("Ceva", Cavalo de Montaria)
+  pela caixa genérica NÃO mexe no familiar — os 2 convivem (2 cards).
+  tsc/testes(335)/build verdes.
 - [ ] **P5 — Criar pet avulso (fora do fluxo de magia/característica).**
   Pedido do Osmar (2026-09): P3/P4 cobrem pet ganho por uma fonte
   conhecida (magia/característica com forma pré-definida), mas o

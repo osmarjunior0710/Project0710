@@ -80,11 +80,12 @@ listando coisa já pronta; limpa no postmortem do Bruxo (2026-09).
   texto livre, não numérico; não existe marcação de "esse truque causa
   dano" nem motor de ataque de magia). Lança Mística também depende do
   mecanismo de invocação repetível acima.
-- **Pacto da Corrente + Investimento do Mestre da Corrente, Punição
-  Mística + Sorvedouro de Vida, Presente dos Protetores + Olhar de
-  Duas Mentes** — dependem de sistemas que não existem ainda: Familiar,
-  motor de dano de magia, gatilho de "salvar de 0 PV". Sem plano de
-  implementação ainda (mais estrutural que os itens acima).
+- **Investimento do Mestre da Corrente, Punição Mística + Sorvedouro de
+  Vida, Presente dos Protetores + Olhar de Duas Mentes** — dependem de
+  sistemas que ainda não existem: motor de dano de magia, gatilho de
+  "salvar de 0 PV". Sem plano de implementação ainda (mais estrutural
+  que os itens acima). (Pacto da Corrente em si já resolvido — Familiar
+  de verdade via aba Pets, ver DECISOES-CLASSES.md "Bruxo — IM.6".)
 - **Patrono Arquifada, Patrono Celestial, Patrono O Grande Antigo** —
   as outras 3 subclasses, cada uma com 4-5 características ativas
   próprias (algumas sem equivalente ainda no motor, ex: Passos
