@@ -35,14 +35,21 @@
 /* Mesmo container do overlay, só escondido — o host do canvas (dentro
    dele) precisa continuar montado no DOM entre uma rolagem e outra,
    senão a lib do dado 3D perde a referência do <canvas> e a 2ª
-   rolagem não aparece mais (só um refresh de página "resolvia" isso). */
+   rolagem não aparece mais (só um refresh de página "resolvia" isso).
+   IMPORTANTE: usa `visibility:hidden`, não `display:none` — o
+   `display:none` zera a largura/altura do container, e a lib inicia o
+   motor 3D com o canvas em 0x0 (nunca mais mostra nada depois disso,
+   nem quando reaberto). `visibility:hidden` esconde sem zerar o
+   tamanho. */
 .overlayEscondido {
   position: fixed;
   inset: 0;
   z-index: 100;
   background: rgba(0, 0, 0, 0.55);
-  display: none;
+  display: flex;
   flex-direction: column;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .canvasHost {

@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2212
+
+Corrigido de novo: a entrega anterior do protótipo de dado 3D fez o
+dado sumir de vez (não aparecia mais nenhum, nem o d20 de antes) — era
+a forma de esconder a tela do dado quando fechada que estava errada,
+corrigido e testado de novo com várias rolagens seguidas.
+
 ## v202609_2205
 
 Protótipo do dado 3D (aquele botão 🎲 na Ficha) ganhou 3 melhorias: (1)

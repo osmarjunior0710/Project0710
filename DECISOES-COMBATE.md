@@ -800,10 +800,22 @@ causa raiz era `Dice3dFab.tsx` desmontar (`{aberto && (...)}`) a div
 `DiceBox` guardada em `useRef` ficava presa a um `<canvas>` que não
 existia mais no DOM, então a 2ª chamada de `.roll()` não tinha onde
 desenhar. Corrigido mantendo esse container SEMPRE montado (escondido
-via CSS — `display:none` no overlay — em vez de remover do React), a
-instância nunca perde a referência do canvas. Confirmado com Playwright:
-3 ciclos seguidos de abrir → rolar → fechar → reabrir → rolar de novo
-(tipos diferentes a cada vez) funcionaram sem refresh de página.
+via CSS em vez de removido do React), a instância nunca perde a
+referência do canvas. Confirmado com Playwright: 3 ciclos seguidos de
+abrir → rolar → fechar → reabrir → rolar de novo (tipos diferentes a
+cada vez) funcionaram sem refresh de página.
+
+**Armadilha nova encontrada corrigindo esse bug (regressão publicada e
+corrigida na sequência):** a 1ª tentativa escondeu o overlay fechado
+com `display:none` — só que isso zera a largura/altura do container, e
+como o motor 3D é inicializado (warm-up) enquanto o overlay ainda está
+fechado, ele cria o canvas em 0×0 e nunca mais mostra nada depois
+disso (nem abrindo o overlay de novo). Trocado pra `visibility:hidden`
++ `pointer-events:none` (esconde sem zerar o tamanho do container) —
+resolvido de verdade. **Padrão generalizável:** qualquer container que
+uma lib externa mede pelo tamanho do elemento (canvas, gráfico, mapa)
+precisa continuar com tamanho real mesmo escondido — nunca usar
+`display:none` nesse caso, só `visibility:hidden`/`opacity:0`.
 
 **Carregamento adiantado ("warm-up"):** a lib agora começa a carregar
 assim que a Ficha abre (`useEffect` no mount do `Dice3dFab`, não mais
