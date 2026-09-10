@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1744
+
+Novo: Necromante (nível 3+) ganha um 2º card na aba Pets, "🧟 Familiar
+Morto-Vivo" — convoca um Esqueleto ou Zumbi como familiar em vez das
+formas normais (morcego, gato, etc). Convocar de novo troca o familiar
+anterior, mesmo comportamento do "Convocar Familiar" do Bruxo.
+
 ## v202609_1609
 
 Novo: Necromante ganha a primeira mecânica de verdade — **Perito em

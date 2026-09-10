@@ -36,6 +36,7 @@ import { criarPet, alterarPvPet as alterarPvPetPuro, type Pet, type AjustesPet }
 import { criaturas } from '../../data/rulesets/dnd2024/criaturas';
 import { pvMaxCriatura } from '../../core/criaturas';
 import { formasFamiliarDasInvocacoes } from '../../core/invocacoesFamiliar';
+import { formasFamiliarMortoVivoElegiveis as formasFamiliarMortoVivoElegiveisNecro } from '../../core/necromante';
 import {
   alternarDuasMaosVersatil,
   desequiparItem as desequiparItemPuro,
@@ -387,6 +388,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const usaRedefPorDescanso = usaRedefinicaoPorDescanso(classe);
   const magiasGratisConcedidas = magiasGratisDasInvocacoes(invocacoesMisticasAtuais);
   const formasFamiliarElegiveis = formasFamiliarDasInvocacoes(invocacoesMisticasAtuais);
+  const formasFamiliarMortoVivoElegiveis = formasFamiliarMortoVivoElegiveisNecro(personagem.subclasse, personagem.nivel);
   const astuciaMagicaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Astúcia Mágica', personagem.nivel) !== null : false;
   const contatarPatronoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contatar Patrono', personagem.nivel) !== null : false;
   const contatoExtraplanar = magias.find((m) => m.nome === 'Contato Extraplanar') ?? null;
@@ -1633,6 +1635,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           <PetsTab
             pets={pets}
             formasFamiliarElegiveis={formasFamiliarElegiveis}
+            formasFamiliarMortoVivoElegiveis={formasFamiliarMortoVivoElegiveis}
             onAdicionarPet={adicionarPet}
             onRemoverPet={removerPet}
             onAlterarPvPet={alterarPvPet}

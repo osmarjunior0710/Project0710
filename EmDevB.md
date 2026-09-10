@@ -532,14 +532,56 @@ Próximo: Fase B (Necromante, subclasse homebrew).
   normais — confirma que a fusão no grimório persistiu corretamente
   por vários level-ups seguidos, sem erro de console.
   tsc/testes(347)/build verdes.
-- [ ] **B3 — Mecânica que usa o motor de Pets (Fase P já fechada).**
-  Familiar Morto-Vivo (Encontrar Familiar com formas especiais
-  Esqueleto/Zumbi), Colheita Macabra (cura o pet ao conjurar magia de
-  Necromancia com espaço), Legião dos Mortos (Animar Mortos, múltiplos
-  Mortos-Vivos simultâneos com bônus), Colheita dos Mortos (Reação,
-  zera PV do pet e cura o personagem), Mestre da Morte (PV Temp em
-  massa + explosão ao pet chegar a 0 PV) — todas viram possíveis assim
-  que a Fase P existir, sem bloqueio estrutural novo.
+**B3 — Mecânica que usa o motor de Pets (Fase P já fechada), quebrada
+em 5 entregas pequenas** (perguntei ao Osmar onde cada uma fica e como
+o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
+
+- **Familiar Morto-Vivo:** card dedicado na aba Pets (mesmo padrão do
+  "Convocar Familiar" do Bruxo), restrito a Esqueleto/Zumbi.
+- **Bônus da Legião dos Mortos (PV extra + dano bônus):** campo
+  visível no `PetCard`, ligado/desligado manualmente pelo jogador —
+  sem cálculo automático de qual magia criou o pet.
+- **Colheita Macabra:** ligado ao "Usar Magia" de verdade (não um
+  botão solto) — ao conjurar magia de Necromancia com espaço, mostra
+  a lista de quem pode ser curado filtrada só pra Morto-Vivo
+  (precisa de uma função de "isso é Morto-Vivo?" olhando
+  `Criatura.tipo`, cuidado com a inconsistência de maiúscula/minúscula
+  já encontrada nos dados — "Morto-Vivo" no Esqueleto vs "Morto-vivo"
+  no Zumbi).
+- **Colheita dos Mortos / Mestre da Morte:** botões na aba Combate que
+  abrem a escolha de pet(s) afetado(s) e refletem o resultado na aba
+  Pets — Colheita dos Mortos escolhe 1 aliado Morto-Vivo da lista e
+  mata ele pra curar o personagem; Mestre da Morte mostra todos os
+  aliados Morto-Vivo numa multi-seleção (mesmo padrão de seleção
+  múltipla já usado em magias) e aplica PV Temporário a todos os
+  marcados.
+
+- [x] **B3a — Familiar Morto-Vivo.** `core/necromante.ts` ganhou
+  `formasFamiliarMortoVivoElegiveis(subclasse, nivel)` — mesmo padrão
+  de `formasFamiliarDasInvocacoes` (Bruxo), só que a elegibilidade vem
+  de `caracteristicaSubclasseDesbloqueada(subclasse, 'Grimório de
+  Necromancia', nivel)` em vez de uma Invocação Mística (a
+  característica já cobre Familiar Morto-Vivo desde o nível 3). 2
+  testes Vitest (nível 3+ mostra Esqueleto/Zumbi; nível 2 ou outra
+  subclasse não mostra nada). `PetsTab.tsx` ganhou um 2º card
+  "🧟 Familiar Morto-Vivo (Encontrar Familiar) — escolha a forma",
+  reaproveitando o componente `AdicionarPet` já existente, com um
+  `origemInvocacaoId` próprio (`necromante-familiar-morto-vivo`) —
+  convocar de novo substitui o anterior, mesma regra de "só 1 por vez"
+  do Convocar Familiar do Bruxo. `FichaShell.tsx` só precisou calcular
+  a lista e passar como prop — zero campo novo pra persistir (a
+  criação do pet já usa o mecanismo `adicionarPet` existente).
+  **Testado no navegador** (Playwright, 390px, Mago Necromante nível
+  3): o card aparece com Esqueleto/Zumbi no dropdown; convocar
+  "Ossorius" (Esqueleto) cria o pet; convocar "Podrengo" (Zumbi) logo
+  depois substitui — só 1 card no final, com CA/PV/traços reais do
+  Zumbi.
+  tsc/testes(349)/build verdes.
+- [ ] **B3b — Legião dos Mortos (bônus manual no PetCard).**
+- [ ] **B3c — Colheita Macabra (ligado ao Usar Magia, filtro
+  Morto-Vivo).**
+- [ ] **B3d — Colheita dos Mortos (botão de Reação no Combate).**
+- [ ] **B3e — Mestre da Morte (Ação Bônus multi-seleção + Reação).**
 - [ ] **B4 — Poder Funesto, parte sem motor novo.** Recuperação
   Arcana também reduz Exaustão em 1 (reaproveita o campo de Exaustão
   já existente, se houver) e Necrose Avassaladora (dano de Necromancia
@@ -549,6 +591,5 @@ Próximo: Fase B (Necromante, subclasse homebrew).
 
 ---
 
-**Próximo passo:** B2 fechado — seguir com **B3** (mecânicas que usam
-o motor de Pets, já fechado na Fase P): Familiar Morto-Vivo, Colheita
-Macabra, Legião dos Mortos, Colheita dos Mortos, Mestre da Morte.
+**Próximo passo:** B3a fechado — seguir com **B3b** (bônus da Legião
+dos Mortos, toggle manual no PetCard).

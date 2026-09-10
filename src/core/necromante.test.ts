@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { magiasPeritoNecromanciaNesteNivel, catalogoPeritoNecromancia } from './necromante';
+import { magiasPeritoNecromanciaNesteNivel, catalogoPeritoNecromancia, formasFamiliarMortoVivoElegiveis } from './necromante';
 import { classes } from '../data/rulesets/dnd2024/classes';
 
 const mago = classes.find((c) => c.nome === 'Mago')!;
@@ -31,5 +31,18 @@ describe('catalogoPeritoNecromancia', () => {
 
   it('caso de borda — círculo máximo 0 não inclui nenhuma magia (só truques ficariam de fora também)', () => {
     expect(catalogoPeritoNecromancia(0)).toEqual([]);
+  });
+});
+
+describe('formasFamiliarMortoVivoElegiveis', () => {
+  it('caso normal — Necromante nível 3+ vê Esqueleto e Zumbi', () => {
+    const formas = formasFamiliarMortoVivoElegiveis('Necromante', 3);
+    expect(formas.map((c) => c.nome).sort()).toEqual(['Esqueleto', 'Zumbi']);
+  });
+
+  it('caso de borda — sem a característica ainda (nível 2, ou outra subclasse) não mostra nada', () => {
+    expect(formasFamiliarMortoVivoElegiveis('Necromante', 2)).toEqual([]);
+    expect(formasFamiliarMortoVivoElegiveis('Abjurador', 5)).toEqual([]);
+    expect(formasFamiliarMortoVivoElegiveis(null, 5)).toEqual([]);
   });
 });

@@ -1,6 +1,8 @@
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { magias, type Magia } from '../data/rulesets/dnd2024/magias';
+import { criaturas, type Criatura } from '../data/rulesets/dnd2024/criaturas';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
+import { caracteristicaSubclasseDesbloqueada } from './levelUp';
 
 function circuloMaximoNoNivel(classe: Classe, nivel: number): number {
   return Math.max(0, ...espacosDeMagiaAtivos(classe, nivel).map((e) => e.circulo));
@@ -30,4 +32,18 @@ export function magiasPeritoNecromanciaNesteNivel(classe: Classe, nivelAnterior:
  * disponível. */
 export function catalogoPeritoNecromancia(circuloMaximo: number): Magia[] {
   return magias.filter((m) => m.escola === 'Necromancia' && m.circulo >= 1 && m.circulo <= circuloMaximo);
+}
+
+const NOMES_FAMILIAR_MORTO_VIVO = ['Esqueleto', 'Zumbi'];
+
+/** Familiar Morto-Vivo (parte de "Grimório de Necromancia", nível 3,
+ * homebrew): ao conjurar Encontrar Familiar, o familiar pode assumir
+ * forma de Esqueleto ou Zumbi em vez das formas usuais — mesmo padrão
+ * de `formasFamiliarDasInvocacoes` (Bruxo/Pacto da Corrente), só que a
+ * elegibilidade vem de uma característica de subclasse em vez de uma
+ * Invocação Mística. `[]` = personagem ainda não tem a característica
+ * (esconde a caixa "Convocar Familiar" na aba Pets). */
+export function formasFamiliarMortoVivoElegiveis(subclasse: string | null, nivel: number): Criatura[] {
+  if (!caracteristicaSubclasseDesbloqueada(subclasse, 'Grimório de Necromancia', nivel)) return [];
+  return criaturas.filter((c) => NOMES_FAMILIAR_MORTO_VIVO.includes(c.nome));
 }

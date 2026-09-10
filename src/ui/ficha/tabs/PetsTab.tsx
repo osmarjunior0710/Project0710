@@ -156,6 +156,11 @@ interface PetsTabProps {
    * vazio = nenhuma, esconde a caixa "Convocar Familiar" (ver P3/P4
    * em EmDevB.md, `core/invocacoesFamiliar.ts`). */
   formasFamiliarElegiveis: Criatura[];
+  /** Formas de Familiar Morto-Vivo (Necromante, "Grimório de
+   * Necromancia", nível 3) — Esqueleto/Zumbi em vez das formas usuais
+   * (ver B3a em EmDevB.md, `core/necromante.ts`). Vazio = personagem
+   * ainda não tem a característica, esconde a caixa. */
+  formasFamiliarMortoVivoElegiveis: Criatura[];
   onAdicionarPet: (nome: string, criaturaId: string, origemInvocacaoId?: string) => void;
   onRemoverPet: (id: string) => void;
   onAlterarPvPet: (id: string, delta: number) => void;
@@ -170,6 +175,11 @@ interface PetsTabProps {
 // fonte (cada uma sabendo seu próprio id) em vez de 1 genérica.
 const ID_INVOCACAO_FAMILIAR = 'pacto-da-corrente';
 
+// Idem, pro Familiar Morto-Vivo do Necromante — fonte diferente
+// (característica de subclasse, não Invocação Mística), mas mesma
+// regra de "só 1 por vez" (convocar de novo substitui o anterior).
+const ID_FAMILIAR_MORTO_VIVO = 'necromante-familiar-morto-vivo';
+
 /** Aba "Pets" — lista de pets/companheiros do personagem (Familiar,
  * montaria, Morto-Vivo do Necromante etc), em array desde o início
  * (ver EmDevB.md Fase P/P0). "Convocar Familiar" (restrito às formas
@@ -181,6 +191,7 @@ const ID_INVOCACAO_FAMILIAR = 'pacto-da-corrente';
 export default function PetsTab({
   pets,
   formasFamiliarElegiveis,
+  formasFamiliarMortoVivoElegiveis,
   onAdicionarPet,
   onRemoverPet,
   onAlterarPvPet,
@@ -203,6 +214,14 @@ export default function PetsTab({
           botaoLabel="Convocar Familiar"
           criaturasDisponiveis={formasFamiliarElegiveis}
           onAdicionarPet={(nome, criaturaId) => onAdicionarPet(nome, criaturaId, ID_INVOCACAO_FAMILIAR)}
+        />
+      )}
+      {formasFamiliarMortoVivoElegiveis.length > 0 && (
+        <AdicionarPet
+          titulo="🧟 Familiar Morto-Vivo (Encontrar Familiar) — escolha a forma"
+          botaoLabel="Convocar Familiar"
+          criaturasDisponiveis={formasFamiliarMortoVivoElegiveis}
+          onAdicionarPet={(nome, criaturaId) => onAdicionarPet(nome, criaturaId, ID_FAMILIAR_MORTO_VIVO)}
         />
       )}
       <AdicionarPet
