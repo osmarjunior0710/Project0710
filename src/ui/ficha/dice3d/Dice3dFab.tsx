@@ -51,8 +51,13 @@ export default function Dice3dFab() {
     });
   }, []);
 
-  async function rolar(tipo: TipoDado) {
+  function abrir() {
     setAberto(true);
+    setResultado(null);
+    setErro(null);
+  }
+
+  async function rolar(tipo: TipoDado) {
     setResultado(null);
     setErro(null);
     try {
@@ -74,7 +79,7 @@ export default function Dice3dFab() {
 
   return (
     <>
-      <div className={styles.fab} onClick={() => rolar('d20')} title="Protótipo: dado 3D">
+      <div className={styles.fab} onClick={abrir} title="Protótipo: dado 3D">
         🎲
       </div>
       {/* Sempre montado (nunca condicional) — a lib do dado 3D fica
@@ -86,6 +91,9 @@ export default function Dice3dFab() {
             {carregando && <div className={styles.status}>Carregando dado 3D…</div>}
             {erro && <div className={styles.status}>⚠️ {erro}</div>}
             {resultado !== null && <div className={styles.resultado}>{resultado}</div>}
+            {!carregando && !erro && resultado === null && (
+              <div className={styles.status}>Escolha um dado pra rolar</div>
+            )}
             <div className={styles.tipos}>
               {TIPOS.map((tipo) => (
                 <div key={tipo} className={styles.tipoBtn} onClick={() => rolar(tipo)}>

@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2242
+
+Corrigido: tocar no FAB 🎲 estava rolando um d20 automaticamente antes
+mesmo de escolher o tipo — agora só abre a tela de escolha ("Escolha
+um dado pra rolar"), e a rolagem só acontece quando você toca em um
+dos tipos (d4 a d100).
+
 ## v202609_2212
 
 Corrigido de novo: a entrega anterior do protótipo de dado 3D fez o
