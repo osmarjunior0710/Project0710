@@ -614,8 +614,38 @@ o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
   desenhado onde fica; decidir junto com o Osmar quando chegar a vez
   (mesmo padrão de "sempre preparada" já usado noutras características,
   ver Descobertas Mágicas/Mago).
-- [ ] **B3c — Colheita Macabra (ligado ao Usar Magia, filtro
-  Morto-Vivo).**
+- [x] **B3c — Colheita Macabra (ligado ao Usar Magia, filtro
+  Morto-Vivo).** `core/necromante.ts` ganhou `curaColheitaMacabra(circulo)`
+  (dobro do círculo do espaço gasto — upcast conta o círculo GASTO, não
+  o original da magia) e `petsElegiveisColheitaMacabra(pets)` (filtra
+  só Morto-Vivo, reaproveitando `ehMortoVivo`). Novo componente
+  compartilhado `ui/components/ColheitaMacabraBanner.tsx` — banner
+  "🩸 Colheita Macabra — cura X PV..." com dropdown de pet + botões
+  Curar/Dispensar, no mesmo estilo visual do banner "Rolagem de acerto
+  feita" que já existia. **Achado ao investigar onde plugar:** existem
+  DUAS implementações separadas e já duplicadas de "conjurar magia com
+  espaço" (`MagiasTab.tsx`'s `processarMagiaAoUsar` e
+  `AcaoPanelContent.tsx`'s `conjurarMagia`, usadas respectivamente pela
+  aba Magias e pelo painel de Ação do Combate) — Colheita Macabra
+  precisou ser plugada nas DUAS, cada uma disparando o banner só
+  quando `circulo !== null` (slot de verdade gasto, não truque nem
+  magia grátis de invocação) E `magia.escola === 'Necromancia'`.
+  **Achado de arquitetura, resolvido:** no painel de Ação do Combate, o
+  próprio painel FECHA assim que a magia é conjurada (`onEscolher`
+  desmonta o `AcaoPanelContent`) — por isso o banner de Colheita
+  Macabra não podia viver dentro do painel (sumiria antes do jogador
+  ver); mora em `CombatTab.tsx` (que sobrevive ao fechamento), igual
+  já acontecia com `danoPendente`/`feedback`, com `AcaoPanelContent`
+  só avisando via um callback novo (`onColheitaMacabraDisponivel`)
+  quando a conjuração se qualifica.
+  **Testado no navegador** (Playwright, 390px, Necromante nível 3,
+  familiar Zumbi danificado de propósito pra ver a cura): conjurar
+  "Vitalidade Vazia" com espaço de 1º círculo pela aba Magias mostrou
+  o banner "cura 2 PV", escolher o Zumbi e confirmar curou de 10/15
+  pra 12/15; repetindo pelo painel de Ação do Combate com espaço de 2º
+  círculo mostrou "cura 4 PV" corretamente (upcast conta certo) — sem
+  erro de console nos dois fluxos.
+  tsc/testes(360)/build verdes.
 - [ ] **B3d — Colheita dos Mortos (botão de Reação no Combate).**
 - [ ] **B3e — Mestre da Morte (Ação Bônus multi-seleção + Reação).**
 - [ ] **B4 — Poder Funesto, parte sem motor novo.** Recuperação
@@ -627,5 +657,6 @@ o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
 
 ---
 
-**Próximo passo:** B3b fechado — seguir com **B3c** (Colheita Macabra,
-ligado ao "Usar Magia" de verdade, filtro Morto-Vivo).
+**Próximo passo:** B3c fechado — seguir com **B3d** (Colheita dos
+Mortos, botão de Reação no Combate que escolhe um pet Morto-Vivo e o
+mata pra curar o personagem).

@@ -5,9 +5,12 @@ import {
   formasFamiliarMortoVivoElegiveis,
   ehMortoVivo,
   bonusLegiaoDosMortos,
+  curaColheitaMacabra,
+  petsElegiveisColheitaMacabra,
 } from './necromante';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { criaturas } from '../data/rulesets/dnd2024/criaturas';
+import { criarPet } from './pets';
 
 const mago = classes.find((c) => c.nome === 'Mago')!;
 
@@ -78,5 +81,30 @@ describe('bonusLegiaoDosMortos', () => {
 
   it('caso de borda — mod. de Inteligência negativo também é aplicado (dano bônus negativo)', () => {
     expect(bonusLegiaoDosMortos(6, -1)).toEqual({ pv: 6, dano: -1 });
+  });
+});
+
+describe('curaColheitaMacabra', () => {
+  it('caso normal — dobro do círculo do espaço gasto', () => {
+    expect(curaColheitaMacabra(2)).toBe(4);
+  });
+
+  it('caso de borda — círculo 1 (mínimo pra gastar espaço) cura só 2', () => {
+    expect(curaColheitaMacabra(1)).toBe(2);
+  });
+});
+
+describe('petsElegiveisColheitaMacabra', () => {
+  it('caso normal — só devolve os pets Morto-Vivo, ignora os demais', () => {
+    const zumbi = criaturas.find((c) => c.id === 'zumbi')!;
+    const gato = criaturas.find((c) => c.id === 'gato')!;
+    const pets = [criarPet('Podrengo', zumbi), criarPet('Bichano', gato)];
+    const elegiveis = petsElegiveisColheitaMacabra(pets);
+    expect(elegiveis.map((p) => p.nome)).toEqual(['Podrengo']);
+  });
+
+  it('caso de borda — sem nenhum Morto-Vivo entre os pets, devolve vazio', () => {
+    const gato = criaturas.find((c) => c.id === 'gato')!;
+    expect(petsElegiveisColheitaMacabra([criarPet('Bichano', gato)])).toEqual([]);
   });
 });

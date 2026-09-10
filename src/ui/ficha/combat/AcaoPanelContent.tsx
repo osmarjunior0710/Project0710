@@ -4,6 +4,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
 import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia } from '../../../core/magiaDano';
+import { curaColheitaMacabra } from '../../../core/necromante';
 import { useRoll } from '../../roll/RollContext';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
@@ -66,6 +67,14 @@ interface AcaoPanelContentProps {
   usosFalarComAnimaisGnomoMaximo: number;
   usosFalarComAnimaisGnomoRestantes: number;
   onUsarFalarComAnimaisGnomo: () => boolean;
+  /** Colheita Macabra (Necromante, nível 3+) — `true` = personagem tem
+   * a característica. Ver `core/necromante.ts`. */
+  colheitaMacabraDisponivel: boolean;
+  /** Chamado (além do fluxo normal de `onEscolher`/`onAtacar`) sempre
+   * que uma magia de Necromancia é conjurada com espaço — o painel
+   * fecha logo em seguida (mesmo `onEscolher`), então quem mostra o
+   * banner de verdade é o `CombatTab` (que sobrevive ao fechamento). */
+  onColheitaMacabraDisponivel: (cura: number) => void;
 }
 
 export default function AcaoPanelContent({
@@ -97,6 +106,8 @@ export default function AcaoPanelContent({
   usosFalarComAnimaisGnomoMaximo,
   usosFalarComAnimaisGnomoRestantes,
   onUsarFalarComAnimaisGnomo,
+  colheitaMacabraDisponivel,
+  onColheitaMacabraDisponivel,
 }: AcaoPanelContentProps) {
   const [telaMagia, setTelaMagia] = useState<'lista' | { magia: Magia; circulos: number[] } | null>(null);
   const { rolarD20, rolarDados } = useRoll();
@@ -147,6 +158,9 @@ export default function AcaoPanelContent({
     }
     setTelaMagia(null);
     const circuloUsado = circulo ?? m.circulo;
+    if (circulo !== null && colheitaMacabraDisponivel && m.escola === 'Necromancia') {
+      onColheitaMacabraDisponivel(curaColheitaMacabra(circulo));
+    }
     const mecanica = mecanicaDaMagia(m);
     if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
       rolarD20({

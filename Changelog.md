@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1907
+
+Novo: Necromante ganha "🩸 Colheita Macabra" — ao conjurar uma magia de
+Necromancia gastando um espaço (na aba Magias ou no painel de Ação do
+Combate), aparece um banner pra curar um Morto-Vivo aliado, com o
+valor certo (dobro do círculo gasto).
+
 ## v202609_1836
 
 Novo: Necromante nível 6+ pode ligar/desligar "🦴 Legião dos Mortos" no

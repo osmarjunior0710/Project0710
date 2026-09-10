@@ -401,6 +401,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const legiaoDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Legião dos Mortos', personagem.nivel);
   const modIntAtual = atributos.find((a) => a.atributo === 'INT')?.mod ?? 0;
   const bonusLegiaoDosMortosValores = legiaoDosMortosDisponivel ? bonusLegiaoDosMortos(personagem.nivel, modIntAtual) : null;
+  const colheitaMacabraDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Grimório de Necromancia', personagem.nivel);
   const astuciaMagicaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Astúcia Mágica', personagem.nivel) !== null : false;
   const contatarPatronoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contatar Patrono', personagem.nivel) !== null : false;
   const contatoExtraplanar = magias.find((m) => m.nome === 'Contato Extraplanar') ?? null;
@@ -1549,6 +1550,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             faltamMagiasPreparadas={faltamMagiasPreparadas}
             onCompletarTruques={() => setCompletarAberto('truques')}
             onCompletarMagiasPreparadas={() => setCompletarAberto('magiasPreparadas')}
+            colheitaMacabraDisponivel={colheitaMacabraDisponivel}
+            pets={pets}
+            onColheitaMacabra={(petId, cura) => alterarPvPet(petId, cura)}
           />
         )}
         {tab === 'combat' && (
@@ -1651,6 +1655,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onDevolverUsoInspiracao={devolverUsoInspiracao}
             iniciativaMod={iniciativa}
             onRolarIniciativa={aoRolarIniciativa}
+            colheitaMacabraDisponivel={colheitaMacabraDisponivel}
+            pets={pets}
+            onColheitaMacabra={(petId, cura) => alterarPvPet(petId, cura)}
           />
         )}
         {tab === 'pets' && (

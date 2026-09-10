@@ -6,12 +6,15 @@ import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
+import type { Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import { calcularDanoMagia, atributoSalvaguarda } from '../../../core/magiaDano';
+import { petsElegiveisColheitaMacabra } from '../../../core/necromante';
 import { useRoll } from '../../roll/RollContext';
 import InfoChip from '../../components/InfoChip';
 import LinearProgressBar from '../../components/LinearProgressBar';
 import ContadorUsos from '../../components/ContadorUsos';
+import ColheitaMacabraBanner from '../../components/ColheitaMacabraBanner';
 import SidePanel from '../combat/SidePanel';
 import AcaoPanelContent, { type DanoPendente } from '../combat/AcaoPanelContent';
 import BonusPanelContent from '../combat/BonusPanelContent';
@@ -163,6 +166,12 @@ interface CombatTabProps {
   onDevolverUsoInspiracao: () => void;
   iniciativaMod: number | null;
   onRolarIniciativa?: () => void;
+  /** Colheita Macabra (Necromante, nível 3+) — banner após conjurar
+   * magia de Necromancia com espaço no painel de Ação, ver
+   * `core/necromante.ts`. */
+  colheitaMacabraDisponivel: boolean;
+  pets: Pet[];
+  onColheitaMacabra: (petId: string, cura: number) => void;
 }
 
 const LABELS: Record<RecursoTurno, { icone: string; nome: string }> = {
@@ -270,6 +279,9 @@ export default function CombatTab({
   onDevolverUsoInspiracao,
   iniciativaMod,
   onRolarIniciativa,
+  colheitaMacabraDisponivel,
+  pets,
+  onColheitaMacabra,
 }: CombatTabProps) {
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
   /** Qual painel foi o ÚLTIMO aberto — ao contrário de `painelAberto`,
@@ -283,6 +295,7 @@ export default function CombatTab({
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [danoPendente, setDanoPendente] = useState<DanoPendente | null>(null);
+  const [colheitaMacabraPendente, setColheitaMacabraPendente] = useState<{ cura: number } | null>(null);
   const [telaSalvaguarda, setTelaSalvaguarda] = useState<{ magia: Magia; circuloUsado: number } | null>(null);
   const [ataquesFeitos, setAtaquesFeitos] = useState(0);
   const [piscando, setPiscando] = useState(false);
@@ -890,6 +903,18 @@ export default function CombatTab({
         </div>
       )}
 
+      {colheitaMacabraPendente && (
+        <ColheitaMacabraBanner
+          cura={colheitaMacabraPendente.cura}
+          petsElegiveis={petsElegiveisColheitaMacabra(pets)}
+          onCurar={(petId) => {
+            onColheitaMacabra(petId, colheitaMacabraPendente.cura);
+            setColheitaMacabraPendente(null);
+          }}
+          onDispensar={() => setColheitaMacabraPendente(null)}
+        />
+      )}
+
       <SidePanel
         open={painelAberto !== null}
         side={ladoDoPainel(ultimoPainel)}
@@ -928,6 +953,8 @@ export default function CombatTab({
             usosFalarComAnimaisGnomoMaximo={usosFalarComAnimaisGnomoMaximo}
             usosFalarComAnimaisGnomoRestantes={usosFalarComAnimaisGnomoRestantes}
             onUsarFalarComAnimaisGnomo={onUsarFalarComAnimaisGnomo}
+            colheitaMacabraDisponivel={colheitaMacabraDisponivel}
+            onColheitaMacabraDisponivel={(cura) => setColheitaMacabraPendente({ cura })}
           />
         )}
         {ultimoPainel === 'bonus' && (

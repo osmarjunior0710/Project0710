@@ -3,6 +3,9 @@ import type { Classe } from '../../../data/rulesets/dnd2024/classes';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { armas } from '../../../data/rulesets/dnd2024/armas';
 import type { ItemMochila } from '../../../core/mochila';
+import type { Pet } from '../../../core/pets';
+import { curaColheitaMacabra, petsElegiveisColheitaMacabra } from '../../../core/necromante';
+import ColheitaMacabraBanner from '../../components/ColheitaMacabraBanner';
 import {
   espacosDeMagiaAtivos,
   truquesDoPersonagem,
@@ -146,6 +149,12 @@ interface MagiasTabProps {
   faltamMagiasPreparadas: number;
   onCompletarTruques: () => void;
   onCompletarMagiasPreparadas: () => void;
+  /** `true` só quando o personagem tem "Grimório de Necromancia"
+   * (Necromante, nível 3+) — controla se o banner de Colheita Macabra
+   * pode aparecer depois de conjurar magia de Necromancia com espaço. */
+  colheitaMacabraDisponivel: boolean;
+  pets: Pet[];
+  onColheitaMacabra: (petId: string, cura: number) => void;
 }
 
 export default function MagiasTab({
@@ -198,6 +207,9 @@ export default function MagiasTab({
   faltamMagiasPreparadas,
   onCompletarTruques,
   onCompletarMagiasPreparadas,
+  colheitaMacabraDisponivel,
+  pets,
+  onColheitaMacabra,
 }: MagiasTabProps) {
   const { rolarD20, rolarDados } = useRoll();
   const [telaCirculo, setTelaCirculo] = useState<{ magia: Magia; circulos: number[] } | null>(null);
@@ -209,6 +221,7 @@ export default function MagiasTab({
     mod: number;
   } | null>(null);
   const [telaSalvaguarda, setTelaSalvaguarda] = useState<{ magia: Magia; circuloUsado: number } | null>(null);
+  const [colheitaMacabraPendente, setColheitaMacabraPendente] = useState<{ cura: number } | null>(null);
 
   if (!conjura) {
     return (
@@ -323,7 +336,11 @@ export default function MagiasTab({
         onConjurar={(circulo) => {
           const ok = onGastarSlotCirculo(circulo);
           setTelaCirculo(null);
-          if (ok) processarMagiaAoUsar(telaCirculo.magia, circulo);
+          if (!ok) return;
+          processarMagiaAoUsar(telaCirculo.magia, circulo);
+          setColheitaMacabraPendente(
+            colheitaMacabraDisponivel && telaCirculo.magia.escola === 'Necromancia' ? { cura: curaColheitaMacabra(circulo) } : null,
+          );
         }}
       />
     );
@@ -370,6 +387,18 @@ export default function MagiasTab({
             🎲 Rolar Dano
           </div>
         </div>
+      )}
+
+      {colheitaMacabraPendente && (
+        <ColheitaMacabraBanner
+          cura={colheitaMacabraPendente.cura}
+          petsElegiveis={petsElegiveisColheitaMacabra(pets)}
+          onCurar={(petId) => {
+            onColheitaMacabra(petId, colheitaMacabraPendente.cura);
+            setColheitaMacabraPendente(null);
+          }}
+          onDispensar={() => setColheitaMacabraPendente(null)}
+        />
       )}
 
       {espacos.length > 0 && (

@@ -3,6 +3,7 @@ import { magias, type Magia } from '../data/rulesets/dnd2024/magias';
 import { criaturas, type Criatura } from '../data/rulesets/dnd2024/criaturas';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
 import { caracteristicaSubclasseDesbloqueada } from './levelUp';
+import type { Pet } from './pets';
 
 function circuloMaximoNoNivel(classe: Classe, nivel: number): number {
   return Math.max(0, ...espacosDeMagiaAtivos(classe, nivel).map((e) => e.circulo));
@@ -63,4 +64,22 @@ export function ehMortoVivo(criatura: Criatura): boolean {
  * (não dá pra saber automaticamente qual pet veio de qual magia). */
 export function bonusLegiaoDosMortos(nivelMago: number, modInt: number): { pv: number; dano: number } {
   return { pv: nivelMago, dano: modInt };
+}
+
+/** Colheita Macabra (parte de "Grimório de Necromancia", nível 3,
+ * homebrew): quanto um Morto-Vivo aliado recupera de PV sempre que o
+ * personagem conjura uma magia de Necromancia usando um espaço de
+ * magia — dobro do círculo do espaço gasto (upcast conta o círculo do
+ * espaço, não o círculo original da magia). */
+export function curaColheitaMacabra(circuloDoEspacoGasto: number): number {
+  return circuloDoEspacoGasto * 2;
+}
+
+/** Pets elegíveis pra receber a cura de Colheita Macabra — só os
+ * Mortos-Vivos sob controle do personagem (ver `ehMortoVivo`). */
+export function petsElegiveisColheitaMacabra(pets: Pet[]): Pet[] {
+  return pets.filter((p) => {
+    const criatura = criaturas.find((c) => c.id === p.criaturaId);
+    return criatura !== undefined && ehMortoVivo(criatura);
+  });
 }
