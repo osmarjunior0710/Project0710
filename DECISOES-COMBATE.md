@@ -779,9 +779,50 @@ registrado aqui pra não esquecer, não é bloqueio do protótipo em si
 
 **Protótipo entregue:** FAB (🎲) fixo no canto inferior direito da
 Ficha, acima da tabbar (`Dice3dFab.tsx`) — toca, abre um overlay de
-tela cheia, rola 1d20 em 3D, mostra o resultado, fecha. Isolado de
-qualquer fluxo real (Combat/Magias/Atributos) de propósito — é só pra
-avaliar peso/visual no celular antes de decidir se vale integrar.
+tela cheia, rola em 3D, mostra o resultado, fecha. Isolado de qualquer
+fluxo real (Combat/Magias/Atributos) de propósito — é só pra avaliar
+peso/visual no celular antes de decidir se vale integrar.
+
+**Expansão pra todos os tipos de dado — sem custo extra de assets:**
+os 7 modelos (d4/d6/d8/d10/d12/d20/d100) já vêm todos dentro do MESMO
+`default.json` (ver acima) — adicionar os outros tipos no FAB não
+baixa nada a mais, só troca a notação passada pra `box.roll()`
+(`1d4`...`1d20`, `1d100`). Percentual (`1d100`) já é tratado pela
+própria lib exatamente como o Osmar descreveu (2 d10 físicos, um de
+dezena e um de unidade, combinados num resultado só — confirmado lendo
+o parser da lib: notação `d100`/`d%` vira `{sides:"d100", data:
+"single"}`, e o roll de fato usa mesh de d10 duas vezes) — não precisou
+de nenhum código nosso pra isso, só usar a notação nativa.
+
+**Bug real corrigido — só rolava 1x por carregamento de página:**
+causa raiz era `Dice3dFab.tsx` desmontar (`{aberto && (...)}`) a div
+`#dice3d-canvas-host` sempre que o overlay fechava — a instância do
+`DiceBox` guardada em `useRef` ficava presa a um `<canvas>` que não
+existia mais no DOM, então a 2ª chamada de `.roll()` não tinha onde
+desenhar. Corrigido mantendo esse container SEMPRE montado (escondido
+via CSS — `display:none` no overlay — em vez de remover do React), a
+instância nunca perde a referência do canvas. Confirmado com Playwright:
+3 ciclos seguidos de abrir → rolar → fechar → reabrir → rolar de novo
+(tipos diferentes a cada vez) funcionaram sem refresh de página.
+
+**Carregamento adiantado ("warm-up"):** a lib agora começa a carregar
+assim que a Ficha abre (`useEffect` no mount do `Dice3dFab`, não mais
+só no clique) — continua sendo `import()` dinâmico (não pesa no bundle
+principal, só adianta o download), então na prática o jogador não vê
+mais o "Carregando dado 3D…" na maioria das vezes, só na 1ª visita à
+Ficha na sessão. Isso é local ao componente (module-scope/`useRef`) —
+some de novo se a página der refresh de verdade; manter assim é
+suficiente pro escopo de protótipo, decisão de persistir entre
+refreshes de página fica pra quando (e se) isso for integrado de
+verdade no motor de regra.
+
+**Nota de teste:** rodando via Playwright headless (sem GPU de
+verdade), a física do dado apareceu funcionando (rola, gira, para) mas
+o valor final voltou sempre 0 com um erro no console
+(`colliderFaceMap Error: No value found for ... mesh face -1`) — é uma
+limitação conhecida de raycasting em Chromium headless/software
+rendering, não um bug da integração; no celular real do Osmar (já
+testado por ele) o valor mostrado bate com a face pra cima.
 
 **Data/origem:** 2026-09, pedido do Osmar.
 

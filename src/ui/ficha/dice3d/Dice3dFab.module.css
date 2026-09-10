@@ -32,6 +32,19 @@
   flex-direction: column;
 }
 
+/* Mesmo container do overlay, só escondido — o host do canvas (dentro
+   dele) precisa continuar montado no DOM entre uma rolagem e outra,
+   senão a lib do dado 3D perde a referência do <canvas> e a 2ª
+   rolagem não aparece mais (só um refresh de página "resolvia" isso). */
+.overlayEscondido {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.55);
+  display: none;
+  flex-direction: column;
+}
+
 .canvasHost {
   flex: 1;
   position: relative;
@@ -70,6 +83,38 @@
   font-size: 39px;
   font-weight: bold;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.tipos {
+  position: absolute;
+  bottom: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  max-width: 92%;
+}
+
+.tipoBtn {
+  color: #fff;
+  font-size: 15px;
+  font-weight: bold;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--shape-full);
+  background: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tipoBtn:active {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .fechar {

@@ -5,6 +5,17 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2205
+
+Protótipo do dado 3D (aquele botão 🎲 na Ficha) ganhou 3 melhorias: (1)
+agora dá pra escolher qualquer tipo — d4, d6, d8, d10, d12, d20 e d100
+— não só o d20 fixo de antes; (2) corrigido o bug que só deixava rolar
+1 vez por carregamento de página (fechar e abrir de novo pra rolar
+outra vez agora funciona sem precisar dar refresh); (3) o dado começa
+a carregar assim que a Ficha abre, então na maioria das vezes não
+aparece mais "Carregando..." na 1ª rolagem. Continua sendo só um
+protótipo isolado, não mexe em nenhuma rolagem real do jogo.
+
 ## v202609_1953
 
 Ajuste: as 4 subclasses do Mago que ainda não têm emblema próprio
