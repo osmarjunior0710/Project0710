@@ -331,21 +331,37 @@ pra existir (Bruxo já tem uma pendência real esperando por isso desde
 antes deste foco) — fazendo agora, a Fase B (Necromante) já nasce
 usando o motor pronto em vez de reinventar.
 
-- [ ] **P0 — decisões de escopo a confirmar com o Osmar antes de
-  codar** (característica nova com interação ativa — seção 6 do
-  CLAUDE.md pede perguntar onde fica/como ativa antes; o "onde" já
-  está decidido — aba Pets, depois de Combate — falta confirmar):
-  quantos pets simultâneos por personagem (proposta: schema em array
-  desde o início — hoje Bruxo usa só 1 posição, mas Legião dos Mortos
-  do Necromante permite vários Mortos-Vivos ao mesmo tempo, não vale a
-  pena fechar em "1 só" cedo); PV/CA do pet rastreável de verdade
-  (dano/cura, mesmo padrão -5/-1/+1/+5 já usado no personagem) — proposta:
-  sim, porque Colheita dos Mortos/Explosão Cadavérica do Necromante
-  (Fase B) só funcionam de verdade se o pet tiver PV de verdade que
-  chega a 0.
-- [ ] **P1 — Dados.** Importar a aba "Estatísticas de Criaturas" (51
-  criaturas) pra `data/rulesets/dnd2024/criaturas.ts`, mesmo padrão
-  1:1 dos outros imports (zero lógica aqui).
+- [x] **P0 — decisões de escopo, confirmadas pelo Osmar (2026-09).**
+  Pets em array desde o início (não trava em "1 só", pra já servir a
+  Legião dos Mortos do Necromante); PV/CA do pet rastreável de verdade
+  (dano/cura, mesmo padrão -5/-1/+1/+5 já usado no personagem).
+- [x] **P1 — Dados.** Aba "Estatísticas de Criaturas" da planilha
+  conferida linha a linha antes de importar (seção 3 do CLAUDE.md): 51
+  criaturas, 28 colunas idênticas em todas as linhas (Familiares do
+  Bruxo e Esqueleto/Zumbi do Necromante juntos na mesma tabela — não
+  precisou reconciliar nada entre "pets/invocações/animais", já é uma
+  tabela única). Formatos 100% consistentes, confirmados um a um:
+  CA sempre número puro; PV sempre `"total (fórmula)"`; Iniciativa
+  sempre `"mod (total)"`; os 6 atributos sempre `"valor (mod[, salv
+  +N])"`; Deslocamento em lista separada por vírgula (1º item sem
+  rótulo = base, resto rotulado Voo/Natação/Escalada/Escavação).
+  `data/rulesets/dnd2024/criaturas.ts` novo: interface `Criatura` (28
+  campos, quase todos string — mesmo padrão 1:1 de `armas.ts`, zero
+  lógica) + as 51 linhas importadas. `core/criaturas.ts` novo:
+  `caCriatura(c)`/`pvMaxCriatura(c)` — só os 2 números que o motor de
+  Pets precisa rastrear de verdade, extraídos por regex simples (não
+  precisa de parser de fórmula de dado, o total já vem pronto antes do
+  parêntese) — com teste Vitest cobrindo caso normal + borda (ex.: PV
+  com subtração "1d4 – 1") pra cada.
+  **Achado corrigido no caminho (avisar o Osmar — mesma categoria já
+  registrada na seção 8 do CLAUDE.md, só que numa aba diferente):** 4
+  células de Ações/Ações Bônus tinham o nome da criatura da PRÓXIMA
+  página colado no final (contaminação de cabeçalho do PDF de origem,
+  não é conteúdo de regra) — Alce, Cobra Constritora, Texugo (campo
+  Ações) e Tigre (Ações Bônus). Truncado na frase real antes de
+  importar (confirmado que a frase real termina em ponto final antes
+  do nome colado, nada de regra foi cortado). Vale auditar a aba
+  inteira por esse padrão se outra entrega mexer nela de novo.
 - [ ] **P2 — Aba nova "Pets".** Entra em `FichaShell.tsx` (`TABS`,
   depois de `combat`) — lista de pets do personagem, 1 card por pet
   (nome escolhido pelo jogador + forma/criatura + CA/PV com barra +
