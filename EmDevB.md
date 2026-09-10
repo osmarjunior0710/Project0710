@@ -362,10 +362,34 @@ usando o motor pronto em vez de reinventar.
   importar (confirmado que a frase real termina em ponto final antes
   do nome colado, nada de regra foi cortado). Vale auditar a aba
   inteira por esse padrão se outra entrega mexer nela de novo.
-- [ ] **P2 — Aba nova "Pets".** Entra em `FichaShell.tsx` (`TABS`,
-  depois de `combat`) — lista de pets do personagem, 1 card por pet
-  (nome escolhido pelo jogador + forma/criatura + CA/PV com barra +
-  atributos + ações reais, vindo de `criaturas.ts`).
+- [x] **P2 — Aba nova "Pets".** `FichaShell.tsx` (`TABS`, depois de
+  `combat`, ícone 🐾). Novo `core/pets.ts`: interface `Pet` (id, nome
+  escolhido, `criaturaId`, `pvAtual` — CA/PV máximo/atributos/ações
+  nunca duplicados, sempre lidos de `criaturas.ts` na hora); `criarPet`
+  (id gerado com contador + `Date.now()`, mesmo padrão de
+  `mochila.ts`/`pactoDaLamina.ts`) e `alterarPvPet` (trava entre 0 e o
+  máximo, sem PV Temporário — pets não têm essa fonte ainda), com
+  testes (caso normal + bordas de dano/cura passando do limite).
+  `PersonagemSalvo.petsAtual?: Pet[]` novo.
+  `PetsTab.tsx` novo: 1 card por pet (nome, CA, barra de PV com os
+  mesmos botões −5/−1/+1/+5 do personagem — `LinearProgressBar`
+  reaproveitado 100%, mesma barra da aba Combat —, os 6 atributos,
+  Deslocamento/Sentidos/Perícias/Traços/Ações/Ações Bônus/Reações) +
+  botão de remover (✕) + formulário "Adicionar Pet" (nome + `<select>`
+  com as 51 criaturas), mesmo padrão do "+ Adicionar item" da Mochila
+  (`MochilaTab.tsx`) reaproveitado.
+  **Ajuste em cima do plano:** por enquanto o "ganhar um pet" já é
+  genérico (qualquer criatura do catálogo, não só uma forma restrita)
+  — deixa a aba já testável e útil sozinha (ver seção 1 do CLAUDE.md,
+  "menor entrega testável"), e ainda serve de base pro P5 (pet avulso).
+  A P3 vai RESTRINGIR essa escolha quando vier de uma fonte específica
+  (ex: só as 13 formas de Encontrar Familiar pro Bruxo), não substituir
+  o mecanismo — é o mesmo componente, só com a lista de opções filtrada.
+  **Testado no navegador** (Playwright, 390px): aba vazia mostra
+  "Nenhum pet ainda"; adicionar "Sombra" (Gato) mostra CA 12, PV 2/2,
+  atributos e Traços/Ações reais; −1 leva a 1/2, +1 volta a 2/2; ✕
+  remove e volta ao estado vazio — sem erro de console.
+  tsc/testes(331)/build verdes.
 - [ ] **P3 — Fluxo de "ganhar"/remover um pet.** Escolher a forma
   dentre as elegíveis pra aquela fonte (ex.: lista padrão de Encontrar
   Familiar pro Bruxo) e desfazer o vínculo.

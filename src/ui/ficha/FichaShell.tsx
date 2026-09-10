@@ -32,6 +32,9 @@ import {
   explicarCapacidadeMaxima,
   type ItemMochila,
 } from '../../core/mochila';
+import { criarPet, alterarPvPet as alterarPvPetPuro, type Pet } from '../../core/pets';
+import { criaturas } from '../../data/rulesets/dnd2024/criaturas';
+import { pvMaxCriatura } from '../../core/criaturas';
 import {
   alternarDuasMaosVersatil,
   desequiparItem as desequiparItemPuro,
@@ -102,6 +105,7 @@ import PerfilTab from './tabs/PerfilTab';
 import MochilaTab from './tabs/MochilaTab';
 import MagiasTab from './tabs/MagiasTab';
 import CombatTab, { type EstadoRecurso, type RecursoTurno } from './tabs/CombatTab';
+import PetsTab from './tabs/PetsTab';
 import Dice3dFab from './dice3d/Dice3dFab';
 import LevelUpShell, { type PersonagemNivel } from './levelup/LevelUpShell';
 import CompletarMagiasShell from './levelup/CompletarMagiasShell';
@@ -109,7 +113,7 @@ import LivroDasSombrasShell from './levelup/LivroDasSombrasShell';
 import MemorizarMagiaShell from './levelup/MemorizarMagiaShell';
 import DescansoOverlay, { type FaseDescanso, type TipoDescanso } from './DescansoOverlay';
 
-type TabName = 'atributos' | 'perfil' | 'mochila' | 'magias' | 'combat';
+type TabName = 'atributos' | 'perfil' | 'mochila' | 'magias' | 'combat' | 'pets';
 
 /** Nome do "Falar com Animais" concedido pelo Gnomo do Bosque — ver
  * comentário em `magias.ts` (id "falarcomanimais-gnomo") sobre por que
@@ -122,6 +126,7 @@ const TABS: { id: TabName; label: string; icon: string }[] = [
   { id: 'mochila', label: 'Mochila', icon: '🎒' },
   { id: 'magias', label: 'Magias', icon: '📖' },
   { id: 'combat', label: 'Combate', icon: '⚔' },
+  { id: 'pets', label: 'Pets', icon: '🐾' },
 ];
 
 const turnoInicial: Record<RecursoTurno, EstadoRecurso> = {
@@ -271,6 +276,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [itensMochila, setItensMochila] = useState<ItemMochila[]>(
     personagemSalvo.itensMochilaAtual ?? calcularItensIniciais(selecao),
   );
+  const [pets, setPets] = useState<Pet[]>(personagemSalvo.petsAtual ?? []);
   const [levelUpAberto, setLevelUpAberto] = useState(false);
   const [completarAberto, setCompletarAberto] = useState<'truques' | 'magiasPreparadas' | null>(null);
   const [livroDasSombrasAberto, setLivroDasSombrasAberto] = useState(false);
@@ -586,6 +592,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       escolhaMagiaTalentoGeral,
       talentosFavoritosAtual: talentosFavoritos,
       itensMochilaAtual: itensMochila,
+      petsAtual: pets,
       levelUpHpModo,
       levelUpHpRolado,
     });
@@ -594,6 +601,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     selecao,
     personagem.nivel,
     personagem.pvMax,
+    pets,
     personagem.subclasse,
     personagem.estiloDeLuta,
     pvAtual,
@@ -984,6 +992,27 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   function desequiparItem(id: string) {
     setItensMochila((prev) => desequiparItemPuro(prev, id));
+  }
+
+  function adicionarPet(nome: string, criaturaId: string) {
+    const criatura = criaturas.find((c) => c.id === criaturaId);
+    if (!criatura) return;
+    setPets((prev) => [...prev, criarPet(nome, criatura)]);
+  }
+
+  function removerPet(id: string) {
+    setPets((prev) => prev.filter((p) => p.id !== id));
+  }
+
+  function alterarPvPet(id: string, delta: number) {
+    setPets((prev) =>
+      prev.map((p) => {
+        if (p.id !== id) return p;
+        const criatura = criaturas.find((c) => c.id === p.criaturaId);
+        if (!criatura) return p;
+        return alterarPvPetPuro(p, delta, pvMaxCriatura(criatura));
+      }),
+    );
   }
 
   function alternarDuasMaos(id: string) {
@@ -1577,6 +1606,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             iniciativaMod={iniciativa}
             onRolarIniciativa={aoRolarIniciativa}
           />
+        )}
+        {tab === 'pets' && (
+          <PetsTab pets={pets} onAdicionarPet={adicionarPet} onRemoverPet={removerPet} onAlterarPvPet={alterarPvPet} />
         )}
       </div>
 

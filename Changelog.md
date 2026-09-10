@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0847
+
+Novo: aba "Pets" 🐾 na Ficha — adicione um pet/companheiro (nome +
+escolha da criatura), veja CA, PV (com barra e botões −5/−1/+1/+5 pra
+dano/cura), atributos e ações reais, e remova quando quiser. Ainda é
+genérico (qualquer criatura do catálogo) — vínculo automático com
+magias/características específicas (ex: Encontrar Familiar do Bruxo)
+vem numa próxima entrega.
+
 ## v202609_0100
 
 Protótipo do dado 3D — 2 melhorias: (1) todos os botões da tela do

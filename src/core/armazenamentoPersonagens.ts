@@ -4,6 +4,7 @@
 
 import type { WizardSelection } from './personagem';
 import type { ItemMochila } from './mochila';
+import type { Pet } from './pets';
 import { ID_PERSONAGEM_DEMO } from '../data/personagemDemo';
 
 export interface PersonagemSalvo {
@@ -186,6 +187,9 @@ export interface PersonagemSalvo {
    * dessa entrega), `FichaShell.tsx` reconstrói a lista inicial a
    * partir de `selecao` (mesmo cálculo de sempre), só na 1ª vez. */
   itensMochilaAtual?: ItemMochila[];
+  /** Pets/companheiros do personagem (ver EmDevB.md Fase P) — em array
+   * desde o início, ausente/vazio = nenhum pet ainda. */
+  petsAtual?: Pet[];
   /** Rascunho do Level Up em andamento (passo de PV) — precisa
    * sobreviver a fechar o Level Up ou dar F5, senão o jogador
    * consegue "voltar" saindo da tela pra rolar o dado de vida de
