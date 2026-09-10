@@ -32,11 +32,20 @@ import {
   explicarCapacidadeMaxima,
   type ItemMochila,
 } from '../../core/mochila';
-import { criarPet, alterarPvPet as alterarPvPetPuro, type Pet, type AjustesPet } from '../../core/pets';
+import {
+  criarPet,
+  alterarPvPet as alterarPvPetPuro,
+  pvMaxEfetivoPet,
+  comBonusExtra,
+  type Pet,
+  type AjustesPet,
+} from '../../core/pets';
 import { criaturas } from '../../data/rulesets/dnd2024/criaturas';
-import { pvMaxCriatura } from '../../core/criaturas';
 import { formasFamiliarDasInvocacoes } from '../../core/invocacoesFamiliar';
-import { formasFamiliarMortoVivoElegiveis as formasFamiliarMortoVivoElegiveisNecro } from '../../core/necromante';
+import {
+  formasFamiliarMortoVivoElegiveis as formasFamiliarMortoVivoElegiveisNecro,
+  bonusLegiaoDosMortos,
+} from '../../core/necromante';
 import {
   alternarDuasMaosVersatil,
   desequiparItem as desequiparItemPuro,
@@ -389,6 +398,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const magiasGratisConcedidas = magiasGratisDasInvocacoes(invocacoesMisticasAtuais);
   const formasFamiliarElegiveis = formasFamiliarDasInvocacoes(invocacoesMisticasAtuais);
   const formasFamiliarMortoVivoElegiveis = formasFamiliarMortoVivoElegiveisNecro(personagem.subclasse, personagem.nivel);
+  const legiaoDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Legião dos Mortos', personagem.nivel);
+  const modIntAtual = atributos.find((a) => a.atributo === 'INT')?.mod ?? 0;
+  const bonusLegiaoDosMortosValores = legiaoDosMortosDisponivel ? bonusLegiaoDosMortos(personagem.nivel, modIntAtual) : null;
   const astuciaMagicaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Astúcia Mágica', personagem.nivel) !== null : false;
   const contatarPatronoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contatar Patrono', personagem.nivel) !== null : false;
   const contatoExtraplanar = magias.find((m) => m.nome === 'Contato Extraplanar') ?? null;
@@ -1022,8 +1034,18 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         if (p.id !== id) return p;
         const criatura = criaturas.find((c) => c.id === p.criaturaId);
         if (!criatura) return p;
-        return alterarPvPetPuro(p, delta, pvMaxCriatura(criatura));
+        return alterarPvPetPuro(p, delta, pvMaxEfetivoPet(p, criatura));
       }),
+    );
+  }
+
+  function alternarBonusLegiaoDosMortos(id: string, ligado: boolean) {
+    setPets((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? comBonusExtra(p, ligado && bonusLegiaoDosMortosValores ? { rotulo: 'Legião dos Mortos', ...bonusLegiaoDosMortosValores } : null)
+          : p,
+      ),
     );
   }
 
@@ -1636,9 +1658,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             pets={pets}
             formasFamiliarElegiveis={formasFamiliarElegiveis}
             formasFamiliarMortoVivoElegiveis={formasFamiliarMortoVivoElegiveis}
+            bonusLegiaoDosMortosValores={bonusLegiaoDosMortosValores}
             onAdicionarPet={adicionarPet}
             onRemoverPet={removerPet}
             onAlterarPvPet={alterarPvPet}
+            onAlternarBonusLegiaoDosMortos={alternarBonusLegiaoDosMortos}
             onAbrirAjustarPet={() => setAjustarPetAberto(true)}
           />
         )}

@@ -47,3 +47,20 @@ export function formasFamiliarMortoVivoElegiveis(subclasse: string | null, nivel
   if (!caracteristicaSubclasseDesbloqueada(subclasse, 'Grimório de Necromancia', nivel)) return [];
   return criaturas.filter((c) => NOMES_FAMILIAR_MORTO_VIVO.includes(c.nome));
 }
+
+/** `Criatura.tipo` é "Morto-Vivo" (Esqueleto) ou "Morto-vivo" (Zumbi)
+ * na planilha — mesma coisa, mas grafada diferente entre linhas (ver
+ * PENDENCIAS.md, aviso ao Osmar). Comparação sem diferenciar
+ * maiúscula/minúscula pra não depender de corrigir o dado agora. */
+export function ehMortoVivo(criatura: Criatura): boolean {
+  return criatura.tipo.toLowerCase() === 'morto-vivo';
+}
+
+/** Legião dos Mortos (Necromante, nível 6, homebrew): PV extra (igual
+ * ao nível de Mago) e dano bônus (igual ao mod. de Inteligência) que
+ * Mortos-Vivos convocados/criados por magia de Necromancia ganham —
+ * calculado aqui, mas aplicado manualmente por pet em `PetsTab.tsx`
+ * (não dá pra saber automaticamente qual pet veio de qual magia). */
+export function bonusLegiaoDosMortos(nivelMago: number, modInt: number): { pv: number; dano: number } {
+  return { pv: nivelMago, dano: modInt };
+}

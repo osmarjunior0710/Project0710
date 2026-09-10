@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { magiasPeritoNecromanciaNesteNivel, catalogoPeritoNecromancia, formasFamiliarMortoVivoElegiveis } from './necromante';
+import {
+  magiasPeritoNecromanciaNesteNivel,
+  catalogoPeritoNecromancia,
+  formasFamiliarMortoVivoElegiveis,
+  ehMortoVivo,
+  bonusLegiaoDosMortos,
+} from './necromante';
 import { classes } from '../data/rulesets/dnd2024/classes';
+import { criaturas } from '../data/rulesets/dnd2024/criaturas';
 
 const mago = classes.find((c) => c.nome === 'Mago')!;
 
@@ -44,5 +51,32 @@ describe('formasFamiliarMortoVivoElegiveis', () => {
     expect(formasFamiliarMortoVivoElegiveis('Necromante', 2)).toEqual([]);
     expect(formasFamiliarMortoVivoElegiveis('Abjurador', 5)).toEqual([]);
     expect(formasFamiliarMortoVivoElegiveis(null, 5)).toEqual([]);
+  });
+});
+
+describe('ehMortoVivo', () => {
+  it('caso normal — Esqueleto (tipo "Morto-Vivo", maiúsculo) é reconhecido', () => {
+    const esqueleto = criaturas.find((c) => c.id === 'esqueleto')!;
+    expect(ehMortoVivo(esqueleto)).toBe(true);
+  });
+
+  it('caso de borda — Zumbi (tipo "Morto-vivo", minúsculo na planilha) também é reconhecido', () => {
+    const zumbi = criaturas.find((c) => c.id === 'zumbi')!;
+    expect(ehMortoVivo(zumbi)).toBe(true);
+  });
+
+  it('uma criatura comum (Gato, tipo Fera) não é Morto-Vivo', () => {
+    const gato = criaturas.find((c) => c.id === 'gato')!;
+    expect(ehMortoVivo(gato)).toBe(false);
+  });
+});
+
+describe('bonusLegiaoDosMortos', () => {
+  it('caso normal — PV extra igual ao nível de Mago, dano igual ao mod. de Inteligência', () => {
+    expect(bonusLegiaoDosMortos(6, 3)).toEqual({ pv: 6, dano: 3 });
+  });
+
+  it('caso de borda — mod. de Inteligência negativo também é aplicado (dano bônus negativo)', () => {
+    expect(bonusLegiaoDosMortos(6, -1)).toEqual({ pv: 6, dano: -1 });
   });
 });

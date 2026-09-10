@@ -13,6 +13,17 @@ export interface AjustesPet {
   atributos?: Partial<Record<Atributo, number>>;
 }
 
+/** Bônus extra manual (ligado/desligado pelo jogador) num pet — pra
+ * característica que dá PV/dano bônus a certos pets sem o motor
+ * genérico precisar saber qual característica é (ex: Legião dos
+ * Mortos do Necromante, ver `core/necromante.ts`). `rotulo` é só
+ * texto pra exibição, os valores vêm calculados de fora. */
+export interface BonusExtraPet {
+  rotulo: string;
+  pv: number;
+  dano: number;
+}
+
 /** Pet/companheiro sob controle do personagem (Familiar do Bruxo/Mago,
  * Morto-Vivo do Necromante, montaria, etc) — em array desde o início
  * (nunca trava em "1 só"), ver EmDevB.md Fase P/P0. PV rastreado de
@@ -39,6 +50,8 @@ export interface Pet {
   /** Ver `AjustesPet` — ausente/vazio = usa a criatura de origem sem
    * nenhuma alteração (caso comum). */
   ajustes?: AjustesPet;
+  /** Ver `BonusExtraPet` — `null`/ausente = nenhum bônus ativo. */
+  bonusExtra?: BonusExtraPet | null;
 }
 
 let contadorId = 0;
@@ -69,7 +82,15 @@ export function caEfetivaPet(pet: Pet, criatura: Criatura): number {
 }
 
 export function pvMaxEfetivoPet(pet: Pet, criatura: Criatura): number {
-  return pet.ajustes?.pvMax ?? pvMaxCriatura(criatura);
+  const base = pet.ajustes?.pvMax ?? pvMaxCriatura(criatura);
+  return base + (pet.bonusExtra?.pv ?? 0);
+}
+
+/** Liga (`bonusExtra` preenchido) ou desliga (`null`) o bônus extra
+ * manual de um pet — motor genérico, quem chama decide rótulo/valores
+ * (ver `BonusExtraPet`). */
+export function comBonusExtra(pet: Pet, bonusExtra: BonusExtraPet | null): Pet {
+  return { ...pet, bonusExtra: bonusExtra ?? undefined };
 }
 
 /** Valor de um atributo do pet, já formatado `"valor (mod)"` igual ao

@@ -577,7 +577,43 @@ o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
   depois substitui — só 1 card no final, com CA/PV/traços reais do
   Zumbi.
   tsc/testes(349)/build verdes.
-- [ ] **B3b — Legião dos Mortos (bônus manual no PetCard).**
+- [x] **B3b — Legião dos Mortos (bônus manual no PetCard).** Cobre só
+  a parte de PV extra/dano bônus (a parte de "Animar Mortos sempre
+  preparada + 1x grátis" ainda não foi feita, ver nota abaixo).
+  `core/pets.ts` ganhou `BonusExtraPet` (`{ rotulo, pv, dano }`) como
+  campo opcional em `Pet` — motor genérico, não sabe o nome da
+  característica, só guarda o que o CALLER mandou; `pvMaxEfetivoPet`
+  passou a somar esse bônus; `comBonusExtra(pet, bonusOuNull)` liga/
+  desliga. **Achado no caminho, corrigido:** `alterarPvPet` (o
+  handler de +/-5/+/-1 no `FichaShell.tsx`) usava `pvMaxCriatura`
+  puro (valor CRU da criatura) como teto de cura em vez de
+  `pvMaxEfetivoPet` (que já considera `ajustes`/`bonusExtra`) — bug
+  antigo desde a P5 (ajustar CA/PV de um pet não afetava o teto real
+  de cura), corrigido junto porque senão o bônus de PV desta entrega
+  nem seria testável de verdade. `core/necromante.ts` ganhou
+  `ehMortoVivo(criatura)` (compara `tipo` sem diferenciar maiúscula/
+  minúscula — a planilha tem "Morto-Vivo" no Esqueleto e "Morto-vivo"
+  no Zumbi, mesma coisa grafada diferente, ver PENDENCIAS.md) e
+  `bonusLegiaoDosMortos(nivelMago, modInt)` (PV = nível de Mago, dano
+  = mod. INT). `PetsTab.tsx`: `PetCard` ganhou uma linha de toggle
+  ("🦴 Legião dos Mortos — +X PV, +Y dano nos ataques"), só visível
+  quando a característica está desbloqueada (nível 6+) E o pet é
+  Morto-Vivo (`ehMortoVivo`) — um Gato comum nunca mostra o toggle,
+  mesmo com a característica ativa. PV mostra tag "🦴 +X" quando
+  ligado. 9 testes Vitest novos (2 em `pets.test.ts`, 7 em
+  `necromante.test.ts`, incluindo o caso de borda da grafia
+  "Morto-vivo" minúscula do Zumbi).
+  **Testado no navegador** (Playwright, 390px, Necromante nível 6):
+  convocou Zumbi (Podrengo) e Gato comum (Bichano) — toggle "Legião
+  dos Mortos +6 PV, +3 dano" só aparece no Zumbi; ligar sobe PV de
+  15/15 pra 15/21; desligar volta pra 15/15; sem erro de console.
+  tsc/testes(356)/build verdes.
+- [ ] **B3b-2 — Legião dos Mortos, parte que falta.** Animar Mortos
+  sempre preparada (some na lista de Magias Preparadas sem gastar
+  vaga) + 1x grátis sem espaço de magia por Descanso Longo — ainda não
+  desenhado onde fica; decidir junto com o Osmar quando chegar a vez
+  (mesmo padrão de "sempre preparada" já usado noutras características,
+  ver Descobertas Mágicas/Mago).
 - [ ] **B3c — Colheita Macabra (ligado ao Usar Magia, filtro
   Morto-Vivo).**
 - [ ] **B3d — Colheita dos Mortos (botão de Reação no Combate).**
@@ -591,5 +627,5 @@ o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
 
 ---
 
-**Próximo passo:** B3a fechado — seguir com **B3b** (bônus da Legião
-dos Mortos, toggle manual no PetCard).
+**Próximo passo:** B3b fechado — seguir com **B3c** (Colheita Macabra,
+ligado ao "Usar Magia" de verdade, filtro Morto-Vivo).

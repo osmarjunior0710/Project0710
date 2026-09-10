@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1836
+
+Novo: Necromante nível 6+ pode ligar/desligar "🦴 Legião dos Mortos" no
+card de um pet Morto-Vivo (aba Pets) — dá PV extra e mostra o dano
+bônus dos ataques dele. Corrigido também: ajustar CA/PV de um pet
+(⚙️) agora afeta de verdade o teto de cura pelos botões +/-5/+/-1
+(antes ignorava o ajuste).
+
 ## v202609_1744
 
 Novo: Necromante (nível 3+) ganha um 2º card na aba Pets, "🧟 Familiar

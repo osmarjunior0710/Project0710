@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { criarPet, alterarPvPet, caEfetivaPet, pvMaxEfetivoPet, atributoEfetivoPet, calcularAjustesPet } from './pets';
+import {
+  criarPet,
+  alterarPvPet,
+  caEfetivaPet,
+  pvMaxEfetivoPet,
+  atributoEfetivoPet,
+  calcularAjustesPet,
+  comBonusExtra,
+} from './pets';
 import { criaturas } from '../data/rulesets/dnd2024/criaturas';
 
 function acha(id: string) {
@@ -89,5 +97,21 @@ describe('calcularAjustesPet', () => {
     } as const;
     const ajustes = calcularAjustesPet(gato, { ca: 12, pvMax: 2, atributos: atributosIguais });
     expect(ajustes).toEqual({});
+  });
+});
+
+describe('comBonusExtra / pvMaxEfetivoPet com bônus', () => {
+  it('caso normal — ligar o bônus soma ao PV máximo efetivo', () => {
+    const gato = acha('gato'); // pv 2
+    const pet = comBonusExtra(criarPet('Sombra', gato), { rotulo: 'Legião dos Mortos', pv: 6, dano: 3 });
+    expect(pvMaxEfetivoPet(pet, gato)).toBe(8);
+  });
+
+  it('caso de borda — desligar o bônus (null) volta ao PV máximo normal', () => {
+    const gato = acha('gato');
+    const comBonus = comBonusExtra(criarPet('Sombra', gato), { rotulo: 'Legião dos Mortos', pv: 6, dano: 3 });
+    const semBonus = comBonusExtra(comBonus, null);
+    expect(pvMaxEfetivoPet(semBonus, gato)).toBe(2);
+    expect(semBonus.bonusExtra).toBeUndefined();
   });
 });

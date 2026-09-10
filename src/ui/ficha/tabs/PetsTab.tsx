@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Pet } from '../../../core/pets';
 import { caEfetivaPet, pvMaxEfetivoPet, atributoEfetivoPet } from '../../../core/pets';
+import { ehMortoVivo } from '../../../core/necromante';
 import { criaturas, type Criatura } from '../../../data/rulesets/dnd2024/criaturas';
 import LinearProgressBar from '../../components/LinearProgressBar';
 import styles from './PetsTab.module.css';
@@ -60,15 +61,28 @@ interface PetCardProps {
   pet: Pet;
   onRemover: () => void;
   onAlterarPv: (delta: number) => void;
+  /** Valores do bônus da Legião dos Mortos (Necromante, nível 6) pro
+   * personagem ATUAL — `null` = característica ainda não desbloqueada,
+   * esconde o toggle. Ver `core/necromante.ts` `bonusLegiaoDosMortos`. */
+  bonusLegiaoDosMortosValores: { pv: number; dano: number } | null;
+  onAlternarBonusLegiaoDosMortos: (ligado: boolean) => void;
 }
 
-function PetCard({ pet, onRemover, onAlterarPv }: PetCardProps) {
+function PetCard({
+  pet,
+  onRemover,
+  onAlterarPv,
+  bonusLegiaoDosMortosValores,
+  onAlternarBonusLegiaoDosMortos,
+}: PetCardProps) {
   const criatura = criaturas.find((c) => c.id === pet.criaturaId);
   if (!criatura) return null;
   const ca = caEfetivaPet(pet, criatura);
   const pvMax = pvMaxEfetivoPet(pet, criatura);
   const caAjustada = pet.ajustes?.ca !== undefined;
   const pvAjustado = pet.ajustes?.pvMax !== undefined;
+  const bonusAtivo = pet.bonusExtra != null;
+  const mostrarToggleLegiao = bonusLegiaoDosMortosValores !== null && ehMortoVivo(criatura);
 
   return (
     <div className={`box-solid ${styles.petCard}`}>
@@ -92,6 +106,7 @@ function PetCard({ pet, onRemover, onAlterarPv }: PetCardProps) {
         <div className="label">
           PV {pet.pvAtual}/{pvMax}
           {pvAjustado && <span className="tag">ajustado</span>}
+          {bonusAtivo && <span className="tag">🦴 +{pet.bonusExtra!.pv}</span>}
         </div>
       </div>
       <LinearProgressBar valor={pet.pvAtual} maximo={pvMax} />
@@ -109,6 +124,16 @@ function PetCard({ pet, onRemover, onAlterarPv }: PetCardProps) {
           +5
         </div>
       </div>
+
+      {mostrarToggleLegiao && (
+        <div className="check-row" style={{ marginBottom: 8 }} onClick={() => onAlternarBonusLegiaoDosMortos(!bonusAtivo)}>
+          <div className={`check-box ${bonusAtivo ? 'checked' : ''}`} />
+          <span className="check-label">
+            🦴 Legião dos Mortos — +{bonusLegiaoDosMortosValores!.pv} PV, +{bonusLegiaoDosMortosValores!.dano} dano nos
+            ataques
+          </span>
+        </div>
+      )}
 
       <div className={styles.atributosRow}>
         {ATRIBUTOS_ORDEM.map((a) => (
@@ -161,9 +186,12 @@ interface PetsTabProps {
    * (ver B3a em EmDevB.md, `core/necromante.ts`). Vazio = personagem
    * ainda não tem a característica, esconde a caixa. */
   formasFamiliarMortoVivoElegiveis: Criatura[];
+  /** Ver `PetCardProps.bonusLegiaoDosMortosValores`. */
+  bonusLegiaoDosMortosValores: { pv: number; dano: number } | null;
   onAdicionarPet: (nome: string, criaturaId: string, origemInvocacaoId?: string) => void;
   onRemoverPet: (id: string) => void;
   onAlterarPvPet: (id: string, delta: number) => void;
+  onAlternarBonusLegiaoDosMortos: (id: string, ligado: boolean) => void;
   /** Abre `AjustarPetShell` (P5) — pegar uma criatura do catálogo e
    * ajustar CA/PV/atributos antes de confirmar. */
   onAbrirAjustarPet: () => void;
@@ -192,9 +220,11 @@ export default function PetsTab({
   pets,
   formasFamiliarElegiveis,
   formasFamiliarMortoVivoElegiveis,
+  bonusLegiaoDosMortosValores,
   onAdicionarPet,
   onRemoverPet,
   onAlterarPvPet,
+  onAlternarBonusLegiaoDosMortos,
   onAbrirAjustarPet,
 }: PetsTabProps) {
   return (
@@ -206,7 +236,14 @@ export default function PetsTab({
         </div>
       )}
       {pets.map((pet) => (
-        <PetCard key={pet.id} pet={pet} onRemover={() => onRemoverPet(pet.id)} onAlterarPv={(delta) => onAlterarPvPet(pet.id, delta)} />
+        <PetCard
+          key={pet.id}
+          pet={pet}
+          onRemover={() => onRemoverPet(pet.id)}
+          onAlterarPv={(delta) => onAlterarPvPet(pet.id, delta)}
+          bonusLegiaoDosMortosValores={bonusLegiaoDosMortosValores}
+          onAlternarBonusLegiaoDosMortos={(ligado) => onAlternarBonusLegiaoDosMortos(pet.id, ligado)}
+        />
       ))}
       {formasFamiliarElegiveis.length > 0 && (
         <AdicionarPet
