@@ -122,7 +122,7 @@ const NOME_FALAR_COM_ANIMAIS_GNOMO = 'Falar com Animais - Traço de Gnomo';
 
 const TABS: { id: TabName; label: string; icon: string }[] = [
   { id: 'atributos', label: 'Atributos', icon: '🧬' },
-  { id: 'perfil', label: 'Perfil', icon: '📜' },
+  { id: 'perfil', label: 'Perfil', icon: '👤' },
   { id: 'mochila', label: 'Mochila', icon: '🎒' },
   { id: 'magias', label: 'Magias', icon: '📖' },
   { id: 'combat', label: 'Combate', icon: '⚔' },
@@ -1620,7 +1620,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               className={`${styles.tabBtn} ${tab === t.id ? styles.tabBtnActive : ''}`}
               onClick={() => setTab(t.id)}
             >
-              <span className={styles.tabIcon}>{t.icon}</span>
+              <span className={styles.tabIconWrap}>
+                <span className={styles.tabIcon}>{t.icon}</span>
+              </span>
               {t.label}
             </div>
           ))}

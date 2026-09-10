@@ -26,61 +26,67 @@
 .tabContent {
   flex: 1;
   overflow-y: auto;
-  /* espaço pra pill flutuante de abas não tapar o fim do conteúdo */
-  padding: var(--space-3) var(--space-4) 84px;
+  /* espaço pra barra de abas fixa não tapar o fim do conteúdo */
+  padding: var(--space-3) var(--space-4) 76px;
 }
 
-/* Camada fixa no viewport, mesmo padrão das pills do wizard (ver
-   DECISOES-DESIGN.md "Wizard — navegação em pills flutuantes"): o
+/* Navigation Bar (M3) fixa no viewport, presa na borda inferior — o
    scroll de cada aba acontece por baixo dela, então trocar de aba
-   nunca depende de rolar até o fim da tela. */
+   nunca depende de rolar até o fim da tela. Trocado de "pill"
+   flutuante pra barra de borda a borda (pedido do Osmar, 2026-09) —
+   ver DECISOES-DESIGN.md "Barra de abas da Ficha vira Navigation Bar
+   (M3) de borda a borda, não pill flutuante". */
 .tabbarLayer {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  display: flex;
-  justify-content: center;
-  padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
-  pointer-events: none;
+  background: var(--panel);
+  border-top: 1px solid var(--line-soft);
+  padding-bottom: env(safe-area-inset-bottom);
   z-index: 30;
 }
 
 .tabbar {
-  pointer-events: auto;
   display: flex;
-  gap: var(--space-1);
-  background: var(--panel);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--shape-full);
-  padding: var(--space-1);
-  box-shadow: var(--elevation-2);
+  width: 100%;
 }
 
 .tabBtn {
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 64px;
+  gap: 2px;
   min-height: var(--touch-target-min);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--shape-full);
+  padding: var(--space-2) 2px;
   font-size: 10px;
   color: var(--text-faint);
   cursor: pointer;
-  transition:
-    color var(--motion-standard) var(--ease-standard),
-    background var(--motion-standard) var(--ease-standard);
+  transition: color var(--motion-standard) var(--ease-standard);
 }
 
 .tabBtnActive {
   color: var(--accent);
+}
+
+.tabIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 24px;
+  border-radius: var(--shape-full);
+  transition: background var(--motion-standard) var(--ease-standard);
+}
+
+.tabBtnActive .tabIconWrap {
   background: var(--accent-dim);
 }
 
 .tabIcon {
   font-size: 17px;
   display: block;
-  margin-bottom: 2px;
 }

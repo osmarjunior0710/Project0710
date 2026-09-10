@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0937
+
+Barra de abas (rodapé da Ficha) mudou de visual: era uma "pill"
+flutuante com espaço vazio nas pontas, agora é uma barra presa na
+borda inferior, ocupando a largura toda com as 6 abas do mesmo
+tamanho. Ícone do Perfil trocou de 📜 pra 👤.
+
 ## v202609_0847
 
 Novo: aba "Pets" 🐾 na Ficha — adicione um pet/companheiro (nome +

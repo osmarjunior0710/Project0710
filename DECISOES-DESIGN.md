@@ -1298,3 +1298,32 @@ só sobrescrever a cor deixava a caixa "azul tracejada", não contínua.
 pequena daqui pra frente): "nível\natual", "Ins.\nHer.", "Bônus\n
 Prof.", "Percepção\nPassiva". Rótulo de 1 palavra só (PV, CA,
 Iniciativa) não quebra.
+
+## Barra de abas da Ficha vira Navigation Bar (M3) de borda a borda, não pill flutuante (2026-09)
+
+**Decisão:** a barra inferior de abas (`FichaShell.tsx`,
+`.tabbarLayer`/`.tabbar`) deixou de ser uma "pill" flutuante (cantos
+arredondados, sombra, margem em volta, largura só do conteúdo) e virou
+uma Navigation Bar padrão M3 — presa na borda inferior, largura 100%,
+sem sombra, com `border-top` fino em vez de elevação. Cada aba usa
+`flex: 1 1 0` (todas exatamente do mesmo tamanho, preenchendo a barra
+inteira) em vez de `min-width` fixo — o padrão certo pra M3 é sempre
+dividir o espaço igualmente entre um número fixo de itens de nível
+superior, nunca deixar né que "sobre" espaço vazio nas pontas. O
+indicador de aba ativa também virou o padrão M3: um pill pequeno
+(`.tabIconWrap`) só atrás do ÍCONE, não atrás do bloco inteiro (ícone +
+rótulo) como antes.
+
+**Motivo:** pedido do Osmar — o visual de "botão flutuante" não
+parecia a navegação principal do app, e a pill deixava espaço vazio
+nas laterais em vez de ocupar a largura toda. Regra geral daqui pra
+frente (seção 5.1 do CLAUDE.md, "M3 primeiro"): qualquer barra de
+navegação de nível superior (a que troca de tela/aba, não uma
+sub-navegação dentro de uma tela) segue esse padrão — borda a borda,
+itens equidistantes, indicador só atrás do ícone. Não se aplica às
+pills de navegação do Wizard (`DECISOES-WIZARD.md`), que são passos
+sequenciais de um fluxo, não abas paralelas — contextos diferentes.
+
+**Testado:** Playwright 390×844 — barra ocupa os 390px inteiros
+(`x: 0`, `width: 390`), 6 abas com exatamente 65px cada (390/6, sem
+sobra), ícone do Perfil trocado de 📜 pra 👤 (pedido junto).
