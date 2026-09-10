@@ -646,12 +646,31 @@ o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
   círculo mostrou "cura 4 PV" corretamente (upcast conta certo) — sem
   erro de console nos dois fluxos.
   tsc/testes(360)/build verdes.
-  **Correção pós-publicação (Osmar testou no celular):** o `<select>`
+  **Correção pós-publicação #1 (Osmar testou no celular):** o `<select>`
   do pet no banner tava com o estilo padrão (minúsculo) do navegador,
   ao lado de um botão "Curar" desproporcionalmente grande. Ajustado
   pra seguir o mesmo padrão visual já usado no `<select>` do
   "Adicionar Pet" (`PetsTab.module.css` `.addSelect`) — lista ocupa a
   largura toda, botões abaixo, também largura toda.
+  **Correção pós-publicação #2, essa de arquitetura (Osmar testou no
+  celular):** o banner vivia dentro de `MagiasTab.tsx`/`CombatTab.tsx`
+  (estado local) — conjurar pelo painel de Ação do Combate escondia o
+  banner lá embaixo na tela, e trocar de aba pra "Magias" o fazia
+  sumir de vez (a aba desmonta, o estado local morre). Virou
+  `ColheitaMacabraModal.tsx` (popup centralizado, reaproveitando
+  `TrocarArmaMaestria.module.css`) com o estado (`colheitaMacabraPendente`)
+  movido pro `FichaShell.tsx` — sobrevive a qualquer troca de aba,
+  título + explicação + escolha num card só, como pedido. Registrado
+  como padrão reaproveitável em `DECISOES-DESIGN.md` (efeito bônus
+  pós-conjuração que atravessa aba). `pets`/`onColheitaMacabra` saíram
+  das props de `MagiasTab`/`CombatTab`/`AcaoPanelContent` — agora só
+  avisam `onColheitaMacabraDisponivel(cura)` pro FichaShell.
+  **Testado no navegador** (Playwright, 390px): conjurar direto pelo
+  painel de Ação do Combate (sem nunca visitar a aba Magias) já mostra
+  o modal na hora, título "🩸 Colheita Macabra" + texto explicando +
+  seletor de pet; curar aplica e fecha o modal, PV do Zumbi sobe
+  corretamente (testado com dano prévio pra ver o antes/depois).
+  tsc/testes(360)/build verdes.
 - [ ] **B3d — Colheita dos Mortos (botão de Reação no Combate).**
 - [ ] **B3e — Mestre da Morte (Ação Bônus multi-seleção + Reação).**
 - [ ] **B4 — Poder Funesto, parte sem motor novo.** Recuperação

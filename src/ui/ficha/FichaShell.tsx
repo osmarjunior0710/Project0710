@@ -45,6 +45,7 @@ import { formasFamiliarDasInvocacoes } from '../../core/invocacoesFamiliar';
 import {
   formasFamiliarMortoVivoElegiveis as formasFamiliarMortoVivoElegiveisNecro,
   bonusLegiaoDosMortos,
+  petsElegiveisColheitaMacabra,
 } from '../../core/necromante';
 import {
   alternarDuasMaosVersatil,
@@ -118,6 +119,7 @@ import MagiasTab from './tabs/MagiasTab';
 import CombatTab, { type EstadoRecurso, type RecursoTurno } from './tabs/CombatTab';
 import PetsTab from './tabs/PetsTab';
 import AjustarPetShell from './pets/AjustarPetShell';
+import ColheitaMacabraModal from '../components/ColheitaMacabraModal';
 import Dice3dFab from './dice3d/Dice3dFab';
 import LevelUpShell, { type PersonagemNivel } from './levelup/LevelUpShell';
 import CompletarMagiasShell from './levelup/CompletarMagiasShell';
@@ -290,6 +292,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   );
   const [pets, setPets] = useState<Pet[]>(personagemSalvo.petsAtual ?? []);
   const [ajustarPetAberto, setAjustarPetAberto] = useState(false);
+  /** Colheita Macabra (Necromante) — mora aqui (não dentro da aba
+   * Magias/Combate) pra sobreviver à troca de aba e aparecer igual
+   * não importa de onde a magia foi conjurada, ver
+   * `ColheitaMacabraModal.tsx`. */
+  const [colheitaMacabraPendente, setColheitaMacabraPendente] = useState<{ cura: number } | null>(null);
   const [levelUpAberto, setLevelUpAberto] = useState(false);
   const [completarAberto, setCompletarAberto] = useState<'truques' | 'magiasPreparadas' | null>(null);
   const [livroDasSombrasAberto, setLivroDasSombrasAberto] = useState(false);
@@ -1412,6 +1419,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           onFimAnimacao={aoFimDaTransicaoDescanso}
         />
       )}
+      {colheitaMacabraPendente && (
+        <ColheitaMacabraModal
+          cura={colheitaMacabraPendente.cura}
+          petsElegiveis={petsElegiveisColheitaMacabra(pets)}
+          onCurar={(petId) => {
+            alterarPvPet(petId, colheitaMacabraPendente.cura);
+            setColheitaMacabraPendente(null);
+          }}
+          onFechar={() => setColheitaMacabraPendente(null)}
+        />
+      )}
       <div className={styles.header}>
         <span className="back" onClick={() => navigate('/lista')}>
           ←
@@ -1551,8 +1569,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onCompletarTruques={() => setCompletarAberto('truques')}
             onCompletarMagiasPreparadas={() => setCompletarAberto('magiasPreparadas')}
             colheitaMacabraDisponivel={colheitaMacabraDisponivel}
-            pets={pets}
-            onColheitaMacabra={(petId, cura) => alterarPvPet(petId, cura)}
+            onColheitaMacabraDisponivel={(cura) => setColheitaMacabraPendente({ cura })}
           />
         )}
         {tab === 'combat' && (
@@ -1656,8 +1673,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             iniciativaMod={iniciativa}
             onRolarIniciativa={aoRolarIniciativa}
             colheitaMacabraDisponivel={colheitaMacabraDisponivel}
-            pets={pets}
-            onColheitaMacabra={(petId, cura) => alterarPvPet(petId, cura)}
+            onColheitaMacabraDisponivel={(cura) => setColheitaMacabraPendente({ cura })}
           />
         )}
         {tab === 'pets' && (

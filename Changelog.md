@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1953
+
+Corrigido: "Colheita Macabra" agora aparece como um popup central (com
+título, explicação e a escolha do pet, tudo junto), na hora e no lugar
+onde você conjurou a magia — não precisa mais trocar pra aba Magias
+pra fazer a escolha, funciona igual direto do painel de Ação do
+Combate.
+
 ## v202609_1926
 
 Corrigido: no banner de "Colheita Macabra" (curar Morto-Vivo), a lista

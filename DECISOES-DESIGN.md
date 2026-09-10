@@ -1373,3 +1373,31 @@ mas deixou igual ao original — só o que É de fato diferente vira
 `ajustes` salvo, então o pet nunca carrega override redundante.
 
 **Data/origem:** 2026-09, Fase P (Motor de Pets/Familiar), P0-P5.
+
+## Efeito bônus pós-conjuração que atravessa aba — modal no FichaShell, não banner na aba
+
+Quando uma característica dispara um efeito OPCIONAL depois de
+conjurar uma magia com espaço (ex: Colheita Macabra do Necromante —
+cura um pet Morto-Vivo), e a magia pode ser conjurada de mais de um
+lugar (aba Magias E painel de Ação do Combate, hoje duas
+implementações separadas de "conjurar com espaço"), **o estado e a UI
+do efeito bônus vivem no `FichaShell.tsx`, nunca dentro da aba/painel
+que disparou** — o Osmar reportou que precisava trocar de aba pra
+interagir quando o banner vivia dentro de `MagiasTab`/`CombatTab`
+(cada aba só existe enquanto está montada; um banner com estado local
+morre ao trocar de aba). A aba/painel só avisa "isso se qualificou,
+aqui está o valor calculado" via 1 callback (`onXDisponivel(valor)`) —
+não sabe nada sobre pets, nem repassa a lista deles.
+
+**Forma final: modal centralizado, não banner inline.** Reaproveita
+`TrocarArmaMaestria.module.css` (`.overlay`/`.card`/`.title`/`.close`)
+— título = nome da característica, texto explicando o efeito, depois
+a escolha, tudo num card só (pedido explícito do Osmar). `z-index`
+mais baixo que o Modal de Salvaguarda/Rolagem de Dado (55/60): se a
+mecânica da própria magia TAMBÉM abrir um desses popups, ele aparece
+por cima primeiro — fechá-lo revela o modal do efeito bônus embaixo,
+sem precisar sequenciar isso manualmente. Ver
+`ui/components/ColheitaMacabraModal.tsx`.
+
+**Data/origem:** 2026-09, Fase B (Necromante), B3c — Colheita Macabra
+(correção pós-publicação, feedback do Osmar testando no celular).
