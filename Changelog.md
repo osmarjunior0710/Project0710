@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1609
+
+Novo: Necromante ganha a primeira mecânica de verdade — **Perito em
+Necromancia**. Ao pegar a subclasse (nível 3) o Level Up mostra um
+passo extra com 2 magias de Necromancia grátis pra escolher (mais 1 a
+cada novo círculo de magia desbloqueado depois, ex: nível 5); elas
+entram direto no Livro de Magias, junto com as normais.
+
 ## v202609_1414
 
 Novo: Mago ganha a 5ª subclasse no Level Up — **Necromante** (homebrew,

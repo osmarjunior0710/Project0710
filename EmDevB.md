@@ -490,10 +490,48 @@ Próximo: Fase B (Necromante, subclasse homebrew).
   características de nível 3 (Perito em Necromancia, Grimório de
   Necromancia) com o texto real — sem erro de console.
   tsc/testes(341)/build verdes.
-- [ ] **B2 — Mecânica simples (sem depender da Fase P).** Perito em
-  Necromancia (2 magias de Necromancia grátis no grimório ao pegar a
-  subclasse + 1 a cada novo círculo de espaço) e Resistência Necrótica
-  (passiva simples).
+- [x] **B2 — Mecânica simples (sem depender da Fase P).** Resistência
+  Necrótica não precisou de código novo — o app não tem motor de
+  resistência a dano por tipo pro personagem jogador em lugar nenhum
+  ainda (Resistência Ínfera do Bruxo é escolha visível, não cálculo
+  automático), então a característica já fica coberta só pelo texto
+  real mostrado na Perfil (B1). Perito em Necromancia ganhou
+  `core/necromante.ts`: `magiasPeritoNecromanciaNesteNivel(classe,
+  nivelAnterior, novoNivel)` (delta do level-up — 2 ao atingir o nível
+  3, +1 toda vez que um círculo de magia novo desbloqueia depois disso,
+  0 no resto — mesmo padrão de ASI/Arcana Mística, nunca acumulado) +
+  `catalogoPeritoNecromancia(circuloMaximo)` (só magias de Necromancia,
+  círculo 1+, até o círculo disponível). 6 testes Vitest cobrindo
+  nível 3, nível abaixo de 3, círculo novo (nível 5, 3º círculo) e
+  nenhum círculo novo (nível 6) — também serviram pra confirmar a
+  progressão real de círculo do Mago (1→nv1, 2→nv3, 3→nv5).
+  `LevelUpShell.tsx` ganhou o passo `peritoNecromancia` (novo item do
+  `LuStep`), condicionado a `subclasseEscolhida === 'Necromante'` +
+  o delta acima > 0, reaproveitando o componente `GrupoMagiaColapsavel`
+  e o padrão de `check-row` já usado em "Livro de Magias". Decisão de
+  arquitetura: em vez de um array persistido separado, as magias
+  escolhidas aqui são só MAIS um passo de escolha que termina
+  fundido no mesmo `livroDeMagiasEscolhidas` enviado no `onConfirmar`
+  — a regra real diz que elas entram "direto no livro de magias", e
+  como o grimório já é só uma lista de nomes sem metadado de origem,
+  não tem por que rastrear "vieram do Perito" separadamente; isso
+  também evita mexer em `FichaShell.tsx`/`armazenamentoPersonagens.ts`
+  (zero campo novo pra persistir). O pool de escolha exclui o que já
+  está no grimório (evita repetir a mesma magia como "grátis" e como
+  escolha normal do mesmo level-up), e a pool de Magias Preparadas
+  passa a aceitar as magias do Perito como preparáveis, igual às do
+  Livro de Magias normal.
+  **Testado no navegador** (Playwright, 390px, personagem Mago
+  Necromante criado do zero pelo wizard, nível 1→6): nível 3 mostra o
+  passo "Perito em Necromancia — escolha 2" com o aviso 🏠 Homebrew
+  visível e o catálogo certo (1º+2º círculo); nível 4 NÃO mostra o
+  passo; nível 5 mostra de novo com "escolha 1" e already inclui o 3º
+  círculo (confirma o desbloqueio); nível 6 NÃO mostra. Na aba Magias,
+  o Livro de Magias final lista as 2 magias do nível 3 ("Raio do
+  Enfraquecimento") e a do nível 5 ("Falar com Mortos") junto com as
+  normais — confirma que a fusão no grimório persistiu corretamente
+  por vários level-ups seguidos, sem erro de console.
+  tsc/testes(347)/build verdes.
 - [ ] **B3 — Mecânica que usa o motor de Pets (Fase P já fechada).**
   Familiar Morto-Vivo (Encontrar Familiar com formas especiais
   Esqueleto/Zumbi), Colheita Macabra (cura o pet ao conjurar magia de
@@ -511,7 +549,6 @@ Próximo: Fase B (Necromante, subclasse homebrew).
 
 ---
 
-**Próximo passo:** aguardando o Osmar confirmar este plano (ou pedir
-ajuste) antes de começar a escrever qualquer código, começando por A1.
-Sequência das 3 fases: **A (Mago base) → P (Pets/Familiar, genérico)
-→ B (Necromante, usando o motor da P)**.
+**Próximo passo:** B2 fechado — seguir com **B3** (mecânicas que usam
+o motor de Pets, já fechado na Fase P): Familiar Morto-Vivo, Colheita
+Macabra, Legião dos Mortos, Colheita dos Mortos, Mestre da Morte.

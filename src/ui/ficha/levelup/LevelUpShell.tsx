@@ -34,6 +34,7 @@ import {
   invocacoesQueDependemDe,
 } from '../../../core/invocacoesMisticas';
 import { circulosArcanaMisticaDesbloqueados, magiasElegiveisArcanaMistica, trocasArcanaMistica } from '../../../core/arcanaMistica';
+import { magiasPeritoNecromanciaNesteNivel, catalogoPeritoNecromancia } from '../../../core/necromante';
 import { iconesMagia } from '../../../core/classificarMagia';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TextoComMagias from '../../components/TextoComMagias';
@@ -205,6 +206,7 @@ type LuStep =
   | 'estiloDeLuta'
   | 'truques'
   | 'livroDeMagias'
+  | 'peritoNecromancia'
   | 'magiasPreparadas'
   | 'invocacoes'
   | 'descobertasMagicas'
@@ -283,6 +285,12 @@ export default function LevelUpShell({
   // "Proficiências Bônus" no mesmo nível (Colégio do Conhecimento,
   // nível 3 — subclasse e a escolha de perícia chegam juntas).
   const [subclasseEscolhida, setSubclasseEscolhida] = useState<string | null>(personagem.subclasse);
+
+  // Perito em Necromancia (Necromante, homebrew — ver core/necromante.ts):
+  // quantas magias de Necromancia bônus ESTE level-up concede (2 ao
+  // escolher a subclasse no nível 3, +1 por círculo novo depois disso).
+  const magiasPeritoNecromanciaBonusNesteNivel =
+    subclasseEscolhida === 'Necromante' ? magiasPeritoNecromanciaNesteNivel(classe, personagem.nivel, novoNivel) : 0;
 
   // Precisa vir antes da montagem de `luSteps` — decide se o passo
   // extra "asiAtributo" entra na sequência (ver mais abaixo).
@@ -417,6 +425,7 @@ export default function LevelUpShell({
   if (temEstiloDeLutaTrocavel(classe, novoNivel)) luSteps.push('estiloDeLuta');
   if (maxTruques > 0) luSteps.push('truques');
   if (temLivroDeMagias) luSteps.push('livroDeMagias');
+  if (magiasPeritoNecromanciaBonusNesteNivel > 0) luSteps.push('peritoNecromancia');
   if (maxMagiasPreparadas > 0) luSteps.push('magiasPreparadas');
   if (maxInvocacoes > 0) luSteps.push('invocacoes');
   // Descobertas Mágicas aparece TODA vez que já estiver desbloqueada
@@ -467,6 +476,7 @@ export default function LevelUpShell({
   if (luSteps.includes('subclasse')) nomesComTelaPropria.add(`Subclasse de ${classe.nome}`);
   if (luSteps.includes('proficienciasBonus')) nomesComTelaPropria.add('Proficiências Bônus');
   if (luSteps.includes('descobertasMagicas')) nomesComTelaPropria.add('Descobertas Mágicas');
+  if (luSteps.includes('peritoNecromancia')) nomesComTelaPropria.add('Perito em Necromancia');
   if (luSteps.includes('estiloDeLuta')) nomesComTelaPropria.add('Estilo de Luta');
   if (luSteps.includes('especialista')) NOMES_ESPECIALISTA.forEach((n) => nomesComTelaPropria.add(n));
   if (luSteps.includes('asi')) nomesComTelaPropria.add('Aumento no Valor de Atributo');
@@ -481,6 +491,10 @@ export default function LevelUpShell({
   const [estiloDeLutaEscolhido, setEstiloDeLutaEscolhido] = useState<string | null>(personagem.estiloDeLuta);
   const [truquesEscolhidos, setTruquesEscolhidos] = useState<string[]>(truquesAtuais);
   const [livroDeMagiasEscolhido, setLivroDeMagiasEscolhido] = useState<string[]>(livroDeMagiasAtuais);
+  // Perito em Necromancia — pura adição, esvazia a cada level-up (as
+  // escolhas de level-ups anteriores já viraram parte permanente de
+  // `livroDeMagiasAtuais`, não precisam ser re-rastreadas aqui).
+  const [peritoNecromanciaEscolhidas, setPeritoNecromanciaEscolhidas] = useState<string[]>([]);
   const [magiasPreparadasEscolhidas, setMagiasPreparadasEscolhidas] = useState<string[]>(magiasPreparadasAtuais);
   const [invocacoesEscolhidas, setInvocacoesEscolhidas] = useState<string[]>(invocacoesMisticasAtuais);
   const [especialistaEscolhidas, setEspecialistaEscolhidas] = useState<string[]>(periciasEspecialistaAtuais);
@@ -555,6 +569,24 @@ export default function LevelUpShell({
 
   const livroDeMagiasValido = livroDeMagiasEscolhido.length === maxLivroDeMagias;
 
+  // Pool exclui o que já está (ou acabou de entrar, no passo anterior)
+  // no grimório — a escolha bônus não pode repetir uma magia que o
+  // personagem já vai ganhar de qualquer jeito.
+  const poolPeritoNecromancia = catalogoPeritoNecromancia(circuloMaximoNovoNivel).filter(
+    (m) => !livroDeMagiasEscolhido.includes(m.nome),
+  );
+  function togglePeritoNecromancia(nome: string) {
+    const i = peritoNecromanciaEscolhidas.indexOf(nome);
+    if (i > -1) {
+      setPeritoNecromanciaEscolhidas((prev) => prev.filter((x) => x !== nome));
+      return;
+    }
+    if (peritoNecromanciaEscolhidas.length < magiasPeritoNecromanciaBonusNesteNivel) {
+      setPeritoNecromanciaEscolhidas((prev) => [...prev, nome]);
+    }
+  }
+  const peritoNecromanciaValido = peritoNecromanciaEscolhidas.length === magiasPeritoNecromanciaBonusNesteNivel;
+
   function toggleInvocacao(id: string) {
     const i = invocacoesEscolhidas.indexOf(id);
     if (i > -1) {
@@ -609,10 +641,13 @@ export default function LevelUpShell({
   const magiasPreparadasValido =
     magiasPreparadasEscolhidas.length === maxMagiasPreparadas && trocasDeMagia <= (usaRedefPorDescanso ? 0 : 1);
   // Mago só pode preparar o que já está no grimório (escolhido no passo
-  // anterior, "livroDeMagias") — outras classes continuam vendo a lista
-  // inteira da classe, igual sempre foi.
+  // anterior, "livroDeMagias", + o bônus de "peritoNecromancia") —
+  // outras classes continuam vendo a lista inteira da classe, igual
+  // sempre foi.
   const magiasPreparadasPool = temLivroDeMagias
-    ? magiasPreparadasDaClasse.filter((m) => livroDeMagiasEscolhido.includes(m.nome))
+    ? magiasPreparadasDaClasse.filter(
+        (m) => livroDeMagiasEscolhido.includes(m.nome) || peritoNecromanciaEscolhidas.includes(m.nome),
+      )
     : magiasPreparadasDaClasse;
 
   // Especialista é só ADIÇÃO — nunca substitui uma perícia já
@@ -703,6 +738,7 @@ export default function LevelUpShell({
     estiloDeLuta: 'Estilo de Luta',
     truques: 'Truques',
     livroDeMagias: 'Livro de Magias',
+    peritoNecromancia: 'Perito em Necromancia',
     magiasPreparadas: 'Magias Preparadas',
     invocacoes: 'Invocações Místicas',
     descobertasMagicas: 'Descobertas Mágicas',
@@ -751,6 +787,10 @@ export default function LevelUpShell({
     }
     if (step === 'livroDeMagias' && !livroDeMagiasValido) {
       setAviso(`Escolha exatamente ${maxLivroDeMagias} magias pro Livro de Magias antes de avançar.`);
+      return;
+    }
+    if (step === 'peritoNecromancia' && !peritoNecromanciaValido) {
+      setAviso(`Escolha exatamente ${magiasPeritoNecromanciaBonusNesteNivel} magia(s) de Necromancia antes de avançar.`);
       return;
     }
     if (step === 'magiasPreparadas' && !magiasPreparadasValido) {
@@ -836,7 +876,9 @@ export default function LevelUpShell({
         subclasseEscolhida,
         estiloDeLutaEscolhido,
         truquesEscolhidos: luSteps.includes('truques') ? truquesEscolhidos : null,
-        livroDeMagiasEscolhidas: luSteps.includes('livroDeMagias') ? livroDeMagiasEscolhido : null,
+        livroDeMagiasEscolhidas: luSteps.includes('livroDeMagias')
+          ? [...livroDeMagiasEscolhido, ...peritoNecromanciaEscolhidas]
+          : null,
         magiasPreparadasEscolhidas: luSteps.includes('magiasPreparadas') ? magiasPreparadasEscolhidas : null,
         invocacoesMisticasEscolhidas: luSteps.includes('invocacoes') ? invocacoesEscolhidas : null,
         periciasEspecialistaEscolhidas: luSteps.includes('especialista') ? especialistaEscolhidas : null,
@@ -959,6 +1001,19 @@ export default function LevelUpShell({
           <div className="label">
             Regra oficial: a cada nível, seu grimório ganha 2 magias novas — as que já tinha nunca saem daqui. A
             troca de Magias Preparadas acontece só no Descanso Longo, não neste passo.
+          </div>
+        </div>
+      )}
+
+      {step === 'peritoNecromancia' && (
+        <div className={styles.subHeader}>
+          <div className="section-title" style={{ marginBottom: 4 }}>
+            Perito em Necromancia — escolha {magiasPeritoNecromanciaBonusNesteNivel} (
+            {peritoNecromanciaEscolhidas.length}/{magiasPeritoNecromanciaBonusNesteNivel})
+          </div>
+          <div className="label">
+            🏠 Homebrew — magias de Necromancia grátis, direto no Livro de Magias, além das que o passo anterior já
+            escolheu. Não conta na conta normal do grimório.
           </div>
         </div>
       )}
@@ -1188,6 +1243,27 @@ export default function LevelUpShell({
                         {' '}<span style={{ color: 'var(--text-faint)', fontSize: 11 }}>
                           ({m.circulo}º círculo{jaTinha ? ' · já tinha' : ''})
                         </span>
+                      </span>
+                    </div>
+                  );
+                }}
+              </GrupoMagiaColapsavel>
+            ))}
+          </>
+        )}
+
+        {step === 'peritoNecromancia' && (
+          <>
+            {agruparMagiasPorCirculo(poolPeritoNecromancia).map((grupo) => (
+              <GrupoMagiaColapsavel key={grupo.circulo} label={grupo.label} magias={grupo.magias}>
+                {(m) => {
+                  const marcado = peritoNecromanciaEscolhidas.includes(m.nome);
+                  return (
+                    <div key={m.id} className="check-row" onClick={() => togglePeritoNecromancia(m.nome)}>
+                      <div className={`check-box ${marcado ? 'checked' : ''}`} />
+                      <span className="check-label">
+                        <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                        {' '}<span style={{ color: 'var(--text-faint)', fontSize: 11 }}>({m.circulo}º círculo)</span>
                       </span>
                     </div>
                   );
@@ -1710,6 +1786,12 @@ export default function LevelUpShell({
                     ? `+${livroDeMagiasEscolhido.length - livroDeMagiasAtuais.length} nova(s)`
                     : 'sem alteração'}
                 </span>
+              </div>
+            )}
+            {luSteps.includes('peritoNecromancia') && (
+              <div className="summary-row">
+                <span>Perito em Necromancia</span>
+                <span>+{peritoNecromanciaEscolhidas.length} nova(s) 🏠</span>
               </div>
             )}
             {luSteps.includes('magiasPreparadas') && (
