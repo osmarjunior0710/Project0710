@@ -419,16 +419,41 @@ usando o motor pronto em vez de reinventar.
   só, não 2); adicionar um pet avulso ("Ceva", Cavalo de Montaria)
   pela caixa genérica NÃO mexe no familiar — os 2 convivem (2 cards).
   tsc/testes(335)/build verdes.
-- [ ] **P5 — Criar pet avulso (fora do fluxo de magia/característica).**
-  Pedido do Osmar (2026-09): P3/P4 cobrem pet ganho por uma fonte
-  conhecida (magia/característica com forma pré-definida), mas o
-  jogador também pode adquirir um pet **por fora** disso (ex: comprar
-  uma montaria, ganhar um companheiro do mestre) — às vezes até com
-  atributos customizados, diferentes do stat block padrão de
-  `criaturas.ts`. Precisa de um jeito de criar esse pet manualmente na
-  aba Pets, sem depender de um vínculo de classe. **Ainda não
-  desenhado** — discutir com o Osmar quando chegar a vez (proposta do
-  Osmar: deixar como a última etapa da Fase P, depois do P4).
+- [x] **P5 — Criar pet avulso, ajustando a partir do catálogo.**
+  Decisão do Osmar (confirmada por pergunta direta, 2 respostas):
+  (1) não é stat block livre do zero — pega uma criatura do catálogo
+  como base e ajusta só os números que precisar (ex: "é um Lobo, mas
+  mais forte"); (2) fica em tela cheia separada, mesmo padrão dos
+  outros formulários grandes do app (Level Up, escolha de magia), não
+  espremido dentro da caixa "Adicionar Pet".
+  `core/pets.ts` ganhou `AjustesPet` (`ca?`/`pvMax?`/
+  `atributos?: Partial<Record<Atributo, number>>`) + `Pet.ajustes?` +
+  `caEfetivaPet`/`pvMaxEfetivoPet`/`atributoEfetivoPet` (usam o ajuste
+  quando existe, senão caem pro valor da criatura — nunca duplicam
+  dado) + `calcularAjustesPet` (compara os valores digitados contra a
+  criatura base e só guarda o que REALMENTE mudou, evita `ajustes`
+  redundante). `core/criaturas.ts` ganhou `valorAtributoCriatura`
+  (extrai o valor bruto de `"valor (mod)"`, ponto de partida pros
+  inputs). Todas com teste (caso normal + borda), 6 novos no total.
+  `ui/ficha/pets/AjustarPetShell.tsx` novo (pasta nova, mesmo padrão de
+  `combat/` — shells específicos de uma aba): nome + select de criatura
+  base + inputs de CA/PV máximo/6 atributos, pré-preenchidos com os
+  valores da criatura escolhida (trocar a criatura reseta os campos).
+  Reaproveita `LevelUpShell.module.css` pro `.screen`/`.header`/
+  `.body`/`.navLayer` (zero CSS de shell novo, só os inputs em si).
+  `PetsTab.tsx`: card de pet mostra tag "ajustado" ao lado de CA/PV
+  quando difere do padrão, e um `•` ao lado do nome do atributo
+  ajustado — transparência de que aquele número não é o da planilha.
+  **Testado no navegador** (Playwright, 390px): abre a partir da caixa
+  "⚙️ Pet com atributos diferentes do padrão?"; trocar pra Lobo
+  preenche CA 12/PV 11/FOR 14 (valores reais do Lobo); ajustar CA pra
+  16 e FOR pra 20 e confirmar mostra o pet "Fenrir" com CA 16
+  (tag "ajustado"), FOR 20 (•), e PV/DES/CON/INT/SAB/CAR intactos
+  (iguais ao Lobo, sem marcação) — sem erro de console.
+  tsc/testes(341)/build verdes.
+
+**Fase P (Motor de Pets/Familiar) fechada — P0 a P5 completos.**
+Próximo: Fase B (Necromante, subclasse homebrew).
 
 - [ ] **B0 — Convenção de marcação "homebrew".** Proposta a confirmar
   com o Osmar antes de codar (mesmo espírito do `[PH]`, seção 12 do

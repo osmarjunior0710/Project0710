@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1250
+
+Novo: aba Pets ganhou "⚙️ Pet com atributos diferentes do padrão?" —
+pega uma criatura do catálogo e ajusta CA, PV máximo e atributos antes
+de confirmar (útil pra um pet que veio de fora do jogo normal, tipo
+presente do mestre, com stats diferentes). O card mostra "ajustado" ao
+lado de qualquer número que você mudou, pra saber o que é padrão e o
+que não é.
+
 ## v202609_1207
 
 Novo: Bruxo com Pacto da Corrente ganha o card "🔮 Convocar Familiar"

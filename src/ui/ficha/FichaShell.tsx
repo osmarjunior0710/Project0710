@@ -32,7 +32,7 @@ import {
   explicarCapacidadeMaxima,
   type ItemMochila,
 } from '../../core/mochila';
-import { criarPet, alterarPvPet as alterarPvPetPuro, type Pet } from '../../core/pets';
+import { criarPet, alterarPvPet as alterarPvPetPuro, type Pet, type AjustesPet } from '../../core/pets';
 import { criaturas } from '../../data/rulesets/dnd2024/criaturas';
 import { pvMaxCriatura } from '../../core/criaturas';
 import { formasFamiliarDasInvocacoes } from '../../core/invocacoesFamiliar';
@@ -107,6 +107,7 @@ import MochilaTab from './tabs/MochilaTab';
 import MagiasTab from './tabs/MagiasTab';
 import CombatTab, { type EstadoRecurso, type RecursoTurno } from './tabs/CombatTab';
 import PetsTab from './tabs/PetsTab';
+import AjustarPetShell from './pets/AjustarPetShell';
 import Dice3dFab from './dice3d/Dice3dFab';
 import LevelUpShell, { type PersonagemNivel } from './levelup/LevelUpShell';
 import CompletarMagiasShell from './levelup/CompletarMagiasShell';
@@ -278,6 +279,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagemSalvo.itensMochilaAtual ?? calcularItensIniciais(selecao),
   );
   const [pets, setPets] = useState<Pet[]>(personagemSalvo.petsAtual ?? []);
+  const [ajustarPetAberto, setAjustarPetAberto] = useState(false);
   const [levelUpAberto, setLevelUpAberto] = useState(false);
   const [completarAberto, setCompletarAberto] = useState<'truques' | 'magiasPreparadas' | null>(null);
   const [livroDasSombrasAberto, setLivroDasSombrasAberto] = useState(false);
@@ -996,7 +998,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setItensMochila((prev) => desequiparItemPuro(prev, id));
   }
 
-  function adicionarPet(nome: string, criaturaId: string, origemInvocacaoId?: string) {
+  function adicionarPet(nome: string, criaturaId: string, origemInvocacaoId?: string, ajustes?: AjustesPet) {
     const criatura = criaturas.find((c) => c.id === criaturaId);
     if (!criatura) return;
     setPets((prev) => {
@@ -1004,7 +1006,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       // dela (mesmo padrão de "só 1 arma de pacto por vez" do Pacto da
       // Lâmina) — nunca afeta pets de outras origens/avulsos.
       const semAntigoDaMesmaFonte = origemInvocacaoId ? prev.filter((p) => p.origemInvocacaoId !== origemInvocacaoId) : prev;
-      return [...semAntigoDaMesmaFonte, criarPet(nome, criatura, origemInvocacaoId)];
+      return [...semAntigoDaMesmaFonte, criarPet(nome, criatura, origemInvocacaoId, ajustes)];
     });
   }
 
@@ -1362,6 +1364,18 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
+  if (ajustarPetAberto) {
+    return (
+      <AjustarPetShell
+        onFechar={() => setAjustarPetAberto(false)}
+        onConfirmar={(nome, criaturaId, ajustes) => {
+          adicionarPet(nome, criaturaId, undefined, ajustes);
+          setAjustarPetAberto(false);
+        }}
+      />
+    );
+  }
+
   return (
     <div className={styles.screen}>
       {descansoEmAndamento && (
@@ -1622,6 +1636,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onAdicionarPet={adicionarPet}
             onRemoverPet={removerPet}
             onAlterarPvPet={alterarPvPet}
+            onAbrirAjustarPet={() => setAjustarPetAberto(true)}
           />
         )}
       </div>

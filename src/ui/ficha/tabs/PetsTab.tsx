@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Pet } from '../../../core/pets';
-import { caCriatura, pvMaxCriatura } from '../../../core/criaturas';
+import { caEfetivaPet, pvMaxEfetivoPet, atributoEfetivoPet } from '../../../core/pets';
 import { criaturas, type Criatura } from '../../../data/rulesets/dnd2024/criaturas';
 import LinearProgressBar from '../../components/LinearProgressBar';
 import styles from './PetsTab.module.css';
@@ -65,8 +65,10 @@ interface PetCardProps {
 function PetCard({ pet, onRemover, onAlterarPv }: PetCardProps) {
   const criatura = criaturas.find((c) => c.id === pet.criaturaId);
   if (!criatura) return null;
-  const ca = caCriatura(criatura);
-  const pvMax = pvMaxCriatura(criatura);
+  const ca = caEfetivaPet(pet, criatura);
+  const pvMax = pvMaxEfetivoPet(pet, criatura);
+  const caAjustada = pet.ajustes?.ca !== undefined;
+  const pvAjustado = pet.ajustes?.pvMax !== undefined;
 
   return (
     <div className={`box-solid ${styles.petCard}`}>
@@ -83,9 +85,13 @@ function PetCard({ pet, onRemover, onAlterarPv }: PetCardProps) {
       </div>
 
       <div className={styles.statsRow}>
-        <div className="label">CA {ca}</div>
+        <div className="label">
+          CA {ca}
+          {caAjustada && <span className="tag">ajustado</span>}
+        </div>
         <div className="label">
           PV {pet.pvAtual}/{pvMax}
+          {pvAjustado && <span className="tag">ajustado</span>}
         </div>
       </div>
       <LinearProgressBar valor={pet.pvAtual} maximo={pvMax} />
@@ -107,8 +113,11 @@ function PetCard({ pet, onRemover, onAlterarPv }: PetCardProps) {
       <div className={styles.atributosRow}>
         {ATRIBUTOS_ORDEM.map((a) => (
           <div key={a} className={styles.atributoBox}>
-            <div className="label">{a}</div>
-            <div className={styles.atributoValor}>{criatura.atributos[a]}</div>
+            <div className="label">
+              {a}
+              {pet.ajustes?.atributos?.[a] !== undefined && <span className="tag">•</span>}
+            </div>
+            <div className={styles.atributoValor}>{atributoEfetivoPet(pet, criatura, a)}</div>
           </div>
         ))}
       </div>
@@ -150,6 +159,9 @@ interface PetsTabProps {
   onAdicionarPet: (nome: string, criaturaId: string, origemInvocacaoId?: string) => void;
   onRemoverPet: (id: string) => void;
   onAlterarPvPet: (id: string, delta: number) => void;
+  /** Abre `AjustarPetShell` (P5) — pegar uma criatura do catálogo e
+   * ajustar CA/PV/atributos antes de confirmar. */
+  onAbrirAjustarPet: () => void;
 }
 
 // Único id de Invocação que concede Familiar hoje (ver
@@ -166,7 +178,14 @@ const ID_INVOCACAO_FAMILIAR = 'pacto-da-corrente';
  * (`AdicionarPet`), só com lista/textos diferentes — convocar de novo
  * substitui o familiar anterior da MESMA fonte (`origemInvocacaoId`),
  * nunca acumula 2 do Pacto da Corrente ao mesmo tempo. */
-export default function PetsTab({ pets, formasFamiliarElegiveis, onAdicionarPet, onRemoverPet, onAlterarPvPet }: PetsTabProps) {
+export default function PetsTab({
+  pets,
+  formasFamiliarElegiveis,
+  onAdicionarPet,
+  onRemoverPet,
+  onAlterarPvPet,
+  onAbrirAjustarPet,
+}: PetsTabProps) {
   return (
     <div>
       <div className="section-title">Pets</div>
@@ -192,6 +211,9 @@ export default function PetsTab({ pets, formasFamiliarElegiveis, onAdicionarPet,
         criaturasDisponiveis={criaturas}
         onAdicionarPet={onAdicionarPet}
       />
+      <div className={`box ${styles.addBox}`} onClick={onAbrirAjustarPet} style={{ cursor: 'pointer', textAlign: 'center' }}>
+        <div className="label">⚙️ Pet com atributos diferentes do padrão? Ajusta aqui.</div>
+      </div>
     </div>
   );
 }

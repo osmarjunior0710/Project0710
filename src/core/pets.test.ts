@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { criarPet, alterarPvPet } from './pets';
+import { criarPet, alterarPvPet, caEfetivaPet, pvMaxEfetivoPet, atributoEfetivoPet, calcularAjustesPet } from './pets';
 import { criaturas } from '../data/rulesets/dnd2024/criaturas';
 
 function acha(id: string) {
@@ -50,5 +50,44 @@ describe('alterarPvPet', () => {
     const pet = criarPet('Sombra', acha('gato')); // pv 2 (já cheio)
     const resultado = alterarPvPet(pet, 5, 2);
     expect(resultado.pvAtual).toBe(2);
+  });
+});
+
+describe('caEfetivaPet / pvMaxEfetivoPet / atributoEfetivoPet', () => {
+  it('caso normal — sem ajustes, usa os valores da criatura de origem (Gato)', () => {
+    const gato = acha('gato');
+    const pet = criarPet('Sombra', gato);
+    expect(caEfetivaPet(pet, gato)).toBe(12);
+    expect(pvMaxEfetivoPet(pet, gato)).toBe(2);
+    expect(atributoEfetivoPet(pet, gato, 'DES')).toBe(gato.atributos.DES);
+  });
+
+  it('caso de borda — com ajustes, sobrescreve só os campos ajustados (CA e FOR, PV/DES continuam do Gato)', () => {
+    const gato = acha('gato');
+    const pet = criarPet('Sombra', gato, undefined, { ca: 15, atributos: { FOR: 10 } });
+    expect(caEfetivaPet(pet, gato)).toBe(15);
+    expect(pvMaxEfetivoPet(pet, gato)).toBe(2); // sem ajuste de PV, mantém o do Gato
+    expect(atributoEfetivoPet(pet, gato, 'FOR')).toBe('10 (+0)');
+    expect(atributoEfetivoPet(pet, gato, 'DES')).toBe(gato.atributos.DES); // sem ajuste
+  });
+});
+
+describe('calcularAjustesPet', () => {
+  it('caso normal — só os campos que mudaram viram ajuste (CA mudou, resto igual ao Gato)', () => {
+    const gato = acha('gato');
+    const atributosIguais = {
+      FOR: 3, DES: 15, CON: 10, INT: 3, SAB: 12, CAR: 7,
+    } as const;
+    const ajustes = calcularAjustesPet(gato, { ca: 16, pvMax: 2, atributos: atributosIguais });
+    expect(ajustes).toEqual({ ca: 16 });
+  });
+
+  it('caso de borda — nada mudou (valores idênticos aos da criatura), ajustes fica vazio', () => {
+    const gato = acha('gato');
+    const atributosIguais = {
+      FOR: 3, DES: 15, CON: 10, INT: 3, SAB: 12, CAR: 7,
+    } as const;
+    const ajustes = calcularAjustesPet(gato, { ca: 12, pvMax: 2, atributos: atributosIguais });
+    expect(ajustes).toEqual({});
   });
 });

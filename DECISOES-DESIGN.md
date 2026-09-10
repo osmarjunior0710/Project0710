@@ -1327,3 +1327,49 @@ sequenciais de um fluxo, não abas paralelas — contextos diferentes.
 **Testado:** Playwright 390×844 — barra ocupa os 390px inteiros
 (`x: 0`, `width: 390`), 6 abas com exatamente 65px cada (390/6, sem
 sobra), ícone do Perfil trocado de 📜 pra 👤 (pedido junto).
+
+## Motor de Pets/Familiar — arquitetura genérica (Fase P completa)
+
+**Uma criatura nunca é duplicada — `Pet` só guarda o que é ESPECÍFICO
+da instância.** `Pet` (`core/pets.ts`) tem `id`/`nome`/`criaturaId`/
+`pvAtual`/`origemInvocacaoId?`/`ajustes?` — CA, PV máximo, atributos,
+ações, traços etc. sempre vêm de `Criatura` (`data/rulesets/dnd2024/
+criaturas.ts`) na hora de exibir, nunca copiados pro pet. Qualquer
+override (`ajustes`) é a exceção registrada, não a regra.
+
+**"De onde veio" e "o que mudou" são campos opcionais, não sistemas
+separados.** `origemInvocacaoId?: string` marca qual característica
+concedeu o pet (`undefined` = avulso/manual); `ajustes?: AjustesPet`
+marca o que foi customizado em cima da criatura base (`undefined` =
+stat block padrão, sem override). Os dois são independentes — um pet
+convocado por invocação PODE também ter `ajustes`, um avulso pode não
+ter nenhum dos dois.
+
+**"Só 1 por fonte" é uma regra de aplicação, não do schema.** O
+array de pets nunca trava em tamanho fixo (P0 — precisa comportar
+vários simultâneos, ex: Legião dos Mortos do Necromante), mas convocar
+de novo pela MESMA `origemInvocacaoId` substitui o pet anterior DAQUELA
+fonte (mesmo padrão já usado por "só 1 arma de pacto por vez" do Pacto
+da Lâmina) — a exclusividade é decidida em `adicionarPet`
+(`FichaShell.tsx`), não no tipo `Pet[]` em si. Uma fonte nova que
+permita vários ao mesmo tempo (Legião dos Mortos) simplesmente não
+passa `origemInvocacaoId`, ou usa uma lógica de substituição diferente
+— o schema já aguenta os dois casos sem mudar.
+
+**"Restrito a uma lista" e "livre" são o mesmo formulário, lista
+diferente.** `AdicionarPet` (`ui/ficha/tabs/PetsTab.tsx`) recebe
+`criaturasDisponiveis: Criatura[]` — "Convocar Familiar" (restrito às
+formas de uma invocação) e "Adicionar Pet" (catálogo inteiro) são a
+mesma função de UI chamada 2x com listas diferentes, não 2
+componentes. Qualquer futura fonte restrita (ex: lista de montarias de
+uma Origem) reaproveita o mesmo componente.
+
+**"Ajustar alguns números" nunca é stat block livre do zero.**
+`AjustarPetShell.tsx` sempre parte de uma `Criatura` do catálogo — só
+CA/PV máximo/6 atributos podem ser sobrescritos, tudo o mais (tipo,
+tamanho, deslocamento, sentidos, ações...) continua vindo da criatura
+base. `calcularAjustesPet` descarta qualquer campo que o jogador digitou
+mas deixou igual ao original — só o que É de fato diferente vira
+`ajustes` salvo, então o pet nunca carrega override redundante.
+
+**Data/origem:** 2026-09, Fase P (Motor de Pets/Familiar), P0-P5.

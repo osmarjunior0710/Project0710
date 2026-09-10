@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { caCriatura, pvMaxCriatura } from './criaturas';
+import { caCriatura, pvMaxCriatura, valorAtributoCriatura } from './criaturas';
 import { criaturas } from '../data/rulesets/dnd2024/criaturas';
 
 function acha(id: string) {
@@ -25,5 +25,15 @@ describe('pvMaxCriatura', () => {
 
   it('caso de borda — Aranha tem PV 1, fórmula com subtração "1d4 – 1"', () => {
     expect(pvMaxCriatura(acha('aranha'))).toBe(1);
+  });
+});
+
+describe('valorAtributoCriatura', () => {
+  it('caso normal — Gato tem DES 15', () => {
+    expect(valorAtributoCriatura(acha('gato'), 'DES')).toBe(15);
+  });
+
+  it('caso de borda — Gato tem FOR 3 (valor baixo, 1 dígito)', () => {
+    expect(valorAtributoCriatura(acha('gato'), 'FOR')).toBe(3);
   });
 });
