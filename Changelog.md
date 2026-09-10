@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1926
+
+Corrigido: no banner de "Colheita Macabra" (curar Morto-Vivo), a lista
+de pets estava minúscula (estilo padrão do navegador) do lado de um
+botão "Curar" gigante — a lista agora ocupa a largura toda, no mesmo
+padrão visual do resto do app.
+
 ## v202609_1907
 
 Novo: Necromante ganha "🩸 Colheita Macabra" — ao conjurar uma magia de

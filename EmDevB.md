@@ -646,6 +646,12 @@ o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
   círculo mostrou "cura 4 PV" corretamente (upcast conta certo) — sem
   erro de console nos dois fluxos.
   tsc/testes(360)/build verdes.
+  **Correção pós-publicação (Osmar testou no celular):** o `<select>`
+  do pet no banner tava com o estilo padrão (minúsculo) do navegador,
+  ao lado de um botão "Curar" desproporcionalmente grande. Ajustado
+  pra seguir o mesmo padrão visual já usado no `<select>` do
+  "Adicionar Pet" (`PetsTab.module.css` `.addSelect`) — lista ocupa a
+  largura toda, botões abaixo, também largura toda.
 - [ ] **B3d — Colheita dos Mortos (botão de Reação no Combate).**
 - [ ] **B3e — Mestre da Morte (Ação Bônus multi-seleção + Reação).**
 - [ ] **B4 — Poder Funesto, parte sem motor novo.** Recuperação

@@ -19,26 +19,37 @@ interface ColheitaMacabraBannerProps {
 export default function ColheitaMacabraBanner({ cura, petsElegiveis, onCurar, onDispensar }: ColheitaMacabraBannerProps) {
   const [petId, setPetId] = useState(petsElegiveis[0]?.id ?? '');
 
+  const selectStyle = {
+    width: '100%',
+    padding: 10,
+    background: 'var(--panel)',
+    border: '1px solid var(--line)',
+    borderRadius: 'var(--shape-sm)',
+    color: 'var(--text)',
+    fontFamily: 'inherit',
+    fontSize: 14,
+  };
+
   return (
     <div className="label" style={{ marginBottom: 12, padding: 10, background: 'var(--panel)', borderRadius: 'var(--shape-md)' }}>
       🩸 Colheita Macabra — cura {cura} PV num Morto-Vivo à sua escolha (até 18 m)
       {petsElegiveis.length === 0 ? (
         <div style={{ marginTop: 6, color: 'var(--text-faint)' }}>Nenhum Morto-Vivo sob seu controle agora.</div>
       ) : (
-        <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <select value={petId} onChange={(e) => setPetId(e.target.value)}>
+        <>
+          <select value={petId} onChange={(e) => setPetId(e.target.value)} style={{ ...selectStyle, marginTop: 8 }}>
             {petsElegiveis.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.nome}
               </option>
             ))}
           </select>
-          <div className="btn btn-primary" style={{ padding: '8px 12px' }} onClick={() => petId && onCurar(petId)}>
+          <div className="btn btn-primary" style={{ marginTop: 8, textAlign: 'center' }} onClick={() => petId && onCurar(petId)}>
             Curar
           </div>
-        </div>
+        </>
       )}
-      <div className="btn" style={{ marginTop: 8, padding: '6px 10px', display: 'inline-block' }} onClick={onDispensar}>
+      <div className="btn" style={{ marginTop: 8, textAlign: 'center' }} onClick={onDispensar}>
         Dispensar
       </div>
     </div>
