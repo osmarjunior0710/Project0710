@@ -32,6 +32,26 @@
   flex-direction: column;
 }
 
+/* Mesmo container do overlay, só escondido — o host do canvas (dentro
+   dele) precisa continuar montado no DOM entre uma rolagem e outra,
+   senão a lib do dado 3D perde a referência do <canvas> e a 2ª
+   rolagem não aparece mais (só um refresh de página "resolvia" isso).
+   IMPORTANTE: usa `visibility:hidden`, não `display:none` — o
+   `display:none` zera a largura/altura do container, e a lib inicia o
+   motor 3D com o canvas em 0x0 (nunca mais mostra nada depois disso,
+   nem quando reaberto). `visibility:hidden` esconde sem zerar o
+   tamanho. */
+.overlayEscondido {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .canvasHost {
   flex: 1;
   position: relative;
@@ -72,18 +92,99 @@
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
 }
 
-.fechar {
+/* Todos os controles de baixo (tipos, múltiplos, fechar) empilhados
+   numa coluna só, ancorada no fundo — evita ter que calcular offset
+   fixo pra cada linha na mão. */
+.controles {
   position: absolute;
   bottom: var(--space-6);
   left: 50%;
   transform: translateX(-50%);
-  color: #fff;
-  font-size: 13px;
-  padding: var(--space-3) var(--space-6);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 92%;
+}
+
+.tipos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+/* Fundo branco/texto preto (pedido do Osmar — texto branco em cima do
+   overlay escuro translúcido tava difícil de ler). */
+.tipoBtn {
+  position: relative;
+  color: #000;
+  font-size: 15px;
+  font-weight: bold;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: var(--shape-full);
+  background: #fff;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tipoBtn:active {
+  background: #e0e0e0;
+}
+
+.tipoBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  min-width: 18px;
+  height: 18px;
+  border-radius: var(--shape-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.multiploBtn {
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
+  padding: var(--space-3) var(--space-6);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: var(--shape-full);
+  background: #fff;
   cursor: pointer;
   min-height: 44px;
   display: flex;
   align-items: center;
+}
+
+.multiploBtn:active {
+  background: #e0e0e0;
+}
+
+.fechar {
+  color: #000;
+  font-size: 13px;
+  padding: var(--space-3) var(--space-6);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: var(--shape-full);
+  background: #fff;
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.fechar:active {
+  background: #e0e0e0;
 }

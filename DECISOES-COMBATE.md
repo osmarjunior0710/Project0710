@@ -779,9 +779,73 @@ registrado aqui pra não esquecer, não é bloqueio do protótipo em si
 
 **Protótipo entregue:** FAB (🎲) fixo no canto inferior direito da
 Ficha, acima da tabbar (`Dice3dFab.tsx`) — toca, abre um overlay de
-tela cheia, rola 1d20 em 3D, mostra o resultado, fecha. Isolado de
-qualquer fluxo real (Combat/Magias/Atributos) de propósito — é só pra
-avaliar peso/visual no celular antes de decidir se vale integrar.
+tela cheia, rola em 3D, mostra o resultado, fecha. Isolado de qualquer
+fluxo real (Combat/Magias/Atributos) de propósito — é só pra avaliar
+peso/visual no celular antes de decidir se vale integrar.
+
+**Expansão pra todos os tipos de dado — sem custo extra de assets:**
+os 7 modelos (d4/d6/d8/d10/d12/d20/d100) já vêm todos dentro do MESMO
+`default.json` (ver acima) — adicionar os outros tipos no FAB não
+baixa nada a mais, só troca a notação passada pra `box.roll()`
+(`1d4`...`1d20`, `1d100`). Percentual (`1d100`) já é tratado pela
+própria lib exatamente como o Osmar descreveu (2 d10 físicos, um de
+dezena e um de unidade, combinados num resultado só — confirmado lendo
+o parser da lib: notação `d100`/`d%` vira `{sides:"d100", data:
+"single"}`, e o roll de fato usa mesh de d10 duas vezes) — não precisou
+de nenhum código nosso pra isso, só usar a notação nativa.
+
+**Bug real corrigido — só rolava 1x por carregamento de página:**
+causa raiz era `Dice3dFab.tsx` desmontar (`{aberto && (...)}`) a div
+`#dice3d-canvas-host` sempre que o overlay fechava — a instância do
+`DiceBox` guardada em `useRef` ficava presa a um `<canvas>` que não
+existia mais no DOM, então a 2ª chamada de `.roll()` não tinha onde
+desenhar. Corrigido mantendo esse container SEMPRE montado (escondido
+via CSS em vez de removido do React), a instância nunca perde a
+referência do canvas. Confirmado com Playwright: 3 ciclos seguidos de
+abrir → rolar → fechar → reabrir → rolar de novo (tipos diferentes a
+cada vez) funcionaram sem refresh de página.
+
+**Armadilha nova encontrada corrigindo esse bug (regressão publicada e
+corrigida na sequência):** a 1ª tentativa escondeu o overlay fechado
+com `display:none` — só que isso zera a largura/altura do container, e
+como o motor 3D é inicializado (warm-up) enquanto o overlay ainda está
+fechado, ele cria o canvas em 0×0 e nunca mais mostra nada depois
+disso (nem abrindo o overlay de novo). Trocado pra `visibility:hidden`
++ `pointer-events:none` (esconde sem zerar o tamanho do container) —
+resolvido de verdade. **Padrão generalizável:** qualquer container que
+uma lib externa mede pelo tamanho do elemento (canvas, gráfico, mapa)
+precisa continuar com tamanho real mesmo escondido — nunca usar
+`display:none` nesse caso, só `visibility:hidden`/`opacity:0`.
+
+**Carregamento adiantado ("warm-up"):** a lib agora começa a carregar
+assim que a Ficha abre (`useEffect` no mount do `Dice3dFab`, não mais
+só no clique) — continua sendo `import()` dinâmico (não pesa no bundle
+principal, só adianta o download), então na prática o jogador não vê
+mais o "Carregando dado 3D…" na maioria das vezes, só na 1ª visita à
+Ficha na sessão. Isso é local ao componente (module-scope/`useRef`) —
+some de novo se a página der refresh de verdade; manter assim é
+suficiente pro escopo de protótipo, decisão de persistir entre
+refreshes de página fica pra quando (e se) isso for integrado de
+verdade no motor de regra.
+
+**Nota de teste:** rodando via Playwright headless (sem GPU de
+verdade), a física do dado apareceu funcionando (rola, gira, para) mas
+o valor final voltou sempre 0 com um erro no console
+(`colliderFaceMap Error: No value found for ... mesh face -1`) — é uma
+limitação conhecida de raycasting em Chromium headless/software
+rendering, não um bug da integração; no celular real do Osmar (já
+testado por ele) o valor mostrado bate com a face pra cima.
+
+**Modo "Múltiplos" (rolar vários dados de tipos diferentes juntos):**
+`box.roll()` já aceita um array de notações (`['3d6', '2d4']`), não
+precisou de nenhuma lógica extra pra somar tipos — só juntar as
+contagens escolhidas num array de string antes de chamar `roll()`.
+Testado com Playwright rolando 5 dados (3d6+2d4) e 10 dados (5d10+5d6)
+juntos, sem erro e com o total certo. **Sem limite artificial de
+quantidade** (nem o app nem a lib impõem um) — não apareceu nenhum
+sinal de degradação até 10 dados simultâneos no teste; se alguém notar
+travamento/lentidão real com uma quantidade bem maior (20+, por
+exemplo), aí sim vale investigar um limite prático.
 
 **Data/origem:** 2026-09, pedido do Osmar.
 

@@ -5,6 +5,40 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0100
+
+Protótipo do dado 3D — 2 melhorias: (1) todos os botões da tela do
+dado (tipos, "Múltiplos" e "fechar") agora são brancos com texto
+preto, mais fácil de ler em cima do fundo escuro; (2) novo botão
+"Múltiplos" — toca nele, depois toca em quantos dados de cada tipo
+quiser (ex: 3x d6 + 2x d4), o botão vira "Rolar (N)" e ao tocar rola
+todos juntos de uma vez, mostrando o total.
+
+## v202609_2242
+
+Corrigido: tocar no FAB 🎲 estava rolando um d20 automaticamente antes
+mesmo de escolher o tipo — agora só abre a tela de escolha ("Escolha
+um dado pra rolar"), e a rolagem só acontece quando você toca em um
+dos tipos (d4 a d100).
+
+## v202609_2212
+
+Corrigido de novo: a entrega anterior do protótipo de dado 3D fez o
+dado sumir de vez (não aparecia mais nenhum, nem o d20 de antes) — era
+a forma de esconder a tela do dado quando fechada que estava errada,
+corrigido e testado de novo com várias rolagens seguidas.
+
+## v202609_2205
+
+Protótipo do dado 3D (aquele botão 🎲 na Ficha) ganhou 3 melhorias: (1)
+agora dá pra escolher qualquer tipo — d4, d6, d8, d10, d12, d20 e d100
+— não só o d20 fixo de antes; (2) corrigido o bug que só deixava rolar
+1 vez por carregamento de página (fechar e abrir de novo pra rolar
+outra vez agora funciona sem precisar dar refresh); (3) o dado começa
+a carregar assim que a Ficha abre, então na maioria das vezes não
+aparece mais "Carregando..." na 1ª rolagem. Continua sendo só um
+protótipo isolado, não mexe em nenhuma rolagem real do jogo.
+
 ## v202609_1953
 
 Ajuste: as 4 subclasses do Mago que ainda não têm emblema próprio
