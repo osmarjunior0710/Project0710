@@ -1,0 +1,11 @@
+.badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: bold;
+  border: 1px solid var(--warn);
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+  color: var(--warn);
+  border-radius: var(--shape-sm);
+  padding: 2px 7px;
+  white-space: nowrap;
+}

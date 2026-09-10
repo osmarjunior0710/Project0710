@@ -1,4 +1,6 @@
 import type { Classe } from '../../../data/rulesets/dnd2024/classes';
+import { subclasses } from '../../../data/rulesets/dnd2024/subclasses';
+import BadgeHomebrew from '../../components/BadgeHomebrew';
 import { origens } from '../../../data/rulesets/dnd2024/origens';
 import { especies } from '../../../data/rulesets/dnd2024/especies';
 import { talentos, talentosOrigem } from '../../../data/rulesets/dnd2024/talentos';
@@ -41,6 +43,7 @@ export default function PerfilTab({
     ? caracteristicasAcumuladas(classe, nivel).filter((c) => c.nome !== NOME_PLACEHOLDER_CARACTERISTICA_SUBCLASSE)
     : [];
   const caracteristicasDaSubclasse = caracteristicasSubclasseAcumuladas(subclasse, nivel);
+  const subclasseInfo = subclasse ? subclasses.find((s) => s.nome === subclasse) ?? null : null;
   const origem = origens.find((o) => o.nome === selecao.origem) ?? null;
   const talento = origem ? talentosOrigem.find((t) => t.id === origem.talentoOrigemId) ?? null : null;
   const especie = especies.find((e) => e.nome === selecao.especie) ?? null;
@@ -92,8 +95,13 @@ export default function PerfilTab({
       {caracteristicasDaSubclasse.length > 0 && (
         <>
           <div className="section-title" style={{ marginTop: 16 }}>
-            Subclasse{subclasse ? ` — ${subclasse}` : ''}
+            Subclasse{subclasse ? ` — ${subclasse}` : ''} {subclasseInfo?.homebrew && <BadgeHomebrew />}
           </div>
+          {subclasseInfo?.homebrew && (
+            <div className="label" style={{ marginBottom: 8 }}>
+              Não é regra oficial ainda — vai ser revisada quando o livro sair.
+            </div>
+          )}
           {caracteristicasDaSubclasse.map((c) => (
             <div key={c.nome} className="opt-card" style={{ cursor: 'default' }}>
               <div className="opt-card-name">{c.nome}</div>

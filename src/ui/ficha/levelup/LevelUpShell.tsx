@@ -39,6 +39,7 @@ import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TextoComMagias from '../../components/TextoComMagias';
 import GrupoMagiaColapsavel from '../../components/GrupoMagiaColapsavel';
 import IconeClasse, { temBannerProprio } from '../../components/IconeClasse';
+import BadgeHomebrew from '../../components/BadgeHomebrew';
 import DistribuirPontosAtributo from '../../components/DistribuirPontosAtributo';
 import { useAvisoTemporario } from '../../hooks/useAvisoTemporario';
 import { talentos } from '../../../data/rulesets/dnd2024/talentos';
@@ -1085,9 +1086,16 @@ export default function LevelUpShell({
                   <div className="opt-card-row">
                     <IconeClasse id={s.id} />
                     <div className="opt-card-info">
-                      <div className="opt-card-name">{s.nome}</div>
+                      <div className="opt-card-name">
+                        {s.nome} {s.homebrew && <BadgeHomebrew />}
+                      </div>
                       {!implementada && <div className="opt-card-desc">Ainda não implementada</div>}
                       {!temArte && <div className="opt-card-desc">[PH] ícone ainda não desenhado</div>}
+                      {s.homebrew && (
+                        <div className="opt-card-desc">
+                          Não é regra oficial ainda — vai ser revisada quando o livro sair.
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

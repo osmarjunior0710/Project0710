@@ -5,8 +5,16 @@
 
 import { caracteristicasClasse } from '../data/rulesets/dnd2024/caracteristicasClasse';
 import { caracteristicasSubclasse } from '../data/rulesets/dnd2024/caracteristicasSubclasse';
+import { caracteristicasSubclasseHomebrew } from '../data/rulesets/dnd2024/caracteristicasSubclasseHomebrew';
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { ID_CARACTERISTICA_CLASSE } from '../data/rulesets/dnd2024/idsCaracteristicasClasse';
+
+// Junta as características oficiais (planilha) com as homebrew
+// (Necromante, transcrita à mão — ver caracteristicasSubclasseHomebrew.ts)
+// numa lista só, pra todo o motor de Level Up ler igual, sem precisar
+// saber a origem de cada uma. A UI mostra o selo de homebrew olhando
+// `Subclasse.homebrew` (subclasses.ts), não essa lista.
+const todasCaracteristicasSubclasse = [...caracteristicasSubclasse, ...caracteristicasSubclasseHomebrew];
 
 export interface CaracteristicaNivel {
   nome: string;
@@ -145,25 +153,26 @@ const CONTAGEM_ATAQUE_EXTRA: Record<string, number> = {
 };
 
 /** True se a subclasse já tem pelo menos 1 característica real
- * importada em `caracteristicasSubclasse.ts` — usado pra bloquear a
+ * importada em `caracteristicasSubclasse.ts` (ou homebrew, ver
+ * `caracteristicasSubclasseHomebrew.ts`) — usado pra bloquear a
  * escolha de subclasses que ainda são só um nome/ícone (ver
  * PENDENCIAS.md "Escolha de subclasse — versão placeholder"). Genérico
  * por dado, não hardcoded pro nome de nenhuma subclasse específica. */
 export function subclasseImplementada(nomeSubclasse: string): boolean {
-  return caracteristicasSubclasse.some((c) => c.subclasse === nomeSubclasse);
+  return todasCaracteristicasSubclasse.some((c) => c.subclasse === nomeSubclasse);
 }
 
 /** Características de subclasse já desbloqueadas (nível 1 até
  * `nivelAtual`, inclusive) — mesmo formato de `caracteristicasAcumuladas`,
- * só que lendo de `caracteristicasSubclasse.ts` (dado próprio, chave
- * é o NOME da subclasse, não a classe). `nomeSubclasse === null`
+ * só que lendo de `caracteristicasSubclasse.ts`/homebrew (dado próprio,
+ * chave é o NOME da subclasse, não a classe). `nomeSubclasse === null`
  * (personagem ainda não escolheu, ou subclasse ainda não importada)
  * retorna sempre vazio — nunca quebra. Cada característica de
  * subclasse já tem o nível certo direto no dado (não precisa cruzar
  * com `classe.progressao` como as de classe base). */
 export function caracteristicasSubclasseAcumuladas(nomeSubclasse: string | null, nivelAtual: number): CaracteristicaNivel[] {
   if (!nomeSubclasse) return [];
-  return caracteristicasSubclasse
+  return todasCaracteristicasSubclasse
     .filter((c) => c.subclasse === nomeSubclasse && c.nivel <= nivelAtual)
     .sort((a, b) => a.nivel - b.nivel)
     .map((c) => ({ nome: c.nome, descricao: c.descricao }));
@@ -179,7 +188,7 @@ export function caracteristicasSubclasseAcumuladas(nomeSubclasse: string | null,
  * de Level Up. */
 export function caracteristicasSubclasseDoNivel(nomeSubclasse: string | null, nivel: number): CaracteristicaNivel[] {
   if (!nomeSubclasse) return [];
-  return caracteristicasSubclasse
+  return todasCaracteristicasSubclasse
     .filter((c) => c.subclasse === nomeSubclasse && c.nivel === nivel)
     .map((c) => ({ nome: c.nome, descricao: c.descricao }));
 }
@@ -207,11 +216,11 @@ export function caracteristicasDoNivelComSubclasse(classe: Classe, nivel: number
 
 /** True se uma característica NOMEADA de subclasse já está desbloqueada
  * no nível atual — mesmo padrão de `caracteristicaDesbloqueada`, só que
- * pra `caracteristicasSubclasse.ts`. Usado por telas que só precisam
- * saber de 1 característica específica (ex: painel de Reação). */
+ * pra `caracteristicasSubclasse.ts`/homebrew. Usado por telas que só
+ * precisam saber de 1 característica específica (ex: painel de Reação). */
 export function caracteristicaSubclasseDesbloqueada(nomeSubclasse: string | null, nome: string, nivelAtual: number): boolean {
   if (!nomeSubclasse) return false;
-  return caracteristicasSubclasse.some((c) => c.subclasse === nomeSubclasse && c.nome === nome && c.nivel <= nivelAtual);
+  return todasCaracteristicasSubclasse.some((c) => c.subclasse === nomeSubclasse && c.nome === nome && c.nivel <= nivelAtual);
 }
 
 export function numeroDeAtaques(classe: Classe, nivelAtual: number): number {

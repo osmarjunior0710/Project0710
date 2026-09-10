@@ -455,19 +455,41 @@ usando o motor pronto em vez de reinventar.
 **Fase P (Motor de Pets/Familiar) fechada — P0 a P5 completos.**
 Próximo: Fase B (Necromante, subclasse homebrew).
 
-- [ ] **B0 — Convenção de marcação "homebrew".** Proposta a confirmar
-  com o Osmar antes de codar (mesmo espírito do `[PH]`, seção 12 do
-  CLAUDE.md, mas significado diferente — "não é regra oficial ainda,
-  vai ser revisado"): campo `homebrew: boolean` em `Subclasse`
-  (`subclasses.ts`) — UI deriva o badge desse campo em qualquer lugar
-  que mostrar nome/característica da subclasse (card de escolha na
-  Level Up, seção de características na Perfil/Combat), nunca
-  hardcoded por nome. Falta decidir o visual do badge (cor, texto —
-  ex.: tag âmbar "🏠 Homebrew — a revisar quando a regra oficial
-  sair").
-- [ ] **B1 — Dados.** `subclasses.ts` (Necromante, `homebrew: true`);
-  `caracteristicasSubclasse.ts` (6 características reais, extraídas
-  do PDF homebrew — texto já lido e transcrito acima).
+- [x] **B0 — Convenção de marcação "homebrew".** Confirmada com o
+  Osmar (proposta aprovada direto): campo `homebrew: boolean` em
+  `Subclasse` (`subclasses.ts`, obrigatório em toda entrada — mesmo
+  padrão de campo explícito de `InvocacaoMistica`, nunca opcional).
+  `ui/components/BadgeHomebrew.tsx` novo: selo âmbar "🏠 Homebrew"
+  (usa `--warn`, mesma cor de outros avisos do app) — sempre acompanhado
+  de uma linha de texto visível "Não é regra oficial ainda — vai ser
+  revisada quando o livro sair" (não um tooltip: hover não existe em
+  touch, precisa aparecer sem interação, mesmo espírito do `[PH]`).
+  Aplicado nos 2 lugares que mostram subclasse hoje: card de escolha
+  no Level Up (`LevelUpShell.tsx`) e seção "Subclasse" da aba Perfil
+  (`PerfilTab.tsx`) — os dois lêem `Subclasse.homebrew`, nunca
+  comparam por nome.
+- [x] **B1 — Dados.** `subclasses.ts` ganhou `mago-necromante`
+  (`homebrew: true`, ícone `mago-necromante-banner.webp` já preparado
+  na A7). Novo `caracteristicasSubclasseHomebrew.ts` (não
+  `caracteristicasSubclasse.ts` — aquele arquivo é "gerado da planilha,
+  não editar à mão"; Necromante não está na planilha, é transcrito do
+  PDF homebrew, merece arquivo próprio com proveniência clara) — 6
+  características reais (nv 3×2, 6×2, 10, 14). `core/levelUp.ts` junta
+  os dois arrays (`todasCaracteristicasSubclasse`) numa função só, pro
+  motor de Level Up ler igual sem se importar de onde veio — zero
+  mudança nos 4 pontos que já liam `caracteristicasSubclasse` (só
+  trocou a fonte). `subclasseImplementada('Necromante')` já retorna
+  `true` de graça (mesma checagem genérica de sempre) — a subclasse já
+  aparece SELECIONÁVEL no Level Up, não travada como as 4 oficiais
+  ainda sem mecânica.
+  **Testado no navegador** (Playwright, 390px, Level Up manual Mago
+  nível 1→3): card "Necromante 🏠 Homebrew" aparece destravado, com
+  ícone de verdade (não 🖼); escolhida e confirmada, o cabeçalho mostra
+  "Mago (Necromante)"; aba Perfil mostra "SUBCLASSE — NECROMANTE
+  🏠 HOMEBREW" com o aviso de "não é regra oficial" e as 2
+  características de nível 3 (Perito em Necromancia, Grimório de
+  Necromancia) com o texto real — sem erro de console.
+  tsc/testes(341)/build verdes.
 - [ ] **B2 — Mecânica simples (sem depender da Fase P).** Perito em
   Necromancia (2 magias de Necromancia grátis no grimório ao pegar a
   subclasse + 1 a cada novo círculo de espaço) e Resistência Necrótica

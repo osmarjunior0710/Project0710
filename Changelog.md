@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1414
+
+Novo: Mago ganha a 5ª subclasse no Level Up — **Necromante** (homebrew,
+selo "🏠 Homebrew" deixa claro que ainda não é regra oficial). Já
+mostra as 6 características reais na aba Perfil ao escolher; a
+mecânica de cada uma (magias grátis, Familiar Morto-Vivo etc.) vem nas
+próximas entregas.
+
 ## v202609_1250
 
 Novo: aba Pets ganhou "⚙️ Pet com atributos diferentes do padrão?" —
