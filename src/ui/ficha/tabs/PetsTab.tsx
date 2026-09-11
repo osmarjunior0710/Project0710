@@ -57,24 +57,28 @@ function AdicionarPet({ titulo, botaoLabel, criaturasDisponiveis, onAdicionarPet
   );
 }
 
+const CIRCULOS_ESPACO_MAGIA = Array.from({ length: 9 }, (_, i) => i + 1);
+
 interface PetCardProps {
   pet: Pet;
   onRemover: () => void;
   onAlterarPv: (delta: number) => void;
-  /** Valores do bônus da Legião dos Mortos (Necromante, nível 6) pro
-   * personagem ATUAL — `null` = característica ainda não desbloqueada,
-   * esconde o toggle. Ver `core/necromante.ts` `bonusLegiaoDosMortos`. */
-  bonusLegiaoDosMortosValores: { pv: number; dano: number } | null;
-  onAlternarBonusLegiaoDosMortos: (ligado: boolean) => void;
+  /** `false` = característica ainda não desbloqueada, esconde o toggle. */
+  legiaoDosMortosDisponivel: boolean;
+  /** Ver `core/necromante.ts` `bonusLegiaoDosMortos` — o app não sabe
+   * automaticamente qual espaço de magia criou o pet, então o círculo
+   * é informado pelo jogador aqui, ao ligar o bônus. */
+  onAlternarBonusLegiaoDosMortos: (ligado: boolean, circuloDoEspacoGasto: number) => void;
 }
 
 function PetCard({
   pet,
   onRemover,
   onAlterarPv,
-  bonusLegiaoDosMortosValores,
+  legiaoDosMortosDisponivel,
   onAlternarBonusLegiaoDosMortos,
 }: PetCardProps) {
+  const [circuloEscolhido, setCirculoEscolhido] = useState(1);
   const criatura = criaturas.find((c) => c.id === pet.criaturaId);
   if (!criatura) return null;
   const ca = caEfetivaPet(pet, criatura);
@@ -82,7 +86,7 @@ function PetCard({
   const caAjustada = pet.ajustes?.ca !== undefined;
   const pvAjustado = pet.ajustes?.pvMax !== undefined;
   const bonusAtivo = pet.bonusExtra != null;
-  const mostrarToggleLegiao = bonusLegiaoDosMortosValores !== null && ehMortoVivo(criatura);
+  const mostrarToggleLegiao = legiaoDosMortosDisponivel && ehMortoVivo(criatura);
 
   return (
     <div className={`box-solid ${styles.petCard}`}>
@@ -127,13 +131,37 @@ function PetCard({
       </div>
 
       {mostrarToggleLegiao && (
-        <div className="check-row" style={{ marginBottom: 8 }} onClick={() => onAlternarBonusLegiaoDosMortos(!bonusAtivo)}>
-          <div className={`check-box ${bonusAtivo ? 'checked' : ''}`} />
-          <span className="check-label">
-            🦴 Legião dos Mortos — +{bonusLegiaoDosMortosValores!.pv} PV, +{bonusLegiaoDosMortosValores!.dano} dano nos
-            ataques
-          </span>
-        </div>
+        <>
+          {!bonusAtivo && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', marginBottom: 6 }}>
+              <span className="label">Círculo do espaço gasto:</span>
+              <select
+                className={styles.addSelect}
+                style={{ flex: 'none', width: 'auto', padding: '4px 8px' }}
+                value={circuloEscolhido}
+                onChange={(e) => setCirculoEscolhido(Number(e.target.value))}
+              >
+                {CIRCULOS_ESPACO_MAGIA.map((c) => (
+                  <option key={c} value={c}>
+                    {c}º
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div
+            className="check-row"
+            style={{ marginBottom: 8 }}
+            onClick={() => onAlternarBonusLegiaoDosMortos(!bonusAtivo, circuloEscolhido)}
+          >
+            <div className={`check-box ${bonusAtivo ? 'checked' : ''}`} />
+            <span className="check-label">
+              {bonusAtivo
+                ? `🦴 Legião dos Mortos — +${pet.bonusExtra!.pv} PV, +${pet.bonusExtra!.dano} dano nos ataques`
+                : '🦴 Legião dos Mortos — ligar com o círculo escolhido acima'}
+            </span>
+          </div>
+        </>
       )}
 
       <div className={styles.atributosRow}>
@@ -187,12 +215,12 @@ interface PetsTabProps {
    * (ver B3a em EmDevB.md, `core/necromante.ts`). Vazio = personagem
    * ainda não tem a característica, esconde a caixa. */
   formasFamiliarMortoVivoElegiveis: Criatura[];
-  /** Ver `PetCardProps.bonusLegiaoDosMortosValores`. */
-  bonusLegiaoDosMortosValores: { pv: number; dano: number } | null;
+  /** Ver `PetCardProps.legiaoDosMortosDisponivel`. */
+  legiaoDosMortosDisponivel: boolean;
   onAdicionarPet: (nome: string, criaturaId: string, origemInvocacaoId?: string) => void;
   onRemoverPet: (id: string) => void;
   onAlterarPvPet: (id: string, delta: number) => void;
-  onAlternarBonusLegiaoDosMortos: (id: string, ligado: boolean) => void;
+  onAlternarBonusLegiaoDosMortos: (id: string, ligado: boolean, circuloDoEspacoGasto: number) => void;
   /** Abre `AjustarPetShell` (P5) — pegar uma criatura do catálogo e
    * ajustar CA/PV/atributos antes de confirmar. */
   onAbrirAjustarPet: () => void;
@@ -221,7 +249,7 @@ export default function PetsTab({
   pets,
   formasFamiliarElegiveis,
   formasFamiliarMortoVivoElegiveis,
-  bonusLegiaoDosMortosValores,
+  legiaoDosMortosDisponivel,
   onAdicionarPet,
   onRemoverPet,
   onAlterarPvPet,
@@ -242,8 +270,8 @@ export default function PetsTab({
           pet={pet}
           onRemover={() => onRemoverPet(pet.id)}
           onAlterarPv={(delta) => onAlterarPvPet(pet.id, delta)}
-          bonusLegiaoDosMortosValores={bonusLegiaoDosMortosValores}
-          onAlternarBonusLegiaoDosMortos={(ligado) => onAlternarBonusLegiaoDosMortos(pet.id, ligado)}
+          legiaoDosMortosDisponivel={legiaoDosMortosDisponivel}
+          onAlternarBonusLegiaoDosMortos={(ligado, circulo) => onAlternarBonusLegiaoDosMortos(pet.id, ligado, circulo)}
         />
       ))}
       {formasFamiliarElegiveis.length > 0 && (

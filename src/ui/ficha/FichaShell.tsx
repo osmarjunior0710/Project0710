@@ -412,7 +412,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const formasFamiliarMortoVivoElegiveis = formasFamiliarMortoVivoElegiveisNecro(personagem.subclasse, personagem.nivel);
   const legiaoDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Legião dos Mortos', personagem.nivel);
   const modIntAtual = atributos.find((a) => a.atributo === 'INT')?.mod ?? 0;
-  const bonusLegiaoDosMortosValores = legiaoDosMortosDisponivel ? bonusLegiaoDosMortos(personagem.nivel, modIntAtual) : null;
   const colheitaMacabraDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Grimório de Necromancia', personagem.nivel);
   const colheitaDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Colheita dos Mortos', personagem.nivel);
   const personagemEstaEnsanguentado = personagemEnsanguentado(pvAtual, personagem.pvMax);
@@ -1059,11 +1058,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
-  function alternarBonusLegiaoDosMortos(id: string, ligado: boolean) {
+  function alternarBonusLegiaoDosMortos(id: string, ligado: boolean, circuloDoEspacoGasto: number) {
     setPets((prev) =>
       prev.map((p) =>
         p.id === id
-          ? comBonusExtra(p, ligado && bonusLegiaoDosMortosValores ? { rotulo: 'Legião dos Mortos', ...bonusLegiaoDosMortosValores } : null)
+          ? comBonusExtra(p, ligado ? { rotulo: 'Legião dos Mortos', ...bonusLegiaoDosMortos(circuloDoEspacoGasto, modIntAtual) } : null)
           : p,
       ),
     );
@@ -1718,7 +1717,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             pets={pets}
             formasFamiliarElegiveis={formasFamiliarElegiveis}
             formasFamiliarMortoVivoElegiveis={formasFamiliarMortoVivoElegiveis}
-            bonusLegiaoDosMortosValores={bonusLegiaoDosMortosValores}
+            legiaoDosMortosDisponivel={legiaoDosMortosDisponivel}
             onAdicionarPet={adicionarPet}
             onRemoverPet={removerPet}
             onAlterarPvPet={alterarPvPet}

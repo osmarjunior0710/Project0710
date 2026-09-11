@@ -57,13 +57,18 @@ export function ehMortoVivo(criatura: Criatura): boolean {
   return criatura.tipo.toLowerCase() === 'morto-vivo';
 }
 
-/** Legião dos Mortos (Necromante, nível 6, homebrew): PV extra (igual
- * ao nível de Mago) e dano bônus (igual ao mod. de Inteligência) que
- * Mortos-Vivos convocados/criados por magia de Necromancia ganham —
- * calculado aqui, mas aplicado manualmente por pet em `PetsTab.tsx`
- * (não dá pra saber automaticamente qual pet veio de qual magia). */
-export function bonusLegiaoDosMortos(nivelMago: number, modInt: number): { pv: number; dano: number } {
-  return { pv: nivelMago, dano: modInt };
+/** Legião dos Mortos (Necromante, nível 6, homebrew): PV extra e dano
+ * bônus que um Morto-Vivo convocado/criado por magia de Necromancia
+ * ganha — igual ao círculo do ESPAÇO DE MAGIA GASTO ao criá-lo (não o
+ * nível de Mago — transcrição anterior errada, corrigida depois de
+ * conferir a foto do PDF de novo) + mod. de Inteligência pro PV; só o
+ * mod. de Inteligência (mínimo 1) pro dano. Calculado aqui, mas
+ * aplicado manualmente por pet em `PetsTab.tsx` — o app não sabe
+ * automaticamente qual espaço de magia criou qual pet (pets são
+ * adicionados manualmente, não via um fluxo real de conjuração), então
+ * o círculo é informado pelo jogador ao ligar o bônus. */
+export function bonusLegiaoDosMortos(circuloDoEspacoGasto: number, modInt: number): { pv: number; dano: number } {
+  return { pv: circuloDoEspacoGasto + modInt, dano: Math.max(1, modInt) };
 }
 
 /** Colheita Macabra (parte de "Grimório de Necromancia", nível 3,

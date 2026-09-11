@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1612
+
+Corrigido: "Legião dos Mortos" (bônus de PV/dano do Necromante nível
+6+, no card do pet) usava o nível de Mago fixo em vez do círculo do
+espaço de magia gasto — mesma categoria de erro já corrigida na
+Colheita dos Mortos. Agora, ao ligar o bônus, escolha o círculo usado
+pra criar/convocar aquele Morto-Vivo — o PV extra e o dano bônus são
+calculados a partir disso (+ mod. de Inteligência).
+
 ## v202609_2351
 
 Corrigido: "Colheita dos Mortos" (Reação do Necromante nível 10+) curava

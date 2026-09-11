@@ -80,12 +80,13 @@ describe('ehMortoVivo', () => {
 });
 
 describe('bonusLegiaoDosMortos', () => {
-  it('caso normal — PV extra igual ao nível de Mago, dano igual ao mod. de Inteligência', () => {
-    expect(bonusLegiaoDosMortos(6, 3)).toEqual({ pv: 6, dano: 3 });
+  it('caso normal — PV = círculo do espaço gasto + mod. INT, dano = mod. INT', () => {
+    expect(bonusLegiaoDosMortos(3, 4)).toEqual({ pv: 7, dano: 4 });
   });
 
-  it('caso de borda — mod. de Inteligência negativo também é aplicado (dano bônus negativo)', () => {
-    expect(bonusLegiaoDosMortos(6, -1)).toEqual({ pv: 6, dano: -1 });
+  it('caso de borda — mod. de Inteligência 0 ou negativo nunca deixa o dano abaixo de 1', () => {
+    expect(bonusLegiaoDosMortos(2, 0)).toEqual({ pv: 2, dano: 1 });
+    expect(bonusLegiaoDosMortos(2, -1)).toEqual({ pv: 1, dano: 1 });
   });
 });
 
