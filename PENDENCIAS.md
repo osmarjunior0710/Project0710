@@ -987,6 +987,18 @@ diferentes numa ficha só") que ainda não foi tomada.
 de `core/`/ficha de um jeito que assuma "sempre 1 classe" de forma rígida
 demais, pra não precisar reescrever tudo quando isso for implementado.
 
+**Achado ao corrigir a Colheita dos Mortos (Necromante, B3e/pós-B3e —
+Osmar apontou testando):** todas as características do Necromante que
+escalam por "nível de Mago" (Colheita dos Mortos, Mestre da Morte,
+Legião dos Mortos, Perito em Necromancia) usam `personagem.nivel` como
+se fosse o nível de Mago — o que hoje é sempre verdade (só existe 1
+classe por personagem), mas vai ficar ERRADO assim que multiclasse
+existir (ex: personagem nível 20 total, mas só 15 em Mago — a
+característica deveria escalar por 15, não por 20). Quando o schema de
+multiclasse for resolvido, esses call sites em `core/necromante.ts`/
+`FichaShell.tsx` precisam trocar `personagem.nivel` por um "nível
+específico de Mago" novo, ainda sem existir no schema.
+
 ## App inteiro não escala pra tablet/desktop — só os ícones de Classe foram corrigidos
 
 **O que é:** o Osmar reportou que em telas largas ("quando vai pra web")
