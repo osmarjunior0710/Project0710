@@ -7,6 +7,7 @@ import type { WizardSelection } from '../../../core/personagem';
 import { magiasDaClasse, type Magia } from '../../../data/rulesets/dnd2024/magias';
 import { subclasses } from '../../../data/rulesets/dnd2024/subclasses';
 import { estilosDeLuta } from '../../../data/rulesets/dnd2024/estilosDeLuta';
+import { ID_CARACTERISTICA_SUBCLASSE } from '../../../data/rulesets/dnd2024/idsCaracteristicasSubclasse';
 import {
   caracteristicasDoNivel,
   caracteristicasDoNivelComSubclasse,
@@ -417,7 +418,7 @@ export default function LevelUpShell({
   // "Proficiências Bônus" (Colégio do Conhecimento, nível 3), sempre 1
   // única vez (nunca de novo depois que as 3 perícias já existem).
   if (
-    caracteristicaSubclasseDesbloqueada(subclasseEscolhida, 'Proficiências Bônus', novoNivel) &&
+    caracteristicaSubclasseDesbloqueada(subclasseEscolhida, ID_CARACTERISTICA_SUBCLASSE.proficienciasBonus, novoNivel) &&
     periciasSubclasseBonusAtuais.length === 0
   ) {
     luSteps.push('proficienciasBonus');
@@ -431,7 +432,7 @@ export default function LevelUpShell({
   // Descobertas Mágicas aparece TODA vez que já estiver desbloqueada
   // (mesmo padrão de Truques) — sempre pode trocar 1 das 2, mesmo sem
   // ser a primeira vez.
-  if (caracteristicaSubclasseDesbloqueada(subclasseEscolhida, 'Descobertas Mágicas', novoNivel)) {
+  if (caracteristicaSubclasseDesbloqueada(subclasseEscolhida, ID_CARACTERISTICA_SUBCLASSE.descobertasMagicas, novoNivel)) {
     luSteps.push('descobertasMagicas');
   }
   // `especialista` só pode depender do talento ESCOLHIDO NESTE

@@ -3,6 +3,7 @@ import { magias, type Magia } from '../data/rulesets/dnd2024/magias';
 import { criaturas, type Criatura } from '../data/rulesets/dnd2024/criaturas';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
 import { caracteristicaSubclasseDesbloqueada } from './levelUp';
+import { ID_CARACTERISTICA_SUBCLASSE } from '../data/rulesets/dnd2024/idsCaracteristicasSubclasse';
 import type { Pet } from './pets';
 
 function circuloMaximoNoNivel(classe: Classe, nivel: number): number {
@@ -45,7 +46,7 @@ const NOMES_FAMILIAR_MORTO_VIVO = ['Esqueleto', 'Zumbi'];
  * Invocação Mística. `[]` = personagem ainda não tem a característica
  * (esconde a caixa "Convocar Familiar" na aba Pets). */
 export function formasFamiliarMortoVivoElegiveis(subclasse: string | null, nivel: number): Criatura[] {
-  if (!caracteristicaSubclasseDesbloqueada(subclasse, 'Grimório de Necromancia', nivel)) return [];
+  if (!caracteristicaSubclasseDesbloqueada(subclasse, ID_CARACTERISTICA_SUBCLASSE.grimorioDeNecromancia, nivel)) return [];
   return criaturas.filter((c) => NOMES_FAMILIAR_MORTO_VIVO.includes(c.nome));
 }
 

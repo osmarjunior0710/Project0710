@@ -217,7 +217,10 @@ export function caracteristicasDoNivelComSubclasse(classe: Classe, nivel: number
 /** True se uma característica NOMEADA de subclasse já está desbloqueada
  * no nível atual — mesmo padrão de `caracteristicaDesbloqueada`, só que
  * pra `caracteristicasSubclasse.ts`/homebrew. Usado por telas que só
- * precisam saber de 1 característica específica (ex: painel de Reação). */
+ * precisam saber de 1 característica específica (ex: painel de Reação).
+ * `nome` deve vir de `ID_CARACTERISTICA_SUBCLASSE` (ver CLAUDE.md seção
+ * 13) — nunca um literal solto, já que o Necromante é homebrew e vai
+ * ser revisado quando o livro sair. */
 export function caracteristicaSubclasseDesbloqueada(nomeSubclasse: string | null, nome: string, nivelAtual: number): boolean {
   if (!nomeSubclasse) return false;
   return todasCaracteristicasSubclasse.some((c) => c.subclasse === nomeSubclasse && c.nome === nome && c.nivel <= nivelAtual);

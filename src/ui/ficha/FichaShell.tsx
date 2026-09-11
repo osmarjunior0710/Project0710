@@ -110,6 +110,7 @@ import {
   contarRepeticoesCaracteristica,
   numeroDeAtaques,
 } from '../../core/levelUp';
+import { ID_CARACTERISTICA_SUBCLASSE } from '../../data/rulesets/dnd2024/idsCaracteristicasSubclasse';
 import { estilosDeLuta } from '../../data/rulesets/dnd2024/estilosDeLuta';
 import { armaduras } from '../../data/rulesets/dnd2024/armaduras';
 import { origens } from '../../data/rulesets/dnd2024/origens';
@@ -410,13 +411,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const magiasGratisConcedidas = magiasGratisDasInvocacoes(invocacoesMisticasAtuais);
   const formasFamiliarElegiveis = formasFamiliarDasInvocacoes(invocacoesMisticasAtuais);
   const formasFamiliarMortoVivoElegiveis = formasFamiliarMortoVivoElegiveisNecro(personagem.subclasse, personagem.nivel);
-  const legiaoDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Legião dos Mortos', personagem.nivel);
+  const legiaoDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.legiaoDosMortos, personagem.nivel);
   const modIntAtual = atributos.find((a) => a.atributo === 'INT')?.mod ?? 0;
-  const colheitaMacabraDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Grimório de Necromancia', personagem.nivel);
-  const colheitaDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Colheita dos Mortos', personagem.nivel);
+  const colheitaMacabraDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.grimorioDeNecromancia, personagem.nivel);
+  const colheitaDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.colheitaDosMortos, personagem.nivel);
   const personagemEstaEnsanguentado = personagemEnsanguentado(pvAtual, personagem.pvMax);
   const opcoesColheitaDosMortosAtuais = opcoesColheitaDosMortos(pets, personagem.nivel);
-  const mestreDaMorteDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Mestre da Morte', personagem.nivel);
+  const mestreDaMorteDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.mestreDaMorte, personagem.nivel);
   const pvTempMestreDaMorteAtual = mestreDaMorteDisponivel ? bonusPvTempMestreDaMorte(personagem.nivel) : 0;
   const petsMortoVivoAtuais = petsMortoVivo(pets);
   const mestreDaMorteExplosaoLiberadaAtual = algumMortoVivoEm0PV(pets);
@@ -440,7 +441,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // preparada (fora do limite normal) — entram no que dá pra conjurar
   // em combate, mas são arrays PRÓPRIOS separados, só unidos aqui pra
   // montar a lista de "o que aparece nos painéis de Ação/Reação".
-  const magiasPactoDoInferoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Magias de Pacto do Ínfero', personagem.nivel);
+  const magiasPactoDoInferoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.magiasDePactoDoInfero, personagem.nivel);
   const magiasPactoDoInferoAtuais = magiasPactoDoInferoDisponivel ? magiasPactoDoInfero(personagem.nivel) : [];
   const magiasPactoDoInferoPreparadas = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
   // Truques + magias fixas da Linhagem Élfica/Gnômica (e futuramente
@@ -519,12 +520,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const ajusteTatico = classe ? caracteristicaDesbloqueada(classe, 'Ajuste Tático', personagem.nivel) : null;
   const contraEncantamentoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contra-Encantamento', personagem.nivel) !== null : false;
   const inspiracaoSuperiorDesbloqueada = classe ? caracteristicaDesbloqueada(classe, 'Inspiração Superior', personagem.nivel) !== null : false;
-  const palavrasDeInterrupcaoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Palavras de Interrupção', personagem.nivel);
-  const periciaInigualavelDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Perícia Inigualável', personagem.nivel);
-  const bencaoDoTenebrosoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Bênção do Tenebroso', personagem.nivel);
-  const sorteDoTenebrosoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'A Sorte do Próprio Tenebroso', personagem.nivel);
-  const resistenciaInferaDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Resistência Ínfera', personagem.nivel);
-  const lancarNoInfernoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Lançar no Inferno', personagem.nivel);
+  const palavrasDeInterrupcaoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.palavrasDeInterrupcao, personagem.nivel);
+  const periciaInigualavelDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.periciaInigualavel, personagem.nivel);
+  const bencaoDoTenebrosoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.bencaoDoTenebroso, personagem.nivel);
+  const sorteDoTenebrosoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.aSorteDoProprioTenebroso, personagem.nivel);
+  const resistenciaInferaDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.resistenciaInfera, personagem.nivel);
+  const lancarNoInfernoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.lancarNoInferno, personagem.nivel);
   const forMod = atributos.find((a) => a.atributo === 'FOR')?.mod ?? 0;
   const desMod = atributos.find((a) => a.atributo === 'DES')?.mod ?? 0;
   const carMod = atributos.find((a) => a.atributo === 'CAR')?.mod ?? 0;

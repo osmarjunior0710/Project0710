@@ -40,15 +40,29 @@ cada vez.
   +1 dano" — batendo com o mod. de Inteligência real do personagem
   gerado (3 + mod. INT 1 = 4; dano = mod. INT 1) — sem erro de console.
   tsc(-b)/testes(373)/build verdes.
-- [ ] **2 — Características do Necromante reconhecidas por nome de
-  texto, não por ID estável.** `caracteristicaSubclasseDesbloqueada`
-  compara `nome` (string livre) — usado por ~4 gates do Necromante
-  (Grimório de Necromancia, Legião dos Mortos, Colheita dos Mortos,
-  Mestre da Morte) + vários do Bruxo. Como o Necromante é homebrew
-  ("vai ser revisado quando o livro sair"), qualquer ajuste de nome
-  quebra a feature em silêncio. Migrar pra ID estável, mesmo padrão já
-  existente em `idsCaracteristicasClasse.ts` (ver PENDENCIAS.md
-  "Migração de comparação-por-nome pra ID estável").
+- [x] **2 — Características do Necromante (e Bruxo) reconhecidas por
+  nome de texto, não por ID estável.** Novo
+  `data/rulesets/dnd2024/idsCaracteristicasSubclasse.ts`
+  (`ID_CARACTERISTICA_SUBCLASSE`, mesmo padrão já existente de
+  `idsCaracteristicasClasse.ts`) — mapa central nome→id anotado à mão,
+  13 características (4 do Necromante + 9 do Bruxo). Todos os 16 pontos
+  de chamada de `caracteristicaSubclasseDesbloqueada` (11 em
+  `FichaShell.tsx`, 2 em `LevelUpShell.tsx`, 2 em `levelUpAleatorio.ts`,
+  1 em `necromante.ts`) trocaram o literal solto por
+  `ID_CARACTERISTICA_SUBCLASSE.xyz` — se o nome de exibição mudar numa
+  revisão futura (planilha do Bruxo ou PDF homebrew do Necromante), só
+  esse mapa precisa de ajuste, não cada chamada espalhada pelo código.
+  **Refatoração pura** (nenhum comportamento muda) — conferido byte a
+  byte que cada valor do mapa bate exatamente com o `nome:` real em
+  `caracteristicasSubclasse.ts`/`caracteristicasSubclasseHomebrew.ts`
+  antes de considerar pronto.
+  **Testado no navegador** (Playwright, 390px, Necromante nível 14):
+  Perfil mostra as 3 características de subclasse (Legião dos Mortos/
+  Colheita dos Mortos/Mestre da Morte); painel de Reação mostra
+  Colheita dos Mortos + Mestre da Morte; painel de Ação Bônus mostra
+  Mestre da Morte — tudo idêntico a antes da refatoração, sem erro de
+  console.
+  tsc(-b)/testes(373)/build verdes.
 - [ ] **3 — 3 cópias quase idênticas de "conjurar magia com espaço"**
   (`MagiasTab.tsx`'s `processarMagiaAoUsar`, `AcaoPanelContent.tsx`'s
   `conjurarMagia`, `ReacaoPanelContent.tsx`'s `conjurarMagia`). Colheita
@@ -57,5 +71,5 @@ cada vez.
   uma armadilha pra qualquer gancho futuro de "ao conjurar com espaço".
   Unificar numa função só reaproveitada pelos 3 painéis.
 
-**Próximo passo:** item 1 fechado — seguir com o item 2 (IDs estáveis
-de característica de subclasse).
+**Próximo passo:** itens 1 e 2 fechados — seguir com o item 3 (unificar
+as 3 cópias de "conjurar magia com espaço").

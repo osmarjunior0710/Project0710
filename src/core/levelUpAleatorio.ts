@@ -12,6 +12,7 @@ import type { Atributo } from '../data/wizardFixtures';
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { subclasses } from '../data/rulesets/dnd2024/subclasses';
 import { estilosDeLuta } from '../data/rulesets/dnd2024/estilosDeLuta';
+import { ID_CARACTERISTICA_SUBCLASSE } from '../data/rulesets/dnd2024/idsCaracteristicasSubclasse';
 import { pericias } from '../data/rulesets/dnd2024/pericias';
 import { magiasDaClasse } from '../data/rulesets/dnd2024/magias';
 import { talentos } from '../data/rulesets/dnd2024/talentos';
@@ -141,7 +142,7 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
 
   let periciasSubclasseBonusEscolhidas: string[] | null = null;
   if (
-    caracteristicaSubclasseDesbloqueada(subclasseEscolhida, 'Proficiências Bônus', novoNivel) &&
+    caracteristicaSubclasseDesbloqueada(subclasseEscolhida, ID_CARACTERISTICA_SUBCLASSE.proficienciasBonus, novoNivel) &&
     params.periciasSubclasseBonusAtuais.length === 0
   ) {
     const periciasNaoProficientes = pericias
@@ -199,7 +200,7 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
 
   const magiasDescobertasMagicasEscolhidas = caracteristicaSubclasseDesbloqueada(
     subclasseEscolhida,
-    'Descobertas Mágicas',
+    ID_CARACTERISTICA_SUBCLASSE.descobertasMagicas,
     novoNivel,
   )
     ? embaralhar(poolDescobertasMagicas(circuloMaximoNovoNivel))

@@ -1149,6 +1149,17 @@ por nome não foi todo migrado retroativamente ainda.
 diretamente. A assinatura pública dessas funções não mudou — quem
 chama de fora não precisou ser tocado.
 
+**Migrado também (postmortem Mago/Necromante, 2026-09):**
+`caracteristicaSubclasseDesbloqueada(nomeSubclasse, nome, nivel)` — os
+16 pontos de chamada (Bruxo + Necromante, espalhados por
+`FichaShell.tsx`/`LevelUpShell.tsx`/`levelUpAleatorio.ts`/
+`necromante.ts`) agora passam `ID_CARACTERISTICA_SUBCLASSE.xyz` (novo
+`data/rulesets/dnd2024/idsCaracteristicasSubclasse.ts`) em vez do nome
+de exibição direto. A função em si continua recebendo `nome: string`
+(não mudou de assinatura, só de onde vem o valor) — motivado por o
+Necromante ser homebrew, com risco real de o nome mudar quando o livro
+sair oficialmente.
+
 **O que ainda falta (decisão explícita do Osmar: escopo menor pra
 Entrega 3, migrar o resto sob demanda):** `caracteristicaDesbloqueada(classe,
 nome, nivel)` e `contarRepeticoesCaracteristica(classe, nome, nivel)`
