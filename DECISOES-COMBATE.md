@@ -847,5 +847,31 @@ sinal de degradação até 10 dados simultâneos no teste; se alguém notar
 travamento/lentidão real com uma quantidade bem maior (20+, por
 exemplo), aí sim vale investigar um limite prático.
 
+**Log das últimas rolagens:** botão "📜 Log (N)" no canto superior do
+overlay, guarda até 20 rolagens (mais recente primeiro), painel com
+altura fixa pra ~5 itens visíveis e scroll pro resto. Reutiliza o
+catálogo real de `data/rulesets/dnd2024/pericias.ts` (não inventou
+lista nova — regra da seção 6.1 do CLAUDE.md). Formato de cada linha,
+2 casos:
+1. **Rolagem de 1d20 solo** (toque direto no botão d20, fora do modo
+   Múltiplos) — o protótipo AINDA não sabe de perícia/atributo de
+   verdade, então **simula** uma perícia aleatória do catálogo real +
+   um modificador aleatório (-1 a +5) + um modo aleatório (Normal 55%,
+   Vantagem 15%, Desvantagem 15%, "Inspiração Heróica"/rerolagem 15%),
+   só pra validar o formato do log antes de existir perícia de
+   verdade. Vantagem/Desvantagem rolam 2d20 (`box.roll(['1d20','1d20'])`)
+   e mostram os 2 valores NA ORDEM QUE CAÍRAM (não ordenados por
+   valor) — Vantagem usa o maior, Desvantagem o menor pro Total.
+   "Inspiração Heróica" sempre mantém a 2ª rolagem (a rerolagem),
+   não importa se é maior ou menor que a 1ª. Exemplo:
+   `Intimidação: 5 | 1 (Vantagem)` / `Total: 10 (5 + 5)` — 5 é o
+   maior dos 2 dados, +5 de modificador simulado.
+2. **Qualquer outra rolagem** (tipo diferente de d20 tocado direto, ou
+   qualquer rolagem feita pelo modo Múltiplos, mesmo que inclua d20) —
+   sem perícia, título vira `Rolagem de {notações}` ordenadas por
+   tamanho de dado crescente (d4→d100, mesma ordem de `TIPOS`), valores
+   na ordem de tiragem, Total = soma direta de todos. Exemplo:
+   `Rolagem de 2d6 + 1d10: 7 | 9` / `Total: 16 (7 + 9)`.
+
 **Data/origem:** 2026-09, pedido do Osmar.
 
