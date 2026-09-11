@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { classesDoPersonagem, nivelTotalPersonagem, nivelNaClasse } from './multiclasse';
+import {
+  classesDoPersonagem,
+  nivelTotalPersonagem,
+  nivelNaClasse,
+  preRequisitoDaClasse,
+  atendePreRequisitoMulticlasse,
+  espacosMagiaParaNivelCombinado,
+} from './multiclasse';
 import type { PersonagemSalvo } from './armazenamentoPersonagens';
 import type { WizardSelection } from './personagem';
 
@@ -74,5 +81,46 @@ describe('nivelNaClasse', () => {
   it('caso de borda — classe sem nenhum nível (nunca multiclassou pra lá) devolve 0', () => {
     const classes = [{ classe: 'Bárbaro', nivel: 1 }];
     expect(nivelNaClasse(classes, 'Mago')).toBe(0);
+  });
+});
+
+describe('preRequisitoDaClasse', () => {
+  it('caso normal — Mago exige 13 em Inteligência', () => {
+    expect(preRequisitoDaClasse('Mago')).toEqual({
+      classe: 'Mago',
+      atributosMinimos: ['INT'],
+      modo: 'todos',
+      fonte: 'Livro do Jogador (D&D 5e 2024)',
+    });
+  });
+
+  it('caso de borda — classe sem entrada na tabela (não é multiclassável/não existe) devolve undefined', () => {
+    expect(preRequisitoDaClasse('Não Existe')).toBeUndefined();
+  });
+});
+
+describe('atendePreRequisitoMulticlasse', () => {
+  const preReqGuardiao = preRequisitoDaClasse('Guardião')!; // modo 'todos' — DES e SAB
+  const preReqGuerreiro = preRequisitoDaClasse('Guerreiro')!; // modo 'qualquer' — FOR ou DES
+
+  it('caso normal — modo "todos" (Guardião), atende só quando os 2 atributos batem', () => {
+    expect(atendePreRequisitoMulticlasse({ FOR: 10, DES: 13, CON: 10, INT: 10, SAB: 13, CAR: 10 }, preReqGuardiao)).toBe(true);
+    expect(atendePreRequisitoMulticlasse({ FOR: 10, DES: 13, CON: 10, INT: 10, SAB: 12, CAR: 10 }, preReqGuardiao)).toBe(false);
+  });
+
+  it('caso de borda — modo "qualquer" (Guerreiro), atende com só 1 dos 2 atributos', () => {
+    expect(atendePreRequisitoMulticlasse({ FOR: 13, DES: 8, CON: 10, INT: 10, SAB: 10, CAR: 10 }, preReqGuerreiro)).toBe(true);
+    expect(atendePreRequisitoMulticlasse({ FOR: 8, DES: 8, CON: 10, INT: 10, SAB: 10, CAR: 10 }, preReqGuerreiro)).toBe(false);
+  });
+});
+
+describe('espacosMagiaParaNivelCombinado', () => {
+  it('caso normal — nível combinado 5 (mesma tabela do Livro do Jogador)', () => {
+    expect(espacosMagiaParaNivelCombinado(5)).toEqual([4, 3, 2, 0, 0, 0, 0, 0, 0]);
+  });
+
+  it('caso de borda — fora da faixa 1-20 devolve null', () => {
+    expect(espacosMagiaParaNivelCombinado(21)).toBeNull();
+    expect(espacosMagiaParaNivelCombinado(0)).toBeNull();
   });
 });

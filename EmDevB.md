@@ -59,7 +59,34 @@ Plano em 5 fases pequenas, aprovado pelo Osmar:
   sem UI nova (por design, ver "critério de pronto" combinado com o
   Osmar). tsc(-b)/testes(389)/build verdes.
 
-**Próximo passo:** M0 fechado — seguir com **M1** (importar a aba
-"Multiclasse" da planilha: pré-requisitos de atributo, proficiências
-obtidas ao multiclassar, tabela de Espaços de Magia por Nível
-Combinado).
+- [x] **M1 — Dados da planilha.** Novo `data/rulesets/dnd2024/multiclasse.ts`
+  (3 tabelas da aba "Multiclasse", conferidas linha a linha, sem
+  lacuna): `preRequisitosMulticlasse` (atributo mínimo por classe — 12
+  linhas, sempre 13); `proficienciasMulticlasse` (texto livre do que se
+  ganha ao multiclassar pra cada classe — igual ao campo `outro` de
+  `PrerequisitosTalento`, ainda não estruturado pra aplicar sozinho,
+  decisão fica pra quando M2/M3 precisar de verdade);
+  `espacosMagiaPorNivelCombinado` (tabela oficial completa, 1-20).
+  **Achado ao ler o pré-requisito:** a maioria das classes pede 1
+  atributo só, mas Guardião/Monge pedem 2 SIMULTÂNEOS ("Destreza E
+  Sabedoria") e o Guerreiro pede 1 DENTRE 2 ("Força OU Destreza") — o
+  padrão já existente de `atributosMinimos: Atributo[]` (Talentos,
+  sempre checado com `.every()`) não cobria o caso "ou". Novo campo
+  `modo: 'todos' | 'qualquer'` generaliza os dois sem duplicar schema.
+  `core/multiclasse.ts` ganhou `preRequisitoDaClasse`,
+  `atendePreRequisitoMulticlasse` (usa `modo` pra decidir `.every()` vs
+  `.some()`) e `espacosMagiaParaNivelCombinado` (lookup simples — como
+  calcular o Nível Combinado em si, com full/meio-conjurador e Bruxo
+  sempre separado, fica pra M4, que é quem vai aplicar a tabela de
+  verdade).
+  6 testes Vitest novos (pré-requisito de 1 atributo, pré-requisito
+  ausente, `modo: 'todos'` vs `'qualquer'` com casos que batem e não
+  batem, lookup da tabela de espaços dentro e fora da faixa 1-20).
+  **Não testável na tela** — mesma natureza do M0, só dado + funções
+  de consulta, nada ligado na UI ainda. tsc(-b)/testes(395)/build
+  verdes.
+
+**Próximo passo:** M1 fechado — seguir com **M2** (Level Up: escolher
+qual classe sobe, validando pré-requisito de atributo na classe atual
+E na nova). Antes de codar a tela, confirmar com o Osmar onde ela
+entra no fluxo do Level Up (que já tem várias telas) e o layout.
