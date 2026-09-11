@@ -13,6 +13,12 @@
 // M2) grava `classes` de verdade.
 
 import type { PersonagemSalvo } from './armazenamentoPersonagens';
+import type { Atributo } from '../data/wizardFixtures';
+import {
+  preRequisitosMulticlasse,
+  espacosMagiaPorNivelCombinado,
+  type PreRequisitoMulticlasse,
+} from '../data/rulesets/dnd2024/multiclasse';
 
 export interface PersonagemClasse {
   /** Nome da classe (ex: "Mago") — mesmo formato usado em `selecao.classe`. */
@@ -56,4 +62,35 @@ export function nivelTotalPersonagem(classes: PersonagemClasse[]): number {
  * Magia de Mago, Legião dos Mortos do Necromante). */
 export function nivelNaClasse(classes: PersonagemClasse[], nomeClasse: string): number {
   return classes.find((c) => c.classe === nomeClasse)?.nivel ?? 0;
+}
+
+/** Pré-requisito de atributo mínimo pra multiclassar PRA essa classe —
+ * `undefined` se o nome não bater com nenhuma linha da planilha (ex:
+ * classe ainda não implementada no app). */
+export function preRequisitoDaClasse(nomeClasse: string): PreRequisitoMulticlasse | undefined {
+  return preRequisitosMulticlasse.find((p) => p.classe === nomeClasse);
+}
+
+/** `true` = os atributos finais atendem o pré-requisito de uma classe
+ * (13+ em todos, quando `modo: 'todos'`; 13+ em pelo menos 1, quando
+ * `modo: 'qualquer'` — único caso hoje é o Guerreiro, Força OU
+ * Destreza). Multiclassar exige isso valer na classe atual E na nova
+ * (ver regra real) — quem chama confere as duas, passando o
+ * pré-requisito de cada uma. */
+export function atendePreRequisitoMulticlasse(
+  atributosFinais: Record<Atributo, number>,
+  preRequisito: PreRequisitoMulticlasse,
+): boolean {
+  const atende = (a: Atributo) => (atributosFinais[a] ?? 0) >= 13;
+  return preRequisito.modo === 'qualquer' ? preRequisito.atributosMinimos.some(atende) : preRequisito.atributosMinimos.every(atende);
+}
+
+/** Espaços de Magia (por círculo, índice 0 = 1º) pro Nível Combinado
+ * de conjuração multiclasse — `null` se fora da faixa 1-20 (não deve
+ * acontecer, nível combinado nunca passa de 20). Ver
+ * `data/rulesets/dnd2024/multiclasse.ts` — como calcular o Nível
+ * Combinado em si (full/meio-conjurador, Bruxo sempre fora) fica pra
+ * quando essa tabela for aplicada de verdade (Fase M4). */
+export function espacosMagiaParaNivelCombinado(nivelCombinado: number): number[] | null {
+  return espacosMagiaPorNivelCombinado.find((e) => e.nivelCombinado === nivelCombinado)?.espacosPorCirculo ?? null;
 }
