@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { Pet } from '../../../core/pets';
 import { iconesMagia } from '../../../core/classificarMagia';
-import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia } from '../../../core/magiaDano';
+import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
@@ -43,6 +43,11 @@ interface ReacaoPanelContentProps {
   usosAncestralidadeGiganteRestantes: number;
   onUsarAncestralidadeGigante: () => boolean;
   modConstituicaoAtual: number;
+  /** Colheita Macabra (Necromante, "Grimório de Necromancia") — `true` =
+   * característica desbloqueada. Reação nunca faz upcast, então o
+   * círculo do espaço gasto é sempre `m.circulo`. */
+  colheitaMacabraDisponivel: boolean;
+  onColheitaMacabraDisponivel: (cura: number) => void;
   /** Colheita dos Mortos (Necromante, nível 10) — `true` = personagem
    * tem a característica (independe de estar Ensanguentado agora). */
   colheitaDosMortosDisponivel: boolean;
@@ -90,6 +95,8 @@ export default function ReacaoPanelContent({
   usosAncestralidadeGiganteRestantes,
   onUsarAncestralidadeGigante,
   modConstituicaoAtual,
+  colheitaMacabraDisponivel,
+  onColheitaMacabraDisponivel,
   colheitaDosMortosDisponivel,
   personagemEnsanguentado,
   opcoesColheitaDosMortos,
@@ -118,46 +125,24 @@ export default function ReacaoPanelContent({
       }
     }
     setAviso(null);
-    const mecanica = mecanicaDaMagia(m);
-    if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
-      rolarD20({
-        label: `Ataque de Magia — ${m.nome}`,
-        formula: `1d20 + ${modAcertoConjuracao}`,
-        mod: modAcertoConjuracao,
-      });
-      const dano = calcularDanoMagia(m, m.circulo, nivel);
-      if (dano) {
-        onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano.', {
-          label: `Dano — ✨ ${m.nome}`,
-          quantidade: dano.quantidade,
-          lados: dano.lados,
-          mod: dano.mod,
-        });
-        return;
-      }
-      onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Veja a descrição da magia (ⓘ) pro dano.');
+    const resultado = decidirConjuracao(m, m.circulo, nivel, modAcertoConjuracao, colheitaMacabraDisponivel, m.circulo > 0);
+    if (resultado.curaColheitaMacabra !== null) {
+      onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
+    }
+    if (resultado.rollAcerto) {
+      rolarD20(resultado.rollAcerto);
+      onEscolher(`✨ ${m.nome}`, resultado.textoFeedback, resultado.danoPendente);
       return;
     }
-    if (mecanica === 'salvaguarda') {
-      onEscolher(`✨ ${m.nome}`, 'Alvo faz salvaguarda — veja o popup pra CD e dano.');
+    if (resultado.mecanica === 'salvaguarda') {
+      onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
       onAbrirSalvaguarda(m, m.circulo);
       return;
     }
-    if (mecanica === 'cura') {
-      const cura = calcularCuraMagia(m, m.circulo, nivel);
-      if (cura) {
-        rolarDados({
-          label: `Cura — ✨ ${m.nome}`,
-          formula: `${cura.quantidade}d${cura.lados}${cura.mod ? ` + ${cura.mod}` : ''}`,
-          quantidade: cura.quantidade,
-          lados: cura.lados,
-          mod: cura.mod,
-        });
-        onEscolher(`✨ ${m.nome}`, 'Cura rolada — aplique o total no alvo.');
-        return;
-      }
+    if (resultado.rollCura) {
+      rolarDados(resultado.rollCura);
     }
-    onEscolher(`✨ ${m.nome}`, m.descricaoCurta ?? '');
+    onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
   }
 
   function usarContraEncantamento() {

@@ -1455,3 +1455,32 @@ esse estado — nunca um evento disparado só de dentro de um handler de
 mutação específico.
 
 **Data/origem:** 2026-09, Fase B (Necromante), B3e — Mestre da Morte.
+
+## 3 telas fazendo a mesma coisa (conjurar magia) — extrai só a DECISÃO pra um `core/`, não força o estado a ser igual
+
+**Achado (postmortem Mago/Necromante):** `MagiasTab.tsx`, `AcaoPanelContent.tsx`
+e `ReacaoPanelContent.tsx` tinham cada um sua PRÓPRIA cópia de "conjurar
+magia com espaço" (qual mecânica, que dado rolar, que texto mostrar) —
+uma característica nova (Colheita Macabra) só foi ligada em 2 das 3,
+porque cada painel reimplementava a lógica por conta própria. Um furo
+clássico de duplicação: quem mexe numa cópia esquece as outras.
+
+**Decisão:** extrair só a DECISÃO (qual mecânica, que rolagem fazer,
+que texto de feedback, se qualifica pra um efeito bônus) pra uma função
+PURA em `core/` (`core/conjurarMagia.ts`'s `decidirConjuracao`), que
+devolve uma descrição do que fazer — nunca chama `rolarD20`/`rolarDados`
+diretamente (são hooks React, não dá pra chamar de fora de componente) e
+nunca decide COMO aplicar o resultado. Cada painel continua com seu
+próprio jeito de aplicar (estado local vs. callback pro pai, painel
+fecha ou não) — essa parte genuinamente difere entre os 3 e forçar
+tudo pra um estado único teria sido um refactor arriscado sem ganho
+real (o que causava o bug não era o estado diferente, era a LÓGICA
+duplicada).
+
+**Padrão a repetir:** sempre que 2+ telas/painéis calculam a mesma
+regra de D&D mas gerenciam o resultado de formas diferentes (uma local,
+outra via callback), extrair só o CÁLCULO/DECISÃO pra uma função pura
+em `core/` que todas chamam — não tentar unificar a gestão de estado
+junto, a menos que ela também seja genuinamente igual.
+
+**Data/origem:** 2026-09, postmortem Fase B (Mago/Necromante).

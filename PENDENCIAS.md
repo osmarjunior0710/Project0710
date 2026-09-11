@@ -1385,12 +1385,11 @@ Necromante).
 **B3b-2 — Legião dos Mortos, resto pendente (nível 6):**
 - Animar Mortos sempre preparada (sem gastar vaga) + 1x grátis sem
   espaço de magia por Descanso Longo — ainda não desenhado onde fica.
-- **Fórmula do bônus de PV/dano pode estar errada** (achado ao corrigir
-  a Colheita dos Mortos, conferindo a mesma foto do PDF homebrew): o
-  texto real usa "nível do espaço de magia GASTO na conjuração + mod.
-  Inteligência" pro PV extra (não "nível de Mago" fixo, como o toggle
-  manual atual em `PetsTab.tsx` aplica) e "mod. Inteligência, mínimo de
-  1" pro dano bônus (não o mod. cru, que pode ser 0 ou negativo hoje).
-  Corrigir exige rastrear qual espaço de magia criou/convocou aquele
-  Morto-Vivo específico — o toggle manual atual não sabe disso,
-  redesenho maior. Resolver junto quando esta pendência for reaberta.
+
+**Fórmula do bônus de PV/dano — corrigida (postmortem Mago/Necromante,
+2026-09):** era "nível de Mago" fixo, o texto real usa "círculo do
+espaço de magia GASTO ao criar aquele Morto-Vivo + mod. Inteligência"
+pro PV extra e "mod. Inteligência, mínimo 1" pro dano. Como o app não
+rastreia automaticamente qual espaço criou qual pet, o jogador agora
+informa o círculo manualmente (select) ao ligar o toggle em
+`PetsTab.tsx` — ver `core/necromante.ts`'s `bonusLegiaoDosMortos`.

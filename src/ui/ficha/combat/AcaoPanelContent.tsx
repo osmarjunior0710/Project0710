@@ -3,8 +3,7 @@ import { acoesBase, type AtaqueInfo } from '../../../data/exampleCombat';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
-import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia } from '../../../core/magiaDano';
-import { curaColheitaMacabra } from '../../../core/necromante';
+import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { useRoll } from '../../roll/RollContext';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
@@ -158,49 +157,24 @@ export default function AcaoPanelContent({
     }
     setTelaMagia(null);
     const circuloUsado = circulo ?? m.circulo;
-    if (circulo !== null && colheitaMacabraDisponivel && m.escola === 'Necromancia') {
-      onColheitaMacabraDisponivel(curaColheitaMacabra(circulo));
+    const resultado = decidirConjuracao(m, circuloUsado, nivel, modAcertoConjuracao, colheitaMacabraDisponivel, circulo !== null);
+    if (resultado.curaColheitaMacabra !== null) {
+      onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
     }
-    const mecanica = mecanicaDaMagia(m);
-    if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
-      rolarD20({
-        label: `Ataque de Magia — ${m.nome}`,
-        formula: `1d20 + ${modAcertoConjuracao}`,
-        mod: modAcertoConjuracao,
-      });
-      const dano = calcularDanoMagia(m, circuloUsado, nivel);
-      if (dano) {
-        onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano.', {
-          label: `Dano — ✨ ${m.nome}`,
-          quantidade: dano.quantidade,
-          lados: dano.lados,
-          mod: dano.mod,
-        });
-        return;
-      }
-      onEscolher(`✨ ${m.nome}`, 'Rolagem de acerto feita. Veja a descrição da magia (ⓘ) pro dano.');
+    if (resultado.rollAcerto) {
+      rolarD20(resultado.rollAcerto);
+      onEscolher(`✨ ${m.nome}`, resultado.textoFeedback, resultado.danoPendente);
       return;
     }
-    if (mecanica === 'salvaguarda') {
-      onEscolher(`✨ ${m.nome}`, 'Alvo faz salvaguarda — veja o popup pra CD e dano.');
+    if (resultado.mecanica === 'salvaguarda') {
+      onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
       onAbrirSalvaguarda(m, circuloUsado);
       return;
     }
-    if (mecanica === 'cura') {
-      const cura = calcularCuraMagia(m, circuloUsado, nivel);
-      if (cura) {
-        rolarDados({
-          label: `Cura — ✨ ${m.nome}`,
-          formula: `${cura.quantidade}d${cura.lados}${cura.mod ? ` + ${cura.mod}` : ''}`,
-          quantidade: cura.quantidade,
-          lados: cura.lados,
-          mod: cura.mod,
-        });
-        onEscolher(`✨ ${m.nome}`, 'Cura rolada — aplique o total no alvo.');
-        return;
-      }
+    if (resultado.rollCura) {
+      rolarDados(resultado.rollCura);
     }
-    onEscolher(`✨ ${m.nome}`, m.descricaoCurta ?? '');
+    onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
   }
 
   const surtoDesabilitado = surtoRestantes <= 0 || surtoUsadoTurno;

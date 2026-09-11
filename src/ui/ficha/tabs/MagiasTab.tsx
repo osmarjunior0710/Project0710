@@ -3,7 +3,6 @@ import type { Classe } from '../../../data/rulesets/dnd2024/classes';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { armas } from '../../../data/rulesets/dnd2024/armas';
 import type { ItemMochila } from '../../../core/mochila';
-import { curaColheitaMacabra } from '../../../core/necromante';
 import {
   espacosDeMagiaAtivos,
   truquesDoPersonagem,
@@ -11,7 +10,8 @@ import {
   circulosDisponiveisParaConjurar,
 } from '../../../core/magiasPersonagem';
 import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
-import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia, atributoSalvaguarda } from '../../../core/magiaDano';
+import { calcularDanoMagia, atributoSalvaguarda } from '../../../core/magiaDano';
+import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
@@ -244,37 +244,27 @@ export default function MagiasTab({
   const [magiasPreparadasExpandido, setMagiasPreparadasExpandido] = useColapsavel('magias-preparadas', true);
   const [livroDeMagiasExpandido, setLivroDeMagiasExpandido] = useColapsavel('livro-de-magias', true);
 
-  function processarMagiaAoUsar(m: Magia, circuloUsado: number) {
-    const mecanica = mecanicaDaMagia(m);
-    if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
-      rolarD20({
-        label: `Ataque de Magia — ${m.nome}`,
-        formula: `1d20 + ${modAcertoConjuracao}`,
-        mod: modAcertoConjuracao,
-      });
-      const dano = calcularDanoMagia(m, circuloUsado, nivel);
-      setDanoPendenteMagia(
-        dano ? { label: `Dano — ✨ ${m.nome}`, quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod } : null,
-      );
+  /** `gastouEspacoDeVerdade` — só true quando um Espaço de Magia real foi
+   * gasto (não pra truque nem magia concedida de graça por Invocação
+   * Mística) — controla se essa conjuração pode disparar a Colheita
+   * Macabra (Necromante), ver `core/conjurarMagia.ts`. */
+  function processarMagiaAoUsar(m: Magia, circuloUsado: number, gastouEspacoDeVerdade: boolean) {
+    const resultado = decidirConjuracao(m, circuloUsado, nivel, modAcertoConjuracao, colheitaMacabraDisponivel, gastouEspacoDeVerdade);
+    if (resultado.curaColheitaMacabra !== null) {
+      onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
+    }
+    if (resultado.rollAcerto) {
+      rolarD20(resultado.rollAcerto);
+      setDanoPendenteMagia(resultado.danoPendente ?? null);
       return;
     }
     setDanoPendenteMagia(null);
-    if (mecanica === 'salvaguarda') {
+    if (resultado.mecanica === 'salvaguarda') {
       setTelaSalvaguarda({ magia: m, circuloUsado });
       return;
     }
-    if (mecanica === 'cura') {
-      const cura = calcularCuraMagia(m, circuloUsado, nivel);
-      if (cura) {
-        rolarDados({
-          label: `Cura — ✨ ${m.nome}`,
-          formula: `${cura.quantidade}d${cura.lados}${cura.mod ? ` + ${cura.mod}` : ''}`,
-          quantidade: cura.quantidade,
-          lados: cura.lados,
-          mod: cura.mod,
-        });
-      }
-      return;
+    if (resultado.rollCura) {
+      rolarDados(resultado.rollCura);
     }
   }
 
@@ -309,13 +299,13 @@ export default function MagiasTab({
     const jaGasta = item.recarga === 'descansoLongo' && magiasGratisGastas.includes(item.invocacaoId);
     if (jaGasta) return;
     onUsarMagiaGratis(item);
-    processarMagiaAoUsar(item.magia, item.magia.circulo);
+    processarMagiaAoUsar(item.magia, item.magia.circulo, false);
   }
 
   function usarMagia(m: Magia) {
     if (desvantagemForcaDestreza) return;
     if (m.circulo === 0) {
-      processarMagiaAoUsar(m, 0);
+      processarMagiaAoUsar(m, 0, false);
       return;
     }
     const circulosDisponiveis = circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo);
@@ -335,10 +325,7 @@ export default function MagiasTab({
           const ok = onGastarSlotCirculo(circulo);
           setTelaCirculo(null);
           if (!ok) return;
-          processarMagiaAoUsar(telaCirculo.magia, circulo);
-          if (colheitaMacabraDisponivel && telaCirculo.magia.escola === 'Necromancia') {
-            onColheitaMacabraDisponivel(curaColheitaMacabra(circulo));
-          }
+          processarMagiaAoUsar(telaCirculo.magia, circulo, true);
         }}
       />
     );

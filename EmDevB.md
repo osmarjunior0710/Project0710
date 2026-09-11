@@ -63,13 +63,35 @@ cada vez.
   Mestre da Morte — tudo idêntico a antes da refatoração, sem erro de
   console.
   tsc(-b)/testes(373)/build verdes.
-- [ ] **3 — 3 cópias quase idênticas de "conjurar magia com espaço"**
-  (`MagiasTab.tsx`'s `processarMagiaAoUsar`, `AcaoPanelContent.tsx`'s
-  `conjurarMagia`, `ReacaoPanelContent.tsx`'s `conjurarMagia`). Colheita
-  Macabra só está ligada em 2 das 3 — hoje inofensivo (nenhuma magia de
-  Necromancia tem tempo de conjuração de Reação no catálogo), mas é
-  uma armadilha pra qualquer gancho futuro de "ao conjurar com espaço".
-  Unificar numa função só reaproveitada pelos 3 painéis.
+- [x] **3 — 3 cópias quase idênticas de "conjurar magia com espaço"
+  unificadas.** Osmar pediu o refactor completo (não só o remendo da
+  Colheita Macabra). Novo `core/conjurarMagia.ts`: `decidirConjuracao(m,
+  circuloUsado, nivel, modAcertoConjuracao, colheitaMacabraDisponivel,
+  gastouEspacoDeVerdade)` — função pura que decide a mecânica (ataque/
+  salvaguarda/cura/nenhuma), monta a rolagem certa, o texto de feedback
+  e se qualifica pra Colheita Macabra; centraliza a lógica que se
+  repetia, mas cada painel continua aplicando o resultado do seu
+  próprio jeito (estado local em `MagiasTab.tsx`, callback pro painel
+  pai em `AcaoPanelContent.tsx`/`ReacaoPanelContent.tsx`) — essa parte
+  genuinamente difere entre os 3 e não fazia sentido forçar igual.
+  **`gastouEspacoDeVerdade` é uma flag separada de `circuloUsado > 0`**
+  — necessária porque uma magia concedida de graça por Invocação
+  Mística pode ter círculo > 0 sem ter gastado espaço de verdade (não
+  qualifica pra Colheita Macabra). **Fecha o furo real:**
+  `ReacaoPanelContent.tsx` agora também recebe
+  `colheitaMacabraDisponivel`/`onColheitaMacabraDisponivel` (antes não
+  tinha esses props — só `MagiasTab`/`AcaoPanelContent` tinham) — se um
+  dia existir magia de Necromancia com tempo de conjuração de Reação,
+  já funciona sem precisar lembrar de religar de novo.
+  8 testes Vitest novos (`decidirConjuracao`, cobrindo os 4 ramos de
+  mecânica + a distinção `gastouEspacoDeVerdade`).
+  **Testado no navegador** (Playwright, 390px): aba Magias — conjurar
+  "Vitalidade Vazia" (Necromancia) com espaço real mostrou o modal de
+  Colheita Macabra e a cura aplicou certo (10→12 PV); painel de Ação —
+  fluxo de "Usar Magia" → escolher círculo → conjurar não quebrou, sem
+  erro de console; painel de Reação — conjurar uma magia de Reação
+  (Escudo Arcano) mostrou o feedback certo e marcou a Reação como
+  usada, sem erro de console nos 3 fluxos.
+  tsc(-b)/testes(381)/build verdes.
 
-**Próximo passo:** itens 1 e 2 fechados — seguir com o item 3 (unificar
-as 3 cópias de "conjurar magia com espaço").
+**Foco fechado — os 3 achados do postmortem foram corrigidos.**

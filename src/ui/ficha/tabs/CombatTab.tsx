@@ -1024,6 +1024,8 @@ export default function CombatTab({
             conjura={conjura}
             magiasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
+            colheitaMacabraDisponivel={colheitaMacabraDisponivel}
+            onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
             detalhesAtivo={detalhesAtivo}
             contraEncantamentoDisponivel={contraEncantamentoDisponivel}
             palavrasDeInterrupcaoDisponivel={palavrasDeInterrupcaoDisponivel}
