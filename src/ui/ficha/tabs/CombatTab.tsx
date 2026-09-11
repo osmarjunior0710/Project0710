@@ -178,6 +178,12 @@ interface CombatTabProps {
   personagemEnsanguentado: boolean;
   opcoesColheitaDosMortos: { pet: Pet; cura: number }[];
   onColheitaDosMortos: (petId: string, cura: number) => void;
+  mestreDaMorteDisponivel: boolean;
+  petsMortoVivo: Pet[];
+  pvTempMestreDaMorte: number;
+  onUsarMestreDaMorte: (petIds: string[]) => void;
+  mestreDaMorteExplosaoLiberada: boolean;
+  modIntAtual: number;
 }
 
 const LABELS: Record<RecursoTurno, { icone: string; nome: string }> = {
@@ -291,6 +297,12 @@ export default function CombatTab({
   personagemEnsanguentado,
   opcoesColheitaDosMortos,
   onColheitaDosMortos,
+  mestreDaMorteDisponivel,
+  petsMortoVivo,
+  pvTempMestreDaMorte,
+  onUsarMestreDaMorte,
+  mestreDaMorteExplosaoLiberada,
+  modIntAtual,
 }: CombatTabProps) {
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
   /** Qual painel foi o ÚLTIMO aberto — ao contrário de `painelAberto`,
@@ -984,6 +996,10 @@ export default function CombatTab({
             cdMantoNecrotico={cdMantoNecrotico}
             onUsarRevelacaoCelestial={usarRevelacaoCelestial}
             acoesGenericasBonus={acoesGenericasBonus}
+            mestreDaMorteDisponivel={mestreDaMorteDisponivel}
+            petsMortoVivo={petsMortoVivo}
+            pvTempMestreDaMorte={pvTempMestreDaMorte}
+            onUsarMestreDaMorte={onUsarMestreDaMorte}
             onEscolher={(nome, desc) => escolherNoPainel('bonus', nome, desc)}
             ataqueBonus={ataqueBonus}
             onUsarAtaqueBonus={usarAtaqueMaoSecundaria}
@@ -1025,6 +1041,9 @@ export default function CombatTab({
             personagemEnsanguentado={personagemEnsanguentado}
             opcoesColheitaDosMortos={opcoesColheitaDosMortos}
             onColheitaDosMortos={onColheitaDosMortos}
+            mestreDaMorteExplosaoDisponivel={mestreDaMorteDisponivel}
+            mestreDaMorteExplosaoLiberada={mestreDaMorteExplosaoLiberada}
+            modIntAtual={modIntAtual}
           />
         )}
       </SidePanel>

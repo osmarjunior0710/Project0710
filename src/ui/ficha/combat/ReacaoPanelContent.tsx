@@ -3,6 +3,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { Pet } from '../../../core/pets';
 import { iconesMagia } from '../../../core/classificarMagia';
 import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia } from '../../../core/magiaDano';
+import { cdConjuracao } from '../../../core/magiasPersonagem';
 import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TickPips from '../../components/TickPips';
@@ -53,6 +54,18 @@ interface ReacaoPanelContentProps {
    * ND dele (ver `opcoesColheitaDosMortos`). */
   opcoesColheitaDosMortos: { pet: Pet; cura: number }[];
   onColheitaDosMortos: (petId: string, cura: number) => void;
+  /** Mestre da Morte (Necromante, nível 14) — metade Reação: `true` =
+   * característica desbloqueada (independe de ter algum Morto-Vivo em
+   * 0 PV agora). */
+  mestreDaMorteExplosaoDisponivel: boolean;
+  /** `true` = existe pelo menos 1 Morto-Vivo controlado em 0 PV agora
+   * (ver `algumMortoVivoEm0PV` em `core/necromante.ts`) — só assim a
+   * Reação pode ser usada de verdade, independente de como o pet
+   * chegou a 0 (dano manual na aba Pets ou Colheita dos Mortos). */
+  mestreDaMorteExplosaoLiberada: boolean;
+  /** Modificador de Inteligência do personagem — dano da explosão
+   * (2d10 + esse valor). */
+  modIntAtual: number;
 }
 
 export default function ReacaoPanelContent({
@@ -81,6 +94,9 @@ export default function ReacaoPanelContent({
   personagemEnsanguentado,
   opcoesColheitaDosMortos,
   onColheitaDosMortos,
+  mestreDaMorteExplosaoDisponivel,
+  mestreDaMorteExplosaoLiberada,
+  modIntAtual,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
@@ -168,6 +184,21 @@ export default function ReacaoPanelContent({
       mod: modConstituicaoAtual,
     });
     onEscolher('🪨 Resistência da Pedra', 'Reduza o dano que você sofreu pelo total mostrado.');
+  }
+
+  function usarExplosaoMestreDaMorte() {
+    rolarDados({
+      label: 'Mestre da Morte — Explosão Necrótica',
+      formula: `2d10 + ${modIntAtual}`,
+      quantidade: 2,
+      lados: 10,
+      mod: modIntAtual,
+    });
+    const cd = modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null;
+    onEscolher(
+      '💥 Mestre da Morte — Explosão',
+      `Cada criatura à sua escolha a até 3m do Morto-Vivo sofre esse dano Necrótico${cd !== null ? ` (salvaguarda de Destreza, CD ${cd}, reduz à metade)` : ''}.`,
+    );
   }
 
   function usarTrovaoDaTempestade() {
@@ -297,6 +328,22 @@ export default function ReacaoPanelContent({
                 : opcoesColheitaDosMortos.length === 0
                   ? 'Nenhum Morto-Vivo sob seu controle agora.'
                   : 'Reduz um Morto-Vivo sob seu controle a 0 PV e recupera PV igual ao dobro do ND dele.'}
+            </div>
+          )}
+        </div>
+      )}
+      {mestreDaMorteExplosaoDisponivel && (
+        <div
+          className={styles.row}
+          style={!mestreDaMorteExplosaoLiberada ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+          onClick={usarExplosaoMestreDaMorte}
+        >
+          <div className={styles.rowName}>💥 Mestre da Morte — Explosão</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              {!mestreDaMorteExplosaoLiberada
+                ? 'Só disponível quando um Morto-Vivo sob seu controle é reduzido a 0 PV.'
+                : 'Causa 2d10 + seu mod. de Inteligência de dano Necrótico em criaturas à sua escolha a até 3m do Morto-Vivo (salvaguarda de Destreza reduz à metade).'}
             </div>
           )}
         </div>

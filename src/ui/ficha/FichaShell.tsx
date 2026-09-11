@@ -37,6 +37,7 @@ import {
   alterarPvPet as alterarPvPetPuro,
   pvMaxEfetivoPet,
   comBonusExtra,
+  ganharPvTemporarioPet,
   type Pet,
   type AjustesPet,
 } from '../../core/pets';
@@ -48,6 +49,8 @@ import {
   petsMortoVivo,
   personagemEnsanguentado,
   opcoesColheitaDosMortos,
+  bonusPvTempMestreDaMorte,
+  algumMortoVivoEm0PV,
 } from '../../core/necromante';
 import {
   alternarDuasMaosVersatil,
@@ -414,6 +417,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const colheitaDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Colheita dos Mortos', personagem.nivel);
   const personagemEstaEnsanguentado = personagemEnsanguentado(pvAtual, personagem.pvMax);
   const opcoesColheitaDosMortosAtuais = opcoesColheitaDosMortos(pets);
+  const mestreDaMorteDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Mestre da Morte', personagem.nivel);
+  const pvTempMestreDaMorteAtual = mestreDaMorteDisponivel ? bonusPvTempMestreDaMorte(personagem.nivel) : 0;
+  const petsMortoVivoAtuais = petsMortoVivo(pets);
+  const mestreDaMorteExplosaoLiberadaAtual = algumMortoVivoEm0PV(pets);
   const astuciaMagicaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Astúcia Mágica', personagem.nivel) !== null : false;
   const contatarPatronoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contatar Patrono', personagem.nivel) !== null : false;
   const contatoExtraplanar = magias.find((m) => m.nome === 'Contato Extraplanar') ?? null;
@@ -1067,6 +1074,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     alterarPv(cura);
   }
 
+  function usarMestreDaMorte(petIds: string[]) {
+    setPets((prev) => prev.map((p) => (petIds.includes(p.id) ? ganharPvTemporarioPet(p, pvTempMestreDaMorteAtual) : p)));
+  }
+
   function alternarDuasMaos(id: string) {
     setItensMochila((prev) => alternarDuasMaosVersatil(prev, id));
   }
@@ -1694,6 +1705,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             personagemEnsanguentado={personagemEstaEnsanguentado}
             opcoesColheitaDosMortos={opcoesColheitaDosMortosAtuais}
             onColheitaDosMortos={usarColheitaDosMortos}
+            mestreDaMorteDisponivel={mestreDaMorteDisponivel}
+            petsMortoVivo={petsMortoVivoAtuais}
+            pvTempMestreDaMorte={pvTempMestreDaMorteAtual}
+            onUsarMestreDaMorte={usarMestreDaMorte}
+            mestreDaMorteExplosaoLiberada={mestreDaMorteExplosaoLiberadaAtual}
+            modIntAtual={modIntAtual}
           />
         )}
         {tab === 'pets' && (

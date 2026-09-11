@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2304
+
+Novo: Necromante nível 14+ ganha "💀 Mestre da Morte" — Ação Bônus
+concede PV Temporário a vários Mortos-Vivos de uma vez (marca quem
+recebe, na tela de Combate) e Reação "💥 Explosão" quando um deles
+chega a 0 PV, causando dano Necrótico em área. PV Temporário do pet
+agora aparece na aba Pets e protege de verdade contra dano.
+
 ## v202609_2117
 
 Novo: Necromante nível 10+ ganha "💀 Colheita dos Mortos" no painel de

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   criarPet,
   alterarPvPet,
+  ganharPvTemporarioPet,
   caEfetivaPet,
   pvMaxEfetivoPet,
   atributoEfetivoPet,
@@ -58,6 +59,25 @@ describe('alterarPvPet', () => {
     const pet = criarPet('Sombra', acha('gato')); // pv 2 (já cheio)
     const resultado = alterarPvPet(pet, 5, 2);
     expect(resultado.pvAtual).toBe(2);
+  });
+
+  it('caso normal — dano desconta do PV Temporário do pet antes do PV normal', () => {
+    const pet = { ...criarPet('Sombra', acha('gato')), pvTemporario: 3 }; // pv 2, temp 3
+    const resultado = alterarPvPet(pet, -1, 2);
+    expect(resultado.pvAtual).toBe(2);
+    expect(resultado.pvTemporario).toBe(2);
+  });
+});
+
+describe('ganharPvTemporarioPet', () => {
+  it('caso normal — pet sem PV Temporário ganha o valor concedido', () => {
+    const pet = criarPet('Sombra', acha('gato'));
+    expect(ganharPvTemporarioPet(pet, 14).pvTemporario).toBe(14);
+  });
+
+  it('caso de borda — não soma com o que já tem, fica o maior valor', () => {
+    const pet = { ...criarPet('Sombra', acha('gato')), pvTemporario: 10 };
+    expect(ganharPvTemporarioPet(pet, 6).pvTemporario).toBe(10);
   });
 });
 

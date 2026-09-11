@@ -111,3 +111,19 @@ export function opcoesColheitaDosMortos(pets: Pet[]): { pet: Pet; cura: number }
     return { pet, cura: curaColheitaDosMortos(ndCriatura(criatura)) };
   });
 }
+
+/** Mestre da Morte (Necromante, nível 14, parte de Ação Bônus): quanto
+ * PV Temporário cada Morto-Vivo controlado ganha — igual ao nível de
+ * Mago do personagem. */
+export function bonusPvTempMestreDaMorte(nivelMago: number): number {
+  return nivelMago;
+}
+
+/** Mestre da Morte (Necromante, nível 14, parte de Reação): `true` =
+ * existe pelo menos 1 Morto-Vivo controlado reduzido a 0 PV agora —
+ * gatilho da Reação de explosão necrótica, independente de COMO o pet
+ * chegou a 0 (dano manual na aba Pets ou a própria Colheita dos
+ * Mortos), já que os dois só mexem no mesmo `Pet.pvAtual` compartilhado. */
+export function algumMortoVivoEm0PV(pets: Pet[]): boolean {
+  return petsMortoVivo(pets).some((p) => p.pvAtual === 0);
+}

@@ -107,6 +107,7 @@ function PetCard({
           PV {pet.pvAtual}/{pvMax}
           {pvAjustado && <span className="tag">ajustado</span>}
           {bonusAtivo && <span className="tag">🦴 +{pet.bonusExtra!.pv}</span>}
+          {(pet.pvTemporario ?? 0) > 0 && <span className="tag">💀 +{pet.pvTemporario} temp</span>}
         </div>
       </div>
       <LinearProgressBar valor={pet.pvAtual} maximo={pvMax} />

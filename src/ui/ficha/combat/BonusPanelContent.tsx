@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { AtaqueResolvido } from '../../../core/ataque';
+import type { Pet } from '../../../core/pets';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import TickPips from '../../components/TickPips';
@@ -67,6 +68,15 @@ interface BonusPanelContentProps {
    * Bônus — não substituem a lista de Ação normal, o jogador escolhe
    * qual usar a cada turno. Vazio = nenhum talento desse tipo. */
   acoesGenericasBonus: AcaoBase[];
+  /** Mestre da Morte (Necromante, nível 14) — `false` = característica
+   * ainda não desbloqueada, esconde a linha inteira. */
+  mestreDaMorteDisponivel: boolean;
+  /** Pets Morto-Vivo sob controle agora (pool da multi-seleção). */
+  petsMortoVivo: Pet[];
+  /** PV Temporário concedido a cada um dos marcados (ver
+   * `bonusPvTempMestreDaMorte` em `core/necromante.ts`). */
+  pvTempMestreDaMorte: number;
+  onUsarMestreDaMorte: (petIds: string[]) => void;
   onEscolher: (nome: string, desc: string) => void;
 }
 
@@ -110,9 +120,29 @@ export default function BonusPanelContent({
   cdMantoNecrotico,
   onUsarRevelacaoCelestial,
   acoesGenericasBonus,
+  mestreDaMorteDisponivel,
+  petsMortoVivo,
+  pvTempMestreDaMorte,
+  onUsarMestreDaMorte,
   onEscolher,
 }: BonusPanelContentProps) {
   const [escolhendoFormaRevelacao, setEscolhendoFormaRevelacao] = useState(false);
+  const [escolhendoMestreDaMorte, setEscolhendoMestreDaMorte] = useState(false);
+  const [petsSelecionados, setPetsSelecionados] = useState<string[]>([]);
+
+  function toggleSelecaoMestreDaMorte(petId: string) {
+    setPetsSelecionados((prev) => (prev.includes(petId) ? prev.filter((id) => id !== petId) : [...prev, petId]));
+  }
+
+  function confirmarMestreDaMorte() {
+    onUsarMestreDaMorte(petsSelecionados);
+    onEscolher(
+      '💀 Mestre da Morte',
+      `${petsSelecionados.length} Morto-Vivo(s) ganharam ${pvTempMestreDaMorte} PV Temporário — veja a aba Pets.`,
+    );
+    setEscolhendoMestreDaMorte(false);
+    setPetsSelecionados([]);
+  }
 
   if (
     usosFolegoMaximo === 0 &&
@@ -124,6 +154,7 @@ export default function BonusPanelContent({
     !formaGrandeDisponivel &&
     !revelacaoCelestialDisponivel &&
     !ataqueBonus &&
+    !mestreDaMorteDisponivel &&
     acoesGenericasBonus.length === 0
   ) {
     return (
@@ -137,6 +168,44 @@ export default function BonusPanelContent({
   const semUsosInspiracao = usosInspiracaoRestantes <= 0;
   const nadaParaRecuperar = usosInspiracaoRestantes >= usosInspiracaoMaximo;
   const recuperarDesabilitado = !temEspacoDisponivel || nadaParaRecuperar;
+
+  if (escolhendoMestreDaMorte) {
+    return (
+      <>
+        <div className="section-title">Mestre da Morte — escolha os Mortos-Vivos</div>
+        <div className="label" style={{ marginBottom: 8 }}>
+          Marque quem recebe {pvTempMestreDaMorte} PV Temporário (a até 18 metros) — o resultado aparece na aba Pets.
+        </div>
+        {petsMortoVivo.length === 0 ? (
+          <div className="label" style={{ color: 'var(--text-faint)', marginBottom: 8 }}>
+            Nenhum Morto-Vivo sob seu controle agora.
+          </div>
+        ) : (
+          petsMortoVivo.map((pet) => (
+            <div key={pet.id} className="check-row" onClick={() => toggleSelecaoMestreDaMorte(pet.id)}>
+              <div className={`check-box ${petsSelecionados.includes(pet.id) ? 'checked' : ''}`} />
+              <span className="check-label">{pet.nome}</span>
+            </div>
+          ))
+        )}
+        <div className={styles.row} onClick={() => setEscolhendoMestreDaMorte(false)}>
+          <div className={styles.rowName}>← Voltar</div>
+        </div>
+        <div
+          className="btn btn-primary"
+          style={{
+            marginTop: 8,
+            padding: 12,
+            textAlign: 'center',
+            ...(petsSelecionados.length === 0 ? { opacity: 0.5, pointerEvents: 'none' } : {}),
+          }}
+          onClick={confirmarMestreDaMorte}
+        >
+          Confirmar ✓
+        </div>
+      </>
+    );
+  }
 
   if (escolhendoFormaRevelacao) {
     return (
@@ -431,6 +500,16 @@ export default function BonusPanelContent({
             </div>
           )}
         </>
+      )}
+      {mestreDaMorteDisponivel && (
+        <div className={styles.row} onClick={() => setEscolhendoMestreDaMorte(true)}>
+          <div className={styles.rowName}>💀 Mestre da Morte</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Concede {pvTempMestreDaMorte} PV Temporário a Mortos-Vivos sob seu controle a até 18m, à sua escolha.
+            </div>
+          )}
+        </div>
       )}
       {acoesGenericasBonus.map((a) => (
         <div key={a.nome} className={styles.row} onClick={() => onEscolher(`${a.icone} ${a.nome}`, a.desc)}>

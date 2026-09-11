@@ -729,7 +729,50 @@ o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
   momento enquanto o RollOverlay está aberto (nem em `textContent`,
   checagem mais rigorosa que `innerText`); ao fechar o RollOverlay
   ("fechar"), o modal aparece limpo, sem fundo residual.
-- [ ] **B3e — Mestre da Morte (Ação Bônus multi-seleção + Reação).**
+- [x] **B3e — Mestre da Morte (Ação Bônus multi-seleção + Reação).**
+  Metade Ação Bônus: `core/necromante.ts` ganhou
+  `bonusPvTempMestreDaMorte(nivelMago)` (PV Temporário = nível de Mago,
+  texto real da característica). `core/pets.ts` ganhou
+  `Pet.pvTemporario?` (PV Temporário do pet, mesmo motor genérico de
+  `core/pvTemporario.ts` já usado pro personagem — `aplicarAlteracaoPv`/
+  `ganharPvTemporario`, reaproveitados sem duplicar lógica) e
+  `ganharPvTemporarioPet(pet, valor)`. `alterarPvPet` (dano/cura do pet)
+  passou a considerar o PV Temporário do pet (dano desconta dele
+  primeiro, igual ao personagem) — sem isso o PV Temporário concedido
+  seria só decorativo, nunca protegeria o pet de verdade.
+  `BonusPanelContent.tsx` ganhou a linha "💀 Mestre da Morte" (só
+  aparece com a característica desbloqueada) que abre uma sub-tela
+  local de multi-seleção (`check-row`/`check-box`, mesmo padrão global
+  já usado em telas de escolha múltipla) com todos os Morto-Vivo
+  controlados — confirmar aplica o PV Temporário a todos os marcados
+  de uma vez (reflexo automático na aba Pets, tag "💀 +N temp" nova no
+  `PetCard`).
+  Metade Reação: `core/necromante.ts` ganhou `algumMortoVivoEm0PV(pets)`
+  — gatilho reaproveitável, `true` sempre que existe pelo menos 1
+  Morto-Vivo controlado em 0 PV, **independente de como ele chegou lá**
+  (dano manual na aba Pets ou a própria Colheita dos Mortos — os dois
+  só mexem no mesmo `Pet.pvAtual` compartilhado, resolve a ambiguidade
+  de "qual aba dispara" sem precisar de motor novo). `ReacaoPanelContent.tsx`
+  ganhou a linha "💥 Mestre da Morte — Explosão" (mesmo padrão visual
+  travado/destravado de "Resistência da Pedra"/"Colheita dos Mortos"),
+  que rola 2d10 + mod. de Inteligência (`rolarDados`, mesmo padrão de
+  "Trovão da Tempestade" — sem modal de salvaguarda dedicado, só texto
+  mostrando a CD real via `cdConjuracao` já existente) e mostra a CD
+  pro jogador aplicar manualmente a salvaguarda de Destreza.
+  16 testes Vitest novos (6 em `pets.test.ts`, incluindo dano
+  descontando do PV Temporário primeiro; 4 em `necromante.test.ts`).
+  **Testado no navegador** (Playwright, 390px, Necromante nível 14 com
+  Zumbi/Podrengo e Esqueleto/Ossorius convocados): "Mestre da Morte"
+  aparece no painel de Ação Bônus com o texto "Concede 14 PV
+  Temporário..." (nível certo); marcar os 2 e Confirmar mostra "2
+  Morto-Vivo(s) ganharam 14 PV Temporário" e a aba Pets reflete
+  "💀 +14 TEMP" nos dois cards; dano suficiente pra zerar PV Temporário
+  + PV real do Esqueleto (14+13=27, seis cliques de −5) destrava
+  "Mestre da Morte — Explosão" no painel de Reação (antes travado);
+  usar rola "2d10 + 0" (mod. de Inteligência real do personagem
+  gerado) e mostra CD 13 real (calculado por `cdConjuracao`) no texto
+  — sem erro de console em nenhum passo.
+  tsc(-b)/testes(375)/build verdes.
 - [ ] **B4 — Poder Funesto, parte sem motor novo.** Recuperação
   Arcana também reduz Exaustão em 1 (reaproveita o campo de Exaustão
   já existente, se houver) e Necrose Avassaladora (dano de Necromancia
@@ -739,6 +782,5 @@ o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
 
 ---
 
-**Próximo passo:** B3d fechado — seguir com **B3e** (Mestre da Morte:
-Ação Bônus com multi-seleção de pets Morto-Vivo pra PV Temporário em
-massa, + Reação de explosão quando um deles chega a 0 PV).
+**Próximo passo:** B3e fechado — seguir com **B4** (Poder Funesto,
+parte sem motor novo: Recuperação Arcana reduzindo Exaustão).

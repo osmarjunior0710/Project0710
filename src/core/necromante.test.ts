@@ -10,6 +10,8 @@ import {
   personagemEnsanguentado,
   curaColheitaDosMortos,
   opcoesColheitaDosMortos,
+  bonusPvTempMestreDaMorte,
+  algumMortoVivoEm0PV,
 } from './necromante';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { criaturas } from '../data/rulesets/dnd2024/criaturas';
@@ -142,5 +144,31 @@ describe('opcoesColheitaDosMortos', () => {
   it('caso de borda — sem nenhum pet Morto-Vivo, devolve vazio', () => {
     const gato = criaturas.find((c) => c.id === 'gato')!;
     expect(opcoesColheitaDosMortos([criarPet('Bichano', gato)])).toEqual([]);
+  });
+});
+
+describe('bonusPvTempMestreDaMorte', () => {
+  it('caso normal — PV Temporário igual ao nível de Mago (14, nível de desbloqueio)', () => {
+    expect(bonusPvTempMestreDaMorte(14)).toBe(14);
+  });
+
+  it('caso de borda — nível maior (20) também reflete direto, sem teto', () => {
+    expect(bonusPvTempMestreDaMorte(20)).toBe(20);
+  });
+});
+
+describe('algumMortoVivoEm0PV', () => {
+  it('caso normal — Morto-Vivo com 0 PV dispara o gatilho', () => {
+    const zumbi = criaturas.find((c) => c.id === 'zumbi')!;
+    const pet = { ...criarPet('Podrengo', zumbi), pvAtual: 0 };
+    expect(algumMortoVivoEm0PV([pet])).toBe(true);
+  });
+
+  it('caso de borda — Morto-Vivo vivo (PV > 0) não dispara, mesmo com outro pet comum em 0', () => {
+    const zumbi = criaturas.find((c) => c.id === 'zumbi')!;
+    const gato = criaturas.find((c) => c.id === 'gato')!;
+    const petVivo = criarPet('Podrengo', zumbi);
+    const gatoEm0 = { ...criarPet('Bichano', gato), pvAtual: 0 };
+    expect(algumMortoVivoEm0PV([petVivo, gatoEm0])).toBe(false);
   });
 });

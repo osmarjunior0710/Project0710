@@ -1,6 +1,7 @@
 import type { Criatura } from '../data/rulesets/dnd2024/criaturas';
 import { caCriatura, pvMaxCriatura, valorAtributoCriatura } from './criaturas';
 import { modFmt } from './personagem';
+import { aplicarAlteracaoPv, ganharPvTemporario } from './pvTemporario';
 import type { Atributo } from '../data/wizardFixtures';
 
 /** Sobrescreve CA/PV máximo/atributos específicos da `Criatura` de
@@ -28,8 +29,9 @@ export interface BonusExtraPet {
  * Morto-Vivo do Necromante, montaria, etc) — em array desde o início
  * (nunca trava em "1 só"), ver EmDevB.md Fase P/P0. PV rastreado de
  * verdade (não só exibido), mesmo padrão -5/-1/+1/+5 já usado pro
- * personagem (`core/pvTemporario.ts`), sem PV Temporário (pets ainda
- * não têm nenhuma fonte disso). */
+ * personagem, incluindo PV Temporário (`core/pvTemporario.ts` — mesmo
+ * motor genérico do personagem, primeira fonte pra pet é Mestre da
+ * Morte do Necromante, ver `core/necromante.ts`). */
 export interface Pet {
   id: string;
   /** Nome escolhido pelo jogador pra esse pet (não o nome da espécie). */
@@ -52,6 +54,10 @@ export interface Pet {
   ajustes?: AjustesPet;
   /** Ver `BonusExtraPet` — `null`/ausente = nenhum bônus ativo. */
   bonusExtra?: BonusExtraPet | null;
+  /** PV Temporário do pet — mesmo motor de `personagem.pvTemporarioAtual`
+   * (absorve dano antes do PV normal, não soma com o que já tem, fica
+   * o maior valor). `undefined`/0 = nenhum. */
+  pvTemporario?: number;
 }
 
 let contadorId = 0;
@@ -72,9 +78,19 @@ export function criarPet(nome: string, criatura: Criatura, origemInvocacaoId?: s
 }
 
 /** Aplica dano (`delta` negativo) ou cura (`delta` positivo) a um pet,
- * sempre travado entre 0 e o PV máximo (já considerando `ajustes`). */
+ * sempre travado entre 0 e o PV máximo (já considerando `ajustes`) —
+ * dano desconta primeiro do PV Temporário do pet, igual ao personagem
+ * (`aplicarAlteracaoPv`, mesmo motor reaproveitado). */
 export function alterarPvPet(pet: Pet, delta: number, pvMax: number): Pet {
-  return { ...pet, pvAtual: Math.max(0, Math.min(pvMax, pet.pvAtual + delta)) };
+  const resultado = aplicarAlteracaoPv(pet.pvAtual, pvMax, pet.pvTemporario ?? 0, delta);
+  return { ...pet, pvAtual: resultado.pvAtual, pvTemporario: resultado.pvTemporario };
+}
+
+/** Concede PV Temporário a um pet — não soma com o que já tem, fica o
+ * maior valor entre os dois (mesma regra de `ganharPvTemporario` do
+ * personagem, ver `core/pvTemporario.ts`). */
+export function ganharPvTemporarioPet(pet: Pet, valor: number): Pet {
+  return { ...pet, pvTemporario: ganharPvTemporario(pet.pvTemporario ?? 0, valor) };
 }
 
 export function caEfetivaPet(pet: Pet, criatura: Criatura): number {
