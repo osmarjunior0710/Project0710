@@ -1,6 +1,7 @@
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { magias, type Magia } from '../data/rulesets/dnd2024/magias';
 import { criaturas, type Criatura } from '../data/rulesets/dnd2024/criaturas';
+import { ndCriatura } from './criaturas';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
 import { caracteristicaSubclasseDesbloqueada } from './levelUp';
 import type { Pet } from './pets';
@@ -75,11 +76,38 @@ export function curaColheitaMacabra(circuloDoEspacoGasto: number): number {
   return circuloDoEspacoGasto * 2;
 }
 
-/** Pets elegíveis pra receber a cura de Colheita Macabra — só os
- * Mortos-Vivos sob controle do personagem (ver `ehMortoVivo`). */
-export function petsElegiveisColheitaMacabra(pets: Pet[]): Pet[] {
+/** Pets Morto-Vivo sob controle do personagem — filtro reaproveitado
+ * por toda característica que só afeta Mortos-Vivos (Colheita
+ * Macabra, Colheita dos Mortos, Mestre da Morte), ver `ehMortoVivo`. */
+export function petsMortoVivo(pets: Pet[]): Pet[] {
   return pets.filter((p) => {
     const criatura = criaturas.find((c) => c.id === p.criaturaId);
     return criatura !== undefined && ehMortoVivo(criatura);
+  });
+}
+
+/** Personagem "Ensanguentado" — PV atual em metade ou menos do
+ * máximo (arredondado pra baixo), condição padrão de D&D 2024 que
+ * dispara Colheita dos Mortos (Necromante, nível 10). */
+export function personagemEnsanguentado(pvAtual: number, pvMax: number): boolean {
+  return pvMax > 0 && pvAtual <= Math.floor(pvMax / 2);
+}
+
+/** Colheita dos Mortos (Necromante, nível 10, homebrew): quanto o
+ * personagem recupera de PV ao reduzir a 0 PV um Morto-Vivo sob seu
+ * controle — dobro do ND da criatura (arredondado pra cima, mínimo 1,
+ * já que a maioria dos Mortos-Vivos convocáveis tem ND fracionário —
+ * ex: Esqueleto/Zumbi, ND 1/4, dariam 0.5 sem o arredondamento). */
+export function curaColheitaDosMortos(nd: number): number {
+  return Math.max(1, Math.ceil(nd * 2));
+}
+
+/** Pets Morto-Vivo elegíveis pra Colheita dos Mortos, já com a cura
+ * de cada um calculada (varia por ND — pets diferentes podem curar
+ * valores diferentes). */
+export function opcoesColheitaDosMortos(pets: Pet[]): { pet: Pet; cura: number }[] {
+  return petsMortoVivo(pets).map((pet) => {
+    const criatura = criaturas.find((c) => c.id === pet.criaturaId)!;
+    return { pet, cura: curaColheitaDosMortos(ndCriatura(criatura)) };
   });
 }

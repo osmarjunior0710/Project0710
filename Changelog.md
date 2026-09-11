@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2117
+
+Novo: Necromante nível 10+ ganha "💀 Colheita dos Mortos" no painel de
+Reação do Combate — quando você fica Ensanguentado (PV na metade ou
+menos), pode reduzir um pet Morto-Vivo a 0 PV pra recuperar PV
+(dobro do ND dele). Corrigido também: o popup de "Colheita Macabra"
+não "espia" mais atrás da rolagem de dado da própria magia — só
+aparece depois que a rolagem é fechada.
+
 ## v202609_1953
 
 Corrigido: "Colheita Macabra" agora aparece como um popup central (com

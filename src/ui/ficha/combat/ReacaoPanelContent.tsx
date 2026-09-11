@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
+import type { Pet } from '../../../core/pets';
 import { iconesMagia } from '../../../core/classificarMagia';
 import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
@@ -41,6 +42,17 @@ interface ReacaoPanelContentProps {
   usosAncestralidadeGiganteRestantes: number;
   onUsarAncestralidadeGigante: () => boolean;
   modConstituicaoAtual: number;
+  /** Colheita dos Mortos (Necromante, nível 10) — `true` = personagem
+   * tem a característica (independe de estar Ensanguentado agora). */
+  colheitaDosMortosDisponivel: boolean;
+  /** `true` = PV atual em metade ou menos do máximo — só assim a
+   * Reação pode ser usada de verdade (ver `personagemEnsanguentado`
+   * em `core/necromante.ts`). */
+  personagemEnsanguentado: boolean;
+  /** Pets Morto-Vivo elegíveis, cada um já com a cura calculada pro
+   * ND dele (ver `opcoesColheitaDosMortos`). */
+  opcoesColheitaDosMortos: { pet: Pet; cura: number }[];
+  onColheitaDosMortos: (petId: string, cura: number) => void;
 }
 
 export default function ReacaoPanelContent({
@@ -65,9 +77,20 @@ export default function ReacaoPanelContent({
   usosAncestralidadeGiganteRestantes,
   onUsarAncestralidadeGigante,
   modConstituicaoAtual,
+  colheitaDosMortosDisponivel,
+  personagemEnsanguentado,
+  opcoesColheitaDosMortos,
+  onColheitaDosMortos,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
+  const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
   const { rolarD20, rolarDados } = useRoll();
+
+  function usarColheitaDosMortos(petId: string, cura: number) {
+    onColheitaDosMortos(petId, cura);
+    setTelaColheitaDosMortos(false);
+    onEscolher('💀 Colheita dos Mortos', `Morto-Vivo reduzido a 0 PV — você recupera ${cura} Pontos de Vida.`);
+  }
 
   function conjurarMagia(m: Magia) {
     if (desvantagemForcaDestreza) return;
@@ -170,6 +193,26 @@ export default function ReacaoPanelContent({
 
   const semUsosInspiracao = usosInspiracaoRestantes <= 0;
 
+  if (telaColheitaDosMortos) {
+    return (
+      <>
+        <div className="section-title">Colheita dos Mortos — escolha o Morto-Vivo</div>
+        <div className="label" style={{ marginBottom: 8 }}>
+          Ele é reduzido a 0 Pontos de Vida; você recupera o dobro do ND dele.
+        </div>
+        {opcoesColheitaDosMortos.map(({ pet, cura }) => (
+          <div key={pet.id} className={styles.row} onClick={() => usarColheitaDosMortos(pet.id, cura)}>
+            <div className={styles.rowName}>💀 {pet.nome}</div>
+            {detalhesAtivo && <div className={styles.rowDesc}>Recupera {cura} Pontos de Vida.</div>}
+          </div>
+        ))}
+        <div className={styles.row} onClick={() => setTelaColheitaDosMortos(false)}>
+          <div className={styles.rowName}>← Voltar</div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       {usosInspiracaoMaximo > 0 && (
@@ -236,6 +279,24 @@ export default function ReacaoPanelContent({
               Criatura a até 18m te acertou com ataque — gasta 1 uso da Ancestralidade Gigante (
               {usosAncestralidadeGiganteRestantes}/{usosAncestralidadeGiganteMaximo} restantes) e causa 1d8 de dano
               Trovejante nela.
+            </div>
+          )}
+        </div>
+      )}
+      {colheitaDosMortosDisponivel && (
+        <div
+          className={styles.row}
+          style={!personagemEnsanguentado || opcoesColheitaDosMortos.length === 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+          onClick={() => setTelaColheitaDosMortos(true)}
+        >
+          <div className={styles.rowName}>💀 Colheita dos Mortos</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              {!personagemEnsanguentado
+                ? 'Só disponível quando você fica Ensanguentado (PV igual ou menor que a metade do máximo).'
+                : opcoesColheitaDosMortos.length === 0
+                  ? 'Nenhum Morto-Vivo sob seu controle agora.'
+                  : 'Reduz um Morto-Vivo sob seu controle a 0 PV e recupera PV igual ao dobro do ND dele.'}
             </div>
           )}
         </div>

@@ -671,7 +671,64 @@ o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
   seletor de pet; curar aplica e fecha o modal, PV do Zumbi sobe
   corretamente (testado com dano prévio pra ver o antes/depois).
   tsc/testes(360)/build verdes.
-- [ ] **B3d — Colheita dos Mortos (botão de Reação no Combate).**
+- [x] **B3d — Colheita dos Mortos (botão de Reação no Combate).**
+  `core/necromante.ts` ganhou `personagemEnsanguentado(pvAtual, pvMax)`
+  (PV em metade ou menos do máximo, condição padrão de D&D 2024) e
+  `curaColheitaDosMortos(nd)` (dobro do ND, arredondado pra cima,
+  mínimo 1 — a maioria dos Mortos-Vivos convocáveis tem ND fracionário,
+  ex: Esqueleto/Zumbi ND 1/4, dariam 0.5 sem o arredondamento) +
+  `opcoesColheitaDosMortos(pets)` (junta pet+cura calculada, um valor
+  por pet já que ND varia). `core/criaturas.ts` ganhou `ndCriatura`
+  (extrai o ND de `Criatura.nd`, parseando fração tipo "1/4"). Renomeei
+  `petsElegiveisColheitaMacabra` pra `petsMortoVivo` (nome mais
+  genérico, já que agora 2 características diferentes reaproveitam o
+  mesmo filtro).
+  **Decisão de arquitetura:** diferente da Colheita Macabra (B3c), o
+  passo de "escolher o pet" aqui fica DENTRO do próprio
+  `ReacaoPanelContent.tsx` (sub-tela local, mesmo padrão do `telaMagia`
+  do painel de Ação) — não precisa virar modal no FichaShell porque a
+  Reação inteira (clicar a característica → escolher o pet → aplicar)
+  acontece sem o painel fechar no meio, diferente da Colheita Macabra
+  (que só dispara DEPOIS que o `onEscolher` já fechou o painel).
+  Botão "💀 Colheita dos Mortos" aparece sempre que a característica
+  está desbloqueada (nível 10+), mas fica travado (opacidade + sem
+  clique) com texto explicando o motivo quando o personagem não está
+  Ensanguentado ou não tem nenhum Morto-Vivo sob controle — mesmo
+  padrão visual já usado por "Resistência da Pedra"/"Trovão da
+  Tempestade" (Golias) quando sem usos.
+  **Achado no caminho:** ao rodar `npx tsc --noEmit` na raiz do
+  projeto pra conferir as mudanças, a checagem não acusava props
+  faltando em `CombatTab.tsx` (deveria ter dado erro) — o `tsc --noEmit`
+  direto não respeita os project references do `tsconfig.json` (`files:
+  []` + `references`), só `npx tsc -b` (o mesmo que `npm run build`
+  já roda) confere de verdade. `npm run build` sempre pegou os erros
+  reais (nunca publicamos nada quebrado por causa disso), mas o
+  atalho que eu vinha usando pra iterar mais rápido durante a sessão
+  não — troquei pra `npx tsc -b` daqui pra frente.
+  9 testes Vitest novos (2 em `criaturas.test.ts`, 7 em
+  `necromante.test.ts`).
+  **Testado no navegador** (Playwright, 390px, Necromante nível 10 com
+  Zumbi convocado): painel de Reação mostra "Colheita dos Mortos"
+  travado com PV cheio (explica "só disponível quando Ensanguentado");
+  dana o personagem até menos da metade do PV máximo — o botão destrava
+  de verdade (confirmado com um clique real via Playwright, que respeita
+  `pointer-events: none`, não só clique forçado via JS); escolher o
+  Zumbi reduz ele a 0 PV e cura o personagem o valor certo (ND 1/4 →
+  cura 1).
+  tsc(-b)/testes(368)/build verdes.
+- [x] **Correção pós-publicação (Osmar testou no celular, achado no
+  meio do B3d):** o modal de Colheita Macabra (B3c) "espiava" atrás do
+  RollOverlay (rolagem de acerto/dano da própria magia) quando os 2
+  ficavam abertos ao mesmo tempo — mesmo com z-index mais baixo, o
+  fundo semitransparente do RollOverlay deixava o card branco por
+  trás aparecer. Corrigido: `FichaShell.tsx` só monta
+  `ColheitaMacabraModal` quando `useRoll().estado === null` (nenhuma
+  rolagem em andamento) — a ordem continua certa (Colheita Macabra é o
+  próximo passo), só não fica visível antes da vez dele. Testado com
+  Playwright: nenhum texto da Colheita Macabra aparece em nenhum
+  momento enquanto o RollOverlay está aberto (nem em `textContent`,
+  checagem mais rigorosa que `innerText`); ao fechar o RollOverlay
+  ("fechar"), o modal aparece limpo, sem fundo residual.
 - [ ] **B3e — Mestre da Morte (Ação Bônus multi-seleção + Reação).**
 - [ ] **B4 — Poder Funesto, parte sem motor novo.** Recuperação
   Arcana também reduz Exaustão em 1 (reaproveita o campo de Exaustão
@@ -682,6 +739,6 @@ o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
 
 ---
 
-**Próximo passo:** B3c fechado — seguir com **B3d** (Colheita dos
-Mortos, botão de Reação no Combate que escolhe um pet Morto-Vivo e o
-mata pra curar o personagem).
+**Próximo passo:** B3d fechado — seguir com **B3e** (Mestre da Morte:
+Ação Bônus com multi-seleção de pets Morto-Vivo pra PV Temporário em
+massa, + Reação de explosão quando um deles chega a 0 PV).

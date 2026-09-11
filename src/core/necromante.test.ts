@@ -6,7 +6,10 @@ import {
   ehMortoVivo,
   bonusLegiaoDosMortos,
   curaColheitaMacabra,
-  petsElegiveisColheitaMacabra,
+  petsMortoVivo,
+  personagemEnsanguentado,
+  curaColheitaDosMortos,
+  opcoesColheitaDosMortos,
 } from './necromante';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { criaturas } from '../data/rulesets/dnd2024/criaturas';
@@ -94,17 +97,50 @@ describe('curaColheitaMacabra', () => {
   });
 });
 
-describe('petsElegiveisColheitaMacabra', () => {
+describe('petsMortoVivo', () => {
   it('caso normal — só devolve os pets Morto-Vivo, ignora os demais', () => {
     const zumbi = criaturas.find((c) => c.id === 'zumbi')!;
     const gato = criaturas.find((c) => c.id === 'gato')!;
     const pets = [criarPet('Podrengo', zumbi), criarPet('Bichano', gato)];
-    const elegiveis = petsElegiveisColheitaMacabra(pets);
+    const elegiveis = petsMortoVivo(pets);
     expect(elegiveis.map((p) => p.nome)).toEqual(['Podrengo']);
   });
 
   it('caso de borda — sem nenhum Morto-Vivo entre os pets, devolve vazio', () => {
     const gato = criaturas.find((c) => c.id === 'gato')!;
-    expect(petsElegiveisColheitaMacabra([criarPet('Bichano', gato)])).toEqual([]);
+    expect(petsMortoVivo([criarPet('Bichano', gato)])).toEqual([]);
+  });
+});
+
+describe('personagemEnsanguentado', () => {
+  it('caso normal — PV exatamente na metade já conta como Ensanguentado', () => {
+    expect(personagemEnsanguentado(10, 20)).toBe(true);
+  });
+
+  it('caso de borda — 1 PV acima da metade ainda não é Ensanguentado', () => {
+    expect(personagemEnsanguentado(11, 20)).toBe(false);
+  });
+});
+
+describe('curaColheitaDosMortos', () => {
+  it('caso normal — dobro do ND, arredondado pra cima (ND 1, cura 2)', () => {
+    expect(curaColheitaDosMortos(1)).toBe(2);
+  });
+
+  it('caso de borda — ND fracionário (1/4, como Esqueleto/Zumbi) nunca cura menos que 1', () => {
+    expect(curaColheitaDosMortos(0.25)).toBe(1);
+  });
+});
+
+describe('opcoesColheitaDosMortos', () => {
+  it('caso normal — cada pet Morto-Vivo aparece com a cura calculada pro ND dele', () => {
+    const zumbi = criaturas.find((c) => c.id === 'zumbi')!; // ND 1/4
+    const pets = [criarPet('Podrengo', zumbi)];
+    expect(opcoesColheitaDosMortos(pets)).toEqual([{ pet: pets[0], cura: 1 }]);
+  });
+
+  it('caso de borda — sem nenhum pet Morto-Vivo, devolve vazio', () => {
+    const gato = criaturas.find((c) => c.id === 'gato')!;
+    expect(opcoesColheitaDosMortos([criarPet('Bichano', gato)])).toEqual([]);
   });
 });

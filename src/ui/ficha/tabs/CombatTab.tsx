@@ -6,6 +6,7 @@ import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
+import type { Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import { calcularDanoMagia, atributoSalvaguarda } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
@@ -169,6 +170,14 @@ interface CombatTabProps {
    * `core/necromante.ts`. */
   colheitaMacabraDisponivel: boolean;
   onColheitaMacabraDisponivel: (cura: number) => void;
+  /** Colheita dos Mortos (Necromante, nível 10) — passo de escolha de
+   * pet fica dentro do próprio painel de Reação (não precisa
+   * sobreviver a troca de aba, diferente da Colheita Macabra: a
+   * Reação inteira acontece sem fechar o painel no meio). */
+  colheitaDosMortosDisponivel: boolean;
+  personagemEnsanguentado: boolean;
+  opcoesColheitaDosMortos: { pet: Pet; cura: number }[];
+  onColheitaDosMortos: (petId: string, cura: number) => void;
 }
 
 const LABELS: Record<RecursoTurno, { icone: string; nome: string }> = {
@@ -278,6 +287,10 @@ export default function CombatTab({
   onRolarIniciativa,
   colheitaMacabraDisponivel,
   onColheitaMacabraDisponivel,
+  colheitaDosMortosDisponivel,
+  personagemEnsanguentado,
+  opcoesColheitaDosMortos,
+  onColheitaDosMortos,
 }: CombatTabProps) {
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
   /** Qual painel foi o ÚLTIMO aberto — ao contrário de `painelAberto`,
@@ -1008,6 +1021,10 @@ export default function CombatTab({
             usosAncestralidadeGiganteRestantes={usosAncestralidadeGiganteRestantes}
             onUsarAncestralidadeGigante={onUsarAncestralidadeGigante}
             modConstituicaoAtual={modConstituicaoAtual}
+            colheitaDosMortosDisponivel={colheitaDosMortosDisponivel}
+            personagemEnsanguentado={personagemEnsanguentado}
+            opcoesColheitaDosMortos={opcoesColheitaDosMortos}
+            onColheitaDosMortos={onColheitaDosMortos}
           />
         )}
       </SidePanel>

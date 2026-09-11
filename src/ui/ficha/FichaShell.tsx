@@ -45,7 +45,9 @@ import { formasFamiliarDasInvocacoes } from '../../core/invocacoesFamiliar';
 import {
   formasFamiliarMortoVivoElegiveis as formasFamiliarMortoVivoElegiveisNecro,
   bonusLegiaoDosMortos,
-  petsElegiveisColheitaMacabra,
+  petsMortoVivo,
+  personagemEnsanguentado,
+  opcoesColheitaDosMortos,
 } from '../../core/necromante';
 import {
   alternarDuasMaosVersatil,
@@ -176,7 +178,7 @@ export default function FichaShell() {
 
 function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }) {
   const navigate = useNavigate();
-  const { registrarBonusExtra, registrarSorte, registrarInspiracaoHeroica } = useRoll();
+  const { registrarBonusExtra, registrarSorte, registrarInspiracaoHeroica, estado: rollEmAndamento } = useRoll();
   const [selecao, setSelecao] = useState<WizardSelection>(personagemSalvo.selecao);
   const classe = classeDaSelecao(selecao);
   const conValor = selecao.atributos.CON;
@@ -409,6 +411,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const modIntAtual = atributos.find((a) => a.atributo === 'INT')?.mod ?? 0;
   const bonusLegiaoDosMortosValores = legiaoDosMortosDisponivel ? bonusLegiaoDosMortos(personagem.nivel, modIntAtual) : null;
   const colheitaMacabraDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Grimório de Necromancia', personagem.nivel);
+  const colheitaDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Colheita dos Mortos', personagem.nivel);
+  const personagemEstaEnsanguentado = personagemEnsanguentado(pvAtual, personagem.pvMax);
+  const opcoesColheitaDosMortosAtuais = opcoesColheitaDosMortos(pets);
   const astuciaMagicaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Astúcia Mágica', personagem.nivel) !== null : false;
   const contatarPatronoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contatar Patrono', personagem.nivel) !== null : false;
   const contatoExtraplanar = magias.find((m) => m.nome === 'Contato Extraplanar') ?? null;
@@ -1057,6 +1062,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
+  function usarColheitaDosMortos(petId: string, cura: number) {
+    alterarPvPet(petId, -9999);
+    alterarPv(cura);
+  }
+
   function alternarDuasMaos(id: string) {
     setItensMochila((prev) => alternarDuasMaosVersatil(prev, id));
   }
@@ -1419,10 +1429,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           onFimAnimacao={aoFimDaTransicaoDescanso}
         />
       )}
-      {colheitaMacabraPendente && (
+      {/* Só monta depois que o RollOverlay (rolagem de acerto/dano da
+          própria magia) fechar — como o fundo dele é semitransparente
+          (rgba(0,0,0,0.6)), esse modal "espiava" por trás enquanto os
+          2 ficavam abertos ao mesmo tempo (achado pelo Osmar testando
+          no celular). A ordem continua certa (Colheita Macabra é o
+          próximo passo), só não pode ficar visível antes da vez dele. */}
+      {colheitaMacabraPendente && rollEmAndamento === null && (
         <ColheitaMacabraModal
           cura={colheitaMacabraPendente.cura}
-          petsElegiveis={petsElegiveisColheitaMacabra(pets)}
+          petsElegiveis={petsMortoVivo(pets)}
           onCurar={(petId) => {
             alterarPvPet(petId, colheitaMacabraPendente.cura);
             setColheitaMacabraPendente(null);
@@ -1674,6 +1690,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onRolarIniciativa={aoRolarIniciativa}
             colheitaMacabraDisponivel={colheitaMacabraDisponivel}
             onColheitaMacabraDisponivel={(cura) => setColheitaMacabraPendente({ cura })}
+            colheitaDosMortosDisponivel={colheitaDosMortosDisponivel}
+            personagemEnsanguentado={personagemEstaEnsanguentado}
+            opcoesColheitaDosMortos={opcoesColheitaDosMortosAtuais}
+            onColheitaDosMortos={usarColheitaDosMortos}
           />
         )}
         {tab === 'pets' && (

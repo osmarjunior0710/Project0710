@@ -24,3 +24,15 @@ export function valorAtributoCriatura(criatura: Criatura, atributo: Atributo): n
   const match = criatura.atributos[atributo].match(/^(\d+)/);
   return match ? Number(match[1]) : 10;
 }
+
+/** ND (Nível de Desafio) de uma `Criatura` — o campo vem como
+ * `"valor (XP N; BP +N)"` (ex: "1/4 (XP 50; BP +2)"), extrai só o
+ * valor, que pode ser fracionário ("1/4", "1/2", "1/8"). */
+export function ndCriatura(criatura: Criatura): number {
+  const texto = criatura.nd.split(' ')[0];
+  if (texto.includes('/')) {
+    const [num, den] = texto.split('/').map(Number);
+    return den ? num / den : 0;
+  }
+  return Number(texto) || 0;
+}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { caCriatura, pvMaxCriatura, valorAtributoCriatura } from './criaturas';
+import { caCriatura, pvMaxCriatura, valorAtributoCriatura, ndCriatura } from './criaturas';
 import { criaturas } from '../data/rulesets/dnd2024/criaturas';
 
 function acha(id: string) {
@@ -35,5 +35,15 @@ describe('valorAtributoCriatura', () => {
 
   it('caso de borda — Gato tem FOR 3 (valor baixo, 1 dígito)', () => {
     expect(valorAtributoCriatura(acha('gato'), 'FOR')).toBe(3);
+  });
+});
+
+describe('ndCriatura', () => {
+  it('caso normal — Elefante tem ND inteiro (4)', () => {
+    expect(ndCriatura(acha('elefante'))).toBe(4);
+  });
+
+  it('caso de borda — Zumbi tem ND fracionário (1/4)', () => {
+    expect(ndCriatura(acha('zumbi'))).toBe(0.25);
   });
 });
