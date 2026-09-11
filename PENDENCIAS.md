@@ -972,32 +972,30 @@ aqui. Os que **não** têm cobertura no plano atual:
   lista real de opções (Cap. 5 do livro) ainda não foi importada da
   planilha nem tem UI de escolha.
 
-## Personagem multiclasse — schema da ficha ainda assume 1 classe só
+## Personagem multiclasse — EM ANDAMENTO (Fase M, ver EmDevB.md)
 
 **O que é:** existe uma aba **Multiclasse** na planilha (pré-requisito de
-atributo mínimo por classe pra poder multiclassar). O wizard e a ficha
-atuais (Fase 0) assumem 1 classe por personagem.
+atributo mínimo por classe, proficiências obtidas ao multiclassar,
+tabela de Espaços de Magia por Nível Combinado — conferida, sem
+lacuna de dado). O wizard e a ficha assumiam 1 classe por personagem.
 
-**Por que foi adiado:** Fase 0 é esqueleto navegável com dados fixos —
-multiclasse é uma feature de regra, não de navegação. Resolver isso exige
-decisão de schema de ficha (como representar "2 progressões de classe
-diferentes numa ficha só") que ainda não foi tomada.
+**Status (2026-09):** Osmar pediu pra resolver de vez, com fidelidade
+total à regra oficial e migração automática de personagens salvos.
+Virou foco ativo — **M0 (fundamento de schema) já fechado**, ver
+`core/multiclasse.ts` (`PersonagemClasse`, `classesDoPersonagem`,
+`nivelTotalPersonagem`, `nivelNaClasse`) e `EmDevB.md` pro plano
+completo (M1-M4) e progresso atual. Esta entrada só sai de
+`PENDENCIAS.md` quando a Fase M inteira fechar — remove daqui o
+achado abaixo só quando `personagem.nivel` parar de ser usado como
+"nível de Mago" de verdade nos call sites do Necromante (M3).
 
-**O que falta pra resolver:** nada urgente agora — só não fechar o schema
-de `core/`/ficha de um jeito que assuma "sempre 1 classe" de forma rígida
-demais, pra não precisar reescrever tudo quando isso for implementado.
-
-**Achado ao corrigir a Colheita dos Mortos (Necromante, B3e/pós-B3e —
-Osmar apontou testando):** todas as características do Necromante que
-escalam por "nível de Mago" (Colheita dos Mortos, Mestre da Morte,
-Legião dos Mortos, Perito em Necromancia) usam `personagem.nivel` como
-se fosse o nível de Mago — o que hoje é sempre verdade (só existe 1
-classe por personagem), mas vai ficar ERRADO assim que multiclasse
-existir (ex: personagem nível 20 total, mas só 15 em Mago — a
-característica deveria escalar por 15, não por 20). Quando o schema de
-multiclasse for resolvido, esses call sites em `core/necromante.ts`/
-`FichaShell.tsx` precisam trocar `personagem.nivel` por um "nível
-específico de Mago" novo, ainda sem existir no schema.
+**Achado original (Necromante, B3e/pós-B3e — Osmar apontou testando):**
+todas as características do Necromante que escalam por "nível de Mago"
+(Colheita dos Mortos, Mestre da Morte, Legião dos Mortos, Perito em
+Necromancia) usam `personagem.nivel` como se fosse o nível de Mago —
+verdade só enquanto existir 1 classe por personagem. Quando a Fase M
+chegar em M3, esses call sites em `core/necromante.ts`/`FichaShell.tsx`
+trocam `personagem.nivel` por `nivelNaClasse(classes, 'Mago')`.
 
 ## App inteiro não escala pra tablet/desktop — só os ícones de Classe foram corrigidos
 
