@@ -5,15 +5,27 @@
 import type { WizardSelection } from './personagem';
 import type { ItemMochila } from './mochila';
 import type { Pet } from './pets';
+import type { PersonagemClasse } from './multiclasse';
 import { ID_PERSONAGEM_DEMO } from '../data/personagemDemo';
 
 export interface PersonagemSalvo {
   id: string;
   criadoEm: string;
+  /** Nível TOTAL do personagem (soma de todas as classes, se
+   * multiclasse) — `selecao.classe`/`subclasseAtual` abaixo continuam
+   * sendo o formato "1 classe só" (pré-multiclasse); ver `classes`. */
   nivel: number;
   xp: number;
   pvAtual: number;
   selecao: WizardSelection;
+  /** Classes do personagem (Fase M — Multiclasse). Ausente = personagem
+   * salvo antes da Fase M, ou nunca multiclassou — `core/multiclasse.ts`'s
+   * `classesDoPersonagem` deriva 1 elemento único de `selecao.classe`/
+   * `nivel`/`subclasseAtual` nesse caso (mesmo padrão de "campo ausente
+   * cai pro antigo" já usado nos campos abaixo). Só escrito de verdade
+   * quando o Level Up ganhar a escolha de classe (Fase M2) — até lá,
+   * fica sempre ausente, nenhum comportamento muda. */
+  classes?: PersonagemClasse[];
   /** Campos abaixo guardam estado de progressão que muda DEPOIS da
    * criação (Level Up, Descanso, uso de recursos em combate) — tudo
    * opcional porque personagens salvos antes dessa entrega não têm
