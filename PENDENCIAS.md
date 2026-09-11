@@ -1337,3 +1337,49 @@ não Itens Mágicos comum). Falta perguntar ao Osmar se vale criar uma
 7ª categoria (ex: `ativo-sem-carga`, pra Bastão Imóvel/Cajados que
 viram criatura) ou se esses casos ficam fora do "20%" da seção 4.1 até
 aparecer pedido real de um jogador pra usar um desses itens em mesa.
+
+## Necromante (Fase B) — fechada em B3e; B4 travado estruturalmente
+
+**Fase B (subclasse homebrew Necromante) fechada com B0-B3e completos**
+(convenção homebrew, dados, Perito em Necromancia, Familiar
+Morto-Vivo, Legião dos Mortos parte 1, Colheita Macabra, Colheita dos
+Mortos, Mestre da Morte — ver `DECISOES-CLASSES.md`/`DECISOES-DESIGN.md`
+pros padrões que ficaram registrados). O que segue é o que ficou de
+propósito sem fazer.
+
+**B4 — Poder Funesto (nível 6), travado em 3 motores que não existem
+fora deste foco:**
+- **Recuperação Arcana também reduz Exaustão em 1.** Não existe NENHUM
+  campo/contador de Exaustão em `PersonagemSalvo`/`core/` — a palavra só
+  aparece em texto descritivo de magia/item/criatura, nunca como estado
+  rastreado. Sem esse motor, não tem o que reduzir.
+- **A própria "Recuperação Arcana" (nível 1, base de Mago) não tem
+  mecânica interativa ainda** — hoje é só texto na aba Perfil
+  (`caracteristicasClasse.ts`), sem botão/UI que realmente recupere
+  espaços de magia no Descanso Curto. Sem isso implementado pra
+  QUALQUER Mago, não tem onde plugar o bônus extra do Necromante.
+- **Necrose Avassaladora (dano de Necromancia ignora resistência)**
+  depende de um motor de resistência a dano por tipo que também não
+  existe — mesma trava já conhecida do talento Adepto Elemental
+  (`Backlog.md`).
+
+**Decisão do Osmar (2026-09):** registrar tudo isso aqui e encerrar a
+Fase B por ora, em vez de construir os 2 motores base (Exaustão +
+Recuperação Arcana interativa) agora — eles afetam QUALQUER Mago, não
+só o Necromante, e são esforço maior que "B4, parte sem motor novo"
+presumia. Retomar quando fizer sentido priorizar esses motores base
+(provavelmente como seu próprio foco, não uma sub-entrega do
+Necromante).
+
+**B3b-2 — Legião dos Mortos, resto pendente (nível 6):**
+- Animar Mortos sempre preparada (sem gastar vaga) + 1x grátis sem
+  espaço de magia por Descanso Longo — ainda não desenhado onde fica.
+- **Fórmula do bônus de PV/dano pode estar errada** (achado ao corrigir
+  a Colheita dos Mortos, conferindo a mesma foto do PDF homebrew): o
+  texto real usa "nível do espaço de magia GASTO na conjuração + mod.
+  Inteligência" pro PV extra (não "nível de Mago" fixo, como o toggle
+  manual atual em `PetsTab.tsx` aplica) e "mod. Inteligência, mínimo de
+  1" pro dano bônus (não o mod. cru, que pode ser 0 ou negativo hoje).
+  Corrigir exige rastrear qual espaço de magia criou/convocou aquele
+  Morto-Vivo específico — o toggle manual atual não sabe disso,
+  redesenho maior. Resolver junto quando esta pendência for reaberta.

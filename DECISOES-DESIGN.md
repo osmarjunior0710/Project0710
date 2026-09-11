@@ -1401,3 +1401,57 @@ sem precisar sequenciar isso manualmente. Ver
 
 **Data/origem:** 2026-09, Fase B (Necromante), B3c — Colheita Macabra
 (correção pós-publicação, feedback do Osmar testando no celular).
+
+## `npx tsc --noEmit` não confere nada neste projeto — sempre usar `npx tsc -b`
+
+**Achado:** o `tsconfig.json` da raiz tem `"files": []` com
+`"references"` pra `tsconfig.app.json`/`tsconfig.node.json` (padrão de
+project references do Vite) — rodar `npx tsc --noEmit` direto na raiz
+silenciosamente não confere NADA contra esse layout (retorna "limpo"
+mesmo com erro de tipo real no código). Descoberto ao faltar 4 props
+obrigatórias novas em `CombatTab.tsx` (B3d) — `tsc --noEmit` disse
+"limpo", mas `npx tsc -b --force` (build mode, respeitando as
+references) corretamente acusou `TS2739: ... is missing the following
+properties`.
+
+**Já era seguro:** `npm run build` (rodado em toda entrega antes de
+publicar, `package.json`) sempre usou `tsc -b && vite build` por
+baixo — nenhum código quebrado foi publicado por causa disso. O
+problema era só um atalho usado durante a sessão pra iterar mais
+rápido (evitar o `vite build` completo), que por acaso não checava
+nada de verdade.
+
+**Regra daqui pra frente:** pra qualquer checagem de tipo intermediária
+(fora do checklist completo de publicação), usar `npx tsc -b --force`
+— nunca `npx tsc --noEmit` sozinho neste projeto.
+
+**Data/origem:** 2026-09, Fase B (Necromante), B3d.
+
+## Reação/passiva disparada por "estado chegou a X" — gatilho é o estado compartilhado, nunca "quem mudou"
+
+**Decisão:** quando uma característica dispara (ou libera) uma ação
+baseada em um estado atingir um valor (ex: "sempre que um Morto-Vivo
+controlado chega a 0 PV" — Mestre da Morte, nível 14), a checagem de
+gatilho é uma função pura derivada do estado compartilhado atual (ex:
+`algumMortoVivoEm0PV(pets)`, olhando só `Pet.pvAtual`), **nunca**
+rastreia POR ONDE o estado mudou.
+
+**Contexto:** um pet pode chegar a 0 PV por caminhos bem diferentes —
+dano manual na aba Pets (`-5`/`-1`), ou pela própria Colheita dos
+Mortos (Reação que reduz o pet a 0 de propósito pra curar o
+personagem). Se o gatilho fosse implementado como um evento/callback
+disparado só no momento da mutação (ex: um `onPetChegouA0PV()`
+chamado só dentro do handler de dano manual), a Colheita dos Mortos
+NUNCA acionaria o Mestre da Morte, mesmo reduzindo o pet a 0 PV do
+mesmo jeito — um bug de acoplamento sutil. Calculando o gatilho como
+uma função pura sobre o estado atual (não sobre "o que acabou de
+acontecer"), os dois caminhos funcionam de graça, sem qualquer
+encanamento extra entre os handlers de dano.
+
+**Padrão a repetir:** qualquer Reação/passiva futura gatilhada por
+"estado chegou a X" (não "ação Y aconteceu") deve ser uma função
+derivada pura do estado atual, computada onde o painel de Combat lê
+esse estado — nunca um evento disparado só de dentro de um handler de
+mutação específico.
+
+**Data/origem:** 2026-09, Fase B (Necromante), B3e — Mestre da Morte.

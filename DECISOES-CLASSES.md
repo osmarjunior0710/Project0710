@@ -1027,3 +1027,52 @@ continuam com seus handlers próprios, sem mudança de comportamento.
 
 **Data/origem:** 2026-09, foco Talentos Fase 4 (Grupo B, B.5 —
 Analítico/Mente Aguçada).
+
+## Necromante (Mago, homebrew) — subclasse fechada em B3e; convenção de homebrew reaproveitável
+
+Primeira subclasse homebrew do projeto (regra não confirmada
+oficialmente — Osmar pediu marcação clara disso em toda tela que a
+mostra). Padrão pra qualquer homebrew futura:
+
+- **Campo explícito, nunca implícito.** `Subclasse.homebrew: boolean`
+  (obrigatório em toda entrada de `subclasses.ts`, mesmo padrão de
+  campo explícito de `InvocacaoMistica`). `ui/components/BadgeHomebrew.tsx`
+  — selo "🏠 Homebrew" + linha de texto sempre visível ("não é regra
+  oficial ainda"), nunca só tooltip (hover não existe em touch).
+  Aplicado nos 2 lugares que mostram subclasse (card de escolha no
+  Level Up, seção Subclasse da aba Perfil) — os dois leem
+  `Subclasse.homebrew`, nunca comparam por nome.
+- **Dado homebrew mora em arquivo PRÓPRIO, nunca no gerado da
+  planilha.** `caracteristicasSubclasseHomebrew.ts` (não
+  `caracteristicasSubclasse.ts`, que é "gerado da planilha, não editar
+  à mão") — transcrito à mão do PDF homebrew que o Osmar forneceu,
+  arquivo é a própria fonte primária desse texto. `core/levelUp.ts`
+  junta os dois arrays (`todasCaracteristicasSubclasse`) numa função
+  só, então o motor de Level Up lê igual sem se importar de onde veio
+  — zero mudança nos pontos que já liam o array gerado da planilha.
+
+**Motor de Pets (Fase P, genérico) serviu 100% pras características que
+dependem de "criatura sob controle"** (Familiar Morto-Vivo, Legião dos
+Mortos, Colheita Macabra/dos Mortos, Mestre da Morte) — nenhuma
+precisou de motor próprio de "invocação", só filtros por cima
+(`ehMortoVivo`, `petsMortoVivo`) e o `BonusExtraPet`/`pvTemporario`
+genéricos já existentes em `core/pets.ts`. Ver `DECISOES-DESIGN.md`
+pros 2 padrões de UI que nasceram aqui (modal no FichaShell pra efeito
+pós-conjuração que atravessa aba; gatilho de Reação como estado
+derivado, não evento de mutação).
+
+**Cuidado com transcrição de característica homebrew — conferir a
+FONTE de novo antes de implementar o número, não só a 1ª leitura.**
+A transcrição inicial de "Colheita dos Mortos" (nível 10) tinha o
+valor de cura errado ("dobro do ND do Morto-Vivo" em vez de "nível de
+Mago", o texto real do PDF) — só descoberto quando o Osmar testou e
+reportou o número batendo errado. Ao entregar qualquer característica
+homebrew nova, vale reconferir o texto fonte no momento de escrever a
+fórmula em `core/`, não confiar só na transcrição já registrada em
+`caracteristicasSubclasseHomebrew.ts` de uma entrega anterior.
+
+**B4 (Poder Funesto) ficou de fora — travado em motores base que não
+existem** (Exaustão, Recuperação Arcana interativa, resistência a dano
+por tipo) — ver `PENDENCIAS.md` "Necromante (Fase B)".
+
+**Data/origem:** 2026-09, Fase B completa (B0-B3e).
