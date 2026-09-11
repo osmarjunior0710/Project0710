@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1757
+
+Protótipo do dado 3D ganhou customização — botão "🎨 Customizar" no
+canto superior esquerdo do overlay, com 2 seletores: Textura (9
+opções, incluindo Padrão) e Cor (8 cores prontas). A escolha vale só
+enquanto a tela do dado tá aberta, não fica salva ainda. Textura e cor
+não afetam nenhuma rolagem de verdade — é só pra você escolher quais
+texturas fazem sentido manter na versão final.
+
 ## v202609_1734
 
 Protótipo do dado 3D ganhou um log — botão "📜 Log (N)" no canto
