@@ -81,6 +81,60 @@
   max-width: 80%;
 }
 
+.logToggle {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  color: #000;
+  font-size: 13px;
+  font-weight: bold;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: var(--shape-full);
+  background: #fff;
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.logToggle:active {
+  background: #e0e0e0;
+}
+
+.logPanel {
+  position: absolute;
+  top: 64px;
+  right: var(--space-4);
+  left: var(--space-4);
+  background: #fff;
+  border-radius: var(--shape-md);
+  box-shadow: var(--elevation-3);
+  overflow-y: auto;
+  padding: var(--space-2) 0;
+}
+
+.logItem {
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.logItem:last-child {
+  border-bottom: none;
+}
+
+.logLinha1 {
+  color: #000;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.logLinha2 {
+  color: #555;
+  font-size: 12px;
+  padding-left: var(--space-4);
+}
+
 .resultado {
   position: absolute;
   top: var(--space-6);

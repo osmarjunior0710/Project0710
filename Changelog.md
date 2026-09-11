@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1734
+
+Protótipo do dado 3D ganhou um log — botão "📜 Log (N)" no canto
+superior mostra as últimas rolagens (guarda até 20, tela mostra ~5 por
+vez com scroll pro resto). Rolar 1d20 sozinho (fora do modo Múltiplos)
+simula uma perícia aleatória, com chance de vir com Vantagem,
+Desvantagem ou "Inspiração Heróica" (mostra os 2 dados e qual foi
+mantido); qualquer outra rolagem aparece como "Rolagem de NdX + ..."
+com o total dos dados.
+
 ## v202609_1612
 
 Corrigido: "Legião dos Mortos" (bônus de PV/dano do Necromante nível
