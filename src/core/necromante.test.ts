@@ -125,25 +125,29 @@ describe('personagemEnsanguentado', () => {
 });
 
 describe('curaColheitaDosMortos', () => {
-  it('caso normal — dobro do ND, arredondado pra cima (ND 1, cura 2)', () => {
-    expect(curaColheitaDosMortos(1)).toBe(2);
+  it('caso normal — igual ao nível de Mago (texto real da característica)', () => {
+    expect(curaColheitaDosMortos(11)).toBe(11);
   });
 
-  it('caso de borda — ND fracionário (1/4, como Esqueleto/Zumbi) nunca cura menos que 1', () => {
-    expect(curaColheitaDosMortos(0.25)).toBe(1);
+  it('caso de borda — nível de desbloqueio (10) também reflete direto', () => {
+    expect(curaColheitaDosMortos(10)).toBe(10);
   });
 });
 
 describe('opcoesColheitaDosMortos', () => {
-  it('caso normal — cada pet Morto-Vivo aparece com a cura calculada pro ND dele', () => {
-    const zumbi = criaturas.find((c) => c.id === 'zumbi')!; // ND 1/4
-    const pets = [criarPet('Podrengo', zumbi)];
-    expect(opcoesColheitaDosMortos(pets)).toEqual([{ pet: pets[0], cura: 1 }]);
+  it('caso normal — cada pet Morto-Vivo aparece com a cura igual ao nível de Mago (não varia por pet)', () => {
+    const zumbi = criaturas.find((c) => c.id === 'zumbi')!;
+    const esqueleto = criaturas.find((c) => c.id === 'esqueleto')!;
+    const pets = [criarPet('Podrengo', zumbi), criarPet('Ossorius', esqueleto)];
+    expect(opcoesColheitaDosMortos(pets, 11)).toEqual([
+      { pet: pets[0], cura: 11 },
+      { pet: pets[1], cura: 11 },
+    ]);
   });
 
   it('caso de borda — sem nenhum pet Morto-Vivo, devolve vazio', () => {
     const gato = criaturas.find((c) => c.id === 'gato')!;
-    expect(opcoesColheitaDosMortos([criarPet('Bichano', gato)])).toEqual([]);
+    expect(opcoesColheitaDosMortos([criarPet('Bichano', gato)], 11)).toEqual([]);
   });
 });
 

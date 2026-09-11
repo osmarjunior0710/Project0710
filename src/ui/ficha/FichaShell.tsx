@@ -416,7 +416,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const colheitaMacabraDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Grimório de Necromancia', personagem.nivel);
   const colheitaDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Colheita dos Mortos', personagem.nivel);
   const personagemEstaEnsanguentado = personagemEnsanguentado(pvAtual, personagem.pvMax);
-  const opcoesColheitaDosMortosAtuais = opcoesColheitaDosMortos(pets);
+  const opcoesColheitaDosMortosAtuais = opcoesColheitaDosMortos(pets, personagem.nivel);
   const mestreDaMorteDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, 'Mestre da Morte', personagem.nivel);
   const pvTempMestreDaMorteAtual = mestreDaMorteDisponivel ? bonusPvTempMestreDaMorte(personagem.nivel) : 0;
   const petsMortoVivoAtuais = petsMortoVivo(pets);

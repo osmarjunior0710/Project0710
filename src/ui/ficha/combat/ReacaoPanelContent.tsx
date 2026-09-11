@@ -229,7 +229,7 @@ export default function ReacaoPanelContent({
       <>
         <div className="section-title">Colheita dos Mortos — escolha o Morto-Vivo</div>
         <div className="label" style={{ marginBottom: 8 }}>
-          Ele é reduzido a 0 Pontos de Vida; você recupera o dobro do ND dele.
+          Ele é reduzido a 0 Pontos de Vida; você recupera PV igual ao seu nível de Mago.
         </div>
         {opcoesColheitaDosMortos.map(({ pet, cura }) => (
           <div key={pet.id} className={styles.row} onClick={() => usarColheitaDosMortos(pet.id, cura)}>
@@ -327,7 +327,7 @@ export default function ReacaoPanelContent({
                 ? 'Só disponível quando você fica Ensanguentado (PV igual ou menor que a metade do máximo).'
                 : opcoesColheitaDosMortos.length === 0
                   ? 'Nenhum Morto-Vivo sob seu controle agora.'
-                  : 'Reduz um Morto-Vivo sob seu controle a 0 PV e recupera PV igual ao dobro do ND dele.'}
+                  : 'Reduz um Morto-Vivo sob seu controle a 0 PV e recupera PV igual ao seu nível de Mago.'}
             </div>
           )}
         </div>

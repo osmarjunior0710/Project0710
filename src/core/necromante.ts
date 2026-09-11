@@ -1,7 +1,6 @@
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { magias, type Magia } from '../data/rulesets/dnd2024/magias';
 import { criaturas, type Criatura } from '../data/rulesets/dnd2024/criaturas';
-import { ndCriatura } from './criaturas';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
 import { caracteristicaSubclasseDesbloqueada } from './levelUp';
 import type { Pet } from './pets';
@@ -95,21 +94,22 @@ export function personagemEnsanguentado(pvAtual: number, pvMax: number): boolean
 
 /** Colheita dos Mortos (Necromante, nível 10, homebrew): quanto o
  * personagem recupera de PV ao reduzir a 0 PV um Morto-Vivo sob seu
- * controle — dobro do ND da criatura (arredondado pra cima, mínimo 1,
- * já que a maioria dos Mortos-Vivos convocáveis tem ND fracionário —
- * ex: Esqueleto/Zumbi, ND 1/4, dariam 0.5 sem o arredondamento). */
-export function curaColheitaDosMortos(nd: number): number {
-  return Math.max(1, Math.ceil(nd * 2));
+ * controle — igual ao nível de Mago do personagem (texto real da
+ * característica, ver `caracteristicasSubclasseHomebrew.ts`; corrigido
+ * de uma transcrição anterior errada que usava "dobro do ND" — o
+ * Osmar reportou testando no celular, nível 11 curou só 1 PV em vez
+ * de 11). Não depende da criatura em si, por isso não precisa mais de
+ * `ndCriatura`. */
+export function curaColheitaDosMortos(nivelMago: number): number {
+  return nivelMago;
 }
 
 /** Pets Morto-Vivo elegíveis pra Colheita dos Mortos, já com a cura
- * de cada um calculada (varia por ND — pets diferentes podem curar
- * valores diferentes). */
-export function opcoesColheitaDosMortos(pets: Pet[]): { pet: Pet; cura: number }[] {
-  return petsMortoVivo(pets).map((pet) => {
-    const criatura = criaturas.find((c) => c.id === pet.criaturaId)!;
-    return { pet, cura: curaColheitaDosMortos(ndCriatura(criatura)) };
-  });
+ * calculada (mesmo valor pra todos — não varia por pet, ver
+ * `curaColheitaDosMortos`). */
+export function opcoesColheitaDosMortos(pets: Pet[], nivelMago: number): { pet: Pet; cura: number }[] {
+  const cura = curaColheitaDosMortos(nivelMago);
+  return petsMortoVivo(pets).map((pet) => ({ pet, cura }));
 }
 
 /** Mestre da Morte (Necromante, nível 14, parte de Ação Bônus): quanto

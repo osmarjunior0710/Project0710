@@ -52,7 +52,7 @@ export const caracteristicasSubclasseHomebrew: CaracteristicaSubclasse[] = [
     nivel: 10,
     nome: 'Colheita dos Mortos',
     descricao:
-      'Quando você ficar Ensanguentado, pode usar uma Reação pra reduzir a 0 Pontos de Vida um Morto-Vivo sob seu controle a até 18 metros e recuperar Pontos de Vida iguais ao dobro do nível do Morto-Vivo (ou ND, se aplicável).',
+      'Sempre que ficar Ensanguentado mas não cair a 0 Pontos de Vida, você pode usar sua Reação pra reduzir a 0 Pontos de Vida uma criatura Morta-Viva sob seu controle que consiga ver a até 18 metros. Quando fizer isso, você imediatamente recupera Pontos de Vida iguais ao seu nível de Mago.',
     tipoAcao: 'Reação',
   },
   {

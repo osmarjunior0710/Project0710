@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2351
+
+Corrigido: "Colheita dos Mortos" (Reação do Necromante nível 10+) curava
+errado — recuperava um valor baseado no ND da criatura sacrificada em
+vez do seu nível de Mago (regra real, conferida na fonte homebrew). Um
+nível 11 que devia curar 11 PV estava curando só 1. Corrigido pra
+recuperar sempre o nível de Mago, não importa qual Morto-Vivo for
+escolhido.
+
 ## v202609_2304
 
 Novo: Necromante nível 14+ ganha "💀 Mestre da Morte" — Ação Bônus

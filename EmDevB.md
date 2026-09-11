@@ -614,6 +614,16 @@ o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
   desenhado onde fica; decidir junto com o Osmar quando chegar a vez
   (mesmo padrão de "sempre preparada" já usado noutras características,
   ver Descobertas Mágicas/Mago).
+  **Achado ao corrigir a Colheita dos Mortos (conferindo a mesma foto
+  do PDF homebrew):** o bônus de PV/dano do B3b também parece estar
+  com a fórmula errada — o texto real usa "nível do espaço de magia
+  GASTO na conjuração + mod. Inteligência" pro PV extra (não "nível de
+  Mago" fixo, como o toggle atual em `PetsTab.tsx` aplica) e "mod.
+  Inteligência, mínimo de 1" pro dano bônus (não o mod. cru, que pode
+  ser 0 ou negativo hoje). Corrigir isso exige rastrear QUAL espaço foi
+  gasto ao criar/convocar aquele Morto-Vivo específico (o toggle manual
+  atual não sabe disso) — redesenho maior, resolver junto com o resto
+  desta pendência, não isolado.
 - [x] **B3c — Colheita Macabra (ligado ao Usar Magia, filtro
   Morto-Vivo).** `core/necromante.ts` ganhou `curaColheitaMacabra(circulo)`
   (dobro do círculo do espaço gasto — upcast conta o círculo GASTO, não
@@ -773,6 +783,34 @@ o jogador ativa ANTES de codar, ver respostas abaixo — CLAUDE.md §6):
   gerado) e mostra CD 13 real (calculado por `cdConjuracao`) no texto
   — sem erro de console em nenhum passo.
   tsc(-b)/testes(375)/build verdes.
+- [x] **Correção pós-publicação (Osmar testou no celular, achado B3d):**
+  "Colheita dos Mortos" curava errado — a transcrição original da
+  característica (B3d) dizia "dobro do nível do Morto-Vivo (ou ND)",
+  mas o texto real do PDF homebrew (conferido de novo por foto do
+  Osmar) diz "recupera Pontos de Vida iguais ao seu nível de Mago",
+  sem nenhuma relação com o ND da criatura sacrificada. Um Necromante
+  nível 11 curava só 1 PV (ND do Zumbi, 1/4, arredondado) em vez de 11.
+  `core/necromante.ts`: `curaColheitaDosMortos` e `opcoesColheitaDosMortos`
+  reescritos pra usar nível de Mago (mesmo padrão trivial de
+  `bonusPvTempMestreDaMorte`); `ndCriatura` removido de `core/criaturas.ts`
+  (ficou sem nenhum outro consumidor depois da correção). Textos da UI
+  (`ReacaoPanelContent.tsx`) e da própria característica
+  (`caracteristicasSubclasseHomebrew.ts`) corrigidos junto.
+  **Achado no caminho, não corrigido agora (avisado ao Osmar em separado):**
+  conferindo a mesma foto do PDF, "Legião dos Mortos" (nível 6) também
+  parece ter uma diferença — o real usa "nível do espaço de magia
+  gasto + mod. Inteligência" (por conjuração) pro PV extra, não "nível
+  de Mago" fixo como o toggle atual em `PetsTab.tsx` aplica; e o dano
+  bônus tem mínimo de 1, não pode ser 0/negativo. Precisa de bônus
+  variável por conjuração (não um toggle fixo), redesenho maior — fica
+  pra quando o B3b-2 (parte que falta da Legião dos Mortos) for aberto.
+  9 testes Vitest ajustados (removidos os 2 de `ndCriatura`,
+  reescritos os de `curaColheitaDosMortos`/`opcoesColheitaDosMortos`).
+  **Testado no navegador** (Playwright, 390px, Necromante nível 11 com
+  Zumbi convocado, PV reduzido até Ensanguentado): "Colheita dos
+  Mortos" agora mostra "Recupera 11 Pontos de Vida" (nível real do
+  personagem) e aplicar cura de fato +11 PV — sem erro de console.
+  tsc(-b)/testes(373)/build verdes.
 - [ ] **B4 — Poder Funesto, parte sem motor novo.** Recuperação
   Arcana também reduz Exaustão em 1 (reaproveita o campo de Exaustão
   já existente, se houver) e Necrose Avassaladora (dano de Necromancia
