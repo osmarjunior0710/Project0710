@@ -13,6 +13,47 @@
   border-color: var(--accent);
 }
 
+.xpArea {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+/* Toda a área é clicável (pedido do Osmar) — abre o popup de lançar
+   XP (`XpShell.tsx`). Não é um botão de verdade (sem fundo/borda de
+   `.btn`) pra não competir visualmente com a seta ⬆️ de Level Up
+   quando ela aparece. */
+.xpChip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+  min-width: 84px;
+  min-height: var(--touch-target-min);
+  justify-content: center;
+}
+
+.xpBarTrack {
+  width: 100%;
+  height: 6px;
+  border-radius: var(--shape-full);
+  background: var(--panel2);
+  overflow: hidden;
+}
+
+.xpBarFill {
+  height: 100%;
+  background: var(--accent);
+  transition: width var(--motion-standard) var(--ease-standard);
+}
+
+.xpChipLabel {
+  font-size: 10px;
+  color: var(--text-faint);
+  text-align: right;
+}
+
 .hpRow {
   display: flex;
   gap: var(--space-1);

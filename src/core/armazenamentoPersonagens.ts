@@ -231,8 +231,15 @@ export interface PersonagemSalvo {
    * novo. `null`/ausente = nenhuma rolagem pendente. Zerado só quando
    * o Level Up é confirmado (`FichaShell.tsx`, `confirmarLevelUp`).
    * Ver DECISOES-DESIGN.md "Level Up — dado de vida rolado...". */
-  levelUpHpModo?: 'media' | 'rolar' | null;
+  levelUpHpModo?: 'media' | 'rolar' | 'manual' | null;
   levelUpHpRolado?: number | null;
+  /** XP acumulado (marcos de XP, ver `core/experiencia.ts` e
+   * DND-Regras.md) — ausente/undefined = 0 (personagem criado antes
+   * dessa entrega, ou nunca lançou XP). Só usado pra decidir quando a
+   * seta de Level Up aparece; não é obrigatório manter em dia — quem
+   * prefere o "⚡ Inst. Level Up" (menu do avatar) nunca precisa
+   * disso. */
+  xpAtual?: number;
   /** Estado do turno de Combate (Ação/Ação Bônus/Reação: cada um
    * "disponivel" ou "usada") — pedido do Osmar (2026-09): antes só
    * existia em estado do React, então sair da Ficha e voltar resetava

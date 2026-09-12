@@ -321,3 +321,44 @@ pro componente pai que já tem auto-save, não ficar em `useState`
 local do fluxo.
 
 **Data/origem:** 2026-08.
+
+## Level Up — 3ª opção de PV (Valor manual) e XP separado do "raio" de teste
+
+**Valor manual (PV):** além de "Usar a média fixa" e "Rolar", existe
+"Valor manual" — pra quando o dado de vida já foi rolado numa sessão
+de mesa antes de existir a ficha digital. Mesmo mecanismo de trava do
+"Rolar" (ver decisão acima: uma vez confirmado em "Avançar", o passo
+mostra o resultado travado, sem chance de editar de novo) — a única
+diferença é a origem do número (digitado, validado entre 1 e o máximo
+do dado da classe, em vez de sorteado). **Padrão:** o valor digitado
+fica num buffer de texto local (não escreve no estado persistido
+`hpRolado`/`levelUpHpRolado` até "Avançar" confirmar que é válido) —
+evita que o card "trava" (que verifica só `hpRolado !== null`) feche
+o campo de digitação no meio do usuário ainda ajustando o número.
+
+**XP separado do Level Up Rápido:** a aba Atributos tinha um único
+card "nível atual" com 2 botões — ⬆️ (abre o fluxo normal de Level
+Up, sempre disponível) e ⚡ (sobe 1 nível sorteando tudo, ferramenta
+de teste). Viraram 2 conceitos independentes (pedido do Osmar,
+2026-09):
+- **⬆️ agora É gated por XP de verdade** — só aparece quando o XP
+  acumulado bate o marco do próximo nível (`core/experiencia.ts`,
+  regra real em `DND-Regras.md`). A área abaixo dela é uma "barra de
+  XP" clicável (todo o chip, não só um botão) que abre
+  `XpShell.tsx` — popup pra digitar um valor e Adicionar/Remover
+  (nunca "definir" direto, porque o jogador pode ter digitado
+  errado da 1ª vez; Remover desfaz).
+- **⚡ virou "Inst. Level Up"** e mudou de tela — saiu do card da aba
+  Atributos e foi pro menu do avatar (`AvatarMenu.tsx`, onde já mora
+  o "🎲 Modo de Teste"), como uma linha de ação (não um toggle). Faz
+  exatamente o mesmo sorteio de antes, ignorando XP de propósito —
+  continua sendo ferramenta de teste, não regra de jogo.
+
+**Por que separar:** XP acumulado é dado real de progressão (pode
+persistir, pode ser consultado depois); o raio é uma ferramenta de
+desenvolvimento/teste. Misturar os dois no mesmo card confundia qual
+dos 2 é "a regra" e qual é "atalho de teste" — agora a UI já deixa
+isso implícito pela localização (card principal vs. menu de
+preferências/teste do avatar).
+
+**Data/origem:** 2026-09, pedido do Osmar.

@@ -123,8 +123,8 @@ interface LevelUpShellProps {
    * progresso) em vez de estado local — uma vez rolado o dado de
    * vida, fechar o Level Up (ou dar F5) não pode apagar o resultado e
    * abrir margem pra rolar de novo. Ver DECISOES-DESIGN.md. */
-  hpModo: 'media' | 'rolar' | null;
-  onHpModoChange: (modo: 'media' | 'rolar' | null) => void;
+  hpModo: 'media' | 'rolar' | 'manual' | null;
+  onHpModoChange: (modo: 'media' | 'rolar' | 'manual' | null) => void;
   hpRolado: number | null;
   onHpRoladoChange: (valor: number | null) => void;
   /** Truques que o personagem já tem (pré-marcados na tela de escolha
@@ -503,8 +503,17 @@ export default function LevelUpShell({
   const [descobertasMagicasEscolhidas, setDescobertasMagicasEscolhidas] = useState<string[]>(magiasDescobertasMagicasAtuais);
   const [asiEscolhas, setAsiEscolhas] = useState<Atributo[]>([]);
   const [aviso, setAviso] = useAvisoTemporario();
+  // Valor manual (pedido do Osmar) — pra quando o dado de vida já foi
+  // rolado na mesa antes de existir a ficha digital. Fica separado
+  // (não usa `hpRolado` até confirmar em "Avançar") pra não travar o
+  // campo de texto assim que o número digitado ficar válido — o
+  // "travado" (ver JSX) só aparece de verdade depois de avançar.
+  const [hpManualTexto, setHpManualTexto] = useState('');
 
   const media = dadoVidaValor[personagem.dadoVida] + personagem.conMod + personagem.bonusPvPorNivel;
+  const dadoVidaMax = parseInt(personagem.dadoVida.slice(1), 10);
+  const hpManualNumero = parseInt(hpManualTexto, 10);
+  const hpManualValido = Number.isInteger(hpManualNumero) && hpManualNumero >= 1 && hpManualNumero <= dadoVidaMax;
   const pvGanho =
     hpModo === 'media'
       ? media
@@ -512,7 +521,13 @@ export default function LevelUpShell({
         ? hpRolado !== null
           ? hpRolado + personagem.conMod + personagem.bonusPvPorNivel
           : null
-        : null;
+        : hpModo === 'manual'
+          ? hpRolado !== null
+            ? hpRolado + personagem.conMod + personagem.bonusPvPorNivel
+            : hpManualValido
+              ? hpManualNumero + personagem.conMod + personagem.bonusPvPorNivel
+              : null
+          : null;
 
   // Rolagem do dado de vida é definitiva assim que acontece — só roda
   // uma vez, disparada pelo "Avançar" (não por um botão dentro do
@@ -765,6 +780,13 @@ export default function LevelUpShell({
         setAviso(null);
         iniciarRolagemDramatica();
         return;
+      }
+      if (hpModo === 'manual' && hpRolado === null) {
+        if (!hpManualValido) {
+          setAviso(`Digite um valor entre 1 e ${dadoVidaMax} antes de avançar.`);
+          return;
+        }
+        onHpRoladoChange(hpManualNumero);
       }
     }
     if (step === 'subclasse' && subclassesDaClasse.length > 0 && subclasseEscolhida === null) {
@@ -1050,12 +1072,15 @@ export default function LevelUpShell({
             <div className="section-title">Como determinar os novos PV?</div>
             {hpRolado !== null ? (
               <div className="opt-card selected" style={{ cursor: 'default' }}>
-                <div className="opt-card-name">🎲 Dado de vida rolado — resultado travado</div>
+                <div className="opt-card-name">
+                  {hpModo === 'manual' ? '✍️ Valor manual — resultado travado' : '🎲 Dado de vida rolado — resultado travado'}
+                </div>
                 <div className="opt-card-desc">
-                  Rolou <b>{hpRolado}</b> em 1{personagem.dadoVida} + mod. CON ({personagem.conMod >= 0 ? '+' : ''}
+                  {hpModo === 'manual' ? 'Digitou' : 'Rolou'} <b>{hpRolado}</b> em 1{personagem.dadoVida} + mod. CON ({personagem.conMod >= 0 ? '+' : ''}
                   {personagem.conMod})
                   {personagem.bonusPvPorNivel > 0 && ` + ${personagem.bonusPvPorNivelLabel} (+${personagem.bonusPvPorNivel})`} ={' '}
-                  <b>+{hpRolado + personagem.conMod + personagem.bonusPvPorNivel} PV</b>. Não dá pra rolar de novo.
+                  <b>+{hpRolado + personagem.conMod + personagem.bonusPvPorNivel} PV</b>.{' '}
+                  {hpModo === 'manual' ? 'Não dá pra editar de novo.' : 'Não dá pra rolar de novo.'}
                 </div>
               </div>
             ) : (
@@ -1077,6 +1102,32 @@ export default function LevelUpShell({
                     {personagem.bonusPvPorNivel > 0 && ` + ${personagem.bonusPvPorNivelLabel} (+${personagem.bonusPvPorNivel})`} — ao
                     tocar em "Avançar" o dado rola e o resultado é definitivo, sem chance de rolar de novo.
                   </div>
+                </div>
+                <div className={`opt-card ${hpModo === 'manual' ? 'selected' : ''}`} onClick={() => onHpModoChange('manual')}>
+                  <div className="opt-card-name">Valor manual</div>
+                  <div className="opt-card-desc">
+                    Já rolou o dado de vida na mesa (sem ficha digital)? Digite o resultado de 1{personagem.dadoVida}{' '}
+                    (1 a {dadoVidaMax}) — mod. CON ({personagem.conMod >= 0 ? '+' : ''}
+                    {personagem.conMod})
+                    {personagem.bonusPvPorNivel > 0 && ` e ${personagem.bonusPvPorNivelLabel} (+${personagem.bonusPvPorNivel})`} são
+                    somados automaticamente.
+                  </div>
+                  {hpModo === 'manual' && (
+                    <input
+                      className={styles.hpManualInput}
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={dadoVidaMax}
+                      placeholder={`1 a ${dadoVidaMax}`}
+                      value={hpManualTexto}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => {
+                        setHpManualTexto(e.target.value);
+                        setAviso(null);
+                      }}
+                    />
+                  )}
                 </div>
               </>
             )}
