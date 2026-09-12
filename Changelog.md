@@ -5,7 +5,7 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
-## v202609_2253
+## v202609_2256
 
 Multiclasse chegou de verdade: no Level Up, se o personagem já
 qualifica pra multiclassar (atributo 13+ na classe atual e na nova),
@@ -15,6 +15,15 @@ personagem no topo (ex: "Guerreiro 3 / Mago 2"), com PV somando as
 duas e um seletor pra trocar qual classe está "em foco" (decide o que
 aparece em Magias/recursos de classe). Personagem que só tem 1 classe
 (todos até agora) não muda em nada.
+
+## v202609_1757
+
+Protótipo do dado 3D ganhou customização — botão "🎨 Customizar" no
+canto superior esquerdo do overlay, com 2 seletores: Textura (9
+opções, incluindo Padrão) e Cor (8 cores prontas). A escolha vale só
+enquanto a tela do dado tá aberta, não fica salva ainda. Textura e cor
+não afetam nenhuma rolagem de verdade — é só pra você escolher quais
+texturas fazem sentido manter na versão final.
 
 ## v202609_1734
 

@@ -12,6 +12,42 @@ const MAX_LOG = 20;
 const LOG_VISIVEIS = 5;
 const LOG_ALTURA_ITEM_PX = 52;
 
+// [PH] Todas as texturas do pacote oficial @3d-dice/dice-themes (ver
+// DECISOES-COMBATE.md) — pedido do Osmar foi colocar todas pra ele
+// escolher quais ficam na versão final. `suportaCor` = tema de
+// material "color" (aceita tingimento via themeColor); os outros têm
+// aparência fixa e ignoram a cor escolhida.
+interface TemaOpcao {
+  id: string;
+  nome: string;
+  suportaCor: boolean;
+}
+
+const TEMAS: TemaOpcao[] = [
+  { id: 'default', nome: '[PH] Padrão', suportaCor: true },
+  { id: 'smooth', nome: '[PH] Liso', suportaCor: true },
+  { id: 'gemstone', nome: '[PH] Gema', suportaCor: true },
+  { id: 'rock', nome: '[PH] Pedra', suportaCor: true },
+  { id: 'rust', nome: '[PH] Ferrugem', suportaCor: true },
+  { id: 'gemstoneMarble', nome: '[PH] Mármore de Gema', suportaCor: false },
+  { id: 'blueGreenMetal', nome: '[PH] Metal Azul/Verde', suportaCor: false },
+  { id: 'diceOfRolling', nome: '[PH] Dado de Mesa', suportaCor: false },
+  { id: 'wooden', nome: '[PH] Madeira', suportaCor: false },
+];
+
+// [PH] Primárias + secundárias + preto/branco — lista fixa pronta em
+// vez de um seletor de cor livre (mais rápido de usar no celular).
+const CORES = [
+  { nome: '[PH] Vermelho', hex: '#c0392b' },
+  { nome: '[PH] Azul', hex: '#2e6da4' },
+  { nome: '[PH] Amarelo', hex: '#d4ac0d' },
+  { nome: '[PH] Verde', hex: '#2e8555' },
+  { nome: '[PH] Laranja', hex: '#d4690d' },
+  { nome: '[PH] Roxo', hex: '#7d3c98' },
+  { nome: '[PH] Preto', hex: '#1c1c1c' },
+  { nome: '[PH] Branco', hex: '#f2f2f2' },
+] as const;
+
 interface RegistroLog {
   id: string;
   /** Nome da perícia OU "Rolagem de NdX + ..." quando não simula perícia. */
@@ -44,8 +80,13 @@ export default function Dice3dFab() {
   const [selecoes, setSelecoes] = useState<Partial<Record<TipoDado, number>>>({});
   const [logs, setLogs] = useState<RegistroLog[]>([]);
   const [logAberto, setLogAberto] = useState(false);
+  const [temaId, setTemaId] = useState(TEMAS[0].id);
+  const [corHex, setCorHex] = useState<string>(CORES[0].hex);
+  const [customAberto, setCustomAberto] = useState(false);
   const diceBoxRef = useRef<DiceBox | null>(null);
   const carregandoPromiseRef = useRef<Promise<DiceBox> | null>(null);
+
+  const temaAtual = TEMAS.find((t) => t.id === temaId) ?? TEMAS[0];
 
   const totalSelecionado = Object.values(selecoes).reduce((acc, n) => acc + (n ?? 0), 0);
 
@@ -92,6 +133,17 @@ export default function Dice3dFab() {
     setLogs((prev) => [{ ...entrada, id: `${Date.now()}-${Math.random()}` }, ...prev].slice(0, MAX_LOG));
   }
 
+  // `roll()` acessa os dados do tema de forma síncrona — precisa
+  // garantir que ele já foi baixado/carregado antes (idempotente, só
+  // baixa de verdade na 1ª vez que cada tema é escolhido).
+  async function garantirTema(box: DiceBox) {
+    await box.loadTheme(temaId);
+  }
+
+  function opcoesRolagem(): { theme: string; themeColor: string } {
+    return { theme: temaId, themeColor: corHex };
+  }
+
   // [PH] Simula uma rolagem de perícia — o protótipo ainda não sabe de
   // atributo/perícia de verdade, então sorteia uma perícia e um
   // modificador só pra testar o formato do log (ver pedido do Osmar).
@@ -108,6 +160,7 @@ export default function Dice3dFab() {
       sorteio < 0.55 ? 'normal' : sorteio < 0.7 ? 'vantagem' : sorteio < 0.85 ? 'desvantagem' : 'reroll';
     try {
       const box = await carregar();
+      await garantirTema(box);
       if (modo === 'normal') {
         box.onRollComplete = (resultados) => {
           const v = resultados[0].value;
@@ -115,7 +168,7 @@ export default function Dice3dFab() {
           setResultado(total);
           adicionarLog({ titulo: pericia, valores: [v], total, partesTotal: [v, modificador] });
         };
-        box.roll('1d20');
+        box.roll('1d20', opcoesRolagem());
       } else {
         box.onRollComplete = (resultados) => {
           const [v1, v2] = resultados.map((r) => r.value);
@@ -135,7 +188,7 @@ export default function Dice3dFab() {
           setResultado(total);
           adicionarLog({ titulo: pericia, valores: [v1, v2], tag, total, partesTotal: [mantido, modificador] });
         };
-        box.roll(['1d20', '1d20']);
+        box.roll(['1d20', '1d20'], opcoesRolagem());
       }
     } catch (e) {
       setCarregando(false);
@@ -157,13 +210,14 @@ export default function Dice3dFab() {
     const titulo = `Rolagem de ${notacoes.join(' + ')}`;
     try {
       const box = await carregar();
+      await garantirTema(box);
       box.onRollComplete = (resultados) => {
         const valores = resultados.map((r) => r.value);
         const total = valores.reduce((acc, v) => acc + v, 0);
         setResultado(total);
         adicionarLog({ titulo, valores, total, partesTotal: valores });
       };
-      box.roll(notacoes.length === 1 ? notacoes[0] : notacoes);
+      box.roll(notacoes.length === 1 ? notacoes[0] : notacoes, opcoesRolagem());
     } catch (e) {
       setCarregando(false);
       setErro(e instanceof Error ? e.message : 'Erro desconhecido ao carregar o dado 3D.');
@@ -204,6 +258,7 @@ export default function Dice3dFab() {
   function fechar() {
     setAberto(false);
     setLogAberto(false);
+    setCustomAberto(false);
   }
 
   const labelBotaoMultiplo = !modoMultiplo
@@ -223,8 +278,56 @@ export default function Dice3dFab() {
         <div id="dice3d-canvas-host" className={styles.canvasHost} />
         {aberto && (
           <>
+            <div
+              className={styles.customToggle}
+              onClick={() => {
+                setCustomAberto((v) => !v);
+                setLogAberto(false);
+              }}
+            >
+              [PH] 🎨 Customizar
+            </div>
+            {customAberto && (
+              <div className={styles.customPanel}>
+                <label className={styles.customLabel}>
+                  [PH] Textura
+                  <select
+                    className={styles.customSelect}
+                    value={temaId}
+                    onChange={(e) => setTemaId(e.target.value)}
+                  >
+                    {TEMAS.map((tema) => (
+                      <option key={tema.id} value={tema.id}>
+                        {tema.nome}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className={styles.customLabel}>
+                  [PH] Cor{!temaAtual.suportaCor && ' (essa textura não muda de cor)'}
+                  <select
+                    className={styles.customSelect}
+                    value={corHex}
+                    disabled={!temaAtual.suportaCor}
+                    onChange={(e) => setCorHex(e.target.value)}
+                  >
+                    {CORES.map((cor) => (
+                      <option key={cor.hex} value={cor.hex}>
+                        {cor.nome}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            )}
             {logs.length > 0 && (
-              <div className={styles.logToggle} onClick={() => setLogAberto((v) => !v)}>
+              <div
+                className={styles.logToggle}
+                onClick={() => {
+                  setLogAberto((v) => !v);
+                  setCustomAberto(false);
+                }}
+              >
                 [PH] 📜 Log ({logs.length})
               </div>
             )}

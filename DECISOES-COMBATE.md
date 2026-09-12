@@ -873,5 +873,34 @@ lista nova — regra da seção 6.1 do CLAUDE.md). Formato de cada linha,
    na ordem de tiragem, Total = soma direta de todos. Exemplo:
    `Rolagem de 2d6 + 1d10: 7 | 9` / `Total: 16 (7 + 9)`.
 
+**Customização de textura/cor (não salva, só dura enquanto o overlay
+tá aberto):** botão "🎨 Customizar" no canto superior esquerdo abre 2
+`<select>` — Textura e Cor. Osmar pediu pra colocar TODAS as texturas
+do pacote oficial `@3d-dice/dice-themes` (não instalado como
+dependência — só os assets de cada tema foram copiados manualmente pra
+`public/assets/themes/<nome>/`, do jeito que a lib espera, MIT license
+do pacote original preservada aqui como crédito) pra ele escolher quais
+ficam na versão final: Padrão, Liso, Gema, Pedra, Ferrugem (essas 5
+aceitam tingimento de cor — material tipo `"color"` no
+`theme.config.json`), Mármore de Gema, Metal Azul/Verde, Dado de Mesa e
+Madeira (essas 4 têm aparência fixa, tipo `"standard"` — o `<select>`
+de cor fica desabilitado quando uma dessas está escolhida). Cor é uma
+lista fixa (primárias + secundárias + preto/branco, 8 no total) em vez
+de um seletor de cor livre — mais rápido de usar no celular.
+
+**Armadilha técnica:** `box.roll()` lê os dados do tema **de forma
+síncrona** — se o tema escolhido ainda não foi carregado nessa sessão,
+quebra. Precisa chamar e `await`ar `box.loadTheme(id)` antes de todo
+`roll()` que usa tema diferente do carregado no `init()` (idempotente,
+1ª vez baixa de verdade, depois só retorna o cache). Tema/cor são
+passados por chamada (`box.roll(notacao, {theme, themeColor})`), não
+no construtor — dá pra trocar sem recriar a `DiceBox`.
+
+**Custo:** cada textura nova baixa só quando escolhida pela 1ª vez
+(lazy, igual os tipos de dado). Tamanho por textura varia bastante —
+Liso/Gema ficam entre 65-135 KB, mas Pedra e Ferrugem vêm com texturas
+em resolução bem mais alta no pacote original (~900 KB e ~665 KB) —
+vale considerar isso na escolha final de quais ficam.
+
 **Data/origem:** 2026-09, pedido do Osmar.
 
