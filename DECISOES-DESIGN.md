@@ -606,3 +606,60 @@ regra de D&D mas gerenciam o resultado de formas diferentes, extrair
 só o CÁLCULO/DECISÃO pra uma função pura em `core/` que todas chamam —
 não tentar unificar a gestão de estado junto, a menos que ela também
 seja genuinamente igual.
+
+## Componente gigante com N cópias do mesmo par `useState`+`toggle` — hook genérico com predicados, não migração de formato salvo
+
+**Achado (foco "Saúde do projeto", 2026-09):** `FichaShell.tsx` e
+`LevelUpShell.tsx` (os 2 maiores componentes do app) acumulavam dezenas
+de `useState` quase idênticos — cada recurso "gasto" (Conhecimento de
+Pedras, Ancestralidade Gigante, etc.) ou passo de "escolha de N itens"
+do Level Up (Truques, Magias Preparadas, Invocações Místicas,
+Proficiências Bônus...) repetia a MESMA forma (`useState` + função que
+soma/remove até um máximo, com sua própria regra de quando travar).
+Cada classe/subclasse nova de D&D 5e adiciona mais cópias — sem
+abstração, o arquivo só cresce.
+
+**Decisão:** consolidar em hooks genéricos que embrulham o `useState`
+já existente, com o comportamento específico de cada caso passado
+como CALLBACK opcional (não hardcoded no hook) — nunca migrar o
+FORMATO salvo (`PersonagemSalvo`) nem forçar os casos únicos/especiais
+pra caber no padrão:
+- `recursoContado`/`recursoFlagUnica` (`src/ui/ficha/hooks/recursoGasto.ts`)
+  — embrulha um par `useState` de contador/flag já existente, devolve
+  `{restantes, disponivel, usar}`.
+- `useEscolhaMultipla` (`src/ui/ficha/hooks/useEscolhaMultipla.ts`) —
+  `useState<string[]>` + `toggle` com `max` e 3 predicados opcionais
+  (`bloqueado(nome)`, `podeRemover(nome, escolhidos)`,
+  `podeAdicionar(nome, escolhidos)`) — os 3 cobrem toda variação real
+  encontrada (trava simples por nome já conhecido, ou trava que
+  depende do conjunto atual, caso de cadeia de dependência de
+  Invocações Místicas).
+- `caracteristicasSubclasseAtivas` — consolida N chamadas de
+  `caracteristicaSubclasseDesbloqueada(subclasse, ID, nível)` (só o ID
+  muda) numa função que devolve um mapa, desestruturado com os MESMOS
+  nomes locais de sempre.
+
+**Padrão a repetir:**
+1. Ler o componente inteiro antes de mexer — o levantamento de fora
+   costuma subestimar a extensão real da duplicação (e às vezes
+   superestimar: um "hook genérico" pode esconder uma migração de
+   formato salvo bem maior/arriscada, ver `recursoContado` acima e o
+   item de Backlog sobre isso).
+2. Extrair o hook com os MESMOS nomes locais desestruturados na saída
+   — o resto do componente (JSX, validações, `onConfirmar`) não
+   precisa mudar nada além da declaração.
+3. Deixar de fora, de propósito, os `useState` que só PARECEM
+   parecidos mas têm lógica própria demais (ex.: Forma Grande, Astúcia
+   Mágica, Arcana Mística) — forçar abstração nesses é pior que
+   manter a cópia.
+4. Rede de segurança: `tsc -b --force` (pega toda desestruturação/
+   import que sobrou morto ou com nome errado) + Playwright de ponta a
+   ponta clicando o fluxo de verdade (Level Up completo, ou a
+   característica em Combat) — esse tipo de refactor não tem teste
+   Vitest (não é `core/`, é estado de React) nem UI nova pra descrever
+   ao Osmar, então a validação É a demonstração ao vivo.
+5. Quando a mesma vasculhada encontrar um caso onde os props/campos
+   também poderiam ser agrupados (não só a lógica de toggle) mas isso
+   mudaria o CONTRATO entre 2 componentes (props de um pra outro, ou
+   formato salvo) — tratar como um refactor à parte, de escopo/risco
+   maior, não emendar na mesma entrega (ver Backlog.md).

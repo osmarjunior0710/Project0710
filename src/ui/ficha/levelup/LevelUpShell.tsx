@@ -24,7 +24,6 @@ import { pericias } from '../../../data/rulesets/dnd2024/pericias';
 import { valorRecursoClasse } from '../../../core/recursosClasse';
 import {
   agruparMagiasPorCirculo,
-  contarTrocas,
   espacosDeMagiaAtivos,
   usaRedefinicaoPorDescanso,
 } from '../../../core/magiasPersonagem';
@@ -49,6 +48,7 @@ import { opcoesMagiaEscolhidaPorEscola, opcoesMagiasRituais, quantidadeMagiasRit
 import { opcoesPericiaRestrita } from '../../../core/periciaTalentoGeral';
 import TelaEscolherTalento from './TelaEscolherTalento';
 import TrocarValorSimples from '../../components/TrocarValorSimples';
+import { useEscolhaMultipla } from '../hooks/useEscolhaMultipla';
 import styles from './LevelUpShell.module.css';
 
 export interface PersonagemNivel {
@@ -273,6 +273,10 @@ export default function LevelUpShell({
   const descobertasMagicasCatalogo = poolDescobertasMagicas.filter(
     (m) => m.circulo === 0 || m.circulo <= circuloMaximoNovoNivel,
   );
+  // Descobertas Mágicas: sempre 2 (número fixo da própria
+  // característica, não escala com nível — diferente de Truques/Magias
+  // Preparadas), trocável 1 por level-up, mesmo padrão de Truques.
+  const MAX_DESCOBERTAS_MAGICAS = 2;
   // Especialista não é uma tabela por nível (não tem coluna numérica
   // na planilha) — a regra real é sempre "+2 perícias por gatilho"
   // (confirmado na descrição da característica), por isso o incremento
@@ -490,17 +494,73 @@ export default function LevelUpShell({
   const [faseDramatica, setFaseDramatica] = useState<FaseDramatica>('idle');
   const [valorDadoAnimado, setValorDadoAnimado] = useState<number | null>(null);
   const [estiloDeLutaEscolhido, setEstiloDeLutaEscolhido] = useState<string | null>(personagem.estiloDeLuta);
-  const [truquesEscolhidos, setTruquesEscolhidos] = useState<string[]>(truquesAtuais);
-  const [livroDeMagiasEscolhido, setLivroDeMagiasEscolhido] = useState<string[]>(livroDeMagiasAtuais);
+  // 8 passos de "escolha múltipla com máximo" (G4.1 do foco de saúde do
+  // projeto, ver `EmDevB.md`/`useEscolhaMultipla.ts`) — cada um mantém
+  // os MESMOS nomes locais de sempre, só a implementação da escolha em
+  // si veio pro hook.
+  const {
+    escolhidos: truquesEscolhidos,
+    toggle: toggleTruque,
+    trocas: trocasDeTruque,
+  } = useEscolhaMultipla(truquesAtuais, maxTruques, {
+    // Mago (usaRedefPorDescanso): truque já conhecido é travado aqui —
+    // a troca dele é só no Descanso Longo, não no Level Up.
+    bloqueado: (nome) => usaRedefPorDescanso && truquesAtuais.includes(nome),
+  });
+  const { escolhidos: livroDeMagiasEscolhido, toggle: toggleLivroDeMagias } = useEscolhaMultipla(
+    livroDeMagiasAtuais,
+    maxLivroDeMagias,
+    // Grimório nunca perde magia — item já conhecido fica travado.
+    { bloqueado: (nome) => livroDeMagiasAtuais.includes(nome) },
+  );
   // Perito em Necromancia — pura adição, esvazia a cada level-up (as
   // escolhas de level-ups anteriores já viraram parte permanente de
   // `livroDeMagiasAtuais`, não precisam ser re-rastreadas aqui).
-  const [peritoNecromanciaEscolhidas, setPeritoNecromanciaEscolhidas] = useState<string[]>([]);
-  const [magiasPreparadasEscolhidas, setMagiasPreparadasEscolhidas] = useState<string[]>(magiasPreparadasAtuais);
-  const [invocacoesEscolhidas, setInvocacoesEscolhidas] = useState<string[]>(invocacoesMisticasAtuais);
-  const [especialistaEscolhidas, setEspecialistaEscolhidas] = useState<string[]>(periciasEspecialistaAtuais);
-  const [proficienciasBonusEscolhidas, setProficienciasBonusEscolhidas] = useState<string[]>(periciasSubclasseBonusAtuais);
-  const [descobertasMagicasEscolhidas, setDescobertasMagicasEscolhidas] = useState<string[]>(magiasDescobertasMagicasAtuais);
+  const { escolhidos: peritoNecromanciaEscolhidas, toggle: togglePeritoNecromancia } = useEscolhaMultipla(
+    [],
+    magiasPeritoNecromanciaBonusNesteNivel,
+  );
+  const {
+    escolhidos: magiasPreparadasEscolhidas,
+    toggle: toggleMagiaPreparada,
+    trocas: trocasDeMagia,
+  } = useEscolhaMultipla(magiasPreparadasAtuais, maxMagiasPreparadas, {
+    // Mago (usaRedefPorDescanso): magia já preparada é travada aqui —
+    // a redefinição livre é só no Descanso Longo, não no Level Up.
+    bloqueado: (nome) => usaRedefPorDescanso && magiasPreparadasAtuais.includes(nome),
+  });
+  const {
+    escolhidos: invocacoesEscolhidas,
+    toggle: toggleInvocacao,
+    trocas: trocasDeInvocacao,
+  } = useEscolhaMultipla(invocacoesMisticasAtuais, maxInvocacoes, {
+    // Não deixa remover uma invocação que ainda serve de requisito pra
+    // outra que continua marcada (regra real: precisa desmontar a
+    // cadeia de trás pra frente, 1 troca por level-up).
+    podeRemover: (id, escolhidos) => invocacoesQueDependemDe(id, escolhidos).length === 0,
+    podeAdicionar: (id, escolhidos) => {
+      const inv = invocacoesCatalogo.find((c) => c.id === id);
+      return !inv || !invocacaoBloqueadaPorRequisitoAusente(inv, escolhidos);
+    },
+  });
+  // Especialista é só ADIÇÃO — nunca substitui uma perícia já
+  // especializada (diferente de Truques/Magias Preparadas, que podem
+  // trocar 1 por level-up), então o `toggle` nem deixa desmarcar o que
+  // já veio de um nível anterior.
+  const { escolhidos: especialistaEscolhidas, toggle: toggleEspecialista } = useEscolhaMultipla(
+    periciasEspecialistaAtuais,
+    maxEspecialista,
+    { bloqueado: (nome) => periciasEspecialistaAtuais.includes(nome) },
+  );
+  const { escolhidos: proficienciasBonusEscolhidas, toggle: toggleProficienciaBonus } = useEscolhaMultipla(
+    periciasSubclasseBonusAtuais,
+    3,
+  );
+  const {
+    escolhidos: descobertasMagicasEscolhidas,
+    toggle: toggleDescobertaMagica,
+    trocas: trocasDeDescobertaMagica,
+  } = useEscolhaMultipla(magiasDescobertasMagicasAtuais, MAX_DESCOBERTAS_MAGICAS);
   const [asiEscolhas, setAsiEscolhas] = useState<Atributo[]>([]);
   const [aviso, setAviso] = useAvisoTemporario();
   // Valor manual (pedido do Osmar) — pra quando o dado de vida já foi
@@ -554,34 +614,8 @@ export default function LevelUpShell({
     setLuIndex((i) => i + 1);
   }
 
-  function toggleTruque(nome: string) {
-    // Mago (usaRedefPorDescanso): truque já conhecido é travado aqui —
-    // a troca dele é só no Descanso Longo, não no Level Up.
-    if (usaRedefPorDescanso && truquesAtuais.includes(nome)) return;
-    const i = truquesEscolhidos.indexOf(nome);
-    if (i > -1) {
-      setTruquesEscolhidos((prev) => prev.filter((x) => x !== nome));
-      return;
-    }
-    if (truquesEscolhidos.length < maxTruques) setTruquesEscolhidos((prev) => [...prev, nome]);
-  }
-
-  const trocasDeTruque = contarTrocas(truquesAtuais, truquesEscolhidos);
   const truquesValido =
     truquesEscolhidos.length === maxTruques && trocasDeTruque <= (usaRedefPorDescanso ? 0 : 1);
-
-  function toggleLivroDeMagias(nome: string) {
-    // Grimório nunca perde magia — item já conhecido fica travado.
-    if (livroDeMagiasAtuais.includes(nome)) return;
-    const i = livroDeMagiasEscolhido.indexOf(nome);
-    if (i > -1) {
-      setLivroDeMagiasEscolhido((prev) => prev.filter((x) => x !== nome));
-      return;
-    }
-    if (livroDeMagiasEscolhido.length < maxLivroDeMagias) {
-      setLivroDeMagiasEscolhido((prev) => [...prev, nome]);
-    }
-  }
 
   const livroDeMagiasValido = livroDeMagiasEscolhido.length === maxLivroDeMagias;
 
@@ -591,69 +625,13 @@ export default function LevelUpShell({
   const poolPeritoNecromancia = catalogoPeritoNecromancia(circuloMaximoNovoNivel).filter(
     (m) => !livroDeMagiasEscolhido.includes(m.nome),
   );
-  function togglePeritoNecromancia(nome: string) {
-    const i = peritoNecromanciaEscolhidas.indexOf(nome);
-    if (i > -1) {
-      setPeritoNecromanciaEscolhidas((prev) => prev.filter((x) => x !== nome));
-      return;
-    }
-    if (peritoNecromanciaEscolhidas.length < magiasPeritoNecromanciaBonusNesteNivel) {
-      setPeritoNecromanciaEscolhidas((prev) => [...prev, nome]);
-    }
-  }
   const peritoNecromanciaValido = peritoNecromanciaEscolhidas.length === magiasPeritoNecromanciaBonusNesteNivel;
 
-  function toggleInvocacao(id: string) {
-    const i = invocacoesEscolhidas.indexOf(id);
-    if (i > -1) {
-      // Não deixa remover uma invocação que ainda serve de requisito
-      // pra outra que continua marcada (regra real: precisa desmontar
-      // a cadeia de trás pra frente, 1 troca por level-up).
-      if (invocacoesQueDependemDe(id, invocacoesEscolhidas).length > 0) return;
-      setInvocacoesEscolhidas((prev) => prev.filter((x) => x !== id));
-      return;
-    }
-    const inv = invocacoesCatalogo.find((c) => c.id === id);
-    if (inv && invocacaoBloqueadaPorRequisitoAusente(inv, invocacoesEscolhidas)) return;
-    if (invocacoesEscolhidas.length < maxInvocacoes) setInvocacoesEscolhidas((prev) => [...prev, id]);
-  }
-
-  const trocasDeInvocacao = contarTrocas(invocacoesMisticasAtuais, invocacoesEscolhidas);
   const invocacoesValido = invocacoesEscolhidas.length === maxInvocacoes && trocasDeInvocacao <= 1;
 
-  // Descobertas Mágicas: sempre 2 (número fixo da própria
-  // característica, não escala com nível — diferente de Truques/Magias
-  // Preparadas), trocável 1 por level-up, mesmo padrão de Truques.
-  const MAX_DESCOBERTAS_MAGICAS = 2;
-  function toggleDescobertaMagica(nome: string) {
-    const i = descobertasMagicasEscolhidas.indexOf(nome);
-    if (i > -1) {
-      setDescobertasMagicasEscolhidas((prev) => prev.filter((x) => x !== nome));
-      return;
-    }
-    if (descobertasMagicasEscolhidas.length < MAX_DESCOBERTAS_MAGICAS) {
-      setDescobertasMagicasEscolhidas((prev) => [...prev, nome]);
-    }
-  }
-  const trocasDeDescobertaMagica = contarTrocas(magiasDescobertasMagicasAtuais, descobertasMagicasEscolhidas);
   const descobertasMagicasValido =
     descobertasMagicasEscolhidas.length === MAX_DESCOBERTAS_MAGICAS && trocasDeDescobertaMagica <= 1;
 
-  function toggleMagiaPreparada(nome: string) {
-    // Mago (usaRedefPorDescanso): magia já preparada é travada aqui —
-    // a redefinição livre é só no Descanso Longo, não no Level Up.
-    if (usaRedefPorDescanso && magiasPreparadasAtuais.includes(nome)) return;
-    const i = magiasPreparadasEscolhidas.indexOf(nome);
-    if (i > -1) {
-      setMagiasPreparadasEscolhidas((prev) => prev.filter((x) => x !== nome));
-      return;
-    }
-    if (magiasPreparadasEscolhidas.length < maxMagiasPreparadas) {
-      setMagiasPreparadasEscolhidas((prev) => [...prev, nome]);
-    }
-  }
-
-  const trocasDeMagia = contarTrocas(magiasPreparadasAtuais, magiasPreparadasEscolhidas);
   const magiasPreparadasValido =
     magiasPreparadasEscolhidas.length === maxMagiasPreparadas && trocasDeMagia <= (usaRedefPorDescanso ? 0 : 1);
   // Mago só pode preparar o que já está no grimório (escolhido no passo
@@ -666,20 +644,6 @@ export default function LevelUpShell({
       )
     : magiasPreparadasDaClasse;
 
-  // Especialista é só ADIÇÃO — nunca substitui uma perícia já
-  // especializada (diferente de Truques/Magias Preparadas, que podem
-  // trocar 1 por level-up), então `toggle` nem deixa desmarcar o que
-  // já veio de um nível anterior.
-  function toggleEspecialista(nome: string) {
-    if (periciasEspecialistaAtuais.includes(nome)) return;
-    const i = especialistaEscolhidas.indexOf(nome);
-    if (i > -1) {
-      setEspecialistaEscolhidas((prev) => prev.filter((x) => x !== nome));
-      return;
-    }
-    if (especialistaEscolhidas.length < maxEspecialista) setEspecialistaEscolhidas((prev) => [...prev, nome]);
-  }
-
   const especialistaValido = especialistaEscolhidas.length === maxEspecialista;
 
   // Proficiências Bônus (Colégio do Conhecimento, nível 3): escolha
@@ -687,15 +651,6 @@ export default function LevelUpShell({
   // proficiente — nunca aparece de novo depois de confirmada (ver
   // condição de `luSteps` acima).
   const periciasNaoProficientes = pericias.filter((p) => !periciasProficientesDoPersonagem.includes(p.nome)).map((p) => p.nome);
-
-  function toggleProficienciaBonus(nome: string) {
-    const i = proficienciasBonusEscolhidas.indexOf(nome);
-    if (i > -1) {
-      setProficienciasBonusEscolhidas((prev) => prev.filter((x) => x !== nome));
-      return;
-    }
-    if (proficienciasBonusEscolhidas.length < 3) setProficienciasBonusEscolhidas((prev) => [...prev, nome]);
-  }
 
   const proficienciasBonusValido = proficienciasBonusEscolhidas.length === 3;
 

@@ -5,6 +5,23 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1737
+
+Arrumação interna, nada novo pra ver na tela: os passos de escolha do
+Level Up (Truques, Magias Preparadas, Especialista, Proficiências
+Bônus, Invocações Místicas, Descobertas Mágicas, Livro de Magias,
+Perito em Necromancia) foram organizados numa peça só do motor
+interno, sem mudar nenhuma regra — Level Up continua funcionando
+exatamente igual.
+
+## v202609_1713
+
+Arrumação interna, nada novo pra ver na tela: os ~50 valores de magia/
+conjuração que ficavam soltos no meio da ficha (Espaços de Magia,
+Truques, magias preparadas, etc.) foram organizados numa peça só do
+motor interno, sem mudar nenhum cálculo. Fecha o levantamento de saúde
+do projeto (G1-G3) antes de começar a próxima classe.
+
 ## v202609_1656
 
 Nova ferramenta de teste: menu do avatar (👤) ganhou "🕰️ Voltar pra
