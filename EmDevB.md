@@ -64,10 +64,16 @@ do teto de 600-800 linhas/15-20 entradas (seção 7.1). Reescrever
 cortando narrativa de entrega/teste, mantendo só o padrão
 generalizado — mesmo processo já usado na compactação de 2026-09.
 
-- [ ] **G2.1** — `DECISOES-DESIGN.md`
-- [ ] **G2.2** — `DECISOES-CLASSES.md`
-- [ ] **G2.3** — `DECISOES-COMBATE.md`
-- [ ] **G2.4** — `DECISOES-DADOS.md`
+- [x] **G2.1** — `DECISOES-DESIGN.md`: 1487→608 linhas.
+- [x] **G2.2** — `DECISOES-CLASSES.md`: 1160→868 linhas.
+- [x] **G2.3** — `DECISOES-COMBATE.md`: 906→353 linhas.
+- [x] **G2.4** — `DECISOES-DADOS.md`: 808→415 linhas.
+
+Feito em paralelo (1 agente por arquivo, mesmas regras da seção 7.1),
+com checagem manual em cada um confirmando que nenhum padrão técnico,
+nome de arquivo/função, ou dívida técnica conhecida foi perdido — só
+narrativa de entrega/status. `tsc -b`/`npm test`/`npm run build`
+limpos depois de cada publicação. **G2 fechado.**
 
 ### G3 — Extrair hooks de `FichaShell.tsx` (1956 linhas, a peça maior)
 
@@ -77,17 +83,45 @@ Combat) — sem abstração de "quais características este personagem tem
 ativas". Faltam ainda 10 classes + ~35 subclasses; resolver agora
 custa bem menos que resolver depois de mais classes empilhadas.
 
-- [ ] **G3.1** — `useAutosavePersonagem`: isolar o `useEffect` de
-      autosave (~130 linhas, ~50 dependências) do `FichaShell.tsx`.
-- [ ] **G3.2** — `useRecursosDeClasse`: hook genérico
-      `{disponivel, maximo, restantes, usar}` parametrizado por id de
-      recurso, substituindo as ~15 cópias quase idênticas de
-      useState+disponível+máximo+restantes+usar.
+- [x] **G3.1** — `useAutosavePersonagem` (`src/ui/ficha/hooks/`):
+      isolado o `useEffect` de autosave (objeto salvo + array de
+      dependências continuam montados no `FichaShell`, exatamente
+      como antes — só o `useEffect` em si mudou de arquivo, pra não
+      mudar a cadência de quando o save dispara). Verificado com
+      `tsc -b`/`npm test` (495)/`npm run build` limpos + teste de
+      ponta a ponta no navegador (mudei PV pela aba Combate, recarreguei
+      a página, valor persistiu igual antes).
+
+**Achado ao ler o arquivo inteiro antes de mexer (importante pra quem
+retomar isso depois):** o levantamento inicial descreveu G3.2 como "1
+hook genérico substituindo as cópias de recurso" — na prática, cada
+"recurso" (Conhecimento de Pedras, Ancestralidade Gigante, etc.) tem
+sua regra de recuperação PRÓPRIA (alguns só no Descanso Longo, alguns
+Curto+Longo, alguns decrementam em vez de zerar) espalhada em 3 lugares
+diferentes que precisam concordar: o `useState`, `descansoCurto`/
+`descansoLongo` (que zeram/decrementam CADA campo por nome, um por
+um), e o autosave (G3.1). Um hook genérico de verdade exigiria unificar
+os 3 lugares numa única estrutura de dado (`Record` de recursos em vez
+de ~20 campos soltos em `PersonagemSalvo`), o que muda o FORMATO
+salvo — precisaria de migração pra personagem já salvo, e é um projeto
+bem maior/mais arriscado do que "extrair um hook". Decisão: **não**
+fazer essa versão profunda agora (registrada no Backlog.md pra quando
+fizer sentido investir nisso) — G3.2 vira a versão mais segura abaixo,
+que ainda reduz duplicação real sem tocar no formato salvo.
+
+- [ ] **G3.2 (re-escopado)** — `useContadorGasto`/`useFlagGasta`: 2
+      hooks pequenos que embrulham CADA par `useState` de recurso já
+      existente (sem mudar o formato salvo) e devolvem
+      `{restantes, disponivel, usar}` ou `{gasta, usar}` — elimina a
+      duplicação das ~15 funções `usarX` quase idênticas, sem tocar
+      em `descansoCurto`/`descansoLongo`/autosave.
 - [ ] **G3.3** — `useMagiasPersonagem`: os ~40 `const magias*`/
-      `truques*` espalhados pelo componente.
-- [ ] **G3.4** — Mecanismo genérico de "características de subclasse
-      ativas" — substitui as 11 constantes manuais tipo
-      `caracteristicaSubclasseDesbloqueada`/`legiaoDosMortosDisponivel`.
+      `truques*` espalhados pelo componente, extraídos como 1 hook de
+      derivação pura (mesmas entradas → mesmo objeto de saída).
+- [ ] **G3.4** — Consolida os ~11 `caracteristicaSubclasseDesbloqueada(...)`
+      chamados um por um (mesmo padrão, ID diferente) num único
+      helper que recebe a lista de IDs e devolve um mapa
+      `{chave: boolean}` — também derivação pura, sem mudar estado.
 
 ### G4 — Avaliar depois de G3 (pode reaproveitar os hooks novos)
 

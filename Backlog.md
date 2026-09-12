@@ -7,6 +7,33 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
+## `FichaShell.tsx` — registro genérico de recursos "gastos" (2026-09)
+
+Achado durante o foco de saúde do projeto (G3, ver `EmDevB.md`): cada
+recurso de subclasse/espécie que "gasta e recupera" (Conhecimento de
+Pedras, Ancestralidade Gigante, Ataque de Sopro, etc. — hoje ~20)
+precisa de 3 lugares concordando por nome de campo: o `useState`
+próprio, uma linha em `descansoCurto`/`descansoLongo` resetando ESSE
+campo (cada um com sua regra própria — só Longo, Curto+Longo,
+decrementa em vez de zerar), e o payload do autosave. Isso é o que
+faz cada classe/espécie nova custar mais que a anterior.
+
+**A versão que resolveria de vez:** trocar os ~20 campos soltos em
+`PersonagemSalvo` por 1 `Record<string, EstadoRecurso>` genérico, com
+metadado de recuperação (`recuperaEm: 'curto' | 'longo' | 'ambos'`,
+`tipo: 'contador' | 'booleano'`) que `descansoCurto`/`descansoLongo`
+percorrem em loop (sem listar campo por campo) e o autosave salva de
+uma vez (sem listar campo por campo). Isso muda o FORMATO salvo —
+precisa de migração pra personagem já salvo (mesmo padrão já usado
+outras vezes no projeto, ex: migração de `espacosGastos` no Multiclasse).
+
+**Por que não foi feito agora:** é bem maior e mais arriscado que
+"extrair um hook" (a G3.2 rescopeada só embrulha os `useState`
+existentes, sem tocar no formato salvo nem em `descansoCurto`/`Longo`)
+— merece seu próprio foco com SDD (chapéu de Game Designer, seção
+6.2 do CLAUDE.md) descrevendo a migração, não ser feito de passagem
+dentro de uma leva de limpeza.
+
 ## Dano em crítico não dobra (geral) + "+1 dado extra" do Perfurador (2026-09)
 
 Descoberto ao implementar o Perfurador: nenhum ataque do app dobra os
