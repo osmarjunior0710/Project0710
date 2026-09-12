@@ -19,6 +19,7 @@ import {
   espacosMagiaPorNivelCombinado,
   type PreRequisitoMulticlasse,
 } from '../data/rulesets/dnd2024/multiclasse';
+import { conjuradoresMulticlasse } from '../data/rulesets/dnd2024/conjuradorMulticlasse';
 
 export interface PersonagemClasse {
   /** Nome da classe (ex: "Mago") — mesmo formato usado em `selecao.classe`. */
@@ -142,4 +143,51 @@ export function deveEscolherClasseNoLevelUp(opcoes: OpcaoLevelUp[]): boolean {
  * quando essa tabela for aplicada de verdade (Fase M4). */
 export function espacosMagiaParaNivelCombinado(nivelCombinado: number): number[] | null {
   return espacosMagiaPorNivelCombinado.find((e) => e.nivelCombinado === nivelCombinado)?.espacosPorCirculo ?? null;
+}
+
+/** `true` = essa classe (nessa entrada de `classes`) conta pra soma do
+ * Nível Equivalente de conjuração multiclasse — completa/meio sempre
+ * contam; "um terço" só conta com a subclasse certa escolhida; Magia
+ * de Pacto (Bruxo) e classes sem Conjuração nunca contam (ver
+ * `data/rulesets/dnd2024/conjuradorMulticlasse.ts`). */
+function contaNaConjuracaoMulticlasse(c: PersonagemClasse): boolean {
+  const entrada = conjuradoresMulticlasse.find((e) => e.classe === c.classe);
+  if (!entrada) return false;
+  if (entrada.tipo === 'completo' || entrada.tipo === 'meio') return true;
+  if (entrada.tipo === 'terco-com-subclasse') return c.subclasse === entrada.subclasseQueAtiva;
+  return false;
+}
+
+/** `true` = personagem tem Conjuração vinda de 2+ classes ao mesmo
+ * tempo (SDD Multiclasse seção 8.1) — só nesse caso a tabela
+ * Conjurador Multiclasse (seção 8.2) entra em jogo; com 0 ou 1 classe
+ * conjuradora, cada uma (se houver) "segue as regras dela mesma". */
+export function temConjuracaoMulticlasse(classes: PersonagemClasse[]): boolean {
+  return classes.filter(contaNaConjuracaoMulticlasse).length >= 2;
+}
+
+/** `true` = personagem tem nível de Bruxo (Magia de Pacto é sempre um
+ * pool à parte, nunca entra na soma de `nivelEquivalenteConjuracaoMulticlasse`
+ * — ver seção 8.5 do SDD, aplicado de verdade no M4b). */
+export function temMagiaDePacto(classes: PersonagemClasse[]): boolean {
+  return classes.some((c) => conjuradoresMulticlasse.find((e) => e.classe === c.classe)?.tipo === 'pacto');
+}
+
+/** Nível Equivalente pra consultar `espacosMagiaParaNivelCombinado`
+ * (SDD seção 8.2): soma cheia de conjuradores completos, metade
+ * (arredondada PRA CIMA) de meio-conjuradores, um terço (arredondado
+ * PRA BAIXO) de Guerreiro/Ladino SÓ com a subclasse certa — Magia de
+ * Pacto do Bruxo nunca entra aqui. Só faz sentido chamar quando
+ * `temConjuracaoMulticlasse` for `true`; com 0 ou 1 conjurador,
+ * cada classe usa a própria tabela de espaços, não esta. */
+export function nivelEquivalenteConjuracaoMulticlasse(classes: PersonagemClasse[]): number {
+  let total = 0;
+  for (const c of classes) {
+    if (!contaNaConjuracaoMulticlasse(c)) continue;
+    const entrada = conjuradoresMulticlasse.find((e) => e.classe === c.classe)!;
+    if (entrada.tipo === 'completo') total += c.nivel;
+    else if (entrada.tipo === 'meio') total += Math.ceil(c.nivel / 2);
+    else if (entrada.tipo === 'terco-com-subclasse') total += Math.floor(c.nivel / 3);
+  }
+  return total;
 }

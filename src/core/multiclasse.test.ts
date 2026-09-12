@@ -8,6 +8,9 @@ import {
   espacosMagiaParaNivelCombinado,
   opcoesLevelUp,
   deveEscolherClasseNoLevelUp,
+  temConjuracaoMulticlasse,
+  temMagiaDePacto,
+  nivelEquivalenteConjuracaoMulticlasse,
 } from './multiclasse';
 import type { PersonagemSalvo } from './armazenamentoPersonagens';
 import type { WizardSelection } from './personagem';
@@ -190,5 +193,80 @@ describe('deveEscolherClasseNoLevelUp', () => {
         { classe: 'Guerreiro', nivelAtual: 0 },
       ]),
     ).toBe(true);
+  });
+});
+
+describe('temConjuracaoMulticlasse', () => {
+  it('caso normal — 1 classe conjuradora só: false ("segue as regras dessa classe")', () => {
+    expect(temConjuracaoMulticlasse([{ classe: 'Mago', nivel: 5 }])).toBe(false);
+  });
+
+  it('caso normal — 2 conjuradores completos (Bardo/Mago): true', () => {
+    expect(
+      temConjuracaoMulticlasse([
+        { classe: 'Bardo', nivel: 2 },
+        { classe: 'Mago', nivel: 3 },
+      ]),
+    ).toBe(true);
+  });
+
+  it('caso de borda — Bruxo (Magia de Pacto) não conta como conjurador aqui, mesmo tendo nível', () => {
+    expect(
+      temConjuracaoMulticlasse([
+        { classe: 'Bruxo', nivel: 5 },
+        { classe: 'Mago', nivel: 3 },
+      ]),
+    ).toBe(false);
+  });
+
+  it('caso de borda — Guerreiro/Ladino só contam com a subclasse certa', () => {
+    expect(
+      temConjuracaoMulticlasse([
+        { classe: 'Guerreiro', nivel: 9, subclasse: 'Cavaleiro Místico' },
+        { classe: 'Mago', nivel: 3 },
+      ]),
+    ).toBe(true);
+    expect(
+      temConjuracaoMulticlasse([
+        { classe: 'Guerreiro', nivel: 9, subclasse: null },
+        { classe: 'Mago', nivel: 3 },
+      ]),
+    ).toBe(false);
+  });
+});
+
+describe('temMagiaDePacto', () => {
+  it('caso normal — com nível de Bruxo: true', () => {
+    expect(temMagiaDePacto([{ classe: 'Bruxo', nivel: 2 }])).toBe(true);
+  });
+
+  it('caso de borda — sem Bruxo: false', () => {
+    expect(temMagiaDePacto([{ classe: 'Mago', nivel: 5 }])).toBe(false);
+  });
+});
+
+describe('nivelEquivalenteConjuracaoMulticlasse', () => {
+  it('caso normal — exemplo do livro: Guardião 4/Feiticeiro 3 = nível equivalente 5', () => {
+    const classes = [
+      { classe: 'Guardião', nivel: 4 },
+      { classe: 'Feiticeiro', nivel: 3 },
+    ];
+    expect(nivelEquivalenteConjuracaoMulticlasse(classes)).toBe(5); // ceil(4/2)=2 + 3 = 5
+  });
+
+  it('caso de borda — Bruxo nunca entra na soma, mesmo multiclassado com um conjurador normal', () => {
+    const classes = [
+      { classe: 'Bruxo', nivel: 5 },
+      { classe: 'Mago', nivel: 3 },
+    ];
+    expect(nivelEquivalenteConjuracaoMulticlasse(classes)).toBe(3);
+  });
+
+  it('caso de borda — Guerreiro/Cavaleiro Místico conta 1/3 arredondado pra baixo', () => {
+    const classes = [
+      { classe: 'Guerreiro', nivel: 9, subclasse: 'Cavaleiro Místico' },
+      { classe: 'Mago', nivel: 3 },
+    ];
+    expect(nivelEquivalenteConjuracaoMulticlasse(classes)).toBe(6); // floor(9/3)=3 + 3 = 6
   });
 });
