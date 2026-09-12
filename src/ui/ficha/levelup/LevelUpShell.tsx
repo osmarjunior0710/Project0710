@@ -32,6 +32,8 @@ import {
   invocacaoRequeridaDe,
   invocacaoBloqueadaPorRequisitoAusente,
   invocacoesQueDependemDe,
+  INVOCACOES_COM_VINCULO_TRUQUE,
+  truquesElegiveisParaVinculo,
 } from '../../../core/invocacoesMisticas';
 import { circulosArcanaMisticaDesbloqueados, magiasElegiveisArcanaMistica, trocasArcanaMistica } from '../../../core/arcanaMistica';
 import { magiasPeritoNecromanciaNesteNivel, catalogoPeritoNecromancia } from '../../../core/necromante';
@@ -87,6 +89,11 @@ interface LevelUpShellProps {
     livroDeMagiasEscolhidas: string[] | null;
     magiasPreparadasEscolhidas: string[] | null;
     invocacoesMisticasEscolhidas: string[] | null;
+    /** Mapa COMPLETO (antigos + recém-vinculados), mesmo padrão de
+     * `truquesEscolhidos`/`invocacoesMisticasEscolhidas` — nunca perde
+     * um vínculo já existente, só cresce. `null` = nenhuma vinculação
+     * pendente nesse level-up (passo não entrou na sequência). */
+    invocacoesTruqueVinculadoEscolhido: Record<string, string> | null;
     periciasEspecialistaEscolhidas: string[] | null;
     periciasSubclasseBonusEscolhidas: string[] | null;
     magiasDescobertasMagicasEscolhidas: string[] | null;
@@ -141,6 +148,13 @@ interface LevelUpShellProps {
   /** Invocações Místicas (Bruxo) que o personagem já tem — Etapa 4.3
    * do Bruxo, mesmo padrão de troca de Truques (1 por level-up). */
   invocacoesMisticasAtuais: string[];
+  /** Truque já vinculado a cada Invocação Mística que exige essa
+   * escolha (Explosão Agonizante/Repulsiva) — chave = id da invocação,
+   * valor = NOME do truque. Ausente/sem a chave = ainda não vinculado
+   * — dispara o passo `vinculoTruqueInvocacao` de novo, mesmo que a
+   * invocação já estivesse marcada de um level-up anterior (ver
+   * `core/invocacoesMisticas.ts`). */
+  invocacoesTruqueVinculadoAtuais: Record<string, string>;
   /** Arcana Mística (Bruxo, níveis 11/13/15/17) — círculo → nome da
    * magia já escolhida pra ele. Só a escolha inicial é feita aqui
    * (trocar depois fica pra outra entrega, ver PENDENCIAS.md). */
@@ -210,6 +224,7 @@ type LuStep =
   | 'peritoNecromancia'
   | 'magiasPreparadas'
   | 'invocacoes'
+  | 'vinculoTruqueInvocacao'
   | 'descobertasMagicas'
   | 'especialista'
   | 'asi'
@@ -241,6 +256,7 @@ export default function LevelUpShell({
   livroDeMagiasAtuais,
   magiasDaClasseDisponiveis,
   invocacoesMisticasAtuais,
+  invocacoesTruqueVinculadoAtuais,
   arcanaMisticaAtuais,
   magiaIniciadaOrigemAtual,
   magiaIniciadaEspecieAtual,
@@ -290,6 +306,49 @@ export default function LevelUpShell({
   // "Proficiências Bônus" no mesmo nível (Colégio do Conhecimento,
   // nível 3 — subclasse e a escolha de perícia chegam juntas).
   const [subclasseEscolhida, setSubclasseEscolhida] = useState<string | null>(personagem.subclasse);
+
+  // Mesmo motivo do comentário acima — precisa vir antes da montagem
+  // de `luSteps`, já que o passo `vinculoTruqueInvocacao` só entra na
+  // sequência quando o jogador ACABOU de marcar Explosão Agonizante/
+  // Repulsiva NESTA MESMA tela de Invocações (`invocacoesEscolhidas`),
+  // não só quando já tinha de antes. Por isso este hook é declarado
+  // aqui, fora da posição "natural" dele lá embaixo com os outros
+  // `useEscolhaMultipla` (linha ~500+).
+  const {
+    escolhidos: invocacoesEscolhidas,
+    toggle: toggleInvocacao,
+    trocas: trocasDeInvocacao,
+  } = useEscolhaMultipla(invocacoesMisticasAtuais, maxInvocacoes, {
+    // Não deixa remover uma invocação que ainda serve de requisito pra
+    // outra que continua marcada (regra real: precisa desmontar a
+    // cadeia de trás pra frente, 1 troca por level-up).
+    podeRemover: (id, escolhidos) => invocacoesQueDependemDe(id, escolhidos).length === 0,
+    podeAdicionar: (id, escolhidos) => {
+      const inv = invocacoesCatalogo.find((c) => c.id === id);
+      return !inv || !invocacaoBloqueadaPorRequisitoAusente(inv, escolhidos);
+    },
+  });
+  // Truque vinculado a cada Invocação Mística que exige essa escolha
+  // (Explosão Agonizante/Repulsiva) — seedado do que já existe salvo;
+  // a tela `vinculoTruqueInvocacao` só marca/substitui a(s) chave(s)
+  // pendente(s) (nunca perde o vínculo de uma invocação que não mudou
+  // nada neste level-up).
+  const [vinculoTruqueEscolhido, setVinculoTruqueEscolhido] = useState<Record<string, string>>(
+    invocacoesTruqueVinculadoAtuais,
+  );
+  // Precisa vinculação: marcada (agora ou antes) e AINDA sem truque —
+  // dispara o passo mesmo quando a invocação não mudou neste level-up
+  // (retroativo, pra personagem que já tinha ela de antes desta
+  // funcionalidade existir). IMPORTANTE: filtra contra
+  // `invocacoesTruqueVinculadoAtuais` (prop, nunca muda durante ESTE
+  // level-up), NUNCA contra `vinculoTruqueEscolhido` (state ao vivo) —
+  // senão, escolher o truque NA PRÓPRIA tela já encolhe `luSteps`
+  // (esse passo desaparece da lista) no mesmo render, empurrando
+  // `luIndex` pro passo seguinte sozinho, ANTES do jogador confirmar,
+  // e a escolha se perde (nunca chega no payload de `onConfirmar`).
+  const invocacoesQuePrecisamVinculo = INVOCACOES_COM_VINCULO_TRUQUE.filter(
+    (id) => (invocacoesEscolhidas.includes(id) || invocacoesMisticasAtuais.includes(id)) && !invocacoesTruqueVinculadoAtuais[id],
+  );
 
   // Perito em Necromancia (Necromante, homebrew — ver core/necromante.ts):
   // quantas magias de Necromancia bônus ESTE level-up concede (2 ao
@@ -433,6 +492,10 @@ export default function LevelUpShell({
   if (magiasPeritoNecromanciaBonusNesteNivel > 0) luSteps.push('peritoNecromancia');
   if (maxMagiasPreparadas > 0) luSteps.push('magiasPreparadas');
   if (maxInvocacoes > 0) luSteps.push('invocacoes');
+  // Independe de `maxInvocacoes > 0` — dispara mesmo num level-up que
+  // não concede invocação nova, se alguma marcada antes ainda não
+  // tiver truque vinculado (ver comentário de `invocacoesQuePrecisamVinculo`).
+  if (invocacoesQuePrecisamVinculo.length > 0) luSteps.push('vinculoTruqueInvocacao');
   // Descobertas Mágicas aparece TODA vez que já estiver desbloqueada
   // (mesmo padrão de Truques) — sempre pode trocar 1 das 2, mesmo sem
   // ser a primeira vez.
@@ -528,20 +591,6 @@ export default function LevelUpShell({
     // Mago (usaRedefPorDescanso): magia já preparada é travada aqui —
     // a redefinição livre é só no Descanso Longo, não no Level Up.
     bloqueado: (nome) => usaRedefPorDescanso && magiasPreparadasAtuais.includes(nome),
-  });
-  const {
-    escolhidos: invocacoesEscolhidas,
-    toggle: toggleInvocacao,
-    trocas: trocasDeInvocacao,
-  } = useEscolhaMultipla(invocacoesMisticasAtuais, maxInvocacoes, {
-    // Não deixa remover uma invocação que ainda serve de requisito pra
-    // outra que continua marcada (regra real: precisa desmontar a
-    // cadeia de trás pra frente, 1 troca por level-up).
-    podeRemover: (id, escolhidos) => invocacoesQueDependemDe(id, escolhidos).length === 0,
-    podeAdicionar: (id, escolhidos) => {
-      const inv = invocacoesCatalogo.find((c) => c.id === id);
-      return !inv || !invocacaoBloqueadaPorRequisitoAusente(inv, escolhidos);
-    },
   });
   // Especialista é só ADIÇÃO — nunca substitui uma perícia já
   // especializada (diferente de Truques/Magias Preparadas, que podem
@@ -712,6 +761,7 @@ export default function LevelUpShell({
     peritoNecromancia: 'Perito em Necromancia',
     magiasPreparadas: 'Magias Preparadas',
     invocacoes: 'Invocações Místicas',
+    vinculoTruqueInvocacao: 'Truque Vinculado',
     descobertasMagicas: 'Descobertas Mágicas',
     especialista: 'Especialista',
     asi: 'Atributo ou Talento',
@@ -790,6 +840,21 @@ export default function LevelUpShell({
       );
       return;
     }
+    if (
+      step === 'vinculoTruqueInvocacao' &&
+      // Só bloqueia quando existe pelo menos 1 truque elegível pra
+      // escolher — sem isso, o jogador ficaria travado pra sempre
+      // (ex.: marcou a invocação mas ainda não tem nenhum truque de
+      // dano conhecido). Sem opção nenhuma, o passo continua marcado
+      // como pendente (`vinculoTruqueEscolhido` não ganha a chave) e
+      // volta a aparecer no próximo level-up, quando talvez já tenha.
+      invocacoesQuePrecisamVinculo.some(
+        (id) => !vinculoTruqueEscolhido[id] && truquesElegiveisParaVinculo(id, truquesEscolhidos).length > 0,
+      )
+    ) {
+      setAviso('Escolha o truque vinculado a cada Invocação Mística antes de avançar.');
+      return;
+    }
     if (step === 'descobertasMagicas' && !descobertasMagicasValido) {
       setAviso(
         trocasDeDescobertaMagica > 1
@@ -859,6 +924,7 @@ export default function LevelUpShell({
           : null,
         magiasPreparadasEscolhidas: luSteps.includes('magiasPreparadas') ? magiasPreparadasEscolhidas : null,
         invocacoesMisticasEscolhidas: luSteps.includes('invocacoes') ? invocacoesEscolhidas : null,
+        invocacoesTruqueVinculadoEscolhido: luSteps.includes('vinculoTruqueInvocacao') ? vinculoTruqueEscolhido : null,
         periciasEspecialistaEscolhidas: luSteps.includes('especialista') ? especialistaEscolhidas : null,
         periciasSubclasseBonusEscolhidas: luSteps.includes('proficienciasBonus') ? proficienciasBonusEscolhidas : null,
         magiasDescobertasMagicasEscolhidas: luSteps.includes('descobertasMagicas') ? descobertasMagicasEscolhidas : null,
@@ -1335,6 +1401,41 @@ export default function LevelUpShell({
                 ⚠️ {trocasDeInvocacao} invocações trocadas — só pode trocar 1 por level-up.
               </div>
             )}
+          </>
+        )}
+
+        {step === 'vinculoTruqueInvocacao' && (
+          <>
+            {invocacoesQuePrecisamVinculo.map((invocacaoId) => {
+              const inv = invocacoesCatalogo.find((i) => i.id === invocacaoId);
+              if (!inv) return null;
+              const opcoes = truquesElegiveisParaVinculo(invocacaoId, truquesEscolhidos);
+              const escolhido = vinculoTruqueEscolhido[invocacaoId];
+              return (
+                <div key={invocacaoId} style={{ marginBottom: 16 }}>
+                  <div className="section-title">{inv.nome} — escolha 1 truque</div>
+                  <div className="label" style={{ marginBottom: 8 }}>
+                    <TextoComMagias texto={inv.beneficios} nomesMagias={inv.magiasMencionadas} />
+                  </div>
+                  {opcoes.length === 0 && (
+                    <div className="label" style={{ color: 'var(--danger)' }}>
+                      Nenhum truque conhecido se encaixa ainda — volte aqui num level-up futuro, depois de aprender
+                      um truque elegível.
+                    </div>
+                  )}
+                  {opcoes.map((m) => (
+                    <div
+                      key={m.id}
+                      className={`opt-card ${escolhido === m.nome ? 'selected' : ''}`}
+                      onClick={() => setVinculoTruqueEscolhido((prev) => ({ ...prev, [invocacaoId]: m.nome }))}
+                    >
+                      <div className="opt-card-name">{m.nome}</div>
+                      <div className="opt-card-desc">{m.descricaoCurta ?? m.descricaoCompleta}</div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
           </>
         )}
 
@@ -1819,6 +1920,17 @@ export default function LevelUpShell({
               <div className="summary-row">
                 <span>Invocações Místicas</span>
                 <span>{trocasDeInvocacao > 0 ? `${trocasDeInvocacao} trocada(s)` : 'sem troca'}</span>
+              </div>
+            )}
+            {luSteps.includes('vinculoTruqueInvocacao') && (
+              <div className="summary-row">
+                <span>Truque Vinculado</span>
+                <span>
+                  {invocacoesQuePrecisamVinculo
+                    .map((id) => vinculoTruqueEscolhido[id])
+                    .filter((nome): nome is string => Boolean(nome))
+                    .join(', ') || 'nenhum truque elegível ainda'}
+                </span>
               </div>
             )}
             {luSteps.includes('descobertasMagicas') && (

@@ -115,6 +115,15 @@ export interface PersonagemSalvo {
    * `truquesAtual`. Ausente = cai pra `selecao.invocacoesMisticasEscolhidas`
    * (retrato da criação). */
   invocacoesMisticasAtual?: string[];
+  /** Truque de Bruxo vinculado a cada Invocação Mística que exige essa
+   * escolha (hoje: Explosão Agonizante/Repulsiva — ver
+   * `core/invocacoesMisticas.ts`, `INVOCACOES_COM_VINCULO_TRUQUE`) —
+   * chave = id da invocação, valor = NOME do truque (mesmo padrão de
+   * `truquesAtual`). Escolhido no Level Up, numa tela própria logo
+   * depois de Invocações Místicas (2026-09). Ausente/sem a chave =
+   * ainda não vinculado — a Ficha volta a pedir a escolha no próximo
+   * Level Up, mesmo sem trocar a invocação. */
+  invocacoesTruqueVinculado?: Record<string, string>;
   /** Livro das Sombras (Bruxo, Pacto do Tomo) — 3 truques + 2 magias
    * rituais atuais, combinados numa lista só (ver DND-Regras.md).
    * Trocável a qualquer momento via "Reconjurar o Livro" na Ficha

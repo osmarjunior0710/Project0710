@@ -31,11 +31,11 @@ interface ReacaoPanelContentProps {
   conjura: boolean;
   magiasReacao: Magia[];
   modAcertoConjuracao: number | null;
-  /** Invocações Místicas atuais e mod. de Carisma — só alimentam
-   * Explosão Agonizante (dano de Raio Místico), ver `MagiasTab.tsx`.
-   * Raio Místico não é Reação hoje, mas o parâmetro é obrigatório em
+  /** NOME do truque vinculado a Explosão Agonizante + mod. de Carisma
+   * — ver `MagiasTab.tsx`/`core/invocacoesMisticas.ts`. Nenhum truque
+   * de ataque de Bruxo é Reação hoje, mas o parâmetro é obrigatório em
    * `decidirConjuracao` — mantém a assinatura igual nos 3 painéis. */
-  invocacoesMisticasAtuais: string[];
+  truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
   detalhesAtivo: boolean;
   contraEncantamentoDisponivel: boolean;
@@ -91,7 +91,7 @@ export default function ReacaoPanelContent({
   conjura,
   magiasReacao,
   modAcertoConjuracao,
-  invocacoesMisticasAtuais,
+  truqueVinculadoAgonizante,
   modCarisma,
   detalhesAtivo,
   contraEncantamentoDisponivel,
@@ -143,7 +143,7 @@ export default function ReacaoPanelContent({
       modAcertoConjuracao,
       colheitaMacabraDisponivel,
       m.circulo > 0,
-      invocacoesMisticasAtuais,
+      truqueVinculadoAgonizante,
       modCarisma,
     );
     if (resultado.curaColheitaMacabra !== null) {

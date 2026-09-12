@@ -32,7 +32,12 @@ import {
   poolDescobertasMagicas,
   usaRedefinicaoPorDescanso,
 } from './magiasPersonagem';
-import { invocacoesElegiveisAteNivel, invocacaoBloqueadaPorRequisitoAusente } from './invocacoesMisticas';
+import {
+  invocacoesElegiveisAteNivel,
+  invocacaoBloqueadaPorRequisitoAusente,
+  INVOCACOES_COM_VINCULO_TRUQUE,
+  truquesElegiveisParaVinculo,
+} from './invocacoesMisticas';
 import { circulosArcanaMisticaDesbloqueados, magiasElegiveisArcanaMistica } from './arcanaMistica';
 import { embaralhar, sorteiaUm } from './sorteio';
 import { talentoDisponivel, sortearAsiDoTalento } from './geradorPersonagemTeste';
@@ -58,6 +63,7 @@ export interface ParamsLevelUpRapido {
   magiasPreparadasAtuais: string[];
   livroDeMagiasAtuais: string[];
   invocacoesMisticasAtuais: string[];
+  invocacoesTruqueVinculadoAtuais: Record<string, string>;
   arcanaMisticaAtuais: Record<number, string>;
   periciasEspecialistaAtuais: string[];
   periciasProficientesDoPersonagem: string[];
@@ -76,6 +82,7 @@ export interface ResultadoLevelUpRapido {
   livroDeMagiasEscolhidas: string[] | null;
   magiasPreparadasEscolhidas: string[] | null;
   invocacoesMisticasEscolhidas: string[] | null;
+  invocacoesTruqueVinculadoEscolhido: Record<string, string> | null;
   periciasEspecialistaEscolhidas: string[] | null;
   periciasSubclasseBonusEscolhidas: string[] | null;
   magiasDescobertasMagicasEscolhidas: string[] | null;
@@ -198,6 +205,27 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
   const invocacoesMisticasEscolhidas =
     maxInvocacoes > 0 ? sortearInvocacoes(invocacoesElegiveisAteNivel(novoNivel), maxInvocacoes) : null;
 
+  // Mesma pendência retroativa do Level Up de verdade (`LevelUpShell`,
+  // `invocacoesQuePrecisamVinculo`) — o Rápido sorteia 1 truque
+  // elegível pra cada Explosão Agonizante/Repulsiva marcada (agora ou
+  // antes) que ainda não tem vínculo. Sem opção elegível ainda, some
+  // sem vincular — o próximo Level Up (rápido ou de verdade) tenta de
+  // novo, já que a invocação continua "sem vínculo" nesse caso.
+  const invocacoesQuePrecisamVinculo = INVOCACOES_COM_VINCULO_TRUQUE.filter(
+    (id) =>
+      ((invocacoesMisticasEscolhidas ?? []).includes(id) || params.invocacoesMisticasAtuais.includes(id)) &&
+      !params.invocacoesTruqueVinculadoAtuais[id],
+  );
+  const invocacoesTruqueVinculadoEscolhido =
+    invocacoesQuePrecisamVinculo.length > 0
+      ? invocacoesQuePrecisamVinculo.reduce<Record<string, string> | null>((acc, id) => {
+          const opcoes = truquesElegiveisParaVinculo(id, truquesEscolhidos ?? params.truquesAtuais);
+          const escolhido = sorteiaUm(opcoes);
+          if (!escolhido) return acc;
+          return { ...(acc ?? params.invocacoesTruqueVinculadoAtuais), [id]: escolhido.nome };
+        }, null)
+      : null;
+
   const magiasDescobertasMagicasEscolhidas = caracteristicaSubclasseDesbloqueada(
     subclasseEscolhida,
     ID_CARACTERISTICA_SUBCLASSE.descobertasMagicas,
@@ -273,6 +301,7 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     livroDeMagiasEscolhidas,
     magiasPreparadasEscolhidas,
     invocacoesMisticasEscolhidas,
+    invocacoesTruqueVinculadoEscolhido,
     periciasEspecialistaEscolhidas,
     periciasSubclasseBonusEscolhidas,
     magiasDescobertasMagicasEscolhidas,

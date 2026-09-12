@@ -51,9 +51,9 @@ interface AcaoPanelContentProps {
   truques: Magia[];
   magiasPreparadas: Magia[];
   modAcertoConjuracao: number | null;
-  /** Invocações Místicas atuais e mod. de Carisma — só alimentam
-   * Explosão Agonizante (dano de Raio Místico), ver `MagiasTab.tsx`. */
-  invocacoesMisticasAtuais: string[];
+  /** NOME do truque vinculado a Explosão Agonizante + mod. de Carisma
+   * — ver `MagiasTab.tsx`/`core/invocacoesMisticas.ts`. */
+  truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
   numAtaques: number;
   ataquesFeitos: number;
@@ -100,7 +100,7 @@ export default function AcaoPanelContent({
   truques,
   magiasPreparadas,
   modAcertoConjuracao,
-  invocacoesMisticasAtuais,
+  truqueVinculadoAgonizante,
   modCarisma,
   numAtaques,
   ataquesFeitos,
@@ -177,7 +177,7 @@ export default function AcaoPanelContent({
       modAcertoConjuracao,
       colheitaMacabraDisponivel,
       circulo !== null,
-      invocacoesMisticasAtuais,
+      truqueVinculadoAgonizante,
       modCarisma,
     );
     if (resultado.curaColheitaMacabra !== null) {

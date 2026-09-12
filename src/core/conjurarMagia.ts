@@ -67,8 +67,10 @@ export interface ConjuracaoDecidida {
  * SEPARADA de `circuloUsado > 0` — necessária porque uma magia
  * concedida de graça por Invocação Mística pode ter círculo > 0 sem
  * ter gastado espaço nenhum (a Colheita Macabra exige "usando um
- * espaço de magia" de verdade, não qualquer conjuração). `invocacoesAtuais`/
- * `modCarisma` só alimentam Explosão Agonizante (ver
+ * espaço de magia" de verdade, não qualquer conjuração).
+ * `truqueVinculadoAgonizante` (NOME do truque escolhido no Level Up
+ * pra Explosão Agonizante, `undefined` = invocação ausente/ainda não
+ * vinculada) + `modCarisma` só alimentam essa invocação (ver
  * `bonusExplosaoAgonizante`) — sem efeito em qualquer outra magia. */
 export function decidirConjuracao(
   m: Magia,
@@ -77,7 +79,7 @@ export function decidirConjuracao(
   modAcertoConjuracao: number | null,
   colheitaMacabraDisponivel: boolean,
   gastouEspacoDeVerdade: boolean,
-  invocacoesAtuais: string[],
+  truqueVinculadoAgonizante: string | undefined,
   modCarisma: number,
 ): ConjuracaoDecidida {
   const curaMacabra =
@@ -87,7 +89,7 @@ export function decidirConjuracao(
 
   if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
     const dano = calcularDanoMagia(m, circuloUsado, nivelPersonagem);
-    const bonusAgonizante = bonusExplosaoAgonizante(m.id, invocacoesAtuais, modCarisma);
+    const bonusAgonizante = bonusExplosaoAgonizante(m.nome, truqueVinculadoAgonizante, modCarisma);
     const danoFinal = dano && bonusAgonizante !== 0 ? { ...dano, mod: dano.mod + bonusAgonizante } : dano;
     return {
       mecanica,

@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2034
+
+Bruxo — Explosão Agonizante e Explosão Repulsiva ganham tela própria
+no Level Up (logo depois de Invocações Místicas): escolha qual truque
+conhecido fica vinculado, e o Perfil mostra "🎯 Vinculada a X" em vez
+do aviso antigo. A rolagem de dano desse truque agora soma o
+modificador de Carisma de verdade quando é Explosão Agonizante.
+Personagem que já tinha uma dessas marcada de antes vê a tela de
+novo no próximo Level Up, pra vincular.
+
 ## v202609_1931
 
 Bruxo — Explosão Agonizante (Invocação Mística) deixa de mostrar

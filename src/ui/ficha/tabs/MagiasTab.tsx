@@ -111,12 +111,11 @@ interface MagiasTabProps {
   /** `true` só quando o personagem tem a Invocação Mística Pacto do
    * Tomo — controla se o botão "Reconjurar o Livro" aparece. */
   temPactoDoTomo: boolean;
-  /** Invocações Místicas atuais do personagem — hoje só alimenta
-   * Explosão Agonizante (soma Carisma ao dano de Raio Místico, ver
-   * `core/invocacoesMisticas.ts`), passado direto (não como booleano
-   * pronto) porque `decidirConjuracao` decide sozinho se a magia
-   * conjurada é a vinculada. Vazio pra quem não tem nenhuma. */
-  invocacoesMisticasAtuais: string[];
+  /** NOME do truque vinculado a Explosão Agonizante (escolhido no
+   * Level Up, ver `core/invocacoesMisticas.ts`) — `undefined` = sem a
+   * invocação ou ainda não vinculada. `decidirConjuracao` compara com
+   * `m.nome` e soma o mod. de Carisma só quando bate. */
+  truqueVinculadoAgonizante: string | undefined;
   /** Mod. de Carisma atual — mesmo motivo do campo acima. */
   modCarisma: number;
   /** `true` = já reconjurado desde o último Descanso Curto/Longo —
@@ -192,7 +191,7 @@ export default function MagiasTab({
   espacosParaConjurar,
   onGastarSlotCirculo,
   modAcertoConjuracao,
-  invocacoesMisticasAtuais,
+  truqueVinculadoAgonizante,
   modCarisma,
   desvantagemForcaDestreza,
   conjura,
@@ -287,7 +286,7 @@ export default function MagiasTab({
       modAcertoConjuracao,
       colheitaMacabraDisponivel,
       gastouEspacoDeVerdade,
-      invocacoesMisticasAtuais,
+      truqueVinculadoAgonizante,
       modCarisma,
     );
     if (resultado.curaColheitaMacabra !== null) {

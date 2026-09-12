@@ -436,20 +436,51 @@ pet anterior dela antes de adicionar o novo — mesma regra de
 "vincular substitui a anterior", aplicada a uma criatura em vez de um
 item. Pets de outras origens nunca são afetados.
 
-**Explosão Agonizante — vinculação "qual truque" fixada em Raio
-Místico, não modelada como escolha:** a regra real deixa o jogador
-escolher qualquer truque de Bruxo causador de dano pra somar Carisma
-ao dano; o app simplifica fixando em Raio Místico (`raiomistico`) —
-único truque causador de dano EXCLUSIVO de Bruxo (Rajada de Veneno/
-Toque Necrótico são compartilhados com outras classes), de longe a
-escolha mais comum na mesa. `core/invocacoesMisticas.ts`
-(`bonusExplosaoAgonizante`) decide o bônus (`0` se a magia não é a
-vinculada ou a invocação não está marcada); `decidirConjuracao`
+**Explosão Agonizante/Repulsiva — vínculo a um truque é escolha de
+verdade no Level Up, não fixado no código.** Regra real: cada uma
+deixa o jogador escolher 1 truque conhecido pra vincular (Agonizante:
+truque que CAUSA DANO; Repulsiva: truque que EXIGE JOGADA DE ATAQUE —
+mais amplo, mas hoje sempre dá no mesmo resultado, já que todo truque
+de ataque na planilha também causa dano). `PersonagemSalvo.invocacoesTruqueVinculado`
+(`Record<idInvocação, nomeDoTruque>`) guarda a escolha; ausência da
+chave = "ainda não vinculado", tratado IGUAL a um placeholder novo
+(`invocacaoTemPlaceholder` some só depois de vincular).
+
+**Onde a escolha acontece — tela própria no Level Up, DEPOIS de
+Invocações Místicas:** `LevelUpShell.tsx` ganha o passo
+`vinculoTruqueInvocacao`, inserido logo após `invocacoes` no array de
+`luSteps` — só entra na sequência quando alguma invocação com vínculo
+pendente está marcada (agora OU de um level-up anterior, cobrindo
+retroativamente quem já tinha a invocação antes desta funcionalidade
+existir). Sem nenhum truque elegível conhecido ainda, a tela mostra
+aviso e deixa avançar sem travar (a invocação continua "sem vínculo"
+e a tela volta a aparecer no próximo level-up).
+
+**Achado que custou 1 rodada de debug — nunca derive "quais invocações
+ainda precisam de vínculo" do estado AO VIVO da própria escolha:**
+a lista (`invocacoesQuePrecisamVinculo`) tem que vir só de
+`invocacoesEscolhidas`/`invocacoesMisticasAtuais` + a prop ESTÁVEL
+`invocacoesTruqueVinculadoAtuais` (o que já estava salvo ANTES deste
+level-up) — nunca do `vinculoTruqueEscolhido` (state que a própria
+tela edita). Filtrar pelo state ao vivo faz a lista encolher no
+MESMO render em que o jogador escolhe o truque, o que encolhe
+`luSteps` (o passo desaparece do array) e empurra `luIndex` pro passo
+seguinte sozinho — a UI pula pro Resumo antes do jogador confirmar, e
+a escolha nunca chega no payload de `onConfirmar`. Mesma armadilha se
+aplica a qualquer passo futuro cuja EXISTÊNCIA dependa de uma escolha
+feita DENTRO dele mesmo (diferente do padrão já documentado de passos
+que dependem de escolha de um passo ANTERIOR, esse é seguro).
+
+**Motor de dano:** `core/invocacoesMisticas.ts` (`bonusExplosaoAgonizante`)
+decide o bônus comparando o NOME do truque conjurado com o vinculado
+(`0` se não bate ou não tem vínculo); `decidirConjuracao`
 (`core/conjurarMagia.ts`) soma ao `dano.mod` antes de montar o
 `danoPendente` — os 3 painéis que chamam essa função (MagiasTab/
-AcaoPanelContent/ReacaoPanelContent) recebem `invocacoesMisticasAtuais`/
-`modCarisma` e repassam sem lógica própria. Se um dia a escolha virar
-de verdade configurável, é só trocar o ID fixo por um campo salvo.
+AcaoPanelContent/ReacaoPanelContent) recebem `truqueVinculadoAgonizante`
+(nome já resolvido) + `modCarisma` e repassam sem lógica própria.
+Explosão Repulsiva ainda não tem o empurrão de 3m automatizado no
+Combat (efeito manual/narrativo por enquanto) — só o vínculo em si e a
+tag no Perfil saem do `[PH]`.
 
 **Data/origem:** 2026-09, plano "Invocações Místicas Fase 2" (IM.1,
 IM.2, IM.4, IM.5) + Fase P (Motor de Pets, P3/P4). Explosão Agonizante

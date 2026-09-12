@@ -7,6 +7,14 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
+## Explosão Repulsiva — empurrão de 3m não automatizado (2026-09)
+
+O vínculo (qual truque) e a tag no Perfil já funcionam de verdade —
+só o efeito em si (empurrar 3m um alvo Grande ou menor acertado pelo
+truque vinculado) continua manual/narrativo, sem botão no Combat.
+Baixa prioridade: efeito situacional, sem número pra calcular (é só
+posição na mesa).
+
 ## `FichaShell.tsx` — registro genérico de recursos "gastos" (2026-09)
 
 Achado durante o foco de saúde do projeto (G3, ver `EmDevB.md`): cada

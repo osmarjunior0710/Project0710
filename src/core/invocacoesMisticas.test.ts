@@ -6,6 +6,7 @@ import {
   invocacoesQueDependemDe,
   invocacaoTemPlaceholder,
   bonusExplosaoAgonizante,
+  truquesElegiveisParaVinculo,
 } from './invocacoesMisticas';
 import { invocacoesMisticas } from '../data/rulesets/dnd2024/invocacoesMisticas';
 
@@ -98,10 +99,24 @@ describe('invocacaoTemPlaceholder', () => {
     expect(invocacaoTemPlaceholder(inv)).toBe(false);
   });
 
-  it('Pacto da Lâmina/Lâmina Sedenta/Lâmina Devoradora/Pacto do Tomo/Explosão Agonizante: sem [PH] (mecânica própria)', () => {
-    for (const id of ['pacto-da-lamina', 'lamina-sedenta', 'lamina-devoradora', 'pacto-do-tomo', 'explosao-agonizante']) {
+  it('Pacto da Lâmina/Lâmina Sedenta/Lâmina Devoradora/Pacto do Tomo: sem [PH] (mecânica própria)', () => {
+    for (const id of ['pacto-da-lamina', 'lamina-sedenta', 'lamina-devoradora', 'pacto-do-tomo']) {
       const inv = invocacoesMisticas.find((i) => i.id === id)!;
       expect(invocacaoTemPlaceholder(inv)).toBe(false);
+    }
+  });
+
+  it('Explosão Agonizante/Repulsiva SEM truque vinculado ainda: [PH]', () => {
+    for (const id of ['explosao-agonizante', 'explosao-repulsiva']) {
+      const inv = invocacoesMisticas.find((i) => i.id === id)!;
+      expect(invocacaoTemPlaceholder(inv, undefined)).toBe(true);
+    }
+  });
+
+  it('Explosão Agonizante/Repulsiva COM truque vinculado: sem [PH]', () => {
+    for (const id of ['explosao-agonizante', 'explosao-repulsiva']) {
+      const inv = invocacoesMisticas.find((i) => i.id === id)!;
+      expect(invocacaoTemPlaceholder(inv, 'Raio Místico')).toBe(false);
     }
   });
 
@@ -122,15 +137,31 @@ describe('invocacaoTemPlaceholder', () => {
 });
 
 describe('bonusExplosaoAgonizante', () => {
-  it('Raio Místico + invocação marcada: soma o mod. de Carisma', () => {
-    expect(bonusExplosaoAgonizante('raiomistico', ['explosao-agonizante'], 4)).toBe(4);
+  it('truque vinculado bate com o nome: soma o mod. de Carisma', () => {
+    expect(bonusExplosaoAgonizante('Raio Místico', 'Raio Místico', 4)).toBe(4);
   });
 
-  it('Raio Místico sem a invocação marcada: 0', () => {
-    expect(bonusExplosaoAgonizante('raiomistico', [], 4)).toBe(0);
+  it('sem vínculo (undefined): 0', () => {
+    expect(bonusExplosaoAgonizante('Raio Místico', undefined, 4)).toBe(0);
   });
 
-  it('borda: outro truque de dano (Toque Necrótico), mesmo com a invocação marcada: 0', () => {
-    expect(bonusExplosaoAgonizante('toquenecrotico', ['explosao-agonizante'], 4)).toBe(0);
+  it('borda: truque diferente do vinculado: 0', () => {
+    expect(bonusExplosaoAgonizante('Toque Necrótico', 'Raio Místico', 4)).toBe(0);
+  });
+});
+
+describe('truquesElegiveisParaVinculo', () => {
+  it('Explosão Agonizante: só truques que CAUSAM DANO', () => {
+    const opcoes = truquesElegiveisParaVinculo('explosao-agonizante', ['Raio Místico', 'Amigos', 'Toque Necrótico']);
+    expect(opcoes.map((m) => m.nome).sort()).toEqual(['Raio Místico', 'Toque Necrótico'].sort());
+  });
+
+  it('Explosão Repulsiva: qualquer truque de ATAQUE — critério mais amplo que "causa dano" em teoria, mas hoje todo truque de ataque na planilha também causa dano, então o resultado bate com Agonizante nesse fixture', () => {
+    const opcoes = truquesElegiveisParaVinculo('explosao-repulsiva', ['Raio Místico', 'Amigos', 'Toque Necrótico']);
+    expect(opcoes.map((m) => m.nome).sort()).toEqual(['Raio Místico', 'Toque Necrótico'].sort());
+  });
+
+  it('borda: nenhum truque conhecido se encaixa — devolve []', () => {
+    expect(truquesElegiveisParaVinculo('explosao-agonizante', ['Amigos', 'Luz'])).toEqual([]);
   });
 });

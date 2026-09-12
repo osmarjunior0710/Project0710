@@ -10,7 +10,7 @@ function magia(id: string) {
 
 describe('decidirConjuracao', () => {
   it('caso normal — mecânica de ataque, com dano cadastrado, rolagem de acerto + dano pendente', () => {
-    const resultado = decidirConjuracao(magia('raiomistico'), 0, 1, 5, false, false, [], 0);
+    const resultado = decidirConjuracao(magia('raiomistico'), 0, 1, 5, false, false, undefined, 0);
     expect(resultado.mecanica).toBe('ataque');
     expect(resultado.rollAcerto).toEqual({ label: 'Ataque de Magia — Raio Místico', formula: '1d20 + 5', mod: 5 });
     expect(resultado.danoPendente).toBeDefined();
@@ -18,13 +18,13 @@ describe('decidirConjuracao', () => {
   });
 
   it('caso de borda — mecânica de ataque mas sem modAcertoConjuracao (null), cai pro fallback "nenhuma"', () => {
-    const resultado = decidirConjuracao(magia('raiomistico'), 0, 1, null, false, false, [], 0);
+    const resultado = decidirConjuracao(magia('raiomistico'), 0, 1, null, false, false, undefined, 0);
     expect(resultado.mecanica).toBe('nenhuma');
     expect(resultado.rollAcerto).toBeUndefined();
   });
 
   it('salvaguarda (Bola de Fogo) — sem rolagem própria, só texto de feedback', () => {
-    const resultado = decidirConjuracao(magia('boladefogo'), 3, 1, 5, false, false, [], 0);
+    const resultado = decidirConjuracao(magia('boladefogo'), 3, 1, 5, false, false, undefined, 0);
     expect(resultado.mecanica).toBe('salvaguarda');
     expect(resultado.rollAcerto).toBeUndefined();
     expect(resultado.rollCura).toBeUndefined();
@@ -32,42 +32,42 @@ describe('decidirConjuracao', () => {
   });
 
   it('cura (Palavra Curativa) — rolagem de cura montada', () => {
-    const resultado = decidirConjuracao(magia('palavracurativa'), 1, 1, null, false, false, [], 0);
+    const resultado = decidirConjuracao(magia('palavracurativa'), 1, 1, null, false, false, undefined, 0);
     expect(resultado.mecanica).toBe('cura');
     expect(resultado.rollCura).toBeDefined();
     expect(resultado.textoFeedback).toBe('Cura rolada — aplique o total no alvo.');
   });
 
   it('nenhuma mecânica reconhecida (Luz) — texto de feedback vira a descrição curta da magia', () => {
-    const resultado = decidirConjuracao(magia('luz'), 0, 1, null, false, false, [], 0);
+    const resultado = decidirConjuracao(magia('luz'), 0, 1, null, false, false, undefined, 0);
     expect(resultado.mecanica).toBe('nenhuma');
     expect(resultado.textoFeedback).toBe(magia('luz').descricaoCurta);
   });
 
   it('Colheita Macabra qualifica — magia de Necromancia, característica desbloqueada, espaço de verdade gasto', () => {
-    const resultado = decidirConjuracao(magia('toquevampirico'), 3, 5, 5, true, true, [], 0);
+    const resultado = decidirConjuracao(magia('toquevampirico'), 3, 5, 5, true, true, undefined, 0);
     expect(resultado.curaColheitaMacabra).toBe(6); // curaColheitaMacabra(3) = 3*2
   });
 
   it('Colheita Macabra NÃO qualifica sem espaço de verdade gasto (ex: magia concedida de graça)', () => {
-    const resultado = decidirConjuracao(magia('toquevampirico'), 3, 5, 5, true, false, [], 0);
+    const resultado = decidirConjuracao(magia('toquevampirico'), 3, 5, 5, true, false, undefined, 0);
     expect(resultado.curaColheitaMacabra).toBeNull();
   });
 
   it('Colheita Macabra NÃO qualifica pra magia que não é de Necromancia', () => {
-    const resultado = decidirConjuracao(magia('raiomistico'), 1, 5, 5, true, true, [], 0);
+    const resultado = decidirConjuracao(magia('raiomistico'), 1, 5, 5, true, true, undefined, 0);
     expect(resultado.curaColheitaMacabra).toBeNull();
   });
 
-  it('Explosão Agonizante — soma mod. de Carisma ao dano de Raio Místico quando a invocação está marcada', () => {
-    const comInvocacao = decidirConjuracao(magia('raiomistico'), 0, 1, 5, false, false, ['explosao-agonizante'], 3);
-    expect(comInvocacao.danoPendente?.mod).toBe(3);
-    const semInvocacao = decidirConjuracao(magia('raiomistico'), 0, 1, 5, false, false, [], 3);
-    expect(semInvocacao.danoPendente?.mod).toBe(0);
+  it('Explosão Agonizante — soma mod. de Carisma ao dano do truque vinculado', () => {
+    const comVinculo = decidirConjuracao(magia('raiomistico'), 0, 1, 5, false, false, 'Raio Místico', 3);
+    expect(comVinculo.danoPendente?.mod).toBe(3);
+    const semVinculo = decidirConjuracao(magia('raiomistico'), 0, 1, 5, false, false, undefined, 3);
+    expect(semVinculo.danoPendente?.mod).toBe(0);
   });
 
-  it('Explosão Agonizante NÃO se aplica a outro truque de dano (Toque Necrótico), mesmo com a invocação marcada', () => {
-    const resultado = decidirConjuracao(magia('toquenecrotico'), 0, 1, 5, false, false, ['explosao-agonizante'], 3);
+  it('Explosão Agonizante NÃO se aplica a um truque diferente do vinculado', () => {
+    const resultado = decidirConjuracao(magia('toquenecrotico'), 0, 1, 5, false, false, 'Raio Místico', 3);
     expect(resultado.danoPendente?.mod).toBe(0);
   });
 });

@@ -24,6 +24,9 @@ interface PerfilTabProps {
   /** Invocações Místicas (Bruxo) atuais — vazio pra qualquer outra
    * classe, a seção some sozinha. */
   invocacoesMisticasAtuais: string[];
+  /** Truque vinculado a cada Invocação Mística que exige essa escolha
+   * (Explosão Agonizante/Repulsiva) — ver `core/invocacoesMisticas.ts`. */
+  invocacoesTruqueVinculado: Record<string, string>;
 }
 
 export default function PerfilTab({
@@ -33,6 +36,7 @@ export default function PerfilTab({
   subclasse,
   talentosGeraisAtuais,
   invocacoesMisticasAtuais,
+  invocacoesTruqueVinculado,
 }: PerfilTabProps) {
   // O placeholder "Característica de Subclasse" (ver levelUp.ts) nunca
   // vira card aqui — a característica REAL já aparece certa na seção
@@ -80,15 +84,19 @@ export default function PerfilTab({
           <div className="section-title" style={{ marginTop: 16 }}>
             Invocações Místicas
           </div>
-          {invocacoesEscolhidas.map((inv) => (
-            <div key={inv.id} className="opt-card" style={{ cursor: 'default' }}>
-              <div className="opt-card-name">{inv.nome}</div>
-              <div className="opt-card-desc">
-                {invocacaoTemPlaceholder(inv) ? '[PH] sem efeito mecânico ainda — ' : ''}
-                {inv.beneficios}
+          {invocacoesEscolhidas.map((inv) => {
+            const truqueVinculado = invocacoesTruqueVinculado[inv.id];
+            return (
+              <div key={inv.id} className="opt-card" style={{ cursor: 'default' }}>
+                <div className="opt-card-name">{inv.nome}</div>
+                <div className="opt-card-desc">
+                  {invocacaoTemPlaceholder(inv, truqueVinculado) ? '[PH] sem efeito mecânico ainda — ' : ''}
+                  {truqueVinculado && `🎯 Vinculada a ${truqueVinculado} — `}
+                  {inv.beneficios}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </>
       )}
 

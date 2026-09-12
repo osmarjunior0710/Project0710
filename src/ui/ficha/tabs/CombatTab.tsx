@@ -135,9 +135,9 @@ interface CombatTabProps {
   magiasPreparadasAcao: Magia[];
   magiasPreparadasReacao: Magia[];
   modAcertoConjuracao: number | null;
-  /** Invocações Místicas atuais e mod. de Carisma — só alimentam
-   * Explosão Agonizante (dano de Raio Místico), ver `MagiasTab.tsx`. */
-  invocacoesMisticasAtuais: string[];
+  /** NOME do truque vinculado a Explosão Agonizante + mod. de Carisma
+   * — ver `MagiasTab.tsx`/`core/invocacoesMisticas.ts`. */
+  truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
   numAtaques: number;
   indomavelMaximo: number;
@@ -272,7 +272,7 @@ export default function CombatTab({
   magiasPreparadasAcao,
   magiasPreparadasReacao,
   modAcertoConjuracao,
-  invocacoesMisticasAtuais,
+  truqueVinculadoAgonizante,
   modCarisma,
   numAtaques,
   indomavelMaximo,
@@ -961,7 +961,7 @@ export default function CombatTab({
             truques={truques}
             magiasPreparadas={magiasPreparadasAcao}
             modAcertoConjuracao={modAcertoConjuracao}
-            invocacoesMisticasAtuais={invocacoesMisticasAtuais}
+            truqueVinculadoAgonizante={truqueVinculadoAgonizante}
             modCarisma={modCarisma}
             numAtaques={numAtaques}
             ataquesFeitos={ataquesFeitos}
@@ -1041,7 +1041,7 @@ export default function CombatTab({
             conjura={conjura}
             magiasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
-            invocacoesMisticasAtuais={invocacoesMisticasAtuais}
+            truqueVinculadoAgonizante={truqueVinculadoAgonizante}
             modCarisma={modCarisma}
             colheitaMacabraDisponivel={colheitaMacabraDisponivel}
             onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
