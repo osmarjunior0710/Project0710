@@ -367,3 +367,34 @@ com preferência 3D/2D no menu do avatar — ver o SDD pra mecânica
 completa.
 
 **Data/origem:** 2026-09, pedido do Osmar.
+
+## Roteamento Ação/Ação Bônus/Reação de magia é só o Tempo de Conjuração da própria magia
+
+Cada magia/truque conjurável entra no painel certo do Combate
+(`useMagiasEConjuracao.ts`) comparando `magia.tempoConjuracao` — nunca
+por uma lista hardcoded de nomes. `core/magiasPersonagem.ts`:
+`ehMagiaDeReacao`/`ehMagiaDeAcaoBonus` (`startsWith('Reação')`/
+`startsWith('Ação Bônus')` — cobre as variantes descritivas dos
+Golpes Divinos/Destruições, que também são Ação Bônus na regra real).
+Reação é checada ANTES de Ação Bônus (nenhuma magia é as 2 coisas).
+Exceção deliberadamente NÃO coberta: uma característica do personagem
+que mude o tipo de ação de uma magia específica — não existe nenhuma
+assim implementada hoje; se aparecer, o roteamento vira uma função que
+aceita um override por personagem, em vez de olhar só a magia.
+
+**"Usar Magia" virou um hook compartilhado entre os painéis:**
+`useUsarMagiaPainel.tsx` (`ui/ficha/combat/`) tem TODO o fluxo
+(picker Truque/Magia Preparada → `EscolherCirculoShell` se for o caso
+→ `decidirConjuracao`) que antes só existia dentro de
+`AcaoPanelContent.tsx` — extraído pra reaproveitar sem copiar ~90
+linhas quando `BonusPanelContent.tsx` ganhou o mesmo fluxo (pedido do
+Osmar: Danação, Ação Bônus do Bruxo, aparecia no painel errado).
+Devolve `{ picker, abrirLista }`: quem chama faz
+`if (picker) return picker;` antes do resto do JSX normal (mesmo
+padrão de antes, só que compartilhado) e usa `abrirLista` no `onClick`
+da linha "✨ Usar Magia". `DanoPendente` saiu de dentro de
+`AcaoPanelContent.tsx` pra `DanoPendente.ts` própria — evita import
+circular (o hook precisa do tipo, e agora `AcaoPanelContent` importa o
+hook).
+
+**Data/origem:** 2026-09, pedido do Osmar.

@@ -131,8 +131,13 @@ interface CombatTabProps {
   usosFalarComAnimaisGnomoRestantes: number;
   onUsarFalarComAnimaisGnomo: () => boolean;
   conjura: boolean;
-  truques: Magia[];
+  /** Truques/Magias Preparadas já roteados por Tempo de Conjuração
+   * (Ação/Ação Bônus/Reação) — ver `useMagiasEConjuracao.ts`. Cada
+   * painel do Combate só recebe a lista do seu próprio tipo. */
+  truquesAcao: Magia[];
+  truquesBonus: Magia[];
   magiasPreparadasAcao: Magia[];
+  magiasPreparadasBonus: Magia[];
   magiasPreparadasReacao: Magia[];
   modAcertoConjuracao: number | null;
   /** NOME do truque vinculado a Explosão Agonizante + mod. de Carisma
@@ -268,8 +273,10 @@ export default function CombatTab({
   usosFalarComAnimaisGnomoRestantes,
   onUsarFalarComAnimaisGnomo,
   conjura,
-  truques,
+  truquesAcao,
+  truquesBonus,
   magiasPreparadasAcao,
+  magiasPreparadasBonus,
   magiasPreparadasReacao,
   modAcertoConjuracao,
   truqueVinculadoAgonizante,
@@ -958,7 +965,7 @@ export default function CombatTab({
             classeAtivaNome={classeAtivaNome}
             ponte={ponte}
             conjura={conjura}
-            truques={truques}
+            truques={truquesAcao}
             magiasPreparadas={magiasPreparadasAcao}
             modAcertoConjuracao={modAcertoConjuracao}
             truqueVinculadoAgonizante={truqueVinculadoAgonizante}
@@ -1017,7 +1024,23 @@ export default function CombatTab({
             petsMortoVivo={petsMortoVivo}
             pvTempMestreDaMorte={pvTempMestreDaMorte}
             onUsarMestreDaMorte={onUsarMestreDaMorte}
-            onEscolher={(nome, desc) => escolherNoPainel('bonus', nome, desc)}
+            onEscolher={(nome, desc, dano) => escolherNoPainel('bonus', nome, desc, dano)}
+            desvantagemForcaDestreza={desvantagemForcaDestreza}
+            conjura={conjura}
+            truques={truquesBonus}
+            magiasPreparadas={magiasPreparadasBonus}
+            espacos={espacos}
+            espacosGastosPorCirculo={espacosGastosPorCirculo}
+            onGastarSlotCirculo={onGastarSlotCirculo}
+            classeAtivaNome={classeAtivaNome}
+            ponte={ponte}
+            nivel={nivel}
+            modAcertoConjuracao={modAcertoConjuracao}
+            truqueVinculadoAgonizante={truqueVinculadoAgonizante}
+            modCarisma={modCarisma}
+            onAbrirSalvaguarda={abrirSalvaguarda}
+            colheitaMacabraDisponivel={colheitaMacabraDisponivel}
+            onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
             ataqueBonus={ataqueBonus}
             onUsarAtaqueBonus={usarAtaqueMaoSecundaria}
             usosInspiracaoMaximo={usosInspiracaoMaximo}

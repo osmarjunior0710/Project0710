@@ -43,6 +43,7 @@ import { acoesBase } from '../../../data/exampleCombat';
 import {
   espacosDeMagiaAtivos,
   ehMagiaDeReacao,
+  ehMagiaDeAcaoBonus,
   truquesDoPersonagem,
   magiasPreparadasDoPersonagem,
   deficitTruques,
@@ -246,8 +247,16 @@ export function useMagiasEConjuracao(input: {
     ...magiasTalentoOrigemPreparadas,
     ...magiasTalentoGeralPreparadas,
   ];
+  // Roteia cada magia conjurável pro painel certo do Combate (Ação/
+  // Ação Bônus/Reação), pelo próprio Tempo de Conjuração da magia —
+  // Reação sempre checada primeiro (nenhuma magia é as 2 coisas ao
+  // mesmo tempo). Truques passam pelo mesmo roteamento (poucos, mas
+  // existem truques de Ação Bônus — ex.: Bordão Místico/Criar Chamas).
   const magiasPreparadasReacao = magiasConjuraveis.filter(ehMagiaDeReacao);
-  const magiasPreparadasAcao = magiasConjuraveis.filter((m) => !ehMagiaDeReacao(m));
+  const magiasPreparadasBonus = magiasConjuraveis.filter((m) => !ehMagiaDeReacao(m) && ehMagiaDeAcaoBonus(m));
+  const magiasPreparadasAcao = magiasConjuraveis.filter((m) => !ehMagiaDeReacao(m) && !ehMagiaDeAcaoBonus(m));
+  const truquesBonus = truques.filter(ehMagiaDeAcaoBonus);
+  const truquesAcao = truques.filter((m) => !ehMagiaDeAcaoBonus(m));
 
   return {
     conjura,
@@ -303,6 +312,9 @@ export function useMagiasEConjuracao(input: {
     acoesGenericasBonus,
     magiasConjuraveis,
     magiasPreparadasReacao,
+    magiasPreparadasBonus,
     magiasPreparadasAcao,
+    truquesAcao,
+    truquesBonus,
   };
 }

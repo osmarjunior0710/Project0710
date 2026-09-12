@@ -1,26 +1,14 @@
-import { useState } from 'react';
 import { acoesBase, type AtaqueInfo } from '../../../data/exampleCombat';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
-import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte } from '../../../core/magiasPersonagem';
-import { decidirConjuracao } from '../../../core/conjurarMagia';
+import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
 import { useRoll } from '../../roll/RollContext';
-import SelecionarMagiaShell from './SelecionarMagiaShell';
-import EscolherCirculoShell from './EscolherCirculoShell';
+import { useUsarMagiaPainel } from './useUsarMagiaPainel';
+import type { DanoPendente } from './DanoPendente';
 import TickPips from '../../components/TickPips';
 import styles from './PanelRows.module.css';
 
-export interface DanoPendente {
-  label: string;
-  quantidade: number;
-  lados: number;
-  mod: number;
-  /** Tipo de dano (ex.: "Perfurante") — ausente quando a fonte não é
-   * um ataque com arma real (ex.: magia/característica sem tipo
-   * definido aqui). Usado só pra habilitar o reroll do Perfurador
-   * (ver `core/rerollDanoTalento.ts`). */
-  tipoDano?: string;
-}
+export type { DanoPendente };
 
 interface AcaoPanelContentProps {
   /** `true` = Armadura equipada sem treinamento — Desvantagem em
@@ -121,8 +109,25 @@ export default function AcaoPanelContent({
   colheitaMacabraDisponivel,
   onColheitaMacabraDisponivel,
 }: AcaoPanelContentProps) {
-  const [telaMagia, setTelaMagia] = useState<'lista' | { magia: Magia; circulos: number[] } | null>(null);
   const { rolarD20, rolarDados } = useRoll();
+  const { picker, abrirLista } = useUsarMagiaPainel({
+    desvantagemForcaDestreza,
+    onEscolher,
+    onAbrirSalvaguarda,
+    gastarSlotCirculo,
+    nivel,
+    espacos,
+    espacosGastosPorCirculo,
+    classeAtivaNome,
+    ponte,
+    truques,
+    magiasPreparadas,
+    modAcertoConjuracao,
+    truqueVinculadoAgonizante,
+    modCarisma,
+    colheitaMacabraDisponivel,
+    onColheitaMacabraDisponivel,
+  });
 
   function usarMaosCurativas() {
     if (!onUsarMaosCurativas()) return;
@@ -154,78 +159,9 @@ export default function AcaoPanelContent({
     });
   }
 
-  /** `circulo` é o espaço a gastar — pode ser maior que `m.circulo`
-   * (upcast, ver `EscolherCirculoShell`); truque passa `null` (não
-   * gasta espaço nenhum). */
-  function conjurarMagia(m: Magia, circulo: number | null, classeDoEspaco: string = classeAtivaNome) {
-    // Trava dupla — a linha "Usar Magia" já fica desabilitada quando
-    // `desvantagemForcaDestreza` é true, mas essa checagem aqui é o
-    // ponto único de verdade (SDD "Penalidades por Falta de
-    // Proficiência": bloqueio de conjuração é pra impedir de verdade,
-    // não só avisar).
-    if (desvantagemForcaDestreza) return;
-    if (circulo !== null) {
-      const ok = gastarSlotCirculo(circulo, classeDoEspaco);
-      if (!ok) return;
-    }
-    setTelaMagia(null);
-    const circuloUsado = circulo ?? m.circulo;
-    const resultado = decidirConjuracao(
-      m,
-      circuloUsado,
-      nivel,
-      modAcertoConjuracao,
-      colheitaMacabraDisponivel,
-      circulo !== null,
-      truqueVinculadoAgonizante,
-      modCarisma,
-    );
-    if (resultado.curaColheitaMacabra !== null) {
-      onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
-    }
-    if (resultado.rollAcerto) {
-      rolarD20(resultado.rollAcerto);
-      onEscolher(`✨ ${m.nome}`, resultado.textoFeedback, resultado.danoPendente);
-      return;
-    }
-    if (resultado.mecanica === 'salvaguarda') {
-      onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
-      onAbrirSalvaguarda(m, circuloUsado);
-      return;
-    }
-    if (resultado.rollCura) {
-      rolarDados(resultado.rollCura);
-    }
-    onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
-  }
-
   const surtoDesabilitado = surtoRestantes <= 0 || surtoUsadoTurno;
 
-  if (telaMagia === 'lista') {
-    return (
-      <SelecionarMagiaShell
-        titulo="Usar Magia"
-        truques={truques}
-        magiasPreparadas={magiasPreparadas}
-        espacos={espacos}
-        espacosGastosPorCirculo={espacosGastosPorCirculo}
-        onFechar={() => setTelaMagia(null)}
-        onEscolherTruque={(m) => conjurarMagia(m, null)}
-        onEscolherMagia={(m, circulosDisponiveis) => setTelaMagia({ magia: m, circulos: circulosDisponiveis })}
-      />
-    );
-  }
-
-  if (telaMagia) {
-    return (
-      <EscolherCirculoShell
-        magia={telaMagia.magia}
-        opcoes={opcoesGastoComPonte(telaMagia.magia.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte)}
-        onVoltar={() => setTelaMagia('lista')}
-        onConjurar={(circulo, classeNome) => conjurarMagia(telaMagia.magia, circulo, classeNome)}
-      />
-    );
-  }
+  if (picker) return picker;
 
   return (
     <>
@@ -272,7 +208,7 @@ export default function AcaoPanelContent({
         <div
           className={styles.row}
           style={desvantagemForcaDestreza ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-          onClick={() => setTelaMagia('lista')}
+          onClick={abrirLista}
         >
           <div className={styles.rowName}>✨ Usar Magia</div>
           {detalhesAtivo && (

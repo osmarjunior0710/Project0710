@@ -515,7 +515,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     chaveDoPoolDeMagia,
     espacosParaConjurar,
     espacosGastosParaConjurar,
-    truques,
     memorizarMagiaDisponivel,
     livroDeMagias,
     usaRedefPorDescanso,
@@ -548,7 +547,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ritualRapidoGasto,
     acoesGenericasBonus,
     magiasPreparadasReacao,
+    magiasPreparadasBonus,
     magiasPreparadasAcao,
+    truquesAcao,
+    truquesBonus,
   } = useMagiasEConjuracao({
     classe,
     personagem,
@@ -1901,8 +1903,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             usosFalarComAnimaisGnomoRestantes={usosFalarComAnimaisGnomoRestantes}
             onUsarFalarComAnimaisGnomo={usarFalarComAnimaisGnomo}
             conjura={conjura}
-            truques={truques}
+            truquesAcao={truquesAcao}
+            truquesBonus={truquesBonus}
             magiasPreparadasAcao={magiasPreparadasAcao}
+            magiasPreparadasBonus={magiasPreparadasBonus}
             magiasPreparadasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}

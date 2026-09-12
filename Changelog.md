@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2057
+
+Combate — magias/truques de Ação Bônus (ex.: Danação, do Bruxo) agora
+aparecem no painel "Bônus" (com o mesmo botão "✨ Usar Magia" que já
+existia no painel "Ação"), em vez de aparecerem no painel errado.
+Ação/Reação continuam exatamente como antes.
+
 ## v202609_2034
 
 Bruxo — Explosão Agonizante e Explosão Repulsiva ganham tela própria

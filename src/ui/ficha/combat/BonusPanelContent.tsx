@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { Pet } from '../../../core/pets';
+import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { AcaoBase } from '../../../data/exampleCombat';
+import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
+import type { DanoPendente } from './DanoPendente';
+import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
 import styles from './PanelRows.module.css';
 
@@ -77,7 +81,39 @@ interface BonusPanelContentProps {
    * `bonusPvTempMestreDaMorte` em `core/necromante.ts`). */
   pvTempMestreDaMorte: number;
   onUsarMestreDaMorte: (petIds: string[]) => void;
-  onEscolher: (nome: string, desc: string) => void;
+  onEscolher: (nome: string, desc: string, dano?: DanoPendente) => void;
+  /** `true` = Armadura equipada sem treinamento — bloqueia conjurar
+   * magia (SDD "Penalidades por Falta de Proficiência", ver
+   * `core/proficienciaArmadura.ts`), mesma trava do painel de Ação. */
+  desvantagemForcaDestreza: boolean;
+  conjura: boolean;
+  /** Truques/Magias Preparadas com Tempo de Conjuração "Ação Bônus" —
+   * já filtrados em `useMagiasEConjuracao.ts` (`ehMagiaDeAcaoBonus`).
+   * Poucos no catálogo hoje (Danação, Palavra Curativa, etc.). */
+  truques: Magia[];
+  magiasPreparadas: Magia[];
+  espacos: EspacoDeMagiaAtivo[];
+  espacosGastosPorCirculo: Record<number, number>;
+  onGastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
+  /** Nome da classe ATIVA — dona do pool acima. Ver `MagiasTab.tsx`. */
+  classeAtivaNome: string;
+  /** Ponte de Magia de Pacto (SDD Multiclasse seção 8.5) — `null` pra
+   * quem não tem Bruxo + outra classe conjuradora ao mesmo tempo. */
+  ponte: PoolDePonte | null;
+  /** Nível do personagem — pro Aprimoramento de Truque. */
+  nivel: number;
+  modAcertoConjuracao: number | null;
+  /** NOME do truque vinculado a Explosão Agonizante + mod. de Carisma
+   * — ver `MagiasTab.tsx`/`core/invocacoesMisticas.ts`. */
+  truqueVinculadoAgonizante: string | undefined;
+  modCarisma: number;
+  /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
+   * de Salvaguarda, que vive em CombatTab. */
+  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
+  /** Colheita Macabra (Necromante, nível 3+) — `true` = personagem tem
+   * a característica. Ver `core/necromante.ts`. */
+  colheitaMacabraDisponivel: boolean;
+  onColheitaMacabraDisponivel: (cura: number) => void;
 }
 
 export default function BonusPanelContent({
@@ -125,10 +161,45 @@ export default function BonusPanelContent({
   pvTempMestreDaMorte,
   onUsarMestreDaMorte,
   onEscolher,
+  desvantagemForcaDestreza,
+  conjura,
+  truques,
+  magiasPreparadas,
+  espacos,
+  espacosGastosPorCirculo,
+  onGastarSlotCirculo,
+  classeAtivaNome,
+  ponte,
+  nivel,
+  modAcertoConjuracao,
+  truqueVinculadoAgonizante,
+  modCarisma,
+  onAbrirSalvaguarda,
+  colheitaMacabraDisponivel,
+  onColheitaMacabraDisponivel,
 }: BonusPanelContentProps) {
   const [escolhendoFormaRevelacao, setEscolhendoFormaRevelacao] = useState(false);
   const [escolhendoMestreDaMorte, setEscolhendoMestreDaMorte] = useState(false);
   const [petsSelecionados, setPetsSelecionados] = useState<string[]>([]);
+  const { picker, abrirLista } = useUsarMagiaPainel({
+    desvantagemForcaDestreza,
+    onEscolher,
+    onAbrirSalvaguarda,
+    gastarSlotCirculo: onGastarSlotCirculo,
+    nivel,
+    espacos,
+    espacosGastosPorCirculo,
+    classeAtivaNome,
+    ponte,
+    truques,
+    magiasPreparadas,
+    modAcertoConjuracao,
+    truqueVinculadoAgonizante,
+    modCarisma,
+    colheitaMacabraDisponivel,
+    onColheitaMacabraDisponivel,
+  });
+  const temMagiaBonus = conjura && (truques.length > 0 || magiasPreparadas.length > 0);
 
   function toggleSelecaoMestreDaMorte(petId: string) {
     setPetsSelecionados((prev) => (prev.includes(petId) ? prev.filter((id) => id !== petId) : [...prev, petId]));
@@ -144,6 +215,8 @@ export default function BonusPanelContent({
     setPetsSelecionados([]);
   }
 
+  if (picker) return picker;
+
   if (
     usosFolegoMaximo === 0 &&
     usosInspiracaoMaximo === 0 &&
@@ -155,6 +228,7 @@ export default function BonusPanelContent({
     !revelacaoCelestialDisponivel &&
     !ataqueBonus &&
     !mestreDaMorteDisponivel &&
+    !temMagiaBonus &&
     acoesGenericasBonus.length === 0
   ) {
     return (
@@ -240,6 +314,22 @@ export default function BonusPanelContent({
 
   return (
     <>
+      {temMagiaBonus && (
+        <div
+          className={styles.row}
+          style={desvantagemForcaDestreza ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+          onClick={abrirLista}
+        >
+          <div className={styles.rowName}>✨ Usar Magia</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              {desvantagemForcaDestreza
+                ? 'Bloqueado — Armadura equipada sem treinamento impede conjurar magias.'
+                : 'Conjurar Truque ou Magia Preparada de Ação Bônus'}
+            </div>
+          )}
+        </div>
+      )}
       {usosInspiracaoMaximo > 0 && (
         <>
           <div className={styles.slotCounter}>

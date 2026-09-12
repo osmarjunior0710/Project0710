@@ -321,6 +321,18 @@ export function ehMagiaDeReacao(magia: Magia): boolean {
   return (magia.tempoConjuracao ?? '').startsWith('Reação');
 }
 
+/** Mesma heurística de `ehMagiaDeReacao`, pra Ação Bônus — cobre tanto
+ * o texto simples ("Ação Bônus") quanto as variantes descritivas dos
+ * Golpes Divinos/Destruições ("Ação Bônus, que você realiza
+ * imediatamente após..."), que também são Ação Bônus na regra real.
+ * Usada pra rotear a magia certa pro painel certo do Combate (Ação/
+ * Ação Bônus/Reação) — exceção: uma característica do personagem que
+ * mude o tipo de ação de uma magia específica não é coberta aqui (não
+ * existe nenhuma assim implementada hoje). */
+export function ehMagiaDeAcaoBonus(magia: Magia): boolean {
+  return (magia.tempoConjuracao ?? '').startsWith('Ação Bônus');
+}
+
 /** Bônus de acerto de conjuração (mod. do atributo + bônus de
  * proficiência) — null se a classe não tiver atributo de conjuração
  * mapeado (ver `ATRIBUTO_POR_NOME`). */

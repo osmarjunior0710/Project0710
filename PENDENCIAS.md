@@ -1045,15 +1045,6 @@ tipos de novo, avaliar replicar o mesmo padrão de card fixo (campos
 próprios de cada tipo — ex. Arma teria Dano/Propriedades/Maestria em
 vez de Tempo/Alcance/Componentes/Duração).
 
-## Painel de Ação Bônus (Combat) ainda não tem integração de magia
-
-`BonusPanelContent.tsx` continua sem gastarSlot/lista de magia —
-magias com Tempo de Conjuração "1 Ação Bônus" (poucas no catálogo, 6
-no total) aparecem hoje no painel de Ação (Etapa 3.2), não no de Ação
-Bônus, onde deveriam por regra. Simplificação aceita por ora (ver
-DECISOES-CLASSES.md "Etapa 3.2"); resolver quando o painel de Bônus
-ganhar suporte a magia de verdade.
-
 ## Painel de Reação ainda usa a lista plana antiga de magias (não ganhou o picker novo)
 
 `ReacaoPanelContent.tsx` continua com a lista simples de magias de

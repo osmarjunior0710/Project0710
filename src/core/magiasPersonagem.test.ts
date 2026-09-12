@@ -10,10 +10,18 @@ import {
   memorizarMagiaValida,
   opcoesGastoComPonte,
   espacosCombinadosComoAtivos,
+  ehMagiaDeReacao,
+  ehMagiaDeAcaoBonus,
 } from './magiasPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
-import { magiasDaClasse } from '../data/rulesets/dnd2024/magias';
+import { magias, magiasDaClasse } from '../data/rulesets/dnd2024/magias';
 import { criarSelecaoInicial } from './personagem';
+
+function magiaFixture(nome: string) {
+  const m = magias.find((m) => m.nome === nome);
+  if (!m) throw new Error(`Fixture "${nome}" não encontrada em data/rulesets/dnd2024/magias.ts`);
+  return m;
+}
 
 const bardo = classes.find((c) => c.nome === 'Bardo');
 if (!bardo) throw new Error('Fixture "Bardo" não encontrada em data/rulesets/dnd2024/classes.ts');
@@ -203,5 +211,30 @@ describe('espacosCombinadosComoAtivos', () => {
 
   it('caso de borda — array de zeros vira lista vazia', () => {
     expect(espacosCombinadosComoAtivos([0, 0, 0, 0, 0, 0, 0, 0, 0])).toEqual([]);
+  });
+});
+
+describe('ehMagiaDeReacao / ehMagiaDeAcaoBonus', () => {
+  it('Contramagia (Reação simples): só ehMagiaDeReacao', () => {
+    const m = magiaFixture('Contramagia');
+    expect(ehMagiaDeReacao(m)).toBe(true);
+    expect(ehMagiaDeAcaoBonus(m)).toBe(false);
+  });
+
+  it('Danação (Ação Bônus simples): só ehMagiaDeAcaoBonus', () => {
+    const m = magiaFixture('Danação');
+    expect(ehMagiaDeAcaoBonus(m)).toBe(true);
+    expect(ehMagiaDeReacao(m)).toBe(false);
+  });
+
+  it('Destruição Cauterizante (Ação Bônus com texto descritivo "que você realiza..."): ainda conta como Ação Bônus', () => {
+    const m = magiaFixture('Destruição Cauterizante');
+    expect(ehMagiaDeAcaoBonus(m)).toBe(true);
+  });
+
+  it('borda — magia de Ação normal (Bola de Fogo): nem Reação nem Ação Bônus', () => {
+    const m = magiaFixture('Bola de Fogo');
+    expect(ehMagiaDeReacao(m)).toBe(false);
+    expect(ehMagiaDeAcaoBonus(m)).toBe(false);
   });
 });
