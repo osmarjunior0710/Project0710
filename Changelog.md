@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1355
+
+Arrumação interna, nada novo pra ver na tela: removida uma duplicação
+de dado (os 10 Estilos de Luta estavam cadastrados 2x em arquivos
+diferentes) e adicionados testes automatizados que faltavam em 6
+partes do motor de cálculo (recursos de classe, Loja, Maestria em
+Arma, Sintonização, Inspiração de Bardo, Equipar/Desequipar). Parte de
+um levantamento de saúde do projeto antes de começar a próxima classe.
+
 ## v202609_1027
 
 Multiclasse — parte final: quem tem 2 classes que conjuram magia ao

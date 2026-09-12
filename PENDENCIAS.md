@@ -953,19 +953,14 @@ aqui. Os que **não** têm cobertura no plano atual:
   esse mesmo buraco. Vira uma entrega própria: Fase 1 = listar/exibir
   (já existe); Fase 2 = efetivamente aplicar o efeito nos cálculos de
   `core/`, talento por talento, conforme cada um for auditado.
-- **ASI não permite +2 no mesmo atributo.** O seletor atual
-  (`toggleAsi` em `LevelUpShell.tsx`) só liga/desliga atributos — clicar
-  de novo no mesmo atributo remove o ponto em vez de somar um segundo.
-  Precisa virar um contador +/- por atributo (0, 1 ou 2 pontos,
-  distribuídos livremente entre 1 ou 2 atributos), e bloquear "Avançar"
-  enquanto os 2 pontos do ASI não tiverem sido todos distribuídos.
-- **Pontos de ASI não afetam a ficha.** Mesmo quando o jogador escolhe
-  atributos no passo de ASI, o valor escolhido nunca é aplicado a
-  nenhum atributo real do personagem — não é passado no `onConfirmar`,
-  não é somado em `calcularAtributosFinais` nem em nenhum lugar
-  derivado dele (CA, PV, perícias, mod. de ataque). Depende de resolver
-  o item anterior (o seletor) antes, mas é um segundo bug: mesmo com o
-  seletor corrigido, ainda falta o "encanamento" de aplicar o resultado.
+~~**ASI não permite +2 no mesmo atributo / não afeta a ficha.**~~ —
+  **resolvido** (sem data exata registrada): o seletor virou
+  `DistribuirPontosAtributo` (mesmo componente do ajuste de atributo
+  por Antecedente, +/- por atributo, bloqueia "Avançar" até distribuir
+  os 2 pontos) e o resultado (`atributosAumentados`) é aplicado de
+  verdade via `aumentarAtributos` em `FichaShell.tsx`. Entrada
+  encontrada desatualizada numa auditoria geral (2026-09) — sem lição
+  de design nova, não precisa de entrada em `DECISOES-*.md`.
 - **Sem escolha de Dádiva Épica (nível 19).** O passo "Dádiva Épica" do
   Level Up hoje só mostra a descrição da característica e um
   placeholder "lista de Dádivas Épicas entra numa próxima entrega" — a
