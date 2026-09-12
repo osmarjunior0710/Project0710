@@ -330,17 +330,47 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [turnState, setTurnState] = useState<Record<RecursoTurno, EstadoRecurso>>(
     personagemSalvo.turnStateAtual ?? turnoInicial,
   );
-  const [espacosGastosPorCirculo, setEspacosGastosPorCirculo] = useState<Record<number, number>>(() => {
-    if (personagemSalvo.espacosGastosPorCirculo) return personagemSalvo.espacosGastosPorCirculo;
-    // Migração de personagem salvo antes da Etapa 4.2 (só existia 1
-    // círculo simultâneo possível) — o valor antigo vira o gasto do
-    // círculo que já estava ativo na época.
-    if (personagemSalvo.espacosGastos) {
-      const circuloAntigo = espacosDeMagiaAtivos(classeDaSelecao(selecao), personagemSalvo.nivel)[0]?.circulo;
-      if (circuloAntigo !== undefined) return { [circuloAntigo]: personagemSalvo.espacosGastos };
-    }
-    return {};
-  });
+  // Espaços de Magia gastos — SEPARADOS por classe (Fase M4b,
+  // multiclasse): 2 classes podem ter espaço do MESMO número de
+  // círculo ao mesmo tempo (ex: Bruxo com Pacto no 2º círculo + Mago
+  // com Espaços de Magia normais também no 2º) — sem separar por
+  // classe, gastar um descontava do outro por engano. Chave externa =
+  // nome da classe; `espacosGastosPorCirculo` (const derivada logo
+  // abaixo) é só a "fatia" da classe ATIVA, pro resto do código
+  // continuar lendo exatamente como sempre leu.
+  const [espacosGastosPorClasseECirculo, setEspacosGastosPorClasseECirculo] = useState<Record<string, Record<number, number>>>(
+    () => {
+      if (personagemSalvo.espacosGastosPorClasseECirculo) return personagemSalvo.espacosGastosPorClasseECirculo;
+      const classeOriginalNomeInit = classesAtual[0]?.classe;
+      if (!classeOriginalNomeInit) return {};
+      // Migração de personagem salvo ANTES do M4b — só existia 1
+      // classe, então o dict antigo (por círculo só) inteiro pertence
+      // a ela.
+      if (personagemSalvo.espacosGastosPorCirculo) {
+        return { [classeOriginalNomeInit]: personagemSalvo.espacosGastosPorCirculo };
+      }
+      // Migração de personagem salvo antes da Etapa 4.2 (só existia 1
+      // círculo simultâneo possível) — o valor antigo vira o gasto do
+      // círculo que já estava ativo na época.
+      if (personagemSalvo.espacosGastos) {
+        const circuloAntigo = espacosDeMagiaAtivos(classeDaSelecao(selecao), personagemSalvo.nivel)[0]?.circulo;
+        if (circuloAntigo !== undefined) {
+          return { [classeOriginalNomeInit]: { [circuloAntigo]: personagemSalvo.espacosGastos } };
+        }
+      }
+      return {};
+    },
+  );
+  const espacosGastosPorCirculo = espacosGastosPorClasseECirculo[classeAtivaNome] ?? {};
+  /** Atualiza o pool de espaços gastos de UMA classe específica (default
+   * = classe ativa) — usado pela ponte do Bruxo (M4b) pra gastar/
+   * devolver espaço de uma classe DIFERENTE da que está em foco agora. */
+  function atualizarEspacosGastos(
+    atualizador: (prev: Record<number, number>) => Record<number, number>,
+    classeNome: string = classeAtivaNome,
+  ) {
+    setEspacosGastosPorClasseECirculo((prev) => ({ ...prev, [classeNome]: atualizador(prev[classeNome] ?? {}) }));
+  }
   const [itensMochila, setItensMochila] = useState<ItemMochila[]>(
     personagemSalvo.itensMochilaAtual ?? calcularItensIniciais(selecao),
   );
@@ -663,7 +693,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       resistenciaInferaGasto,
       lancarNoInfernoGasto,
       surtoGasto,
-      espacosGastosPorCirculo,
+      espacosGastosPorClasseECirculo,
       inspiracaoGasto,
       truquesAtual: truquesAtuais,
       magiasPreparadasAtual: magiasPreparadasAtuais,
@@ -727,7 +757,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     resistenciaInferaGasto,
     lancarNoInfernoGasto,
     surtoGasto,
-    espacosGastosPorCirculo,
+    espacosGastosPorClasseECirculo,
     inspiracaoGasto,
     truquesAtuais,
     magiasPreparadasAtuais,
@@ -849,7 +879,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     const def = espacos.find((e) => e.circulo === circulo);
     const gasto = espacosGastosPorCirculo[circulo] ?? 0;
     if (!def || gasto >= def.maximo) return false;
-    setEspacosGastosPorCirculo((prev) => ({ ...prev, [circulo]: (prev[circulo] ?? 0) + 1 }));
+    atualizarEspacosGastos((prev) => ({ ...prev, [circulo]: (prev[circulo] ?? 0) + 1 }));
     return true;
   }
 
@@ -919,7 +949,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // conceder de novo a cada Descanso Longo. Nunca desliga sozinho
     // aqui — só o jogador desliga (manual ou usando o reroll).
     if (selecao.especie === 'Humano') setInspiracaoHeroicaAtiva(true);
-    setEspacosGastosPorCirculo({});
+    setEspacosGastosPorClasseECirculo({});
     setFolegoGasto(0);
     setVigorImplacavelGasto(false);
     setConhecimentoDePedrasGasto(0);
@@ -951,11 +981,30 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }
 
   function descansoCurto() {
-    const circulosQueRecuperam = espacos.filter((e) => e.recuperaNoDescansoCurto).map((e) => e.circulo);
-    if (circulosQueRecuperam.length > 0) {
-      setEspacosGastosPorCirculo((prev) => {
+    // Percorre TODAS as classes do personagem (não só a ativa) — o
+    // Bruxo recupera Magia de Pacto no Descanso Curto mesmo se a pill
+    // em foco agora for outra classe (Fase M4b, achado do mesmo bug de
+    // pool compartilhado corrigido nesta entrega). `algumCirculoRecuperou`
+    // é calculado ANTES do `setEspacosGastosPorClasseECirculo` (não
+    // dentro do updater) — o updater do useState não roda na hora, na
+    // sequência síncrona desta função.
+    const circulosQueRecuperamPorClasse = classesAtual.map((c) => {
+      const classeCatalogo = catalogoClasses.find((cc) => cc.nome === c.classe) ?? null;
+      const circulos = espacosDeMagiaAtivos(classeCatalogo, c.nivel)
+        .filter((e) => e.recuperaNoDescansoCurto)
+        .map((e) => e.circulo);
+      return { classeNome: c.classe, circulos };
+    });
+    const algumCirculoRecuperou = circulosQueRecuperamPorClasse.some((c) => c.circulos.length > 0);
+    if (algumCirculoRecuperou) {
+      setEspacosGastosPorClasseECirculo((prev) => {
         const proximo = { ...prev };
-        for (const c of circulosQueRecuperam) proximo[c] = 0;
+        for (const { classeNome, circulos } of circulosQueRecuperamPorClasse) {
+          if (circulos.length === 0) continue;
+          const poolClasse = { ...(proximo[classeNome] ?? {}) };
+          for (const circ of circulos) poolClasse[circ] = 0;
+          proximo[classeNome] = poolClasse;
+        }
         return proximo;
       });
     }
@@ -966,7 +1015,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setResistenciaInferaGasto(false);
     setPicoDeAdrenalinaGasto(0);
     setRestStatus(
-      `Descanso Curto: ${circulosQueRecuperam.length > 0 ? 'Espaços de Magia recuperados, ' : ''}${fonteDeInspiracao ? 'Inspiração de Bardo recuperada, ' : ''}1 uso de Recuperar Fôlego devolvido, Pico de Adrenalina recuperado. PV não recupera automaticamente por descanso curto.`,
+      `Descanso Curto: ${algumCirculoRecuperou ? 'Espaços de Magia recuperados, ' : ''}${fonteDeInspiracao ? 'Inspiração de Bardo recuperada, ' : ''}1 uso de Recuperar Fôlego devolvido, Pico de Adrenalina recuperado. PV não recupera automaticamente por descanso curto.`,
     );
   }
 
@@ -1012,7 +1061,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   function usarAstuciaMagica() {
     if (astuciaMagicaGasta || !espacoPactoAtual || astuciaMagicaRecupera <= 0) return;
     const circulo = espacoPactoAtual.circulo;
-    setEspacosGastosPorCirculo((prev) => ({ ...prev, [circulo]: Math.max(0, (prev[circulo] ?? 0) - astuciaMagicaRecupera) }));
+    atualizarEspacosGastos((prev) => ({ ...prev, [circulo]: Math.max(0, (prev[circulo] ?? 0) - astuciaMagicaRecupera) }));
     setAstuciaMagicaGasta(true);
   }
 

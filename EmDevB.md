@@ -24,8 +24,28 @@ Osmar aprovou seguir ("bora") logo após o fechamento do M2+M3.
 Plano em 3 entregas pequenas:
 - **M4a — Motor: classificação de conjurador + nível equivalente**
   (sem nada visível na tela ainda).
-- **M4b — Motor: Magia de Pacto do Bruxo sempre separada + ponte de
-  uso cruzado de espaços.**
+- [x] **M4b (parte 1) — Isolamento do pool de espaços por classe.**
+  Achado ao investigar a ponte do Bruxo: `espacosGastosPorCirculo`
+  era 1 dict SÓ (chave = número do círculo), compartilhado entre
+  QUALQUER classe ativa — 2 classes com espaço no mesmo número de
+  círculo (ex: Bruxo com Pacto no 2º + Mago com Espaços normais também
+  no 2º) corrompiam o contador uma da outra. Também achado: Descanso
+  Curto só recuperava os círculos da classe ATIVA no momento do
+  descanso — o Bruxo perdia a recuperação de Pacto se a pill estivesse
+  noutra classe. Corrigido: novo estado
+  `espacosGastosPorClasseECirculo: Record<string, Record<number, number>>`
+  (chave externa = nome da classe), com migração automática do formato
+  antigo (1 classe só) pra dentro da classe original. Descanso Curto
+  agora percorre TODAS as classes do personagem, não só a ativa.
+  Testado ao vivo no navegador: gastar um Espaço de Magia com Mago
+  ativo (Guerreiro/Mago) mostra o contador de 1º círculo caindo de 2/2
+  pra 1/2 corretamente, sem regressão no caso de 1 classe só.
+  tsc(-b)/testes(419)/build verdes.
+- [ ] **M4b (parte 2) — ponte de uso cruzado de espaços entre Magia de
+  Pacto do Bruxo e Conjuração normal.** Pausado pra confirmar com o
+  Osmar onde/como essa escolha aparece na tela antes de codar (CLAUDE.md
+  §6) — é uma interação nova (escolher DE QUAL pool gastar o espaço),
+  só alcançável hoje com Bruxo+Bardo ou Bruxo+Mago multiclasse.
 - **M4c — Ficha: Magias tab mostra o pool combinado** (quando 2+
   classes conjuradoras normais coexistem) em vez de cada classe
   separada.

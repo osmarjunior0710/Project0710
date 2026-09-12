@@ -67,12 +67,23 @@ export interface PersonagemSalvo {
    * pra migrar personagens salvos antes dessa entrega (ver
    * `FichaShell.tsx`) — nunca mais escrito. */
   espacosGastos?: number;
-  /** Espaços de Magia gastos, por círculo (Etapa 4.2 — Bardo pode ter
-   * 2+ círculos ativos ao mesmo tempo a partir do nível 3). Chave =
-   * número do círculo. Ausente = personagem nunca gastou espaço desde
-   * essa entrega; `FichaShell.tsx` migra de `espacosGastos` (campo
-   * antigo) nesse caso. */
+  /** @deprecated Fase M4b (multiclasse) — só guardava 1 personagem =
+   * 1 classe, então círculo sozinho já identificava o pool. Substituído
+   * por `espacosGastosPorClasseECirculo`. Mantido só pra migrar
+   * personagens salvos antes do M4b (ver `FichaShell.tsx`) — nunca
+   * mais escrito. */
   espacosGastosPorCirculo?: Record<number, number>;
+  /** Espaços de Magia gastos, por CLASSE e por círculo (Fase M4b —
+   * multiclasse: 2 classes podem ter espaços do mesmo número de
+   * círculo ao mesmo tempo, ex. Bruxo com Pacto no círculo 2 e Mago
+   * com Espaços de Magia normais também no círculo 2 — sem separar por
+   * classe, gastar um erradamente descontava do outro). Chave externa
+   * = nome da classe (`PersonagemClasse.classe`), interna = círculo.
+   * Ausente = personagem nunca gastou espaço desde essa entrega;
+   * `FichaShell.tsx` migra de `espacosGastosPorCirculo`/`espacosGastos`
+   * (campos antigos, sempre pra dentro da classe ORIGINAL — só existia
+   * 1 classe quando eles foram escritos). */
+  espacosGastosPorClasseECirculo?: Record<string, Record<number, number>>;
   inspiracaoGasto?: number;
   /** Truques conhecidos DEPOIS da criação — cresce/troca no Level Up
    * (Etapa 4.1). Ausente = personagem nunca passou por um Level Up
