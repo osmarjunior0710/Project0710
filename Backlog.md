@@ -34,6 +34,35 @@ existentes, sem tocar no formato salvo nem em `descansoCurto`/`Longo`)
 6.2 do CLAUDE.md) descrevendo a migração, não ser feito de passagem
 dentro de uma leva de limpeza.
 
+## `CombatTab.tsx` — agrupar props de recurso em 1 objeto por característica (2026-09)
+
+Avaliado no foco de saúde do projeto (G4.2, ver `EmDevB.md`):
+`CombatTab.tsx` recebe ~93 props de `FichaShell.tsx`, boa parte em
+"quadras" repetidas por característica (`xDisponivel`, `xMaximo`,
+`xRestantes`, `onUsarX` — Fôlego, Conhecimento de Pedras, Pico de
+Adrenalina, Ataque de Sopro, Ancestralidade Gigante, Mãos Curativas,
+Inspiração de Bardo, etc.). Cada classe/espécie nova de D&D 5e tende a
+adicionar mais 1 quadra dessas.
+
+**A versão que resolveria:** agrupar cada quadra num objeto só (ex.:
+`folego: { maximo, restantes, onUsar }`) — reduziria a INTERFACE
+(`CombatTabProps`) de ~93 pra ~30-40 entradas.
+
+**Por que não foi feito no mesmo foco que os hooks de `FichaShell.tsx`/
+`LevelUpShell.tsx` (G3/G4.1):** é uma categoria de risco diferente —
+aqueles 2 hooks só mudaram implementação INTERNA de 1 arquivo (nada
+observável de fora mudou, o `tsc` pega qualquer nome esquecido). Esse
+aqui muda o CONTRATO entre `FichaShell.tsx` (quem monta os props) e
+`CombatTab.tsx` (quem consome) — ~93 pontos de acoplamento pra
+reagrupar corretamente nos 2 lados, sem nenhum teste automatizado
+cobrindo essa camada (é UI pura, não `core/`), então um agrupamento
+errado (ex.: 2 valores trocados de posição no mesmo objeto) só
+apareceria testando manualmente cada característica em Combat, não no
+`tsc`/`npm test`. Não é "não vale a pena" — é maior/mais arriscado do
+que cabia numa entrega da mesma leva; fica como candidato a foco
+próprio quando o Osmar quiser priorizar, feito devagar (talvez 1
+categoria de recurso por vez) com teste manual de cada uma.
+
 ## Dano em crítico não dobra (geral) + "+1 dado extra" do Perfurador (2026-09)
 
 Descoberto ao implementar o Perfurador: nenhum ataque do app dobra os
