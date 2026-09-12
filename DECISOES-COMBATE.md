@@ -8,899 +8,346 @@
 > `CLAUDE.md` pra regra de quando registrar uma entrada aqui — e pro
 > critério de "isso é padrão reaproveitável ou changelog de entrega"
 > que mantém este arquivo pequeno.
+>
+> Compactado em 2026-09 (2ª passagem, só este arquivo) — entradas que
+> só narravam progresso/teste ou bug sem lição foram cortadas; o que
+> sobrou foi reescrito como padrão generalizado, sem a narrativa de
+> como se chegou lá.
 
 ---
 
-## Combat Layout C — painéis com `position: fixed` na viewport (não relativos ao frame)
+## Combat Layout C — overlays usam `position: fixed` na viewport, não no "frame" do wireframe
 
-**Decisão:** os painéis deslizantes de Ação/Ação Bônus/Reação (Layout C,
-já escolhido antes — ver entrada "Combate — economia de ação" abaixo)
-usam `position: fixed` relativo à viewport do navegador, igual às pills
-do wizard, em vez de `position: absolute` relativo a um elemento "frame"
-como no wireframe HTML original (que simulava um celular dentro da
-página). Como o app de verdade não tem esse frame — a tela real do
-celular já é o contêiner — `fixed` é o equivalente correto.
+**Padrão:** qualquer painel/overlay deslizante (Ação/Bônus/Reação, bottom
+sheet, Roll Overlay, etc.) usa `position: fixed` relativo à viewport real
+do navegador — o wireframe original simulava um celular dentro de uma div
+`#frame`; o app de verdade não tem esse frame, a tela real já é o
+contêiner. Vale pra qualquer overlay novo daqui pra frente.
 
-**Contexto:** decisão técnica quase óbvia (o wireframe tinha uma div
-`#frame` simulando um celular; o app de verdade não tem isso), mas
-registro aqui porque estabelece um padrão: **qualquer overlay/painel
-futuro** (bottom sheet, modais, o Roll Overlay que chega na 0.7) deve
-seguir esse mesmo padrão de `fixed` na viewport, não tentar reproduzir
-posicionamento relativo ao "frame" do wireframe.
+## Combate — economia de ação: 3 botões fixos, cada um abre painel do seu lado
 
-**Data/origem:** 2026-08, entrega 0.6.
+**Decisão:** Ação/Ação Bônus/Reação são 3 botões fixos; cada um abre um
+painel deslizante do seu lado correspondente (Ação da esquerda, Ação
+Bônus da direita, Reação sobe de baixo). Dentro do painel de Ação, "Usar
+Magia" expande inline como acordeão — não navega pra outra tela.
 
-## Combate — economia de ação (Layout C)
-
-**Decisão:** interação de combate usa 3 botões fixos (Ação / Ação Bônus /
-Reação), cada um abrindo um painel deslizante do seu lado correspondente
-na tela: Ação desliza da esquerda, Ação Bônus da direita, Reação sobe de
-baixo. Dentro do painel de Ação, "Usar Magia" é um acordeão que expande
-inline (não navega pra outra tela).
-
-**Contexto:** o app precisa ser jogável em tempo real durante uma sessão
-de mesa, sem atrapalhar o ritmo do jogo.
-
-**Alternativas descartadas:**
-- **Radial/pizza menu** com as 12 ações do Cap. 1 espalhadas em círculo
-  ao redor de um botão central "Ação", com interação de arrastar até
-  "grudar" na opção mais próxima. Implementado e testado — ficou
-  visualmente poluído em tela de celular (itens pequenos demais, difícil
-  de mirar com o dedo). Padrão que funciona melhor em telas grandes
-  (desktop) com mais espaço. **Não repetir esse padrão em mobile.**
-- **Botão único "Ação" abrindo lista vertical simples empilhada** — menos
-  ruim que o radial, mas ainda misturava os 3 tipos de recurso (Ação,
-  Ação Bônus, Reação) numa lista só, dificultando ver rapidamente qual
-  recurso já foi gasto no turno.
+**Padrões mobile testados e descartados, não repetir:**
+- Menu radial/pizza com as ações em círculo ao redor de um botão central
+  — itens pequenos demais pro dedo em celular; funciona melhor em telas
+  grandes com mais espaço (desktop).
+- Lista vertical única misturando os 3 tipos de recurso — dificulta ver
+  rápido o que já foi gasto no turno.
 
 ## Combate — estado Ativo vs Usada
 
-**Decisão:** cada um dos 3 botões (Ação/Bônus/Reação) tem 2 estados
-visuais: "ativo" (colorido, clicável) e "usada" (cinza, bloqueado,
-`pointer-events:none`). Um botão "↻ Fim do Turno" restaura os 3 de uma vez.
+**Decisão:** cada botão de recurso (Ação/Bônus/Reação) tem 2 estados —
+ativo (colorido, clicável) e usada (cinza, bloqueado,
+`pointer-events:none`). "↻ Fim do Turno" restaura os 3 de uma vez.
 
-**Contexto:** na prática de mesa, um jogador comum tem só 1 Ação, 1 Ação
-Bônus (se tiver) e 1 Reação por turno — o app deveria refletir isso
-visualmente pra evitar o jogador (ou o app) perder a conta do que já foi
-usado.
+**Dívida técnica conhecida:** o modelo é um booleano simples (usado/não
+usado) — não cobre classe/situação que concede mais de 1 uso do MESMO
+recurso por turno (ex.: Monge com Rajada de Golpes, Multiclasse).
+Tratamento específico fica pra quando isso for implementado de verdade.
 
-**Caso conhecido e propositalmente adiado:** classes/situações que
-concedem mais de 1 do mesmo recurso por turno (ex: Monge com Rajada de
-Golpes, multiclasse) não são cobertas por este modelo simples de
-booleano. Tratamento específico fica pra quando isso for implementado de
-verdade — não travar o MVP por causa disso.
+## Combate — espaços de magia: pips por círculo, recuperação é regra por classe
 
-## Combate — espaços de magia
+**Decisão:** contador visual de pips (preenchido/gasto) por círculo,
+dentro do acordeão "Usar Magia". Truques não consomem espaço; círculo 1+
+consome e bloqueia nova conjuração quando zerado.
 
-**Decisão:** contador visual de pips (preenchido/gasto) por círculo de
-magia, dentro do acordeão "Usar Magia". Truques (círculo 0) não consomem
-espaço; magias de círculo 1+ consomem, e bloqueiam nova conjuração quando
-zerado.
+**Padrão:** cada classe conjuradora declara sua PRÓPRIA regra de
+recuperação de espaço — nunca assumir Descanso Longo pra todas (Bruxo/
+Magia de Pacto recupera em Descanso Curto).
 
-**Aprendizado de regra importante:** Bruxo (Warlock) usa Magia de Pacto,
-que recupera em **Descanso Curto** — diferente da maioria dos
-conjuradores, que só recuperam em Descanso Longo. Isso já foi
-implementado corretamente no protótipo. **Ao portar pra dado real, cada
-classe conjuradora precisa declarar sua própria regra de recuperação de
-espaço** — não assumir que todas recuperam só no Descanso Longo.
+## Combate — Reação é botão baixo/compacto; Ação e Ação Bônus continuam grandes
 
-## Nomenclatura da 4ª aba: "Combat", não "Play"
+**Padrão:** recurso usado com menos frequência numa sessão de mesa
+(Reação) ganha tratamento visual menor/mais compacto (barra horizontal
+baixa, `--touch-target-min`) que os recursos usados praticamente todo
+turno (Ação/Bônus, 76px, ícone empilhado) — comportamento (estado ativo/
+usada, painel deslizante) é o mesmo, só muda o peso visual do gatilho.
 
-**Decisão:** a aba de ações de turno se chama "Combat" (com ícone de
-espadas cruzadas), não "Play" como no rascunho inicial.
+**Cogitado e descartado:** 4ª categoria "Grátis" (ações que não gastam
+nenhum dos 3 recursos, ex.: trocar de arma equipada) numa grade 2×2 —
+não implementar sem a planilha mapear quais ações são realmente grátis;
+reabrir como proposta nova se virar necessidade real.
 
-**Contexto:** "Play" era genérico demais e não deixava claro o propósito
-específico da aba (ações de combate em tempo real).
+## Combat — convenção de cor (remoção = vermelho) e switch "Detalhes"
 
-## Combate — Reação vira botão baixo/compacto, não mais mesmo tamanho de Ação/Bônus
+**Convenção de cor confirmada:** amarelo/`--warn` é só pra aviso/
+criticidade; qualquer ação de remover/apagar usa vermelho/`--danger`
+(mesmo padrão do botão de apagar personagem, `CharacterList.tsx`).
 
-Ajuste pedido pelo Osmar sobre o Layout C: Ação e Ação Bônus continuam
-lado a lado, tamanho grande (76px, ícone empilhado). Reação virou uma
-barra horizontal baixa (`--touch-target-min`, ícone+nome+estado numa
-linha só) embaixo das outras duas — usada com bem menos frequência
-numa sessão normal de mesa, não precisa do mesmo destaque visual.
-Comportamento (estado ativo/usada, painel deslizante de baixo) não
-mudou, só o tamanho/formato do botão-gatilho.
+**Padrão de switch "Detalhes":** um switch (`SidePanel.tsx`, estado de
+sessão em `CombatTab.tsx`, mesmo padrão de `itensDetalhados`/`pesoAtivo`
+da Mochila) liga/desliga o texto explicativo de apoio por linha
+(`rowDesc`) — mas a informação ESSENCIAL pra decisão do jogador (ex.:
+dado de dano/tipo/alcance de uma arma) nunca é escondida: sempre separe
+"texto essencial pra agir agora" de "explicação de regra por trás", só o
+2º some com o switch.
 
-**Cogitado e descartado nessa conversa:** adicionar uma 4ª categoria
-"Grátis" (ações que não gastam nenhum dos 3 recursos — trocar de arma
-equipada, etc.), numa grade 2×2. Osmar decidiu não seguir por ora —
-prefere manter só as 3 categorias já existentes, com a Reação só
-menor. Se "ações grátis" virar necessidade real de novo, reabrir como
-proposta nova (a planilha precisaria mapear quais ações realmente são
-grátis — não é regra pra inventar de memória).
+## Combat "Usar Magia" — fluxo de telas cheias com upcast real
 
-**Data/origem:** 2026-08.
-
-## Combat — 3 ajustes rápidos (cor de remoção, título do painel, switch Detalhes)
-
-Pedidos do Osmar testando o Level Up e o Combat:
-
-1. **Marcação "será removido" (Level Up de Truques) vira vermelha, não
-   amarela.** Regra de cor confirmada: amarelo/`--warn` fica reservado
-   pra aviso/criticidade (ex.: "só pode trocar 1 truque"); qualquer
-   ação de remover/apagar usa vermelho/`--danger` — mesmo padrão já
-   usado no botão de apagar personagem (`CharacterList.tsx`).
-2. **Título dos painéis de Combat perde o "— escolha uma"** — "⚔
-   Ação", "⚡ Bônus", "🛡 Reação", sem sufixo.
-3. **Switch "Detalhes" novo**, entre o título e a lista de cada painel
-   (Ação/Bônus/Reação) — liga/desliga o texto explicativo de cada
-   linha (`rowDesc`). Ligado por padrão (comportamento de sempre).
-   Desligado, o texto some, **exceto** a informação essencial de
-   arma/Ataque Desarmado (dado de dano, tipo, mãos, alcance/munição —
-   ex.: "1d8 Perfurante · Duas Mãos, Munição..."), que o Osmar pediu
-   pra manter sempre visível porque o jogador precisa saber isso na
-   hora de atacar. Implementado separando, nas linhas de ataque
-   (arma e mão secundária), o texto essencial (`ataqueAtual.descricao`/
-   `ataqueBonus.descricao` — já vem assim de `core/ataque.ts`, sem
-   floreio) da frase explicativa extra (regra de Ataque Extra/Leve
-   nas duas mãos/etc.), que aí sim é escondida com o switch.
-   `SidePanel.tsx` ganhou o switch (reaproveitando o mesmo padrão
-   visual do menu de preferências do avatar); estado vive em
-   `CombatTab.tsx` (sessão, não persiste — mesmo padrão de
-   `itensDetalhados`/`pesoAtivo` da Mochila).
-
-**Testado:** Playwright 390×844 — painel de Ação do Guerreiro, switch
-ligado mostra tudo, desligado esconde todo texto exceto "Soco, chute
-ou golpe corpo a corpo sem arma. Dano Contundente." no Ataque
-Desarmado; título confirmado sem "escolha uma".
-
-**Data/origem:** 2026-08.
-
-## Combat "Usar Magia" (Ação) — fluxo de 2 telas com upcast real (Fase A)
-
-**Problema:** o acordeão único de "Usar Magia" empilhava Truques +
-Magias Preparadas numa lista só, sem parar — algumas classes chegam a
-20+ magias preparadas em níveis altos. O Osmar pediu um fluxo em
-telas, e aproveitou pra fechar o upcast de verdade (que nunca existiu
-— `gastarSlotCirculo` só aceitava o círculo exato da magia).
-
-**Regra de upcast confirmada com o Osmar (regra real do livro):** uma
-magia NUNCA cabe num Espaço de Magia de círculo MENOR que o dela, mas
-cabe no dela ou em qualquer um MAIOR, contanto que sobre espaço —
-mesmo até círculo 9 (classes full-caster). `core/magiasPersonagem.ts`
-ganhou `circulosDisponiveisParaConjurar(magiaCirculo, espacos,
+**Regra de upcast (real, confirmada):** uma magia nunca cabe num Espaço
+de círculo MENOR que o dela, cabe no dela ou em qualquer maior (até
+círculo 9), contanto que sobre espaço. `core/magiasPersonagem.ts` →
+`circulosDisponiveisParaConjurar(magiaCirculo, espacos,
 espacosGastosPorCirculo)`, genérica pra qualquer classe/círculo, sem
 hardcode.
 
-**Fluxo em 2 telas cheias (mesmo padrão `.screen`/`.header`/`.body`/
-`.navLayer` de `LevelUpShell.module.css`, reaproveitado — nenhum CSS
-novo pro esqueleto):**
-- **Tela 2** (`SelecionarMagiaShell.tsx`): Truques + Magias Preparadas
-  agrupados por círculo (`GrupoMagiaColapsavel`, mesmo componente do
-  Level Up — do círculo mais alto pro mais baixo, Truques sempre
-  disponíveis). Magia de círculo N fica esmaecida/sem clique só quando
-  NENHUM espaço ≥ N sobra.
-- **Tela 3** (`EscolherCirculoShell.tsx`): só aparece quando a magia
-  tem mais de 1 círculo disponível pra upar — mostra o card da magia
-  (com o texto que já tem "Upcast: +Xd8 por círculo" pras ~131 magias
-  que escalam) e uma opção por círculo com os espaços disponíveis.
-  Com só 1 círculo possível, pula direto pra conjurar (não faz
-  sentido perguntar sem escolha real).
+**Padrão de fluxo:** telas cheias sequenciais reaproveitando o esqueleto
+`.screen`/`.header`/`.body`/`.navLayer` de `LevelUpShell.module.css`
+(nenhum CSS novo de esqueleto) — Truques/Magias Preparadas agrupados por
+círculo (`SelecionarMagiaShell.tsx`, componente `GrupoMagiaColapsavel`,
+mesmo do Level Up; magia de círculo N fica esmaecida só quando NENHUM
+espaço ≥ N sobra). A tela de escolha de círculo (`EscolherCirculoShell.tsx`)
+mostra o card da magia + 1 opção por círculo com espaços disponíveis, e
+**sempre aparece antes de conjurar, mesmo com 1 único círculo possível**
+— importante o jogador ver qual espaço está sendo gasto, mesmo sem
+escolha real.
 
-**Decisão consciente de escopo — Fase A vs B:** por enquanto a Tela 3
-mostra só o TEXTO da magia (já suficiente, o jogador lê e calcula),
-não um número calculado por círculo escolhido. **Fase B concluída
-depois** (foco "Auditoria de Magias", ver DECISOES-DADOS.md "Magias —
-motor de dano completo") — `core/magiaDano.ts` hoje calcula o dado
-certo (Dano Base + Upcast + Escala de Truque) e já é usado pra rodar o
-dano de verdade depois de conjurar. A ÚNICA coisa que ainda não existe
-é mostrar esse número PRÉVIO em cada opção de círculo da própria Tela
-3 (antes de escolher) — trivial de fazer agora que o motor existe, só
-não foi pedido ainda (ver Backlog.md).
+**Escopo consciente:** a tela de escolha de círculo mostra só o TEXTO da
+magia (ex.: "Upcast: +Xd8 por círculo"), não um número pré-calculado por
+opção — `core/magiaDano.ts` (`calcularDanoMagia`) já calcula o dado certo
+e é usado pra rodar o dano depois de conjurar; mostrar esse número PRÉVIO
+em cada opção é só o que falta (ver Backlog.md). Só o painel de Ação
+ganhou esse fluxo novo — Reação ficou com a lista simples antiga (ver
+PENDENCIAS.md).
 
-**Também decidido não fazer agora:** o "empilhar telas com offset
-lateral" que o Osmar sugeriu como visual fica pra quando ele decidir
-como quer deixar isso "interessante" — a Fase A entregou o
-comportamento (telas cheias sequenciais, mesmo padrão já usado em
-Level Up), não o polish visual do empilhamento.
+## Magia de ataque/salvaguarda — 2 modais, 1 única fonte de decisão de qual abrir
 
-**Só o painel de Ação ganhou o picker novo** — Reação continua com a
-lista simples antiga (registrado em PENDENCIAS.md; normalmente tem
-poucas magias qualificadas, o problema de lista infinita não bate tão
-forte lá).
+**Padrão:** os 2 pontos de acesso a magia no app (aba Magias, aba
+Combat) sempre disparam a MESMA lógica — nunca comportamento divergente
+entre lugares diferentes que fazem a mesma coisa.
 
-**Testado:** Playwright 390×844 — Bardo nível 5 (1º: 4 espaços, 2º: 3,
-3º: 2), 1º círculo esgotado manualmente. Tela 2 mostrou "Curar
-Ferimentos" (1º círculo) ainda clicável; Tela 3 ofereceu só 2º e 3º
-círculo (1º corretamente ausente); escolhido 2º círculo, confirmado
-que gastou um espaço de 2º (não de 1º, que já estava zerado) —
-`espacosGastosPorCirculo` final `{"1":4,"2":1}`. Testado também o
-caminho de 1 círculo só (Bardo nível 1): clicar na magia conjura
-direto, sem passar pela Tela 3.
+- **Modal de Ataque** (magia tipo Raio Místico): rola 1d20 de ataque
+  (igual arma), depois oferece "Rolar Dano" via `DanoPendente` — mesmo
+  padrão de arma, não um popup próprio. O app nunca modela CA do
+  inimigo — o jogador decide se acertou.
+- **Modal de Salvaguarda** (`MagiaSalvaguardaModal.tsx`): quem rola é o
+  ALVO, fora do app; o modal só mostra CD + atributo exigido + o que
+  acontece no sucesso/falha (textos separados) + botão "Rolar Dano"
+  sempre com dano cheio (jogador ajusta na mesa). Reaproveita
+  `TrocarArmaMaestria.module.css`.
 
-**Data/origem:** 2026-08.
-
-## Magia de ataque/salvaguarda — 2 modais, mesmos 2 pontos de acesso (Magias + Combat)
-
-**Pedido do Osmar:** os 2 pontos onde o jogador já usa magia (aba
-Magias — direto da lista; aba Combat — Ação/Ação Bônus/Reação)
-precisam dos mesmos 2 modais novos, disparados pela mesma lógica —
-nunca comportamento diferente entre os 2 lugares.
-
-- **Modal de Ataque** (magia tipo Raio Místico) — rola 1d20 de ataque
-  à distância/corpo a corpo (igual arma), depois oferece "🎲 Rolar
-  Dano" — reaproveita 100% o padrão `DanoPendente` que arma já usava
-  (banner + botão, não um popup próprio). O app nunca modela CA do
-  inimigo (igual arma, sempre foi assim) — o jogador decide na mesa se
-  acertou.
-- **Modal de Salvaguarda** (novo componente, `MagiaSalvaguardaModal.tsx`)
-  — quem rola a salvaguarda é o ALVO, fora do app; o modal só mostra
-  CD + atributo exigido + o que acontece no sucesso/falha (textos
-  SEPARADOS, um por resultado — sucesso pode ser dano nenhum, metade,
-  ou completo dependendo da magia) + botão "Rolar Dano" sempre com
-  dano cheio (jogador ajusta na mesa se soube que o alvo passou —
-  mesma filosofia do Ataque de Sopro/Lançar no Inferno, nunca tenta
-  rastrear sucesso/falha sozinho). Popup pequeno sem estado próprio,
-  reaproveita `TrocarArmaMaestria.module.css` (mesmo molde visual de
-  `AtaqueDeSoproModal`).
-
-**Qual modal abrir é decidido por UMA fonte só:** o campo estruturado
-`ataqueOuSalvaguarda` (ver DECISOES-DADOS.md), nunca a heurística de
-regex de `classificarMagia` (usada só pro ícone ⚔️ da lista) — usar 2
-fontes pra essa decisão arriscaria elas discordarem e abrir o modal
-errado. Efeito colateral bom: truque de salvaguarda sem ataque (ex.
-Badalar Fúnebre) que antes ficava com "Usar" travado (nenhuma jogada
-automatizável existia) agora sempre tem uma ação válida.
-
-**Data/origem:** 2026-09.
-
-## Tela 3 do upcast sempre aparece, mesmo com 1 círculo só disponível
-
-**Pedido do Osmar:** mesmo quando a magia só tem 1 círculo possível
-pra gastar (ex: Bardo com uma única magia de 2º círculo — não tem
-"escolha" real), a Tela 3 (`EscolherCirculoShell`) continua aparecendo
-antes de conjurar, em vez de pular direto — importante o jogador ver
-qual espaço tá sendo gasto, mesmo sem opção. Removido o atalho que
-existia em `AcaoPanelContent.tsx` (`if (circulosDisponiveis.length ===
-1) conjurarMagia(...)`).
-
-**Testado:** Playwright 390×844 — aba Magias com 1º círculo 3/4 (3
-azuis + 1 cinza no fim), 2º círculo 1/3 (1 azul + 2 cinzas no fim), 3º
-círculo 2/2 (ambos azuis) — confirma esvaziamento pela direita em
-todos os tamanhos. Tela 3 do upcast confirmada mostrando os ticks por
-círculo em vez de texto, e aparecendo mesmo com só 1 círculo
-disponível.
-
-**Data/origem:** 2026-08.
+**Qual modal abrir vem de 1 campo estruturado só** (`ataqueOuSalvaguarda`,
+ver DECISOES-DADOS.md) — nunca da heurística de regex (`classificarMagia`,
+usada só pro ícone da lista). Duas fontes pra mesma decisão arriscam
+discordar e abrir o modal errado.
 
 ## Combat — botões de Iniciativa e Fim do Turno no topo da aba
 
-**O que é:** pedido do Osmar — 2 botões novos no topo da aba Combat
-(acima de Pontos de Vida), no mesmo estilo visual dos botões
-Ação/Ação Bônus.
+- **Iniciativa:** 1º toque rola 1d20+mod (mesmo `rolarD20` do
+  `RollContext` de sempre) e mostra o resultado no próprio botão; 2º
+  toque limpa (reinicia). Também dispara a recuperação de Inspiração de
+  Bardo (nv18), mesmo gatilho já existente na aba Atributos — **rolar
+  Iniciativa é rolar Iniciativa, não importa qual tela disparou.**
+- **Fim do Turno:** reseta Ação/Bônus/Reação (comportamento de sempre);
+  não mexe no valor de Iniciativa — ela é "por combate", não "por
+  turno", só o 2º toque no próprio botão de Iniciativa encerra.
 
-- **Iniciativa** (esquerda): 1º toque rola 1d20 + mod. de Iniciativa
-  (reaproveita o `rolarD20` do `RollContext`, mesmo padrão de todo
-  resto do app) e mostra o resultado direto no botão + "(Aperte
-  novamente para terminar o combate)". 2º toque limpa o valor, volta
-  ao estado inicial ("🎲 Iniciativa"). Também dispara a recuperação de
-  Inspiração de Bardo do "Inspiração Superior" (nv18), igual o mesmo
-  gatilho já existente na aba Atributos — rolar Iniciativa é rolar
-  Iniciativa, não importa qual botão da tela disparou.
-- **Fim do Turno** (direita): mesmo comportamento de sempre (reseta
-  Ação/Ação Bônus/Reação pro estado "ativo") — só mudou de lugar (era
-  uma faixa tracejada mais abaixo na tela). Não mexe no valor de
-  Iniciativa — ele é "por combate", não "por turno", só o 2º toque no
-  próprio botão de Iniciativa encerra.
+## Combat — Pontos de Vida: indicador linear M3 por severidade
 
-Testado via Playwright (390px): rolar Iniciativa mostra o valor no
-botão E no overlay de rolagem: 2º toque limpa; Fim do Turno com
-Iniciativa ativa preserva o valor.
+**Estado final:** a barra de PV é um indicador linear reto M3
+(`LinearProgressBar.tsx`, renomeado de uma 1ª tentativa
+`WavyProgressBar.tsx`) — cor por severidade: >50% verde (`--good`),
+25-50% âmbar (`--warn`), ≤25% vermelho (`--danger`), trecho não
+preenchido em `--line`. A variante "wavy" (M3 Expressive) foi tentada e
+descartada — não ficou legível no tamanho de tela do app; ficar sempre
+com a linear reta. Os botões de ajuste viraram 1 linha de 5 abaixo do
+card (−5 · −1 · Manual `[PH]` · +1 · +5), não mais dentro dele —
+"Manual" ainda é `[PH]`, aguarda campo de digitar quantidade exata.
+`onAlterarPv(delta)` já aceitava qualquer delta, sem mudança em `core/`.
 
-**Data/origem:** 2026-08.
+## Modo de Teste — sequência fixa de d20 pra testar estados visuais, sem afetar dano
 
-## Combat — Pontos de Vida vira indicador "wavy" (M3 Expressive)
+**Padrão:** ferramenta de QA que força resultado de dado previsível
+(fila fixa `[1, 10, 15, 20]`, dá a volta no fim), com escopo restrito ao
+d20 — dano e qualquer outro dado continuam de verdade mesmo ligado.
+Nunca persiste entre carregamentos de página, e mostra indicador visual
+(badge) quando ativo, pra nunca "esquecer ligado" no meio de uma sessão
+de jogo real. `RollContext.tsx`: `modoTeste`/`alternarModoTeste`,
+`rolarD20Dado` como função pura parametrizada por refs (não state, por
+rodar dentro de callback memoizado com deps vazias). Vantagem/
+Desvantagem (2 d20 juntos) consome o PRÓXIMO da fila pra cada um, sem
+lógica adicional.
 
-**O que é:** pedido do Osmar — redesenhar o bloco de PV da aba Combat:
-1. Removido o texto de aviso de protótipo.
-2. A barra de PV virou um indicador linear "wavy" (componente M3
-   Expressive) — novo componente `WavyProgressBar.tsx`
-   (`ui/components/`), SVG com `preserveAspectRatio="none"` (estica
-   pra largura real do container sem precisar medir em JS). Cor muda
-   por severidade: >50% verde (`--good`), 25-50% âmbar (`--warn`),
-   ≤25% vermelho (`--danger`) — trecho não preenchido fica em
-   `--line` (neutro).
-3. Os botões +/- saíram de dentro do card de PV e viraram uma linha de
-   5 botões abaixo: −5 · −1 · Manual `[PH]` · +1 · +5. "Manual" ainda
-   não faz nada (marcado `[PH]` por enquanto, CLAUDE.md seção 12) — é
-   pra quando tiver um campo de digitar quantidade exata.
+## Reroll condicionado — motor genérico pra "se sair 1, pode jogar de novo" (1 dado)
 
-Nenhuma mudança em `core/` — `onAlterarPv(delta)` já aceitava
-qualquer delta, só passou a ser chamado com -5/+5 também.
+**Padrão:** `RollState.valorDado` guarda o valor real (não decorativo)
+quando `rolarDados` é chamado com `quantidade === 1`; passar
+`rerollSe1: { rotulo }` na chamada da ação só quando o personagem tiver
+o talento — o resto (botão no overlay, 1 reroll só) é automático.
+Primeiro caso: Valentão de Taverna. Ver "Grid de dados individuais"
+abaixo pra reroll não condicionado ao valor.
 
-Testado via Playwright em 390px, com PV cheio (barra toda verde), PV
-baixo em ~36% (mostra âmbar) e PV zerado (barra toda neutra, sem
-trecho colorido).
+**Gotcha:** o nome de um ataque já vem com emoji embutido (`` `🗡
+${nome}` ``), então um label composto (`DanoPendente.label`) nunca bate
+com `===` exato — comparação por nome dentro de um label precisa de
+`.includes`/`.endsWith`.
 
-**Data/origem:** 2026-08.
+## Grid de dados individuais — rolagem de 2+ dados mostra cada valor, com arte por tipo
 
-## Combat — ajuste de padding + barra de PV volta a ser reta
+**Padrão:** `RollState.dadosIndividuais?: DadoIndividual[]` (`{id,
+lados, valor}`) só existe quando a rolagem tem 2+ dados no total
+(suporta mistura de tipos via `RollDadosOptions.gruposExtras`). Rolagem
+de 1 dado só NÃO ganha o campo — mantém a aparência antiga de propósito
+(nunca mudar o que já funciona sem necessidade). `RollOverlay.tsx`
+escolhe o layout pelo campo: presente → quebra em linhas de até 4 dados
+centralizadas; ausente → linha única de sempre.
 
-**O que é:** 2 ajustes rápidos pedidos pelo Osmar, em cima da entrega
-anterior:
-1. `WavyProgressBar.tsx` renomeado pra `LinearProgressBar.tsx` e
-   simplificado — tirada a onda (senoide), volta a ser uma linha reta
-   colorida por severidade. A variante "wavy" do M3 Expressive não
-   ficou legível o suficiente no tamanho de tela do app; decisão:
-   ficar só com o indicador linear reto (ainda M3, só não a variante
-   "wavy").
-2. Padding reduzido nos botões da aba Combat: `.splitBtn` (Ação/Ação
-   Bônus/Iniciativa/Fim do Turno) de `min-height: 76px` + padding
-   grande pra `58px` + padding menor; `.splitBtnSmall` (Reação) com
-   padding vertical reduzido. O texto "(Aperte novamente...)" do botão
-   de Iniciativa ganhou uma classe própria (`.sbHint`, 9px) separada
-   do `.sbState` genérico (10px, maiúsculo) — é só um lembrete, não
-   precisa do mesmo peso visual do "ATIVO/USADA".
+**Arte por tipo de dado:** mapa `lados → import` centralizado em
+`src/ui/roll/dadosArte.ts` (`artePorLados`) — arquivo COMPARTILHADO
+porque existe mais de 1 lugar no app que desenha um "dado girando"
+(ver dívida técnica abaixo). Um `lados` sem arte cadastrada (ex.: dano
+fixo modelado como "1 lado só", sem d1 físico) cai de volta na moldura
+genérica antiga sem quebrar nada — é o comportamento CORRETO, não bug.
 
-**Data/origem:** 2026-08.
+**Padrão de duração sincronizada:** toda animação de "suspense" (giro do
+dado, piscada de Fim de Turno) tem sua duração numa ÚNICA constante JS
+(`DURACAO_ANIMACAO_MS`, `DURACAO_PISCADA_MS`), repassada ao CSS via
+custom property escrita via `style` inline — nunca duplicar o número
+separadamente no JS e no `@keyframes`.
 
-## Modo de Teste — sequência fixa de d20, sem afetar dano nem persistir (2026-09)
+**Dívida técnica conhecida:** `LevelUpShell.tsx` tem seu PRÓPRIO
+mecanismo de "dado rolando" (`setInterval` + tela preta full-screen),
+criado antes do `RollContext`/`RollOverlay` e **nunca unificado** com
+eles — hoje as 2 telas só compartilham a fonte de arte (`dadosArte.ts`),
+não o motor de rolagem em si. Se aparecer uma 3ª tela de "dado rolando",
+reaproveitar `dadosArte.ts`; uma futura unificação de motor fica pra
+quando essa área for mexida de novo por outro motivo.
 
-**Decisão:** o RNG de verdade (`Math.random()` em `RollContext.tsx`)
-já era genuinamente aleatório — auditado, sem bug encontrado. O pedido
-do Osmar era outra coisa: um jeito de FORÇAR resultados previsíveis de
-d20 pra testar os 4 estados visuais que mais importam (1 = falha
-crítica, 20 = sucesso crítico, 10/15 = meio-termo) sem depender de
-sorte durante teste manual.
+**Reroll à escolha (não condicionado a sair 1):** generaliza o
+mecanismo de reroll acima pra "qualquer dado, qualquer valor" — com
+grid, o jogador toca no dado (`id`) que quer rerolar; com 1 dado só,
+reaproveita o mesmo botão do reroll condicionado. `core/
+rerollDanoTalento.ts` (`temPerfurador`) + `AtaqueInfo.danoTipo` decidem
+quando oferecer (ex.: Perfurador, só quando o dano é Perfurante).
 
-**Mecanismo:** `RollContext` ganhou `modoTeste`/`alternarModoTeste`,
-toggle no `AvatarMenu` (canto superior direito da Ficha). Ligado, todo
-d20 sai da sequência fixa `[1, 10, 15, 20]` em ordem, dando a volta no
-fim — `rolarD20Dado` vira função pura parametrizada por 2 refs
-(`modoTeste`/`indice`, não state, porque é chamada de dentro de
-callbacks memoizados com `[]` de dependência). Quando 2 d20 saem
-juntos (Vantagem/Desvantagem), cada um consome o PRÓXIMO da fila —
-nunca reseta entre eles — então "1, 10" sai sozinho sem lógica
-adicional, só por chamar a mesma função 2x em sequência.
+## Magia/característica com múltiplos ataques discretos (feixes) — simplificar pra 1 ataque + N dados
 
-**Escopo deliberadamente restrito a d20:** dano e qualquer outro dado
-(`rolarDados`, Bônus Extra tipo Sorte do Tenebroso) continuam de
-verdade mesmo com o modo ligado — o objetivo é testar acerto/crítico,
-não dano.
+**Padrão:** quando uma característica concede RAW múltiplas jogadas de
+ataque separadas (feixes/rajadas), mas o app já trata "acertar" como
+decisão do jogador (não calcula CA do inimigo), simplifique pra **1
+rolagem de ataque + N dados de dano somados numa rolagem só** —
+reaproveitando o mesmo mecanismo de "N cópias do dado" já usado por
+Aprimoramento de Truque/upcast (`escalaTruqueTipo: "dado"`), nunca
+criando um sistema de "múltiplos ataques" à parte. Antes de desenhar
+estrutura nova pra um caso parecido, confira se o valor final bate com
+"dado base + 1 dado por [o que escala]" — só saia desse padrão se os
+dados forem de tamanhos diferentes por ataque, ou a progressão não
+crescer em degraus fixos. Ver `core/magiaDano.ts`.
 
-**Nunca persiste** (sempre nasce desligado a cada carregamento de
-página) e mostra um badge vermelho no avatar quando ativo — pra nunca
-"esquecer ligado" no meio de uma sessão de jogo de verdade sem
-perceber.
+## Penalidade de proficiência (Armadura/Escudo/Arma) — 3 regras independentes, sinal calculado 1 vez só
 
-## Reroll de "saiu 1" — motor genérico pra dado avulso (não-d20)
+**Regra real:** arma sem proficiência só perde o Bônus de Proficiência
+no ataque (`core/proficienciaArma.ts`); escudo sem proficiência só não
+soma bônus de CA (`calcularCAEquipado`); armadura sem proficiência dá
+Desvantagem em QUALQUER d20 de Força/Destreza e bloqueia conjuração
+inteira enquanto vestida — as 3 nunca compartilham a mesma regra.
 
-**Problema:** vários talentos/características têm a mesma regra —
-"se esse dado de dano/cura sair 1, pode jogar de novo e usar o novo
-resultado, só 1x" (Dano Garantido do Valentão de Taverna, Cura
-Garantida do Curandeiro) — mas o `RollContext` só sabia fazer isso pra
-d20 (`usarSorte`, Sorte do Pequenino). `rolarDados` (tipo `'dados'`)
-nem guardava o valor de cada dado — só a soma total, mostrando sempre
-"💥" decorativo.
+**Padrão pra "Desvantagem em toda rolagem de X":** calcular o sinal
+booleano UMA VEZ no nível mais alto (`FichaShell.tsx`, `core/
+proficienciaArmadura.ts`) e passar como prop simples pra cada tela que
+faz a rolagem afetada — nunca recalcular o sinal dentro de cada
+componente; aplicar `vantagem: 'desvantagem'` só quando a rolagem ainda
+não tem Vantagem/Desvantagem decidida por outro motivo, nunca
+sobrescrevendo uma escolha explícita. Ataque com magia usa o atributo de
+conjuração, nunca esse sinal.
 
-**Mecanismo:** quando `rolarDados` é chamado com `quantidade === 1`,
-`RollState.valorDado` agora guarda o número de verdade (não "💥") e
-aceita `rerollSe1: { rotulo }` — se o resultado sair 1, o
-`RollOverlay` mostra um botão "🎲 {rotulo} — jogar de novo"
-(`usarRerollSe1` no contexto), mesmo padrão visual do botão de Sorte.
-Continua só com 1 dado só de propósito (não precisa saber "qual dado
-saiu 1" com mais de um) — mas o grid de `dadosIndividuais` (ver
-entrada abaixo, "Grid de dados individuais") resolveu a limitação
-geral de "só a soma, sem saber cada dado" pra quem precisar, então
-esse não é mais um teto técnico, só a escolha certa pra ESSE caso
-específico (reroll condicionado ao valor sair exatamente 1).
+**Bloqueio de conjuração:** trava em TODOS os pontos que deixam
+conjurar direto (Ação e Reação em Combat, mais a aba Magias) — sempre
+bloqueio de verdade (retorno cedo, sem gastar Espaço nem rolar), nunca
+só aviso visual.
 
-**Como plugar num talento novo:** no `rolarDados({...})` da ação,
-passar `rerollSe1: { rotulo: 'Nome do Benefício' }` só quando o
-personagem tiver o talento — resto é automático. Primeiro uso:
-Valentão de Taverna (Ataque Desarmado, `CombatTab.rolarDanoPendente`,
-gate por `efeitoMecanicoDoTalento(talentosEfetivos,
-'dado-ataque-desarmado')`, mesma característica que já controla o
-dado 1d4). Curandeiro (Cura Garantida) fica só com o motor pronto —
-falta a ação de cura em si existir (ver Backlog.md, curar OUTRO
-personagem ainda não é modelado).
+**Padrão pra somar categorias vindas de vários talentos:** quando mais
+de 1 talento pode contribuir a mesma categoria ao mesmo personagem (ex.:
+proficiência de armadura por talento), varra TODOS os talentos com
+aquele tipo — `efeitoMecanicoDoTalento` não serve pra isso (para no
+primeiro match).
 
-**Achado no caminho:** o `nome` passado pra `rolarAtaque` já vem com
-emoji (`` `🗡 ${ataqueAtual.nome}` ``), então `DanoPendente.label` fica
-`"Dano — 🗡 Ataque Desarmado"`, não `"Dano — Ataque Desarmado"`.
-Comparação exata (`===`) falha silenciosamente aqui — use
-`.endsWith(...)` ou `.includes(...)` pra detectar o nome do ataque
-dentro do label sempre que precisar comparar por nome de novo.
+## "Usar Magia" — painel de Espaços de Magia fixo à direita, só nessa tela
 
-## Grid de dados individuais — rolagem de 2+ dados mostra cada um, não só a soma (2026-09)
+**Padrão de CSS (armadilha real):** um ancestral com `transform` (ex.:
+um drawer/`SidePanel` animando slide-in) vira o "containing block" de
+todo `position:fixed` descendente — por isso uma tela aberta de dentro
+desse drawer nunca ocupa 100% da largura real da viewport, mesmo
+marcada como `fixed`. Isso é esperado pelo CSS, não é bug a corrigir; só
+o elemento que PRECISA cobrir a tela cheia de verdade deve escapar disso
+via `createPortal` pro `<body>`.
 
-**Motivo:** pedido do Osmar pra "aprofundar a rolagem de dados" —
-rolagem de dano com 2+ dados só mostrava "💥" decorativo + a soma; sem
-saber o valor de CADA dado, não dá pra implementar nada que dependa de
-1 dado específico (reroll à escolha, futuras regras "maior/menor
-dado", etc.). Também pedido: suportar MISTURA de tipos na mesma
-rolagem (ex.: 1d20 + 1d4 + 1d6) e deixar definidos os 7 tipos de dado
-do jogo (d4/d6/d8/d10/d12/d20/d100 — d100 aqui é 1 rolagem direta de
-1-100, a mesa usa 2xd10 físicos, o app não precisa).
+**Padrão de padding reservado:** `padding-right`/margem reservada num
+container pra um elemento `fixed` relativo à tela CHEIA precisa ser
+calculada pela largura REAL do container (que pode ser menor que 100%
+da tela, ver acima), nunca pela largura do próprio elemento fixed.
 
-**Mecanismo:** `RollState.dadosIndividuais?: DadoIndividual[]`
-(`{ id, lados, valor }`) — só existe quando a rolagem `'dados'` tem 2+
-dados no TOTAL (`quantidade` do grupo principal + soma dos
-`gruposExtras`, ver `RollDadosOptions.gruposExtras` pra misturar
-tipos). Rolagem de 1 dado só **não** ganha esse campo — continua
-exatamente como antes (`.diceRow` de sempre), decisão explícita do
-Osmar pra não mudar a aparência do que já funciona. `RollOverlay.tsx`
-escolhe o layout pelo campo: `dadosIndividuais` presente → quebrado em
-linhas de até 4 (`agruparEmLinhas`, esquerda→direita, JS — não CSS
-grid), cada linha um `flex` próprio com `justify-content: center`
-(`.diceGridRow`) — linha com 4 preenche tudo (visualmente igual a um
-grid comum), linha com 1-3 (só pode ser a ÚLTIMA) fica centralizada
-em vez de grudada à esquerda com espaço vazio sobrando; ausente →
-`.diceRow` de sempre.
+## Estado "temporário" de turno precisa persistir — reset é sempre um evento explícito
 
-**Arte por tipo de dado:** cada `lados` (4/6/8/10/12/20/100) tem sua
-própria arte (`src/assets/icones-dados/dado-dN.webp`, mesmo padrão
-WebP já usado pros emblemas de Classe/Origem/Espécie — PNG original
-convertido e redimensionado pra ~240×240, ~6-10 KB cada). `d100` usa
-a MESMA arte de "2×d10" (na mesa física seriam 2 d10; aqui o app rola
-1-100 direto numa jogada só, mas a arte mantém a referência visual do
-par). O mapa `lados → import` e a função `artePorLados(lados)` vivem
-em `src/ui/roll/dadosArte.ts` — arquivo COMPARTILHADO, não interno do
-`RollOverlay`, porque existe mais de 1 lugar no app que desenha um
-"dado girando" (ver abaixo). `DadoVisual` (componente interno do
-`RollOverlay.tsx`) renderiza a arte como `<img>` absoluto atrás do
-valor (`.dieArtImg`), com o número por cima em texto branco +
-`text-shadow` (contraste garante legibilidade em qualquer cor de
-fundo). Molduras antigas (borda sólida, fundo cinza) somem quando há
-arte (`.dieComArte`); acerto/falha crítica e o contorno tracejado de
-"dá pra rerolar" (Perfurador) viram anel (`box-shadow`/`outline`) em
-vez de cor de fundo, pra não brigar visualmente com a arte. Vale pro
-grid (2+ dados) E pra rolagem de 1 dado só (`.diceRow`) — inclusive
-d20 de ataque/perícia/salvaguarda e o "bônus extra" (Inspiração
-Divina, Ajuda Duplicada etc.). Um `lados` fora da lista (ex.: Ataque
-Desarmado é "1d1" — dano fixo "1 + mod. Força" da regra real,
-implementado como um dado de 1 lado só pra reaproveitar o mesmo cano
-de rolagem, não existe d1 físico) simplesmente não ganha arte — cai de
-volta na moldura genérica antiga, sem quebrar nada. Isso é o
-comportamento CORRETO, não um bug: só dado que existe de verdade
-ganha arte.
+**Padrão:** qualquer estado que pareça "durar só o turno/a sessão", mas
+que o jogador veria sumir sozinho ao trocar de tela (sair/voltar da
+Ficha, F5, trocar de aba do navegador), precisa entrar no mesmo save
+automático de tudo mais — o reset tem que ser um EVENTO explícito, nunca
+"o componente desmontou". Aqui: Ação/Bônus/Reação e Surto de Ação
+(`PersonagemSalvo.turnStateAtual`/`surtoUsadoTurnoAtual`) resetam só em
+"Fim do Turno" ou ao rolar Iniciativa nova (RAW, toda rolagem de
+Iniciativa é início de combate/cena novo).
 
-**Suspense da rolagem — 1s, 2 voltas completas antes do resultado
-(pedido do Osmar, 2026-09):** `DURACAO_ANIMACAO_MS` (`RollContext.tsx`)
-controla quanto tempo a rolagem fica em `fase: 'rolando'` antes de
-`'concluido'` revelar o valor/total — usado por TODA rolagem
-(`rolarD20`, `rolarDados`, reroll de qualquer tipo), não só a com
-arte. O keyframe `spin` (`RollOverlay.module.css`, aplicado em `.die`)
-tem que durar exatamente o mesmo tempo — os 2 ficam citados um no
-comentário do outro pra não dessincronizar se alguém mudar só 1 lado.
-2 voltas = `rotate(720deg)` no keyframe (não 360deg).
+## "Fim do Turno" — transição de "piscada de olho" esconde o reset
 
-**Reaproveitado também na tela dramática de PV do Level Up
-(`LevelUpShell.tsx`)** — essa tela tem seu PRÓPRIO mecanismo de
-"rolar dado" (`setInterval` com número aleatório, animação e
-tela preta full-screen), completamente separado do `RollContext`/
-`RollOverlay` (existia antes deles, nunca foi unificado). Em vez de
-duplicar o mapa de arte ali, ela importa `artePorLados` do mesmo
-`dadosArte.ts` e aplica a mesma técnica (`.dramaDieComArte`,
-`.dramaDieArtImg`, `.dramaDieValue` em `LevelUpShell.module.css`) —
-2 telas com HTML/CSS de moldura diferentes, mas a MESMA fonte de arte
-por tipo de dado. Se aparecer uma 3ª tela de "dado rolando" no
-futuro, repita esse padrão (importar de `dadosArte.ts`) em vez de
-copiar o mapa de novo.
+**Padrão:** uma troca de estado que merece ser disfarçada (não
+instantânea/visível) pode fechar a tela com 2 planos cobrindo-a por
+completo, aplicar o reset de verdade no MEIO exato da transição (tela
+100% coberta, ninguém vê o salto) e reabrir em seguida — duração
+sincronizada JS/CSS via custom property (mesmo padrão de
+`DURACAO_PISCADA_MS`, ver "Grid de dados individuais" acima).
 
-**Reroll de 1 dado À ESCOLHA (Perfurador)** — generaliza o
-`rerollSe1` acima pra "reroll de qualquer dado, independente do
-valor": `RollState.rerollEscolhido`/`rerollEscolhidoUsado` +
-`rerollDadoEscolhido(id?)` no contexto. Com grid (2+ dados), o
-jogador TOCA no dado que quer rerolar (`id` do `DadoIndividual`); com
-1 dado só, reaproveita o MESMO botão do `rerollSe1` (sem exigir que o
-valor seja 1) — Perfurador funciona nos 2 casos, já que a maioria das
-armas de nível baixo rola 1 dado só. `core/rerollDanoTalento.ts`
-(`temPerfurador`) + `AtaqueInfo.danoTipo` (já existia, só não
-chegava até o dado de dano) propagado através de `DanoPendente.tipoDano`
-até `CombatTab.rolarDanoPendente`, que só passa `rerollEscolhido`
-quando o dano é Perfurante.
+## Padrão: variante de um componente que não desmonta nunca deriva de um estado que já virou "vazio"
 
-**Fora do escopo, registrado em Backlog.md:** "+1 dado extra no
-crítico" do Perfurador — depende de dano em crítico geral (dobrar os
-dados), que o app ainda não modela pra ataque nenhum.
+**Lição (de um bug real: painéis de Ação Bônus/Reação sempre saíam pela
+esquerda ao fechar):** quando um componente decide QUAL VARIANTE
+renderizar (lado/cor/layout) mas nunca desmonta — só troca de classe CSS
+pra animar — essa variante não pode vir de um estado que já virou
+`null`/fechado no mesmo instante em que a animação de SAÍDA começa.
+Guarde o "último valor válido" num estado separado (aqui: `ultimoPainel`
+ao lado de `painelAberto`) — só o booleano puro de aberto/fechado deve
+resetar na hora certa.
 
-## Magia/característica com múltiplos ataques discretos (feixes,
-## rajadas) — simplificada pra 1 ataque + N dados de dano
+## Protótipo: dado 3D com física (não CSS) é viável — `@3d-dice/dice-box`
 
-**Problema:** algumas magias (Raio Místico) e, no futuro, talentos
-como Ataque Extra de arma já concedem N jogadas de ataque separadas
-por turno (RAW: cada feixe/ataque rola seu próprio d20, acerta ou erra
-independente). O app nunca modela a CA do inimigo (o jogador decide
-"acertei" sozinho, na mesa) — simular N ataques independentes exigiria
-rastrear resultado individual de cada um, sem ganho real pro jogador.
+**Escolha:** `@3d-dice/dice-box` (BabylonJS + Ammo.js, física rodando em
+Web Worker) — não `dice-box-threejs` (irmã da mesma família, menos
+madura/mantida). Todos os 7 tipos (d4-d20, d100) vêm num único
+`default.json` + texturas (~620 KB estáticos); o JS da lib (~660 KB) só
+baixa via `import()` dinâmico no clique/warm-up, não entra no bundle
+principal.
 
-**Decisão:** sempre que uma característica conceder múltiplos ataques
-que RAW seriam jogadas separadas, mas o app já trata "acertar" como
-decisão do jogador (não calculada), simplificar pra **1 rolagem de
-ataque única + N dados de dano somados numa rolagem só** — não simular
-N jogadas de ataque independentes. Reaproveita 100% o mecanismo que já
-existe pra "N cópias do mesmo dado de dano" (Aprimoramento de Truque,
-Upcast "dado-por-círculo") em vez de criar um sistema de "múltiplos
-ataques" novo. Primeiro caso: Raio Místico (Bruxo) — RAW cria 2/3/4
-feixes com jogada de ataque separada cada nos níveis 5/11/17;
-`magias.ts` marca `escalaTruqueTipo: "dado"` (mesmo campo do
-Aprimoramento de Truque comum) em vez de um campo próprio, porque o
-resultado numérico é idêntico (base 1d10 + 1 dado por patamar = 2/3/4
-dados, mesma coisa que "N feixes de 1d10"). Ver `core/magiaDano.ts`
-`calcularDanoMagia`.
+**Gotchas reais (documentar antes de qualquer integração de verdade):**
+- A lib não publica tipos TypeScript — precisa de `.d.ts` próprio, só
+  com o que for usado.
+- O `<canvas>` que a lib cria não vem estilizado — sem
+  `width:100%;height:100%` explícito no container, fica no tamanho
+  padrão do navegador (300×150px, canto superior esquerdo), invisível,
+  sem nenhum erro no console.
+- Um container que uma lib externa MEDE pelo tamanho do elemento nunca
+  pode ser escondido com `display:none` (zera o tamanho e a lib nunca
+  mais desenha nada depois) — usar `visibility:hidden`/`opacity:0`, que
+  preserva o tamanho real.
+- Um componente que guarda a instância da lib em `useRef` não pode
+  desmontar o container real do DOM entre usos (a instância fica presa
+  a um canvas morto) — manter sempre montado, escondido via CSS.
+- `box.roll()` lê tema/textura de forma SÍNCRONA — precisa `await
+  box.loadTheme(id)` antes de rolar com um tema ainda não carregado
+  nessa sessão (idempotente depois da 1ª vez).
 
-**Ao encontrar um caso novo parecido** (outra magia com "feixes"/
-"raios"/"ataques separados", ou um talento de arma com Ataque Extra
-que precise de tratamento especial): primeiro confira se o valor final
-bate com "dado base + 1 dado por [o que quer que escale]" — se bater,
-reaproveita `escalaTruqueTipo`/Upcast, sem mecanismo novo. Só crie
-estrutura nova se o valor não seguir essa fórmula simples (ex.: dados
-de tamanhos diferentes por ataque, ou nº de ataques que não cresce em
-degraus fixos).
+**Bloqueio real, não resolvido:** a lib decide o resultado pela própria
+física (`box.roll('1d20')` sorteia sozinha) — não há, na documentação
+pública, como forçar um resultado específico. Isso importa se o app
+precisar que o NOSSO gerador de número (não o da lib) seja a fonte de
+verdade do resultado, pra ficar consistente com bônus/vantagem já
+calculados. Investigar antes de trocar a arte 2D atual por isso de
+verdade.
 
-## Penalidade de proficiência de Armadura/Escudo/Arma — 3 regras independentes, sinal único calculado 1x
-
-Regra real (Cap. 6): armadura, escudo e arma têm penalidades
-DIFERENTES por falta de proficiência, nunca a mesma regra reaproveitada
-— arma só perde o Bônus de Proficiência no ataque (`core/
-proficienciaArma.ts`, já existia); escudo só não soma o bônus de CA
-(`core/calculoPersonagem.ts`, `calcularCAEquipado`); armadura (Leve/
-Média/Pesada) dá Desvantagem em QUALQUER D20 de Força/Destreza +
-bloqueia conjuração inteira, enquanto estiver vestida.
-
-**Padrão usado pra "Desvantagem em toda rolagem de X":** calcular o
-sinal booleano UMA VEZ em `FichaShell.tsx`
-(`armaduraSemTreinamentoEquipada`, `core/proficienciaArmadura.ts`) e
-passar como prop simples (`desvantagemForcaDestreza`) pra cada tela
-que faz uma rolagem afetada — nunca recalcular o sinal dentro de cada
-componente. Em cada chamada de `rolarD20`, o sinal vira `vantagem:
-'desvantagem'` só quando a rolagem ainda não tem Vantagem/Desvantagem
-decidida por outro motivo — nunca sobrescreve uma escolha explícita.
-Pontos que hoje leem o sinal: `AtributosTab` (atributo FOR/DES,
-perícias de FOR/DES, Iniciativa), `CombatTab` (Iniciativa do painel,
-ataque de Mão Secundária), `AcaoPanelContent` (ataque principal).
-Ataques com magia (`modAcertoConjuracao`) NÃO usam esse sinal — usam o
-atributo de conjuração, nunca Força/Destreza.
-
-**Bloqueio de conjuração:** trava em 3 pontos — `conjurarMagia` em
-`AcaoPanelContent.tsx` (Ação) e em `ReacaoPanelContent.tsx` (Reação),
-mais reforço em `MagiasTab.tsx` (única outra tela que deixa conjurar
-direto, fora do Combat). Cada ponto é bloqueio de verdade (`return`
-cedo, sem gastar Espaço de Magia nem rolar), não só aviso — a regra
-real diz "impede conjurar", não "desconta something".
-
-**Proficiência de Armadura/Escudo por talento** (Especialista em
-Armaduras Leves/Médias/Pesadas) usa o mesmo desenho de "somar
-categorias de vários talentos" já visto — como mais de 1 talento pode
-contribuir categorias diferentes ao mesmo personagem, a leitura varre
-TODOS os talentos com esse `tipo`, nunca só o primeiro achado
-(`efeitoMecanicoDoTalento` do `calculoPersonagem.ts` não serve aqui —
-ele já para no primeiro match).
-
-**Data/origem:** 2026-09, SDD fornecido pelo Osmar durante o foco de
-Talentos Fase 4 (Grupo C, entre B.2 e B.3).
-
-## "Usar Magia" (Combat) ganha painel de Espaços de Magia ancorado à direita — só nessa tela
-
-**Pedido do Osmar** ao ver a Tela 2 do fluxo "Usar Magia" (lista de
-Truques/Magias Preparadas) num Mago de nível alto: o resumo de
-Espaços ficava espremido em 1-2 linhas de texto corrido no topo
-("1º: 4/4 2º: 3/3..."), enquanto a aba Magias já tinha uma versão boa
-disso (pips grandes, 1 linha por círculo, seção "Espaços de Magia").
-Pedido: mostrar essa MESMA informação, só que num painel à DIREITA da
-lista, exclusivamente na Tela 2 do "Usar Magia" (não na aba Magias
-normal) — desaparece junto com a lista ao voltar/mudar de ideia.
-
-**Implementação:** `SelecionarMagiaShell.tsx` ganhou CSS próprio
-(`SelecionarMagiaShell.module.css`, não mexe no `LevelUpShell.module.css`
-compartilhado). O painel (`.painelEspacos`) usa `position: fixed`
-(mesma técnica do `.navLayer`/botão "Avançar" do Level Up) — ancorado
-à direita da tela, centralizado verticalmente (`top:50%` +
-`translateY(-50%)`), pra ficar sempre visível mesmo com a lista de
-magias rolando por baixo, em vez de rolar junto no fluxo normal do
-documento. Largo o suficiente pra caber 4 pips de `TickPips
-tamanho="sm"` por linha antes de quebrar. `.listCol` ganha
-`padding-right` pra nenhum texto da lista ficar embaixo do painel
-fixo. Testado com Mago nível 17 (9 círculos simultâneos) e nível 1 (1
-círculo só) — cabe nos dois casos em ~390px sem cortar a lista, e o
-painel se mantém parado na tela mesmo rolando a lista.
-
-**Achado técnico — `position:fixed` preso ao drawer "Ação":** a tela
-"Usar Magia" abre de dentro do drawer lateral `SidePanel` (o painel
-que desliza ao tocar "Ação" na Combat), que usa `transform`
-(`SidePanel.module.css`, `.panelLeft`/`.panelRight`) pra animar o
-slide-in. Qualquer ancestral com `transform` vira o "containing
-block" de todo `position:fixed` descendente (regra do CSS, não bug do
-navegador) — por isso o `.screen` dessas telas fica preso a ~84% da
-largura real (não 100%), sobrando uma faixa da Ficha visível à
-direita. **Isso é o tamanho ESPERADO da tela — não um bug a corrigir.**
-Só o `.painelEspacos` precisa escapar disso (ver acima: `createPortal`
-pro `<body>`, único elemento que precisa cobrir a tela cheia de
-verdade). Uma tentativa de portar a tela INTEIRA (`SelecionarMagiaShell`/
-`EscolherCirculoShell`) pra fazer as 2 ocuparem 100% da largura foi
-revertida — o Osmar só queria que o TEXTO da lista aproveitasse melhor
-a largura de ~84% que já existia, não que a tela cobrisse a Ficha
-toda.
-
-**Fix de verdade — `padding-right` da lista recalibrado:**
-`.listCol` reservava `padding-right: 108px` (calculado como se a
-`.screen` tivesse 100% da largura) — mas como a tela só tem ~84%, e o
-painel é `fixed` relativo à tela CHEIA (não à `.screen`), a maior
-parte da largura do painel já cai fora da área visível da tela — bem
-menos que 108px do texto realmente precisa ficar de fora. Baixado pra
-`padding-right: 56px` (calibrado pra ~390px, aproximado — não dá pra
-calcular isso em CSS puro sabendo só a % do drawer). Padrão a
-lembrar: **`padding-right`/margem reservada pra um elemento `fixed`
-relativo à tela cheia, dentro de um container que NÃO ocupa a tela
-cheia, precisa ser recalculado pela largura real do container, não
-pela largura do elemento fixed.**
-
-**Data/origem:** 2026-09, revisão pedida pelo Osmar depois do foco
-Mago (outra conta/branch) chegar na Combat.
-
-## Estado do turno (Ação/Ação Bônus/Reação, Surto de Ação) persiste — só reseta em Iniciativa nova ou "Fim do Turno"
-
-**Problema:** `turnState` (os 3 botões Ação/Ação Bônus/Reação — ativo
-ou usada) e `surtoUsadoTurno` só existiam em estado do React
-(`useState` sem persistência), diferente de quase todo o resto da
-Ficha (PV, Espaços de Magia, usos de característica — tudo salvo em
-`localStorage` a cada mudança, ver `FichaShell.tsx`). Sair da Ficha e
-voltar (Lista de Personagens, F5, trocar de aba do navegador) resetava
-os 3 botões sozinho, mesmo no meio do MESMO turno de combate — bug
-reportado pelo Osmar.
-
-**Decisão:** `turnState`/`surtoUsadoTurno` agora entram no mesmo save
-automático de tudo mais (`PersonagemSalvo.turnStateAtual`/
-`surtoUsadoTurnoAtual`, `core/armazenamentoPersonagens.ts`) — sobrevive
-a sair/voltar da Ficha. Só reseta de propósito em 2 gatilhos, ambos já
-existentes: **"Fim do Turno"** (`fimDoTurno` em `FichaShell.tsx`, sem
-mudança) e **rolar Iniciativa** (novo — `aoRolarIniciativa`, chamado
-tanto pelo botão de Iniciativa da aba Combat quanto pelo card de
-Iniciativa da aba Atributos, os 2 pontos que rolam esse dado). O
-motivo de rolar Iniciativa também resetar: RAW, cada rolagem de
-Iniciativa é o início de uma cena/combate nova — manter os 3 botões
-travados de um combate anterior não faz sentido ao começar outro.
-
-**Padrão a lembrar:** todo estado "supostamente temporário" (dura só o
-turno/a sessão) que na prática o jogador vê sumir sem querer ao trocar
-de tela precisa entrar no save automático de qualquer forma — o reset
-tem que ser um EVENTO explícito (Fim do Turno, Descanso, Iniciativa
-nova), nunca "o componente desmontou".
-
-**Data/origem:** 2026-09, bug reportado pelo Osmar.
-
-## "Fim do Turno" pisca a tela — 2 planos pretos fecham/abrem, reset acontece escondido no meio
-
-**Pedido do Osmar:** ao tocar "Fim do Turno", em vez do reset dos 3
-botões acontecer instantâneo e visível, 2 planos pretos (metade de
-cima, metade de baixo da tela) fecham vindo de fora da tela (de cima
-pra baixo / de baixo pra cima), se encontram no meio, e abrem de novo
-saindo por onde entraram — como uma piscada de olho. Analogia
-explícita do Osmar: cada turno de mesa dura no máximo 6 segundos, "fim
-de turno" é rápido como um piscar.
-
-**Implementação (`CombatTab.tsx`/`CombatTab.module.css`):**
-`fimDoTurno()` não reseta mais na hora — dispara `piscando: true`
-(mostra os 2 planos, `position:fixed` cobrindo a tela, `z-index: 90`),
-agenda o reset de verdade (`onFimDoTurno`, `setFeedback(null)` etc.)
-pro **meio exato** da animação (`DURACAO_PISCADA_MS / 2`, tela
-totalmente coberta — ninguém vê o "salto"), e agenda esconder os
-planos no final (`DURACAO_PISCADA_MS`). Duração total: 500ms — metade
-fechando, metade abrindo, 1 `@keyframes` por plano
-(`translateY(-100%→0→-100%)` pro de cima,
-`translateY(100%→0→100%)` pro de baixo). A borda de encontro dos 2
-planos usa `border-radius` elíptico bem raso (`50% 50% / 10px 10px`)
-pra não ficar 100% reto — uma leve curva complementar entre os dois,
-como pálpebras.
-
-**Padrão a lembrar:** JS (`DURACAO_PISCADA_MS`) e CSS (`@keyframes`)
-duram o MESMO tempo por construção — a duração vira uma CSS custom
-property (`--duracao-piscada`) escrita via `style` inline a partir da
-constante JS, em vez de duplicar o número em 2 lugares (mesmo cuidado
-já registrado pra `DURACAO_ANIMACAO_MS`/spin do dado, ver acima —
-"Suspense da rolagem").
+**Escopo:** protótipo isolado (FAB `Dice3dFab.tsx` na Ficha, overlay
+próprio) — não integrado a nenhum fluxo real (Combat/Magias/Atributos).
 
 **Data/origem:** 2026-09, pedido do Osmar.
-
-## Bug: painel de Ação Bônus/Reação saía sempre pela esquerda ao fechar
-
-**Sintoma:** os 3 painéis (Ação/Ação Bônus/Reação) abriam certinho
-pelo lado certo (esquerda/direita/baixo), mas ao FECHAR, o de Ação
-Bônus e o de Reação saíam deslizando pra esquerda também — só o de
-Ação (que já é esquerda) fechava "certo". Reportado pelo Osmar como
-"todos vêm da esquerda pra direita".
-
-**Causa raiz:** `SidePanel` recebe `side` calculado a partir de
-`painelAberto ? ladoDoPainel(painelAberto) : 'left'` — ao fechar,
-`painelAberto` vira `null` NO MESMO instante que o painel começa a
-sumir, então `side` cai no fallback `'left'` ENQUANTO a animação de
-saída ainda está rodando. Como o `SidePanel` nunca desmonta (só troca
-de classe CSS pra animar), a troca de `side` no meio do caminho troca
-literalmente a classe do painel de `panelRight`/`panelBottom` pra
-`panelLeft` durante a transição — o `transform` (que É animado)
-continua suave, mas o ANCHOR do painel (`left`/`right`/`top`/`bottom`,
-que NÃO é animado) pula instantaneamente pro lado esquerdo, fazendo
-todo painel "saltar" pra lá e só depois deslizar pra fora — sempre
-pela esquerda, não importa de onde veio.
-
-**Fix:** `CombatTab.tsx` ganhou `ultimoPainel` — estado separado de
-`painelAberto` que só é setado ao ABRIR (nunca reseta ao fechar).
-`side`/`title`/conteúdo do `SidePanel` usam `ultimoPainel` (nunca
-`null`); só o `open` do `SidePanel` continua vindo de `painelAberto
-!== null` (isso sim precisa resetar, é o que dispara a classe
-`panelOpen` sumir e a animação de saída rodar). Resultado: o painel
-mantém a classe/lado correto do início ao fim da transição de saída.
-
-**Padrão a lembrar:** qualquer prop de um componente que NÃO desmonta
-(anima via classe CSS) e que decide QUAL VARIANTE renderizar (lado,
-cor, layout) nunca pode derivar de um estado que já virou "fechado/
-vazio" no mesmo instante em que a animação de saída começa — guarde o
-"último valor válido" separado do estado "aberto/fechado", e só o
-`open` (booleano puro) deve resetar na hora.
-
-**Data/origem:** 2026-09, bug reportado pelo Osmar depois da entrega
-da "piscada de olho" (a checagem anterior só validou a classe no
-estado ABERTO, não durante o fechamento).
-
-## Protótipo isolado: dado 3D de verdade (física) é viável — FAB na Ficha
-
-**Pergunta do Osmar:** dá pra ter um dado 3D "bonito" (física de
-verdade, não CSS) pra qualquer tipo (d4 a d100), sem substituir a arte
-2D já aprovada? Resposta: sim, testado e funciona.
-
-**Escolha técnica:** `@3d-dice/dice-box` (BabylonJS + Ammo.js, roda a
-física num Web Worker com OffscreenCanvas) — não `dice-box-threejs`
-(irmã da mesma família, mas Three.js/cannon-es, menos madura/mantida).
-Modelos 3D de TODOS os tipos (d4/d6/d8/d10/d12/d20/d100) já vêm
-prontos num `default.json` só (156 KB) + texturas (~130 KB) + o WASM
-da física (312 KB) — total ~620 KB de assets estáticos, carregados uma
-vez em `public/assets/` (fora do bundle JS, não conta pro chunk
-principal). O JS da lib (Babylon + Ammo + workers) soma ~660 KB
-gzipado, mas só baixa quando o jogador REALMENTE toca o botão —
-`import()` dinâmico dentro do handler de clique, confirmado pelo build
-que o bundle principal (`index.js`) não cresceu nada.
-
-**2 armadilhas reais encontradas (documentar pra quem for evoluir
-isso):**
-1. **A lib não publica tipos TypeScript** — precisa de um `.d.ts`
-   próprio (`src/types/dice-box.d.ts`), só com o que for usado (não
-   tentar tipar a API inteira).
-2. **O `<canvas>` que a lib cria não vem estilizado** (o CSS que ela
-   publica só cuida de opacity) — sem `width:100%; height:100%`
-   explícito no seletor `canvas` dentro do container, ele fica no
-   tamanho padrão do navegador (300×150px, canto superior esquerdo) e
-   a rolagem "funciona" (o resultado volta certo) mas fica
-   praticamente invisível atrás do resto da UI. Isso NÃO aparece em
-   nenhum warning/erro — só percebido comparando o `getBoundingClientRect`
-   do canvas com o esperado.
-
-**Ainda NÃO resolvido (documentar antes de qualquer integração real,
-não é escopo deste protótipo):** a lib rola o dado com resultado
-determinado pela FÍSICA dela mesma (`box.roll('1d20')` sorteia
-sozinha) — não achei, na documentação pública, um jeito de dizer "esse
-d20 tem que terminar mostrando 17" (útil quando o app precisa que o
-NOSSO gerador de número, não o da lib, seja a fonte de verdade do
-resultado, pra manter consistência com bônus/vantagem/etc. já
-calculados). Precisa investigar antes de trocar a arte 2D de verdade —
-registrado aqui pra não esquecer, não é bloqueio do protótipo em si
-(que só mostra o dado rolando, sem ligar no motor de regra).
-
-**Protótipo entregue:** FAB (🎲) fixo no canto inferior direito da
-Ficha, acima da tabbar (`Dice3dFab.tsx`) — toca, abre um overlay de
-tela cheia, rola em 3D, mostra o resultado, fecha. Isolado de qualquer
-fluxo real (Combat/Magias/Atributos) de propósito — é só pra avaliar
-peso/visual no celular antes de decidir se vale integrar.
-
-**Expansão pra todos os tipos de dado — sem custo extra de assets:**
-os 7 modelos (d4/d6/d8/d10/d12/d20/d100) já vêm todos dentro do MESMO
-`default.json` (ver acima) — adicionar os outros tipos no FAB não
-baixa nada a mais, só troca a notação passada pra `box.roll()`
-(`1d4`...`1d20`, `1d100`). Percentual (`1d100`) já é tratado pela
-própria lib exatamente como o Osmar descreveu (2 d10 físicos, um de
-dezena e um de unidade, combinados num resultado só — confirmado lendo
-o parser da lib: notação `d100`/`d%` vira `{sides:"d100", data:
-"single"}`, e o roll de fato usa mesh de d10 duas vezes) — não precisou
-de nenhum código nosso pra isso, só usar a notação nativa.
-
-**Bug real corrigido — só rolava 1x por carregamento de página:**
-causa raiz era `Dice3dFab.tsx` desmontar (`{aberto && (...)}`) a div
-`#dice3d-canvas-host` sempre que o overlay fechava — a instância do
-`DiceBox` guardada em `useRef` ficava presa a um `<canvas>` que não
-existia mais no DOM, então a 2ª chamada de `.roll()` não tinha onde
-desenhar. Corrigido mantendo esse container SEMPRE montado (escondido
-via CSS em vez de removido do React), a instância nunca perde a
-referência do canvas. Confirmado com Playwright: 3 ciclos seguidos de
-abrir → rolar → fechar → reabrir → rolar de novo (tipos diferentes a
-cada vez) funcionaram sem refresh de página.
-
-**Armadilha nova encontrada corrigindo esse bug (regressão publicada e
-corrigida na sequência):** a 1ª tentativa escondeu o overlay fechado
-com `display:none` — só que isso zera a largura/altura do container, e
-como o motor 3D é inicializado (warm-up) enquanto o overlay ainda está
-fechado, ele cria o canvas em 0×0 e nunca mais mostra nada depois
-disso (nem abrindo o overlay de novo). Trocado pra `visibility:hidden`
-+ `pointer-events:none` (esconde sem zerar o tamanho do container) —
-resolvido de verdade. **Padrão generalizável:** qualquer container que
-uma lib externa mede pelo tamanho do elemento (canvas, gráfico, mapa)
-precisa continuar com tamanho real mesmo escondido — nunca usar
-`display:none` nesse caso, só `visibility:hidden`/`opacity:0`.
-
-**Carregamento adiantado ("warm-up"):** a lib agora começa a carregar
-assim que a Ficha abre (`useEffect` no mount do `Dice3dFab`, não mais
-só no clique) — continua sendo `import()` dinâmico (não pesa no bundle
-principal, só adianta o download), então na prática o jogador não vê
-mais o "Carregando dado 3D…" na maioria das vezes, só na 1ª visita à
-Ficha na sessão. Isso é local ao componente (module-scope/`useRef`) —
-some de novo se a página der refresh de verdade; manter assim é
-suficiente pro escopo de protótipo, decisão de persistir entre
-refreshes de página fica pra quando (e se) isso for integrado de
-verdade no motor de regra.
-
-**Nota de teste:** rodando via Playwright headless (sem GPU de
-verdade), a física do dado apareceu funcionando (rola, gira, para) mas
-o valor final voltou sempre 0 com um erro no console
-(`colliderFaceMap Error: No value found for ... mesh face -1`) — é uma
-limitação conhecida de raycasting em Chromium headless/software
-rendering, não um bug da integração; no celular real do Osmar (já
-testado por ele) o valor mostrado bate com a face pra cima.
-
-**Modo "Múltiplos" (rolar vários dados de tipos diferentes juntos):**
-`box.roll()` já aceita um array de notações (`['3d6', '2d4']`), não
-precisou de nenhuma lógica extra pra somar tipos — só juntar as
-contagens escolhidas num array de string antes de chamar `roll()`.
-Testado com Playwright rolando 5 dados (3d6+2d4) e 10 dados (5d10+5d6)
-juntos, sem erro e com o total certo. **Sem limite artificial de
-quantidade** (nem o app nem a lib impõem um) — não apareceu nenhum
-sinal de degradação até 10 dados simultâneos no teste; se alguém notar
-travamento/lentidão real com uma quantidade bem maior (20+, por
-exemplo), aí sim vale investigar um limite prático.
-
-**Log das últimas rolagens:** botão "📜 Log (N)" no canto superior do
-overlay, guarda até 20 rolagens (mais recente primeiro), painel com
-altura fixa pra ~5 itens visíveis e scroll pro resto. Reutiliza o
-catálogo real de `data/rulesets/dnd2024/pericias.ts` (não inventou
-lista nova — regra da seção 6.1 do CLAUDE.md). Formato de cada linha,
-2 casos:
-1. **Rolagem de 1d20 solo** (toque direto no botão d20, fora do modo
-   Múltiplos) — o protótipo AINDA não sabe de perícia/atributo de
-   verdade, então **simula** uma perícia aleatória do catálogo real +
-   um modificador aleatório (-1 a +5) + um modo aleatório (Normal 55%,
-   Vantagem 15%, Desvantagem 15%, "Inspiração Heróica"/rerolagem 15%),
-   só pra validar o formato do log antes de existir perícia de
-   verdade. Vantagem/Desvantagem rolam 2d20 (`box.roll(['1d20','1d20'])`)
-   e mostram os 2 valores NA ORDEM QUE CAÍRAM (não ordenados por
-   valor) — Vantagem usa o maior, Desvantagem o menor pro Total.
-   "Inspiração Heróica" sempre mantém a 2ª rolagem (a rerolagem),
-   não importa se é maior ou menor que a 1ª. Exemplo:
-   `Intimidação: 5 | 1 (Vantagem)` / `Total: 10 (5 + 5)` — 5 é o
-   maior dos 2 dados, +5 de modificador simulado.
-2. **Qualquer outra rolagem** (tipo diferente de d20 tocado direto, ou
-   qualquer rolagem feita pelo modo Múltiplos, mesmo que inclua d20) —
-   sem perícia, título vira `Rolagem de {notações}` ordenadas por
-   tamanho de dado crescente (d4→d100, mesma ordem de `TIPOS`), valores
-   na ordem de tiragem, Total = soma direta de todos. Exemplo:
-   `Rolagem de 2d6 + 1d10: 7 | 9` / `Total: 16 (7 + 9)`.
-
-**Customização de textura/cor (não salva, só dura enquanto o overlay
-tá aberto):** botão "🎨 Customizar" no canto superior esquerdo abre 2
-`<select>` — Textura e Cor. Osmar pediu pra colocar TODAS as texturas
-do pacote oficial `@3d-dice/dice-themes` (não instalado como
-dependência — só os assets de cada tema foram copiados manualmente pra
-`public/assets/themes/<nome>/`, do jeito que a lib espera, MIT license
-do pacote original preservada aqui como crédito) pra ele escolher quais
-ficam na versão final: Padrão, Liso, Gema, Pedra, Ferrugem (essas 5
-aceitam tingimento de cor — material tipo `"color"` no
-`theme.config.json`), Mármore de Gema, Metal Azul/Verde, Dado de Mesa e
-Madeira (essas 4 têm aparência fixa, tipo `"standard"` — o `<select>`
-de cor fica desabilitado quando uma dessas está escolhida). Cor é uma
-lista fixa (primárias + secundárias + preto/branco, 8 no total) em vez
-de um seletor de cor livre — mais rápido de usar no celular.
-
-**Armadilha técnica:** `box.roll()` lê os dados do tema **de forma
-síncrona** — se o tema escolhido ainda não foi carregado nessa sessão,
-quebra. Precisa chamar e `await`ar `box.loadTheme(id)` antes de todo
-`roll()` que usa tema diferente do carregado no `init()` (idempotente,
-1ª vez baixa de verdade, depois só retorna o cache). Tema/cor são
-passados por chamada (`box.roll(notacao, {theme, themeColor})`), não
-no construtor — dá pra trocar sem recriar a `DiceBox`.
-
-**Custo:** cada textura nova baixa só quando escolhida pela 1ª vez
-(lazy, igual os tipos de dado). Tamanho por textura varia bastante —
-Liso/Gema ficam entre 65-135 KB, mas Pedra e Ferrugem vêm com texturas
-em resolução bem mais alta no pacote original (~900 KB e ~665 KB) —
-vale considerar isso na escolha final de quais ficam.
-
-**Data/origem:** 2026-09, pedido do Osmar.
-
