@@ -109,12 +109,22 @@ fazer essa versão profunda agora (registrada no Backlog.md pra quando
 fizer sentido investir nisso) — G3.2 vira a versão mais segura abaixo,
 que ainda reduz duplicação real sem tocar no formato salvo.
 
-- [ ] **G3.2 (re-escopado)** — `useContadorGasto`/`useFlagGasta`: 2
-      hooks pequenos que embrulham CADA par `useState` de recurso já
-      existente (sem mudar o formato salvo) e devolvem
-      `{restantes, disponivel, usar}` ou `{gasta, usar}` — elimina a
-      duplicação das ~15 funções `usarX` quase idênticas, sem tocar
-      em `descansoCurto`/`descansoLongo`/autosave.
+- [x] **G3.2 (re-escopado)** — `recursoContado`/`recursoFlagUnica`
+      (`src/ui/ficha/hooks/recursoGasto.ts`): embrulham CADA par
+      `useState` de recurso já existente (sem mudar o formato salvo)
+      e devolvem `{restantes, disponivel, usar}` ou `{disponivel,
+      usar}` — 16 funções `usarX` quase idênticas viraram wrappers de
+      1 linha (Conhecimento de Pedras, Pico de Adrenalina, Ataque de
+      Sopro, Voo Dracônico, Ancestralidade Gigante, Mãos Curativas,
+      Revelação Celestial, Falar com Animais do Gnomo, Inspiração de
+      Bardo, Contatar Patrono, Fôlego, Indomável, Ponto de Sorte,
+      Sorte do Tenebroso, Lançar no Inferno, Surto de Ação). Forma
+      Grande e Astúcia Mágica ficaram de fora de propósito (lógica
+      própria demais pra caber no padrão genérico sem forçar). Não
+      mexe em `descansoCurto`/`descansoLongo`/autosave. Verificado com
+      `tsc -b`/`npm test` (495)/`npm run build` limpos + teste de
+      ponta a ponta no navegador (Inspiração de Bardo: clicar gasta 1
+      uso, recarregar a página mantém o uso gasto).
 - [ ] **G3.3** — `useMagiasPersonagem`: os ~40 `const magias*`/
       `truques*` espalhados pelo componente, extraídos como 1 hook de
       derivação pura (mesmas entradas → mesmo objeto de saída).

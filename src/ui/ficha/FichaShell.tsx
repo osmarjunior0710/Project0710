@@ -4,6 +4,7 @@ import { armazenamentoPersonagens, type PersonagemSalvo } from '../../core/armaz
 import { garantirPersonagemDemo, ID_PERSONAGEM_DEMO } from '../../core/personagemDemo';
 import { useColapsavel } from '../hooks/useColapsavel';
 import { useAutosavePersonagem } from './hooks/useAutosavePersonagem';
+import { recursoContado, recursoFlagUnica } from './hooks/recursoGasto';
 import {
   bonusProficiencia,
   calcularAtributosFinais,
@@ -845,42 +846,45 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setPvTemporario(resultado.pvTemporario);
   }
 
+  // G3.2 (foco de saúde do projeto, ver EmDevB.md): `recursoContado`/
+  // `recursoFlagUnica` embrulham o par useState de cada recurso e
+  // absorvem o "se não sobrou uso, recusa; senão soma 1" repetido —
+  // `useState`, descansoCurto/Longo e o autosave continuam intocados,
+  // lendo/zerando os mesmos campos de sempre por nome.
+  const conhecimentoDePedras = recursoContado(usosConhecimentoDePedrasMaximo, conhecimentoDePedrasGasto, setConhecimentoDePedrasGasto);
   function usarConhecimentoDePedras(): boolean {
-    if (usosConhecimentoDePedrasRestantes <= 0) return false;
-    setConhecimentoDePedrasGasto((v) => v + 1);
-    return true;
+    return conhecimentoDePedras.usar();
   }
 
+  const picoDeAdrenalina = recursoContado(usosPicoDeAdrenalinaMaximo, picoDeAdrenalinaGasto, setPicoDeAdrenalinaGasto);
   function usarPicoDeAdrenalina(): boolean {
-    if (usosPicoDeAdrenalinaRestantes <= 0) return false;
-    setPicoDeAdrenalinaGasto((v) => v + 1);
+    if (!picoDeAdrenalina.usar()) return false;
     setPvTemporario((atual) => ganharPvTemporario(atual, bonusProficienciaAtual));
     return true;
   }
 
+  const ataqueDeSopro = recursoContado(usosAtaqueDeSoproMaximo, ataqueDeSoproGasto, setAtaqueDeSoproGasto);
   function usarAtaqueDeSopro(): boolean {
-    if (usosAtaqueDeSoproRestantes <= 0) return false;
-    setAtaqueDeSoproGasto((v) => v + 1);
-    return true;
+    return ataqueDeSopro.usar();
   }
 
+  const vooDraconico = recursoFlagUnica(vooDraconicoGasto, setVooDraconicoGasto);
   function usarVooDraconico(): boolean {
-    if (vooDraconicoGasto) return false;
-    setVooDraconicoGasto(true);
-    return true;
+    return vooDraconico.usar();
   }
 
+  const ancestralidadeGigante = recursoContado(usosAncestralidadeGiganteMaximo, ancestralidadeGiganteGasto, setAncestralidadeGiganteGasto);
   function usarAncestralidadeGigante(): boolean {
-    if (usosAncestralidadeGiganteRestantes <= 0) return false;
-    setAncestralidadeGiganteGasto((v) => v + 1);
-    return true;
+    return ancestralidadeGigante.usar();
   }
 
   /** Toggle — ligar (1ª vez, gasta o uso) ou desligar (encerrar antes
    * do Descanso Longo, sem devolver o uso) a Forma Grande. Só o
    * Descanso Longo desliga sozinho e devolve o uso (ver
    * `descansoLongo`) — o app não segue tempo real pra saber quando os
-   * 10 minutos da transformação acabam. */
+   * 10 minutos da transformação acabam. Fica de fora do padrão
+   * genérico acima de propósito: 2 booleanos interdependentes
+   * (`Gasto`/`Ativa`), não 1 só. */
   function usarFormaGrande(): boolean {
     if (formaGrandeAtiva) {
       setFormaGrandeAtiva(false);
@@ -892,23 +896,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return true;
   }
 
+  const maosCurativas = recursoFlagUnica(maosCurativasGasto, setMaosCurativasGasto);
   function usarMaosCurativas(): boolean {
-    if (maosCurativasGasto) return false;
-    setMaosCurativasGasto(true);
-    return true;
+    return maosCurativas.usar();
   }
 
+  const revelacaoCelestial = recursoFlagUnica(revelacaoCelestialGasto, setRevelacaoCelestialGasto);
   function usarRevelacaoCelestial(formaEscolhida: string): boolean {
-    if (revelacaoCelestialGasto) return false;
-    setRevelacaoCelestialGasto(true);
+    if (!revelacaoCelestial.usar()) return false;
     setRevelacaoCelestialFormaAtiva(formaEscolhida);
     return true;
   }
 
+  const falarComAnimaisGnomo = recursoContado(usosFalarComAnimaisGnomoMaximo, falarComAnimaisGnomoGasto, setFalarComAnimaisGnomoGasto);
   function usarFalarComAnimaisGnomo(): boolean {
-    if (usosFalarComAnimaisGnomoRestantes <= 0) return false;
-    setFalarComAnimaisGnomoGasto((v) => v + 1);
-    return true;
+    return falarComAnimaisGnomo.usar();
   }
 
   function marcarUsado(categoria: RecursoTurno) {
@@ -947,10 +949,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return false;
   }
 
+  const inspiracaoDeBardo = recursoContado(usosInspiracaoMax, inspiracaoGasto, setInspiracaoGasto);
   function usarInspiracao(): boolean {
-    if (usosInspiracaoRestantes <= 0) return false;
-    setInspiracaoGasto((v) => v + 1);
-    return true;
+    return inspiracaoDeBardo.usar();
   }
 
   function recuperarInspiracaoComEspaco(): boolean {
@@ -1118,9 +1119,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setAstuciaMagicaGasta(true);
   }
 
+  const contatarPatrono = recursoFlagUnica(contatarPatronoGasto, setContatarPatronoGasto);
   function usarContatarPatrono() {
-    if (contatarPatronoGasto) return;
-    setContatarPatronoGasto(true);
+    contatarPatrono.usar();
   }
 
   function aplicarBencaoDoTenebroso() {
@@ -1255,34 +1256,29 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setItensMochila((prev) => desvincularArmaDePacto(prev));
   }
 
+  const usoFolego = recursoContado(usosFolegoMaximo, folegoGasto, setFolegoGasto);
   function usarUsoFolego(): boolean {
-    if (usosFolegoRestantes <= 0) return false;
-    setFolegoGasto((v) => v + 1);
-    return true;
+    return usoFolego.usar();
   }
 
+  const indomavel = recursoContado(indomavelMaximo, indomavelGasto, setIndomavelGasto);
   function usarIndomavel(): boolean {
-    if (indomavelRestantes <= 0) return false;
-    setIndomavelGasto((v) => v + 1);
-    return true;
+    return indomavel.usar();
   }
 
+  const pontoDeSorte = recursoContado(pontosDeSorteMaximo, pontosDeSorteGasto, setPontosDeSorteGasto);
   function usarPontoDeSorte(): boolean {
-    if (pontosDeSorteRestantes <= 0) return false;
-    setPontosDeSorteGasto((v) => v + 1);
-    return true;
+    return pontoDeSorte.usar();
   }
 
+  const sorteDoTenebroso = recursoContado(sorteDoTenebrosoMaximo, sorteDoTenebrosoGasto, setSorteDoTenebrosoGasto);
   function usarSorteDoTenebroso(): boolean {
-    if (sorteDoTenebrosoRestantes <= 0) return false;
-    setSorteDoTenebrosoGasto((v) => v + 1);
-    return true;
+    return sorteDoTenebroso.usar();
   }
 
+  const lancarNoInferno = recursoFlagUnica(lancarNoInfernoGasto, setLancarNoInfernoGasto);
   function usarLancarNoInferno(): boolean {
-    if (lancarNoInfernoGasto) return false;
-    setLancarNoInfernoGasto(true);
-    return true;
+    return lancarNoInferno.usar();
   }
 
   function recuperarLancarNoInfernoComEspacoDePacto(): boolean {
@@ -1333,9 +1329,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return () => registrarInspiracaoHeroica(null);
   }, [inspiracaoHeroicaAtiva, registrarInspiracaoHeroica]);
 
+  const surto = recursoContado(surtoMaximo, surtoGasto, setSurtoGasto);
   function usarSurto(): boolean {
-    if (surtoRestantes <= 0 || surtoUsadoTurno) return false;
-    setSurtoGasto((v) => v + 1);
+    if (surtoUsadoTurno) return false;
+    if (!surto.usar()) return false;
     setSurtoUsadoTurno(true);
     return true;
   }
