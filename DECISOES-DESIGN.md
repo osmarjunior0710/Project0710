@@ -35,1452 +35,574 @@
 > passaram por uma compactação — narração de entrega/bug corrigido/
 > "testei X" removida, só padrão reaproveitável ficou. Regra daqui
 > pra frente, pra não engordar de novo: ver seção 7 do `CLAUDE.md`.
+>
+> **2026-09 — 2ª passagem de compactação (só este arquivo):** este
+> arquivo sozinho tinha voltado a passar de 1480 linhas. Passagem
+> nova aplicando o mesmo teste da seção 7.1: entradas superadas por
+> uma decisão posterior foram fundidas no estado final (ex: as ~5
+> iterações do formato de ícone de Classe/Espécie/Origem viraram 1
+> entrada só descrevendo o pipeline de arte atual); bug já corrigido
+> sem lição, narração de teste/entrega e ajuste visual pontual sem
+> padrão por trás foram cortados.
 
 ---
 
 ## Level Up — overlay em cima da ficha, não uma rota separada
 
-**Decisão:** o fluxo de Level Up (`LevelUpShell`) é renderizado como um
-overlay de tela cheia (`position: fixed`) **dentro** do componente da
-ficha (`FichaShell`), trocado por uma flag de estado
-(`levelUpAberto`), e não por uma navegação de rota (`/ficha/:id/levelup`).
+**Decisão:** qualquer fluxo que precise "tomar a tela inteira" mas
+continuar dentro do contexto de uma ficha já aberta (Level Up hoje;
+editor de item, ficha de NPC dentro de uma sessão no futuro) deve ser
+um overlay de tela cheia (`position: fixed`) renderizado **dentro** do
+componente da ficha (`FichaShell`), trocado por flag de estado (ex:
+`levelUpAberto`) — nunca uma rota separada (`/ficha/:id/levelup`).
 
-**Contexto:** o wireframe HTML original usa uma "tela" separada
-(`screen-levelup`) alcançada por `go('screen-levelup')`. Copiar esse
-padrão literalmente como uma rota React Router faria o React desmontar o
-`FichaShell` ao navegar — perdendo todo o estado vivo da sessão de
-combate (PV atual, Espaços de Magia gastos, estado Ativo/Usada dos 3
-botões de turno) só porque o jogador foi fazer level-up no meio de uma
-sessão. Manter como overlay dentro do mesmo componente preserva esse
-estado.
-
-**Alternativas descartadas:** rota `/ficha/:id/levelup` separada,
-descartada pelo motivo acima.
-
-**Padrão a repetir:** qualquer fluxo futuro que precise "tomar a tela
-inteira" mas continuar dentro do contexto de uma ficha já aberta (ex:
-editor de item, ficha de NPC dentro de uma sessão) deve seguir esse
-mesmo padrão — overlay controlado por estado local, não rota nova.
-
-**Data/origem:** 2026-08, entrega 0.7.
+**Por quê:** uma rota React Router desmontaria o `FichaShell` ao
+navegar, perdendo todo o estado vivo da sessão de combate (PV atual,
+Espaços de Magia gastos, estado Ativo/Usada dos botões de turno) só
+porque o jogador foi fazer algo relacionado no meio de uma sessão.
 
 ## Rolagem de dados — contexto global (`RollProvider`), não popup por tela
 
 **Decisão:** existe um único componente de overlay de dado
 (`RollOverlay`) montado uma vez no topo do app (`App.tsx`), controlado
 por um React Context (`RollContext`/`useRoll()`). Qualquer tela chama
-`rolarD20(...)` ou `rolarDados(...)` de qualquer lugar da árvore de
-componentes, sem precisar montar sua própria cópia do overlay.
-
-**Contexto:** o wireframe tinha um único `#roll-overlay` compartilhado
-manipulado via funções globais (`roll()`, `rollDamage()`) porque era só
-HTML/JS solto. Em React, o equivalente correto de "uma coisa só que
-qualquer tela aciona" é Context + Provider no topo da árvore, não
-duplicar o componente de overlay em cada tela que precisa rolar dado.
-
-**Data/origem:** 2026-08, entrega 0.7.
+`rolarD20(...)`/`rolarDados(...)` de qualquer lugar da árvore, sem
+montar sua própria cópia do overlay. Padrão geral: "uma coisa só que
+qualquer tela aciona" em React é Context + Provider no topo da árvore,
+nunca duplicar o componente de overlay tela por tela.
 
 ## Tema visual do app de verdade (React): light, não dark
 
 **Decisão:** o app em React usa paleta **clara** (fundo claro, texto
-escuro), ainda monocromática/cinza — não o dark do wireframe HTML
-original.
-
-**Contexto:** o wireframe HTML (`wireframe-app-rpg-v2.html`) foi feito em
-dark de propósito pra simular "protótipo neutro" (ver seção 9 do
-`guia-mestre-projeto.md`), mas na hora de validar texto e leitura durante
-o desenvolvimento em React, o Osmar achou mais fácil revisar em fundo
-claro. Pedido explícito, na entrega 0.2.
-
-**Alternativas descartadas:** manter o dark do wireframe como já estava —
-descartado porque dificultava a validação de texto nesta fase.
+escuro), ainda monocromática/cinza — diferente do dark do wireframe
+HTML (`wireframe-app-rpg-v2.html`, que é dark de propósito só pra
+simular "protótipo neutro"). Facilita revisar texto/leitura durante o
+desenvolvimento.
 
 **Pendência conhecida:** a direção visual "RPGzística" de verdade
-(tipografia old-school, paleta dourado/bronze, textura) continua adiada
-pra mais pra frente (ver seção 9 do `guia-mestre-projeto.md`) — light aqui
-é só facilitar revisão nesta fase inicial, não é a decisão final de
-identidade visual. Quando a direção visual entrar, esse tema muda de novo
-e essa entrada deve ser atualizada.
+(tipografia old-school, paleta dourado/bronze, textura) continua
+adiada — light aqui não é a decisão final de identidade visual. Quando
+a direção visual entrar, esse tema muda de novo.
 
-**Data/origem:** 2026-08, durante a entrega 0.2 (Fase 0 — esqueleto
-navegável).
+## Técnica de escala pra moldura ornamentada — 9-slice (`border-image`)
 
-## Carimbo de versão visível em toda entrega
-
-**Decisão:** todo build publicado mostra um carimbo `v{AAAA}{MM}_{HHmm}`
-(ano/mês/hora/minuto do commit) fixo e discreto na tela, lido de
-`src/version.ts`.
-
-**Contexto:** o Osmar testa cada entrega abrindo o mesmo link Netlify
-repetidas vezes. Sem um jeito visível de diferenciar versões, é difícil
-saber se o navegador está mostrando a entrega nova ou uma versão em
-cache. Pedido explícito, na entrega 0.2. Regra fixa registrada também no
-`CLAUDE.md` (seção 10).
-
-**Data/origem:** 2026-08, durante a entrega 0.2.
-
----
-
-## UI — tooltip em texto sublinhado / pill com ícone "i" (a implementar)
-
-**Decisão (adiada, só registrada por ora):** qualquer termo com descrição
-própria (talento, magia, truque) aparece sublinhado; tocar abre popup com
-a descrição, sem trocar de tela. Quando o termo é uma opção selecionável
-em formato de pill, o mesmo comportamento vem de um ícone "i" ao lado em
-vez do sublinhado.
-
-**Contexto:** mesmo padrão do builder anterior. Ainda não está no
-wireframe atual.
-
-## Técnica de escala pra molduras ornamentadas — 9-slice (border-image)
-
-**Decisão:** painéis, botões e cards com moldura ornamentada (a pele RPG
-que vai por cima da estrutura M3) devem usar a técnica **9-slice**
-(equivalente web do 9-patch/9-slice que o Osmar já usava no Unity) via
-CSS `border-image` — não gerar uma imagem por tamanho de componente.
-
-**O que é:** o asset é dividido numa grade 3x3. Os 4 cantos nunca
-esticam (preservam o entalhe/ornamento); as bordas do meio esticam só
-numa direção; o centro estica nas duas. Implementado via
-`border-image-source` + `border-image-slice` + `border-image-width`, com
-`border-image-repeat: repeat` pra texturas como pedra/tecido (evita
-esticar e borrar) ou `stretch` pra gradientes lisos.
-
-**Contexto:** pergunta direta do Osmar comparando com a técnica que ele
-já usa em Unity para assets de jogo. Confirmado que existe equivalente
-nativo em CSS, sem precisar de biblioteca extra pra DOM comum (só
-necessário considerar solução alternativa tipo `NineSlicePlane` do
-Pixi.js se algum componente futuro for renderizado em canvas/WebGL em vez
-de DOM normal).
-
-**Relevância direta:** os estandartes e emblemas com moldura ornamentada
-já produzidos são candidatos naturais a usar esse padrão quando virarem
-componentes reais (botões, cards) de tamanho variável.
+**Decisão:** painel/botão/card com moldura ornamentada (pele RPG por
+cima da estrutura M3) usa a técnica **9-slice** (equivalente web do
+9-patch do Unity) via CSS `border-image-source`/`-slice`/`-width` — não
+gerar uma imagem por tamanho de componente. Grade 3×3: os 4 cantos
+nunca esticam (preservam entalhe/ornamento), bordas do meio esticam só
+numa direção, centro estica nas duas. `border-image-repeat: repeat`
+pra textura (pedra/tecido, evita esticar e borrar) ou `stretch` pra
+gradiente liso. Nativo em CSS, sem lib extra — só considerar algo tipo
+`NineSlicePlane` (Pixi.js) se algum componente futuro renderizar em
+canvas/WebGL em vez de DOM normal.
 
 ## Referência de design — Material Design 3 (m3.material.io)
 
-**Decisão:** usar o Material Design 3 do Google como referência de
-**estrutura/comportamento** (espaçamento, states de componente, motion,
-acessibilidade, padrões de bottom sheet/FAB/seleção) sempre que houver
-dúvida se um padrão de UI está dentro de boa prática.
+**Decisão:** usar o M3 do Google como referência de **estrutura/
+comportamento** (espaçamento, states, motion, acessibilidade, padrões
+de bottom sheet/FAB/seleção) sempre que houver dúvida se um padrão de
+UI está dentro de boa prática. Processo de construção padrão (ver
+CLAUDE.md 5.1): 1) M3 como base estrutural → 2) pele RPGzística por
+cima.
 
-**Nota importante (correção de um mal-entendido inicial):** estrutura
-(M3) e identidade visual RPGzística **não são excludentes** — são duas
-camadas independentes. Um botão pode seguir o padrão estrutural de pill
-do M3 (formato, área de toque, comportamento de seleção) e ao mesmo tempo
-ter textura de pedra/pergaminho e tipografia old-school por cima. Não é
-"M3 ou RPG", é "M3 por baixo, RPG por cima" — dá pra fazer os dois ao
-mesmo tempo, a qualquer momento, sem esperar uma fase específica.
+**Nuance importante:** estrutura (M3) e identidade visual RPGzística
+**não são fases sequenciais excludentes** — são duas camadas
+independentes que podem ser aplicadas juntas a qualquer momento se o
+Osmar quiser (um botão pode seguir o formato/área de toque/estado de
+seleção do M3 E já ter textura de pedra/tipografia old-school por
+cima). "Visual pode vir depois" é só prioridade (lógica/fluxo bloqueia
+decisões, visual não bloqueia nada) — não é regra contra adiantar
+identidade visual.
 
-**Sobre timing:** a recomendação de "visual pode vir depois" era só
-sobre prioridade (validar fluxo/lógica é mais urgente porque bloqueia
-decisões; visual não bloqueia nada). Não é uma regra contra começar a
-aplicar identidade visual mais cedo, se o Osmar quiser — só não é
-pré-requisito pra avançar o resto.
+**Pendência conhecida:** as telas da Fase 0 não foram auditadas contra
+M3 retroativamente — vale como padrão daqui pra frente ou quando uma
+tela existente for revisitada por outro motivo, não é gatilho pra
+varredura geral.
 
-**Decisão de processo de construção (confirmada):** todo componente será
-construído primeiro seguindo a estrutura/comportamento do M3 (isso é o
-"correto por padrão" ao implementar qualquer tela nova), e só depois
-recebe a alteração temática de RPG por cima. Ou seja, a ordem de trabalho
-padrão é sempre: 1) implementar com M3 como base estrutural → 2) aplicar
-a pele RPGzística. Isso vale como diretriz permanente de como construir
-qualquer tela nova daqui pra frente, não só uma observação pontual. Regra
-correspondente registrada no `CLAUDE.md`, seção 5.1.
+## `ItemComDescricao` — popup de descrição de item, com regra fixa de variante
 
-**Contexto:** Osmar encontrou o m3.material.io e perguntou se dava pra
-usar sempre como referência.
+**Decisão:** qualquer termo com descrição própria (item, talento,
+característica) usa o componente compartilhado
+`ui/components/ItemComDescricao.tsx` — toque abre popup central (nome
+no topo, descrição embaixo; mesmo estilo visual do `RollOverlay`).
+Item sem descrição cadastrada renderiza como texto simples. Índice de
+busca único, case-insensitive, por
+`data/rulesets/dnd2024/buscarDescricaoItem.ts` — qualquer tela que
+precise saber "esse item tem descrição?" usa essa mesma função, não
+reimplementa a busca. O clique no nome sempre usa `stopPropagation`
+(o item costuma estar dentro de um card clicável maior — sem isso, o
+clique também dispararia a seleção do card por baixo).
 
-**Pendência conhecida:** as telas já construídas na Fase 0 (splash,
-login, home, lista, wizard, ficha, combate) **não foram auditadas** contra
-M3 retroativamente — essa regra vale como padrão daqui pra frente, pra
-telas novas ou quando uma tela existente for revisitada por outro motivo.
-Não é gatilho pra uma varredura geral agora.
-
-## Popup de descrição de item — implementado (ItemComDescricao)
-
-**Decisão:** o padrão "tooltip em texto sublinhado", que estava adiado
-desde a entrega de Origens, agora existe de verdade:
-`ui/components/ItemComDescricao.tsx`. Nome do item vem com sublinhado
-serrilhado quando tem descrição cadastrada; toque abre um popup central
-(mesmo estilo visual do `RollOverlay`: card com borda de destaque,
-sombra, botão "fechar") com o nome no topo e a descrição embaixo. Item
-sem descrição renderiza como texto simples, sem sublinhado.
-
-**Contexto:** o Osmar atualizou a planilha mestra com uma coluna
-"Descrição" nova em **Equipamento de Aventura** (98/98 itens) e
-**Montarias e Veículos** (2/19 itens — Sela Militar e Sela Exótica são
-os únicos com regra mecânica; o resto é só carga/custo). Isso desbloqueou
-o popup que antes só estava desenhado no papel.
-
-**Detalhe de implementação:**
-- `data/rulesets/dnd2024/equipamentoAventura.ts` e `montariasVeiculos.ts`
-  — dados gerados da planilha, linhas de cabeçalho de seção (ex: "—
-  Foco Arcano —") filtradas na importação.
-- `data/rulesets/dnd2024/buscarDescricaoItem.ts` — índice único por nome
-  (case-insensitive) que cruza as duas fontes; qualquer tela que
-  precise saber "esse item tem descrição?" usa essa mesma função, não
-  reimplementa a busca.
-- O clique no nome do item usa `stopPropagation` — importante porque em
-  vários lugares o item aparece **dentro** de um card clicável maior
-  (ex: o card de "Opção A" na tela de Origem); sem isso, tocar no nome
-  do item também dispararia a seleção do card por baixo.
-- Cobertura ainda parcial: Armas e Armaduras não foram importadas (não
-  têm campo de descrição corrido na planilha, têm colunas mecânicas) —
-  ver `PENDENCIAS.md`.
-
-**Data/origem:** 2026-08, depois da atualização da planilha mestra com a
-coluna Descrição.
-
-## ItemComDescricao — regra fixa de qual variante usar (sublinhado vs. ícone)
-
-**Decisão:** `ItemComDescricao` tem 2 variantes visuais pro mesmo
-comportamento (toque abre popup com nome+descrição) — a partir de
-agora, qual usar não é escolha caso a caso, é regra fixa por contexto:
-- **`sublinhado`** (padrão) — termo dentro de uma frase/parágrafo de
-  texto corrido (ex: descrição de kit, lista de itens da Loja/Origem).
+**Duas variantes visuais, escolha por contexto (não por preferência de
+tela) — regra fixa:**
+- **`sublinhado`** (padrão) — termo dentro de frase/parágrafo de texto
+  corrido (descrição de kit, lista de itens da Loja/Origem).
 - **`icone`** (ⓘ solto ao lado, nome sem sublinhado) — termo dentro de
-  uma **linha de estatística ou linha com checkbox**, onde sublinhar o
-  texto competiria visualmente com o resto da linha ou pareceria um
-  controle interativo à parte (ex: Mochila com "itens detalhados"
-  desligado, Maestria em Arma — tanto no wizard quanto na Ficha).
-
-**Contexto:** a Maestria em Arma tinha ganhado sublinhado na Ficha (B2)
-e ícone no wizard (ajuste seguinte) sem uma regra declarada — o Osmar
-notou a inconsistência e perguntou qual deveria ser o padrão único.
-Resposta: não existe 1 variante única pro app inteiro, existem 2
-variantes com contexto de uso bem definido — o real problema era essa
-regra não estar registrada em lugar nenhum, então cada tela escolhia
-"no olho". Agora está: tanto no JSDoc de `ItemComDescricao.tsx` quanto
-aqui. Qualquer termo novo com popup de descrição consulta essa regra
-antes de escolher a variante — não decide de novo.
-
-**Termo de design pra isso:** isso é uma **guideline de uso de
-componente** (ou "contrato de variante") — a mesma ideia de design
-system que já usamos nesse arquivo pra qualquer decisão de UI: uma vez
-registrada, vale pra sempre até você pedir pra mudar, sem precisar
-repetir o pedido a cada tela nova.
-
-**Data/origem:** 2026-08.
-
-## Deploy migrado do Netlify pro GitHub Pages
-
-**Decisão:** o app deixou de ser publicado no Netlify
-(`dndcompapp.netlify.app`) e passou a ser publicado no GitHub Pages,
-via GitHub Actions (`.github/workflows/deploy.yml`), que builda e
-publica automaticamente a cada push na branch de desenvolvimento. Novo
-link: `https://osmarjunior0710.github.io/Project0710/` (repositório
-renomeado de `DND-Conpanion-App` pra `Project0710` em 2026-09 — ver
-"Repositório renomeado" logo abaixo).
-
-**Contexto:** o time do Netlify ficou sem crédito operacional
-("operational credits"), o que pausou os deploys de produção — os
-commits chegavam no GitHub normalmente, mas o site publicado ficou
-travado numa versão antiga sem nenhum erro de código envolvido. Como o
-app é 100% front-end (sem backend próprio; a Fase 5 com Supabase
-conversa direto do navegador, sem precisar de função de servidor), o
-GitHub Pages cobre o caso de uso sem depender de crédito pago.
-
-**O que mudou tecnicamente:**
-- `vite.config.ts`: `base: '/Project0710/'` (o GitHub Pages serve
-  o site dentro de um subcaminho com o nome do repositório, diferente
-  do Netlify que serve na raiz).
-- `src/main.tsx`: `BrowserRouter` ganhou `basename="/Project0710"`
-  pra as rotas do React Router baterem com esse subcaminho.
-- `public/404.html` + trecho em `index.html`: truque padrão
-  "spa-github-pages" (rafgraph) pra recarregar uma rota tipo
-  `/ficha/123` não dar erro 404 — o GitHub Pages não tem redirecionamento
-  de rota nativo como o `netlify.toml` tinha.
-- `netlify.toml` removido (não é mais usado).
-
-**Limite conhecido pro futuro:** GitHub Pages grátis só serve site
-público enquanto o repositório for público. Se um dia o repositório
-virar privado, o link para de funcionar (exigiria GitHub Enterprise pra
-Pages privado). Registrado aqui pra não ser surpresa depois — hoje o
-repo é público, então não trava nada agora.
-
-**Data/origem:** 2026-08, mesmo dia da entrega acima — Osmar pediu a
-migração depois de descobrir a pausa de créditos do Netlify.
-
-## Repositório renomeado de DND-Conpanion-App pra Project0710 (2026-09)
-
-O Osmar renomeou o repositório no GitHub. Como o GitHub Pages serve o
-site num subcaminho com o nome do repositório (ver decisão acima),
-renomear o repo muda o link público e exige atualizar o subcaminho
-hardcoded em 3 lugares: `vite.config.ts` (`base`), `src/main.tsx`
-(`BrowserRouter basename`), `public/404.html` (`basePath` do truque de
-SPA). Os 3 já foram atualizados pra `/Project0710/`. Novo link:
-`https://osmarjunior0710.github.io/Project0710/`.
-
-**Se o repositório for renomeado de novo no futuro:** procurar por
-esses 3 lugares (mais qualquer entrada da família `DECISOES-*.md` que
-cite o nome antigo do repo, como a decisão acima) — não existe mais
-nenhum outro lugar no código com o nome hardcoded (confirmado por
-busca no repositório inteiro nesta entrega).
-
-## Passada de legibilidade — fontes maiores e cinzas mais escuros
-
-**Decisão:** todo `font-size` de texto pequeno/médio (≤20px) no app
-subiu +2px, de forma global — 77 declarações em CSS + inline `style`
-espalhadas pelas telas. Além disso, os dois tons de cinza secundário
-ficaram mais escuros: `--text-dim` de `#55565b` pra `#45464b`, e
-`--text-faint` de `#86878c` pra `#6b6c72` (esse último quase sem
-contraste contra o fundo `#f5f5f2`/branco antes da mudança).
-
-**Contexto:** pedido explícito do Osmar — "muito ruim de ler", "mal dá
-pra ver o cinza no branco", "os textos são minúsculos". Fontes de
-14px+ (títulos, números grandes) não foram tocadas, só as pequenas.
-
-**Como foi feito:** script único fazendo a troca em todos os arquivos
-`.css`/`.module.css` e nos `style={{ fontSize: N }}` inline dos
-componentes React, não editado tela por tela — garante consistência e
-evita esquecer algum componente.
-
-**Pendência de fundo, não resolvida agora:** o projeto ainda não tem
-tokens de escala tipográfica (tipo `--font-size-xs/sm/md`) — cada
-componente guarda seu próprio valor em px. Esse ajuste manteve o
-padrão atual (valores soltos), só que maiores. Migrar pra tokens de
-escala é um passo de arquitetura CSS separado, não necessário agora.
-
-**Data/origem:** 2026-08, pedido direto após revisar a entrega de
-Espécies.
-
-## Popups (InfoChip/ItemComDescricao) travam o scroll da página de trás
-
-**Decisão:** os dois componentes de popup (`InfoChip`, `ItemComDescricao`)
-agora usam um hook novo, `ui/hooks/useLockBodyScroll.ts`, que trava o
-scroll da `body` enquanto o popup está aberto e devolve a posição exata
-de scroll ao fechar. A trava usa `position: fixed` na `body` (não só
-`overflow: hidden`) porque é o único jeito confiável de bloquear scroll
-de verdade em navegador mobile — `overflow: hidden` sozinho não impede o
-dedo de arrastar o conteúdo de trás em iOS/Android. O `.overlay` dos dois
-componentes também ganhou `overscroll-behavior: contain` e
-`touch-action: none`, e o `.card` ganhou `max-height: 80vh` +
-`overflow-y: auto` (segurança pra descrição muito longa não estourar a
-tela em celular baixo).
-
-**Contexto:** o Osmar reportou dois sintomas do mesmo bug, num celular
-Android real: o fundo preto do popup "deslocava" com o scroll (subia
-quando rolava pra baixo, descia quando rolava pra cima), e a tela de
-trás rolava mesmo com o dedo em cima do popup. Isso é o clássico bug de
-"scroll vaza atrás do modal" no mobile — o `position: fixed` do overlay
-continua correto, mas sem travar a `body`, o navegador deixa a página de
-trás rolar por baixo (e em Android/Chrome isso pode gerar um artefato
-visual de "atraso" no overlay durante o scroll por inércia).
-
-**Data/origem:** 2026-08, reportado num Samsung Android real, mesmo dia
-da entrega de Idiomas.
-
-## Prioridade: fechar fluxo completo wizard → ficha antes de polir tela isolada
-
-**Decisão:** a partir de agora, a prioridade é fechar um caminho
-completo de construção de personagem até a ficha final navegável — cada
-nova peça de dado (Classe, Talentos e Perícias de classe, etc.) deve
-nascer já conectada de ponta a ponta (wizard → ficha), criando o
-caminho de regressão junto, em vez de ficar só na tela isolada do
-wizard. Ajustes de design fino em telas isoladas (ex: "Escolhas da
-Espécie" ainda estranha — ver PENDENCIAS.md) ficam pra depois desse
-fluxo estar de pé.
-
-**Contexto:** pedido explícito do Osmar — ele quer validar cada entrega
-nova olhando a ficha final resultante, não só a tela do wizard isolada.
-Isso também evita retrabalho de polir uma tela isolada antes do
-contexto ao redor dela (o resto do fluxo) estar decidido.
-
-**Data/origem:** 2026-08, mesmo dia da pendência de design da tela de
-Espécie.
-
-## Ícones de Classe — tamanho de origem e onde ficam no repositório
-
-**Decisão:** a área do ícone nos cards de opção (`.opt-card-img`, usada
-em Classe/Origem/Espécie) é **56×56px CSS**. A arte-mestra de cada ícone
-é exportada em **512×512px PNG com fundo transparente**, com ~10% de
-margem de respiro nas bordas do quadrado (o card corta em
-`border-radius`, então arte encostada na borda pode ser cortada). Isso
-cobre qualquer densidade de tela (2x/3x) e qualquer tamanho maior que a
-gente queira usar no futuro (tablet/desktop) sem precisar redesenhar.
-
-Antes de entrar no repositório, cada PNG de 512px é redimensionado pra
-**256×256px** e re-otimizado (ainda bem acima do necessário pro box
-atual de 56px, mas ~8x mais leve em disco que o master de 512px) — o
-app carrega isso pela rede do celular do Osmar, então tamanho de
-arquivo importa mesmo sendo uso pessoal. Arquivos ficam em
-`src/assets/icones-classes/{id-da-classe}.png` (nome = id da classe:
-`guerreiro.png`, `mago.png` etc). `ClasseStep.tsx` usa
-`import.meta.glob` pra montar automaticamente o mapa id→arquivo — não
-precisa listar imports um por um nem tocar em código quando uma nova
-classe for importada, só adicionar o PNG com o nome certo.
-
-**Contexto:** os 12 ícones de classe (todas, mesmo as 11 ainda "em
-breve") vieram prontos do Osmar em 2026-08, então já foram conectados
-em todas as classes de uma vez — inclusive nos cards desabilitados —
-pra lista de Classe já ficar com a cara final antes mesmo das outras
-11 classes serem importadas da planilha.
-
-**Data/origem:** 2026-08, pedido direto do Osmar (upload de
-`iconesclasses512.zip`).
-
-## Ícones de Classe — evoluiu pra banner retangular (estandarte), não mais só o losango quadrado
-
-**Decisão:** o emblema em losango quadrado (decisão acima) foi
-substituído, classe por classe, por um banner/estandarte retangular
-(proporção ~1:2, retrato) conforme o Osmar for entregando a arte de
-cada classe. `ClasseStep.tsx` decide sozinho qual formato usar por
-classe: se existe um arquivo `{id}-banner.png` em
-`src/assets/icones-classes/`, usa ele sem a caixa quadrada, só a
-imagem alinhada ao centro vertical do card (classe CSS
-`.opt-card-img-banner`, altura fixa 96px, largura livre pela proporção
-original); senão cai de volta pro emblema quadrado antigo
-(`.opt-card-img`, 56×56px) ou, na ausência de qualquer arquivo, no
-placeholder 🖼. Isso permite migrar classe por classe sem quebrar as
-que ainda não têm banner.
-
-Master de origem: 887×1774px PNG com alpha, redimensionado pra
-256×512px antes de entrar no repositório (mesma lógica de
-compressão do emblema quadrado). Guerreiro, Bárbaro, Bardo e Bruxo já
-têm banner — o emblema quadrado antigo desses 4 foi **apagado** do
-repositório (ficou sem uso, só pesava à toa). As outras 8 classes
-continuam com o emblema quadrado até o Osmar mandar o banner de cada
-uma.
-
-**Contexto:** o Osmar pediu pra testar o formato banner isolado no
-Bárbaro primeiro ("quero ver como fica"), aprovou o resultado, e
-decidiu expandir pra todas as classes conforme for reunindo as artes
-— não é uma entrega de uma vez só, é incremental.
-
-**Data/origem:** 2026-08, pedido direto do Osmar (upload de
-`emblemasclasses512.zip`, depois `barbaro-emblema` avulso pra teste, e
-banners de Guerreiro/Bruxo/Bardo em seguida).
-
-**Atualização:** concluído — as 12 classes têm banner agora (Clérigo/
-Druida/Feiticeiro e depois Guardião/Ladino/Mago/Monge/Paladino
-completaram a lista). Nenhum emblema quadrado sobrou no repositório;
-o fallback pro formato quadrado/placeholder em `IconeClasse`
-(`ClasseStep.tsx`) continua no código só como rede de segurança caso
-algum arquivo de banner seja removido por engano — não é mais
-usado na prática.
-
-## `core/` nasce com `personagem.ts` + `calculoPersonagem.ts` + `armazenamentoPersonagens.ts`
-
-**Decisão:** o `WizardSelection` (forma de dado das escolhas do wizard)
-e as funções puras de atributo (`modificador`, `modFmt`,
-`valorFinalAtributo`) saíram de `ui/wizard/types.ts` e foram pra
-`core/personagem.ts` — é dado de personagem, não componente de tela, e
-o motor de cálculo precisava importar isso de algum lugar dentro de
-`core/`, não de dentro de `ui/`. `core/calculoPersonagem.ts` reúne as
-fórmulas (PV máximo nível 1, CA — já resolve pela armadura escolhida no
-equipamento inicial, com o parser de texto `"N + modificador de Des
-(máx. N)"` da planilha de Armaduras —, Percepção Passiva, Iniciativa,
-ouro inicial). `core/armazenamentoPersonagens.ts` é a interface trocável
-de armazenamento (`ArmazenamentoPersonagens`) com implementação
-`localStorage` por trás — nenhum componente acessa `localStorage`
-direto, só essa camada.
-
-**Contexto:** Entrega A1 do plano de 6 entregas pra fechar o fluxo
-wizard → Ficha (ver PENDENCIAS.md). Testado de ponta a ponta: um
-Guerreiro completo criado no wizard salva de verdade e aparece na Lista
-de Personagens com PV/CA/Percepção Passiva calculados, não mais
-fixture.
-
-**Pendência conhecida:** a exceção de CA de Bárbaro/Monge (ver decisão
-"Cálculo de CA" acima) ainda não tem entrada no motor — nenhuma das
-duas classes está importada ainda. A função foi estruturada pra receber
-esse lookup por `classeId` quando chegar a vez, sem espalhar `if
-classe === "Bárbaro"` pelo código, como já estava recomendado.
-
-## Todo número calculado tem um "ⓘ" explicando a conta
-
-**Decisão:** qualquer valor gerado pelo motor de cálculo (PV máximo, CA,
-Percepção Passiva, Iniciativa, Ouro inicial, cada Perícia) mostra um
-"ⓘ" tocável logo ao lado — abre um popup com a conta em formato de
-**tabela** (efeito à esquerda, valor à direita, alinhado em colunas
-invisíveis; a última linha é o total, separada por uma linha divisória
-e destacada). Aplicado tanto na tela "7. Resumo" do wizard quanto na
-aba Perfil da Ficha — os mesmos números aparecem nos dois lugares.
-Texto tipo "no nível 1 nunca rola nem tira média" foi tirado — é
-contexto de regra, não parte da conta em si, e poluía o popup.
-
-**Componente novo:** `ui/components/InfoValor.tsx` — mesmo padrão
-visual de popup de `InfoChip`/`ItemComDescricao` (overlay + card
-central), mas o gatilho é só o ícone "ⓘ" solto, não um chip nem texto
-sublinhado. `core/calculoPersonagem.ts` ganhou o tipo
-`ExplicacaoCalculo` (`{ linhas: {label, valor}[], total: {label,
-valor} }`) e uma função `explicar*` pra cada `calcular*` que devolve
-isso já estruturado — nunca uma string solta, exatamente pra caber na
-tabela sem parsing.
-
-**Bug corrigido (clique vazava pra linha de baixo):** o popup do
-`InfoValor` é renderizado *dentro* da linha clicável que mostra o
-número (ex: linha de Perícia que rola dado ao toque). Mesmo com
-`position: fixed` cobrindo a tela toda visualmente, no DOM o overlay
-continua sendo filho dessa linha — então, sem `stopPropagation`, tocar
-pra fechar o popup borbulhava pro `onClick` da linha por baixo e
-disparava uma rolagem de dado sem querer. Corrigido com
-`e.stopPropagation()` em todo clique dentro do overlay (fechar tocando
-fora do card, e no botão "fechar"), não só no ícone que abre. Vale
-como lição geral: **qualquer popup `position: fixed` renderizado
-dentro de um elemento clicável precisa desse cuidado**, não só o
-`InfoValor` — `InfoChip`/`ItemComDescricao` têm o mesmo risco latente
-se algum dia forem usados dentro de uma linha com `onClick` (hoje não
-são, por isso não deu bug neles ainda).
-
-**Contexto:** pedido direto do Osmar — "olhando só o número, eu não sei
-dizer se está certo ou não", mais 2 bugs reportados no formato de texto
-livre (nível 1 sem sentido, clique vazando pra rolar dado sem querer
-na Ficha). Motivo real do pedido original: ele não programa, não pode
-abrir o código pra conferir a fórmula, e cada número novo que aparece
-precisa de alguma forma de verificação **na tela**, não só confiar que
-"deve estar certo" (regra 1 do `CLAUDE.md`).
-
-**Data/origem:** 2026-08, pedido direto do Osmar (texto livre + versão
-com tabela).
-
-## Bug estrutural corrigido: `#root` usava `min-height`, deveria ser `height`
-
-**Decisão:** `#root` (em `index.css`) trocou `min-height: 100vh/100dvh`
-por `height: 100vh/100dvh`. Antes disso, a página inteira crescia junto
-com o conteúdo e quem rolava era o documento/janela — os containers
-internos com `overflow-y: auto` (`.body` do `WizardShell`/`FichaShell`/
-`LevelUpShell`, todos já desenhados assumindo que rolariam por conta
-própria) nunca chegavam a ficar menores que o próprio conteúdo, então
-o `overflow-y: auto` deles nunca entrava em ação de verdade — sem
-efeito prático, mas também sem quebrar nada, porque não havia nada que
-dependesse disso rolar "por dentro" em vez de rolar a página toda.
-
-**Por que isso importa agora:** o cabeçalho flutuante de ouro/peso da
-Loja (pedido do Osmar) usa `position: sticky`, que só funciona de
-verdade quando o elemento tem um container-pai que realmente rola
-(`overflow-y: auto` com altura finita) — com a página inteira rolando
-em vez do `.body`, o sticky não tinha "onde" grudar e sumia da tela ao
-rolar. A correção faz `.body` (e equivalentes) virarem o scroll de
-verdade, do jeito que a estrutura já tinha sido desenhada pra
-funcionar.
-
-**Verificado que não quebra nada:** telas sem scroll interno próprio
-(Home, Lista de Personagens) continuam rolando pela página normalmente
-— `#root` não ganhou `overflow: hidden`, só um `height` fixo, então
-conteúdo que ultrapassar a tela nessas telas ainda tem como aparecer
-via rolagem do documento, igual antes. Testado nas 5 telas principais
-(Home, Lista, Loja com scroll, Ficha Perfil/Mochila/Combat) sem
-regressão visual.
-
-**Data/origem:** 2026-08, achado ao implementar o cabeçalho flutuante
-da Loja (pedido do Osmar).
-
-## Passagem de design geral: apertando o espaço em branco (escala de espaçamento + seta duplicada)
-
-**Decisão:** o Osmar achou que o app estava com margem/espaçamento
-grande demais no geral (screenshot da Loja como exemplo), fazendo o
-fluxo "parecer mil vezes maior" do que precisava. Dois ajustes, os
-dois valendo pra tudo (não só uma tela):
-- **Escala de espaçamento (`--space-4/5/6` no `index.css`)** apertada:
-  16→12px / 20→16px / 24→20px. `--space-1/2/3` (4/8/12px) ficaram como
-  estavam — já eram os valores mais finos, o excesso estava nos
-  maiores (padding de tela inteira, cabeçalho, cards). Como a maioria
-  dos componentes já usa os tokens em vez de pixel fixo, essa mudança
-  sozinha aperta a tela inteira (Home, Lista, Loja, Ficha etc.) sem
-  precisar editar arquivo por arquivo.
-- **Seta de voltar duplicada removida** — `WizardShell` e
-  `LevelUpShell` tinham `←` no cabeçalho **e** o pill "← Voltar" no
-  rodapé fazendo a mesma coisa. Removida a seta do cabeçalho nos dois,
-  mantido só o pill (mesmo padrão do "Avançar →" ao lado). `FichaShell`
-  e `CharacterList` não tinham essa duplicação (não têm pill de Voltar
-  no rodapé) — não mexidos.
-- **Cabeçalhos das 3 "shells" (Wizard/Ficha/LevelUp)** ganharam padding
-  mais apertado além do que a escala de tokens já dava sozinha
-  (`var(--space-3) var(--space-4) var(--space-2)` no lugar de
-  `var(--space-4) var(--space-5) var(--space-3)`), e o corpo rolável
-  (`.body`/`.tabContent`) foi de `var(--space-4) var(--space-5)` pra
-  `var(--space-3) var(--space-4)`.
-
-**Detalhe técnico que quase quebrou:** o cabeçalho flutuante da Loja
-(`.ouroBox`, `position: sticky`) usa um truque de margem negativa pra
-cobrir de ponta a ponta por cima do padding do `.body` — o valor da
-margem negativa precisa bater exatamente com o padding real do
-`.body`. Como o padding do `.body` mudou nesta entrega, a margem
-negativa do `.ouroBox` teve que ser atualizada junto (senão sobrava
-uma faixa sem cobrir nas bordas). Deixei um comentário no CSS
-avisando que os dois precisam mudar juntos se algum dos dois for
-mexido de novo.
-
-**Não mexido:** `--touch-target-min` (48px) ficou intocado — a
-economia de espaço é só em margem/padding visual, nenhuma área de
-toque encolheu.
-
-**Contexto:** pedido direto do Osmar depois de ver a Loja no celular;
-confirmado "faz pra tudo" quando perguntei se era só o wizard ou o
-app inteiro.
-
-**Data/origem:** 2026-08, pedido direto do Osmar.
-
-## Ícones novos (emblema redondo) substituem os estandartes na tela de Classe
-
-**Decisão:** o Osmar subiu 2 novos ícones em formato de emblema redondo
-(dourado/bronze, moldura ornamentada) — Guerreiro (espada) e Bardo
-(alaúde) — pra substituir o estandarte alto/estreito antigo na tela
-"1. Classe" do wizard. Mesmo arquivo (`{id}-banner.png`), mas exibido
-na caixa quadrada padrão (`.opt-card-img-emblema`, ~56-110px) em vez
-da caixa alta (`.opt-card-img-banner`) — o formato redondo cabe melhor
-nela.
-
-**Classes sem emblema próprio ainda usam uma cópia do emblema do
-Guerreiro como placeholder** (as 10 restantes: Bárbaro, Bruxo,
-Clérigo, Druida, Feiticeiro, Guardião, Ladino, Mago, Monge, Paladino)
-— aparecem cinza/desativadas porque já ficam dentro do card "em
-breve" (`btn-disabled`, opacidade 0.35), não precisou de tratamento
-visual extra. Trocar pelo emblema real de cada classe assim que
-existir — é só substituir o arquivo, o código não muda.
-
-**Bardo corrigido pra `disponivel: false` (achado ao mexer nisso).**
-A Etapa 1 (dados) do Bardo tinha deixado `disponivel: true` por engano
-— e `ClasseStep.tsx` **nunca filtrava por esse campo** (só Origem e
-Espécie filtravam; funcionava por acaso enquanto só existia 1 classe
-no array). Corrigidos os dois: Bardo virou `disponivel: false` (wizard
-ainda não sabe criar um Bardo de ponta a ponta — falta a Etapa 2), e
-`ClasseStep.tsx` agora filtra `classes` por `disponivel` como as
-outras telas já faziam, mostrando classes com dado real mas ainda não
-prontas ("em breve" com nome/emblema reais) separadas da lista
-hardcoded `CLASSES_EM_BREVE` (que agora só cobre as 10 sem dado
-nenhum ainda).
-
-**Testado:** Playwright 390×844 — Guerreiro aparece selecionável com
-o emblema de espada; Bardo aparece "em breve" com o emblema de
-alaúde (cinza); as outras 10 aparecem "em breve" com o emblema de
-espada reaproveitado (cinza).
-
-**Data/origem:** 2026-08.
-
-## Card padronizado pra magia/truque (MagiaComDescricao) — mesmo formato sempre
-
-Também portado do "outro modelo", a pedido do Osmar (junto com a
-marcação de duplicidade e os ícones de magia da entrega anterior). Em
-vez do popup genérico (`ItemComDescricao`, só nome + texto corrido),
-`MagiaComDescricao` fixa o formato pra qualquer magia/truque: Nome,
-Tipo (Truque ou "Xº Círculo"), toggle Desc. curta/longa, Tempo de
-Conjuração + Alcance, Componentes, Duração, e a descrição em si.
-
-Regras confirmadas com o Osmar:
-- **Campo em branco fica escondido** — `null`/vazio não aparece como
-  linha vazia (ex.: se não tiver Componentes, a linha some).
-- **O toggle Desc. curta/Desc. longa só aparece se as duas existirem
-  E forem diferentes** — se forem o mesmo texto (ou uma faltando),
-  mostra só a descrição direto, sem o par de botões.
-
-Escopo desta entrega: só Magias (única classe conjuradora pronta é
-Bardo, único lugar que usa isso hoje é Truques/Magias Preparadas da
-criação). Replicar esse padrão de card fixo pra Itens
-Comuns/Mágicos/Armas/Armaduras é pendência registrada em
-PENDENCIAS.md — cada tipo teria campos próprios (Arma: Dano/
-Propriedades/Maestria, por exemplo), não é o mesmo card reaproveitado
-1:1.
-
-**Data/origem:** 2026-08.
-
-## Lista de Personagens usa o emblema da Classe no lugar do 👤 genérico
-
-A pedido do Osmar: enquanto o upload de imagem de avatar não existe de
-verdade (só um placeholder na tela de Resumo do wizard, agora marcado
-`[PH]`), a Lista de Personagens preenche o espaço de avatar com o
-emblema redondo da Classe do personagem — a mesma arte já usada na
-tela de escolher Classe do wizard.
-
-`IconeClasse` (componente que já existia dentro de `ClasseStep.tsx`)
-virou compartilhado (`ui/components/IconeClasse.tsx`) pra poder ser
-reaproveitado aqui sem duplicar a lógica de `import.meta.glob` dos
-arquivos `-banner.png`. `CharacterList.tsx` busca o `id` da classe do
-personagem em `classes.ts` pelo nome salvo e passa pro componente; sem
-classe reconhecida (não deveria acontecer, mas por segurança), cai de
-volta no 👤 antigo.
-
-**Espaço do avatar aumentado** (48px → 64px) a pedido do Osmar, já que
-o emblema é uma arte bonita e merece aparecer bem — `object-fit: cover`
-preenche a caixa quadrada sem distorcer.
-
-**Data/origem:** 2026-08.
-
-## Menu inferior vira 5 abas: Atributos / Perfil (nova) / Mochila / Magias / Combate
-
-**Decisão:** a antiga aba "Perfil" (atributos, PV/CA/Iniciativa,
-perícias, descanso, maestria em arma) foi renomeada pra **"Atributos"**
-(`AtributosTab.tsx`, era `PerfilTab.tsx` — arquivo renomeado, conteúdo
-idêntico). O nome "Perfil" foi liberado pra uma aba nova de verdade:
-lista as habilidades REAIS do personagem, na ordem Classe → Origem →
-Espécie, cada uma como card não-interativo (mesmo padrão `.opt-card`
-já usado no step "Características desbloqueadas" do Level Up — zero
-componente novo). "Combat" no rótulo virou "Combate" (só o texto, id
-interno continua `combat`).
-
-**Classe:** `core/levelUp.ts` ganhou `caracteristicasAcumuladas(classe,
-nivelAtual)` — roda `caracteristicasDoNivel` do nível 1 até o atual e
-deduplica por nome (características repetidas em vários níveis, tipo
-Indomável/Surto de Ação, só contam +1 uso — não viram card duplicado).
-Diferente de `caracteristicasDoNivel` (só 1 nível, usada no Level Up
-pra mostrar "o que ganhei AGORA"), essa é "tudo que já tenho".
-
-**Origem:** busca o `Talento de Origem` real (`talentosOrigem.ts` via
-`origem.talentoOrigemId`) — nome + benefícios reais, com a variante
-quando existir (ex. "Iniciado em Magia (Clérigo)").
-
-**Espécie:** os `traços` reais da espécie (`especies.ts`), já vêm
-prontos com nome+descrição, sem precisar de lookup.
-
-**Testado:** Playwright 390×844 — barra de 5 abas cabe sem cortar
-(largura exata do viewport, sem overflow horizontal), rótulos legíveis.
-Aba Perfil de um Anão Bardo mostrou "Classe — Bardo" (Inspiração de
-Bardo + Conjuração, descrições completas), "Origem — Fazendeiro"
-(Vigoroso: PV máximo +2x nível...), "Espécie — Anão" (Visão no Escuro,
-Resistência a Toxinas, Tenacidade Anã, Conhecimento de Pedras) — os 4
-traços reais do Anão. Aba Combate confirmada funcionando sem regressão
-depois da renomeação do rótulo.
-
-**Data/origem:** 2026-08.
-
-## Ícones de classe/subclasse viram WebP (compressão, ~82% menores)
-
-**Achado do Osmar:** os ícones 512×512 (Bardo + 4 Colégios novos)
-deixaram o bundle bem mais pesado — perguntou se dava pra comprimir
-sem precisar reimportar as artes originais.
-
-**Decisão:** convertidos de PNG pra WebP (`Pillow`, qualidade 85,
-`method=6`) — mesma resolução 512×512, ~82% menores (ex.: Bardo
-435KB → 81KB; os 4 Colégios ficaram entre 82-89KB cada, contra
-452-474KB em PNG). PNG puro com `optimize=True` (lossless) quase não
-ajudou (~3-4%) — a arte gerada por IA já vinha perto do limite de
-compressão sem perda; WebP com perda leve (qualidade 85) foi a troca
-que realmente valeu, sem degradação visível no tamanho de emblema
-exibido (~64px na Lista, ~48-72px nos cards de seleção).
-
-**`IconeClasse.tsx`** — único lugar que referenciava esses arquivos —
-trocou o glob de `*.png` pra `*.webp`; resto do componente (lookup por
-`{id}-banner.webp` / `{id}.webp`) idêntico, zero mudança de API.
-
-**Achado no processo:** Vite deduplica arquivos de conteúdo
-idêntico no build — as 10 classes "em breve" (cópias do emblema do
-Guerreiro) e o Guerreiro real acabam virando FISICAMENTE 1 arquivo só
-no `dist/` (nome do hash reflete só uma delas), então o ganho real de
-espaço no app publicado já era menor do que a soma ingênua dos 16
-arquivos sugeria — mas a compressão ainda ajuda bastante nos arquivos
-que são conteúdo único (Bardo + 4 Colégios).
-
-**Testado:** Playwright 390×844 — comparação visual direta do arquivo
-WebP isolado (sem UI por perto) confirma nitidez igual ao original.
-Um "ícone quebrado" aparente na tela de seleção de Classe foi
-investigado a fundo (`elementFromPoint`) e identificado como o botão
-flutuante 🔀 ("Sortear tudo desta etapa") renderizado sem fonte de
-emoji colorida neste ambiente de teste headless — nada a ver com a
-troca de formato; confirmado pelo próprio Osmar.
-
-**Data/origem:** 2026-08.
-
-## Ícones de Classe/Espécie/Origem — arte própria completa, mesmo padrão nas 3 categorias
-
-**O que é:** o Osmar mandou arte própria (512×512, fundo transparente,
-mesmo estilo emblema-redondo) pras 12 Classes do livro, 10 Espécies e
-16 Origens — conjunto completo nas 3 categorias (Classe tinha só
-Guerreiro/Bardo/Bruxo reais + cópias do Guerreiro como placeholder nas
-"em breve"; Espécie e Origem usavam só o emoji 🖼).
-
-**Classes — substituição, não adição:** as 9 classes "em breve"
-(`CLASSES_EM_BREVE` em `ClasseStep.tsx`) usavam uma CÓPIA física do
-arquivo do Guerreiro como placeholder de arte (ver "Ícones de
-classe/subclasse viram WebP" acima, "Achado no processo") — não o
-emoji 🖼. Substituir o arquivo `{id}-banner.webp` de cada uma pelo
-arquivo novo bastou; zero mudança de código, `IconeClasse.tsx` já lia
-por esse nome. Guerreiro/Bardo/Bruxo (já prontos, com arte própria
-antes desta entrega) também foram substituídos, pra manter o conjunto
-das 12 visualmente coerente. Também recebeu arte um
-`psionico-banner.webp` — salvo no mesmo padrão, mas **NÃO ligado a
-nenhuma tela**: Psiônico é conteúdo Unearthed Arcana (não-oficial),
-fora do escopo do produto (CLAUDE.md seção 9 "só D&D 5e regras 2024",
-mesmo motivo que já excluiu a aba "Magias — UA Psion" da importação)
-— o arquivo fica pronto caso o escopo mude um dia, sem criar uma
-entrada "(em breve)" que sugeriria suporte futuro à classe.
-
-**Espécie e Origem — padrão novo, mesmo molde de Classe:**
-`IconeEspecie.tsx` e `IconeOrigem.tsx` (componentes novos,
-`ui/components/`) são cópias estruturais exatas de `IconeClasse.tsx`
-— mesmo glob (`import.meta.glob` eager), mesma convenção de nome
-(`{id}-banner.webp`), mesma classe CSS `opt-card-img-emblema`, mesmo
-fallback `🖼` quando não há arte — só apontam pra pasta própria
-(`assets/icones-especies/`, `assets/icones-origens/`) em vez de
-reaproveitar a de Classe (categorias diferentes, mesmo padrão
-visual). Ligados em `EspecieStep.tsx`/`OrigemStep.tsx` (únicas telas
-que mostram cada categoria com ícone hoje). Todas as 10 espécies do
-livro ganharam arte (Aasimar, Anão, Draconato, Elfo, Gnomo, Golias,
-Humano, Orc, Pequenino, Tiferino) e todas as 16 origens (Acólito,
-Andarilho, Artesão, Artista, Charlatão, Criminoso, Eremita, Escriba,
-Fazendeiro, Guarda, Guia, Marinheiro, Mercador, Nobre, Sábio,
-Soldado) — não sobrou nenhum `🖼` genérico nas 3 categorias.
-
-**Data/origem:** 2026-09.
-
-## Ticks/pips padronizados: sempre esvazia de trás pra frente ("tanque de combustível")
-
-**Regra única pedida pelo Osmar, pra todo lugar que mostra "N usos,
-alguns já gastos"** (Espaços de Magia, Recuperar Fôlego, Inspiração de
-Bardo, Espaço de Magia por círculo no fluxo de upcast): quadradinho
-azul = disponível; quando o jogador usa 1, o ÚLTIMO quadradinho vira
-cinza (não o primeiro) — array de N sempre preenchido da esquerda,
-esvaziando pela direita. Achado ao mexer: o app já tinha as DUAS
-convenções coexistindo — `BonusPanelContent.tsx` (Fôlego/Inspiração)
-já usava `i >= restantes` (esvazia pela direita, certo), mas
-`MagiasTab.tsx` (Espaços de Magia) usava `i < gasto` (esvaziava pela
-esquerda, errado/inconsistente).
-
-**Componente novo único:** `ui/components/TickPips.tsx` —
-`{ total, usados, tamanho }`, `usados` sempre conta de trás pra frente
-(`i >= total - usados`). Substituiu as 2 implementações duplicadas
-(`.slotPip`/`.slotPipGasto` de `MagiasTab.module.css` e
-`.slotPipLg`/`.slotPipLgGasto` de `PanelRows.module.css`, ambas
-removidas — CSS morto). Também usado na Tela 3 do fluxo de upcast
-(`EscolherCirculoShell.tsx`), que antes mostrava só o texto "X/Y
-espaços disponíveis" — agora mostra os ticks, mais fácil de bater o
-olho.
-
-**Extensão (2026-09, Ritual Rápido):** quando um recurso "extra"/pool
-compartilhado aparece na MESMA tela de um recurso base (ex.: Ritual
-Rápido — 1 uso compartilhado entre magias Rituais — ao lado de Magias
-de Talentos Gerais), o pip desse recurso extra usa
-`variante="especial"` (roxo/lavanda, `--accent-especial`) em vez do
-azul padrão — só o "disponível" muda de cor, o "já gasto" continua
-cinza nos 2 casos. Objetivo: o jogador bate o olho e sabe que aquele
-contador não é o mesmo Espaço de Magia normal, sem precisar ler o
-texto. `TickPips`/`ContadorUsos` aceitam essa prop — qualquer recurso
-futuro do mesmo formato (uso extra/compartilhado que não é o recurso
-base) reaproveita, não cria variante de cor nova.
-
-## Ajuste visual — chips mais compactos, "Ferramenta" renomeado, fontes 1px menores em todo o app
-
-**Contexto:** feedback direto do Osmar depois de ver o card de Origem
-novo: "o design tá bem ruim" — 3 pontos: (1) o rótulo "Ferramenta"
-devia ser "Proficiência na Ferramenta", e a linha de baixo (Origens
-com escolha de ferramenta, tipo Artesão) quebrava estranho; (2) os
-chips (`InfoChip`) estavam com padding grande demais; (3) pediu pra
-reduzir 1px em toda fonte do app, não só dessa tela.
-
-**Decisão:**
-1. Rótulo "Ferramenta" → "Proficiência na Ferramenta" em
-   `OrigemStep.tsx`. O caso de Origem com escolha de ferramenta (ex:
-   Artesão → "escolha 1 de Ferramentas de Artesão") trocou de
-   `<span className="label">` (texto solto, sem contenção visual,
-   causava a quebra estranha) pra `<span className="tag">` (badge
-   pequeno com borda, mesmo componente já usado em "(em breve)" —
-   compacto, não quebra).
-2. `InfoChip.module.css`: `padding` de `var(--space-2) var(--space-3)`
-   (8px/12px) pra `var(--space-1) var(--space-2)` (4px/8px);
-   `min-height` de 36px pra 26px — chip visualmente bem mais discreto,
-   ainda tocável (o toque é isolado dentro de um card com scroll, não
-   uma grade densa de botões adjacentes).
-3. **Todo** `font-size` (CSS e `fontSize` inline em TSX) do projeto
-   reduzido em 1px, com piso em 10px (nada fica menor que 10px, pra
-   não virar ilegível no celular) — script único (`sed`-like em
-   Python, não manual) rodou nos 165 pontos encontrados em 40
-   arquivos, `.css` e `.tsx`. Números grandes de destaque (dado
-   animado, título splash) também caíram 1px, igual pedido — só o piso
-   de 10px protege texto já bem pequeno.
-
-**Testado:** `npm run build` limpo depois da mudança; Playwright
-390×844 confirmando visualmente o card de Origem (chips menores,
-rótulo novo, badge sem quebra).
-
-**Data/origem:** 2026-08.
+  uma **linha de estatística ou linha com checkbox**, onde sublinhar
+  competiria visualmente com o resto da linha (Mochila com "itens
+  detalhados" desligado, Maestria em Arma no wizard e na Ficha).
+
+Qualquer termo novo com popup de descrição consulta essa regra antes
+de escolher a variante — não decide "no olho" de novo (documentado
+também no JSDoc de `ItemComDescricao.tsx`).
+
+**Cobertura de dado:** `equipamentoAventura.ts` e `montariasVeiculos.ts`
+vêm da coluna "Descrição" da planilha mestra. Armas e Armaduras ainda
+não têm campo de descrição corrida na planilha (só colunas mecânicas)
+— ver `PENDENCIAS.md`.
+
+## Deploy: GitHub Pages (não Netlify) — e o que muda se o repositório for renomeado
+
+**Decisão:** o app é publicado via GitHub Actions
+(`.github/workflows/deploy.yml`) em GitHub Pages, não mais Netlify
+(o Netlify pausou deploy de produção por falta de crédito
+operacional, mesmo com commits chegando normalmente no GitHub; como o
+app é 100% front-end, Pages cobre o caso de uso sem depender de
+crédito pago).
+
+**O que muda tecnicamente por causa do subcaminho** (GitHub Pages
+serve dentro de `/<nome-do-repo>/`, diferente da raiz do Netlify):
+`vite.config.ts` (`base: '/Project0710/'`), `src/main.tsx`
+(`BrowserRouter basename="/Project0710"`), `public/404.html` + trecho
+em `index.html` (truque "spa-github-pages" do rafgraph, pra recarregar
+uma rota tipo `/ficha/123` não dar 404 — Pages não tem redirect de
+rota nativo). `netlify.toml` removido.
+
+**Se o repositório for renomeado de novo:** atualizar esses mesmos 3
+lugares pro novo nome (aconteceu uma vez, de `DND-Conpanion-App` pra
+`Project0710` em 2026-09) — mais qualquer entrada de `DECISOES-*.md`
+que cite o nome antigo. Não existe mais nenhum outro lugar no código
+com o nome hardcoded.
+
+**Limite conhecido:** GitHub Pages grátis só serve site público
+enquanto o repositório for público — se virar privado, o link para de
+funcionar (exigiria GitHub Enterprise). Hoje o repo é público, não
+trava nada agora.
+
+## Popup (`InfoChip`/`ItemComDescricao`) trava o scroll da página de trás
+
+**Decisão:** todo popup desse tipo usa `ui/hooks/useLockBodyScroll.ts`
+— trava o scroll da `body` enquanto aberto e devolve a posição exata
+ao fechar. A trava usa `position: fixed` na `body` (não só `overflow:
+hidden`, que sozinho não impede o dedo de arrastar o conteúdo de trás
+em iOS/Android — bug clássico de "scroll vaza atrás do modal" no
+mobile). O `.overlay` também ganha `overscroll-behavior: contain` +
+`touch-action: none`, e o `.card` ganha `max-height: 80vh` +
+`overflow-y: auto` (segurança pra descrição muito longa em celular
+baixo). Qualquer popup novo em cima da tela segue esse mesmo hook, não
+reimplementa a trava.
+
+## Ícones de Classe/Espécie/Origem — pipeline de arte e componente compartilhado
+
+**Formato final (depois de evoluir de emblema quadrado → banner
+retangular → emblema redondo):** card de seleção mostra um emblema
+redondo dourado/bronze com moldura ornamentada, numa caixa quadrada
+(`opt-card-img-emblema`); a Lista de Personagens reaproveita a mesma
+arte como avatar (64px, `object-fit: cover`) no lugar do 👤 genérico
+enquanto upload de avatar de verdade não existe.
+
+**Pipeline de asset:** arte-mestra 512×512px PNG com fundo
+transparente e ~10% de margem de respiro (o card corta em
+`border-radius`, arte encostada na borda seria cortada) →
+redimensionada pra 256×256 → convertida pra **WebP** (Pillow,
+qualidade 85, `method=6`) antes de entrar no repositório — ~82%
+menor que o PNG equivalente (PNG `optimize=True` lossless só ganhava
+~3-4%, arte gerada por IA já vinha perto do limite de compressão sem
+perda), sem degradação visível no tamanho exibido (~48-72px nos
+cards). Vale como técnica padrão pra qualquer arte nova desse tipo
+que entrar no projeto.
+
+**Convenção de arquivo/componente (idêntica nas 3 categorias):**
+`{id}-banner.webp` em `src/assets/icones-classes/`,
+`icones-especies/`, `icones-origens/` (nome = id da entidade). Cada
+categoria tem seu componente (`ui/components/IconeClasse.tsx`,
+`IconeEspecie.tsx`, `IconeOrigem.tsx`) — cópias estruturais exatas:
+`import.meta.glob` eager monta o mapa id→arquivo sozinho (nunca listar
+import um por um), fallback pro emoji 🖼 quando não há arte pra aquele
+id. Adicionar arte nova de uma classe/espécie/origem é só soltar o
+arquivo com o nome certo — zero mudança de código. Vite deduplica
+arquivos de conteúdo idêntico no build (cópias-placeholder viram
+fisicamente 1 arquivo só no `dist/`).
+
+**Hoje:** as 3 categorias completas com arte própria (12 classes, 10
+espécies, 16 origens) — não sobra nenhum 🖼 genérico. Existe também um
+`psionico-banner.webp` pronto mas **não ligado a nenhuma tela**
+(Psiônico é conteúdo Unearthed Arcana, fora de escopo — CLAUDE.md
+seção 9); fica pronto caso o escopo mude, sem criar entrada "em breve"
+que sugeriria suporte futuro.
+
+## `MagiaComDescricao` — formato único e fixo pra qualquer magia/truque na tela
+
+**Decisão:** qualquer nome de magia/truque clicável em qualquer tela
+usa `<MagiaComDescricao magia={m} />` — nunca inventar um jeito
+próprio de mostrar/formatar magia numa tela nova. Formato: pill com
+fundo lilás claro (`var(--accent-dim)`) com o ⓘ **dentro** da própria
+pill (nunca separado). Popup mostra Nome, Tipo (Truque ou "Xº
+Círculo"), toggle Desc. curta/longa, Tempo de Conjuração + Alcance,
+Componentes, Duração, e a descrição — **campo em branco fica
+escondido** (não vira linha vazia), e o **toggle curta/longa só
+aparece se as duas existirem E forem diferentes**.
+
+**Por que só 1 variante:** existiu uma variante "sublinhado + ⓘ
+separado" e uma "pill lilás com ⓘ dentro" coexistindo por
+inconsistência entre telas — resolvido pra 1 formato só, com a prop
+`variante` removida do componente (não faz mais sentido existir).
+Como todo lugar do app já usava o componente compartilhado, a mudança
+de formato propagou sozinha pra wizard/Level Up/Ficha/Combat sem
+precisar tocar em cada tela — prova de que reaproveitar o componente
+certo (CLAUDE.md 6.5) compensa nessa hora.
+
+**Escopo:** hoje só cobre Magias/Truques. Card fixo equivalente pra
+Itens Comuns/Mágicos/Armas/Armaduras (campos próprios por tipo, ex:
+Arma teria Dano/Propriedades/Maestria) é pendência registrada em
+`PENDENCIAS.md` — não é o mesmo card reaproveitado 1:1.
+
+## Aba "Perfil" — habilidades reais do personagem, agregadas de Classe/Origem/Espécie
+
+**Decisão:** o menu inferior tem 5 abas: Atributos (era "Perfil" —
+atributos, PV/CA/Iniciativa, perícias, descanso, renomeada pra abrir
+espaço) / **Perfil** (nova) / Mochila / Magias / Combate. A aba Perfil
+lista as habilidades REAIS do personagem, ordem Classe → Origem →
+Espécie, cada uma como card não-interativo (`.opt-card`, mesmo padrão
+já usado no Level Up — zero componente novo).
+
+**Fonte de cada bloco:** Classe usa `core/levelUp.ts` →
+`caracteristicasAcumuladas(classe, nivelAtual)`, que roda
+`caracteristicasDoNivel` do nível 1 até o atual e deduplica por nome
+(característica repetida em vários níveis conta +1 uso, não vira card
+duplicado) — diferente de `caracteristicasDoNivel` (só 1 nível, usada
+no Level Up pra "o que ganhei AGORA"). Origem busca o Talento de
+Origem real (`talentosOrigem.ts`, com variante quando existir, ex:
+"Iniciado em Magia (Clérigo)"). Espécie usa os `traços` reais de
+`especies.ts` diretamente (já vêm prontos com nome+descrição).
+
+## Padrão de pip/contador de uso — `TickPips` + `ContadorUsos`
+
+**Regra permanente, sem exceção:** qualquer recurso "N vezes pra usar
+algo" (Espaços de Magia, Recuperar Fôlego, Inspiração de Bardo,
+Indomável, Surto de Ação, Pontos de Sorte, Ataque de Sopro, etc.)
+mostra o "quanto resta" como **pip circular** ao lado do NOME/título
+do recurso — nunca como texto tipo `(3/5 usos)` enfiado no meio do
+parágrafo de descrição (ilegível numa tela de celular no meio de
+sessão). O parágrafo abaixo guarda só QUANDO recarrega (Descanso
+Curto/Longo), nunca repete o número.
+
+**Componentes (`ui/components/`):** `TickPips` — os pips em si,
+círculo (não quadrado com canto arredondado — decisão visual
+explícita, não usar tokens de shape aqui), preenchido da esquerda,
+**esvazia sempre pelo ÚLTIMO índice primeiro** ("tanque de
+combustível": `i >= total - usados`, nunca `i < usados`) — regra única
+em qualquer lugar que mostre "N usos, alguns já gastos". `ContadorUsos`
+— pips + texto pequeno "restantes/total", pronto pra colocar do lado
+de um título. Um recurso extra/compartilhado que aparece na MESMA tela
+de um recurso base (ex: Ritual Rápido ao lado de Magias de Talentos
+Gerais) usa `variante="especial"` (roxo/lavanda) só na cor do
+"disponível" — "já gasto" continua cinza nos dois casos.
+
+**Não é pip:** um toggle de 1 uso só (liga/desliga, ex: Vigor
+Implacável, Astúcia Mágica) continua sendo card/checkbox normal, sem
+pip — "N de M" é o gatilho, não "tem uma habilidade especial".
 
 ## Auditoria externa (GPT) — o que foi adotado e o que não foi
 
-**Contexto:** o Osmar trouxe uma auditoria técnica + "SDDs" feita por
-outra IA (documento .docx), propondo uma bateria grande de mudanças
-estruturais: Vitest com pirâmide de testes completa, contrato
-`Character` separado de `WizardSelection`, `schemaVersion` +
-migradores versionados na persistência, quebra de
-`calculoPersonagem.ts`/`FichaShell.tsx` em módulos/hooks por domínio,
-desacoplar o Roll Engine do `RollContext`, CI com gate de
-lint+test+build antes do deploy, e um validador automático dos
-catálogos de dado.
+**Contexto:** uma auditoria técnica feita por outra IA (documento
+externo) propôs uma bateria de mudanças estruturais pesadas: Vitest
+com pirâmide de testes completa, contrato `Character` formal separado
+de `WizardSelection`, `schemaVersion` + migradores versionados,
+quebra de arquivos grandes em módulos/hooks por domínio, CI com gate
+de lint+test+build, validador automático de catálogo de dado.
 
-**Avaliação:** a auditoria acertou 2 achados reais e específicos
-deste projeto — (1) zero teste automatizado hoje (`package.json` não
-declara `test`, confirmado), e (2) regra de nível/característica de
-classe reconhecida por comparação de **nome de exibição** em vez de
-ID estável (`levelUp.ts` compara strings tipo `'Mestre Tático'`,
-`'Aumento no Valor de Atributo'` — frágil porque o Osmar edita a
-planilha por fora, um nome pode mudar de revisão editorial sem que a
-regra devesse quebrar). O resto do pacote (contrato `Character`
-formal, `schemaVersion`+migradores, quebra de arquivo em hooks por
-domínio, CI bloqueando deploy) é conselho correto pra um SaaS com
-time e múltiplos usuários, mas pesado demais pro contexto real deste
-projeto (uso pessoal, Osmar + grupo de mesa, ver CLAUDE.md seção 9) —
-pausar pra fazer tudo isso antes de continuar contraria o próprio
-ritmo de entrega pequena e validada na hora que já funciona aqui. O
-documento também tinha pelo menos 1 número errado apresentado como
-"evidência verificada" (`index.css` "possui 1542 linhas" — na
-verdade tinha 368 na hora da checagem, e o projeto já usa CSS Modules
-extensivamente, contrariando a própria premissa do achado) — motivo
-a mais pra não adotar o pacote inteiro sem checar caso a caso.
+**Decisão:** adotar só os 2 achados verificados e baratos, hoje regra
+permanente em CLAUDE.md seção 13 — (1) toda função nova de cálculo em
+`core/` vem com teste Vitest no mesmo commit, (2) característica/regra
+reconhecida por código usa ID estável, nunca nome de exibição. O resto
+do pacote é conselho correto pra um SaaS com time e múltiplos
+usuários, mas pesado demais pro contexto real (uso pessoal, ver
+CLAUDE.md seção 9) — fica de fora até (se) aparecer necessidade real
+(ex: um bug de migração de fato, não hipotético).
 
-**Decisão:** adotar só os 2 pontos verificados e baratos, formalizados
-em CLAUDE.md seção 13 (regra permanente daqui pra frente, não só essa
-rodada):
-1. Toda função nova de cálculo em `core/` vem com teste automatizado
-   (Vitest) no mesmo commit.
-2. Toda característica/regra reconhecida por código (não só exibida)
-   usa ID estável, nunca nome de exibição.
+**Lição geral:** uma auditoria externa deve ser verificada achado por
+achado antes de adotar — esta tinha pelo menos 1 número apresentado
+como "evidência" que não batia com o código real na hora da checagem.
 
-`schemaVersion`+migradores versionados NÃO foi adotado agora — fica
-pra quando (se) aparecer um bug real de migração; hoje os fallbacks
-`??` opcionais em `PersonagemSalvo` dão conta na prática. Modularização
-de `calculoPersonagem.ts`/`FichaShell.tsx`, CI gate e validador de
-catálogo também ficam de fora por ora — sem urgência real hoje.
+## ID estável — padrão de arquivo de mapeamento hand-maintained
 
-**Data/origem:** 2026-08.
-
-## Entrega 3 — IDs estáveis em `levelUp.ts` (1º caso real de migração)
-
-**O que é:** primeira aplicação prática da regra da seção 13 num
-arquivo já existente. Criado `data/rulesets/dnd2024/idsCaracteristicasClasse.ts`
-— mapa hand-maintained `ID_CARACTERISTICA_CLASSE` (ex: `asi` →
-`'Aumento no Valor de Atributo'`, `estiloDeLuta` → `'Estilo de
-Luta'`), no mesmo padrão do `efeitoMecanico` de `talentos.ts`: não vem
-da planilha, tem aviso no topo do arquivo pra reaplicar manualmente se
-algo mudar. `levelUp.ts` (`niveisComASI`, `niveisComDadivaEpica`,
-`temEstiloDeLutaTrocavel`, `NOMES_ESPECIALISTA`,
-`CONTAGEM_ATAQUE_EXTRA`) agora compara contra esse ID em vez do nome
-de exibição direto. Assinatura pública das funções não mudou — nenhum
-outro arquivo precisou ser tocado.
-
-**Escopo reduzido de propósito:** o Osmar escolheu migrar só a parte
-interna de `levelUp.ts` nesta entrega, não as ~8 chamadas externas que
-ainda passam nome (`caracteristicaDesbloqueada`/
-`contarRepeticoesCaracteristica` em `FichaShell.tsx`,
-`calculoPersonagem.ts`, `inspiracaoBardo.ts`) — fica pra quando essas
-características específicas forem tocadas de novo por outro motivo,
-não uma entrega isolada. Ver `PENDENCIAS.md` "Migração de
-comparação-por-nome pra ID estável" pro detalhe do que falta.
-
-Teste automatizado novo: `src/core/levelUp.test.ts` (7 casos,
-`niveisComASI`/`niveisComDadivaEpica`/`temEstiloDeLutaTrocavel`/
-`numeroDeAtaques`, incluindo caso de borda de classe sem progressão e
-nível 0), per CLAUDE.md seção 13.
-
-**Data/origem:** 2026-08.
+**Decisão:** quando uma característica/regra precisa ser reconhecida
+por código (CLAUDE.md seção 13) num dado que já existe sem ID próprio,
+o padrão é um arquivo de mapeamento separado, hand-maintained, ex:
+`data/rulesets/dnd2024/idsCaracteristicasClasse.ts` exportando um mapa
+`ID_CARACTERISTICA_CLASSE` (`asi` → `'Aumento no Valor de Atributo'`
+etc.) — mesmo molde do `efeitoMecanico` em `talentos.ts`. O consumidor
+(ex: `core/levelUp.ts`) passa a comparar contra o ID, nunca contra o
+nome direto, sem mudar sua assinatura pública. O arquivo carrega aviso
+no topo pra reaplicar manualmente se o nome de exibição mudar na
+planilha.
 
 ## Modal de rolagem — Vantagem/Desvantagem escolhida DEPOIS do resultado
 
-**O que é:** pedido do Osmar, spec detalhada por ele — depois de uma
-rolagem de d20 normal (sem Vantagem/Desvantagem pré-definida),
-aparecem 2 botões "Desvantagem" (vermelho, esquerda) e "Vantagem"
-(verde, direita) embaixo do resultado. Ao tocar em um, um 2º d20
-rola do lado do primeiro (mesma animação de girar), e o total/crítico
-são recalculados a partir do dado que a regra manda usar (maior pra
-Vantagem, menor pra Desvantagem) — o dado descartado fica com opacidade
-reduzida, não escondido (regra pede rolar os 2, não esconder o que não
-foi usado).
+**Decisão:** numa rolagem de d20 sem Vantagem/Desvantagem
+pré-definida, aparecem 2 botões ("Desvantagem"/"Vantagem") embaixo do
+resultado. Ao tocar, um 2º d20 rola do lado do primeiro e o
+total/crítico são recalculados a partir do dado que a regra manda
+usar — o dado descartado fica com opacidade reduzida, não escondido
+(regra pede rolar os 2).
 
-**Por que só rolagem de d20 (não dano):** Vantagem/Desvantagem é
-mecânica exclusiva de teste/salvaguarda/ataque (1 d20) nas regras de
-D&D — nunca se aplica a dano nem a "dado extra pra somar num d20"
-(ex: Perícia Inigualável, Mente Tática). Por sorte o código já
-separava isso: `rolarD20` (sempre 1d20) vs `rolarDados` (quantidade/
-lados variáveis) — só precisei ligar os botões novos em `rolarD20`;
-`rolarDados` nunca ativa `podeEscolherVantagem` (garantia estrutural,
-não um `if` a mais pra lembrar de manter).
-
-**Implementação:**
-- `RollContext.tsx`: `RollState` ganhou `tipo` ('d20'/'dados'),
-  `dado2` (2º d20, só quando Vantagem/Desvantagem está em jogo),
-  `vantagem` (qual regra está valendo), `mod` (guardado só em rolagens
-  'd20' pra poder recalcular o total depois) e `podeEscolherVantagem`
-  (true só numa rolagem 'd20' concluída, sem Vantagem/Desvantagem
-  ainda decidida). Removido o campo antigo `detalheVantagem` (texto)
-  — virou visual (2 dados lado a lado + opacidade no descartado).
-- Nova função `escolherVantagemPosRolagem(tipo)`: rola o 2º d20 e
-  recalcula total/crítico a partir do dado usado pela regra.
-- O fluxo de Vantagem/Desvantagem PRÉ-definida na chamada (ex:
-  Contra-Encantamento em `ReacaoPanelContent.tsx`, que já nasce com
-  `vantagem: 'vantagem'`) continua funcionando igual, só que agora
-  também mostra os 2 dados visualmente (antes só tinha o texto) — sem
-  os botões, porque a decisão já foi tomada na hora da chamada.
-- `RollOverlay.tsx`/`.module.css`: `.card` ganhou `min-width` maior
-  (260px) pra já caber os 2 dados sem "pular" de tamanho quando o 2º
-  aparece — com 1 dado só, ele fica centralizado dentro dessa largura
-  (`.diceRow` com `justify-content: center`); com 2, o 1º desloca pra
-  esquerda naturalmente pelo layout flex.
-
-Testado via Playwright em 390px: teste de atributo sem Vantagem/
-Desvantagem mostra os 2 botões; clicar em Vantagem faz o 2º dado
-girar e resolver (ex: 20 e 1 saíram numa rolagem de Desvantagem — o
-1 ficou em destaque com borda de Falha Crítica, o 20 ficou
-esmaecido); total e crítico bateram com o dado usado, não com o
-primeiro rolado.
-
-**Data/origem:** 2026-09.
-
-
-## Pill padrão pra toda menção a magia/truque na tela (2026-09)
-
-**Achado do Osmar:** cada tela mostrava magia/truque de um jeito
-diferente — algumas com texto sublinhado sem ícone, outras com texto
-solto + ícone ⓘ separado do lado, sem consistência entre wizard, Level
-Up, Ficha e Combat. "Tá virando uma loucura a inconsistência."
-
-**Decisão:** existe agora **1 formatação só** pra qualquer nome de
-magia/truque clicável em qualquer tela — pill com fundo lilás claro
-(`var(--accent-dim)`, mesmo tom já usado em cards selecionados) com o
-ⓘ **dentro** da própria pill, nunca separado. Implementado em
-`MagiaComDescricao.tsx`/`.module.css` (`variante` removida — só existe
-1 variante agora, então nem faz mais sentido a prop existir; todos os
-~19 pontos de chamada limpos). Como todo lugar do app já usava esse
-componente compartilhado, a mudança propagou sozinha pra wizard/Level
-Up/Ficha/Combat sem precisar tocar em cada tela individualmente —
-prova de que reaproveitar o componente certo (regra 6.1 do CLAUDE.md)
-compensa exatamente nessa hora.
-
-**Regra permanente:** toda tela nova que mostrar nome de magia/truque
-usa `<MagiaComDescricao magia={m} />` — nunca inventar um jeito
-próprio de mostrar/formatar magia numa tela nova.
-
-**Data/origem:** 2026-09.
+**Só se aplica a rolagem de d20 (nunca dano):** Vantagem/Desvantagem é
+mecânica exclusiva de teste/salvaguarda/ataque — o código já separava
+`rolarD20` (sempre 1d20) de `rolarDados` (quantidade/lados variáveis),
+então os botões só existem em `rolarD20`; `rolarDados` nunca ativa
+`podeEscolherVantagem` — garantia estrutural, não um `if` a mais pra
+lembrar de manter. `RollState` guarda `tipo`, `dado2`, `vantagem`,
+`mod` (pra poder recalcular o total depois) e `podeEscolherVantagem`.
+Vantagem/Desvantagem PRÉ-definida na chamada (ex: Contra-Encantamento)
+continua funcionando igual, só ganhou a mesma visualização de 2 dados
+— sem os botões, porque a decisão já foi tomada na hora da chamada.
 
 ## "Usar de graça" só existe quando algo é rastreado por uso
 
-**Achado do Osmar:** o botão "Usar de graça" (Invocações Místicas Fase
-2 — magia concedida sem gastar Espaço de Pacto) não fazia sentido pra
-invocações `ilimitado` (ex: Salto Sobrenatural) — clicar não muda
-nada, não há contador, não há efeito rastreável (diferente de uma cura
-real, onde cada clique teria efeito). Botão clicável sem efeito nenhum
-confunde o jogador (parece que faz algo).
+**Regra generalizável:** todo botão de ação precisa ter algo
+rastreável por trás (um contador, um estado que muda) — senão vira tag
+informativa (`<span className="tag">sem custo</span>`, mesma
+formatação de "já possui"), nunca um botão clicável sem efeito nenhum
+(confunde o jogador, parece que faz algo). Ex: um recurso `recarga:
+'ilimitado'` não tem botão "Usar de graça"; um recurso rastreado
+(`recarga: 'descansoLongo'`, contador dedicado) mantém o botão
+"Usar de graça"/"Usada".
 
-**Decisão:** quando não há NADA contado por uso (`recarga: 'ilimitado'`),
-não existe botão — vira uma tag muda `<span className="tag">sem
-custo</span>`, mesma formatação já usada pra "já possui"
-(`TalentoOrigemEscolhasStep.tsx`) — reaproveito direto da classe global
-`.tag`, não um componente novo. Só quando existe estado real por trás
-(`recarga: 'descansoLongo'`, rastreado em `magiasGratisGastas`) que o
-botão "Usar de graça"/"Usada" continua existindo. Regra generalizável:
-**todo botão de ação precisa ter algo rastreável por trás — senão vira
-tag informativa, não botão.**
+## Barra de PV Temporário — escala estendida, e lição sobre animar SVG
 
-**Data/origem:** 2026-09.
+**Barra de PV Temporário:** quando o personagem tem PV Temporário, a
+barra de Pontos de Vida (aba Combat) estende a escala além do máximo
+— verde até o PV máximo, azul do máximo até máximo+temporário. Sem PV
+Temporário, a barra é idêntica a antes. `LinearProgressBar.tsx` ganhou
+prop opcional `temporario`.
 
-## Barra de PV: PV Temporário estende a escala + animação suave (2026-09)
+**Lição técnica pra qualquer barra/indicador animado do app:** CSS
+`transition` em atributo de geometria SVG (`x1`/`x2` de `<line>`,
+`x`/`width` de `<rect>`) **não anima de forma confiável** — o valor
+pula seco pro final em vez de interpolar. Resolvido animando em **JS
+puro** (`requestAnimationFrame`, ease-out quadrático) no hook
+`useValorAnimado` — funciona sempre, não depende de suporte do
+navegador a transição de geometria SVG. Reaproveitar esse hook em
+qualquer barra/indicador novo, não tentar `transition` em atributo SVG
+de novo.
 
-**Barra de PV Temporário:** pedido do Osmar — quando o personagem tem
-PV Temporário, a barra de Pontos de Vida (aba Combat) estende a escala
-além do máximo: verde até o PV máximo, azul do máximo até
-máximo+temporário. Sem PV Temporário, a barra continua idêntica a
-antes (escala = só o máximo, sem trecho azul). `LinearProgressBar.tsx`
-ganhou prop opcional `temporario` — reaproveitado pra CombatTab sem
-quebrar nenhum outro uso do componente.
+## Cura acima do máximo vira PV Temporário — HOUSE RULE, não regra oficial
 
-**Animação (~0,5s) ao mudar de valor — achado técnico importante:**
-CSS `transition` em atributos de geometria SVG (`x1`/`x2` de `<line>`,
-até `x`/`width` de `<rect>`) **não anima de forma confiável** — testado
-com Playwright amostrando o atributo ao longo do tempo, o valor pula
-seco pro final em vez de interpolar. Resolvido animando em **JS puro**
-(`requestAnimationFrame`, ease-out quadrático, hook `useValorAnimado`
-dentro do próprio componente) — funciona sempre, não depende de
-suporte do navegador a transição de geometria SVG. Confirmado via
-Playwright: amostrando a largura do retângulo a cada 80ms durante a
-transição, os valores interpolam suavemente (69→63→57→52→48→46→45),
-não pulam.
+**Decisão:** o PV enche até o máximo primeiro — se uma cura cruza o
+máximo, o excedente DESSE clique é descartado (igual à regra real).
+Só depois de já estar no máximo é que uma nova cura vira PV Temporário
+inteiro, somando com o que já havia (não "pega o maior"). Ex: 90/100 +
+15 = 100/100; clicar de novo já em 100/100 com +5 vira +5 PV
+Temporário.
 
-**Lição pra próxima barra/indicador animado do app:** não usar CSS
-`transition` em atributo de geometria SVG — usar o padrão
-`useValorAnimado` (ou extrair pra hook compartilhado se aparecer um
-2º caso).
-
-**Data/origem:** 2026-09.
-
-## Cura acima do máximo vira PV Temporário — HOUSE RULE, não regra oficial (2026-09)
-
-**Pedido do Osmar:** o PV enche até o máximo primeiro — se um clique de
-cura cruza o máximo, o excedente DESSE clique é descartado (não vira
-Temporário), igual à regra real. Só depois de já estar no máximo é que
-um novo clique de cura vira PV Temporário inteiro (soma com o que já
-tinha, não "pega o maior"). Ex: 90/100 + cura de 15 = 100/100 (os 5
-que passariam do máximo são descartados nesse clique); clicar de novo
-já em 100/100 com +5 aí sim vira +5 PV Temporário.
-
-**Importante — isso é house rule, NÃO regra oficial:** pela regra real
+**Por que fica aqui e não em `DND-Regras.md`:** pela regra real
 (Glossário do Livro do Jogador), cura acima do máximo é sempre
-perdida, mesmo já no máximo — nenhuma menção a virar PV Temporário.
-Por isso essa decisão fica aqui (design), não em `DND-Regras.md` (só
-fatos confirmados no livro). Não confundir com `ganharPvTemporario()`
-(habilidade que concede PV Temporário direto, tipo Vigor Ínfero) —
-essa continua "pega o maior valor", regra real, intocada; a soma só
-vale pra cura normal já no máximo (`aplicarAlteracaoPv`).
+perdida, mesmo já no máximo — sem nenhuma menção a virar Temporário.
+É house rule do Osmar, registrada como tal. Não confundir com
+`ganharPvTemporario()` (habilidade que concede PV Temporário direto,
+ex: Vigor Ínfero) — essa continua "pega o maior valor", regra real,
+intocada; a soma só vale pra cura normal já no máximo
+(`aplicarAlteracaoPv`).
 
-**Data/origem:** 2026-09.
+## Sentidos Especiais — dado estruturado, regra do maior valor (não soma)
 
-## Sentidos Especiais viram dado estruturado (não mais só texto) (2026-09)
-
-**Antes:** Visão no Escuro/às Cegas/Verdadeira/Sismiconsciência só
-existiam como texto solto dentro da descrição de traço de espécie ou
-de Invocação Mística (ex: "Você tem Visão no Escuro com um alcance de
-36 metros.") — sem jeito de somar/comparar entre fontes diferentes.
-
-**Agora:** campo estruturado `sentidoConcedido: { tipo, alcanceMetros }
-| null` em `TracoEspecie` (`especies.ts`) e `InvocacaoMistica`
+**Decisão:** Visão no Escuro/às Cegas/Verdadeira/Sismiconsciência têm
+campo estruturado `sentidoConcedido: { tipo, alcanceMetros } | null` em
+`TracoEspecie` (`especies.ts`) e `InvocacaoMistica`
 (`invocacoesMisticas.ts`), tipo `TipoSentido` centralizado em
 `data/rulesets/dnd2024/sentidos.ts` (Visão Comum não entra — todo
-personagem já tem, não é algo "concedido"). `core/sentidos.ts` junta
-todas as fontes do personagem (espécie + Invocações Místicas atuais,
-mais fontes no futuro — itens mágicos, outras classes) num resultado
-por tipo.
+personagem já tem, não é "concedido"). `core/sentidos.ts` junta todas
+as fontes do personagem (espécie + Invocações Místicas hoje, mais
+fontes no futuro) num resultado por tipo.
 
-**Regra de empilhamento — pega o MAIOR valor, nunca soma.** Confirmado
-com o Osmar: quando 2+ fontes dão o MESMO tipo de sentido (ex: espécie
-já dá Visão no Escuro 36m + uma invocação que também dá Visão no
-Escuro), o valor final é o maior entre elas — é a regra padrão do
-Apêndice C. Somar só valeria se o texto de uma fonte específica pedisse
-isso de propósito (nenhuma hoje pede — o exemplo cogitado foi uma
-característica do Patrono Ínfero, ainda não importada; quando essa
-hora chegar, decidir um mecanismo de override específico pra ela, não
-mudar a regra padrão).
+**Regra de empilhamento — pega o MAIOR valor entre fontes do MESMO
+tipo, nunca soma** (regra padrão do Apêndice C). Somar só valeria se o
+texto de uma fonte específica pedisse isso de propósito — nenhuma
+hoje pede; se aparecer uma que peça, decidir um override específico
+pra ela, não mudar a regra padrão.
 
-**"Conhecimento de Pedras" do Anão (Sismiconsciência temporária, Ação
-Bônus, usos limitados) fica de fora do campo estruturado** — só sentido
-passivo permanente entra; habilidade ativada/temporária continua só
-como texto do traço, não aparece na seção "Sentidos" da Ficha (que
-mostra o que o personagem TEM agora, não o que ele pode ativar).
+**O que fica de fora do campo estruturado:** sentido ativado/temporário
+por habilidade limitada (ex: Conhecimento de Pedras do Anão) — só
+sentido passivo permanente entra; continua como texto do traço. Tela:
+seção "Sentidos" na aba Atributos, só aparece se pelo menos 1 valor
+for > 0.
 
-**Tela:** seção "Sentidos" nova na aba Atributos, antes de "Descanso"
-— só aparece se pelo menos 1 valor for > 0 (personagem sem nenhum
-sentido especial não vê seção nenhuma).
+## Ferramenta de teste "sorteia e aplica direto" — pula o fluxo de telas, chama o mesmo aplicador
 
-**Data/origem:** 2026-09, pedido do Osmar depois de revisar a cadeia
-de pré-requisito das Invocações Místicas.
-
-## Ferramenta de teste "sorteia e aplica direto" — não reabre o fluxo real, gera o resultado final e chama o mesmo aplicador (2026-09)
-
-Padrão usado 2x agora (Personagem de Teste, Level Up Rápido) — vale
-pra qualquer botão de teste futuro que precise "pular" um fluxo de
-várias telas: em vez de rodar a UI de verdade em modo automático
-(clicando "Avançar" sozinho), uma função pura em `core/` recebe os
-mesmos parâmetros que a tela real receberia e devolve **o objeto de
-resultado final**, no formato exato que o `onConfirmar`/aplicador real
-espera — daí quem chama usa o mesmo aplicador de sempre (`FichaShell.
-confirmarLevelUp`, por ex.), sem duplicar a lógica de "o que fazer com
-o resultado". Zero tela aparece — clicou, já aplicou.
-
+**Padrão pra qualquer botão de teste que precise "pular" um fluxo de
+várias telas:** uma função pura em `core/` recebe os mesmos parâmetros
+que a tela real receberia e devolve **o objeto de resultado final**,
+no formato exato que o aplicador real espera (ex: `FichaShell.
+confirmarLevelUp`) — quem chama reaproveita o mesmo aplicador de
+sempre, sem duplicar "o que fazer com o resultado". Zero tela aparece.
 A função de sorteio replica as MESMAS condições que decidem se cada
-passo se aplica (ex: `luSteps` do `LevelUpShell` — subclasse só no
-nível certo e se ainda não tinha, Especialista só nos níveis que
-concedem, etc.) — nunca reimplementa a regra do zero, só troca "tela
-com clique" por "sorteio". Sorteio em si (embaralhar/escolher 1)
+passo se aplica (nunca reimplementa a regra do zero, só troca "tela
+com clique" por "sorteio"); o sorteio em si (embaralhar/escolher 1)
 mora em `core/sorteio.ts`, compartilhado por qualquer ferramenta desse
-tipo — não duplicar `embaralhar`/`sorteiaUm` de novo num terceiro
-arquivo.
+tipo. Usado hoje em Personagem de Teste e Level Up Rápido
+(`core/levelUpAleatorio.ts` — sempre pela média de PV, nunca rola
+dado, pra ser instantâneo).
 
-**Level Up Rápido especificamente:** botão "⚡" ao lado do "⬆ Level
-Up" normal (aba Atributos), cor diferente (`var(--warn)`) só pra não
-confundir os dois. Sobe exatamente 1 nível por clique (pra subir mais,
-clica de novo) — PV sempre pela média (nunca rola dado, é pra ser
-instantâneo). `core/levelUpAleatorio.ts` (testado).
+## Bônus opcional somado a uma rolagem concluída — linha no próprio modal de rolagem
 
-## Bônus opcional somado a uma rolagem concluída — vira linha no próprio modal de rolagem, não um card na tela (2026-09)
-
-Padrão pra qualquer característica tipo "A Sorte do Próprio Tenebroso"
-(Bruxo): soma um dado avulso a UMA rolagem de teste de
-atributo/salvaguarda já feita, com usos limitados. Em vez de um card
-separado na Ficha (que obrigava o jogador a rolar, decorar o resultado
-manualmente, olhar o card, somar de cabeça — jeito antigo, descartado),
-virou uma linha dentro do próprio `RollOverlay` (o modal que já
-aparece toda rolagem), do lado dos botões de Vantagem/Desvantagem —
-consistente com como Vantagem/Desvantagem já funciona (escolhida DEPOIS
-de ver o resultado, recalcula o total na hora).
-
-**Mecanismo (genérico, não é código exclusivo de nenhuma classe):**
-`RollContext.tsx` ganhou `BonusExtraProvider` (rótulo, lados do dado,
-usos restantes/máximo, função `usar()` que consome 1 uso) +
+**Padrão (genérico, não exclusivo de nenhuma classe):** uma
+característica que soma um dado avulso a UMA rolagem de
+teste/salvaguarda já feita (ex: A Sorte do Próprio Tenebroso, Bruxo)
+vira uma linha dentro do próprio `RollOverlay` (o modal que já aparece
+toda rolagem), do lado dos botões de Vantagem/Desvantagem — nunca um
+card separado na Ficha que obrigaria o jogador a rolar e somar de
+cabeça. Mecanismo: `RollContext.tsx` tem `BonusExtraProvider`
+(rótulo, lados do dado, usos restantes/máximo, função `usar()`) +
 `registrarBonusExtra`/`aplicarBonusExtra`. Como o `RollOverlay` é
-montado global (`App.tsx`, fora da árvore da Ficha), quem TEM o
-recurso (`FichaShell.tsx`) registra o provider num `useEffect` toda vez
-que o estado muda (e desregistra ao desmontar) — o Overlay só lê o que
-está registrado, sem saber nada de Bruxo/Patrono Ínfero. `RollState`
-ganhou `categoria` (hoje só `'atributoOuSalvaguarda'`) — só rolagens
-marcadas com essa categoria mostram o botão; ataque/dano/iniciativa
-nunca marcam, então nunca mostram, sem precisar de lista de exclusão.
+montado global (fora da árvore da Ficha), quem TEM o recurso
+(`FichaShell.tsx`) registra o provider num `useEffect` toda vez que o
+estado muda (e desregistra ao desmontar) — o Overlay só lê o que está
+registrado, sem saber nada da classe específica. `RollState` tem
+`categoria` (`'atributoOuSalvaguarda'` hoje) — só rolagens marcadas
+mostram o botão; ataque/dano/iniciativa nunca marcam. Qualquer
+característica futura do mesmo formato reaproveita o mesmo
+`BonusExtraProvider`, só trocando rótulo/lados/fonte do `usar()`.
 
-**Pra próxima característica parecida** (ex: um "Orientação"/Guidance
-+1d4 futuro): reaproveitar o mesmo `BonusExtraProvider`, só trocando
-rótulo/lados/fonte do `usar()` — não criar um 2º mecanismo.
+## Borda azul = interativo, borda cinza = passivo (regra pra qualquer caixa de stat)
 
-## Todo contador "N usos de M" vira pip circular ao lado do nome — nunca texto no meio do parágrafo (2026-09)
+**Regra permanente:** qualquer caixa de número/stat (Ficha ou Wizard)
+com borda azul CONTÍNUA (`var(--accent)`, `border-style: solid`,
+classe `.hpBoxAccent`) sinaliza que role dado OU tem interação de
+toque; borda cinza TRACEJADA padrão (`.box`, sem modificador) sinaliza
+que é só informativa, sem toque nenhum — a cor E o traço já comunicam
+"dá pra tocar" vs "é só um número", sem precisar de texto explicando.
+`.hpBoxAccent` precisa fixar `border-style: solid` explicitamente
+porque `.box`/`.stat-box` partem tracejados por padrão. `.stat-box`
+também é usado no wizard (`AtributosStep.tsx`), onde azul já significa
+outra coisa ("valor já atribuído") — por isso o modificador azul só é
+aplicado na Ficha (`AtributosTab.tsx`), nunca na classe global.
 
-**Regra permanente, sem exceção, daqui pra frente:** qualquer recurso
-onde o jogador "tem N vezes pra usar algo" (Indomável, Surto de Ação,
-Pontos de Sorte, Recuperar Fôlego, Inspiração de Bardo, Espaços de
-Magia, Ataque de Sopro, Ancestralidade Gigante, Conhecimento de
-Pedras, Pico de Adrenalina, Salto da Nuvem, Perícia Inigualável,
-Mente Tática, e qualquer coisa nova parecida) mostra o "quanto resta"
-como **pip circular** ao lado do NOME/título do recurso — nunca como
-`(3/5 usos — recarrega no Descanso Longo)` enfiado no meio do
-parágrafo de descrição. Motivo: a Ficha tinha vários desses contadores
-embutidos assim, texto corrido demais pra ler rápido numa tela de
-celular no meio de uma sessão de jogo (pedido do Osmar revisando a
-tela de Combat).
+**Regra de rótulo:** label de caixa pequena com mais de 1 palavra
+sempre quebra depois da 1ª palavra ("Bônus\nProf.", "Percepção\n
+Passiva"); label de 1 palavra só (PV, CA) não quebra.
 
-**Como implementar (2 componentes, `ui/components/`):**
-- `TickPips` — os pips em si (bolinha cheia = disponível, cinza = já
-  gasto; esvazia do ÚLTIMO índice pro primeiro, nunca do primeiro pro
-  último). Círculo (`border-radius: 50%`), não quadrado com canto
-  arredondado — decisão visual explícita do Osmar, não usar
-  `--shape-xs`/`--shape-sm` aqui.
-- `ContadorUsos` — pips + texto pequeno "restantes/total" (cinza,
-  `var(--text-faint)`), pronto pra colocar do lado de um título;
-  cuida de neutralizar o `text-transform`/`letter-spacing` herdado de
-  `.section-title` (que não deve afetar números).
+## Barra de abas de nível superior vira Navigation Bar (M3), não pill flutuante
 
-**Onde plugar:** o container do título (`.section-title`,
-`.opt-card-name`, ou o rótulo de um `.slotCounter` dentro de um painel
-de Ação/Bônus/Reação) vira flex (`display:flex; align-items:center;
-gap:8px; flexWrap:wrap`) com o nome + `<ContadorUsos .../>` dentro. O
-parágrafo de descrição abaixo mantém só a informação de QUANDO recarga
-(Descanso Curto/Longo) — nunca repete o número, que já está no pip.
+**Regra permanente:** qualquer barra de navegação de nível superior
+(a que troca de tela/aba principal, não uma sub-navegação dentro de
+uma tela) segue o padrão M3 de Navigation Bar — presa na borda
+inferior, largura 100%, sem sombra, `border-top` fino em vez de
+elevação; cada item usa `flex: 1 1 0` (todos do mesmo tamanho,
+preenchendo a barra inteira, nunca `min-width` fixo deixando espaço
+vazio nas pontas); indicador de item ativo é um pill pequeno só atrás
+do ÍCONE, não atrás do bloco inteiro (ícone + rótulo). Aplicado na
+barra de abas da Ficha (`FichaShell.tsx`, `.tabbarLayer`/`.tabbar`,
+indicador `.tabIconWrap`). **Não se aplica** às pills de navegação do
+Wizard (`DECISOES-WIZARD.md`) — são passos sequenciais de um fluxo,
+não abas paralelas, contexto diferente.
 
-**Não é pip:** um toggle de 1 uso só (Vigor Implacável, Astúcia
-Mágica, Inspiração Heroica) não é "N de M", é liga/desliga — continua
-sendo o card/checkbox normal, sem pip (a única exceção existente,
-Inspiração Heroica em `AtributosTab`, usa `TickPips` com `total={1}`
-só porque já existia antes dessa regra; não é o padrão a copiar pra
-um toggle novo).
-
-**Auditoria 2026-09:** os painéis de Ação/Bônus/Reação
-(`AcaoPanelContent`/`BonusPanelContent`/`ReacaoPanelContent`,
-`EscolherCirculoShell`, `MagiasTab`) já seguiam esse padrão antes da
-regra existir formalmente — só precisaram da troca de quadrado pra
-círculo. O único lugar com o anti-padrão (contador enterrado no texto)
-era `CombatTab.tsx`: Indomável, Pontos de Sorte, Mente Tática, Perícia
-Inigualável, Ataque de Sopro, Ancestralidade Gigante — todos
-corrigidos.
-
-## Borda azul = interativo, borda cinza = passivo — regra pro topo da aba Atributos (2026-09)
-
-**Problema:** o topo da aba Atributos (PV/CA/Iniciativa/Bônus Prof./
-Inspiração Heroica) usava a borda cinza padrão (`.box`) em toda caixa
-por igual, sem distinguir visualmente qual toca/rola dado (Iniciativa,
-Inspiração Heroica) de qual é só informativo (PV, CA, Bônus de
-Proficiência) — só a caixa de Nível já tinha borda azul de propósito.
-Também não havia lugar de destaque pra Percepção Passiva (Feedback.md:
-ela vivia como a 19ª linha da lista de Perícias, com a mesma cara das
-perícias de verdade, mesmo não sendo clicável nem rolável).
-
-**Solução, regra permanente pra qualquer caixa desse estilo daqui pra
-frente:** borda azul CONTÍNUA (`var(--accent)`, `border-style: solid`
-— classe `.hpBoxAccent` em `AtributosTab.module.css`, mesmo tom/traço
-já usado em `.levelBox`) em qualquer caixa que role dado OU tenha
-interação de toque (liga/desliga etc); borda cinza TRACEJADA padrão
-(`.box` sem modificador, sem mudar `border-style`) em qualquer caixa
-só informativa, sem toque nenhum. A cor E o traço sozinhos já comunicam
-"dá pra tocar" vs "é só um número" — dispensa qualquer instrução
-escrita. `.hpBoxAccent` precisa fixar `border-style: solid` explicitamente
-porque tanto `.box` quanto `.stat-box` partem tracejados por padrão —
-só sobrescrever a cor deixava a caixa "azul tracejada", não contínua.
-
-**Layout resultante (3 linhas, decidido com o Osmar):**
-- Linha 1: Nível (50% da largura, `flex:2` vs `flex:1` das outras
-  duas) · PV · Inspiração Heroica.
-- Linha 2, 4 colunas iguais: Bônus de Proficiência · **Percepção
-  Passiva** (nova, resolve o pedido do Feedback.md — fica ao lado de
-  CA/Bônus Prof., mesma família de "número fixo pra consulta", com
-  borda cinza reforçando que não é clicável) · CA · Iniciativa.
-- Linha 3: grade de atributos (`.stat-box`, cada um rola d20 — ganhou
-  `.hpBoxAccent` também, mesma regra azul/cinza acima; correção rápida
-  pedida pelo Osmar logo depois da entrega original, que tinha deixado
-  essa linha de fora "sem mudança" por engano — ela é tão interativa
-  quanto Iniciativa). `.stat-box` também é usado no passo Atributos do
-  WIZARD (`AtributosStep.tsx`), onde borda azul já significa outra
-  coisa ("valor já atribuído aqui") — por isso o modificador é
-  aplicado só na Ficha (`AtributosTab.tsx`), nunca na classe global
-  `.stat-box` em si.
-
-**Rótulo de mais de 1 palavra sempre quebra depois da 1ª palavra**
-(pedido explícito do Osmar, regra geral pra qualquer label de caixa
-pequena daqui pra frente): "nível\natual", "Ins.\nHer.", "Bônus\n
-Prof.", "Percepção\nPassiva". Rótulo de 1 palavra só (PV, CA,
-Iniciativa) não quebra.
-
-## Barra de abas da Ficha vira Navigation Bar (M3) de borda a borda, não pill flutuante (2026-09)
-
-**Decisão:** a barra inferior de abas (`FichaShell.tsx`,
-`.tabbarLayer`/`.tabbar`) deixou de ser uma "pill" flutuante (cantos
-arredondados, sombra, margem em volta, largura só do conteúdo) e virou
-uma Navigation Bar padrão M3 — presa na borda inferior, largura 100%,
-sem sombra, com `border-top` fino em vez de elevação. Cada aba usa
-`flex: 1 1 0` (todas exatamente do mesmo tamanho, preenchendo a barra
-inteira) em vez de `min-width` fixo — o padrão certo pra M3 é sempre
-dividir o espaço igualmente entre um número fixo de itens de nível
-superior, nunca deixar né que "sobre" espaço vazio nas pontas. O
-indicador de aba ativa também virou o padrão M3: um pill pequeno
-(`.tabIconWrap`) só atrás do ÍCONE, não atrás do bloco inteiro (ícone +
-rótulo) como antes.
-
-**Motivo:** pedido do Osmar — o visual de "botão flutuante" não
-parecia a navegação principal do app, e a pill deixava espaço vazio
-nas laterais em vez de ocupar a largura toda. Regra geral daqui pra
-frente (seção 5.1 do CLAUDE.md, "M3 primeiro"): qualquer barra de
-navegação de nível superior (a que troca de tela/aba, não uma
-sub-navegação dentro de uma tela) segue esse padrão — borda a borda,
-itens equidistantes, indicador só atrás do ícone. Não se aplica às
-pills de navegação do Wizard (`DECISOES-WIZARD.md`), que são passos
-sequenciais de um fluxo, não abas paralelas — contextos diferentes.
-
-**Testado:** Playwright 390×844 — barra ocupa os 390px inteiros
-(`x: 0`, `width: 390`), 6 abas com exatamente 65px cada (390/6, sem
-sobra), ícone do Perfil trocado de 📜 pra 👤 (pedido junto).
-
-## Motor de Pets/Familiar — arquitetura genérica (Fase P completa)
+## Motor de Pets/Familiar — arquitetura genérica
 
 **Uma criatura nunca é duplicada — `Pet` só guarda o que é ESPECÍFICO
-da instância.** `Pet` (`core/pets.ts`) tem `id`/`nome`/`criaturaId`/
+da instância.** `Pet` (`core/pets.ts`): `id`/`nome`/`criaturaId`/
 `pvAtual`/`origemInvocacaoId?`/`ajustes?` — CA, PV máximo, atributos,
-ações, traços etc. sempre vêm de `Criatura` (`data/rulesets/dnd2024/
-criaturas.ts`) na hora de exibir, nunca copiados pro pet. Qualquer
-override (`ajustes`) é a exceção registrada, não a regra.
+ações, traços etc. sempre vêm de `Criatura`
+(`data/rulesets/dnd2024/criaturas.ts`) na hora de exibir, nunca
+copiados pro pet. Qualquer override (`ajustes`) é a exceção
+registrada, não a regra.
 
 **"De onde veio" e "o que mudou" são campos opcionais, não sistemas
-separados.** `origemInvocacaoId?: string` marca qual característica
-concedeu o pet (`undefined` = avulso/manual); `ajustes?: AjustesPet`
-marca o que foi customizado em cima da criatura base (`undefined` =
-stat block padrão, sem override). Os dois são independentes — um pet
-convocado por invocação PODE também ter `ajustes`, um avulso pode não
-ter nenhum dos dois.
+separados.** `origemInvocacaoId?` marca qual característica concedeu o
+pet (`undefined` = avulso/manual); `ajustes?: AjustesPet` marca
+customização em cima da criatura base (`undefined` = stat block
+padrão). Os dois são independentes.
 
-**"Só 1 por fonte" é uma regra de aplicação, não do schema.** O
-array de pets nunca trava em tamanho fixo (P0 — precisa comportar
-vários simultâneos, ex: Legião dos Mortos do Necromante), mas convocar
-de novo pela MESMA `origemInvocacaoId` substitui o pet anterior DAQUELA
-fonte (mesmo padrão já usado por "só 1 arma de pacto por vez" do Pacto
-da Lâmina) — a exclusividade é decidida em `adicionarPet`
-(`FichaShell.tsx`), não no tipo `Pet[]` em si. Uma fonte nova que
-permita vários ao mesmo tempo (Legião dos Mortos) simplesmente não
-passa `origemInvocacaoId`, ou usa uma lógica de substituição diferente
-— o schema já aguenta os dois casos sem mudar.
+**"Só 1 por fonte" é regra de aplicação, não do schema.** O array de
+pets nunca trava em tamanho fixo (precisa comportar vários
+simultâneos no futuro), mas convocar de novo pela MESMA
+`origemInvocacaoId` substitui o pet anterior daquela fonte (mesmo
+padrão de "só 1 arma de pacto por vez") — decidido em `adicionarPet`
+(`FichaShell.tsx`), não no tipo `Pet[]`. Uma fonte que permita vários
+ao mesmo tempo simplesmente não passa `origemInvocacaoId`.
 
 **"Restrito a uma lista" e "livre" são o mesmo formulário, lista
 diferente.** `AdicionarPet` (`ui/ficha/tabs/PetsTab.tsx`) recebe
-`criaturasDisponiveis: Criatura[]` — "Convocar Familiar" (restrito às
-formas de uma invocação) e "Adicionar Pet" (catálogo inteiro) são a
-mesma função de UI chamada 2x com listas diferentes, não 2
-componentes. Qualquer futura fonte restrita (ex: lista de montarias de
-uma Origem) reaproveita o mesmo componente.
+`criaturasDisponiveis: Criatura[]` — telas de "restrito" (formas de
+uma invocação) e "catálogo inteiro" são a mesma função de UI chamada
+2x com listas diferentes, não 2 componentes.
 
 **"Ajustar alguns números" nunca é stat block livre do zero.**
 `AjustarPetShell.tsx` sempre parte de uma `Criatura` do catálogo — só
-CA/PV máximo/6 atributos podem ser sobrescritos, tudo o mais (tipo,
-tamanho, deslocamento, sentidos, ações...) continua vindo da criatura
-base. `calcularAjustesPet` descarta qualquer campo que o jogador digitou
-mas deixou igual ao original — só o que É de fato diferente vira
-`ajustes` salvo, então o pet nunca carrega override redundante.
+CA/PV máximo/6 atributos podem ser sobrescritos. `calcularAjustesPet`
+descarta qualquer campo que o jogador deixou igual ao original — só o
+que É de fato diferente vira `ajustes` salvo.
 
-**Data/origem:** 2026-09, Fase P (Motor de Pets/Familiar), P0-P5.
+## Efeito bônus pós-conjuração que atravessa aba — modal no `FichaShell`, não banner na aba
 
-## Efeito bônus pós-conjuração que atravessa aba — modal no FichaShell, não banner na aba
+**Regra:** quando uma característica dispara um efeito OPCIONAL depois
+de conjurar uma magia com espaço, e a magia pode ser conjurada de mais
+de um lugar (aba Magias E painel de Ação do Combate), o estado e a UI
+do efeito vivem no `FichaShell.tsx`, nunca dentro da aba/painel que
+disparou — um banner com estado local morre ao trocar de aba, e o
+jogador teria que voltar pra mesma aba pra interagir. A aba/painel só
+avisa "isso se qualificou, aqui está o valor" via 1 callback (ex:
+`onXDisponivel(valor)`) — não sabe nada do domínio do efeito.
 
-Quando uma característica dispara um efeito OPCIONAL depois de
-conjurar uma magia com espaço (ex: Colheita Macabra do Necromante —
-cura um pet Morto-Vivo), e a magia pode ser conjurada de mais de um
-lugar (aba Magias E painel de Ação do Combate, hoje duas
-implementações separadas de "conjurar com espaço"), **o estado e a UI
-do efeito bônus vivem no `FichaShell.tsx`, nunca dentro da aba/painel
-que disparou** — o Osmar reportou que precisava trocar de aba pra
-interagir quando o banner vivia dentro de `MagiasTab`/`CombatTab`
-(cada aba só existe enquanto está montada; um banner com estado local
-morre ao trocar de aba). A aba/painel só avisa "isso se qualificou,
-aqui está o valor calculado" via 1 callback (`onXDisponivel(valor)`) —
-não sabe nada sobre pets, nem repassa a lista deles.
-
-**Forma final: modal centralizado, não banner inline.** Reaproveita
-`TrocarArmaMaestria.module.css` (`.overlay`/`.card`/`.title`/`.close`)
-— título = nome da característica, texto explicando o efeito, depois
-a escolha, tudo num card só (pedido explícito do Osmar). `z-index`
-mais baixo que o Modal de Salvaguarda/Rolagem de Dado (55/60): se a
-mecânica da própria magia TAMBÉM abrir um desses popups, ele aparece
-por cima primeiro — fechá-lo revela o modal do efeito bônus embaixo,
-sem precisar sequenciar isso manualmente. Ver
-`ui/components/ColheitaMacabraModal.tsx`.
-
-**Data/origem:** 2026-09, Fase B (Necromante), B3c — Colheita Macabra
-(correção pós-publicação, feedback do Osmar testando no celular).
+**Forma final: modal centralizado, não banner inline.** Reaproveita o
+CSS de outro modal existente (`TrocarArmaMaestria.module.css`) —
+título, texto explicando o efeito, escolha, tudo num card só. `z-index`
+mais baixo que o modal de Salvaguarda/Rolagem de Dado: se a mecânica
+da própria magia também abrir um desses popups, ele aparece por cima
+primeiro, e fechá-lo revela o modal do efeito bônus embaixo, sem
+sequenciamento manual (ver `ui/components/ColheitaMacabraModal.tsx`
+como referência de implementação).
 
 ## `npx tsc --noEmit` não confere nada neste projeto — sempre usar `npx tsc -b`
 
 **Achado:** o `tsconfig.json` da raiz tem `"files": []` com
-`"references"` pra `tsconfig.app.json`/`tsconfig.node.json` (padrão de
-project references do Vite) — rodar `npx tsc --noEmit` direto na raiz
-silenciosamente não confere NADA contra esse layout (retorna "limpo"
-mesmo com erro de tipo real no código). Descoberto ao faltar 4 props
-obrigatórias novas em `CombatTab.tsx` (B3d) — `tsc --noEmit` disse
-"limpo", mas `npx tsc -b --force` (build mode, respeitando as
-references) corretamente acusou `TS2739: ... is missing the following
-properties`.
-
-**Já era seguro:** `npm run build` (rodado em toda entrega antes de
-publicar, `package.json`) sempre usou `tsc -b && vite build` por
-baixo — nenhum código quebrado foi publicado por causa disso. O
-problema era só um atalho usado durante a sessão pra iterar mais
-rápido (evitar o `vite build` completo), que por acaso não checava
-nada de verdade.
-
-**Regra daqui pra frente:** pra qualquer checagem de tipo intermediária
-(fora do checklist completo de publicação), usar `npx tsc -b --force`
-— nunca `npx tsc --noEmit` sozinho neste projeto.
-
-**Data/origem:** 2026-09, Fase B (Necromante), B3d.
+`references` pra `tsconfig.app.json`/`tsconfig.node.json` (project
+references do Vite) — `npx tsc --noEmit` direto na raiz retorna
+"limpo" mesmo com erro de tipo real no código, porque não confere nada
+contra esse layout. `npm run build` sempre foi seguro (usa `tsc -b &&
+vite build` por baixo), mas qualquer checagem de tipo INTERMEDIÁRIA
+(fora do checklist completo de publicação) deve usar `npx tsc -b
+--force`, nunca `npx tsc --noEmit` sozinho.
 
 ## Reação/passiva disparada por "estado chegou a X" — gatilho é o estado compartilhado, nunca "quem mudou"
 
 **Decisão:** quando uma característica dispara (ou libera) uma ação
 baseada em um estado atingir um valor (ex: "sempre que um Morto-Vivo
-controlado chega a 0 PV" — Mestre da Morte, nível 14), a checagem de
-gatilho é uma função pura derivada do estado compartilhado atual (ex:
-`algumMortoVivoEm0PV(pets)`, olhando só `Pet.pvAtual`), **nunca**
-rastreia POR ONDE o estado mudou.
+controlado chega a 0 PV"), a checagem de gatilho é uma função pura
+derivada do estado compartilhado atual (ex: `algumMortoVivoEm0PV(pets)`
+olhando só `Pet.pvAtual`) — **nunca** um evento/callback disparado só
+no momento de uma mutação específica.
 
-**Contexto:** um pet pode chegar a 0 PV por caminhos bem diferentes —
-dano manual na aba Pets (`-5`/`-1`), ou pela própria Colheita dos
-Mortos (Reação que reduz o pet a 0 de propósito pra curar o
-personagem). Se o gatilho fosse implementado como um evento/callback
-disparado só no momento da mutação (ex: um `onPetChegouA0PV()`
-chamado só dentro do handler de dano manual), a Colheita dos Mortos
-NUNCA acionaria o Mestre da Morte, mesmo reduzindo o pet a 0 PV do
-mesmo jeito — um bug de acoplamento sutil. Calculando o gatilho como
-uma função pura sobre o estado atual (não sobre "o que acabou de
-acontecer"), os dois caminhos funcionam de graça, sem qualquer
-encanamento extra entre os handlers de dano.
+**Por quê:** o mesmo estado pode ser alterado por caminhos bem
+diferentes (dano manual numa aba, ou uma Reação que reduz o pet a 0 de
+propósito) — um evento acoplado a só um desses handlers nunca
+dispararia pelo outro caminho, mesmo produzindo o mesmo estado final.
+Calculando o gatilho como função pura sobre o estado atual, todos os
+caminhos funcionam de graça, sem encanamento extra entre handlers.
 
-**Padrão a repetir:** qualquer Reação/passiva futura gatilhada por
-"estado chegou a X" (não "ação Y aconteceu") deve ser uma função
-derivada pura do estado atual, computada onde o painel de Combat lê
-esse estado — nunca um evento disparado só de dentro de um handler de
-mutação específico.
+## Duplicação entre telas que fazem a mesma coisa — extrai só a DECISÃO pra `core/`, não força o estado a ser igual
 
-**Data/origem:** 2026-09, Fase B (Necromante), B3e — Mestre da Morte.
-
-## 3 telas fazendo a mesma coisa (conjurar magia) — extrai só a DECISÃO pra um `core/`, não força o estado a ser igual
-
-**Achado (postmortem Mago/Necromante):** `MagiasTab.tsx`, `AcaoPanelContent.tsx`
-e `ReacaoPanelContent.tsx` tinham cada um sua PRÓPRIA cópia de "conjurar
-magia com espaço" (qual mecânica, que dado rolar, que texto mostrar) —
-uma característica nova (Colheita Macabra) só foi ligada em 2 das 3,
-porque cada painel reimplementava a lógica por conta própria. Um furo
-clássico de duplicação: quem mexe numa cópia esquece as outras.
+**Achado:** 3 painéis (`MagiasTab.tsx`, `AcaoPanelContent.tsx`,
+`ReacaoPanelContent.tsx`) tinham cada um sua PRÓPRIA cópia de
+"conjurar magia com espaço" (qual mecânica, que dado rolar, que texto
+mostrar) — uma característica nova só foi ligada em 2 das 3, porque
+cada painel reimplementava a lógica por conta própria.
 
 **Decisão:** extrair só a DECISÃO (qual mecânica, que rolagem fazer,
-que texto de feedback, se qualifica pra um efeito bônus) pra uma função
-PURA em `core/` (`core/conjurarMagia.ts`'s `decidirConjuracao`), que
-devolve uma descrição do que fazer — nunca chama `rolarD20`/`rolarDados`
-diretamente (são hooks React, não dá pra chamar de fora de componente) e
-nunca decide COMO aplicar o resultado. Cada painel continua com seu
-próprio jeito de aplicar (estado local vs. callback pro pai, painel
-fecha ou não) — essa parte genuinamente difere entre os 3 e forçar
-tudo pra um estado único teria sido um refactor arriscado sem ganho
-real (o que causava o bug não era o estado diferente, era a LÓGICA
-duplicada).
+que texto de feedback, se qualifica pra um efeito bônus) pra uma
+função PURA em `core/` (ex: `core/conjurarMagia.ts`'s
+`decidirConjuracao`) que devolve uma descrição do que fazer — nunca
+chama hooks de rolagem diretamente (não dá pra chamar hook de fora de
+componente) e nunca decide COMO aplicar o resultado. Cada painel
+continua com seu próprio jeito de aplicar (estado local vs. callback
+pro pai, fecha ou não) quando essa parte genuinamente difere entre
+eles — forçar tudo pra um estado único seria refactor arriscado sem
+ganho real, já que o bug era a LÓGICA duplicada, não o estado
+diferente.
 
 **Padrão a repetir:** sempre que 2+ telas/painéis calculam a mesma
-regra de D&D mas gerenciam o resultado de formas diferentes (uma local,
-outra via callback), extrair só o CÁLCULO/DECISÃO pra uma função pura
-em `core/` que todas chamam — não tentar unificar a gestão de estado
-junto, a menos que ela também seja genuinamente igual.
-
-**Data/origem:** 2026-09, postmortem Fase B (Mago/Necromante).
+regra de D&D mas gerenciam o resultado de formas diferentes, extrair
+só o CÁLCULO/DECISÃO pra uma função pura em `core/` que todas chamam —
+não tentar unificar a gestão de estado junto, a menos que ela também
+seja genuinamente igual.

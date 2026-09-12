@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { armazenamentoPersonagens, type PersonagemSalvo } from '../../core/armazenamentoPersonagens';
 import { garantirPersonagemDemo, ID_PERSONAGEM_DEMO } from '../../core/personagemDemo';
 import { useColapsavel } from '../hooks/useColapsavel';
+import { useAutosavePersonagem } from './hooks/useAutosavePersonagem';
+import { recursoContado, recursoFlagUnica } from './hooks/recursoGasto';
 import {
   bonusProficiencia,
   calcularAtributosFinais,
@@ -704,104 +706,28 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // 2026-09) — sair da Ficha e voltar não deve resetar o turno de
   // combate em andamento; só reseta de propósito ao rolar nova
   // Iniciativa ou tocar "Fim do Turno" (`aoRolarIniciativa`/
-  // `fimDoTurno` abaixo).
-  useEffect(() => {
-    // Tira `snapshotsNivel` do spread — o snapshot de cada nível nunca
-    // pode conter snapshots dentro dele (aninhamento infinito).
-    const { snapshotsNivel: _snapshotsNivelIgnorado, ...personagemSalvoBase } = personagemSalvo;
-    const estadoAtual: Omit<PersonagemSalvo, 'snapshotsNivel'> = {
-      ...personagemSalvoBase,
-      selecao,
-      nivel: nivelTotalAtual,
-      classes: classesAtual,
-      classeAtivaAtual: classeAtivaNome,
-      periciasMulticlasseAtual: periciasMulticlasseAtuais,
-      ferramentasMulticlasseAtual: ferramentasMulticlasseAtuais,
-      pvAtual,
-      turnStateAtual: turnState,
-      surtoUsadoTurnoAtual: surtoUsadoTurno,
-      pvMax: personagem.pvMax,
-      pvTemporarioAtual: pvTemporario,
-      subclasseAtual: personagem.subclasse,
-      estiloDeLutaAtual: personagem.estiloDeLuta,
-      maestriaArmaAtual: maestriaArma,
-      folegoGasto,
-      vigorImplacavelGasto,
-      conhecimentoDePedrasGasto,
-      picoDeAdrenalinaGasto,
-      ataqueDeSoproGasto,
-      vooDraconicoGasto,
-      ancestralidadeGiganteGasto,
-      formaGrandeGasto,
-      formaGrandeAtiva,
-      maosCurativasGasto,
-      revelacaoCelestialGasto,
-      revelacaoCelestialFormaAtiva,
-      falarComAnimaisGnomoGasto,
-      inspiracaoHeroicaAtiva,
-      indomavelGasto,
-      pontosDeSorteGasto,
-      sorteDoTenebrosoGasto,
-      resistenciaInferaAtual,
-      resistenciaInferaGasto,
-      lancarNoInfernoGasto,
-      surtoGasto,
-      espacosGastosPorClasseECirculo,
-      inspiracaoGasto,
-      truquesAtual: truquesAtuais,
-      magiasPreparadasAtual: magiasPreparadasAtuais,
-      livroDeMagiasAtual: livroDeMagiasAtuais,
-      invocacoesMisticasAtual: invocacoesMisticasAtuais,
-      periciasEspecialistaAtual: periciasEspecialistaAtuais,
-      periciasSubclasseBonusAtual: periciasSubclasseBonusAtuais,
-      periciasTalentoGeralAtual: periciasTalentoGeralAtuais,
-      magiasDescobertasMagicasAtual: magiasDescobertasMagicasAtuais,
-      livroDasSombrasAtual: livroDasSombrasAtuais,
-      livroDasSombrasGasto,
-      memorizarMagiaGasta,
-      astuciaMagicaGasta,
-      contatarPatronoGasto,
-      arcanaMisticaAtual: arcanaMisticaAtuais,
-      arcanaMisticaGastos,
-      magiasGratisInvocacoesGastas: magiasGratisGastas,
-      talentosGeraisAtual: talentosGeraisAtuais,
-      escolhaMagiaTalentoGeral,
-      talentosFavoritosAtual: talentosFavoritos,
-      itensMochilaAtual: itensMochila,
-      petsAtual: pets,
-      levelUpHpModo,
-      levelUpHpRolado,
-      xp: xpAtual,
-    };
-    // Snapshot de teste (ver PersonagemSalvo.snapshotsNivel) — captura
-    // 1x por nível, na 1ª vez que ele é alcançado (não fica
-    // reescrevendo a cada mudancinha, senão o efeito re-roda toda
-    // hora só por causa disso). Guardado em `useState` (não derivado
-    // de `personagemSalvo` a cada render — ver comentário na
-    // declaração, senão perde escrita anterior quando 2 níveis são
-    // alcançados em sequência rápida, ex: "⚡ Inst. Level Up" repetido).
-    const jaTemSnapshot = nivelTotalAtual in snapshotsNivel;
-    const snapshotsAtualizados = jaTemSnapshot ? snapshotsNivel : { ...snapshotsNivel, [nivelTotalAtual]: estadoAtual };
-    if (!jaTemSnapshot) setSnapshotsNivel(snapshotsAtualizados);
-    armazenamentoPersonagens.salvar({ ...estadoAtual, snapshotsNivel: snapshotsAtualizados });
-  }, [
-    personagemSalvo,
-    snapshotsNivel,
+  // `fimDoTurno` abaixo). Efeito em si mora em `useAutosavePersonagem`
+  // (G3.1, ver EmDevB.md) — aqui só monta o objeto salvo e a lista de
+  // dependências, exatamente como antes.
+  // Tira `snapshotsNivel` do spread — o snapshot de cada nível nunca
+  // pode conter snapshots dentro dele (aninhamento infinito).
+  const { snapshotsNivel: _snapshotsNivelIgnorado, ...personagemSalvoBase } = personagemSalvo;
+  const estadoAtual: Omit<PersonagemSalvo, 'snapshotsNivel'> = {
+    ...personagemSalvoBase,
     selecao,
-    nivelTotalAtual,
-    classesAtual,
-    classeAtivaNome,
-    periciasMulticlasseAtuais,
-    ferramentasMulticlasseAtuais,
-    personagem.pvMax,
-    pets,
-    personagem.subclasse,
-    personagem.estiloDeLuta,
+    nivel: nivelTotalAtual,
+    classes: classesAtual,
+    classeAtivaAtual: classeAtivaNome,
+    periciasMulticlasseAtual: periciasMulticlasseAtuais,
+    ferramentasMulticlasseAtual: ferramentasMulticlasseAtuais,
     pvAtual,
-    turnState,
-    surtoUsadoTurno,
-    pvTemporario,
-    maestriaArma,
+    turnStateAtual: turnState,
+    surtoUsadoTurnoAtual: surtoUsadoTurno,
+    pvMax: personagem.pvMax,
+    pvTemporarioAtual: pvTemporario,
+    subclasseAtual: personagem.subclasse,
+    estiloDeLutaAtual: personagem.estiloDeLuta,
+    maestriaArmaAtual: maestriaArma,
     folegoGasto,
     vigorImplacavelGasto,
     conhecimentoDePedrasGasto,
@@ -825,30 +751,109 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     surtoGasto,
     espacosGastosPorClasseECirculo,
     inspiracaoGasto,
-    truquesAtuais,
-    magiasPreparadasAtuais,
-    livroDeMagiasAtuais,
-    invocacoesMisticasAtuais,
-    periciasEspecialistaAtuais,
-    periciasSubclasseBonusAtuais,
-    periciasTalentoGeralAtuais,
-    magiasDescobertasMagicasAtuais,
-    livroDasSombrasAtuais,
+    truquesAtual: truquesAtuais,
+    magiasPreparadasAtual: magiasPreparadasAtuais,
+    livroDeMagiasAtual: livroDeMagiasAtuais,
+    invocacoesMisticasAtual: invocacoesMisticasAtuais,
+    periciasEspecialistaAtual: periciasEspecialistaAtuais,
+    periciasSubclasseBonusAtual: periciasSubclasseBonusAtuais,
+    periciasTalentoGeralAtual: periciasTalentoGeralAtuais,
+    magiasDescobertasMagicasAtual: magiasDescobertasMagicasAtuais,
+    livroDasSombrasAtual: livroDasSombrasAtuais,
     livroDasSombrasGasto,
     memorizarMagiaGasta,
     astuciaMagicaGasta,
     contatarPatronoGasto,
-    arcanaMisticaAtuais,
+    arcanaMisticaAtual: arcanaMisticaAtuais,
     arcanaMisticaGastos,
-    magiasGratisGastas,
-    talentosGeraisAtuais,
+    magiasGratisInvocacoesGastas: magiasGratisGastas,
+    talentosGeraisAtual: talentosGeraisAtuais,
     escolhaMagiaTalentoGeral,
-    talentosFavoritos,
-    itensMochila,
+    talentosFavoritosAtual: talentosFavoritos,
+    itensMochilaAtual: itensMochila,
+    petsAtual: pets,
     levelUpHpModo,
     levelUpHpRolado,
-    xpAtual,
-  ]);
+    xp: xpAtual,
+  };
+
+  // Snapshot de teste (ver PersonagemSalvo.snapshotsNivel) — captura 1x
+  // por nível, na 1ª vez que ele é alcançado (não fica reescrevendo a
+  // cada mudancinha). Efeito PRÓPRIO, com deps mínimas (só
+  // `nivelTotalAtual`) — separado do autosave abaixo de propósito.
+  useEffect(() => {
+    setSnapshotsNivel((prev) => (nivelTotalAtual in prev ? prev : { ...prev, [nivelTotalAtual]: estadoAtual }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nivelTotalAtual]);
+
+  useAutosavePersonagem(
+    { ...estadoAtual, snapshotsNivel },
+    [
+      personagemSalvo,
+      snapshotsNivel,
+      selecao,
+      nivelTotalAtual,
+      classesAtual,
+      classeAtivaNome,
+      periciasMulticlasseAtuais,
+      ferramentasMulticlasseAtuais,
+      personagem.pvMax,
+      pets,
+      personagem.subclasse,
+      personagem.estiloDeLuta,
+      pvAtual,
+      turnState,
+      surtoUsadoTurno,
+      pvTemporario,
+      maestriaArma,
+      folegoGasto,
+      vigorImplacavelGasto,
+      conhecimentoDePedrasGasto,
+      picoDeAdrenalinaGasto,
+      ataqueDeSoproGasto,
+      vooDraconicoGasto,
+      ancestralidadeGiganteGasto,
+      formaGrandeGasto,
+      formaGrandeAtiva,
+      maosCurativasGasto,
+      revelacaoCelestialGasto,
+      revelacaoCelestialFormaAtiva,
+      falarComAnimaisGnomoGasto,
+      inspiracaoHeroicaAtiva,
+      indomavelGasto,
+      pontosDeSorteGasto,
+      sorteDoTenebrosoGasto,
+      resistenciaInferaAtual,
+      resistenciaInferaGasto,
+      lancarNoInfernoGasto,
+      surtoGasto,
+      espacosGastosPorClasseECirculo,
+      inspiracaoGasto,
+      truquesAtuais,
+      magiasPreparadasAtuais,
+      livroDeMagiasAtuais,
+      invocacoesMisticasAtuais,
+      periciasEspecialistaAtuais,
+      periciasSubclasseBonusAtuais,
+      periciasTalentoGeralAtuais,
+      magiasDescobertasMagicasAtuais,
+      livroDasSombrasAtuais,
+      livroDasSombrasGasto,
+      memorizarMagiaGasta,
+      astuciaMagicaGasta,
+      contatarPatronoGasto,
+      arcanaMisticaAtuais,
+      arcanaMisticaGastos,
+      magiasGratisGastas,
+      talentosGeraisAtuais,
+      escolhaMagiaTalentoGeral,
+      talentosFavoritos,
+      itensMochila,
+      levelUpHpModo,
+      levelUpHpRolado,
+      xpAtual,
+    ],
+  );
 
   function toggleFavoritoTalento(id: string) {
     setTalentosFavoritos((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -867,42 +872,45 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setPvTemporario(resultado.pvTemporario);
   }
 
+  // G3.2 (foco de saúde do projeto, ver EmDevB.md): `recursoContado`/
+  // `recursoFlagUnica` embrulham o par useState de cada recurso e
+  // absorvem o "se não sobrou uso, recusa; senão soma 1" repetido —
+  // `useState`, descansoCurto/Longo e o autosave continuam intocados,
+  // lendo/zerando os mesmos campos de sempre por nome.
+  const conhecimentoDePedras = recursoContado(usosConhecimentoDePedrasMaximo, conhecimentoDePedrasGasto, setConhecimentoDePedrasGasto);
   function usarConhecimentoDePedras(): boolean {
-    if (usosConhecimentoDePedrasRestantes <= 0) return false;
-    setConhecimentoDePedrasGasto((v) => v + 1);
-    return true;
+    return conhecimentoDePedras.usar();
   }
 
+  const picoDeAdrenalina = recursoContado(usosPicoDeAdrenalinaMaximo, picoDeAdrenalinaGasto, setPicoDeAdrenalinaGasto);
   function usarPicoDeAdrenalina(): boolean {
-    if (usosPicoDeAdrenalinaRestantes <= 0) return false;
-    setPicoDeAdrenalinaGasto((v) => v + 1);
+    if (!picoDeAdrenalina.usar()) return false;
     setPvTemporario((atual) => ganharPvTemporario(atual, bonusProficienciaAtual));
     return true;
   }
 
+  const ataqueDeSopro = recursoContado(usosAtaqueDeSoproMaximo, ataqueDeSoproGasto, setAtaqueDeSoproGasto);
   function usarAtaqueDeSopro(): boolean {
-    if (usosAtaqueDeSoproRestantes <= 0) return false;
-    setAtaqueDeSoproGasto((v) => v + 1);
-    return true;
+    return ataqueDeSopro.usar();
   }
 
+  const vooDraconico = recursoFlagUnica(vooDraconicoGasto, setVooDraconicoGasto);
   function usarVooDraconico(): boolean {
-    if (vooDraconicoGasto) return false;
-    setVooDraconicoGasto(true);
-    return true;
+    return vooDraconico.usar();
   }
 
+  const ancestralidadeGigante = recursoContado(usosAncestralidadeGiganteMaximo, ancestralidadeGiganteGasto, setAncestralidadeGiganteGasto);
   function usarAncestralidadeGigante(): boolean {
-    if (usosAncestralidadeGiganteRestantes <= 0) return false;
-    setAncestralidadeGiganteGasto((v) => v + 1);
-    return true;
+    return ancestralidadeGigante.usar();
   }
 
   /** Toggle — ligar (1ª vez, gasta o uso) ou desligar (encerrar antes
    * do Descanso Longo, sem devolver o uso) a Forma Grande. Só o
    * Descanso Longo desliga sozinho e devolve o uso (ver
    * `descansoLongo`) — o app não segue tempo real pra saber quando os
-   * 10 minutos da transformação acabam. */
+   * 10 minutos da transformação acabam. Fica de fora do padrão
+   * genérico acima de propósito: 2 booleanos interdependentes
+   * (`Gasto`/`Ativa`), não 1 só. */
   function usarFormaGrande(): boolean {
     if (formaGrandeAtiva) {
       setFormaGrandeAtiva(false);
@@ -914,23 +922,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return true;
   }
 
+  const maosCurativas = recursoFlagUnica(maosCurativasGasto, setMaosCurativasGasto);
   function usarMaosCurativas(): boolean {
-    if (maosCurativasGasto) return false;
-    setMaosCurativasGasto(true);
-    return true;
+    return maosCurativas.usar();
   }
 
+  const revelacaoCelestial = recursoFlagUnica(revelacaoCelestialGasto, setRevelacaoCelestialGasto);
   function usarRevelacaoCelestial(formaEscolhida: string): boolean {
-    if (revelacaoCelestialGasto) return false;
-    setRevelacaoCelestialGasto(true);
+    if (!revelacaoCelestial.usar()) return false;
     setRevelacaoCelestialFormaAtiva(formaEscolhida);
     return true;
   }
 
+  const falarComAnimaisGnomo = recursoContado(usosFalarComAnimaisGnomoMaximo, falarComAnimaisGnomoGasto, setFalarComAnimaisGnomoGasto);
   function usarFalarComAnimaisGnomo(): boolean {
-    if (usosFalarComAnimaisGnomoRestantes <= 0) return false;
-    setFalarComAnimaisGnomoGasto((v) => v + 1);
-    return true;
+    return falarComAnimaisGnomo.usar();
   }
 
   function marcarUsado(categoria: RecursoTurno) {
@@ -969,10 +975,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return false;
   }
 
+  const inspiracaoDeBardo = recursoContado(usosInspiracaoMax, inspiracaoGasto, setInspiracaoGasto);
   function usarInspiracao(): boolean {
-    if (usosInspiracaoRestantes <= 0) return false;
-    setInspiracaoGasto((v) => v + 1);
-    return true;
+    return inspiracaoDeBardo.usar();
   }
 
   function recuperarInspiracaoComEspaco(): boolean {
@@ -1140,9 +1145,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setAstuciaMagicaGasta(true);
   }
 
+  const contatarPatrono = recursoFlagUnica(contatarPatronoGasto, setContatarPatronoGasto);
   function usarContatarPatrono() {
-    if (contatarPatronoGasto) return;
-    setContatarPatronoGasto(true);
+    contatarPatrono.usar();
   }
 
   function aplicarBencaoDoTenebroso() {
@@ -1277,34 +1282,29 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setItensMochila((prev) => desvincularArmaDePacto(prev));
   }
 
+  const usoFolego = recursoContado(usosFolegoMaximo, folegoGasto, setFolegoGasto);
   function usarUsoFolego(): boolean {
-    if (usosFolegoRestantes <= 0) return false;
-    setFolegoGasto((v) => v + 1);
-    return true;
+    return usoFolego.usar();
   }
 
+  const indomavel = recursoContado(indomavelMaximo, indomavelGasto, setIndomavelGasto);
   function usarIndomavel(): boolean {
-    if (indomavelRestantes <= 0) return false;
-    setIndomavelGasto((v) => v + 1);
-    return true;
+    return indomavel.usar();
   }
 
+  const pontoDeSorte = recursoContado(pontosDeSorteMaximo, pontosDeSorteGasto, setPontosDeSorteGasto);
   function usarPontoDeSorte(): boolean {
-    if (pontosDeSorteRestantes <= 0) return false;
-    setPontosDeSorteGasto((v) => v + 1);
-    return true;
+    return pontoDeSorte.usar();
   }
 
+  const sorteDoTenebroso = recursoContado(sorteDoTenebrosoMaximo, sorteDoTenebrosoGasto, setSorteDoTenebrosoGasto);
   function usarSorteDoTenebroso(): boolean {
-    if (sorteDoTenebrosoRestantes <= 0) return false;
-    setSorteDoTenebrosoGasto((v) => v + 1);
-    return true;
+    return sorteDoTenebroso.usar();
   }
 
+  const lancarNoInferno = recursoFlagUnica(lancarNoInfernoGasto, setLancarNoInfernoGasto);
   function usarLancarNoInferno(): boolean {
-    if (lancarNoInfernoGasto) return false;
-    setLancarNoInfernoGasto(true);
-    return true;
+    return lancarNoInferno.usar();
   }
 
   function recuperarLancarNoInfernoComEspacoDePacto(): boolean {
@@ -1355,9 +1355,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return () => registrarInspiracaoHeroica(null);
   }, [inspiracaoHeroicaAtiva, registrarInspiracaoHeroica]);
 
+  const surto = recursoContado(surtoMaximo, surtoGasto, setSurtoGasto);
   function usarSurto(): boolean {
-    if (surtoRestantes <= 0 || surtoUsadoTurno) return false;
-    setSurtoGasto((v) => v + 1);
+    if (surtoUsadoTurno) return false;
+    if (!surto.usar()) return false;
     setSurtoUsadoTurno(true);
     return true;
   }
