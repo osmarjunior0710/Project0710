@@ -31,6 +31,12 @@ interface ReacaoPanelContentProps {
   conjura: boolean;
   magiasReacao: Magia[];
   modAcertoConjuracao: number | null;
+  /** Invocações Místicas atuais e mod. de Carisma — só alimentam
+   * Explosão Agonizante (dano de Raio Místico), ver `MagiasTab.tsx`.
+   * Raio Místico não é Reação hoje, mas o parâmetro é obrigatório em
+   * `decidirConjuracao` — mantém a assinatura igual nos 3 painéis. */
+  invocacoesMisticasAtuais: string[];
+  modCarisma: number;
   detalhesAtivo: boolean;
   contraEncantamentoDisponivel: boolean;
   palavrasDeInterrupcaoDisponivel: boolean;
@@ -85,6 +91,8 @@ export default function ReacaoPanelContent({
   conjura,
   magiasReacao,
   modAcertoConjuracao,
+  invocacoesMisticasAtuais,
+  modCarisma,
   detalhesAtivo,
   contraEncantamentoDisponivel,
   palavrasDeInterrupcaoDisponivel,
@@ -128,7 +136,16 @@ export default function ReacaoPanelContent({
       }
     }
     setAviso(null);
-    const resultado = decidirConjuracao(m, m.circulo, nivel, modAcertoConjuracao, colheitaMacabraDisponivel, m.circulo > 0);
+    const resultado = decidirConjuracao(
+      m,
+      m.circulo,
+      nivel,
+      modAcertoConjuracao,
+      colheitaMacabraDisponivel,
+      m.circulo > 0,
+      invocacoesMisticasAtuais,
+      modCarisma,
+    );
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
     }

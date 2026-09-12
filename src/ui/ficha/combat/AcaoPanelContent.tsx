@@ -51,6 +51,10 @@ interface AcaoPanelContentProps {
   truques: Magia[];
   magiasPreparadas: Magia[];
   modAcertoConjuracao: number | null;
+  /** Invocações Místicas atuais e mod. de Carisma — só alimentam
+   * Explosão Agonizante (dano de Raio Místico), ver `MagiasTab.tsx`. */
+  invocacoesMisticasAtuais: string[];
+  modCarisma: number;
   numAtaques: number;
   ataquesFeitos: number;
   surtoMax: number;
@@ -96,6 +100,8 @@ export default function AcaoPanelContent({
   truques,
   magiasPreparadas,
   modAcertoConjuracao,
+  invocacoesMisticasAtuais,
+  modCarisma,
   numAtaques,
   ataquesFeitos,
   surtoMax,
@@ -164,7 +170,16 @@ export default function AcaoPanelContent({
     }
     setTelaMagia(null);
     const circuloUsado = circulo ?? m.circulo;
-    const resultado = decidirConjuracao(m, circuloUsado, nivel, modAcertoConjuracao, colheitaMacabraDisponivel, circulo !== null);
+    const resultado = decidirConjuracao(
+      m,
+      circuloUsado,
+      nivel,
+      modAcertoConjuracao,
+      colheitaMacabraDisponivel,
+      circulo !== null,
+      invocacoesMisticasAtuais,
+      modCarisma,
+    );
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
     }

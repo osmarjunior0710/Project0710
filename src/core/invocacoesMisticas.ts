@@ -42,9 +42,30 @@ export function invocacoesQueDependemDe(id: string, invocacoesAtuais: string[]):
 /** Invocações com mecânica própria que não passa por nenhum dos 3
  * campos padrão (`magiaGratisConcedida`/`pvTemporarioConcedido`/
  * `sentidoConcedido`) — Pacto da Lâmina (cria a arma), Lâmina
- * Sedenta/Devoradora (Ataque Extra) e Pacto do Tomo (Livro das
- * Sombras) têm implementação própria em outro lugar do app. */
-const IDS_COM_MECANICA_PROPRIA = ['pacto-da-lamina', 'lamina-sedenta', 'lamina-devoradora', 'pacto-do-tomo'];
+ * Sedenta/Devoradora (Ataque Extra), Pacto do Tomo (Livro das
+ * Sombras) e Explosão Agonizante (soma Carisma ao dano de Raio
+ * Místico, ver `bonusExplosaoAgonizante`) têm implementação própria
+ * em outro lugar do app. */
+const IDS_COM_MECANICA_PROPRIA = ['pacto-da-lamina', 'lamina-sedenta', 'lamina-devoradora', 'pacto-do-tomo', 'explosao-agonizante'];
+
+/** Regra real: Explosão Agonizante deixa o jogador escolher QUALQUER
+ * truque de Bruxo causador de dano pra vincular o bônus — o app ainda
+ * não modela essa escolha (`repetivel`, comentário "Fase 2" em
+ * `InvocacaoMistica`). Simplificação adotada: fixar em Raio Místico
+ * (id `raiomistico`) — único truque causador de dano EXCLUSIVO de
+ * Bruxo (Rajada de Veneno/Toque Necrótico são compartilhados com
+ * outras classes), de longe a escolha mais comum na mesa de verdade. */
+const ID_TRUQUE_EXPLOSAO_AGONIZANTE = 'raiomistico';
+
+/** Bônus de dano (mod. de Carisma) que Explosão Agonizante soma à
+ * jogada de dano de `magiaId` — `0` quando a magia não é o truque
+ * vinculado (ver `ID_TRUQUE_EXPLOSAO_AGONIZANTE`) ou o personagem não
+ * tem a invocação. */
+export function bonusExplosaoAgonizante(magiaId: string, invocacoesAtuais: string[], modCarisma: number): number {
+  if (magiaId !== ID_TRUQUE_EXPLOSAO_AGONIZANTE) return 0;
+  if (!invocacoesAtuais.includes('explosao-agonizante')) return 0;
+  return modCarisma;
+}
 
 /** Invocações passivas de texto puro — regra real, sem cálculo
  * possível (mesmo tratamento das ações genéricas do Cap.1, CLAUDE.md

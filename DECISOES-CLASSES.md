@@ -436,8 +436,24 @@ pet anterior dela antes de adicionar o novo — mesma regra de
 "vincular substitui a anterior", aplicada a uma criatura em vez de um
 item. Pets de outras origens nunca são afetados.
 
+**Explosão Agonizante — vinculação "qual truque" fixada em Raio
+Místico, não modelada como escolha:** a regra real deixa o jogador
+escolher qualquer truque de Bruxo causador de dano pra somar Carisma
+ao dano; o app simplifica fixando em Raio Místico (`raiomistico`) —
+único truque causador de dano EXCLUSIVO de Bruxo (Rajada de Veneno/
+Toque Necrótico são compartilhados com outras classes), de longe a
+escolha mais comum na mesa. `core/invocacoesMisticas.ts`
+(`bonusExplosaoAgonizante`) decide o bônus (`0` se a magia não é a
+vinculada ou a invocação não está marcada); `decidirConjuracao`
+(`core/conjurarMagia.ts`) soma ao `dano.mod` antes de montar o
+`danoPendente` — os 3 painéis que chamam essa função (MagiasTab/
+AcaoPanelContent/ReacaoPanelContent) recebem `invocacoesMisticasAtuais`/
+`modCarisma` e repassam sem lógica própria. Se um dia a escolha virar
+de verdade configurável, é só trocar o ID fixo por um campo salvo.
+
 **Data/origem:** 2026-09, plano "Invocações Místicas Fase 2" (IM.1,
-IM.2, IM.4, IM.5) + Fase P (Motor de Pets, P3/P4).
+IM.2, IM.4, IM.5) + Fase P (Motor de Pets, P3/P4). Explosão Agonizante
+corrigida à parte, 2026-09.
 
 ## Bruxo — pré-requisito encadeado entre Invocações Místicas
 

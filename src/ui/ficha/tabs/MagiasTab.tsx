@@ -111,6 +111,14 @@ interface MagiasTabProps {
   /** `true` só quando o personagem tem a Invocação Mística Pacto do
    * Tomo — controla se o botão "Reconjurar o Livro" aparece. */
   temPactoDoTomo: boolean;
+  /** Invocações Místicas atuais do personagem — hoje só alimenta
+   * Explosão Agonizante (soma Carisma ao dano de Raio Místico, ver
+   * `core/invocacoesMisticas.ts`), passado direto (não como booleano
+   * pronto) porque `decidirConjuracao` decide sozinho se a magia
+   * conjurada é a vinculada. Vazio pra quem não tem nenhuma. */
+  invocacoesMisticasAtuais: string[];
+  /** Mod. de Carisma atual — mesmo motivo do campo acima. */
+  modCarisma: number;
   /** `true` = já reconjurado desde o último Descanso Curto/Longo —
    * botão "Reconjurar" fica travado até o próximo descanso. */
   livroDasSombrasGasto: boolean;
@@ -184,6 +192,8 @@ export default function MagiasTab({
   espacosParaConjurar,
   onGastarSlotCirculo,
   modAcertoConjuracao,
+  invocacoesMisticasAtuais,
+  modCarisma,
   desvantagemForcaDestreza,
   conjura,
   truquesAtuais,
@@ -270,7 +280,16 @@ export default function MagiasTab({
    * Mística) — controla se essa conjuração pode disparar a Colheita
    * Macabra (Necromante), ver `core/conjurarMagia.ts`. */
   function processarMagiaAoUsar(m: Magia, circuloUsado: number, gastouEspacoDeVerdade: boolean) {
-    const resultado = decidirConjuracao(m, circuloUsado, nivel, modAcertoConjuracao, colheitaMacabraDisponivel, gastouEspacoDeVerdade);
+    const resultado = decidirConjuracao(
+      m,
+      circuloUsado,
+      nivel,
+      modAcertoConjuracao,
+      colheitaMacabraDisponivel,
+      gastouEspacoDeVerdade,
+      invocacoesMisticasAtuais,
+      modCarisma,
+    );
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
     }

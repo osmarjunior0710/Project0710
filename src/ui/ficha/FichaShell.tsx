@@ -1768,6 +1768,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             espacosParaConjurar={espacosParaConjurar}
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}
+            invocacoesMisticasAtuais={invocacoesMisticasAtuais}
+            modCarisma={carMod}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             conjura={conjura}
             truquesAtuais={truquesAtuais}
@@ -1888,6 +1890,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             magiasPreparadasAcao={magiasPreparadasAcao}
             magiasPreparadasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
+            invocacoesMisticasAtuais={invocacoesMisticasAtuais}
+            modCarisma={carMod}
             numAtaques={numAtaques}
             indomavelMaximo={indomavelMaximo}
             indomavelRestantes={indomavelRestantes}

@@ -5,6 +5,7 @@ import {
   invocacaoBloqueadaPorRequisitoAusente,
   invocacoesQueDependemDe,
   invocacaoTemPlaceholder,
+  bonusExplosaoAgonizante,
 } from './invocacoesMisticas';
 import { invocacoesMisticas } from '../data/rulesets/dnd2024/invocacoesMisticas';
 
@@ -97,8 +98,8 @@ describe('invocacaoTemPlaceholder', () => {
     expect(invocacaoTemPlaceholder(inv)).toBe(false);
   });
 
-  it('Pacto da Lâmina/Lâmina Sedenta/Lâmina Devoradora/Pacto do Tomo: sem [PH] (mecânica própria)', () => {
-    for (const id of ['pacto-da-lamina', 'lamina-sedenta', 'lamina-devoradora', 'pacto-do-tomo']) {
+  it('Pacto da Lâmina/Lâmina Sedenta/Lâmina Devoradora/Pacto do Tomo/Explosão Agonizante: sem [PH] (mecânica própria)', () => {
+    for (const id of ['pacto-da-lamina', 'lamina-sedenta', 'lamina-devoradora', 'pacto-do-tomo', 'explosao-agonizante']) {
       const inv = invocacoesMisticas.find((i) => i.id === id)!;
       expect(invocacaoTemPlaceholder(inv)).toBe(false);
     }
@@ -117,5 +118,19 @@ describe('invocacaoTemPlaceholder', () => {
   it('Pacto da Corrente: ainda [PH] (depende de sistema de Familiar)', () => {
     const inv = invocacoesMisticas.find((i) => i.id === 'pacto-da-corrente')!;
     expect(invocacaoTemPlaceholder(inv)).toBe(true);
+  });
+});
+
+describe('bonusExplosaoAgonizante', () => {
+  it('Raio Místico + invocação marcada: soma o mod. de Carisma', () => {
+    expect(bonusExplosaoAgonizante('raiomistico', ['explosao-agonizante'], 4)).toBe(4);
+  });
+
+  it('Raio Místico sem a invocação marcada: 0', () => {
+    expect(bonusExplosaoAgonizante('raiomistico', [], 4)).toBe(0);
+  });
+
+  it('borda: outro truque de dano (Toque Necrótico), mesmo com a invocação marcada: 0', () => {
+    expect(bonusExplosaoAgonizante('toquenecrotico', ['explosao-agonizante'], 4)).toBe(0);
   });
 });

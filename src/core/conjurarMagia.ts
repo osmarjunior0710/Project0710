@@ -13,6 +13,7 @@
 import type { Magia } from '../data/rulesets/dnd2024/magias';
 import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia, type MecanicaMagia } from './magiaDano';
 import { curaColheitaMacabra } from './necromante';
+import { bonusExplosaoAgonizante } from './invocacoesMisticas';
 
 /** Rolagem de 1 dado só (acerto de magia) — mesmo formato mínimo de
  * `RollD20Options` (`useRoll()`), sem `quantidade`/`lados` (sempre 1d20). */
@@ -66,7 +67,9 @@ export interface ConjuracaoDecidida {
  * SEPARADA de `circuloUsado > 0` — necessária porque uma magia
  * concedida de graça por Invocação Mística pode ter círculo > 0 sem
  * ter gastado espaço nenhum (a Colheita Macabra exige "usando um
- * espaço de magia" de verdade, não qualquer conjuração). */
+ * espaço de magia" de verdade, não qualquer conjuração). `invocacoesAtuais`/
+ * `modCarisma` só alimentam Explosão Agonizante (ver
+ * `bonusExplosaoAgonizante`) — sem efeito em qualquer outra magia. */
 export function decidirConjuracao(
   m: Magia,
   circuloUsado: number,
@@ -74,6 +77,8 @@ export function decidirConjuracao(
   modAcertoConjuracao: number | null,
   colheitaMacabraDisponivel: boolean,
   gastouEspacoDeVerdade: boolean,
+  invocacoesAtuais: string[],
+  modCarisma: number,
 ): ConjuracaoDecidida {
   const curaMacabra =
     colheitaMacabraDisponivel && gastouEspacoDeVerdade && m.escola === 'Necromancia' ? curaColheitaMacabra(circuloUsado) : null;
@@ -82,11 +87,15 @@ export function decidirConjuracao(
 
   if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
     const dano = calcularDanoMagia(m, circuloUsado, nivelPersonagem);
+    const bonusAgonizante = bonusExplosaoAgonizante(m.id, invocacoesAtuais, modCarisma);
+    const danoFinal = dano && bonusAgonizante !== 0 ? { ...dano, mod: dano.mod + bonusAgonizante } : dano;
     return {
       mecanica,
       rollAcerto: { label: `Ataque de Magia — ${m.nome}`, formula: `1d20 + ${modAcertoConjuracao}`, mod: modAcertoConjuracao },
-      danoPendente: dano ? { label: `Dano — ✨ ${m.nome}`, quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod } : undefined,
-      textoFeedback: dano
+      danoPendente: danoFinal
+        ? { label: `Dano — ✨ ${m.nome}`, quantidade: danoFinal.quantidade, lados: danoFinal.lados, mod: danoFinal.mod }
+        : undefined,
+      textoFeedback: danoFinal
         ? 'Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano.'
         : 'Rolagem de acerto feita. Veja a descrição da magia (ⓘ) pro dano.',
       curaColheitaMacabra: curaMacabra,

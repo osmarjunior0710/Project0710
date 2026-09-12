@@ -135,6 +135,10 @@ interface CombatTabProps {
   magiasPreparadasAcao: Magia[];
   magiasPreparadasReacao: Magia[];
   modAcertoConjuracao: number | null;
+  /** Invocações Místicas atuais e mod. de Carisma — só alimentam
+   * Explosão Agonizante (dano de Raio Místico), ver `MagiasTab.tsx`. */
+  invocacoesMisticasAtuais: string[];
+  modCarisma: number;
   numAtaques: number;
   indomavelMaximo: number;
   indomavelRestantes: number;
@@ -268,6 +272,8 @@ export default function CombatTab({
   magiasPreparadasAcao,
   magiasPreparadasReacao,
   modAcertoConjuracao,
+  invocacoesMisticasAtuais,
+  modCarisma,
   numAtaques,
   indomavelMaximo,
   indomavelRestantes,
@@ -955,6 +961,8 @@ export default function CombatTab({
             truques={truques}
             magiasPreparadas={magiasPreparadasAcao}
             modAcertoConjuracao={modAcertoConjuracao}
+            invocacoesMisticasAtuais={invocacoesMisticasAtuais}
+            modCarisma={modCarisma}
             numAtaques={numAtaques}
             ataquesFeitos={ataquesFeitos}
             surtoMax={surtoMaximo}
@@ -1033,6 +1041,8 @@ export default function CombatTab({
             conjura={conjura}
             magiasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
+            invocacoesMisticasAtuais={invocacoesMisticasAtuais}
+            modCarisma={modCarisma}
             colheitaMacabraDisponivel={colheitaMacabraDisponivel}
             onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
             detalhesAtivo={detalhesAtivo}

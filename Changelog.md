@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1931
+
+Bruxo — Explosão Agonizante (Invocação Mística) deixa de mostrar
+"[PH] sem efeito mecânico ainda" no Perfil: agora soma de verdade o
+modificador de Carisma ao dano de Raio Místico sempre que essa
+invocação estiver marcada (na aba Magias e no painel de Ação/Reação
+do Combate).
+
 ## v202609_1846
 
 O dado 3D (🎲, botão flutuante na Ficha) deixa de ser protótipo: agora
