@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1737
+
+Arrumação interna, nada novo pra ver na tela: os passos de escolha do
+Level Up (Truques, Magias Preparadas, Especialista, Proficiências
+Bônus, Invocações Místicas, Descobertas Mágicas, Livro de Magias,
+Perito em Necromancia) foram organizados numa peça só do motor
+interno, sem mudar nenhuma regra — Level Up continua funcionando
+exatamente igual.
+
 ## v202609_1713
 
 Arrumação interna, nada novo pra ver na tela: os ~50 valores de magia/

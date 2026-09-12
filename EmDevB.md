@@ -157,8 +157,30 @@ que ainda reduz duplicação real sem tocar no formato salvo.
 
 ### G4 — Avaliar depois de G3 (pode reaproveitar os hooks novos)
 
-- [ ] **G4.1** — `LevelUpShell.tsx` (1910 linhas, ~20 `useState` por
-      escolha de level-up).
+- [x] **G4.1** — `LevelUpShell.tsx` (1961 linhas): lido o arquivo
+      inteiro antes de mexer — 8 dos passos de escolha (Truques,
+      Livro de Magias, Perito em Necromancia, Magias Preparadas,
+      Invocações Místicas, Descobertas Mágicas, Especialista,
+      Proficiências Bônus) seguiam a MESMA forma (`useState<string[]>`
+      + função `toggle` soma/remove até um máximo, cada um com sua
+      própria regra de quando um item já conhecido trava). Consolidado
+      num hook genérico `useEscolhaMultipla(atuais, max, {bloqueado,
+      podeRemover, podeAdicionar})` (`src/ui/ficha/hooks/`) — os 3
+      parâmetros opcionais cobrem as 3 variações reais encontradas
+      (trava simples por nome, ou trava que depende do conjunto atual
+      de escolhidos, caso de Invocações Místicas). Os outros ~16
+      `useState` do arquivo (luIndex, faseDramatica, subclasseEscolhida,
+      talentoEscolhido, arcanaMisticaEscolhidas, etc.) ficaram de fora
+      de propósito — cada um é uma peça de estado genuinamente
+      diferente, não duplicação do mesmo padrão (mesmo critério do
+      G3.2: não força abstração em cima do que não é igual de
+      verdade). Verificado com `tsc -b`/`npm test` (495)/`npm run
+      build` limpos + Level Up de ponta a ponta no navegador (Bardo
+      criado do zero, nível 1→2→3 pela tela de verdade, clicando em
+      Truques/Magias Preparadas/Especialista/Proficiências Bônus/
+      Subclasse) — todos os passos validaram e avançaram certo, sem
+      erro de console, resultado final (subclasse, truques, magias,
+      perícias) todos coerentes com o que foi clicado.
 - [ ] **G4.2** — `CombatTab.tsx` (~100 props individuais, 1 quadra
       `xDisponivel`/`xMaximo`/`xRestantes`/`onUsarX` por recurso).
 
