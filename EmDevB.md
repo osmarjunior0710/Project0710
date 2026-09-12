@@ -128,10 +128,17 @@ que ainda reduz duplicação real sem tocar no formato salvo.
 - [ ] **G3.3** — `useMagiasPersonagem`: os ~40 `const magias*`/
       `truques*` espalhados pelo componente, extraídos como 1 hook de
       derivação pura (mesmas entradas → mesmo objeto de saída).
-- [ ] **G3.4** — Consolida os ~11 `caracteristicaSubclasseDesbloqueada(...)`
-      chamados um por um (mesmo padrão, ID diferente) num único
-      helper que recebe a lista de IDs e devolve um mapa
-      `{chave: boolean}` — também derivação pura, sem mudar estado.
+- [x] **G3.4** — `caracteristicasSubclasseAtivas` (`src/ui/ficha/hooks/`):
+      consolida os 11 `caracteristicaSubclasseDesbloqueada(subclasse,
+      ID, nível)` (mesmos 2 primeiros argumentos sempre, só o ID
+      muda) numa chamada só, devolvendo um mapa `{chave: boolean}`
+      desestruturado com os MESMOS nomes locais de sempre
+      (`legiaoDosMortosDisponivel`, `mestreDaMorteDisponivel`, etc.) —
+      nenhum outro ponto do arquivo precisou mudar. Verificado com
+      `tsc -b`/`npm test` (495)/`npm run build` limpos + clique em
+      todas as 6 abas da Ficha (Atributos/Perfil/Mochila/Magias/
+      Combate/Pets) num Bardo, sem erro de console nem `undefined`/
+      `NaN` vazando pra tela.
 
 ### G4 — Avaliar depois de G3 (pode reaproveitar os hooks novos)
 

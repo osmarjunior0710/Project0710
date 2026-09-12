@@ -5,6 +5,7 @@ import { garantirPersonagemDemo, ID_PERSONAGEM_DEMO } from '../../core/personage
 import { useColapsavel } from '../hooks/useColapsavel';
 import { useAutosavePersonagem } from './hooks/useAutosavePersonagem';
 import { recursoContado, recursoFlagUnica } from './hooks/recursoGasto';
+import { caracteristicasSubclasseAtivas } from './hooks/caracteristicasSubclasseAtivas';
 import {
   bonusProficiencia,
   calcularAtributosFinais,
@@ -123,13 +124,7 @@ import {
   type PoolDePonte,
 } from '../../core/magiasPersonagem';
 import { usosInspiracaoMaximo, dadoInspiracao, fonteDeInspiracaoDesbloqueada } from '../../core/inspiracaoBardo';
-import {
-  caracteristicaDesbloqueada,
-  caracteristicaSubclasseDesbloqueada,
-  contarRepeticoesCaracteristica,
-  numeroDeAtaques,
-} from '../../core/levelUp';
-import { ID_CARACTERISTICA_SUBCLASSE } from '../../data/rulesets/dnd2024/idsCaracteristicasSubclasse';
+import { caracteristicaDesbloqueada, contarRepeticoesCaracteristica, numeroDeAtaques } from '../../core/levelUp';
 import { estilosDeLuta } from '../../data/rulesets/dnd2024/estilosDeLuta';
 import { armaduras } from '../../data/rulesets/dnd2024/armaduras';
 import { origens } from '../../data/rulesets/dnd2024/origens';
@@ -544,13 +539,39 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const magiasGratisConcedidas = magiasGratisDasInvocacoes(invocacoesMisticasAtuais);
   const formasFamiliarElegiveis = formasFamiliarDasInvocacoes(invocacoesMisticasAtuais);
   const formasFamiliarMortoVivoElegiveis = formasFamiliarMortoVivoElegiveisNecro(personagem.subclasse, personagem.nivel);
-  const legiaoDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.legiaoDosMortos, personagem.nivel);
+  // G3.4 (foco de saúde do projeto, ver EmDevB.md): consolida os
+  // 11 `caracteristicaSubclasseDesbloqueada(subclasse, ID, nível)`
+  // (mesmos 2 primeiros argumentos sempre, só o ID muda) numa chamada
+  // só — os nomes locais abaixo continuam exatamente os mesmos de
+  // antes, só a forma de calculá-los mudou.
+  const {
+    legiaoDosMortos: legiaoDosMortosDisponivel,
+    grimorioDeNecromancia: colheitaMacabraDisponivel,
+    colheitaDosMortos: colheitaDosMortosDisponivel,
+    mestreDaMorte: mestreDaMorteDisponivel,
+    magiasDePactoDoInfero: magiasPactoDoInferoDisponivel,
+    palavrasDeInterrupcao: palavrasDeInterrupcaoDisponivel,
+    periciaInigualavel: periciaInigualavelDisponivel,
+    bencaoDoTenebroso: bencaoDoTenebrosoDisponivel,
+    aSorteDoProprioTenebroso: sorteDoTenebrosoDisponivel,
+    resistenciaInfera: resistenciaInferaDisponivel,
+    lancarNoInferno: lancarNoInfernoDisponivel,
+  } = caracteristicasSubclasseAtivas(personagem.subclasse, personagem.nivel, [
+    'legiaoDosMortos',
+    'grimorioDeNecromancia',
+    'colheitaDosMortos',
+    'mestreDaMorte',
+    'magiasDePactoDoInfero',
+    'palavrasDeInterrupcao',
+    'periciaInigualavel',
+    'bencaoDoTenebroso',
+    'aSorteDoProprioTenebroso',
+    'resistenciaInfera',
+    'lancarNoInferno',
+  ]);
   const modIntAtual = atributos.find((a) => a.atributo === 'INT')?.mod ?? 0;
-  const colheitaMacabraDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.grimorioDeNecromancia, personagem.nivel);
-  const colheitaDosMortosDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.colheitaDosMortos, personagem.nivel);
   const personagemEstaEnsanguentado = personagemEnsanguentado(pvAtual, personagem.pvMax);
   const opcoesColheitaDosMortosAtuais = opcoesColheitaDosMortos(pets, personagem.nivel);
-  const mestreDaMorteDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.mestreDaMorte, personagem.nivel);
   const pvTempMestreDaMorteAtual = mestreDaMorteDisponivel ? bonusPvTempMestreDaMorte(personagem.nivel) : 0;
   const petsMortoVivoAtuais = petsMortoVivo(pets);
   const mestreDaMorteExplosaoLiberadaAtual = algumMortoVivoEm0PV(pets);
@@ -574,7 +595,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // preparada (fora do limite normal) — entram no que dá pra conjurar
   // em combate, mas são arrays PRÓPRIOS separados, só unidos aqui pra
   // montar a lista de "o que aparece nos painéis de Ação/Reação".
-  const magiasPactoDoInferoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.magiasDePactoDoInfero, personagem.nivel);
   const magiasPactoDoInferoAtuais = magiasPactoDoInferoDisponivel ? magiasPactoDoInfero(personagem.nivel) : [];
   const magiasPactoDoInferoPreparadas = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
   // Truques + magias fixas da Linhagem Élfica/Gnômica (e futuramente
@@ -653,12 +673,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const ajusteTatico = classe ? caracteristicaDesbloqueada(classe, 'Ajuste Tático', personagem.nivel) : null;
   const contraEncantamentoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contra-Encantamento', personagem.nivel) !== null : false;
   const inspiracaoSuperiorDesbloqueada = classe ? caracteristicaDesbloqueada(classe, 'Inspiração Superior', personagem.nivel) !== null : false;
-  const palavrasDeInterrupcaoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.palavrasDeInterrupcao, personagem.nivel);
-  const periciaInigualavelDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.periciaInigualavel, personagem.nivel);
-  const bencaoDoTenebrosoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.bencaoDoTenebroso, personagem.nivel);
-  const sorteDoTenebrosoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.aSorteDoProprioTenebroso, personagem.nivel);
-  const resistenciaInferaDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.resistenciaInfera, personagem.nivel);
-  const lancarNoInfernoDisponivel = caracteristicaSubclasseDesbloqueada(personagem.subclasse, ID_CARACTERISTICA_SUBCLASSE.lancarNoInferno, personagem.nivel);
   const forMod = atributos.find((a) => a.atributo === 'FOR')?.mod ?? 0;
   const desMod = atributos.find((a) => a.atributo === 'DES')?.mod ?? 0;
   const carMod = atributos.find((a) => a.atributo === 'CAR')?.mod ?? 0;
