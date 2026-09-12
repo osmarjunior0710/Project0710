@@ -83,6 +83,11 @@ bruta por trás dela. Nunca busque regra em lugar nenhum além desses
 dois (memória própria, web) — se nem a planilha nem os PDFs tiverem
 algo, pare e avise exatamente o que está faltando.
 
+`livros-referencia/INDICE.md` cataloga o que tem em cada PDF (títulos
+de seção + nomes próprios dos itens cobertos) — consulte-o primeiro
+pra saber em qual arquivo procurar um assunto, sem precisar abrir
+todos os PDFs.
+
 **Antes de começar qualquer entrega que toque em dado de regra**
 (classes, subclasses, origens, espécies, talentos, magias, equipamento,
 condições, progressão) — mesmo que pareça que o dado já foi importado
