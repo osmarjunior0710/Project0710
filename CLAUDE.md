@@ -65,13 +65,23 @@ Ação/Ação Bônus/Reação, estado Ativo vs Usada, contador de Espaços de
 Magia). Não invente fluxo novo sem confirmar antes. Se algo não estiver
 claro no wireframe, pergunte — não assuma.
 
-## 3. Fonte de verdade de dados: a planilha, nunca os PDFs
+## 3. Fonte de verdade de dados: a planilha manda, os PDFs são referência bruta
 
-`dnd-master-referencia.xlsx`, na raiz do repositório, é a fonte de dados
-de regras (classes, magias, talentos, equipamento, condições). Os PDFs
-originais dos livros **não existem neste repositório** de propósito.
-Nunca tente buscar regra em outro lugar (memória própria, web) — se a
-planilha não tiver algo, pare e avise exatamente o que está faltando.
+`dnd-master-referencia.xlsx`, na raiz do repositório, continua sendo a
+fonte de **dado confirmado e pronto pra importar** (classes, magias,
+talentos, equipamento, condições) — o que está na planilha é o que
+vale pra `src/data/`, sempre.
+
+Desde 2026-09, os PDFs originais dos livros (Livro do Jogador e Livro
+do Mestre, regras 2024) também vivem no repositório, em
+`livros-referencia/` — deixaram de ser proposital-ausentes. Use-os
+pra **entender uma regra que a planilha ainda não cobre** ou tirar
+dúvida ao quebrar uma entrega nova (ver o chapéu de Product Manager,
+seção 6.1) — nunca pra sobrescrever ou contradizer o que a planilha já
+diz: a planilha é sempre o dado que vale, o livro é só contexto/regra
+bruta por trás dela. Nunca busque regra em lugar nenhum além desses
+dois (memória própria, web) — se nem a planilha nem os PDFs tiverem
+algo, pare e avise exatamente o que está faltando.
 
 **Antes de começar qualquer entrega que toque em dado de regra**
 (classes, subclasses, origens, espécies, talentos, magias, equipamento,
@@ -153,15 +163,79 @@ Todo trabalho roda em cima de um **foco** (uma classe, uma aba, um
 sistema) registrado no `EmDev.md`. Nunca comece a implementar sem um
 plano aprovado.
 
-**Abrindo um foco:** proponha a quebra em entregas pequenas, checando
-antes o que já existe no código pra reaproveitar (ver 6.1), o que a
-família `DECISOES-*.md` já decidiu sobre assunto parecido, e o que
-`PENDENCIAS.md` já tinha registrado sobre esse foco (não reabrir sem
-saber o que já tinha contexto). Pra qualquer característica nova com
-interação ativa em Combat/UI (não é só reaproveitar um padrão já
-validado), **pergunte ao Osmar onde ela fica e como o jogador ativa
-ANTES de codar** — não construa e ajuste depois. Só comece a escrever
-código depois de aprovado.
+**Abrindo um foco:** siga os 2 chapéus abaixo (6.1 e 6.2), nessa ordem,
+antes de escrever qualquer passo no `EmDev`/`EmDevB`. Só depois dos
+dois aprovados pelo Osmar é que o plano vira checklist (seção 14) e
+entra em execução entrega por entrega (chapéu de execução, seção 6.3).
+
+### 6.1 Chapéu 1 — Product Manager: entender e quebrar em entregas
+
+Antes de propor qualquer plano, vista o chapéu de Product Manager: leia
+o que já existe (código, família `DECISOES-*.md` sobre assunto
+parecido, `PENDENCIAS.md` sobre esse foco — não reabrir sem saber o
+que já tinha contexto) e entenda a necessidade real por trás do
+pedido, não só o pedido literal.
+
+Pra qualquer entrega que toque em dado de regra de D&D, reúna (peça ao
+Osmar se ainda não tiver em mãos) os documentos de apoio, nesta ordem
+de importância:
+1. **Planilha** (`dnd-master-referencia.xlsx`) — sempre; é o dado
+   confirmado (seção 3).
+2. **PDFs dos livros** (Livro do Jogador e Livro do Mestre, em
+   `livros-referencia/`) — sempre que a planilha não cobrir o
+   suficiente pra entender a regra por trás do pedido.
+3. **SDD com decupagem**, quando existir um pra esse assunto —
+   opcional, ajuda a entender decisão de implementação já pensada
+   antes.
+
+Não assuma nada que não estiver nesses documentos — falta informação,
+pare e pergunte, mesmo que pareça dar pra adivinhar.
+
+A entrega deste chapéu é **quebrar a entrega grande em entregas
+pequenas que cada uma agrega valor sozinha**, e propor o que cada uma
+é e em que ordem fazer (ex.: "Mago e especializações" quebra em: dado
+no banco sem mudar nada visível → habilitar Mago na criação de
+personagem, que também destrava parte de Multiclasse de graça → os 20
+níveis sem features → magias/círculos/espaços → cada feature indo ao
+ar → Multiclasse). Se houver ambiguidade de prioridade — inclusive se
+vale abrir uma frente nova que ainda não existe no app (ex.: familiar/
+pet) em vez de continuar o que já estava andamento — pergunte ao
+Osmar em vez de decidir sozinho.
+
+### 6.2 Chapéu 2 — Product/UI Design: plano holístico de encaixe na UI
+
+Com a quebra em entregas aprovada, vista o chapéu de Product/UI
+Design. Olhe pra tudo que o chapéu 1 planejou e pra UI que já existe
+(o app já acumula bastante complexidade de tela) e proponha, de forma
+**holística** — o conjunto, não tela por tela isolada — como cada
+peça nova encaixa na interface atual. Já deixe uma proposta concreta
+de como resolver cada necessidade nova (onde entra, que padrão de
+tela usa), consultando a família `DECISOES-*.md` antes (seção 7) pra
+não repetir uma decisão já tomada e revertida.
+
+Mesma regra do chapéu 1: dúvida ou informação faltando, pergunte — não
+assuma. O foco aqui é a usabilidade do app como um todo.
+
+### 6.3 Execução de cada entrega — UI Designer + Engenheiro juntos
+
+Na hora de executar uma peça específica do plano (um item do
+checklist do `EmDev`/`EmDevB`), 2 chapéus entram em cena juntos, antes
+de codar:
+
+- **UI Designer** (nível de implementação): avalia a tela/interação
+  concreta dessa entrega especificamente e propõe a solução de UI.
+- **Engenheiro**: olha o que já existe pra reaproveitar (ver 6.4) ou o
+  que precisa ser criado do zero, e como implementar da forma mais
+  eficiente.
+
+São 2 óticas diferentes buscando a mesma entrega — "conversem" antes,
+resolvendo a tensão entre a melhor UI possível e o que é viável
+construir bem, e só decidam juntos a solução final. Pra qualquer
+característica nova com interação ativa em Combat/UI (não é só
+reaproveitar um padrão já validado), **pergunte ao Osmar onde ela fica
+e como o jogador ativa ANTES de codar** — isso vale mesmo depois do
+acordo entre os 2 papéis; não construa e ajuste depois. Só comece a
+escrever código depois de aprovado.
 
 **Durante o foco:** um achado que dá pra resolver dentro do MESMO foco,
 só não nessa entrega, vira **item novo dentro do próprio `EmDev.md`**
@@ -184,7 +258,7 @@ limpar do `PENDENCIAS.md` qualquer coisa — mesmo de outro foco — que
 foi resolvida no caminho; (4) esvazie o `EmDev.md`; (5) pergunte qual o
 próximo foco.
 
-### 6.1 Reaproveite o padrão que já existe — não invente um novo
+### 6.4 Reaproveite o padrão que já existe — não invente um novo
 
 Antes de desenhar schema, componente ou fluxo novo, procure ativamente
 se já existe algo parecido no código (schema de dado semelhante,
