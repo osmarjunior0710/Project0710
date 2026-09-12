@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1846
+
+O dado 3D (🎲, botão flutuante na Ficha) deixa de ser protótipo: agora
+o jogador escolhe um rótulo livre e Normal/Vantagem/Desvantagem antes
+de rolar 1d20 avulso (em vez de sortear uma perícia à toa só pra
+testar). E o mais importante — o "📜 Log" do dado 3D agora mostra
+TODAS as rolagens da Ficha, não só as do próprio dado 3D: role uma
+perícia normal, um ataque, o que for, e ela aparece na mesma lista.
+
 ## v202609_1737
 
 Arrumação interna, nada novo pra ver na tela: os passos de escolha do
