@@ -312,7 +312,7 @@ Guarde o "último valor válido" num estado separado (aqui: `ultimoPainel`
 ao lado de `painelAberto`) — só o booleano puro de aberto/fechado deve
 resetar na hora certa.
 
-## Protótipo: dado 3D com física (não CSS) é viável — `@3d-dice/dice-box`
+## Dado 3D com física (não CSS) — `@3d-dice/dice-box`, Fase A formalizada
 
 **Escolha:** `@3d-dice/dice-box` (BabylonJS + Ammo.js, física rodando em
 Web Worker) — não `dice-box-threejs` (irmã da mesma família, menos
@@ -339,15 +339,31 @@ principal.
   box.loadTheme(id)` antes de rolar com um tema ainda não carregado
   nessa sessão (idempotente depois da 1ª vez).
 
-**Bloqueio real, não resolvido:** a lib decide o resultado pela própria
-física (`box.roll('1d20')` sorteia sozinha) — não há, na documentação
-pública, como forçar um resultado específico. Isso importa se o app
-precisar que o NOSSO gerador de número (não o da lib) seja a fonte de
-verdade do resultado, pra ficar consistente com bônus/vantagem já
-calculados. Investigar antes de trocar a arte 2D atual por isso de
-verdade.
+**Confirmado (lendo `Dice.js` da lib):** a lib decide o resultado só
+pela física (raycasting no dado já parado) — não existe API pra forçar
+um resultado. Sem forma de gerar o número com `Math.random()`/nosso
+motor e só "decorar" com a física depois — quando o dado 3D vira fonte
+de verdade de uma rolagem real, a física da lib TEM que ser a origem
+do número bruto (motor de vantagem/modificador/total continua nosso).
+Mapeamento completo de cada mecânica atual (Vantagem pré/pós-rolagem,
+reroll, grupos mistos, Modo de Teste) pro motor 3D: ver
+`sdd/sdd-dado-3d.md`.
 
-**Escopo:** protótipo isolado (FAB `Dice3dFab.tsx` na Ficha, overlay
-próprio) — não integrado a nenhum fluxo real (Combat/Magias/Atributos).
+**Escopo — decisão de fases (Osmar, 2026-09):** o dado 3D vira os dois,
+em fases. **Fase A** (feito): `Dice3dFab.tsx` formalizado como
+ferramenta avulsa permanente da Ficha (não é mais protótipo/`[PH]`) —
+todos os tipos de dado, modo Múltiplos, customização de textura/cor, e
+um histórico de rolagens **compartilhado com o resto da Ficha**
+(`RollContext.log`/`adicionarLog`): toda rolagem real do jogo
+(`rolarD20`/`rolarDados`, logada em `fechar()` quando a rolagem está
+`concluido`) E toda rolagem avulsa do FAB aparecem na MESMA lista —
+`RollContext` é o único lugar que os dois mundos enxergam, já que o
+resto da Ficha nem sabe que o dado 3D existe. O d20 avulso do FAB não
+simula perícia mais (era sorteio aleatório só pra testar formato) — o
+jogador escolhe rótulo (texto livre) e Normal/Vantagem/Desvantagem
+manualmente antes de rolar. **Fase B** (não iniciada): o motor 3D vira
+o padrão pra toda rolagem oficial do jogo (Combate/Magias/Atributos),
+com preferência 3D/2D no menu do avatar — ver o SDD pra mecânica
+completa.
 
 **Data/origem:** 2026-09, pedido do Osmar.

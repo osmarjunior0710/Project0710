@@ -127,6 +127,68 @@ export interface RollState {
   rerollEscolhidoUsado?: boolean;
 }
 
+/** 1 linha do histórico de rolagens (últimas 20, mais recente
+ * primeiro) — pedido do Osmar (2026-09): "pegar todas as rolagens, de
+ * dentro do rolador de dados [3D avulso] e do resto da ficha [rolagens
+ * de verdade, `rolarD20`/`rolarDados`]". Fica no `RollContext` (não em
+ * `Dice3dFab.tsx`) porque é o único lugar que os dois mundos
+ * enxergam — o resto da Ficha nem sabe que o dado 3D existe. */
+export interface RegistroLog {
+  id: string;
+  /** Nome da perícia/ação (rolagem real, vem de `label`) OU "Rolagem
+   * de NdX + ..."/rótulo livre (dado 3D avulso). */
+  titulo: string;
+  /** Valores de cada dado, na ordem que caíram. */
+  valores: (number | string)[];
+  /** "Vantagem" | "Desvantagem" — omitido = rolagem sem os dois. */
+  tag?: string;
+  total: number;
+  /** Parcelas somadas pra formar o total (dado(s) mantido(s) +
+   * modificador, ou todos os dados de uma rolagem sem modificador). */
+  partesTotal: (number | string)[];
+}
+
+const MAX_LOG = 20;
+
+/** Converte uma `RollState` concluída (rolagem real da Ficha) numa
+ * `RegistroLog` — chamado só de dentro de `fechar()` (1x por sessão de
+ * rolagem, não a cada mutação intermediária de Vantagem/reroll/Bônus
+ * Extra, já que o jogador só fecha o overlay depois de decidir tudo). */
+function criarRegistroLogDaRolagem(estado: RollState): Omit<RegistroLog, 'id'> {
+  const mod = estado.mod ?? 0;
+  let valores: (number | string)[];
+  let usado: number | string;
+  let tag: string | undefined;
+
+  if (estado.tipo === 'd20' && estado.dado2 != null) {
+    valores = [estado.valorDado, estado.dado2];
+    const d1 = typeof estado.valorDado === 'number' ? estado.valorDado : 0;
+    const d2 = typeof estado.dado2 === 'number' ? estado.dado2 : 0;
+    usado = estado.vantagem === 'desvantagem' ? Math.min(d1, d2) : Math.max(d1, d2);
+    tag = estado.vantagem === 'desvantagem' ? 'Desvantagem' : 'Vantagem';
+  } else if (estado.dadosIndividuais) {
+    valores = estado.dadosIndividuais.map((d) => d.valor);
+    usado = valores.reduce((acc: number, v) => acc + (typeof v === 'number' ? v : 0), 0);
+  } else {
+    valores = [estado.valorDado];
+    usado = estado.valorDado;
+  }
+
+  const partesTotal: (number | string)[] = [usado];
+  if (estado.bonusExtra && typeof estado.bonusExtra.valor === 'number') {
+    partesTotal.push(estado.bonusExtra.valor);
+  }
+  if (mod !== 0) partesTotal.push(mod);
+
+  return {
+    titulo: estado.label,
+    valores,
+    tag,
+    total: estado.total ?? 0,
+    partesTotal,
+  };
+}
+
 /** Inspiração Heroica — flag booleano por personagem (nunca contador,
  * ver SDD): se `disponivel`, rejoga QUALQUER d20 já concluído (sem
  * Vantagem/Desvantagem em jogo) e usa o novo resultado, gastando a
@@ -241,6 +303,16 @@ interface RollContextValue {
    * sempre nasce desligado, pra nunca "esquecer ligado" sem perceber. */
   modoTeste: boolean;
   alternarModoTeste: () => void;
+  /** Histórico compartilhado de rolagens (últimas `MAX_LOG`, mais
+   * recente primeiro) — alimentado automaticamente por toda rolagem
+   * real (`rolarD20`/`rolarDados`, via `fechar()`) E pelo dado 3D
+   * avulso (`Dice3dFab.tsx`, via `adicionarLog`), já que os dois
+   * mundos precisam aparecer no mesmo lugar (pedido do Osmar). */
+  log: RegistroLog[];
+  /** Acrescenta 1 linha ao histórico compartilhado — usado pelo dado 3D
+   * avulso (rolagens que não passam por `rolarD20`/`rolarDados`, então
+   * não caem sozinhas no log via `fechar()`). */
+  adicionarLog: (registro: Omit<RegistroLog, 'id'>) => void;
 }
 
 const RollContext = createContext<RollContextValue | null>(null);
@@ -502,7 +574,18 @@ export function RollProvider({ children }: { children: ReactNode }) {
     }, DURACAO_ANIMACAO_MS);
   }, []);
 
-  const fechar = useCallback(() => setEstado(null), []);
+  const [log, setLog] = useState<RegistroLog[]>([]);
+  const adicionarLog = useCallback((registro: Omit<RegistroLog, 'id'>) => {
+    const id = `log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setLog((prev) => [{ ...registro, id }, ...prev].slice(0, MAX_LOG));
+  }, []);
+
+  const fechar = useCallback(() => {
+    setEstado((prev) => {
+      if (prev && prev.fase === 'concluido') adicionarLog(criarRegistroLogDaRolagem(prev));
+      return null;
+    });
+  }, [adicionarLog]);
 
   const [bonusExtraProvider, setBonusExtraProvider] = useState<BonusExtraProvider | null>(null);
   const registrarBonusExtra = useCallback((provider: BonusExtraProvider | null) => setBonusExtraProvider(provider), []);
@@ -602,6 +685,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
         usarInspiracaoHeroica,
         modoTeste,
         alternarModoTeste,
+        log,
+        adicionarLog,
       }}
     >
       {children}

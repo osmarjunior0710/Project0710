@@ -1,18 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import type DiceBox from '@3d-dice/dice-box';
-import { pericias } from '../../../data/rulesets/dnd2024/pericias';
+import { useRoll } from '../../roll/RollContext';
 import styles from './Dice3dFab.module.css';
 
 const TIPOS = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'] as const;
 type TipoDado = (typeof TIPOS)[number];
 
-const MAX_LOG = 20;
 // Painel mostra só ~5 por vez (o resto rola por dentro) — altura por
 // item calculada pra bater com o CSS de .logItem (2 linhas + padding).
 const LOG_VISIVEIS = 5;
 const LOG_ALTURA_ITEM_PX = 52;
 
-// [PH] Todas as texturas do pacote oficial @3d-dice/dice-themes (ver
+// Todas as texturas do pacote oficial @3d-dice/dice-themes (ver
 // DECISOES-COMBATE.md) — pedido do Osmar foi colocar todas pra ele
 // escolher quais ficam na versão final. `suportaCor` = tema de
 // material "color" (aceita tingimento via themeColor); os outros têm
@@ -24,65 +23,65 @@ interface TemaOpcao {
 }
 
 const TEMAS: TemaOpcao[] = [
-  { id: 'default', nome: '[PH] Padrão', suportaCor: true },
-  { id: 'smooth', nome: '[PH] Liso', suportaCor: true },
-  { id: 'gemstone', nome: '[PH] Gema', suportaCor: true },
-  { id: 'rock', nome: '[PH] Pedra', suportaCor: true },
-  { id: 'rust', nome: '[PH] Ferrugem', suportaCor: true },
-  { id: 'gemstoneMarble', nome: '[PH] Mármore de Gema', suportaCor: false },
-  { id: 'blueGreenMetal', nome: '[PH] Metal Azul/Verde', suportaCor: false },
-  { id: 'diceOfRolling', nome: '[PH] Dado de Mesa', suportaCor: false },
-  { id: 'wooden', nome: '[PH] Madeira', suportaCor: false },
+  { id: 'default', nome: 'Padrão', suportaCor: true },
+  { id: 'smooth', nome: 'Liso', suportaCor: true },
+  { id: 'gemstone', nome: 'Gema', suportaCor: true },
+  { id: 'rock', nome: 'Pedra', suportaCor: true },
+  { id: 'rust', nome: 'Ferrugem', suportaCor: true },
+  { id: 'gemstoneMarble', nome: 'Mármore de Gema', suportaCor: false },
+  { id: 'blueGreenMetal', nome: 'Metal Azul/Verde', suportaCor: false },
+  { id: 'diceOfRolling', nome: 'Dado de Mesa', suportaCor: false },
+  { id: 'wooden', nome: 'Madeira', suportaCor: false },
 ];
 
-// [PH] Primárias + secundárias + preto/branco — lista fixa pronta em
-// vez de um seletor de cor livre (mais rápido de usar no celular).
+// Primárias + secundárias + preto/branco — lista fixa pronta em vez
+// de um seletor de cor livre (mais rápido de usar no celular).
 const CORES = [
-  { nome: '[PH] Vermelho', hex: '#c0392b' },
-  { nome: '[PH] Azul', hex: '#2e6da4' },
-  { nome: '[PH] Amarelo', hex: '#d4ac0d' },
-  { nome: '[PH] Verde', hex: '#2e8555' },
-  { nome: '[PH] Laranja', hex: '#d4690d' },
-  { nome: '[PH] Roxo', hex: '#7d3c98' },
-  { nome: '[PH] Preto', hex: '#1c1c1c' },
-  { nome: '[PH] Branco', hex: '#f2f2f2' },
+  { nome: 'Vermelho', hex: '#c0392b' },
+  { nome: 'Azul', hex: '#2e6da4' },
+  { nome: 'Amarelo', hex: '#d4ac0d' },
+  { nome: 'Verde', hex: '#2e8555' },
+  { nome: 'Laranja', hex: '#d4690d' },
+  { nome: 'Roxo', hex: '#7d3c98' },
+  { nome: 'Preto', hex: '#1c1c1c' },
+  { nome: 'Branco', hex: '#f2f2f2' },
 ] as const;
 
-interface RegistroLog {
-  id: string;
-  /** Nome da perícia OU "Rolagem de NdX + ..." quando não simula perícia. */
-  titulo: string;
-  /** Valores de cada dado, na ordem que caíram. */
-  valores: number[];
-  /** "Vantagem" | "Desvantagem" | "Inspiração Heróica" — só rolagem de perícia simulada. */
-  tag?: string;
-  total: number;
-  /** Parcelas somadas pra formar o total (dado(s) mantido(s) + modificador, ou todos os dados). */
-  partesTotal: number[];
-}
+const MODOS_D20 = ['normal', 'vantagem', 'desvantagem'] as const;
+type ModoD20 = (typeof MODOS_D20)[number];
 
-/** [PH] Protótipo isolado (pedido do Osmar, 2026-09) — testa se dado 3D
- * de verdade (física, não CSS) é viável nesse app antes de decidir
- * trocar a arte 2D atual. `@3d-dice/dice-box` (BabylonJS + Ammo.js,
- * roda em Web Worker) é carregado sob demanda (dynamic import) assim
- * que a Ficha abre — não bloqueia o carregamento inicial do app (a
- * Ficha já mostra tudo antes disso terminar), mas já fica pronto antes
- * do jogador tocar o FAB pela 1ª vez. Toda a UI aqui é placeholder —
- * ainda não está ligada a nenhuma rolagem real do jogo, inclusive a
- * "perícia" de cada rolagem de d20 é sorteada à toa só pra testar o
- * formato do log (ver DECISOES-COMBATE.md). */
+const ROTULO_MODO_D20: Record<ModoD20, string> = {
+  normal: 'Normal',
+  vantagem: 'Vantagem',
+  desvantagem: 'Desvantagem',
+};
+
+/** Ferramenta avulsa de dado 3D (Fase A do `sdd/sdd-dado-3d.md`) —
+ * `@3d-dice/dice-box` (BabylonJS + Ammo.js, roda em Web Worker) é
+ * carregado sob demanda (dynamic import) assim que a Ficha abre — não
+ * bloqueia o carregamento inicial do app, mas já fica pronto antes do
+ * jogador tocar o FAB pela 1ª vez. O log de rolagens é compartilhado
+ * com o resto da Ficha (`RollContext.log`) — toda rolagem real do jogo
+ * também aparece aqui, e vice-versa. Ainda não é o motor oficial de
+ * rolagem do jogo (isso é a Fase B, ver o SDD) — este FAB é só uma
+ * ferramenta avulsa que o jogador aciona quando quiser rolar dado com
+ * física de verdade, sem estar ligada a nenhuma perícia/ataque
+ * específico ainda.
+ */
 export default function Dice3dFab() {
+  const { log, adicionarLog } = useRoll();
   const [aberto, setAberto] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [resultado, setResultado] = useState<number | null>(null);
   const [modoMultiplo, setModoMultiplo] = useState(false);
   const [selecoes, setSelecoes] = useState<Partial<Record<TipoDado, number>>>({});
-  const [logs, setLogs] = useState<RegistroLog[]>([]);
   const [logAberto, setLogAberto] = useState(false);
   const [temaId, setTemaId] = useState(TEMAS[0].id);
   const [corHex, setCorHex] = useState<string>(CORES[0].hex);
   const [customAberto, setCustomAberto] = useState(false);
+  const [rotuloD20, setRotuloD20] = useState('');
+  const [modoD20, setModoD20] = useState<ModoD20>('normal');
   const diceBoxRef = useRef<DiceBox | null>(null);
   const carregandoPromiseRef = useRef<Promise<DiceBox> | null>(null);
 
@@ -127,10 +126,8 @@ export default function Dice3dFab() {
     setModoMultiplo(false);
     setSelecoes({});
     setLogAberto(false);
-  }
-
-  function adicionarLog(entrada: Omit<RegistroLog, 'id'>) {
-    setLogs((prev) => [{ ...entrada, id: `${Date.now()}-${Math.random()}` }, ...prev].slice(0, MAX_LOG));
+    setRotuloD20('');
+    setModoD20('normal');
   }
 
   // `roll()` acessa os dados do tema de forma síncrona — precisa
@@ -144,49 +141,32 @@ export default function Dice3dFab() {
     return { theme: temaId, themeColor: corHex };
   }
 
-  // [PH] Simula uma rolagem de perícia — o protótipo ainda não sabe de
-  // atributo/perícia de verdade, então sorteia uma perícia e um
-  // modificador só pra testar o formato do log (ver pedido do Osmar).
-  // 1 dado só (perícia real é sempre 1d20) — Vantagem mantém o maior,
-  // Desvantagem o menor, "reroll" simula Inspiração Heróica (mantém a
-  // 2ª rolagem, seja ela qual for).
-  async function rolarPericiaSimulada() {
+  // Rolagem de 1d20 avulsa — rótulo e Normal/Vantagem/Desvantagem são
+  // escolhidos manualmente pelo jogador antes de tocar no dado (esta
+  // ferramenta não conhece perícia/ataque nenhum, é avulsa — ver o
+  // SDD). Sem esses dois controles, um dado 3D "puro" não daria pra
+  // registrar Vantagem/Desvantagem no log nem dar nome à rolagem.
+  async function rolarD20() {
     setResultado(null);
     setErro(null);
-    const pericia = pericias[Math.floor(Math.random() * pericias.length)].nome;
-    const modificador = Math.floor(Math.random() * 7) - 1; // -1..5
-    const sorteio = Math.random();
-    const modo: 'normal' | 'vantagem' | 'desvantagem' | 'reroll' =
-      sorteio < 0.55 ? 'normal' : sorteio < 0.7 ? 'vantagem' : sorteio < 0.85 ? 'desvantagem' : 'reroll';
+    const titulo = rotuloD20.trim() || 'Rolagem de 1d20';
     try {
       const box = await carregar();
       await garantirTema(box);
-      if (modo === 'normal') {
+      if (modoD20 === 'normal') {
         box.onRollComplete = (resultados) => {
           const v = resultados[0].value;
-          const total = v + modificador;
-          setResultado(total);
-          adicionarLog({ titulo: pericia, valores: [v], total, partesTotal: [v, modificador] });
+          setResultado(v);
+          adicionarLog({ titulo, valores: [v], total: v, partesTotal: [v] });
         };
         box.roll('1d20', opcoesRolagem());
       } else {
         box.onRollComplete = (resultados) => {
           const [v1, v2] = resultados.map((r) => r.value);
-          let mantido: number;
-          let tag: string;
-          if (modo === 'vantagem') {
-            mantido = Math.max(v1, v2);
-            tag = 'Vantagem';
-          } else if (modo === 'desvantagem') {
-            mantido = Math.min(v1, v2);
-            tag = 'Desvantagem';
-          } else {
-            mantido = v2;
-            tag = 'Inspiração Heróica';
-          }
-          const total = mantido + modificador;
-          setResultado(total);
-          adicionarLog({ titulo: pericia, valores: [v1, v2], tag, total, partesTotal: [mantido, modificador] });
+          const mantido = modoD20 === 'vantagem' ? Math.max(v1, v2) : Math.min(v1, v2);
+          const tag = ROTULO_MODO_D20[modoD20];
+          setResultado(mantido);
+          adicionarLog({ titulo, valores: [v1, v2], tag, total: mantido, partesTotal: [mantido] });
         };
         box.roll(['1d20', '1d20'], opcoesRolagem());
       }
@@ -196,7 +176,7 @@ export default function Dice3dFab() {
     }
   }
 
-  // Rolagem "crua" (sem perícia envolvida) — usada tanto pro toque
+  // Rolagem "crua" (sem d20 sozinho envolvido) — usada tanto pro toque
   // direto num tipo que não seja d20 quanto pro modo Múltiplos. Ordena
   // os tipos por tamanho (TIPOS já vem d4→d100) antes de montar a
   // notação e o título.
@@ -230,7 +210,7 @@ export default function Dice3dFab() {
       return;
     }
     if (tipo === 'd20') {
-      rolarPericiaSimulada();
+      rolarD20();
     } else {
       rolarGenerico([{ tipo, qtd: 1 }]);
     }
@@ -262,14 +242,14 @@ export default function Dice3dFab() {
   }
 
   const labelBotaoMultiplo = !modoMultiplo
-    ? '[PH] Múltiplos'
+    ? 'Múltiplos'
     : totalSelecionado === 0
-      ? '[PH] Cancelar'
-      : `[PH] Rolar (${totalSelecionado})`;
+      ? 'Cancelar'
+      : `Rolar (${totalSelecionado})`;
 
   return (
     <>
-      <div className={styles.fab} onClick={abrir} title="[PH] Protótipo: dado 3D">
+      <div className={styles.fab} onClick={abrir} title="Dado 3D">
         🎲
       </div>
       {/* Sempre montado (nunca condicional) — a lib do dado 3D fica
@@ -285,12 +265,12 @@ export default function Dice3dFab() {
                 setLogAberto(false);
               }}
             >
-              [PH] 🎨 Customizar
+              🎨 Customizar
             </div>
             {customAberto && (
               <div className={styles.customPanel}>
                 <label className={styles.customLabel}>
-                  [PH] Textura
+                  Textura
                   <select
                     className={styles.customSelect}
                     value={temaId}
@@ -304,7 +284,7 @@ export default function Dice3dFab() {
                   </select>
                 </label>
                 <label className={styles.customLabel}>
-                  [PH] Cor{!temaAtual.suportaCor && ' (essa textura não muda de cor)'}
+                  Cor{!temaAtual.suportaCor && ' (essa textura não muda de cor)'}
                   <select
                     className={styles.customSelect}
                     value={corHex}
@@ -320,7 +300,7 @@ export default function Dice3dFab() {
                 </label>
               </div>
             )}
-            {logs.length > 0 && (
+            {log.length > 0 && (
               <div
                 className={styles.logToggle}
                 onClick={() => {
@@ -328,7 +308,7 @@ export default function Dice3dFab() {
                   setCustomAberto(false);
                 }}
               >
-                [PH] 📜 Log ({logs.length})
+                📜 Log ({log.length})
               </div>
             )}
             {logAberto && (
@@ -336,7 +316,7 @@ export default function Dice3dFab() {
                 className={styles.logPanel}
                 style={{ maxHeight: `${LOG_VISIVEIS * LOG_ALTURA_ITEM_PX}px` }}
               >
-                {logs.map((registro) => (
+                {log.map((registro) => (
                   <div key={registro.id} className={styles.logItem}>
                     <div className={styles.logLinha1}>
                       {registro.titulo}: {registro.valores.join(' | ')}
@@ -349,16 +329,38 @@ export default function Dice3dFab() {
                 ))}
               </div>
             )}
-            {carregando && <div className={styles.status}>[PH] Carregando dado 3D…</div>}
+            {carregando && <div className={styles.status}>Carregando dado 3D…</div>}
             {erro && <div className={styles.status}>⚠️ {erro}</div>}
             {resultado !== null && <div className={styles.resultado}>{resultado}</div>}
             {!carregando && !erro && resultado === null && !modoMultiplo && (
-              <div className={styles.status}>[PH] Escolha um dado pra rolar</div>
+              <div className={styles.status}>Escolha um dado pra rolar</div>
             )}
             {modoMultiplo && (
-              <div className={styles.status}>[PH] Toque nos dados que quer rolar juntos</div>
+              <div className={styles.status}>Toque nos dados que quer rolar juntos</div>
             )}
             <div className={styles.controles}>
+              {!modoMultiplo && (
+                <div className={styles.d20Config}>
+                  <input
+                    type="text"
+                    className={styles.d20RotuloInput}
+                    placeholder="Rótulo do d20 (opcional)"
+                    value={rotuloD20}
+                    onChange={(e) => setRotuloD20(e.target.value)}
+                  />
+                  <div className={styles.d20ModoRow}>
+                    {MODOS_D20.map((modo) => (
+                      <div
+                        key={modo}
+                        className={modo === modoD20 ? styles.d20ModoBtnAtivo : styles.d20ModoBtn}
+                        onClick={() => setModoD20(modo)}
+                      >
+                        {ROTULO_MODO_D20[modo]}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className={styles.tipos}>
                 {TIPOS.map((tipo) => (
                   <div key={tipo} className={styles.tipoBtn} onClick={() => tocarTipo(tipo)}>
@@ -373,7 +375,7 @@ export default function Dice3dFab() {
                 {labelBotaoMultiplo}
               </div>
               <div className={styles.fechar} onClick={fechar}>
-                [PH] fechar
+                fechar
               </div>
             </div>
           </>

@@ -153,3 +153,42 @@ pequena — checklist completo (`tsc -b`, `npm test -- --run`,
 (nenhuma tela nova pra clicar, então a validação é "app continua
 idêntico", não uma feature nova). G3/G4 quebram mais ainda na hora se
 precisar.
+
+---
+
+## Foco (paralelo, fechado): Dado 3D — formalização, Fase A
+
+Pedido do Osmar: rodar o processo de produto/design (seção 6) no
+protótipo avulso de dado 3D (`Dice3dFab.tsx`) antes de continuar outra
+coisa. Decisão de escopo (chapéu PM): o dado 3D vira os dois — Fase A
+(ferramenta avulsa, formalizar o que já existia) e Fase B (motor
+oficial de rolagem do jogo, com preferência 3D/2D) — ver
+`sdd/sdd-dado-3d.md` (Game Designer) pro mapeamento mecânico completo
+e `DECISOES-COMBATE.md` (entrada "Dado 3D com física... Fase A
+formalizada") pro resumo da decisão.
+
+- [x] Confirmar, lendo o código-fonte da lib, que não existe API pra
+      forçar resultado — bloqueia decisão de Fase B até existir
+      mapeamento de mecânica (feito, ver SDD).
+- [x] `Dice3dFab.tsx`: remover todo `[PH]` (nomes de tema/cor, textos
+      de status/botão) — não é mais protótipo, é ferramenta permanente.
+- [x] Substituir a simulação aleatória de perícia (sorteava perícia +
+      modificador + vantagem/reroll só pra testar formato do log) por
+      controle manual: campo de rótulo livre + seletor Normal/
+      Vantagem/Desvantagem, escolhidos pelo jogador antes de rolar.
+- [x] Log de rolagens deixa de ser local do FAB — pedido do Osmar
+      "pegar todas as rolagens, de dentro do rolador de dados e do
+      resto da ficha": `RegistroLog`/`adicionarLog`/`log` movidos pro
+      `RollContext` (único lugar que os 2 mundos — rolagem real via
+      `rolarD20`/`rolarDados`, e o FAB avulso — enxergam). Toda
+      rolagem real loga sozinha em `fechar()` (fase `concluido`); o
+      FAB chama `adicionarLog` direto pras próprias rolagens.
+      Verificado com Playwright (390px): rolagem de perícia real
+      (Acrobacia) e rolagem manual do FAB aparecem juntas no mesmo
+      painel de log, mais recente primeiro.
+- [x] `tsc -b`/`npm test -- --run` (495)/`npm run build` limpos.
+
+**Fase B não entra aqui** — é foco próprio, futuro, quando o Osmar
+quiser abrir (mapeamento já pronto no SDD, não precisa replanejar do
+zero). Nada ficou de propósito sem fazer dentro desta Fase A — sem
+pendência nova.
