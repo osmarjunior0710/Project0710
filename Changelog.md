@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1656
+
+Nova ferramenta de teste: menu do avatar (👤) ganhou "🕰️ Voltar pra
+nível" — quando você sobe de nível (por qualquer caminho), o app
+guarda um retrato do personagem naquele momento; toque num nível
+anterior pra voltar pra ele e testar/arrumar algo, sem perder o
+progresso. Atenção: voltar pra um nível apaga os retratos dos níveis
+acima dele (ex: foi até o 15, voltou pro 12 — 13/14/15 somem; subir de
+novo a partir do 12 cria eles de novo).
+
 ## v202609_1427
 
 2 melhorias no Level Up e na aba Atributos: (1) na hora de definir os

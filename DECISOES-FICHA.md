@@ -362,3 +362,45 @@ isso implícito pela localização (card principal vs. menu de
 preferências/teste do avatar).
 
 **Data/origem:** 2026-09, pedido do Osmar.
+
+## Ferramenta de teste — snapshot por nível (voltar/avançar pra testar a build)
+
+**Pergunta do Osmar:** dá pra ir até o nível 20 testando, voltar pra
+um nível anterior pra arrumar algo, sem perder o progresso de teste
+dos níveis mais altos?
+
+**Decisão:** `PersonagemSalvo.snapshotsNivel` guarda uma cópia
+completa do personagem na 1ª vez que ele alcança cada nível (1 a 20).
+Restaurar um nível (menu do avatar → "🕰️ Voltar pra nível") sobrescreve
+o personagem inteiro com essa cópia e recarrega a página — **apaga os
+snapshots dos níveis ACIMA do escolhido** (ex: foi até o 15, voltou
+pro 12, os snapshots de 13/14/15 somem; subir de novo a partir do 12
+cria snapshots novos pra eles). É ferramenta de teste, não regra de
+jogo — mora no menu do avatar, junto com "🎲 Modo de Teste"/"⚡ Inst.
+Level Up".
+
+**Padrão técnico:** o estado do `useState` de qualquer dado derivado
+de "reler algo de fora" (aqui, `personagemSalvo` — recomputado via
+`armazenamentoPersonagens.buscar(id)` no topo do componente, a cada
+render) **precisa de `useState` próprio** se outro código depender
+dele para "acumular" ao longo de várias atualizações seguidas — nunca
+usar o valor relido de fora como base de merge dentro de um efeito.
+Motivo real encontrado: `personagemSalvo` é uma referência NOVA a
+cada render (nunca memoizada), e usá-lo direto como fonte de
+"snapshots já existentes" dentro do efeito de auto-save perdia o
+snapshot do nível anterior sempre que 2 níveis eram alcançados em
+sequência rápida (ex: "⚡ Inst. Level Up" clicado várias vezes
+seguidas) — o efeito do 2º nível via `personagemSalvo.snapshotsNivel`
+vazio mesmo com o localStorage já tendo o do 1º. Corrigido dando ao
+snapshot seu próprio `useState` (mesmo padrão de todo o resto do
+estado persistido no componente), inicializado 1x de
+`personagemSalvo.snapshotsNivel` no mount.
+
+**Restauração é reload de página, não reset de `useState` na mão:**
+como o mount já sabe ler cada campo persistido corretamente (dezenas
+de `useState(personagemSalvo.x ?? default)`), reaproveitar isso via
+`window.location.reload()` depois de sobrescrever o personagem salvo é
+mais simples e confiável do que duplicar essa lógica de inicialização
+num "resetar tudo na mão".
+
+**Data/origem:** 2026-09, pedido do Osmar.

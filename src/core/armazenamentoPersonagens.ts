@@ -15,6 +15,13 @@ export interface PersonagemSalvo {
    * multiclasse) — `selecao.classe`/`subclasseAtual` abaixo continuam
    * sendo o formato "1 classe só" (pré-multiclasse); ver `classes`. */
   nivel: number;
+  /** XP acumulado (marcos de XP, ver `core/experiencia.ts` e
+   * DND-Regras.md) — sempre existiu nesse campo (0 desde a criação,
+   * `WizardShell.tsx`), mas só passou a ser lido/editado de verdade a
+   * partir da barra de XP na aba Atributos (2026-09, pedido do
+   * Osmar). Só usado pra decidir quando a seta de Level Up aparece;
+   * não é obrigatório manter em dia — quem prefere o "⚡ Inst. Level
+   * Up" (menu do avatar) nunca precisa disso. */
   xp: number;
   pvAtual: number;
   selecao: WizardSelection;
@@ -233,13 +240,6 @@ export interface PersonagemSalvo {
    * Ver DECISOES-DESIGN.md "Level Up — dado de vida rolado...". */
   levelUpHpModo?: 'media' | 'rolar' | 'manual' | null;
   levelUpHpRolado?: number | null;
-  /** XP acumulado (marcos de XP, ver `core/experiencia.ts` e
-   * DND-Regras.md) — ausente/undefined = 0 (personagem criado antes
-   * dessa entrega, ou nunca lançou XP). Só usado pra decidir quando a
-   * seta de Level Up aparece; não é obrigatório manter em dia — quem
-   * prefere o "⚡ Inst. Level Up" (menu do avatar) nunca precisa
-   * disso. */
-  xpAtual?: number;
   /** Estado do turno de Combate (Ação/Ação Bônus/Reação: cada um
    * "disponivel" ou "usada") — pedido do Osmar (2026-09): antes só
    * existia em estado do React, então sair da Ficha e voltar resetava
@@ -313,6 +313,16 @@ export interface PersonagemSalvo {
    * Descanso Longo (traço Eficiente). Gasto = usar o reroll no
    * RollOverlay, que zera pra `false`. */
   inspiracaoHeroicaAtiva?: boolean;
+  /** [Ferramenta de teste] Snapshot completo do personagem capturado na
+   * 1ª vez que ele alcança cada nível (1 a 20) — pedido do Osmar
+   * (2026-09): "ir até o nível 20 pra testar, voltar e arrumar" sem
+   * perder o estado de cada nível pelo caminho. Restaurar um nível
+   * (`FichaShell.tsx`, `restaurarSnapshotNivel`) apaga os snapshots dos
+   * níveis ACIMA dele (ex: foi até o 15, voltou pro 12 — 13/14/15
+   * somem; subir de novo a partir do 12 gera snapshots novos pra eles).
+   * `snapshotsNivel` do próprio snapshot nunca é gravado (evitaria
+   * aninhamento infinito). */
+  snapshotsNivel?: Record<number, Omit<PersonagemSalvo, 'snapshotsNivel'>>;
 }
 
 export interface ArmazenamentoPersonagens {

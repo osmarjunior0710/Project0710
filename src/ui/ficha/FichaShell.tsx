@@ -371,8 +371,19 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagemSalvo.levelUpHpModo ?? null,
   );
   const [levelUpHpRolado, setLevelUpHpRolado] = useState<number | null>(personagemSalvo.levelUpHpRolado ?? null);
-  const [xpAtual, setXpAtual] = useState(personagemSalvo.xpAtual ?? 0);
+  const [xpAtual, setXpAtual] = useState(personagemSalvo.xp ?? 0);
   const [xpPopupAberto, setXpPopupAberto] = useState(false);
+  // [Ferramenta de teste] Snapshot de cada nível já visitado (ver
+  // PersonagemSalvo.snapshotsNivel) — precisa de `useState` próprio
+  // (mesmo padrão de todo o resto do estado persistido aqui) em vez
+  // de derivar direto de `personagemSalvo.snapshotsNivel` a cada
+  // render: `personagemSalvo` é relido de fora (localStorage) no topo
+  // do componente a cada render, então usá-lo como fonte de verdade
+  // dentro do efeito de auto-save (abaixo) perde escritas anteriores
+  // quando 2 níveis são alcançados em sequência rápida.
+  const [snapshotsNivel, setSnapshotsNivel] = useState<Record<number, Omit<PersonagemSalvo, 'snapshotsNivel'>>>(
+    personagemSalvo.snapshotsNivel ?? {},
+  );
   const [itensDetalhados, setItensDetalhados] = useColapsavel('itens-detalhados', false);
   const [pesoAtivo, setPesoAtivo] = useState(true);
 
@@ -627,73 +638,88 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // `fimDoTurno` abaixo). Efeito em si mora em `useAutosavePersonagem`
   // (G3.1, ver EmDevB.md) — aqui só monta o objeto salvo e a lista de
   // dependências, exatamente como antes.
+  // Tira `snapshotsNivel` do spread — o snapshot de cada nível nunca
+  // pode conter snapshots dentro dele (aninhamento infinito).
+  const { snapshotsNivel: _snapshotsNivelIgnorado, ...personagemSalvoBase } = personagemSalvo;
+  const estadoAtual: Omit<PersonagemSalvo, 'snapshotsNivel'> = {
+    ...personagemSalvoBase,
+    selecao,
+    nivel: nivelTotalAtual,
+    classes: classesAtual,
+    classeAtivaAtual: classeAtivaNome,
+    periciasMulticlasseAtual: periciasMulticlasseAtuais,
+    ferramentasMulticlasseAtual: ferramentasMulticlasseAtuais,
+    pvAtual,
+    turnStateAtual: turnState,
+    surtoUsadoTurnoAtual: surtoUsadoTurno,
+    pvMax: personagem.pvMax,
+    pvTemporarioAtual: pvTemporario,
+    subclasseAtual: personagem.subclasse,
+    estiloDeLutaAtual: personagem.estiloDeLuta,
+    maestriaArmaAtual: maestriaArma,
+    folegoGasto,
+    vigorImplacavelGasto,
+    conhecimentoDePedrasGasto,
+    picoDeAdrenalinaGasto,
+    ataqueDeSoproGasto,
+    vooDraconicoGasto,
+    ancestralidadeGiganteGasto,
+    formaGrandeGasto,
+    formaGrandeAtiva,
+    maosCurativasGasto,
+    revelacaoCelestialGasto,
+    revelacaoCelestialFormaAtiva,
+    falarComAnimaisGnomoGasto,
+    inspiracaoHeroicaAtiva,
+    indomavelGasto,
+    pontosDeSorteGasto,
+    sorteDoTenebrosoGasto,
+    resistenciaInferaAtual,
+    resistenciaInferaGasto,
+    lancarNoInfernoGasto,
+    surtoGasto,
+    espacosGastosPorClasseECirculo,
+    inspiracaoGasto,
+    truquesAtual: truquesAtuais,
+    magiasPreparadasAtual: magiasPreparadasAtuais,
+    livroDeMagiasAtual: livroDeMagiasAtuais,
+    invocacoesMisticasAtual: invocacoesMisticasAtuais,
+    periciasEspecialistaAtual: periciasEspecialistaAtuais,
+    periciasSubclasseBonusAtual: periciasSubclasseBonusAtuais,
+    periciasTalentoGeralAtual: periciasTalentoGeralAtuais,
+    magiasDescobertasMagicasAtual: magiasDescobertasMagicasAtuais,
+    livroDasSombrasAtual: livroDasSombrasAtuais,
+    livroDasSombrasGasto,
+    memorizarMagiaGasta,
+    astuciaMagicaGasta,
+    contatarPatronoGasto,
+    arcanaMisticaAtual: arcanaMisticaAtuais,
+    arcanaMisticaGastos,
+    magiasGratisInvocacoesGastas: magiasGratisGastas,
+    talentosGeraisAtual: talentosGeraisAtuais,
+    escolhaMagiaTalentoGeral,
+    talentosFavoritosAtual: talentosFavoritos,
+    itensMochilaAtual: itensMochila,
+    petsAtual: pets,
+    levelUpHpModo,
+    levelUpHpRolado,
+    xp: xpAtual,
+  };
+
+  // Snapshot de teste (ver PersonagemSalvo.snapshotsNivel) — captura 1x
+  // por nível, na 1ª vez que ele é alcançado (não fica reescrevendo a
+  // cada mudancinha). Efeito PRÓPRIO, com deps mínimas (só
+  // `nivelTotalAtual`) — separado do autosave abaixo de propósito.
+  useEffect(() => {
+    setSnapshotsNivel((prev) => (nivelTotalAtual in prev ? prev : { ...prev, [nivelTotalAtual]: estadoAtual }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nivelTotalAtual]);
+
   useAutosavePersonagem(
-    {
-      ...personagemSalvo,
-      selecao,
-      nivel: nivelTotalAtual,
-      classes: classesAtual,
-      classeAtivaAtual: classeAtivaNome,
-      periciasMulticlasseAtual: periciasMulticlasseAtuais,
-      ferramentasMulticlasseAtual: ferramentasMulticlasseAtuais,
-      pvAtual,
-      turnStateAtual: turnState,
-      surtoUsadoTurnoAtual: surtoUsadoTurno,
-      pvMax: personagem.pvMax,
-      pvTemporarioAtual: pvTemporario,
-      subclasseAtual: personagem.subclasse,
-      estiloDeLutaAtual: personagem.estiloDeLuta,
-      maestriaArmaAtual: maestriaArma,
-      folegoGasto,
-      vigorImplacavelGasto,
-      conhecimentoDePedrasGasto,
-      picoDeAdrenalinaGasto,
-      ataqueDeSoproGasto,
-      vooDraconicoGasto,
-      ancestralidadeGiganteGasto,
-      formaGrandeGasto,
-      formaGrandeAtiva,
-      maosCurativasGasto,
-      revelacaoCelestialGasto,
-      revelacaoCelestialFormaAtiva,
-      falarComAnimaisGnomoGasto,
-      inspiracaoHeroicaAtiva,
-      indomavelGasto,
-      pontosDeSorteGasto,
-      sorteDoTenebrosoGasto,
-      resistenciaInferaAtual,
-      resistenciaInferaGasto,
-      lancarNoInfernoGasto,
-      surtoGasto,
-      espacosGastosPorClasseECirculo,
-      inspiracaoGasto,
-      truquesAtual: truquesAtuais,
-      magiasPreparadasAtual: magiasPreparadasAtuais,
-      livroDeMagiasAtual: livroDeMagiasAtuais,
-      invocacoesMisticasAtual: invocacoesMisticasAtuais,
-      periciasEspecialistaAtual: periciasEspecialistaAtuais,
-      periciasSubclasseBonusAtual: periciasSubclasseBonusAtuais,
-      periciasTalentoGeralAtual: periciasTalentoGeralAtuais,
-      magiasDescobertasMagicasAtual: magiasDescobertasMagicasAtuais,
-      livroDasSombrasAtual: livroDasSombrasAtuais,
-      livroDasSombrasGasto,
-      memorizarMagiaGasta,
-      astuciaMagicaGasta,
-      contatarPatronoGasto,
-      arcanaMisticaAtual: arcanaMisticaAtuais,
-      arcanaMisticaGastos,
-      magiasGratisInvocacoesGastas: magiasGratisGastas,
-      talentosGeraisAtual: talentosGeraisAtuais,
-      escolhaMagiaTalentoGeral,
-      talentosFavoritosAtual: talentosFavoritos,
-      itensMochilaAtual: itensMochila,
-      petsAtual: pets,
-      levelUpHpModo,
-      levelUpHpRolado,
-      xpAtual,
-    },
+    { ...estadoAtual, snapshotsNivel },
     [
       personagemSalvo,
+      snapshotsNivel,
       selecao,
       nivelTotalAtual,
       classesAtual,
@@ -1402,6 +1428,26 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setXpAtual((v) => Math.max(0, v + delta));
   }
 
+  // [Ferramenta de teste] Pula pra qualquer nível já visitado (ver
+  // PersonagemSalvo.snapshotsNivel) — pedido do Osmar (2026-09): "ir
+  // até o nível 20 pra testar, voltar e arrumar". Recarrega a página
+  // de propósito (em vez de tentar resetar cada `useState` na mão) —
+  // o mount inicial já sabe ler cada campo persistido corretamente, é
+  // mais simples e confiável reaproveitar isso do que duplicar a
+  // lógica de inicialização. Voltar pra um nível anterior APAGA os
+  // snapshots dos níveis ACIMA dele (pedido do Osmar) — ex: foi até o
+  // 15, voltou pro 12, os snapshots de 13/14/15 somem (a próxima subida
+  // a partir do 12 vai gerar snapshots novos pra esses níveis).
+  function restaurarSnapshotNivel(nivel: number) {
+    const snapshot = snapshotsNivel[nivel];
+    if (!snapshot) return;
+    const snapshotsSemFuturo = Object.fromEntries(
+      Object.entries(snapshotsNivel).filter(([n]) => Number(n) <= nivel),
+    );
+    armazenamentoPersonagens.salvar({ ...snapshot, snapshotsNivel: snapshotsSemFuturo });
+    window.location.reload();
+  }
+
   if (escolhendoClasseLevelUp) {
     const opcoes = opcoesLevelUp(classesAtual, atributosFinaisAtuais, catalogoClasses);
     return (
@@ -1627,6 +1673,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           pesoAtivo={pesoAtivo}
           onTogglePeso={() => setPesoAtivo((v) => !v)}
           onLevelUpRapido={classe ? levelUpRapido : undefined}
+          niveisComSnapshot={Object.keys(snapshotsNivel)
+            .map(Number)
+            .sort((a, b) => a - b)}
+          nivelAtualSnapshot={nivelTotalAtual}
+          onRestaurarNivel={restaurarSnapshotNivel}
         />
       </div>
 

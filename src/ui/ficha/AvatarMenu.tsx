@@ -15,6 +15,14 @@ interface AvatarMenuProps {
    * card "nível atual" da aba Atributos. `undefined` quando não tem
    * classe (nada pra subir). */
   onLevelUpRapido?: () => void;
+  /** [Ferramenta de teste] Níveis com snapshot salvo (ver
+   * `PersonagemSalvo.snapshotsNivel`) — pedido do Osmar (2026-09):
+   * "ir até o nível 20 pra testar, voltar e arrumar". Só aparece a
+   * seção quando há mais de 1 nível visitado (nada pra escolher com
+   * só o atual). */
+  niveisComSnapshot: number[];
+  nivelAtualSnapshot: number;
+  onRestaurarNivel: (nivel: number) => void;
 }
 
 /** Avatar no canto superior direito da Ficha — toque abre um menu
@@ -27,6 +35,9 @@ export default function AvatarMenu({
   pesoAtivo,
   onTogglePeso,
   onLevelUpRapido,
+  niveisComSnapshot,
+  nivelAtualSnapshot,
+  onRestaurarNivel,
 }: AvatarMenuProps) {
   const [aberto, setAberto] = useState(false);
   const { modoTeste, alternarModoTeste } = useRoll();
@@ -91,6 +102,31 @@ export default function AvatarMenu({
                 </div>
                 <span className={styles.menuRowChevron}>›</span>
               </div>
+            )}
+            {niveisComSnapshot.length > 1 && (
+              <>
+                <div className={styles.menuTitle}>🕰️ Voltar pra nível (teste)</div>
+                <div className={styles.snapshotDesc}>
+                  Cada nível já visitado guarda seu próprio estado — pular pra um deles recarrega a Ficha nesse
+                  ponto. Atenção: voltar pra um nível anterior apaga os snapshots dos níveis ACIMA dele (ex: ir do
+                  15 pro 12 apaga 13/14/15 — subir de novo a partir do 12 cria eles de novo).
+                </div>
+                <div className={styles.snapshotRow}>
+                  {niveisComSnapshot.map((nivel) => (
+                    <div
+                      key={nivel}
+                      className={`${styles.snapshotChip} ${nivel === nivelAtualSnapshot ? styles.snapshotChipAtual : ''}`}
+                      onClick={() => {
+                        if (nivel === nivelAtualSnapshot) return;
+                        onRestaurarNivel(nivel);
+                        setAberto(false);
+                      }}
+                    >
+                      {nivel}
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </>
