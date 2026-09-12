@@ -9,6 +9,7 @@ import {
   completarListaDeMagias,
   memorizarMagiaValida,
   opcoesGastoComPonte,
+  espacosCombinadosComoAtivos,
 } from './magiasPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { magiasDaClasse } from '../data/rulesets/dnd2024/magias';
@@ -188,5 +189,19 @@ describe('opcoesGastoComPonte (multiclasse — ponte de Magia de Pacto)', () => 
       { circulo: 1, classeNome: 'Mago', maximo: 4, gasto: 0 },
       { circulo: 2, classeNome: 'Mago', maximo: 2, gasto: 0 },
     ]);
+  });
+});
+
+describe('espacosCombinadosComoAtivos', () => {
+  it('caso normal — converte a tabela por índice em EspacoDeMagiaAtivo[], sempre sem recarga no Curto', () => {
+    expect(espacosCombinadosComoAtivos([4, 3, 2, 0, 0, 0, 0, 0, 0])).toEqual([
+      { circulo: 1, maximo: 4, recuperaNoDescansoCurto: false },
+      { circulo: 2, maximo: 3, recuperaNoDescansoCurto: false },
+      { circulo: 3, maximo: 2, recuperaNoDescansoCurto: false },
+    ]);
+  });
+
+  it('caso de borda — array de zeros vira lista vazia', () => {
+    expect(espacosCombinadosComoAtivos([0, 0, 0, 0, 0, 0, 0, 0, 0])).toEqual([]);
   });
 });

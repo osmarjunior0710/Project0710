@@ -1134,12 +1134,27 @@ bate, nas DUAS pontas, seção 2 do SDD); com 1 classe só e nenhuma
 outra elegível (100% dos personagens antes desta entrega), a tela nunca
 aparece, fluxo idêntico a antes.
 
-**M4 (conjuração combinada de 2+ classes conjuradoras, SDD seção 8.2)
-ficou de fora de propósito** — ver `PENDENCIAS.md` "Multiclasse — M4".
-Até lá, um personagem com 2 classes conjuradoras vê os Espaços de
-Magia de cada uma separadamente (pela pill), não a tabela combinada
-oficial (mais fraca) — simplificação aceita porque só afeta esse caso
-específico (2 conjuradores ao mesmo tempo), não o caminho mais comum
-de multiclasse (1 conjurador + 1 não-conjurador).
+**Conjuração combinada (M4) — pool COMBINADO ganha uma chave própria,
+nem classe ativa nem classe original.** Quando o personagem tem 2+
+classes conjuradoras normais ao mesmo tempo (Bardo/Clérigo/Druida/
+Feiticeiro/Mago completos, Guardião/Paladino meio, Guerreiro/Ladino só
+com a subclasse certa — nunca o Bruxo, sempre à parte), a soma vira o
+"Nível Equivalente" (SDD seção 8.2: cheio + metade-pra-cima +
+terço-pra-baixo conforme o tipo) e consulta a tabela oficial
+"Conjurador Multiclasse" — sempre mais fraca que a soma das tabelas
+isoladas, de propósito. Esse pool tem UMA chave própria
+(`"combinado"`) dentro de `espacosGastosPorClasseECirculo`, escrita e
+lida IGUAL não importa qual das 2 classes esteja na pill — trocar de
+pill não duplica nem zera o contador, porque as duas leem a mesma
+chave. `data/rulesets/dnd2024/conjuradorMulticlasse.ts` guarda a
+classificação (fato de regra, não vem da planilha).
 
-**Data/origem:** 2026-09, Fase M completa (M0-M3).
+Padrão geral que emergiu das 3 sub-entregas de M4: cada "pool de
+Espaço de Magia" que o personagem pode ter (classe isolada, Magia de
+Pacto do Bruxo, ou combinado) usa uma CHAVE PRÓPRIA dentro do mesmo
+dict `espacosGastosPorClasseECirculo` — nunca reaproveita o nome de
+uma classe pra outra coisa. Adicionar um 4º tipo de pool no futuro
+(ex: uma classe homebrew com recurso próprio) segue o mesmo padrão:
+nova chave, sem mexer nas que já existem.
+
+**Data/origem:** 2026-09, Fase M completa (M0-M4).

@@ -150,7 +150,7 @@ export function espacosMagiaParaNivelCombinado(nivelCombinado: number): number[]
  * contam; "um terço" só conta com a subclasse certa escolhida; Magia
  * de Pacto (Bruxo) e classes sem Conjuração nunca contam (ver
  * `data/rulesets/dnd2024/conjuradorMulticlasse.ts`). */
-function contaNaConjuracaoMulticlasse(c: PersonagemClasse): boolean {
+export function contaNaConjuracaoMulticlasse(c: PersonagemClasse): boolean {
   const entrada = conjuradoresMulticlasse.find((e) => e.classe === c.classe);
   if (!entrada) return false;
   if (entrada.tipo === 'completo' || entrada.tipo === 'meio') return true;

@@ -26,6 +26,19 @@ export interface EspacoDeMagiaAtivo {
   recuperaNoDescansoCurto: boolean;
 }
 
+/** Converte a tabela "Espaços por Nível Combinado" (índice 0 = 1º
+ * círculo, `core/multiclasse.ts`/`espacosMagiaParaNivelCombinado`) pro
+ * mesmo formato `EspacoDeMagiaAtivo[]` usado em toda a UI de
+ * conjuração — o pool combinado (SDD Multiclasse seção 8.2) sempre
+ * recupera só no Descanso Longo (seção 8.4), nunca no Curto. Círculos
+ * com `0` na tabela (nenhum espaço ainda nesse Nível Combinado) saem
+ * do array. */
+export function espacosCombinadosComoAtivos(espacosPorCirculo: number[]): EspacoDeMagiaAtivo[] {
+  return espacosPorCirculo
+    .map((maximo, i) => ({ circulo: i + 1, maximo, recuperaNoDescansoCurto: false }))
+    .filter((e) => e.maximo > 0);
+}
+
 const REGEX_CIRCULO = /^Espaços de Magia — (\d+)º Círculo$/;
 
 /** TODOS os círculos de Espaço de Magia ativos no nível atual (Etapa

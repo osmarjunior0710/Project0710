@@ -972,34 +972,25 @@ aqui. Os que **não** têm cobertura no plano atual:
   lista real de opções (Cap. 5 do livro) ainda não foi importada da
   planilha nem tem UI de escolha.
 
-## Multiclasse — M4 (conjuração combinada) ainda não construída
+## Multiclasse — SDD seção 7 (Ataque Extra/CA por método alternativo) sem dedupe entre classes
 
-**O que já foi resolvido (M0-M3, fechados 2026-09 — ver DECISOES-CLASSES.md
-"Multiclasse — arquitetura de nível ativo vs. total"):** personagem já
-pode ter 2+ classes de verdade (`classesAtual`, Level Up com tela de
-escolha de classe, ficha mostrando todas com um seletor de pill,
-Bônus de Proficiência pelo nível total, PV somando as duas, e
-proficiência de arma/armadura da classe original + pacote reduzido de
-cada classe multiclassada depois — SDD Multiclasse seção 6).
+Fase M inteira (M0-M4: schema, dados, Level Up com escolha de classe,
+ficha com múltiplas classes, conjuração combinada + ponte de Magia de
+Pacto) fechou 2026-09 — ver `DECISOES-CLASSES.md` "Multiclasse —
+arquitetura de nível ativo vs. total".
 
-**O que ainda falta (M4, não é bloqueio pro dia a dia — só importa
-quando o personagem tem Conjuração vinda de 2+ classes AO MESMO
-TEMPO):**
-- Hoje, um personagem com 2 classes conjuradoras (ex: Bardo/Mago,
-  Bardo/Bruxo) vê os Espaços de Magia de CADA classe separadamente
-  (trocando a pill) — não a tabela oficial "Conjurador Multiclasse"
-  (SDD seção 8.2, mais fraca que a soma das duas tabelas isoladas).
-  Isso super-poderia levemente esses casos específicos até o M4
-  aplicar o cálculo combinado de verdade.
-- Bruxo (Magia de Pacto) nunca entra nessa soma — permanece sempre
-  separado (regra já confirmada no SDD, seção 8.5), incluindo a ponte
-  de uso cruzado de espaços entre Pacto e Conjuração normal.
-- SDD seção 7 (Ataque Extra não empilha entre classes; CA por método
-  alternativo, só 1 de cada vez) — ainda não tem lógica de dedupe
-  entre classes; hoje não é alcançável (nenhuma das 4 classes
-  implementadas concede os dois ao mesmo tempo num personagem
-  multiclasse plausível), mas fica registrado pra quando entrar uma
-  5ª classe que colida com isso.
+**Único ponto do SDD ainda sem lógica própria:** seção 7 (Ataque Extra
+não empilha entre classes que concedem os dois; CA por método
+alternativo — Defesa Sem Armadura etc. — só 1 de cada vez, nunca soma).
+Hoje não é alcançável (nenhuma das 4 classes implementadas — Guerreiro/
+Bardo/Bruxo/Mago — concede os dois ao mesmo tempo num personagem
+multiclasse plausível), mas fica registrado pra quando entrar uma 5ª
+classe que colida com isso (ex: Bárbaro, que tem Defesa Sem Armadura
+própria).
+
+**Também sem picker de círculo (por isso sem a ponte de Magia de
+Pacto):** o Painel de Reação — ver "Painel de Reação ainda usa a
+lista plana antiga" logo abaixo, é a mesma pendência.
 
 ## App inteiro não escala pra tablet/desktop — só os ícones de Classe foram corrigidos
 

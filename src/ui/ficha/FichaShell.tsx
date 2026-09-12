@@ -31,6 +31,10 @@ import {
   opcoesLevelUp,
   deveEscolherClasseNoLevelUp,
   temPonteDeMagiaDePacto,
+  temConjuracaoMulticlasse,
+  contaNaConjuracaoMulticlasse,
+  nivelEquivalenteConjuracaoMulticlasse,
+  espacosMagiaParaNivelCombinado,
   type PersonagemClasse,
 } from '../../core/multiclasse';
 import { classes as catalogoClasses } from '../../data/rulesets/dnd2024/classes';
@@ -112,6 +116,7 @@ import {
   magiasDisponiveisParaPreparar,
   poolDescobertasMagicas,
   usaRedefinicaoPorDescanso,
+  espacosCombinadosComoAtivos,
   type PoolDePonte,
 } from '../../core/magiasPersonagem';
 import { usosInspiracaoMaximo, dadoInspiracao, fonteDeInspiracaoDesbloqueada } from '../../core/inspiracaoBardo';
@@ -499,6 +504,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           espacosGastosPorCirculo: espacosGastosPorClasseECirculo[outraClasseEntry.classe] ?? {},
         }
       : null;
+  // M4c — quando a classe ATIVA é uma das 2+ classes conjuradoras
+  // normais combinadas (SDD Multiclasse seção 8.2), o pool exibido/
+  // gasto passa a ser o COMBINADO (chave própria "combinado", nunca o
+  // da classe isolada) em vez do de cada classe separada — Bruxo nunca
+  // entra aqui (Magia de Pacto sempre à parte, mesmo multiclassado).
+  const emConjuracaoCombinada = temConjuracaoMulticlasse(classesAtual) && (classeAtivaEntry ? contaNaConjuracaoMulticlasse(classeAtivaEntry) : false);
+  const chaveDoPoolDeMagia = emConjuracaoCombinada ? 'combinado' : classeAtivaNome;
+  const espacosParaConjurar = emConjuracaoCombinada
+    ? espacosCombinadosComoAtivos(espacosMagiaParaNivelCombinado(nivelEquivalenteConjuracaoMulticlasse(classesAtual)) ?? [])
+    : espacos;
+  const espacosGastosParaConjurar = emConjuracaoCombinada ? (espacosGastosPorClasseECirculo['combinado'] ?? {}) : espacosGastosPorCirculo;
   const truques = truquesDoPersonagem(truquesAtuais);
   const magiasPreparadas = magiasPreparadasDoPersonagem(magiasPreparadasAtuais);
   const magiasDescobertasMagicas = magiasPreparadasDoPersonagem(magiasDescobertasMagicasAtuais);
@@ -892,14 +908,15 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setSurtoUsadoTurno(false);
   }
 
-  /** `classeNome` — omitido = gasta da classe ATIVA (comportamento de
-   * sempre); passado = gasta de OUTRA classe (ponte de Magia de Pacto,
-   * SDD Multiclasse seção 8.5 — só chega aqui vindo de
+  /** `classeNome` — omitido = gasta do pool "principal" em foco agora
+   * (a classe ativa, ou o pool COMBINADO quando `emConjuracaoCombinada`
+   * — ver M4c); passado = gasta de OUTRA classe (ponte de Magia de
+   * Pacto, SDD Multiclasse seção 8.5 — só chega aqui vindo de
    * `EscolherCirculoShell` quando `ponte` não é `null`). */
-  function gastarSlotCirculo(circulo: number, classeNome: string = classeAtivaNome): boolean {
-    const ehClasseAtiva = classeNome === classeAtivaNome;
-    const espacosDaClasse = ehClasseAtiva ? espacos : (ponte?.espacos ?? []);
-    const gastosDaClasse = ehClasseAtiva ? espacosGastosPorCirculo : (ponte?.espacosGastosPorCirculo ?? {});
+  function gastarSlotCirculo(circulo: number, classeNome: string = chaveDoPoolDeMagia): boolean {
+    const ehPoolPrincipal = classeNome === chaveDoPoolDeMagia;
+    const espacosDaClasse = ehPoolPrincipal ? espacosParaConjurar : (ponte?.espacos ?? []);
+    const gastosDaClasse = ehPoolPrincipal ? espacosGastosParaConjurar : (ponte?.espacosGastosPorCirculo ?? {});
     const def = espacosDaClasse.find((e) => e.circulo === circulo);
     const gasto = gastosDaClasse[circulo] ?? 0;
     if (!def || gasto >= def.maximo) return false;
@@ -1731,9 +1748,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           <MagiasTab
             classe={classe}
             nivel={personagem.nivel}
-            espacosGastosPorCirculo={espacosGastosPorCirculo}
-            classeAtivaNome={classeAtivaNome}
+            espacosGastosPorCirculo={espacosGastosParaConjurar}
+            classeAtivaNome={chaveDoPoolDeMagia}
             ponte={ponte}
+            espacosParaConjurar={espacosParaConjurar}
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
@@ -1801,10 +1819,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             turnState={turnState}
             onMarcarUsado={marcarUsado}
             onFimDoTurno={fimDoTurno}
-            espacos={espacos}
-            espacosGastosPorCirculo={espacosGastosPorCirculo}
+            espacos={espacosParaConjurar}
+            espacosGastosPorCirculo={espacosGastosParaConjurar}
             onGastarSlotCirculo={gastarSlotCirculo}
-            classeAtivaNome={classeAtivaNome}
+            classeAtivaNome={chaveDoPoolDeMagia}
             ponte={ponte}
             estiloDeLuta={estiloDeLuta}
             nivel={personagem.nivel}

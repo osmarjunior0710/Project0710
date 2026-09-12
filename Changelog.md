@@ -5,6 +5,17 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1027
+
+Multiclasse — parte final: quem tem 2 classes que conjuram magia ao
+mesmo tempo (ex: Bardo + Mago) agora vê um único contador de Espaços
+de Magia combinado (regra oficial), em vez de cada classe separada.
+Quem tem Bruxo (Magia de Pacto) + outra classe conjuradora ganhou uma
+pergunta na hora de conjurar quando os dois "estoques" de magia têm
+espaço — escolhe de qual gastar. Corrigido também um bug de bastidor:
+gastar espaço de uma classe não mexia mais sem querer no contador de
+outra classe (só afetava quem já tinha 2 classes que conjuram).
+
 ## v202609_2256
 
 Multiclasse chegou de verdade: no Level Up, se o personagem já

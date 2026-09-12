@@ -9,6 +9,7 @@ import {
   magiasPreparadasDoPersonagem,
   opcoesGastoComPonte,
   type PoolDePonte,
+  type EspacoDeMagiaAtivo,
 } from '../../../core/magiasPersonagem';
 import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
 import { calcularDanoMagia, atributoSalvaguarda } from '../../../core/magiaDano';
@@ -41,6 +42,12 @@ interface MagiasTabProps {
    * Quando presente, a tela de "em qual círculo" mostra as opções das
    * 2 classes juntas. */
   ponte: PoolDePonte | null;
+  /** Override do pool de Espaços de Magia — presente (M4c) quando a
+   * classe ativa é uma de 2+ classes conjuradoras normais combinadas
+   * (SDD Multiclasse seção 8.2): mostra o pool COMBINADO em vez do da
+   * classe isolada. `undefined` (imensa maioria dos personagens) = usa
+   * `espacosDeMagiaAtivos(classe, nivel)` normal, como sempre. */
+  espacosParaConjurar?: EspacoDeMagiaAtivo[];
   onGastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
   modAcertoConjuracao: number | null;
   /** `true` = Armadura equipada sem treinamento — bloqueia qualquer
@@ -174,6 +181,7 @@ export default function MagiasTab({
   espacosGastosPorCirculo,
   classeAtivaNome,
   ponte,
+  espacosParaConjurar,
   onGastarSlotCirculo,
   modAcertoConjuracao,
   desvantagemForcaDestreza,
@@ -242,7 +250,7 @@ export default function MagiasTab({
     );
   }
 
-  const espacos = espacosDeMagiaAtivos(classe, nivel);
+  const espacos = espacosParaConjurar ?? espacosDeMagiaAtivos(classe, nivel);
   const truques = truquesDoPersonagem(truquesAtuais);
   const preparadas = magiasPreparadasDoPersonagem(magiasPreparadasAtuais);
   const livroDeMagias = magiasPreparadasDoPersonagem(livroDeMagiasAtuais);
