@@ -19,6 +19,11 @@ Talentos, Cap. 6 Equipamento, Cap. 7 Magias (2 partes: A-I, I-Z), Ap. A
 O Multiverso, Ap. B Estatísticas de Criaturas, Ap. C Glossário de
 Regras, Índice.
 
-## Livro do Mestre — pendente
+## Livro do Mestre — completo (`livro-do-mestre/`)
 
-Osmar ainda vai adicionar os arquivos PDF do Livro do Mestre.
+15 capítulos (regras 2024): Sumário e Introdução, Cap. 1 Seu Próprio
+Mundo, Cap. 2 Criando um Multiverso, Cap. 3 Criando Aventuras, Cap. 4
+Criando Personagens do Mestre, Cap. 5 Ambientes de Aventura, Cap. 6
+Entre Aventuras, Cap. 7 Tesouro (2 partes), Cap. 8 Conduzindo o Jogo,
+Cap. 9 Oficina do Mestre, Ap. A Masmorras Aleatórias, Ap. B Listas de
+Monstros, Ap. C Mapas, Ap. D Inspiração do Mestre.
