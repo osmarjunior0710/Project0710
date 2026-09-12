@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { acoesBase, type AtaqueInfo } from '../../../data/exampleCombat';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
-import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
+import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte } from '../../../core/magiasPersonagem';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { useRoll } from '../../roll/RollContext';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
@@ -36,12 +36,17 @@ interface AcaoPanelContentProps {
    * CombatTab (persiste depois do painel fechar). `circuloUsado` é
    * pro upcast (igual `conjurarMagia` já calcula). */
   onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
-  gastarSlotCirculo: (circulo: number) => boolean;
+  gastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
   /** Nível do personagem — pro Aprimoramento de Truque (dano escala
    * nos níveis 5/11/17, ver `calcularDanoMagia`). */
   nivel: number;
   espacos: EspacoDeMagiaAtivo[];
   espacosGastosPorCirculo: Record<number, number>;
+  /** Nome da classe ATIVA — dona do pool acima. Ver `MagiasTab.tsx`. */
+  classeAtivaNome: string;
+  /** Ponte de Magia de Pacto (SDD Multiclasse seção 8.5) — `null` pra
+   * quem não tem Bruxo + outra classe conjuradora ao mesmo tempo. */
+  ponte: PoolDePonte | null;
   conjura: boolean;
   truques: Magia[];
   magiasPreparadas: Magia[];
@@ -85,6 +90,8 @@ export default function AcaoPanelContent({
   nivel,
   espacos,
   espacosGastosPorCirculo,
+  classeAtivaNome,
+  ponte,
   conjura,
   truques,
   magiasPreparadas,
@@ -144,7 +151,7 @@ export default function AcaoPanelContent({
   /** `circulo` é o espaço a gastar — pode ser maior que `m.circulo`
    * (upcast, ver `EscolherCirculoShell`); truque passa `null` (não
    * gasta espaço nenhum). */
-  function conjurarMagia(m: Magia, circulo: number | null) {
+  function conjurarMagia(m: Magia, circulo: number | null, classeDoEspaco: string = classeAtivaNome) {
     // Trava dupla — a linha "Usar Magia" já fica desabilitada quando
     // `desvantagemForcaDestreza` é true, mas essa checagem aqui é o
     // ponto único de verdade (SDD "Penalidades por Falta de
@@ -152,7 +159,7 @@ export default function AcaoPanelContent({
     // não só avisar).
     if (desvantagemForcaDestreza) return;
     if (circulo !== null) {
-      const ok = gastarSlotCirculo(circulo);
+      const ok = gastarSlotCirculo(circulo, classeDoEspaco);
       if (!ok) return;
     }
     setTelaMagia(null);
@@ -198,11 +205,9 @@ export default function AcaoPanelContent({
     return (
       <EscolherCirculoShell
         magia={telaMagia.magia}
-        circulosDisponiveis={telaMagia.circulos}
-        espacos={espacos}
-        espacosGastosPorCirculo={espacosGastosPorCirculo}
+        opcoes={opcoesGastoComPonte(telaMagia.magia.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte)}
         onVoltar={() => setTelaMagia('lista')}
-        onConjurar={(circulo) => conjurarMagia(telaMagia.magia, circulo)}
+        onConjurar={(circulo, classeNome) => conjurarMagia(telaMagia.magia, circulo, classeNome)}
       />
     );
   }

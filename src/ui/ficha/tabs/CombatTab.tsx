@@ -4,7 +4,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { AtaqueResolvido } from '../../../core/ataque';
-import type { EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
+import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
@@ -57,7 +57,12 @@ interface CombatTabProps {
   onFimDoTurno: () => void;
   espacos: EspacoDeMagiaAtivo[];
   espacosGastosPorCirculo: Record<number, number>;
-  onGastarSlotCirculo: (circulo: number) => boolean;
+  onGastarSlotCirculo: (circulo: number, classeNome?: string) => boolean;
+  /** Nome da classe ATIVA — dona do pool acima. Ver `MagiasTab.tsx`. */
+  classeAtivaNome: string;
+  /** Ponte de Magia de Pacto (SDD Multiclasse seção 8.5) — `null` pra
+   * quem não tem Bruxo + outra classe conjuradora ao mesmo tempo. */
+  ponte: PoolDePonte | null;
   estiloDeLuta: EstiloDeLuta | null;
   nivel: number;
   usosFolegoMaximo: number;
@@ -210,6 +215,8 @@ export default function CombatTab({
   espacos,
   espacosGastosPorCirculo,
   onGastarSlotCirculo,
+  classeAtivaNome,
+  ponte,
   estiloDeLuta,
   nivel,
   usosFolegoMaximo,
@@ -942,6 +949,8 @@ export default function CombatTab({
             nivel={nivel}
             espacos={espacos}
             espacosGastosPorCirculo={espacosGastosPorCirculo}
+            classeAtivaNome={classeAtivaNome}
+            ponte={ponte}
             conjura={conjura}
             truques={truques}
             magiasPreparadas={magiasPreparadasAcao}

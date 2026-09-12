@@ -191,3 +191,14 @@ export function nivelEquivalenteConjuracaoMulticlasse(classes: PersonagemClasse[
   }
   return total;
 }
+
+/** `true` = personagem tem Magia de Pacto (Bruxo) E pelo menos 1 outra
+ * classe com Conjuração normal ao mesmo tempo — só nesse caso a ponte
+ * de uso cruzado de espaços (SDD Multiclasse seção 8.5) entra em jogo.
+ * Os 2 pools continuam SEPARADOS (cada um com sua própria recarga) —
+ * a ponte só deixa escolher de qual dos dois gastar um espaço, pra
+ * QUALQUER magia preparada (de qualquer uma das 2 classes), nos dois
+ * sentidos. */
+export function temPonteDeMagiaDePacto(classes: PersonagemClasse[]): boolean {
+  return temMagiaDePacto(classes) && nivelEquivalenteConjuracaoMulticlasse(classes) > 0;
+}

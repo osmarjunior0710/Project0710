@@ -41,12 +41,35 @@ Plano em 3 entregas pequenas:
   ativo (Guerreiro/Mago) mostra o contador de 1º círculo caindo de 2/2
   pra 1/2 corretamente, sem regressão no caso de 1 classe só.
   tsc(-b)/testes(419)/build verdes.
-- [ ] **M4b (parte 2) — ponte de uso cruzado de espaços entre Magia de
-  Pacto do Bruxo e Conjuração normal.** Pausado pra confirmar com o
-  Osmar onde/como essa escolha aparece na tela antes de codar (CLAUDE.md
-  §6) — é uma interação nova (escolher DE QUAL pool gastar o espaço),
-  só alcançável hoje com Bruxo+Bardo ou Bruxo+Mago multiclasse.
-- **M4c — Ficha: Magias tab mostra o pool combinado** (quando 2+
+- [x] **M4b (parte 2) — ponte de uso cruzado de espaços entre Magia de
+  Pacto do Bruxo e Conjuração normal.** Confirmado com o Osmar antes de
+  codar (CLAUDE.md §6): pergunta sempre que os 2 pools tiverem espaço
+  pro círculo da magia (nunca some fora, e nunca assume 1 dos 2 como
+  "prioridade fixa"); com só 1 dos 2 tendo espaço, gasta dele direto,
+  sem perguntar nada. Confirmado também que a ponte vale nos DOIS
+  sentidos — qualquer uma das 2 classes pode gastar de qualquer um dos
+  2 pools, não só "a que combina com a origem da magia" (SDD Multiclasse
+  seção 8.5).
+  Novo `core/magiasPersonagem.ts`: `opcoesGastoComPonte` junta as
+  opções de círculo da classe ativa + (se `temPonteDeMagiaDePacto`,
+  `core/multiclasse.ts`) as da outra classe, cada uma rotulada com a
+  classe dona. `EscolherCirculoShell` (tela compartilhada por
+  Magias/Ação/Reação) mostra o rótulo da classe só quando existem 2+
+  classes nas opções — pra 100% dos personagens sem essa combinação,
+  tela idêntica a antes. `gastarSlotCirculo` (`FichaShell.tsx`) ganhou
+  um 2º parâmetro opcional (classe a descontar, default = ativa).
+  Painel de Reação NÃO ganhou a ponte ainda (já não tem o picker novo,
+  ver `PENDENCIAS.md` "Painel de Reação ainda usa a lista plana antiga") —
+  continua gastando só da classe ativa.
+  6 testes Vitest novos em `magiasPersonagem.test.ts` (sem ponte =
+  idêntico a antes; com ponte = junta as 2; pool da ponte cheio não
+  aparece) + 3 em `multiclasse.test.ts` (`temPonteDeMagiaDePacto`).
+  **Não testado ao vivo no navegador** (só Vitest) — só alcançável
+  hoje com Bruxo+Bardo ou Bruxo+Mago multiclasse, criar esse
+  personagem de teste levaria muitas etapas de wizard; a cobertura de
+  teste usa os números oficiais do livro como fixture. tsc(-b)/
+  testes(425)/build verdes.
+- [ ] **M4c — Ficha: Magias tab mostra o pool combinado** (quando 2+
   classes conjuradoras normais coexistem) em vez de cada classe
   separada.
 

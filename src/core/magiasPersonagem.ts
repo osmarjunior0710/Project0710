@@ -88,6 +88,54 @@ export function circulosDisponiveisParaConjurar(
     .sort((a, b) => a - b);
 }
 
+/** Pool de outra classe disponível pra "ponte" de Magia de Pacto (SDD
+ * Multiclasse seção 8.5) — ver `temPonteDeMagiaDePacto` (core/multiclasse.ts). */
+export interface PoolDePonte {
+  classeNome: string;
+  espacos: EspacoDeMagiaAtivo[];
+  espacosGastosPorCirculo: Record<number, number>;
+}
+
+export interface OpcaoGastoEspaco {
+  circulo: number;
+  /** Nome da classe DONA desse espaço — a UI usa isso pra saber de
+   * qual pool descontar ao confirmar (`atualizarEspacosGastos` em
+   * `FichaShell.tsx`), nunca assume que é sempre a classe ativa. */
+  classeNome: string;
+  maximo: number;
+  gasto: number;
+}
+
+/** Junta as opções de espaço da classe ativa com as da `ponte` (Magia
+ * de Pacto do Bruxo cruzando com Conjuração normal, ou vice-versa) —
+ * quando `ponte` é `null` (personagem sem essa combinação, caso de
+ * 100% dos personagens hoje), devolve só as opções normais, idêntico
+ * a `circulosDisponiveisParaConjurar` de sempre. Cada opção já vem
+ * rotulada com a classe dona, pra UI mostrar de onde vem cada espaço
+ * e a `FichaShell` saber de qual pool descontar. */
+export function opcoesGastoComPonte(
+  magiaCirculo: number,
+  classeAtivaNome: string,
+  espacos: EspacoDeMagiaAtivo[],
+  espacosGastosPorCirculo: Record<number, number>,
+  ponte: PoolDePonte | null,
+): OpcaoGastoEspaco[] {
+  const opcoesAtiva = circulosDisponiveisParaConjurar(magiaCirculo, espacos, espacosGastosPorCirculo).map((circulo) => ({
+    circulo,
+    classeNome: classeAtivaNome,
+    maximo: espacos.find((e) => e.circulo === circulo)?.maximo ?? 0,
+    gasto: espacosGastosPorCirculo[circulo] ?? 0,
+  }));
+  if (!ponte) return opcoesAtiva;
+  const opcoesPonte = circulosDisponiveisParaConjurar(magiaCirculo, ponte.espacos, ponte.espacosGastosPorCirculo).map((circulo) => ({
+    circulo,
+    classeNome: ponte.classeNome,
+    maximo: ponte.espacos.find((e) => e.circulo === circulo)?.maximo ?? 0,
+    gasto: ponte.espacosGastosPorCirculo[circulo] ?? 0,
+  }));
+  return [...opcoesAtiva, ...opcoesPonte];
+}
+
 function buscarMagiasPorNome(nomes: string[]): Magia[] {
   return nomes.map((nome) => magias.find((m) => m.nome === nome)).filter((m): m is Magia => m !== undefined);
 }

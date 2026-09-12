@@ -11,6 +11,7 @@ import {
   temConjuracaoMulticlasse,
   temMagiaDePacto,
   nivelEquivalenteConjuracaoMulticlasse,
+  temPonteDeMagiaDePacto,
 } from './multiclasse';
 import type { PersonagemSalvo } from './armazenamentoPersonagens';
 import type { WizardSelection } from './personagem';
@@ -268,5 +269,29 @@ describe('nivelEquivalenteConjuracaoMulticlasse', () => {
       { classe: 'Mago', nivel: 3 },
     ];
     expect(nivelEquivalenteConjuracaoMulticlasse(classes)).toBe(6); // floor(9/3)=3 + 3 = 6
+  });
+});
+
+describe('temPonteDeMagiaDePacto', () => {
+  it('caso normal — Bruxo + outro conjurador (Mago): true', () => {
+    expect(
+      temPonteDeMagiaDePacto([
+        { classe: 'Bruxo', nivel: 3 },
+        { classe: 'Mago', nivel: 3 },
+      ]),
+    ).toBe(true);
+  });
+
+  it('caso de borda — só Bruxo, sem outro conjurador: false ("segue as regras dessa classe")', () => {
+    expect(temPonteDeMagiaDePacto([{ classe: 'Bruxo', nivel: 5 }])).toBe(false);
+  });
+
+  it('caso de borda — Bruxo + classe sem Conjuração (Guerreiro): false', () => {
+    expect(
+      temPonteDeMagiaDePacto([
+        { classe: 'Bruxo', nivel: 3 },
+        { classe: 'Guerreiro', nivel: 3 },
+      ]),
+    ).toBe(false);
   });
 });

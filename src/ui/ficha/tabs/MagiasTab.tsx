@@ -7,7 +7,8 @@ import {
   espacosDeMagiaAtivos,
   truquesDoPersonagem,
   magiasPreparadasDoPersonagem,
-  circulosDisponiveisParaConjurar,
+  opcoesGastoComPonte,
+  type PoolDePonte,
 } from '../../../core/magiasPersonagem';
 import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
 import { calcularDanoMagia, atributoSalvaguarda } from '../../../core/magiaDano';
@@ -30,7 +31,17 @@ interface MagiasTabProps {
   classe: Classe | null;
   nivel: number;
   espacosGastosPorCirculo: Record<number, number>;
-  onGastarSlotCirculo: (circulo: number) => boolean;
+  /** Nome da classe ATIVA — dono do pool `espacosGastosPorCirculo`
+   * acima. Só importa pra rotular a opção certa quando `ponte` existe
+   * (ver abaixo); em toda outra situação é só um rótulo. */
+  classeAtivaNome: string;
+  /** Pool de Magia de Pacto (Bruxo) em ponte com a Conjuração normal
+   * (SDD Multiclasse seção 8.5) — `null` pra 100% dos personagens sem
+   * essa combinação (ver `temPonteDeMagiaDePacto`, core/multiclasse.ts).
+   * Quando presente, a tela de "em qual círculo" mostra as opções das
+   * 2 classes juntas. */
+  ponte: PoolDePonte | null;
+  onGastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
   modAcertoConjuracao: number | null;
   /** `true` = Armadura equipada sem treinamento — bloqueia qualquer
    * conjuração feita direto por aqui (SDD "Penalidades por Falta de
@@ -161,6 +172,8 @@ export default function MagiasTab({
   classe,
   nivel,
   espacosGastosPorCirculo,
+  classeAtivaNome,
+  ponte,
   onGastarSlotCirculo,
   modAcertoConjuracao,
   desvantagemForcaDestreza,
@@ -211,7 +224,7 @@ export default function MagiasTab({
   onColheitaMacabraDisponivel,
 }: MagiasTabProps) {
   const { rolarD20, rolarDados } = useRoll();
-  const [telaCirculo, setTelaCirculo] = useState<{ magia: Magia; circulos: number[] } | null>(null);
+  const [telaCirculo, setTelaCirculo] = useState<Magia | null>(null);
   const [armaDePactoEscolhida, setArmaDePactoEscolhida] = useState('');
   const [danoPendenteMagia, setDanoPendenteMagia] = useState<{
     label: string;
@@ -308,24 +321,23 @@ export default function MagiasTab({
       processarMagiaAoUsar(m, 0, false);
       return;
     }
-    const circulosDisponiveis = circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo);
-    if (circulosDisponiveis.length === 0) return;
-    setTelaCirculo({ magia: m, circulos: circulosDisponiveis });
+    const opcoes = opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte);
+    if (opcoes.length === 0) return;
+    setTelaCirculo(m);
   }
 
   if (telaCirculo) {
     return (
       <EscolherCirculoShell
-        magia={telaCirculo.magia}
-        circulosDisponiveis={telaCirculo.circulos}
-        espacos={espacos}
-        espacosGastosPorCirculo={espacosGastosPorCirculo}
+        magia={telaCirculo}
+        opcoes={opcoesGastoComPonte(telaCirculo.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte)}
         onVoltar={() => setTelaCirculo(null)}
-        onConjurar={(circulo) => {
-          const ok = onGastarSlotCirculo(circulo);
+        onConjurar={(circulo, classeNome) => {
+          const ok = onGastarSlotCirculo(circulo, classeNome);
+          const magiaConjurada = telaCirculo;
           setTelaCirculo(null);
           if (!ok) return;
-          processarMagiaAoUsar(telaCirculo.magia, circulo, true);
+          processarMagiaAoUsar(magiaConjurada, circulo, true);
         }}
       />
     );
@@ -585,7 +597,7 @@ export default function MagiasTab({
             Colégio do Conhecimento — sempre preparadas, não contam na conta de Magias Preparadas.
           </div>
           {descobertasMagicas.map((m) => {
-            const semEspaco = m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+            const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
               <div key={m.id} className={styles.spellRow}>
@@ -612,7 +624,7 @@ export default function MagiasTab({
             Patrono Ínfero — sempre preparadas, não contam na conta de Magias Preparadas.
           </div>
           {pactoDoInfero.map((m) => {
-            const semEspaco = m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+            const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
               <div key={m.id} className={styles.spellRow}>
@@ -639,7 +651,7 @@ export default function MagiasTab({
             Concedidas pela espécie — sempre preparadas, não contam na conta de Magias Preparadas.
           </div>
           {magiasEspecie.map((m) => {
-            const semEspaco = m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+            const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
               <div key={m.id} className={styles.spellRow}>
@@ -666,7 +678,7 @@ export default function MagiasTab({
             Iniciado em Magia — sempre preparadas, não contam na conta de Magias Preparadas.
           </div>
           {magiasTalentoOrigem.map((m) => {
-            const semEspaco = m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+            const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
               <div key={m.id} className={styles.spellRow}>
@@ -695,7 +707,7 @@ export default function MagiasTab({
               ' Botão roxo "Grátis" = usa o Ritual Rápido (1 uso compartilhado); "Usar" continua gastando Espaço normal.'}
           </div>
           {magiasTalentoGeral.map((m) => {
-            const semEspaco = m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+            const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             // Elegível pro pool do Ritual Rápido (Conjurador Ritualista) —
             // só as magias com tag Ritual, e só quando o personagem tem
@@ -805,7 +817,7 @@ export default function MagiasTab({
               : 'Reconjurar o Livro das Sombras — toque pra escolher'}
           </div>
           {livroDasSombras.map((m) => {
-            const semEspaco = m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+            const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
               <div key={m.id} className={styles.spellRow}>
@@ -852,7 +864,7 @@ export default function MagiasTab({
                 </div>
               )}
               {preparadas.map((m) => {
-                const semEspaco = circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+                const semEspaco = opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
                 return (
                   <div key={m.id} className={styles.spellRow}>
                     <div className={styles.spellName}>

@@ -8,6 +8,7 @@ import {
   usaRedefinicaoPorDescanso,
   completarListaDeMagias,
   memorizarMagiaValida,
+  opcoesGastoComPonte,
 } from './magiasPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { magiasDaClasse } from '../data/rulesets/dnd2024/magias';
@@ -149,5 +150,43 @@ describe('cdConjuracao', () => {
 
   it('mod negativo/zero: CD ainda soma normal (sem mínimo especial)', () => {
     expect(cdConjuracao(0)).toBe(8);
+  });
+});
+
+describe('opcoesGastoComPonte (multiclasse — ponte de Magia de Pacto)', () => {
+  const espacosMago3 = espacosDeMagiaAtivos(mago, 3); // 4 de 1º + 2 de 2º
+  const espacosBruxo3 = espacosDeMagiaAtivos(bruxo, 3); // pool único, 2 espaços de 2º
+
+  it('caso normal — sem ponte (null): idêntico a circulosDisponiveisParaConjurar, só rotulado', () => {
+    const opcoes = opcoesGastoComPonte(1, 'Mago', espacosMago3, {}, null);
+    expect(opcoes).toEqual([
+      { circulo: 1, classeNome: 'Mago', maximo: 4, gasto: 0 },
+      { circulo: 2, classeNome: 'Mago', maximo: 2, gasto: 0 },
+    ]);
+  });
+
+  it('caso normal — com ponte, junta as opções das 2 classes (incluindo upcast pro 2º círculo do próprio Mago)', () => {
+    const opcoes = opcoesGastoComPonte(1, 'Mago', espacosMago3, {}, {
+      classeNome: 'Bruxo',
+      espacos: espacosBruxo3,
+      espacosGastosPorCirculo: {},
+    });
+    expect(opcoes).toEqual([
+      { circulo: 1, classeNome: 'Mago', maximo: 4, gasto: 0 },
+      { circulo: 2, classeNome: 'Mago', maximo: 2, gasto: 0 },
+      { circulo: 2, classeNome: 'Bruxo', maximo: 2, gasto: 0 },
+    ]);
+  });
+
+  it('caso de borda — pool da ponte cheio não aparece, mesmo com a ponte ativa (mas o 2º círculo do próprio Mago continua)', () => {
+    const opcoes = opcoesGastoComPonte(1, 'Mago', espacosMago3, {}, {
+      classeNome: 'Bruxo',
+      espacos: espacosBruxo3,
+      espacosGastosPorCirculo: { 2: 2 }, // Bruxo sem espaço sobrando
+    });
+    expect(opcoes).toEqual([
+      { circulo: 1, classeNome: 'Mago', maximo: 4, gasto: 0 },
+      { circulo: 2, classeNome: 'Mago', maximo: 2, gasto: 0 },
+    ]);
   });
 });

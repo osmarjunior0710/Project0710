@@ -30,6 +30,7 @@ import {
   nivelTotalPersonagem,
   opcoesLevelUp,
   deveEscolherClasseNoLevelUp,
+  temPonteDeMagiaDePacto,
   type PersonagemClasse,
 } from '../../core/multiclasse';
 import { classes as catalogoClasses } from '../../data/rulesets/dnd2024/classes';
@@ -111,6 +112,7 @@ import {
   magiasDisponiveisParaPreparar,
   poolDescobertasMagicas,
   usaRedefinicaoPorDescanso,
+  type PoolDePonte,
 } from '../../core/magiasPersonagem';
 import { usosInspiracaoMaximo, dadoInspiracao, fonteDeInspiracaoDesbloqueada } from '../../core/inspiracaoBardo';
 import {
@@ -482,6 +484,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const usosFalarComAnimaisGnomoRestantes = Math.max(0, usosFalarComAnimaisGnomoMaximo - falarComAnimaisGnomoGasto);
   const conjura = personagemConjura(classe, selecao, talentosEfetivos);
   const espacos = espacosDeMagiaAtivos(classe, personagem.nivel);
+  // Ponte de Magia de Pacto (SDD Multiclasse seção 8.5) — só quando o
+  // personagem tem Bruxo E outra classe conjuradora ao mesmo tempo.
+  // `outraClasseComConjuracao` é a "outra" (não a ativa agora) — com
+  // só 2 classes possíveis hoje (4 classes implementadas, Guerreiro
+  // nunca conjura), é sempre a única candidata; deixa de existir se
+  // um dia o personagem puder ter 3+ classes ao mesmo tempo.
+  const outraClasseEntry = classesAtual.find((c) => c.classe !== classeAtivaNome);
+  const ponte: PoolDePonte | null =
+    temPonteDeMagiaDePacto(classesAtual) && outraClasseEntry
+      ? {
+          classeNome: outraClasseEntry.classe,
+          espacos: espacosDeMagiaAtivos(catalogoClasses.find((c) => c.nome === outraClasseEntry.classe) ?? null, outraClasseEntry.nivel),
+          espacosGastosPorCirculo: espacosGastosPorClasseECirculo[outraClasseEntry.classe] ?? {},
+        }
+      : null;
   const truques = truquesDoPersonagem(truquesAtuais);
   const magiasPreparadas = magiasPreparadasDoPersonagem(magiasPreparadasAtuais);
   const magiasDescobertasMagicas = magiasPreparadasDoPersonagem(magiasDescobertasMagicasAtuais);
@@ -875,11 +892,18 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setSurtoUsadoTurno(false);
   }
 
-  function gastarSlotCirculo(circulo: number): boolean {
-    const def = espacos.find((e) => e.circulo === circulo);
-    const gasto = espacosGastosPorCirculo[circulo] ?? 0;
+  /** `classeNome` — omitido = gasta da classe ATIVA (comportamento de
+   * sempre); passado = gasta de OUTRA classe (ponte de Magia de Pacto,
+   * SDD Multiclasse seção 8.5 — só chega aqui vindo de
+   * `EscolherCirculoShell` quando `ponte` não é `null`). */
+  function gastarSlotCirculo(circulo: number, classeNome: string = classeAtivaNome): boolean {
+    const ehClasseAtiva = classeNome === classeAtivaNome;
+    const espacosDaClasse = ehClasseAtiva ? espacos : (ponte?.espacos ?? []);
+    const gastosDaClasse = ehClasseAtiva ? espacosGastosPorCirculo : (ponte?.espacosGastosPorCirculo ?? {});
+    const def = espacosDaClasse.find((e) => e.circulo === circulo);
+    const gasto = gastosDaClasse[circulo] ?? 0;
     if (!def || gasto >= def.maximo) return false;
-    atualizarEspacosGastos((prev) => ({ ...prev, [circulo]: (prev[circulo] ?? 0) + 1 }));
+    atualizarEspacosGastos((prev) => ({ ...prev, [circulo]: (prev[circulo] ?? 0) + 1 }), classeNome);
     return true;
   }
 
@@ -1708,6 +1732,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             classe={classe}
             nivel={personagem.nivel}
             espacosGastosPorCirculo={espacosGastosPorCirculo}
+            classeAtivaNome={classeAtivaNome}
+            ponte={ponte}
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
@@ -1778,6 +1804,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             espacos={espacos}
             espacosGastosPorCirculo={espacosGastosPorCirculo}
             onGastarSlotCirculo={gastarSlotCirculo}
+            classeAtivaNome={classeAtivaNome}
+            ponte={ponte}
             estiloDeLuta={estiloDeLuta}
             nivel={personagem.nivel}
             usosFolegoMaximo={usosFolegoMaximo}

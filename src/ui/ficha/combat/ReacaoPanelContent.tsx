@@ -21,7 +21,10 @@ interface ReacaoPanelContentProps {
    * CombatTab. Reação nunca faz upcast, então `circuloUsado` é sempre
    * `magia.circulo`. */
   onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
-  gastarSlotCirculo: (circulo: number) => boolean;
+  /** `classeNome` opcional — Reação sempre gasta da classe ATIVA (sem
+   * ponte de Magia de Pacto ainda, ver PENDENCIAS.md "Painel de Reação
+   * ainda usa a lista plana antiga"), então quem chama pode omitir. */
+  gastarSlotCirculo: (circulo: number, classeNome?: string) => boolean;
   /** Nível do personagem — pro Aprimoramento de Truque (dano escala
    * nos níveis 5/11/17, ver `calcularDanoMagia`). */
   nivel: number;
