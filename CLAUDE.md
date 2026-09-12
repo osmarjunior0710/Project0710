@@ -168,10 +168,11 @@ Todo trabalho roda em cima de um **foco** (uma classe, uma aba, um
 sistema) registrado no `EmDev.md`. Nunca comece a implementar sem um
 plano aprovado.
 
-**Abrindo um foco:** siga os 2 chapéus abaixo (6.1 e 6.2), nessa ordem,
-antes de escrever qualquer passo no `EmDev`/`EmDevB`. Só depois dos
-dois aprovados pelo Osmar é que o plano vira checklist (seção 14) e
-entra em execução entrega por entrega (chapéu de execução, seção 6.3).
+**Abrindo um foco:** siga os 3 chapéus abaixo (6.1, 6.2 e 6.3), nessa
+ordem, antes de escrever qualquer passo no `EmDev`/`EmDevB`. Só depois
+dos três aprovados pelo Osmar é que o plano vira checklist (seção 14)
+e entra em execução entrega por entrega (chapéu de execução, seção
+6.4).
 
 ### 6.1 Chapéu 1 — Product Manager: entender e quebrar em entregas
 
@@ -189,9 +190,10 @@ de importância:
 2. **PDFs dos livros** (Livro do Jogador e Livro do Mestre, em
    `livros-referencia/`) — sempre que a planilha não cobrir o
    suficiente pra entender a regra por trás do pedido.
-3. **SDD com decupagem**, quando existir um pra esse assunto —
-   opcional, ajuda a entender decisão de implementação já pensada
-   antes.
+3. **SDD com decupagem** (`sdd/`), quando já existir um pra esse
+   assunto de um foco anterior — ajuda a entender decisão de
+   implementação já pensada antes. Se não existir, o chapéu 2 (Game
+   Designer, seção 6.2) cria um novo daqui a pouco.
 
 Não assuma nada que não estiver nesses documentos — falta informação,
 pare e pergunte, mesmo que pareça dar pra adivinhar.
@@ -207,21 +209,52 @@ vale abrir uma frente nova que ainda não existe no app (ex.: familiar/
 pet) em vez de continuar o que já estava andamento — pergunte ao
 Osmar em vez de decidir sozinho.
 
-### 6.2 Chapéu 2 — Product/UI Design: plano holístico de encaixe na UI
+### 6.2 Chapéu 2 — Game Designer: SDD da feature (garantir que vai funcionar)
 
-Com a quebra em entregas aprovada, vista o chapéu de Product/UI
-Design. Olhe pra tudo que o chapéu 1 planejou e pra UI que já existe
-(o app já acumula bastante complexidade de tela) e proponha, de forma
-**holística** — o conjunto, não tela por tela isolada — como cada
-peça nova encaixa na interface atual. Já deixe uma proposta concreta
-de como resolver cada necessidade nova (onde entra, que padrão de
-tela usa), consultando a família `DECISOES-*.md` antes (seção 7) pra
-não repetir uma decisão já tomada e revertida.
+Com a quebra em entregas aprovada (chapéu 1), vista o chapéu de Game
+Designer — antes de qualquer plano de UI. Pegue o dado de regra
+levantado no chapéu 1 (planilha + PDFs) e olhe o que já existe no
+motor de cálculo (`core/`, `data/`) pra escrever um **SDD** (documento
+de especificação, com decupagem) descrevendo, em detalhe suficiente
+pra garantir que a parte nova vai funcionar de verdade:
+
+- Como a feature se comporta mecanicamente — estados possíveis, casos
+  de borda.
+- Como ela **interage com sistemas já existentes** (ex.: economia de
+  ação, Multiclasse, Espaços de Magia) — é aqui que se pega antes uma
+  colisão que só apareceria depois, no meio da implementação.
+- Qualquer decisão de como mapear/simplificar a regra do livro pro
+  motor do app.
+
+Guarde o documento em `sdd/sdd-<assunto>.md` (ex.:
+`sdd/sdd-multiclasse.md`). Diferente do `EmDev`/`EmDevB`, o SDD **não
+é descartado ao fechar o foco** — continua valendo depois, como
+referência de "como essa mecânica deveria funcionar", e pode ser
+corrigido se um erro for encontrado nele durante a implementação (quando
+isso acontecer, corrija o SDD e trate como correção de dado de
+especificação, não como decisão nova).
+
+Mesma regra dos outros chapéus: dúvida ou informação faltando,
+pergunte — não assuma uma regra que não esteja confirmada na
+planilha/PDF. Os chapéus 3 (Product/UI Design) e 4 (execução) usam
+esse SDD como referência principal de "como a mecânica funciona" ao
+planejar UI e implementação.
+
+### 6.3 Chapéu 3 — Product/UI Design: plano holístico de encaixe na UI
+
+Com a quebra em entregas e o SDD da feature aprovados, vista o chapéu
+de Product/UI Design. Olhe pra tudo que os chapéus 1 e 2 planejaram e
+pra UI que já existe (o app já acumula bastante complexidade de tela)
+e proponha, de forma **holística** — o conjunto, não tela por tela
+isolada — como cada peça nova encaixa na interface atual. Já deixe uma
+proposta concreta de como resolver cada necessidade nova (onde entra,
+que padrão de tela usa), consultando a família `DECISOES-*.md` antes
+(seção 7) pra não repetir uma decisão já tomada e revertida.
 
 Mesma regra do chapéu 1: dúvida ou informação faltando, pergunte — não
 assuma. O foco aqui é a usabilidade do app como um todo.
 
-### 6.3 Execução de cada entrega — UI Designer + Engenheiro juntos
+### 6.4 Execução de cada entrega — UI Designer + Engenheiro juntos
 
 Na hora de executar uma peça específica do plano (um item do
 checklist do `EmDev`/`EmDevB`), 2 chapéus entram em cena juntos, antes
@@ -229,9 +262,9 @@ de codar:
 
 - **UI Designer** (nível de implementação): avalia a tela/interação
   concreta dessa entrega especificamente e propõe a solução de UI.
-- **Engenheiro**: olha o que já existe pra reaproveitar (ver 6.4) ou o
-  que precisa ser criado do zero, e como implementar da forma mais
-  eficiente.
+- **Engenheiro**: olha o SDD da feature (chapéu 2) e o que já existe
+  pra reaproveitar (ver 6.5) ou o que precisa ser criado do zero, e
+  como implementar da forma mais eficiente.
 
 São 2 óticas diferentes buscando a mesma entrega — "conversem" antes,
 resolvendo a tensão entre a melhor UI possível e o que é viável
@@ -263,7 +296,7 @@ limpar do `PENDENCIAS.md` qualquer coisa — mesmo de outro foco — que
 foi resolvida no caminho; (4) esvazie o `EmDev.md`; (5) pergunte qual o
 próximo foco.
 
-### 6.4 Reaproveite o padrão que já existe — não invente um novo
+### 6.5 Reaproveite o padrão que já existe — não invente um novo
 
 Antes de desenhar schema, componente ou fluxo novo, procure ativamente
 se já existe algo parecido no código (schema de dado semelhante,
