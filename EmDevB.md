@@ -125,9 +125,24 @@ que ainda reduz duplicação real sem tocar no formato salvo.
       `tsc -b`/`npm test` (495)/`npm run build` limpos + teste de
       ponta a ponta no navegador (Inspiração de Bardo: clicar gasta 1
       uso, recarregar a página mantém o uso gasto).
-- [ ] **G3.3** — `useMagiasPersonagem`: os ~40 `const magias*`/
-      `truques*` espalhados pelo componente, extraídos como 1 hook de
-      derivação pura (mesmas entradas → mesmo objeto de saída).
+- [x] **G3.3** — `useMagiasEConjuracao` (`src/ui/ficha/hooks/`): os
+      ~50 valores derivados de magia/conjuração (espaços, truques,
+      magias preparadas, pontes de multiclasse, Astúcia Mágica,
+      Colheita dos Mortos, Contatar Patrono, Ritual Rápido, etc.)
+      extraídos do meio do `FichaShell` como 1 hook de derivação pura
+      (cópia literal do bloco original — mesmas entradas, mesmo
+      objeto de saída, nada recalculado diferente). Maior das 4
+      entregas de G3: exigiu mover ~25 imports de `core/`/`data/` que
+      só esse bloco usava, e cortar ~14 nomes desestruturados que
+      viraram intermediários 100% internos ao hook (seguem calculados
+      e devolvidos por ele, só não são mais puxados pro escopo do
+      `FichaShell`, que não os usa em lugar nenhum). `tsc -b --force`
+      foi a rede de segurança principal pra achar todo import/
+      desestruturação que sobrou morto depois da extração. Verificado
+      com `tsc -b`/`npm test` (495)/`npm run build` limpos + teste de
+      ponta a ponta no navegador (abas Magias e Combate do Bardo:
+      Espaços de Magia, Truques, Perícia Inigualável renderizando
+      igual, zero erro de console/`undefined`/`NaN`). **G3 fechado.**
 - [x] **G3.4** — `caracteristicasSubclasseAtivas` (`src/ui/ficha/hooks/`):
       consolida os 11 `caracteristicaSubclasseDesbloqueada(subclasse,
       ID, nível)` (mesmos 2 primeiros argumentos sempre, só o ID
