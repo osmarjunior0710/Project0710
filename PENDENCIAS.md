@@ -972,30 +972,34 @@ aqui. Os que **não** têm cobertura no plano atual:
   lista real de opções (Cap. 5 do livro) ainda não foi importada da
   planilha nem tem UI de escolha.
 
-## Personagem multiclasse — EM ANDAMENTO (Fase M, ver EmDevB.md)
+## Multiclasse — M4 (conjuração combinada) ainda não construída
 
-**O que é:** existe uma aba **Multiclasse** na planilha (pré-requisito de
-atributo mínimo por classe, proficiências obtidas ao multiclassar,
-tabela de Espaços de Magia por Nível Combinado — conferida, sem
-lacuna de dado). O wizard e a ficha assumiam 1 classe por personagem.
+**O que já foi resolvido (M0-M3, fechados 2026-09 — ver DECISOES-CLASSES.md
+"Multiclasse — arquitetura de nível ativo vs. total"):** personagem já
+pode ter 2+ classes de verdade (`classesAtual`, Level Up com tela de
+escolha de classe, ficha mostrando todas com um seletor de pill,
+Bônus de Proficiência pelo nível total, PV somando as duas, e
+proficiência de arma/armadura da classe original + pacote reduzido de
+cada classe multiclassada depois — SDD Multiclasse seção 6).
 
-**Status (2026-09):** Osmar pediu pra resolver de vez, com fidelidade
-total à regra oficial e migração automática de personagens salvos.
-Virou foco ativo — **M0 (fundamento de schema) já fechado**, ver
-`core/multiclasse.ts` (`PersonagemClasse`, `classesDoPersonagem`,
-`nivelTotalPersonagem`, `nivelNaClasse`) e `EmDevB.md` pro plano
-completo (M1-M4) e progresso atual. Esta entrada só sai de
-`PENDENCIAS.md` quando a Fase M inteira fechar — remove daqui o
-achado abaixo só quando `personagem.nivel` parar de ser usado como
-"nível de Mago" de verdade nos call sites do Necromante (M3).
-
-**Achado original (Necromante, B3e/pós-B3e — Osmar apontou testando):**
-todas as características do Necromante que escalam por "nível de Mago"
-(Colheita dos Mortos, Mestre da Morte, Legião dos Mortos, Perito em
-Necromancia) usam `personagem.nivel` como se fosse o nível de Mago —
-verdade só enquanto existir 1 classe por personagem. Quando a Fase M
-chegar em M3, esses call sites em `core/necromante.ts`/`FichaShell.tsx`
-trocam `personagem.nivel` por `nivelNaClasse(classes, 'Mago')`.
+**O que ainda falta (M4, não é bloqueio pro dia a dia — só importa
+quando o personagem tem Conjuração vinda de 2+ classes AO MESMO
+TEMPO):**
+- Hoje, um personagem com 2 classes conjuradoras (ex: Bardo/Mago,
+  Bardo/Bruxo) vê os Espaços de Magia de CADA classe separadamente
+  (trocando a pill) — não a tabela oficial "Conjurador Multiclasse"
+  (SDD seção 8.2, mais fraca que a soma das duas tabelas isoladas).
+  Isso super-poderia levemente esses casos específicos até o M4
+  aplicar o cálculo combinado de verdade.
+- Bruxo (Magia de Pacto) nunca entra nessa soma — permanece sempre
+  separado (regra já confirmada no SDD, seção 8.5), incluindo a ponte
+  de uso cruzado de espaços entre Pacto e Conjuração normal.
+- SDD seção 7 (Ataque Extra não empilha entre classes; CA por método
+  alternativo, só 1 de cada vez) — ainda não tem lógica de dedupe
+  entre classes; hoje não é alcançável (nenhuma das 4 classes
+  implementadas concede os dois ao mesmo tempo num personagem
+  multiclasse plausível), mas fica registrado pra quando entrar uma
+  5ª classe que colida com isso.
 
 ## App inteiro não escala pra tablet/desktop — só os ícones de Classe foram corrigidos
 

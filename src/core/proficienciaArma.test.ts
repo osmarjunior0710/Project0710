@@ -41,4 +41,12 @@ describe('classeProficienteComArma', () => {
     expect(classeProficienteComArma(classe('Bardo'), arma('Espada Longa'), [])).toBe(false);
     expect(classeProficienteComArma(classe('Bardo'), arma('Adaga'), ['treinamento-com-armas-marciais'])).toBe(true);
   });
+
+  it('multiclasse: classe extra dá proficiência mesmo se a classe ativa não dá (Mago ativo + Guerreiro extra)', () => {
+    expect(classeProficienteComArma(classe('Mago'), arma('Espada Longa'), [], ['Guerreiro'])).toBe(true);
+  });
+
+  it('multiclasse: classe extra que não dá arma nenhuma ao multiclassar (Bardo/Bruxo/Mago) não muda nada', () => {
+    expect(classeProficienteComArma(classe('Mago'), arma('Espada Longa'), [], ['Bardo'])).toBe(false);
+  });
 });

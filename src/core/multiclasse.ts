@@ -85,6 +85,55 @@ export function atendePreRequisitoMulticlasse(
   return preRequisito.modo === 'qualquer' ? preRequisito.atributosMinimos.some(atende) : preRequisito.atributosMinimos.every(atende);
 }
 
+export interface OpcaoLevelUp {
+  /** Nome da classe (ex: "Mago"). */
+  classe: string;
+  /** Nível atual do personagem NESSA classe — `0` = ainda não tem
+   * (essa opção seria uma multiclasse nova, "Nível 0 → 1"). */
+  nivelAtual: number;
+}
+
+/** Opções de classe pro primeiro passo do Level Up: as classes que o
+ * personagem já tem (sempre elegíveis — já qualificou quando entrou
+ * nelas) + qualquer OUTRA classe do catálogo pra qual ele atende o
+ * pré-requisito de atributo (seção 2 do SDD Multiclasse) — que é
+ * bidirecional: precisa bater o pré-requisito de TODAS as classes que
+ * já tem E o da classe nova. Classe do catálogo sem entrada em
+ * `preRequisitosMulticlasse` (nenhuma hoje, mas por via das dúvidas)
+ * fica de fora — sem dado, não oferece. */
+export function opcoesLevelUp(
+  classes: PersonagemClasse[],
+  atributosFinais: Record<Atributo, number>,
+  catalogoClasses: { nome: string }[],
+): OpcaoLevelUp[] {
+  const opcoes: OpcaoLevelUp[] = classes.map((c) => ({ classe: c.classe, nivelAtual: c.nivel }));
+
+  const atendeTodasAsAtuais = classes.every((c) => {
+    const preReq = preRequisitoDaClasse(c.classe);
+    return !preReq || atendePreRequisitoMulticlasse(atributosFinais, preReq);
+  });
+  if (!atendeTodasAsAtuais) return opcoes;
+
+  const nomesAtuais = new Set(classes.map((c) => c.classe));
+  for (const c of catalogoClasses) {
+    if (nomesAtuais.has(c.nome)) continue;
+    const preReqNova = preRequisitoDaClasse(c.nome);
+    if (!preReqNova || !atendePreRequisitoMulticlasse(atributosFinais, preReqNova)) continue;
+    opcoes.push({ classe: c.nome, nivelAtual: 0 });
+  }
+
+  return opcoes;
+}
+
+/** `true` = mostra o passo de escolha de classe no Level Up — só
+ * quando existe alguma escolha de verdade (2+ opções). Personagem com
+ * 1 classe só e nenhuma outra elegível (caso de 100% dos personagens
+ * hoje) não vê nada de novo — segue direto pro passo de PV, igual
+ * sempre foi. */
+export function deveEscolherClasseNoLevelUp(opcoes: OpcaoLevelUp[]): boolean {
+  return opcoes.length > 1;
+}
+
 /** Espaços de Magia (por círculo, índice 0 = 1º) pro Nível Combinado
  * de conjuração multiclasse — `null` se fora da faixa 1-20 (não deve
  * acontecer, nível combinado nunca passa de 20). Ver

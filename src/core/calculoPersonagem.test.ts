@@ -14,7 +14,7 @@ import {
   ferramentasProficientes,
 } from './calculoPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
-import { criarSelecaoInicial, type WizardSelection } from './personagem';
+import { criarSelecaoInicial, modificador, type WizardSelection } from './personagem';
 import type { ItemMochila } from './mochila';
 
 const guerreiro = classes.find((c) => c.nome === 'Guerreiro');
@@ -211,6 +211,20 @@ describe('calcularPericias (perícia da espécie — Hábil do Humano)', () => {
   });
 });
 
+describe('calcularPericias (multiclasse — nivelTotal separado de nivel-na-classe)', () => {
+  it('caso normal — sem nivelTotal, usa o próprio nivel pro Bônus de Proficiência (comportamento de sempre)', () => {
+    const s = selecaoGuerreiro({ periciasClasseEscolhidas: ['Furtividade'] });
+    const resultado = calcularPericias(s, 1);
+    expect(resultado.find((p) => p.nome === 'Furtividade')?.mod).toBe(modificador(s.atributos.DES ?? 10) + bonusProficiencia(guerreiro, 1));
+  });
+
+  it('caso de borda — com nivelTotal, o Bônus de Proficiência usa o TOTAL, não o nivel-na-classe', () => {
+    const s = selecaoGuerreiro({ periciasClasseEscolhidas: ['Furtividade'] });
+    const resultado = calcularPericias(s, 1, [], [], 5);
+    expect(resultado.find((p) => p.nome === 'Furtividade')?.mod).toBe(modificador(s.atributos.DES ?? 10) + bonusProficiencia(guerreiro, 5));
+  });
+});
+
 describe('calcularProficienciasFerramenta', () => {
   it('lista só as ferramentas concedidas (Classe), com mod. atributo + Bônus de Proficiência', () => {
     const s = selecaoGuerreiro({ ferramentasClasseEscolhidas: ['Ferramentas de Ladrão'] }); // Destreza
@@ -232,6 +246,13 @@ describe('calcularProficienciasFerramenta', () => {
     });
     const resultado = calcularProficienciasFerramenta(s, 1);
     expect(resultado).toHaveLength(1);
+  });
+
+  it('multiclasse — ferramentasBonusExtras soma sem duplicar (ex: Instrumento escolhido ao multiclassar pra Bardo)', () => {
+    const s = selecaoGuerreiro();
+    const resultado = calcularProficienciasFerramenta(s, 1, ['Alaúde']);
+    expect(resultado).toHaveLength(1);
+    expect(resultado[0].nome).toBe('Alaúde');
   });
 });
 

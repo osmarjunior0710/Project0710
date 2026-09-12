@@ -6,6 +6,8 @@ import {
   preRequisitoDaClasse,
   atendePreRequisitoMulticlasse,
   espacosMagiaParaNivelCombinado,
+  opcoesLevelUp,
+  deveEscolherClasseNoLevelUp,
 } from './multiclasse';
 import type { PersonagemSalvo } from './armazenamentoPersonagens';
 import type { WizardSelection } from './personagem';
@@ -122,5 +124,71 @@ describe('espacosMagiaParaNivelCombinado', () => {
   it('caso de borda — fora da faixa 1-20 devolve null', () => {
     expect(espacosMagiaParaNivelCombinado(21)).toBeNull();
     expect(espacosMagiaParaNivelCombinado(0)).toBeNull();
+  });
+});
+
+const CATALOGO = [{ nome: 'Guerreiro' }, { nome: 'Bardo' }, { nome: 'Bruxo' }, { nome: 'Mago' }, { nome: 'Guardião' }];
+
+describe('opcoesLevelUp', () => {
+  it('caso normal — 1 classe só, sem atender pré-requisito de nenhuma outra: só ela mesma na lista', () => {
+    const classes = [{ classe: 'Mago', nivel: 5 }];
+    const atributos = { FOR: 8, DES: 10, CON: 10, INT: 16, SAB: 10, CAR: 10 };
+    expect(opcoesLevelUp(classes, atributos, CATALOGO)).toEqual([{ classe: 'Mago', nivelAtual: 5 }]);
+  });
+
+  it('caso normal — 1 classe só, atendendo pré-requisito de outra: as duas aparecem (nova como nível 0)', () => {
+    const classes = [{ classe: 'Mago', nivel: 5 }];
+    const atributos = { FOR: 13, DES: 10, CON: 10, INT: 16, SAB: 10, CAR: 10 };
+    expect(opcoesLevelUp(classes, atributos, CATALOGO)).toEqual([
+      { classe: 'Mago', nivelAtual: 5 },
+      { classe: 'Guerreiro', nivelAtual: 0 },
+    ]);
+  });
+
+  it('caso normal — já multiclasse (2 classes): as 2 sempre aparecem, independente de elegibilidade nova', () => {
+    const classes = [
+      { classe: 'Guerreiro', nivel: 3 },
+      { classe: 'Mago', nivel: 2 },
+    ];
+    const atributos = { FOR: 13, DES: 10, CON: 10, INT: 16, SAB: 10, CAR: 10 };
+    expect(opcoesLevelUp(classes, atributos, CATALOGO)).toEqual([
+      { classe: 'Guerreiro', nivelAtual: 3 },
+      { classe: 'Mago', nivelAtual: 2 },
+    ]);
+  });
+
+  it('modo "qualquer" (Guerreiro): FOR OU DES basta pra oferecer a classe nova', () => {
+    const classes = [{ classe: 'Mago', nivel: 5 }];
+    const atributos = { FOR: 8, DES: 13, CON: 10, INT: 16, SAB: 10, CAR: 10 };
+    const opcoes = opcoesLevelUp(classes, atributos, CATALOGO);
+    expect(opcoes.some((o) => o.classe === 'Guerreiro')).toBe(true);
+  });
+
+  it('modo "todos" (Guardião): só DES não basta, precisa de SAB junto', () => {
+    const classes = [{ classe: 'Mago', nivel: 5 }];
+    const atributos = { FOR: 8, DES: 13, CON: 10, INT: 16, SAB: 10, CAR: 10 };
+    const opcoes = opcoesLevelUp(classes, atributos, CATALOGO);
+    expect(opcoes.some((o) => o.classe === 'Guardião')).toBe(false);
+  });
+
+  it('caso de borda — não atende mais o pré-requisito de uma classe já possuída: continua na lista, mas não oferece nenhuma nova', () => {
+    const classes = [{ classe: 'Guerreiro', nivel: 3 }];
+    const atributos = { FOR: 8, DES: 8, CON: 10, INT: 16, SAB: 10, CAR: 10 };
+    expect(opcoesLevelUp(classes, atributos, CATALOGO)).toEqual([{ classe: 'Guerreiro', nivelAtual: 3 }]);
+  });
+});
+
+describe('deveEscolherClasseNoLevelUp', () => {
+  it('caso normal — 1 opção só: não mostra o passo', () => {
+    expect(deveEscolherClasseNoLevelUp([{ classe: 'Mago', nivelAtual: 5 }])).toBe(false);
+  });
+
+  it('caso de borda — 2+ opções: mostra o passo', () => {
+    expect(
+      deveEscolherClasseNoLevelUp([
+        { classe: 'Mago', nivelAtual: 5 },
+        { classe: 'Guerreiro', nivelAtual: 0 },
+      ]),
+    ).toBe(true);
   });
 });

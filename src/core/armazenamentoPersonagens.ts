@@ -46,6 +46,18 @@ export interface PersonagemSalvo {
    * característica mecânica de subclasse existe ainda. */
   subclasseAtual?: string | null;
   estiloDeLutaAtual?: string | null;
+  /** Qual classe está "em foco" na ficha hoje (seletor tipo pill,
+   * só aparece com 2+ classes) — decide de qual classe vêm Truques/
+   * Magias/recursos de classe exibidos. Ausente = primeira classe de
+   * `classes` (ou a única, pra quem não multiclassou). */
+  classeAtivaAtual?: string;
+  /** Perícia(s)/instrumento(s) ganhos ESPECIFICAMENTE ao multiclassar
+   * pra uma classe nova (SDD Multiclasse, seção 6 — ex: Bardo ganha 1
+   * perícia + 1 Instrumento Musical à escolha) — somam com as
+   * proficiências normais de perícia/ferramenta, nunca as substituem.
+   * Ausente/vazio = nenhuma escolha desse tipo ainda. */
+  periciasMulticlasseAtual?: string[];
+  ferramentasMulticlasseAtual?: string[];
   maestriaArmaAtual?: string[];
   folegoGasto?: number;
   indomavelGasto?: number;

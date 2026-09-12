@@ -41,6 +41,16 @@ describe('classeProficienteComArmadura', () => {
     expect(classeProficienteComArmadura(classe('Bardo'), 'Pesada', t)).toBe(true);
     expect(classeProficienteComArmadura(classe('Bardo'), 'Escudos', t)).toBe(false);
   });
+
+  it('multiclasse: classe extra dá treinamento mesmo se a classe ativa não dá (Mago ativo + Guerreiro extra)', () => {
+    expect(classeProficienteComArmadura(classe('Mago'), 'Média', [], ['Guerreiro'])).toBe(true);
+    expect(classeProficienteComArmadura(classe('Mago'), 'Escudos', [], ['Guerreiro'])).toBe(true);
+  });
+
+  it('multiclasse: classe extra que só dá Leve (Bruxo) não dá Média/Escudos', () => {
+    expect(classeProficienteComArmadura(classe('Mago'), 'Leve', [], ['Bruxo'])).toBe(true);
+    expect(classeProficienteComArmadura(classe('Mago'), 'Média', [], ['Bruxo'])).toBe(false);
+  });
 });
 
 describe('categoriaArmaduraEquipada', () => {

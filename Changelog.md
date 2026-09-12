@@ -5,6 +5,17 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2253
+
+Multiclasse chegou de verdade: no Level Up, se o personagem já
+qualifica pra multiclassar (atributo 13+ na classe atual e na nova),
+uma tela nova deixa escolher qual classe sobe — continuar na atual ou
+começar uma nova do zero. A ficha agora mostra todas as classes do
+personagem no topo (ex: "Guerreiro 3 / Mago 2"), com PV somando as
+duas e um seletor pra trocar qual classe está "em foco" (decide o que
+aparece em Magias/recursos de classe). Personagem que só tem 1 classe
+(todos até agora) não muda em nada.
+
 ## v202609_1734
 
 Protótipo do dado 3D ganhou um log — botão "📜 Log (N)" no canto

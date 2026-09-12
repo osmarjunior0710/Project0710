@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { armazenamentoPersonagens } from '../../core/armazenamentoPersonagens';
 import { ID_PERSONAGEM_DEMO } from '../../core/personagemDemo';
 import { calcularPvMaximoNivel1 } from '../../core/calculoPersonagem';
+import { classesDoPersonagem } from '../../core/multiclasse';
 import { classes } from '../../data/rulesets/dnd2024/classes';
 import { subclasses } from '../../data/rulesets/dnd2024/subclasses';
 import IconeClasse from '../components/IconeClasse';
@@ -30,11 +31,18 @@ export default function CharacterList() {
     const subclasseId = p.subclasseAtual
       ? (subclasses.find((s) => s.nome === p.subclasseAtual)?.id ?? null)
       : null;
+    // Multiclasse (Fase M3) — 2+ classes mostram "Guerreiro 3 / Mago 2"
+    // em vez de só o nome da classe original; personagem de 1 classe
+    // só (100% dos personagens antes desta entrega) continua igual.
+    const classesDoPj = classesDoPersonagem(p);
+    const classeResumo =
+      classesDoPj.length > 1 ? classesDoPj.map((c) => `${c.classe} ${c.nivel}`).join(' / ') : (p.selecao.classe ?? '—');
     return {
       id: p.id,
       nome: p.selecao.nome || '(sem nome)',
       especie: p.selecao.especie ?? '—',
-      classe: p.selecao.classe ?? '—',
+      classe: classeResumo,
+      multiclasse: classesDoPj.length > 1,
       classeId,
       iconeId: subclasseId ?? classeId,
       nivel: p.nivel,
@@ -90,7 +98,8 @@ export default function CharacterList() {
           <div className={styles.info}>
             <div className={styles.name}>{c.nome}</div>
             <div className={styles.meta}>
-              {c.especie} · {c.classe} · Nível {c.nivel}
+              {c.especie} · {c.classe}
+              {c.multiclasse ? '' : ` · Nível ${c.nivel}`}
             </div>
           </div>
           <span className="tag">

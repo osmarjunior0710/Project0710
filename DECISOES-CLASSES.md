@@ -1076,3 +1076,70 @@ existem** (Exaustão, Recuperação Arcana interativa, resistência a dano
 por tipo) — ver `PENDENCIAS.md` "Necromante (Fase B)".
 
 **Data/origem:** 2026-09, Fase B completa (B0-B3e).
+
+---
+
+## Multiclasse — "nível na classe ativa" nunca deixou de ser o padrão; só ganhou um "nível total" ao lado
+
+**Decisão:** `personagem.nivel`/`personagem.subclasse` continuam
+significando exatamente o que sempre significaram — nível/subclasse
+**da classe em foco** (`classeAtivaNome`, `core/multiclasse.ts`) —
+em praticamente todos os ~70 pontos que já liam esses campos
+(recursos de classe, espaços de magia, características/subclasse,
+truques/magias preparadas). Isso é o que faz um personagem multiclasse
+"simplesmente funcionar" sem reescrever esses ~70 pontos: cada classe
+calcula suas próprias coisas olhando só o próprio nível, exatamente
+como já fazia quando só existia 1 classe.
+
+Um `nivelTotalPersonagem(classesAtual)` **separado** entra só nos
+poucos pontos que a regra real liga ao nível TOTAL do personagem, não
+ao de uma classe isolada: Bônus de Proficiência (e tudo que soma ele —
+perícias, ferramentas, Percepção Passiva, Iniciativa, recursos
+baseados em Bônus de Proficiência tipo Conhecimento de Pedras/Pico de
+Adrenalina/Ataque de Sopro) e qualquer coisa de espécie (não de
+classe) que escale por nível de personagem (ex: magias de Linhagem
+Élfica). `calcularPericias` precisou de um 5º parâmetro opcional
+(`nivelTotal`) porque ela mistura os dois: o Bônus de Proficiência
+(total) E o gatilho de "Pau pra Toda Obra" do Bardo (nível NA classe)
+na mesma função — os outros 3 helpers afetados (`calcularIniciativa`,
+`calcularPercepcaoPassiva`, `calcularProficienciasFerramenta`) não
+tinham esse conflito, só passaram a receber nível total no lugar do
+nível único que já recebiam.
+
+**"Classe ativa" (o que aparece na ficha) é um conceito DIFERENTE de
+"classe original" (o que decide proficiência de arma/armadura).** Um
+personagem multiclasse tem 1 seletor de pill pra decidir qual classe
+mostrar (Truques/Magias/recursos daquela classe) — mas a proficiência
+de arma/armadura NUNCA olha pra pill: ela sempre usa a PRIMEIRA classe
+do personagem (`classesAtual[0]`, sempre a original, nível 1 "puro")
+com a tabela cheia de proficiência, e QUALQUER outra classe
+multiclassada depois dela com o pacote reduzido (SDD Multiclasse
+seção 6, `data/rulesets/dnd2024/proficienciasEntradaMulticlasse.ts`).
+Um Guerreiro que multiclassa pra Mago continua com armadura Pesada
+mesmo com a pill em "Mago" — ele não "perde" a proficiência da classe
+original só porque ela não está em foco. Isso foi um bug real pego só
+testando ao vivo no navegador (a 1ª versão usava a classe ativa pros
+dois papéis) — vale como lembrete de sempre testar troca de pill com
+uma classe original que tenha proficiência que a nova classe NÃO
+daria, não só o caminho feliz.
+
+**Tela de escolha de classe no Level Up vive FORA do `LevelUpShell`.**
+`EscolherClasseLevelUp.tsx` é um componente próprio, aberto pela
+`FichaShell` ANTES de `LevelUpShell` (nunca dentro da lista de passos
+dele) — `LevelUpShell` continua recebendo `classe`/`personagem` já
+resolvidos, sem saber que multiclasse existe. Só aparece quando há
+escolha de verdade (`deveEscolherClasseNoLevelUp` — 2+ opções: classes
+já possuídas + qualquer outra classe cujo pré-requisito de atributo já
+bate, nas DUAS pontas, seção 2 do SDD); com 1 classe só e nenhuma
+outra elegível (100% dos personagens antes desta entrega), a tela nunca
+aparece, fluxo idêntico a antes.
+
+**M4 (conjuração combinada de 2+ classes conjuradoras, SDD seção 8.2)
+ficou de fora de propósito** — ver `PENDENCIAS.md` "Multiclasse — M4".
+Até lá, um personagem com 2 classes conjuradoras vê os Espaços de
+Magia de cada uma separadamente (pela pill), não a tabela combinada
+oficial (mais fraca) — simplificação aceita porque só afeta esse caso
+específico (2 conjuradores ao mesmo tempo), não o caminho mais comum
+de multiclasse (1 conjurador + 1 não-conjurador).
+
+**Data/origem:** 2026-09, Fase M completa (M0-M3).

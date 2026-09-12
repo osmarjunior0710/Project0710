@@ -23,6 +23,35 @@
   margin-top: 2px;
 }
 
+/* Seletor de classe ativa (multiclasse, Fase M3) — só aparece com 2+
+   classes; decide de qual classe vêm Truques/Magias/recursos exibidos
+   no resto da ficha. Pills pequenas, tocáveis, quebram linha em telas
+   estreitas (~390px) sem exigir scroll horizontal. */
+.classePills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.classePill {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line-soft);
+  color: var(--text-faint);
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.classePillAtiva {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--text);
+  font-weight: 600;
+}
+
 .tabContent {
   flex: 1;
   overflow-y: auto;

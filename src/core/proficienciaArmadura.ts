@@ -7,6 +7,7 @@
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import type { Armadura } from '../data/rulesets/dnd2024/armaduras';
 import { proficienciasArmaArmaduraClasse } from '../data/rulesets/dnd2024/proficienciasArmaArmaduraClasse';
+import { proficienciasEntradaMulticlasse } from '../data/rulesets/dnd2024/proficienciasEntradaMulticlasse';
 import { talentos } from '../data/rulesets/dnd2024/talentos';
 
 export type CategoriaArmadura = 'Leve' | 'Média' | 'Pesada' | 'Escudos';
@@ -31,21 +32,32 @@ function categoriasArmaduraDosTalentos(talentosAtuais: string[] | undefined): Se
   return categorias;
 }
 
-/** `true` se a classe (ou um talento como Especialista em Armaduras)
- * dá treinamento com a categoria de Armadura/Escudo — lê o texto
- * livre da coluna "Treinamento com Armadura" da planilha. `talentosAtuais`
+/** `true` se a classe ATIVA (ou um talento como Especialista em
+ * Armaduras, ou uma OUTRA classe multiclassada em `classesExtrasNomes`)
+ * dá treinamento com a categoria de Armadura/Escudo. `talentosAtuais`
  * é opcional, mesmo padrão de `classeProficienteComArma`. Sem entrada
- * de classe nem talento = sem treinamento (nunca assume). */
+ * de classe nem talento = sem treinamento (nunca assume).
+ * `classesExtrasNomes` = nomes de OUTRAS classes que o personagem já
+ * tem via multiclasse (ver `core/multiclasse.ts`) — cada uma checada
+ * pelo pacote REDUZIDO de `proficienciasEntradaMulticlasse.ts`, nunca
+ * pelo pacote de nível 1 completo (só a classe ativa usa esse). */
 export function classeProficienteComArmadura(
   classe: Classe,
   categoria: CategoriaArmadura,
   talentosAtuais?: string[],
+  classesExtrasNomes?: string[],
 ): boolean {
   if (categoriasArmaduraDosTalentos(talentosAtuais).has(categoria)) return true;
 
   const entrada = proficienciasArmaArmaduraClasse.find((p) => p.classe === classe.nome);
-  if (!entrada) return false;
-  return entrada.treinamentoArmadura.includes(categoria);
+  if (entrada?.treinamentoArmadura.includes(categoria)) return true;
+
+  for (const nomeExtra of classesExtrasNomes ?? []) {
+    const entradaExtra = proficienciasEntradaMulticlasse.find((p) => p.classe === nomeExtra);
+    if (entradaExtra?.treinamentoArmadura.includes(categoria)) return true;
+  }
+
+  return false;
 }
 
 /** Categoria de Armadura (Leve/Média/Pesada) da armadura equipada —
@@ -70,8 +82,9 @@ export function armaduraSemTreinamentoEquipada(
   classe: Classe | null,
   armaduraCatalogo: Armadura | undefined,
   talentosAtuais?: string[],
+  classesExtrasNomes?: string[],
 ): boolean {
   const categoria = categoriaArmaduraEquipada(armaduraCatalogo);
   if (categoria === null || !classe) return false;
-  return !classeProficienteComArmadura(classe, categoria, talentosAtuais);
+  return !classeProficienteComArmadura(classe, categoria, talentosAtuais, classesExtrasNomes);
 }

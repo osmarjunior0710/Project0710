@@ -213,9 +213,13 @@ function bonusCaFase4(
  * criação) OU quando a classe realmente tem treinamento com Escudos
  * (SDD "Penalidades por Falta de Proficiência" — sem isso, o número de
  * CA não muda, só não soma o bônus do escudo). */
-function proficienteComEscudo(classe: Classe | null | undefined, talentosAtuais: string[] | undefined): boolean {
+function proficienteComEscudo(
+  classe: Classe | null | undefined,
+  talentosAtuais: string[] | undefined,
+  classesExtrasNomes?: string[],
+): boolean {
   if (!classe) return true;
-  return classeProficienteComArmadura(classe, 'Escudos', talentosAtuais);
+  return classeProficienteComArmadura(classe, 'Escudos', talentosAtuais, classesExtrasNomes);
 }
 
 export function calcularCAEquipado(
@@ -224,6 +228,7 @@ export function calcularCAEquipado(
   estiloDeLutaEscolhido?: string | null,
   talentosAtuais?: string[],
   classe?: Classe | null,
+  classesExtrasNomes?: string[],
 ): number {
   const desMod = modificador(desValor);
   const { armadura, escudo } = resumoEquipado(itensMochila);
@@ -231,7 +236,8 @@ export function calcularCAEquipado(
   const { defensivoBonus, tetoDesOverride } = bonusCaFase4(armaduraCatalogo, desValor, estiloDeLutaEscolhido, talentosAtuais);
   const base = armaduraCatalogo ? caPelaArmadura(armaduraCatalogo.classeArmadura, desMod, tetoDesOverride) : 10 + desMod;
   const escudoCatalogo = escudo ? armaduras.find((a) => a.nome === escudo.nome) : undefined;
-  const bonus = escudoCatalogo && proficienteComEscudo(classe, talentosAtuais) ? bonusEscudo(escudoCatalogo.classeArmadura) : 0;
+  const bonus =
+    escudoCatalogo && proficienteComEscudo(classe, talentosAtuais, classesExtrasNomes) ? bonusEscudo(escudoCatalogo.classeArmadura) : 0;
   return base + bonus + defensivoBonus;
 }
 
@@ -242,12 +248,13 @@ export function explicarCAEquipado(
   estiloDeLutaEscolhido?: string | null,
   talentosAtuais?: string[],
   classe?: Classe | null,
+  classesExtrasNomes?: string[],
 ): ExplicacaoCalculo {
   const desMod = modificador(desValor);
   const { armadura, escudo } = resumoEquipado(itensMochila);
   const armaduraCatalogo = armadura ? armaduras.find((a) => a.nome === armadura.nome) : undefined;
   const escudoCatalogo = escudo ? armaduras.find((a) => a.nome === escudo.nome) : undefined;
-  const escudoProficiente = proficienteComEscudo(classe, talentosAtuais);
+  const escudoProficiente = proficienteComEscudo(classe, talentosAtuais, classesExtrasNomes);
   const bonus = escudoCatalogo && escudoProficiente ? bonusEscudo(escudoCatalogo.classeArmadura) : 0;
   const { defensivoBonus, tetoDesOverride } = bonusCaFase4(armaduraCatalogo, desValor, estiloDeLutaEscolhido, talentosAtuais);
 
@@ -389,11 +396,18 @@ export function calcularPericias(
   nivel: number,
   periciasEspecialista: string[] = [],
   periciasBonusExtras: string[] = [],
+  /** Nível TOTAL do personagem (soma de todas as classes, ver
+   * `core/multiclasse.ts`) — só usado pro Bônus de Proficiência.
+   * Omitido (chamadas de 1 classe só, ou resumo do wizard) = usa o
+   * próprio `nivel`, igual sempre foi. `nivel` continua sendo o nível
+   * NA CLASSE ativa — é ele que decide se "Pau pra Toda Obra" (Bardo)
+   * já desbloqueou, nunca o total. */
+  nivelTotal?: number,
 ): PericiaFinal[] {
   const classe = classeDaSelecao(selection);
   if (!classe) return [];
   const proficientes = new Set([...periciasProficientes(selection), ...periciasBonusExtras]);
-  const bonus = bonusProficiencia(classe, nivel);
+  const bonus = bonusProficiencia(classe, nivelTotal ?? nivel);
   const temPauParaTodaObra = caracteristicaDesbloqueada(classe, 'Pau pra Toda Obra', nivel) !== null;
   const resultado: PericiaFinal[] = [];
   for (const pericia of pericias) {
@@ -476,12 +490,20 @@ export interface FerramentaFinal {
  * `calcularPericias`, que lista as 18 sempre) — a lista de proficiência
  * de ferramenta não tem um catálogo fechado pra "todas, marcando quem
  * tem", então só faz sentido mostrar o que o personagem realmente tem. */
-export function calcularProficienciasFerramenta(selection: WizardSelection, nivel: number): FerramentaFinal[] {
+export function calcularProficienciasFerramenta(
+  selection: WizardSelection,
+  nivel: number,
+  /** Ferramentas/Instrumentos ganhos fora da criação (ex: escolha ao
+   * multiclassar pra Bardo, SDD Multiclasse seção 6) — soma com
+   * `ferramentasProficientes(selection)`, mesmo padrão de
+   * `periciasBonusExtras` em `calcularPericias`. */
+  ferramentasBonusExtras: string[] = [],
+): FerramentaFinal[] {
   const classe = classeDaSelecao(selection);
   if (!classe) return [];
   const bonus = bonusProficiencia(classe, nivel);
   const resultado: FerramentaFinal[] = [];
-  for (const nome of ferramentasProficientes(selection)) {
+  for (const nome of [...new Set([...ferramentasProficientes(selection), ...ferramentasBonusExtras])]) {
     const atributoCompleto = ATRIBUTO_DA_FERRAMENTA[nome] ?? null;
     const atributo = atributoCompleto ? (ATRIBUTO_POR_NOME_COMPLETO[atributoCompleto] ?? null) : null;
     const valorAtributo = atributo ? valorFinalAtributo(selection, atributo) : null;

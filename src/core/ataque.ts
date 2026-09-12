@@ -98,11 +98,12 @@ export function ataqueComArma(
   outraArmaNaMaoSecundaria = false,
   atribForcada?: number,
   talentosAtuais?: string[],
+  classesExtrasNomes?: string[],
 ): AtaqueResolvido {
   const acuidade = arma.propriedades.includes('Acuidade');
   const distancia = arma.categoria.includes('à Distância');
   const atribMod = atribForcada ?? (acuidade ? Math.max(forMod, desMod) : distancia ? desMod : forMod);
-  const prof = classeProficienteComArma(classe, arma, talentosAtuais) ? bonusProficiencia(classe, nivel) : 0;
+  const prof = classeProficienteComArma(classe, arma, talentosAtuais, classesExtrasNomes) ? bonusProficiencia(classe, nivel) : 0;
   const dadoVersatil = identificarEquipamento(arma.nome).dadoVersatil;
   const usaVersatil = duasMaosAtivo && dadoVersatil;
   const { quantidade, lados, tipo } = usaVersatil ? parseDano(`${dadoVersatil} ${arma.dano.replace(/^\d+d\d+\s*/, '')}`) : parseDano(arma.dano);

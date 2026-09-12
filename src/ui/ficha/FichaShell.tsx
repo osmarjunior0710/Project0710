@@ -26,6 +26,15 @@ import {
 import { aumentarAtributos, modificador, valorFinalAtributo, type WizardSelection } from '../../core/personagem';
 import { atributosOrdem, type Atributo } from '../../data/wizardFixtures';
 import {
+  classesDoPersonagem,
+  nivelTotalPersonagem,
+  opcoesLevelUp,
+  deveEscolherClasseNoLevelUp,
+  type PersonagemClasse,
+} from '../../core/multiclasse';
+import { classes as catalogoClasses } from '../../data/rulesets/dnd2024/classes';
+import EscolherClasseLevelUp, { type ResultadoEscolhaClasseLevelUp } from './levelup/EscolherClasseLevelUp';
+import {
   calcularCapacidadeMaxima,
   calcularItensIniciais,
   criarItemManual,
@@ -184,20 +193,59 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const navigate = useNavigate();
   const { registrarBonusExtra, registrarSorte, registrarInspiracaoHeroica, estado: rollEmAndamento } = useRoll();
   const [selecao, setSelecao] = useState<WizardSelection>(personagemSalvo.selecao);
-  const classe = classeDaSelecao(selecao);
+
+  // Multiclasse (Fase M2/M3, ver EmDevB.md e SDD Multiclasse) —
+  // `classesAtual` é a fonte de verdade de nível por classe;
+  // `classeAtivaNome` decide qual classe está "em foco" na ficha agora
+  // (Truques/Magias/recursos de classe, e qual classe o Level Up vai
+  // aplicar). Pra 100% dos personagens de hoje (1 classe só),
+  // `classeAtivaNome` sempre bate com essa única classe — nada muda.
+  const [classesAtual, setClassesAtual] = useState<PersonagemClasse[]>(() => classesDoPersonagem(personagemSalvo));
+  const [classeAtivaNome, setClasseAtivaNome] = useState<string>(
+    () => personagemSalvo.classeAtivaAtual ?? classesDoPersonagem(personagemSalvo)[0]?.classe ?? '',
+  );
+  const classeAtivaEntry = classesAtual.find((c) => c.classe === classeAtivaNome);
+  const nivelTotalAtual = nivelTotalPersonagem(classesAtual);
+
+  const classe = catalogoClasses.find((c) => c.nome === classeAtivaNome) ?? classeDaSelecao(selecao);
+  // Proficiência de arma/armadura NÃO segue a classe ativa (pill de
+  // exibição) — segue "classe original" (a primeira, com o pacote de
+  // nível 1 completo, sempre `classesAtual[0]`) + qualquer OUTRA classe
+  // multiclassada depois dela (pacote reduzido, SDD Multiclasse seção
+  // 6) — mesmo que o jogador esteja com a classe original "em foco" ou
+  // não. Sem essa distinção, trocar a pill pra classe nova faria o
+  // personagem "perder" proficiência de arma/armadura que ele já tinha
+  // de verdade desde o nível 1.
+  const classeOriginalNome = classesAtual[0]?.classe;
+  const classeOriginal = catalogoClasses.find((c) => c.nome === classeOriginalNome) ?? classe;
+  const classesMulticlassadasNomes = classesAtual.filter((c) => c.classe !== classeOriginalNome).map((c) => c.classe);
   const conValor = selecao.atributos.CON;
 
   const [tab, setTab] = useState<TabName>('atributos');
-  const [personagem, setPersonagem] = useState<PersonagemNivel>({
-    nivel: personagemSalvo.nivel,
-    pvMax: personagemSalvo.pvMax ?? calcularPvMaximoNivel1(selecao) ?? personagemSalvo.pvAtual,
+  const [pvMax, setPvMax] = useState(personagemSalvo.pvMax ?? calcularPvMaximoNivel1(selecao) ?? personagemSalvo.pvAtual);
+  const [estiloDeLutaAtivo, setEstiloDeLutaAtivo] = useState<string | null>(
+    personagemSalvo.estiloDeLutaAtual ?? selecao.estiloDeLutaEscolhido,
+  );
+  const [periciasMulticlasseAtuais, setPericiasMulticlasseAtuais] = useState<string[]>(
+    personagemSalvo.periciasMulticlasseAtual ?? [],
+  );
+  const [ferramentasMulticlasseAtuais, setFerramentasMulticlasseAtuais] = useState<string[]>(
+    personagemSalvo.ferramentasMulticlasseAtual ?? [],
+  );
+  const [escolhendoClasseLevelUp, setEscolhendoClasseLevelUp] = useState(false);
+  // Objeto derivado (não é state) — nível/subclasse vêm da classe ATIVA
+  // (`classeAtivaEntry`); PV máximo/mod. CON/bônus fixo por nível são
+  // do personagem inteiro, iguais pra qualquer classe em foco.
+  const personagem: PersonagemNivel = {
+    nivel: classeAtivaEntry?.nivel ?? 0,
+    pvMax,
     dadoVida: classe?.dadoDeVida ?? 'd8',
     conMod: conValor !== null ? modificador(conValor) : 0,
-    subclasse: personagemSalvo.subclasseAtual ?? null,
-    estiloDeLuta: personagemSalvo.estiloDeLutaAtual ?? selecao.estiloDeLutaEscolhido,
+    subclasse: classeAtivaEntry?.subclasse ?? null,
+    estiloDeLuta: estiloDeLutaAtivo,
     bonusPvPorNivel: bonusPvPorNivelDaEspecie(selecao) + bonusPvPorNivelDoTalento(selecao),
     bonusPvPorNivelLabel: rotulosBonusPvPorNivel(selecao).join(' + '),
-  });
+  };
   const [pvAtual, setPvAtual] = useState(personagemSalvo.pvAtual);
   const [pvTemporario, setPvTemporario] = useState(personagemSalvo.pvTemporarioAtual ?? 0);
   const [maestriaArma, setMaestriaArma] = useState<string[]>(personagemSalvo.maestriaArmaAtual ?? selecao.maestriaArmaEscolhida);
@@ -335,7 +383,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ...(origemPersonagem ? [origemPersonagem.talentoOrigemId] : []),
     ...(selecao.talentoEspecieEscolhido ? [selecao.talentoEspecieEscolhido] : []),
   ];
-  const ca = calcularCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos, classe);
+  const ca = calcularCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos, classeOriginal, classesMulticlassadasNomes);
   // Penalidade de proficiência de Armadura (SDD "Penalidades por Falta
   // de Proficiência") — Desvantagem em D20 de Força/Destreza sempre
   // que a armadura equipada (Leve/Média/Pesada) não tiver treinamento;
@@ -345,51 +393,54 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const armaduraEquipadaCatalogo = itemArmaduraEquipada
     ? armaduras.find((a) => a.nome === itemArmaduraEquipada.nome)
     : undefined;
-  const desvantagemForcaDestreza = armaduraSemTreinamentoEquipada(classe, armaduraEquipadaCatalogo, talentosEfetivos);
-  const iniciativa = calcularIniciativa(selecao, classe, personagem.nivel, talentosEfetivos);
-  const percepcaoPassiva = calcularPercepcaoPassiva(selecao, personagem.nivel);
+  const desvantagemForcaDestreza = armaduraSemTreinamentoEquipada(classeOriginal, armaduraEquipadaCatalogo, talentosEfetivos, classesMulticlassadasNomes);
+  const iniciativa = calcularIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);
+  const percepcaoPassiva = calcularPercepcaoPassiva(selecao, nivelTotalAtual);
   const atributos = calcularAtributosFinais(selecao);
   const atributosFinaisAtuais = Object.fromEntries(
     atributosOrdem.map((a) => [a, valorFinalAtributo(selecao, a) ?? 10]),
   ) as Record<Atributo, number>;
-  const pericias = calcularPericias(selecao, personagem.nivel, periciasEspecialistaAtuais, [
-    ...periciasSubclasseBonusAtuais,
-    ...periciasTalentoGeralAtuais,
-  ]);
-  const proficienciasFerramenta = calcularProficienciasFerramenta(selecao, personagem.nivel);
-  const bonusProficienciaAtual = classe ? bonusProficiencia(classe, personagem.nivel) : 0;
+  const pericias = calcularPericias(
+    selecao,
+    personagem.nivel,
+    periciasEspecialistaAtuais,
+    [...periciasSubclasseBonusAtuais, ...periciasTalentoGeralAtuais, ...periciasMulticlasseAtuais],
+    nivelTotalAtual,
+  );
+  const proficienciasFerramenta = calcularProficienciasFerramenta(selecao, nivelTotalAtual, ferramentasMulticlasseAtuais);
+  const bonusProficienciaAtual = classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
   const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva);
   const explicacaoCapacidadeMaxima = explicarCapacidadeMaxima(selecao, formaGrandeAtiva);
   const explicacaoPv = explicarPvMaximo(selecao, personagem.pvMax);
-  const explicacaoCa = explicarCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos, classe);
-  const explicacaoIniciativa = explicarIniciativa(selecao, classe, personagem.nivel, talentosEfetivos);
-  const explicacaoPercepcaoPassiva = explicarPercepcaoPassiva(selecao, personagem.nivel);
+  const explicacaoCa = explicarCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos, classeOriginal, classesMulticlassadasNomes);
+  const explicacaoIniciativa = explicarIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);
+  const explicacaoPercepcaoPassiva = explicarPercepcaoPassiva(selecao, nivelTotalAtual);
   const estiloDeLuta = estilosDeLuta.find((e) => e.nome === personagem.estiloDeLuta) ?? null;
   const usosFolegoMaximo = classe ? quantidadeRecuperarFolego(classe, personagem.nivel) : 0;
   const usosFolegoRestantes = Math.max(0, usosFolegoMaximo - folegoGasto);
   const temVigorImplacavel = selecao.especie === 'Orc';
-  const usosConhecimentoDePedrasMaximo = selecao.especie === 'Anão' && classe ? bonusProficiencia(classe, personagem.nivel) : 0;
+  const usosConhecimentoDePedrasMaximo = selecao.especie === 'Anão' && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
   const usosConhecimentoDePedrasRestantes = Math.max(0, usosConhecimentoDePedrasMaximo - conhecimentoDePedrasGasto);
-  const usosPicoDeAdrenalinaMaximo = selecao.especie === 'Orc' && classe ? bonusProficiencia(classe, personagem.nivel) : 0;
+  const usosPicoDeAdrenalinaMaximo = selecao.especie === 'Orc' && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
   const usosPicoDeAdrenalinaRestantes = Math.max(0, usosPicoDeAdrenalinaMaximo - picoDeAdrenalinaGasto);
   const especieAtual = especies.find((e) => e.nome === selecao.especie) ?? null;
   const ataqueDeSoproDisponivel = selecao.especie === 'Draconato';
-  const usosAtaqueDeSoproMaximo = ataqueDeSoproDisponivel && classe ? bonusProficiencia(classe, personagem.nivel) : 0;
+  const usosAtaqueDeSoproMaximo = ataqueDeSoproDisponivel && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
   const usosAtaqueDeSoproRestantes = Math.max(0, usosAtaqueDeSoproMaximo - ataqueDeSoproGasto);
   const conValorFinal = valorFinalAtributo(selecao, 'CON') ?? 10;
   const cdAtaqueDeSopro = 8 + modificador(conValorFinal) + bonusProficienciaAtual;
-  const numDadosAtaqueDeSopro = dadosAtaqueDeSopro(personagem.nivel);
+  const numDadosAtaqueDeSopro = dadosAtaqueDeSopro(nivelTotalAtual);
   const tipoDanoAtaqueDeSopro = especieAtual ? tipoDanoSubescolha(especieAtual, selecao) : null;
-  const vooDraconicoDisponivel = selecao.especie === 'Draconato' && personagem.nivel >= 5;
+  const vooDraconicoDisponivel = selecao.especie === 'Draconato' && nivelTotalAtual >= 5;
   const ancestralidadeGiganteEscolhida = selecao.especie === 'Golias' ? selecao.subescolhaEspecieEscolhida : null;
   const usosAncestralidadeGiganteMaximo =
-    ancestralidadeGiganteEscolhida && classe ? bonusProficiencia(classe, personagem.nivel) : 0;
+    ancestralidadeGiganteEscolhida && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
   const usosAncestralidadeGiganteRestantes = Math.max(0, usosAncestralidadeGiganteMaximo - ancestralidadeGiganteGasto);
-  const formaGrandeDisponivel = selecao.especie === 'Golias' && personagem.nivel >= 5;
+  const formaGrandeDisponivel = selecao.especie === 'Golias' && nivelTotalAtual >= 5;
   const modConstituicaoAtual = modificador(conValorFinal);
   const maosCurativasDisponivel = selecao.especie === 'Aasimar';
   const dadosMaosCurativas = bonusProficienciaAtual;
-  const revelacaoCelestialDisponivel = selecao.especie === 'Aasimar' && personagem.nivel >= 3;
+  const revelacaoCelestialDisponivel = selecao.especie === 'Aasimar' && nivelTotalAtual >= 3;
   const opcoesRevelacaoCelestial = especieAtual ? opcoesEscolhaReutilizavel(especieAtual) ?? [] : [];
   const danoBonusRevelacaoCelestial = bonusProficienciaAtual;
   const carValorFinal = valorFinalAtributo(selecao, 'CAR') ?? 10;
@@ -397,7 +448,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const falarComAnimaisGnomoDisponivel =
     selecao.especie === 'Gnomo' && selecao.subescolhaEspecieEscolhida === 'Gnomo do Bosque';
   const usosFalarComAnimaisGnomoMaximo =
-    falarComAnimaisGnomoDisponivel && classe ? bonusProficiencia(classe, personagem.nivel) : 0;
+    falarComAnimaisGnomoDisponivel && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
   const usosFalarComAnimaisGnomoRestantes = Math.max(0, usosFalarComAnimaisGnomoMaximo - falarComAnimaisGnomoGasto);
   const conjura = personagemConjura(classe, selecao, talentosEfetivos);
   const espacos = espacosDeMagiaAtivos(classe, personagem.nivel);
@@ -449,7 +500,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // (espécie não tem classe própria), ver `core/magiasEspecie.ts`.
   const magiasEspecieAtuais = [
     ...truquesEspecie(selecao),
-    ...magiasEspecieDoPersonagem(selecao, personagem.nivel),
+    ...magiasEspecieDoPersonagem(selecao, nivelTotalAtual),
   ];
   const magiasEspeciePreparadas = magiasPreparadasDoPersonagem(magiasEspecieAtuais);
   // "Falar com Animais - Traço de Gnomo" sai da lista genérica de
@@ -500,7 +551,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   ];
   const magiasPreparadasReacao = magiasConjuraveis.filter(ehMagiaDeReacao);
   const magiasPreparadasAcao = magiasConjuraveis.filter((m) => !ehMagiaDeReacao(m));
-  const modAcertoConjuracao = calcularModAcertoConjuracao(selecao, classe, personagem.nivel);
+  const modAcertoConjuracao = calcularModAcertoConjuracao(selecao, classe, nivelTotalAtual);
   const usosInspiracaoMax = usosInspiracaoMaximo(selecao, classe, personagem.nivel);
   const usosInspiracaoRestantes = Math.max(0, usosInspiracaoMax - inspiracaoGasto);
   const tamanhoDadoInspiracao = dadoInspiracao(classe, personagem.nivel);
@@ -578,7 +629,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     armazenamentoPersonagens.salvar({
       ...personagemSalvo,
       selecao,
-      nivel: personagem.nivel,
+      nivel: nivelTotalAtual,
+      classes: classesAtual,
+      classeAtivaAtual: classeAtivaNome,
+      periciasMulticlasseAtual: periciasMulticlasseAtuais,
+      ferramentasMulticlasseAtual: ferramentasMulticlasseAtuais,
       pvAtual,
       turnStateAtual: turnState,
       surtoUsadoTurnoAtual: surtoUsadoTurno,
@@ -637,7 +692,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }, [
     personagemSalvo,
     selecao,
-    personagem.nivel,
+    nivelTotalAtual,
+    classesAtual,
+    classeAtivaNome,
+    periciasMulticlasseAtuais,
+    ferramentasMulticlasseAtuais,
     personagem.pvMax,
     pets,
     personagem.subclasse,
@@ -1204,15 +1263,22 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       ? aumentarAtributos(selecao.atributos, resultado.atributosAumentados)
       : null;
     if (novosAtributos) setSelecao((prev) => ({ ...prev, atributos: novosAtributos }));
-    const novoConValor = novosAtributos?.CON;
-    setPersonagem((prev) => ({
-      ...prev,
-      nivel: resultado.novoNivel,
-      pvMax: prev.pvMax + resultado.pvGanho,
-      subclasse: resultado.subclasseEscolhida ?? prev.subclasse,
-      estiloDeLuta: resultado.estiloDeLutaEscolhido ?? prev.estiloDeLuta,
-      conMod: novoConValor !== null && novoConValor !== undefined ? modificador(novoConValor) : prev.conMod,
-    }));
+    // Grava o nível/subclasse novos na classe ATIVA dentro de `classesAtual`
+    // (não mais num `personagem` solto) — cria a entrada se for a
+    // primeira vez que essa classe aparece (multiclasse nova, `nivelAtual`
+    // 0 → 1 escolhido em `EscolherClasseLevelUp`). `conMod` não precisa de
+    // sync manual mais: deriva de `selecao.atributos.CON` a cada render.
+    setClassesAtual((prev) => {
+      const idx = prev.findIndex((c) => c.classe === classeAtivaNome);
+      if (idx === -1) {
+        return [...prev, { classe: classeAtivaNome, nivel: resultado.novoNivel, subclasse: resultado.subclasseEscolhida ?? null }];
+      }
+      return prev.map((c, i) =>
+        i === idx ? { ...c, nivel: resultado.novoNivel, subclasse: resultado.subclasseEscolhida ?? c.subclasse } : c,
+      );
+    });
+    setPvMax((v) => v + resultado.pvGanho);
+    if (resultado.estiloDeLutaEscolhido) setEstiloDeLutaAtivo(resultado.estiloDeLutaEscolhido);
     setPvAtual((v) => v + resultado.pvGanho);
     if (resultado.truquesEscolhidos) setTruquesAtuais(resultado.truquesEscolhidos);
     if (resultado.livroDeMagiasEscolhidas) setLivroDeMagiasAtuais(resultado.livroDeMagiasEscolhidas);
@@ -1257,6 +1323,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         ...periciasProficientes(selecao),
         ...periciasSubclasseBonusAtuais,
         ...periciasTalentoGeralAtuais,
+        ...periciasMulticlasseAtuais,
       ].includes(resultado.periciaRestritaTalentoEscolhida);
       if (jaEraProficiente) {
         setPericiasEspecialistaAtuais((prev) => [...prev, resultado.periciaRestritaTalentoEscolhida!]);
@@ -1284,6 +1351,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         ...periciasProficientes(selecao),
         ...periciasSubclasseBonusAtuais,
         ...periciasTalentoGeralAtuais,
+        ...periciasMulticlasseAtuais,
       ],
       periciasSubclasseBonusAtuais,
       magiasDescobertasMagicasAtuais,
@@ -1291,6 +1359,24 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       talentosGeraisAtuais,
     });
     confirmarLevelUp(resultado);
+  }
+
+  if (escolhendoClasseLevelUp) {
+    const opcoes = opcoesLevelUp(classesAtual, atributosFinaisAtuais, catalogoClasses);
+    return (
+      <EscolherClasseLevelUp
+        opcoes={opcoes}
+        classePadrao={classeAtivaNome}
+        onFechar={() => setEscolhendoClasseLevelUp(false)}
+        onConfirmar={(resultado: ResultadoEscolhaClasseLevelUp) => {
+          setClasseAtivaNome(resultado.classeEscolhida);
+          if (resultado.periciasEscolhidas) setPericiasMulticlasseAtuais((prev) => [...prev, ...resultado.periciasEscolhidas!]);
+          if (resultado.ferramentasEscolhidas) setFerramentasMulticlasseAtuais((prev) => [...prev, ...resultado.ferramentasEscolhidas!]);
+          setEscolhendoClasseLevelUp(false);
+          setLevelUpAberto(true);
+        }}
+      />
+    );
   }
 
   if (levelUpAberto && classe) {
@@ -1318,6 +1404,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           ...periciasProficientes(selecao),
           ...periciasSubclasseBonusAtuais,
           ...periciasTalentoGeralAtuais,
+          ...periciasMulticlasseAtuais,
         ]}
         periciasSubclasseBonusAtuais={periciasSubclasseBonusAtuais}
         magiasDescobertasMagicasAtuais={magiasDescobertasMagicasAtuais}
@@ -1464,10 +1551,26 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         <div>
           <div className={styles.name}>{selecao.nome || '(sem nome)'}</div>
           <div className={styles.meta}>
-            {selecao.especie ?? '—'} {selecao.classe ?? '—'}
-            {personagem.subclasse ? ` (${personagem.subclasse})` : ''} · Nível {personagem.nivel} · CA{' '}
-            {ca ?? '—'}
+            {selecao.especie ?? '—'}{' '}
+            {classesAtual.length > 1
+              ? classesAtual.map((c) => `${c.classe} ${c.nivel}${c.subclasse ? ` (${c.subclasse})` : ''}`).join(' / ')
+              : `${selecao.classe ?? '—'}${personagem.subclasse ? ` (${personagem.subclasse})` : ''}`}
+            {' · Nível '}
+            {nivelTotalAtual} · CA {ca ?? '—'}
           </div>
+          {classesAtual.length > 1 && (
+            <div className={styles.classePills}>
+              {classesAtual.map((c) => (
+                <span
+                  key={c.classe}
+                  className={`${styles.classePill} ${c.classe === classeAtivaNome ? styles.classePillAtiva : ''}`}
+                  onClick={() => setClasseAtivaNome(c.classe)}
+                >
+                  {c.classe}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         <AvatarMenu
           itensDetalhados={itensDetalhados}
@@ -1498,7 +1601,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onDescansoLongo={() => iniciarDescanso('longo')}
             onDescansoCurto={() => iniciarDescanso('curto')}
             restStatus={restStatus}
-            onAbrirLevelUp={() => setLevelUpAberto(true)}
+            onAbrirLevelUp={() => {
+              const opcoes = opcoesLevelUp(classesAtual, atributosFinaisAtuais, catalogoClasses);
+              if (deveEscolherClasseNoLevelUp(opcoes)) {
+                setEscolhendoClasseLevelUp(true);
+              } else {
+                setLevelUpAberto(true);
+              }
+            }}
             onLevelUpRapido={classe ? levelUpRapido : undefined}
             maestriaArma={maestriaArma}
             armasParaMaestria={classe ? listarArmasParaMaestria(classe) : []}
