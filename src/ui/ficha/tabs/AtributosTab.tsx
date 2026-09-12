@@ -37,10 +37,16 @@ interface AtributosTabProps {
   onDescansoCurto: () => void;
   restStatus: string | null;
   onAbrirLevelUp: () => void;
-  /** "⚡ Level Up Rápido" — ferramenta de teste, sobe 1 nível sorteando
-   * tudo (mesmo espírito do "🎲 Personagem de Teste"), sem passar por
-   * nenhuma tela. `undefined` quando não tem classe (nada pra subir). */
-  onLevelUpRapido?: () => void;
+  /** XP acumulado (ver `core/experiencia.ts`) — a "barra de xp" (toda
+   * a área é clicável, abre popup de lançar XP em `XpShell.tsx`) e a
+   * seta ⬆️ de Level Up só aparecem quando o XP já bate o marco do
+   * próximo nível. "⚡ Level Up Rápido" (ferramenta de teste, ignora
+   * XP de propósito) mudou de lugar — agora fica no menu do avatar
+   * (`AvatarMenu.tsx`), pedido do Osmar (2026-09). */
+  xpAtual: number;
+  proximoMarcoXp: { nivel: number; xpNecessario: number } | null;
+  podeLevelUpPelaXp: boolean;
+  onAbrirXpPopup: () => void;
   maestriaArma: string[];
   armasParaMaestria: Arma[];
   onTrocarArmaMaestria: (armaAntiga: string, armaNova: string) => void;
@@ -88,7 +94,10 @@ export default function AtributosTab({
   onDescansoCurto,
   restStatus,
   onAbrirLevelUp,
-  onLevelUpRapido,
+  xpAtual,
+  proximoMarcoXp,
+  podeLevelUpPelaXp,
+  onAbrirXpPopup,
   maestriaArma,
   armasParaMaestria,
   onTrocarArmaMaestria,
@@ -118,19 +127,27 @@ export default function AtributosTab({
             </div>
             <div style={{ fontSize: 17 }}>{nivel}</div>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <div className="btn btn-primary" style={{ padding: '8px 10px' }} onClick={onAbrirLevelUp}>
-              ⬆️
-            </div>
-            {onLevelUpRapido && (
-              <div
-                className="btn"
-                style={{ padding: '8px 10px', background: 'var(--warn)', borderColor: 'var(--warn)', color: '#fff', fontWeight: 'bold' }}
-                onClick={onLevelUpRapido}
-              >
-                ⚡
+          <div className={styles.xpArea}>
+            {podeLevelUpPelaXp && (
+              <div className="btn btn-primary" style={{ padding: '6px 10px' }} onClick={onAbrirLevelUp}>
+                ⬆️ Level Up
               </div>
             )}
+            <div className={styles.xpChip} onClick={onAbrirXpPopup}>
+              <div className={styles.xpBarTrack}>
+                <div
+                  className={styles.xpBarFill}
+                  style={{
+                    width: proximoMarcoXp
+                      ? `${Math.min(100, (xpAtual / proximoMarcoXp.xpNecessario) * 100)}%`
+                      : '100%',
+                  }}
+                />
+              </div>
+              <div className={styles.xpChipLabel}>
+                {proximoMarcoXp ? `${xpAtual}/${proximoMarcoXp.xpNecessario} XP` : `${xpAtual} XP (máx.)`}
+              </div>
+            </div>
           </div>
         </div>
         <div className={`box ${styles.hpBox}`}>

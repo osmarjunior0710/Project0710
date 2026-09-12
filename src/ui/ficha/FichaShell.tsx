@@ -104,6 +104,7 @@ import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
 import { armaduraSemTreinamentoEquipada } from '../../core/proficienciaArmadura';
 import { useRoll } from '../roll/RollContext';
 import { sortearLevelUpRapido } from '../../core/levelUpAleatorio';
+import { podeLevelUpPorXp, proximoMarcoXp } from '../../core/experiencia';
 import { espacosARecuperar } from '../../core/astuciaMagica';
 import {
   espacosDeMagiaAtivos,
@@ -148,6 +149,7 @@ import CompletarMagiasShell from './levelup/CompletarMagiasShell';
 import LivroDasSombrasShell from './levelup/LivroDasSombrasShell';
 import MemorizarMagiaShell from './levelup/MemorizarMagiaShell';
 import DescansoOverlay, { type FaseDescanso, type TipoDescanso } from './DescansoOverlay';
+import XpShell from './XpShell';
 
 type TabName = 'atributos' | 'perfil' | 'mochila' | 'magias' | 'combat' | 'pets';
 
@@ -403,8 +405,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     tipo: TipoDescanso;
     fase: FaseDescanso | 'escolhendoMagias';
   } | null>(null);
-  const [levelUpHpModo, setLevelUpHpModo] = useState<'media' | 'rolar' | null>(personagemSalvo.levelUpHpModo ?? null);
+  const [levelUpHpModo, setLevelUpHpModo] = useState<'media' | 'rolar' | 'manual' | null>(
+    personagemSalvo.levelUpHpModo ?? null,
+  );
   const [levelUpHpRolado, setLevelUpHpRolado] = useState<number | null>(personagemSalvo.levelUpHpRolado ?? null);
+  const [xpAtual, setXpAtual] = useState(personagemSalvo.xpAtual ?? 0);
+  const [xpPopupAberto, setXpPopupAberto] = useState(false);
   const [itensDetalhados, setItensDetalhados] = useColapsavel('itens-detalhados', false);
   const [pesoAtivo, setPesoAtivo] = useState(true);
 
@@ -751,6 +757,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       petsAtual: pets,
       levelUpHpModo,
       levelUpHpRolado,
+      xpAtual,
     });
   }, [
     personagemSalvo,
@@ -814,6 +821,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     itensMochila,
     levelUpHpModo,
     levelUpHpRolado,
+    xpAtual,
   ]);
 
   function toggleFavoritoTalento(id: string) {
@@ -1451,6 +1459,19 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     confirmarLevelUp(resultado);
   }
 
+  // XP e Level Up "pela seta" ficam separados do "⚡ Inst. Level Up"
+  // (menu do avatar, ver AvatarMenu) — pedido do Osmar (2026-09): a
+  // seta só aparece quando o XP acumulado já bate o marco do próximo
+  // nível (dado real, `core/experiencia.ts`); o raio ignora XP de
+  // propósito (ferramenta de teste). XP nunca é obrigatório de manter
+  // em dia — quem não quer usar marco de XP, usa só o raio.
+  const proximoMarco = proximoMarcoXp(nivelTotalAtual);
+  const podeLevelUpPelaXp = podeLevelUpPorXp(nivelTotalAtual, xpAtual);
+
+  function ajustarXp(delta: number) {
+    setXpAtual((v) => Math.max(0, v + delta));
+  }
+
   if (escolhendoClasseLevelUp) {
     const opcoes = opcoesLevelUp(classesAtual, atributosFinaisAtuais, catalogoClasses);
     return (
@@ -1634,6 +1655,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           onFechar={() => setColheitaMacabraPendente(null)}
         />
       )}
+      {xpPopupAberto && (
+        <XpShell
+          xpAtual={xpAtual}
+          proximoMarco={proximoMarco}
+          onAjustar={ajustarXp}
+          onFechar={() => setXpPopupAberto(false)}
+        />
+      )}
       <div className={styles.header}>
         <span className="back" onClick={() => navigate('/lista')}>
           ←
@@ -1667,6 +1696,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           onToggleItensDetalhados={() => setItensDetalhados(!itensDetalhados)}
           pesoAtivo={pesoAtivo}
           onTogglePeso={() => setPesoAtivo((v) => !v)}
+          onLevelUpRapido={classe ? levelUpRapido : undefined}
         />
       </div>
 
@@ -1699,7 +1729,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
                 setLevelUpAberto(true);
               }
             }}
-            onLevelUpRapido={classe ? levelUpRapido : undefined}
+            xpAtual={xpAtual}
+            proximoMarcoXp={proximoMarco}
+            podeLevelUpPelaXp={podeLevelUpPelaXp}
+            onAbrirXpPopup={() => setXpPopupAberto(true)}
             maestriaArma={maestriaArma}
             armasParaMaestria={classe ? listarArmasParaMaestria(classe) : []}
             onTrocarArmaMaestria={trocarArmaMaestria}

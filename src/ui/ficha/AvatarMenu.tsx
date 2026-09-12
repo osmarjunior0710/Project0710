@@ -7,13 +7,27 @@ interface AvatarMenuProps {
   onToggleItensDetalhados: () => void;
   pesoAtivo: boolean;
   onTogglePeso: () => void;
+  /** "⚡ Inst. Level Up" — ferramenta de teste, sobe 1 nível sorteando
+   * tudo (mesmo espírito do "🎲 Personagem de Teste"), sem passar por
+   * nenhuma tela e sem depender de XP acumulado (ver `XpShell.tsx` e
+   * `AtributosTab.tsx` pro fluxo normal, que exige o marco de XP).
+   * Mudou pra cá (2026-09, pedido do Osmar) — antes ficava direto no
+   * card "nível atual" da aba Atributos. `undefined` quando não tem
+   * classe (nada pra subir). */
+  onLevelUpRapido?: () => void;
 }
 
 /** Avatar no canto superior direito da Ficha — toque abre um menu
  * dropdown com preferências de exibição da Mochila. O menu já nasce
  * pronto pra receber mais preferências depois sem precisar de outro
  * ponto de entrada na UI. */
-export default function AvatarMenu({ itensDetalhados, onToggleItensDetalhados, pesoAtivo, onTogglePeso }: AvatarMenuProps) {
+export default function AvatarMenu({
+  itensDetalhados,
+  onToggleItensDetalhados,
+  pesoAtivo,
+  onTogglePeso,
+  onLevelUpRapido,
+}: AvatarMenuProps) {
   const [aberto, setAberto] = useState(false);
   const { modoTeste, alternarModoTeste } = useRoll();
 
@@ -60,6 +74,24 @@ export default function AvatarMenu({ itensDetalhados, onToggleItensDetalhados, p
                 </div>
               </div>
             ))}
+            {onLevelUpRapido && (
+              <div
+                className={styles.menuRow}
+                onClick={() => {
+                  onLevelUpRapido();
+                  setAberto(false);
+                }}
+              >
+                <div className={styles.menuRowText}>
+                  <div className={styles.menuRowLabel}>⚡ Inst. Level Up</div>
+                  <div className={styles.menuRowDesc}>
+                    Sobe 1 nível sorteando tudo, sem passar pelo fluxo normal e sem precisar de XP — ferramenta de
+                    teste.
+                  </div>
+                </div>
+                <span className={styles.menuRowChevron}>›</span>
+              </div>
+            )}
           </div>
         </>
       )}

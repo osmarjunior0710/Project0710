@@ -5,6 +5,18 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1427
+
+2 melhorias no Level Up e na aba Atributos: (1) na hora de definir os
+novos PV, além de "Usar a média" e "Rolar", agora tem "Valor manual" —
+pra quando o dado de vida já foi rolado numa sessão de mesa antes de
+existir a ficha digital; (2) o card "nível atual" virou uma barra de
+XP de verdade — toque nela pra lançar quanto de XP ganhou (some ou
+tira, se errar o valor), e a seta de Level Up só aparece quando o XP
+acumulado bate o marco do próximo nível. O antigo botão de "subir de
+nível na sorte" (⚡) continua existindo, mas mudou de lugar — agora é
+"⚡ Inst. Level Up" no menu do avatar (canto superior direito).
+
 ## v202609_1355
 
 Arrumação interna, nada novo pra ver na tela: removida uma duplicação

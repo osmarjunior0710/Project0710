@@ -80,6 +80,26 @@ Passivo + Reação + Passivo na mesma célula de texto) — nunca assumir
 
 Fonte: `dnd-master-referencia.xlsx`, aba "Talentos".
 
+## Marcos de Experiência (XP) por Nível
+
+**Tabela oficial (regra 2024)** — XP mínimo acumulado pra alcançar
+cada nível, 1 a 20:
+
+| Nível | XP | Nível | XP | Nível | XP | Nível | XP |
+|---|---|---|---|---|---|---|---|
+| 1 | 0 | 6 | 14000 | 11 | 85000 | 16 | 195000 |
+| 2 | 300 | 7 | 23000 | 12 | 100000 | 17 | 225000 |
+| 3 | 900 | 8 | 34000 | 13 | 120000 | 18 | 265000 |
+| 4 | 2700 | 9 | 48000 | 14 | 140000 | 19 | 305000 |
+| 5 | 6500 | 10 | 64000 | 15 | 165000 | 20 | 355000 |
+
+XP é cumulativo — nunca reseta ao subir de nível. Nível 20 não tem
+próximo marco (é o máximo).
+
+Fonte: `dnd-master-referencia.xlsx`, aba "Evolução do Personagem".
+Importado em `src/data/rulesets/dnd2024/evolucaoPersonagem.ts`, lido
+por `core/experiencia.ts`.
+
 ## Bruxo — Invocação Mística "Pacto do Tomo"
 
 **Livro das Sombras:** conjurado ao final de um Descanso Curto ou
