@@ -489,6 +489,15 @@ botões está. Histórico é a única exceção ao "fecha só clicando fora":
 abre como popup central com botão de fechar (✕) explícito, pedido à
 parte do Osmar.
 
+Ajuste de cor no caminho: os pills começaram brancos, mas o Osmar achou
+estranho contra o resto da tela — viraram `var(--accent)` (mesmo tom do
+🎲). **Padrão pra qualquer botão flutuante que "perde a função" quando
+seu próprio menu está aberto** (aqui, o 🎲 só fecha nesse momento, não
+rola nada): dar um estado visual "afundado"/selecionado nele mesmo, não
+só mudar a cor dos itens do menu — aqui virou `.fabAberto` (tom mais
+escuro da mesma família, `#1e2a6e`, + `box-shadow: inset` em vez de por
+fora, simulando "pressionado").
+
 **Data/origem:** 2026-09, pedido do Osmar.
 
 ## Roteamento Ação/Ação Bônus/Reação de magia é só o Tempo de Conjuração da própria magia

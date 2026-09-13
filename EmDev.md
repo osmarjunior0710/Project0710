@@ -149,9 +149,18 @@ controles dentro. Trocado por uma coluna de botões que expande do
 próprio FAB pra cima, alinhada à direita, sem fundo escuro nenhum.
 
 - [x] Botões, de baixo (perto do FAB) pra cima: Múltiplos, d4, d6, d8,
-      d10, d12, d20, d100, Histórico — cada um um pill branco
-      (`.menuBtn`), coluna com `flex-direction: column-reverse` +
-      `align-items: flex-end`.
+      d10, d12, d20, d100, Histórico — cada um um pill (`.menuBtn`),
+      coluna com `flex-direction: column-reverse` +
+      `align-items: flex-end`. Ordem corrigida no caminho: `column-
+      reverse` bota o 1º item do DOM embaixo (perto do FAB) e o último
+      em cima — pra Múltiplos ficar embaixo, ele precisa vir PRIMEIRO
+      no JSX, não por último.
+- [x] Pills mudaram de branco pra `var(--accent)` (mesmo tom do 🎲) —
+      branco puro contra o resto da tela ficou estranho (pedido do
+      Osmar). O próprio 🎲 ganhou um estado "afundado"/selecionado
+      (`.fabAberto`, azul-marinho `#1e2a6e` + sombra por dentro) enquanto
+      a coluna está expandida — ele não tem função de rolar nesse
+      momento (só fecha), o visual "pressionado" deixa isso claro.
 - [x] Removida a Customização de tema/cor (`temaId`/`corHex`/
       `TEMAS`/`CORES`) — o tema fica sempre "default" e cada TIPO de
       dado ganhou cor FIXA própria (`CORES_POR_TIPO`): d4 azul, d6

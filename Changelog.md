@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1411
+
+Dado 3D — os botões da coluna expandida (Múltiplos, d4 a d100,
+Histórico) mudaram de branco pra azul (mesmo tom do 🎲). Enquanto a
+coluna está aberta, o próprio 🎲 fica com visual "afundado"/azul-marinho
+(ele só fecha nesse momento, não tem função de rolar).
+
 ## v202609_1400
 
 Dado 3D — o botão 🎲 avulso mudou de visual: em vez de abrir uma tela

@@ -263,7 +263,11 @@ export default function Dice3dFab() {
         </div>
       )}
 
-      <div className={styles.fab} onClick={alternarAberto} title="Dado 3D">
+      <div
+        className={aberto ? `${styles.fab} ${styles.fabAberto}` : styles.fab}
+        onClick={alternarAberto}
+        title="Dado 3D"
+      >
         🎲
       </div>
     </div>
