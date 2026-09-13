@@ -268,12 +268,18 @@ de codar:
 
 São 2 óticas diferentes buscando a mesma entrega — "conversem" antes,
 resolvendo a tensão entre a melhor UI possível e o que é viável
-construir bem, e só decidam juntos a solução final. Pra qualquer
-característica nova com interação ativa em Combat/UI (não é só
-reaproveitar um padrão já validado), **pergunte ao Osmar onde ela fica
-e como o jogador ativa ANTES de codar** — isso vale mesmo depois do
-acordo entre os 2 papéis; não construa e ajuste depois. Só comece a
-escrever código depois de aprovado.
+construir bem, e só decidam juntos a solução final.
+
+**Regra geral de aprovação antes de codar** (pedido do Osmar, 2026-09):
+antes de escrever qualquer código de uma entrega, apresente a proposta
+pro Osmar — o que vai mudar, como vai funcionar mecanicamente, qualquer
+decisão de UI/regra que a entrega exija — e espere ele responder "ok"
+ou passar feedback. Só comece a implementar depois de aprovado. Isso
+vale pra QUALQUER entrega de QUALQUER foco, não só característica nova
+de Combat/UI (regra antiga, mais estreita, que essa substitui). Pra
+característica nova com interação ativa em Combat/UI especificamente, a
+proposta apresentada já deve dizer onde ela fica na tela e como o
+jogador ativa — não construa isso e ajuste depois.
 
 **Durante o foco:** um achado que dá pra resolver dentro do MESMO foco,
 só não nessa entrega, vira **item novo dentro do próprio `EmDev.md`**
