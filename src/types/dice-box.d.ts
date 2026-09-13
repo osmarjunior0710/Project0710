@@ -22,15 +22,30 @@ declare module '@3d-dice/dice-box' {
     themeColor?: string;
   }
 
+  /** Forma alternativa de notação: um grupo por tipo de dado, cada um
+   * com sua própria `themeColor` (a lib usa `grupo.themeColor` antes de
+   * cair pro `themeColor` do nível da rolagem) — usado quando dados de
+   * tipos diferentes precisam de cor fixa própria na MESMA rolagem
+   * (ver `CORES_POR_TIPO` em `Dice3dFab.tsx`). `sides` é o número de
+   * lados, exceto `"100"` (string), caso especial da lib pro d100 de
+   * face única. */
+  export interface DiceBoxGrupoNotacao {
+    qty: number;
+    sides: number | string;
+    themeColor?: string;
+  }
+
+  export type DiceBoxNotacao = string | string[] | DiceBoxGrupoNotacao | DiceBoxGrupoNotacao[];
+
   export default class DiceBox {
     constructor(config: DiceBoxConfig);
     init(): Promise<void>;
-    roll(notation: string | string[], opcoes?: DiceBoxRollOpcoes): Promise<DiceBoxResultado[]> | void;
+    roll(notation: DiceBoxNotacao, opcoes?: DiceBoxRollOpcoes): Promise<DiceBoxResultado[]> | void;
     /** Joga dado(s) A MAIS na cena SEM limpar os que já pararam
      * (diferente de `roll()`, que sempre limpa tudo primeiro) — usado
      * pra Vantagem/Desvantagem escolhida DEPOIS de ver o 1º resultado
      * (ver `sdd/sdd-dado-3d.md`). Mesma assinatura de `roll()`. */
-    add(notation: string | string[], opcoes?: DiceBoxRollOpcoes): Promise<DiceBoxResultado[]> | void;
+    add(notation: DiceBoxNotacao, opcoes?: DiceBoxRollOpcoes): Promise<DiceBoxResultado[]> | void;
     /** Rerola FISICAMENTE só o(s) dado(s) apontado(s) — passe de volta
      * o(s) `DiceBoxResultado` exatamente como veio de `onRollComplete`
      * (a lib usa os campos internos pra identificar qual dado é). Usado

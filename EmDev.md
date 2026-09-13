@@ -141,6 +141,44 @@ Heroica, Perfurador) e escolha de Vantagem/Desvantagem DEPOIS de ver o
   garante que nunca trava, mas vale um teste manual no celular com um
   Pequenino antes de considerar 100% validado.
 
+### Redesenho do FAB avulso (Fase A) — coluna de botões em vez de overlay escuro
+
+Pedido do Osmar depois do B4: o FAB avulso (🎲, ferramenta solta, não
+official roll) tinha um overlay preto cobrindo a tela inteira com os
+controles dentro. Trocado por uma coluna de botões que expande do
+próprio FAB pra cima, alinhada à direita, sem fundo escuro nenhum.
+
+- [x] Botões, de baixo (perto do FAB) pra cima: Múltiplos, d4, d6, d8,
+      d10, d12, d20, d100, Histórico — cada um um pill branco
+      (`.menuBtn`), coluna com `flex-direction: column-reverse` +
+      `align-items: flex-end`.
+- [x] Removida a Customização de tema/cor (`temaId`/`corHex`/
+      `TEMAS`/`CORES`) — o tema fica sempre "default" e cada TIPO de
+      dado ganhou cor FIXA própria (`CORES_POR_TIPO`): d4 azul, d6
+      cian, d8 verde, d10 amarelo, d12 laranja, d20 vermelho, d100
+      roxo. Pra dar cor por tipo numa MESMA rolagem (ex.: Múltiplos com
+      d6+d20 juntos), a notação virou array de objetos
+      `{ qty, sides, themeColor }` em vez de string — a lib já suporta
+      isso (`Z.themeColor || d.themeColor`, lido direto do bundle
+      minificado), só não estava documentado no `dice-box.d.ts` (agora
+      tem `DiceBoxGrupoNotacao`/`DiceBoxNotacao`).
+- [x] Canvas físico do dado (`#dice3d-canvas-host`) continua cobrindo a
+      tela inteira (precisa do espaço pra física), mas agora
+      TRANSPARENTE (`pointer-events: none`) — o dado cai visível por
+      cima da tela normal, sem nenhum fundo escondendo o app atrás.
+- [x] Resultado/erro/carregando viraram uma pílula flutuante no topo da
+      tela (`.statusFlutuante`), independente da coluna de botões.
+- [x] Histórico virou popup central com botão de fechar (✕) explícito
+      (`.logPopup`/`.logPopupFechar`) — pedido à parte do Osmar,
+      diferente do resto (que só fecha clicando fora).
+- [x] Clicar fora do FAB + coluna + popup de log colapsa tudo de volta
+      pro FAB (`pointerdown` no `document`, ignorado se o alvo está
+      dentro do wrapper que embrulha FAB/coluna/popup).
+      Verificado: `tsc -b`/`npm test` (529)/`npm run build` limpos +
+      Playwright em 390px (coluna expande com a ordem certa, sem
+      "Customizar"; clicar fora colapsa; d20 rola físico vermelho;
+      Histórico abre em popup com ✕ que fecha só ele).
+
 ## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade) — PAUSADO, retomar depois do Dado 3D
 
 77 talentos ainda sem efeito mecânico, em 5 categorias (Geral 42,

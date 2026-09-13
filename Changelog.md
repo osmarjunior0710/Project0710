@@ -5,6 +5,17 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1400
+
+Dado 3D — o botão 🎲 avulso mudou de visual: em vez de abrir uma tela
+preta cobrindo tudo, agora os botões de dado expandem numa coluna
+saindo do próprio 🎲, alinhada à direita (Múltiplos, d4 até d100,
+Histórico), sem escurecer a tela — o dado cai por cima do conteúdo
+normal. Cada tipo de dado tem cor fixa (d4 azul, d6 cian, d8 verde,
+d10 amarelo, d12 laranja, d20 vermelho, d100 roxo) — a customização de
+cor/textura saiu. Tocar fora da coluna fecha ela. Histórico agora abre
+num popup com botão de fechar (✕).
+
 ## v202609_1339
 
 Dado 3D — mais 2 casos usam física de verdade agora: escolher

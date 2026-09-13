@@ -453,6 +453,42 @@ frágil (a lib pode mudá-los numa atualização) e desnecessário.
   motor 3D pra nenhum tipo de dado (só d20 até aqui), então não tem
   resultado físico pra rerolar ainda.
 
+**Redesenho do FAB avulso (Fase A) — coluna de botões, sem overlay
+escuro, cor fixa por tipo de dado:** o `Dice3dFab.tsx` (ferramenta
+avulsa) trocou o overlay preto cobrindo a tela toda por uma coluna de
+botões que expande do próprio FAB pra cima, alinhada à direita
+(`flex-direction: column-reverse` + `align-items: flex-end`), ordem
+fixa de baixo (perto do FAB) pra cima: Múltiplos → d4 → d6 → d8 → d10 →
+d12 → d20 → d100 → Histórico. Clicar fora do conjunto (FAB + coluna +
+popup de log) colapsa tudo — um `pointerdown` no `document` que ignora
+cliques dentro de um wrapper `ref` que embrulha os três. **Padrão
+reaproveitável:** "botão flutuante que expande uma coluna de ações
+alinhada a ele, sem overlay, fecha ao clicar fora" — usar esse mesmo
+esqueleto pra qualquer FAB futuro com múltiplas ações, em vez de abrir
+um overlay/bottom sheet cheio pra poucas opções.
+
+Customização de tema/cor foi REMOVIDA (o Osmar decidiu fixar em vez de
+deixar escolher) — tema sempre "default", e cada TIPO de dado tem cor
+FIXA própria (`CORES_POR_TIPO`: d4 azul, d6 cian, d8 verde, d10
+amarelo, d12 laranja, d20 vermelho, d100 roxo). Pra colorir por tipo
+numa MESMA rolagem (ex.: Múltiplos com d6+d20 juntos, cada um com sua
+cor), a notação passada pra `box.roll()`/`box.add()` virou array de
+objetos `{ qty, sides, themeColor }` em vez de string — confirmado
+lendo o bundle minificado que o campo por-grupo (`grupo.themeColor`)
+tem prioridade sobre o do nível da rolagem inteira; `d100` precisa de
+`sides: "100"` (string, não número) pro caso especial de dado de face
+única da lib. `dice-box.d.ts` ganhou `DiceBoxGrupoNotacao`/
+`DiceBoxNotacao` pra cobrir essa forma alternativa.
+
+O canvas físico continua cobrindo a tela inteira (precisa do espaço
+pra física cair), mas agora com `pointer-events: none` e SEM fundo —
+o dado cai visível por cima do conteúdo normal da Ficha, não mais
+sobre um fundo escurecido. Resultado/erro/carregando viraram uma
+pílula flutuante fixa no topo da tela, independente de onde a coluna de
+botões está. Histórico é a única exceção ao "fecha só clicando fora":
+abre como popup central com botão de fechar (✕) explícito, pedido à
+parte do Osmar.
+
 **Data/origem:** 2026-09, pedido do Osmar.
 
 ## Roteamento Ação/Ação Bônus/Reação de magia é só o Tempo de Conjuração da própria magia
