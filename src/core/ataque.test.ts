@@ -6,6 +6,9 @@ import { classes } from '../data/rulesets/dnd2024/classes';
 const bruxo = classes.find((c) => c.nome === 'Bruxo')!;
 const rapieira = armas.find((a) => a.nome === 'Rapieira')!;
 const guerreiro = classes.find((c) => c.nome === 'Guerreiro')!;
+const barbaro = classes.find((c) => c.nome === 'Bárbaro')!;
+const machadoGrande = armas.find((a) => a.nome === 'Machado Grande')!;
+const arcoLongo = armas.find((a) => a.nome === 'Arco Longo')!;
 
 describe('ataqueComArma — atribForcada (Pacto da Lâmina)', () => {
   it('sem atribForcada: usa Força/Destreza/Acuidade normalmente', () => {
@@ -45,5 +48,37 @@ describe('ataqueDesarmado — dado-ataque-desarmado (Valentão de Taverna)', () 
     expect(r.info.danoQuantidade).toBe(1);
     expect(r.info.danoLados).toBe(4);
     expect(r.info.danoMod).toBe(3);
+  });
+
+  it('bonusDanoSeForca (Dano da Fúria): soma sempre, Ataque Desarmado é sempre Força', () => {
+    const r = ataqueDesarmado(barbaro, 1, 3, [], 2);
+    expect(r.info.danoMod).toBe(3 + 2);
+  });
+});
+
+describe('ataqueComArma — bonusDanoSeForca (Dano da Fúria do Bárbaro)', () => {
+  it('arma Corpo a Corpo sem Acuidade (Machado Grande): soma o bônus no dano', () => {
+    const r = ataqueComArma(machadoGrande, barbaro, 1, 3, 1, false, false, null, false, undefined, [], undefined, 2);
+    expect(r.info.danoMod).toBe(3 + 2); // mod. Força (3) + bônus da Fúria (2)
+  });
+
+  it('arma à Distância (Arco Longo): NUNCA soma o bônus, mesmo com Força alta', () => {
+    const r = ataqueComArma(arcoLongo, barbaro, 1, 5, 1, false, false, null, false, undefined, [], undefined, 2);
+    expect(r.info.danoMod).toBe(1); // só mod. Destreza, sem o bônus da Fúria
+  });
+
+  it('arma com Acuidade (Rapieira), Destreza maior que Força: não soma o bônus (o ataque usou Destreza)', () => {
+    const r = ataqueComArma(rapieira, barbaro, 1, 1, 3, false, false, null, false, undefined, [], undefined, 2);
+    expect(r.info.danoMod).toBe(3); // só mod. Destreza, sem o bônus
+  });
+
+  it('arma com Acuidade (Rapieira), Força maior ou igual: soma o bônus (o ataque usou Força)', () => {
+    const r = ataqueComArma(rapieira, barbaro, 1, 4, 2, false, false, null, false, undefined, [], undefined, 2);
+    expect(r.info.danoMod).toBe(4 + 2); // mod. Força (4) + bônus da Fúria
+  });
+
+  it('atribForcada (Pacto da Lâmina) sempre desliga o bônus, mesmo numa arma Corpo a Corpo', () => {
+    const r = ataqueComArma(machadoGrande, barbaro, 1, 3, 1, false, false, null, false, 5, [], undefined, 2);
+    expect(r.info.danoMod).toBe(5); // só o atributo forçado, sem o bônus da Fúria
   });
 });

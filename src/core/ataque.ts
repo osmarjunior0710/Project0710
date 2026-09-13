@@ -44,7 +44,13 @@ function parseDano(dano: string): { quantidade: number; lados: number; tipo: str
  * de verdade (`dado-ataque-desarmado`, ver `talentos.ts`); sem esse
  * talento, o dano continua o "1d1" padrão (na prática, sempre 1).
  */
-export function ataqueDesarmado(classe: Classe, nivel: number, forMod: number, talentosAtuais?: string[]): AtaqueResolvido {
+export function ataqueDesarmado(
+  classe: Classe,
+  nivel: number,
+  forMod: number,
+  talentosAtuais?: string[],
+  bonusDanoSeForca = 0,
+): AtaqueResolvido {
   const prof = bonusProficiencia(classe, nivel);
   const dadoTalento = efeitoMecanicoDoTalento(talentosAtuais, 'dado-ataque-desarmado');
   const danoQuantidade = dadoTalento?.quantidade ?? 1;
@@ -52,7 +58,10 @@ export function ataqueDesarmado(classe: Classe, nivel: number, forMod: number, t
   return {
     nome: 'Ataque Desarmado',
     descricao: 'Soco, chute ou golpe corpo a corpo sem arma. Dano Contundente.',
-    info: { modAcerto: forMod + prof, danoQuantidade, danoLados, danoMod: forMod, danoTipo: 'Contundente' },
+    // Ataque Desarmado sempre usa Força (Apêndice C) — `bonusDanoSeForca`
+    // (Dano da Fúria do Bárbaro, ver sdd/sdd-barbaro-furia.md) soma
+    // sempre que informado, sem precisar checar atributo.
+    info: { modAcerto: forMod + prof, danoQuantidade, danoLados, danoMod: forMod + bonusDanoSeForca, danoTipo: 'Contundente' },
   };
 }
 
@@ -99,10 +108,16 @@ export function ataqueComArma(
   atribForcada?: number,
   talentosAtuais?: string[],
   classesExtrasNomes?: string[],
+  /** Dano da Fúria (Bárbaro, ver sdd/sdd-barbaro-furia.md) — só soma
+   * quando o ataque usa Força de verdade (nunca em armas à distância;
+   * em armas com Acuidade, só quando Força empata ou supera Destreza —
+   * a mesma escolha que decide `atribMod` abaixo). */
+  bonusDanoSeForca = 0,
 ): AtaqueResolvido {
   const acuidade = arma.propriedades.includes('Acuidade');
   const distancia = arma.categoria.includes('à Distância');
   const atribMod = atribForcada ?? (acuidade ? Math.max(forMod, desMod) : distancia ? desMod : forMod);
+  const usouForca = !atribForcada && !distancia && (!acuidade || forMod >= desMod);
   const prof = classeProficienteComArma(classe, arma, talentosAtuais, classesExtrasNomes) ? bonusProficiencia(classe, nivel) : 0;
   const dadoVersatil = identificarEquipamento(arma.nome).dadoVersatil;
   const usaVersatil = duasMaosAtivo && dadoVersatil;
@@ -122,7 +137,7 @@ export function ataqueComArma(
       modAcerto: atribMod + prof + bonusArquearia,
       danoQuantidade: quantidade,
       danoLados: lados,
-      danoMod: danoMod + bonusDuelismo,
+      danoMod: danoMod + bonusDuelismo + (usouForca ? bonusDanoSeForca : 0),
       danoTipo: tipo,
     },
   };
@@ -143,11 +158,26 @@ export function ataqueAtual(
   outraArmaNaMaoSecundaria = false,
   atribForcada?: number,
   talentosAtuais?: string[],
+  bonusDanoSeForca = 0,
 ): AtaqueResolvido {
   const arma = nomeArmaEquipada ? armas.find((a) => a.nome === nomeArmaEquipada) : undefined;
   return arma
-    ? ataqueComArma(arma, classe, nivel, forMod, desMod, false, duasMaosAtivo, estiloDeLutaEscolhido, outraArmaNaMaoSecundaria, atribForcada, talentosAtuais)
-    : ataqueDesarmado(classe, nivel, forMod, talentosAtuais);
+    ? ataqueComArma(
+        arma,
+        classe,
+        nivel,
+        forMod,
+        desMod,
+        false,
+        duasMaosAtivo,
+        estiloDeLutaEscolhido,
+        outraArmaNaMaoSecundaria,
+        atribForcada,
+        talentosAtuais,
+        undefined,
+        bonusDanoSeForca,
+      )
+    : ataqueDesarmado(classe, nivel, forMod, talentosAtuais, bonusDanoSeForca);
 }
 
 /**
@@ -166,6 +196,7 @@ export function ataqueBonusMaoSecundaria(
   desMod: number,
   estiloDeLutaEscolhido?: string | null,
   talentosAtuais?: string[],
+  bonusDanoSeForca = 0,
 ): AtaqueResolvido | null {
   if (!nomeMaoPrincipal || !nomeMaoSecundaria) return null;
   const principal = armas.find((a) => a.nome === nomeMaoPrincipal);
@@ -175,5 +206,19 @@ export function ataqueBonusMaoSecundaria(
   // `outraArmaNaMaoSecundaria: true` — este ATAQUE é o de outra arma
   // na mão secundária, então Duelismo ("nenhuma outra arma") nunca se
   // aplica aqui, só potencialmente no ataque principal.
-  return ataqueComArma(secundaria, classe, nivel, forMod, desMod, true, false, estiloDeLutaEscolhido, true, undefined, talentosAtuais);
+  return ataqueComArma(
+    secundaria,
+    classe,
+    nivel,
+    forMod,
+    desMod,
+    true,
+    false,
+    estiloDeLutaEscolhido,
+    true,
+    undefined,
+    talentosAtuais,
+    undefined,
+    bonusDanoSeForca,
+  );
 }

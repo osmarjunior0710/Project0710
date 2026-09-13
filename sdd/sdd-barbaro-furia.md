@@ -136,11 +136,12 @@ confirmar ou pedir o Caminho B.
 - **"Dano da Fúria" é automatizável:** `core/ataque.ts`
   (`ataqueComArma`/`ataqueDesarmado`) já calcula, internamente, se o
   ataque usa Força, Destreza ou um atributo forçado (Acuidade/Pacto da
-  Lâmina) — só não EXPÕE essa escolha pra fora hoje (`AtaqueResolvido`
-  só devolve os números já somados). Pra somar o bônus da Fúria
-  automaticamente, `AtaqueResolvido`/`AtaqueInfo` precisam expor um
-  campo tipo `atributoUsado` — detalhe de implementação da entrega
-  B3, não uma decisão de produto.
+  Lâmina). **Implementado na B3** sem precisar expor esse atributo pra
+  fora: as 4 funções de ataque ganharam um parâmetro opcional
+  `bonusDanoSeForca` (0 por padrão) que cada função já soma sozinha no
+  `danoMod` quando decide, internamente, que o ataque usou Força —
+  `FichaShell.tsx` só passa `furiaAtiva ? furiaBonusDano : 0`.
+  `AtaqueResolvido`/`AtaqueInfo` não precisaram mudar de formato.
 
 ## 6. Decisões confirmadas com o Osmar
 

@@ -297,6 +297,15 @@ export interface PersonagemSalvo {
    * pra saber se o bônus de tamanho de Capacidade de Carga (Porte
    * Poderoso + Forma Grande) está valendo agora — ver `core/mochila.ts`. */
   formaGrandeAtiva?: boolean;
+  /** Usos gastos de Fúria (Bárbaro) desde o último Descanso Longo — 1
+   * uso recupera no Descanso Curto, todos no Longo. */
+  furiaGasto?: number;
+  /** `true` = Fúria ATIVA agora (mesmo padrão de `formaGrandeAtiva` —
+   * ativar/encerrar não mexe no uso gasto, só liga/desliga o efeito).
+   * Ver `sdd/sdd-barbaro-furia.md` — duração simplificada: fica ativa
+   * até "Encerrar Fúria" ou vestir Armadura Pesada, não expira sozinha
+   * por turno. */
+  furiaAtiva?: boolean;
   /** `true` = Mãos Curativas (Aasimar) já usada desde o último Descanso
    * Longo — só ele reseta. */
   maosCurativasGasto?: boolean;

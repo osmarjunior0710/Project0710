@@ -55,6 +55,15 @@ interface BonusPanelContentProps {
    * só o Descanso Longo desliga e devolve o uso junto. */
   formaGrandeAtiva: boolean;
   onUsarFormaGrande: () => void;
+  /** Fúria (Bárbaro) — ver sdd/sdd-barbaro-furia.md. `false` = classe
+   * não tem esse recurso. O toggle aqui só ATIVA (gasta 1 uso); encerrar
+   * já ativa acontece pelo card fixo da tela principal do Combate, não
+   * aqui — este painel fecha assim que a Ação Bônus é gasta. */
+  furiaDisponivel: boolean;
+  furiaMaximo: number;
+  furiaRestantes: number;
+  furiaAtiva: boolean;
+  onUsarFuria: () => void;
   /** Revelação Celestial (Aasimar, nível 3+) — natureza
    * `escolha_reutilizavel`: a forma é escolhida de novo a cada uso,
    * por isso as opções vêm daqui (não do wizard). */
@@ -152,6 +161,11 @@ export default function BonusPanelContent({
   formaGrandeGasto,
   formaGrandeAtiva,
   onUsarFormaGrande,
+  furiaDisponivel,
+  furiaMaximo,
+  furiaRestantes,
+  furiaAtiva,
+  onUsarFuria,
   revelacaoCelestialDisponivel,
   revelacaoCelestialGasto,
   revelacaoCelestialFormaAtiva,
@@ -559,6 +573,39 @@ export default function BonusPanelContent({
           {formaGrandeGasto && !formaGrandeAtiva && (
             <div className="label" style={{ marginTop: 6 }}>
               já usado — descanse pra recuperar.
+            </div>
+          )}
+        </>
+      )}
+      {furiaDisponivel && (
+        <>
+          <div
+            className={`${styles.row} ${styles.toggleRowLine}`}
+            style={furiaAtiva || furiaRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+            onClick={onUsarFuria}
+          >
+            <div>
+              <div className={styles.rowName}>😡 Fúria</div>
+              {detalhesAtivo && (
+                <div className={styles.rowDesc}>
+                  Resistência a dano Contundente/Cortante/Perfurante, +dano em ataques baseados em Força, Vantagem em
+                  testes/salvaguardas de Força — sem Concentração/magia. Encerra sozinha ao vestir Armadura Pesada, ou
+                  manualmente pelo card fixo do Combate.
+                </div>
+              )}
+            </div>
+            <div className={`${styles.switchTrack} ${furiaAtiva ? styles.switchOn : ''}`}>
+              <div className={styles.switchThumb} />
+            </div>
+          </div>
+          {furiaAtiva && (
+            <div className="label" style={{ marginTop: 6 }}>
+              já ativa — encerre pelo card fixo na tela do Combate.
+            </div>
+          )}
+          {!furiaAtiva && furiaRestantes <= 0 && (
+            <div className="label" style={{ marginTop: 6 }}>
+              sem usos disponíveis ({furiaMaximo} no total) — descanse pra recuperar.
             </div>
           )}
         </>
