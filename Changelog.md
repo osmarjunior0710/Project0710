@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0042
+
+Corrigido: na tela de "Selecione uma classe" (criação de personagem),
+"Mago" aparecia 2x (1 clicável, 1 cinza "em breve" — sobra de antes
+dele ficar pronto). Bárbaro começa a aparecer como "(em breve)" — dado
+da classe já entrou no motor interno, mas a criação de personagem
+ainda não reconhece ela de ponta a ponta.
+
 ## v202609_2336
 
 Arrumação interna, nada novo pra ver na tela: os recursos de classe/

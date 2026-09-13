@@ -37,11 +37,22 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
 
 ### Plano de entregas
 
-- [ ] **B1 — Dado no banco:** `classes.ts` (progressão nível 1-20,
-      recursos Fúrias/Dano da Fúria/Maestria em Arma),
-      `caracteristicasClasse.ts` (descrição completa de cada
-      característica), `subclasses.ts` (as 4 Trilhas). Nada visível
-      ainda — Bárbaro continua "(em breve)" na criação.
+- [x] **B1 — Dado no banco:** `classes.ts` (progressão nível 1-20,
+      recursos Fúrias/Dano da Fúria/Maestria em Arma, `disponivel:
+      false`), `caracteristicasClasse.ts` (as 20 características base,
+      3 células limpas de conteúdo colado de outra aba da planilha —
+      Maestria em Arma/Conhecimento Primordial/Campeão Primitivo, ver
+      comentário no arquivo), `subclasses.ts` (as 4 Trilhas, só nome/
+      id por enquanto — características de cada uma entram em
+      B5-B8). Achado no caminho: `ClasseStep.tsx` tinha uma lista
+      hardcoded (`CLASSES_EM_BREVE`) desatualizada, com "Mago"
+      duplicado (já tinha virado `disponivel: true` no dado real, mas
+      continuava também na lista hardcoded — 2 cards, 1 clicável e 1
+      cinza) — corrigido junto (removido Mago e Bárbaro do hardcoded,
+      já que Bárbaro agora vem do dado real também). Verificado com
+      `tsc -b`/`npm test` (512)/`npm run build` limpos + tela de
+      criação de personagem: "Bárbaro" aparece 1x só (em breve),
+      "Mago" aparece 1x só (não mais duplicado), zero erro de console.
 - [ ] **B2 — Habilitar na criação (wizard):** proficiências (armas/
       armadura já são regra fixa "Simples e Marciais" / "Leve, Média,
       Escudos"), 2 perícias de {Atletismo, Intimidação, Lidar com

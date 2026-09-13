@@ -3,13 +3,11 @@ import IconeClasse from '../../components/IconeClasse';
 import type { StepProps } from './StepProps';
 
 const CLASSES_EM_BREVE = [
-  { nome: 'Bárbaro', id: 'barbaro' },
   { nome: 'Clérigo', id: 'clerigo' },
   { nome: 'Druida', id: 'druida' },
   { nome: 'Feiticeiro', id: 'feiticeiro' },
   { nome: 'Guardião', id: 'guardiao' },
   { nome: 'Ladino', id: 'ladino' },
-  { nome: 'Mago', id: 'mago' },
   { nome: 'Monge', id: 'monge' },
   { nome: 'Paladino', id: 'paladino' },
 ];
@@ -76,8 +74,8 @@ export default function ClasseStep({ selection, update }: StepProps) {
         </div>
       ))}
       <div className="label" style={{ marginTop: 6 }}>
-        Guerreiro, Bardo e Bruxo estão prontos por enquanto — as outras classes ainda não foram
-        implementadas de ponta a ponta. Ver <code>PENDENCIAS.md</code>.
+        Guerreiro, Bardo, Bruxo e Mago estão prontos por enquanto — as outras classes ainda não
+        foram implementadas de ponta a ponta. Ver <code>PENDENCIAS.md</code>.
       </div>
     </>
   );

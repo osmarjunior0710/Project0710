@@ -17,6 +17,10 @@ export interface Subclasse {
 }
 
 export const subclasses: Subclasse[] = [
+  { id: 'barbaro-trilha-da-arvore-do-mundo', classeId: 'barbaro', nome: 'Trilha da Árvore do Mundo', homebrew: false },
+  { id: 'barbaro-trilha-do-berserker', classeId: 'barbaro', nome: 'Trilha do Berserker', homebrew: false },
+  { id: 'barbaro-trilha-do-coracao-selvagem', classeId: 'barbaro', nome: 'Trilha do Coração Selvagem', homebrew: false },
+  { id: 'barbaro-trilha-do-fanatico', classeId: 'barbaro', nome: 'Trilha do Fanático', homebrew: false },
   { id: 'bardo-colegio-da-bravura', classeId: 'bardo', nome: 'Colégio da Bravura', homebrew: false },
   { id: 'bardo-colegio-da-danca', classeId: 'bardo', nome: 'Colégio da Dança', homebrew: false },
   { id: 'bardo-colegio-do-conhecimento', classeId: 'bardo', nome: 'Colégio do Conhecimento', homebrew: false },
