@@ -480,10 +480,10 @@ individuais" (`RollState.dadosIndividuais`):**
   único, espelha `resultadoBrutoD20`) — cada grupo de notação vai pro
   motor como `{qty:1, sides}` (um grupo por dado, nunca `qty:N`), única
   forma de mapear `resultados[i]` de volta pro dado certo do grid.
-- Dado d100 (não usado em dano hoje, mas o tipo `LadosDado` permite)
-  precisa de `sides: "100"` STRING pro caso especial de face única da
-  lib — mesmo detalhe do avulso (`Dice3dFab.tsx`), agora extraído pra
-  `ladosParaLib()` compartilhada.
+- Dado d100 usa `sides: 100` (NÚMERO) igual aos outros — ver correção
+  logo abaixo, "d100 corrigido" (achado depois de publicado, motivo por
+  que a explicação de `sides: "100"` STRING que aparecia aqui era
+  errada).
 
 **Redesenho do FAB avulso (Fase A) — coluna de botões, sem overlay
 escuro, cor fixa por tipo de dado:** o `Dice3dFab.tsx` (ferramenta
@@ -507,10 +507,27 @@ numa MESMA rolagem (ex.: Múltiplos com d6+d20 juntos, cada um com sua
 cor), a notação passada pra `box.roll()`/`box.add()` virou array de
 objetos `{ qty, sides, themeColor }` em vez de string — confirmado
 lendo o bundle minificado que o campo por-grupo (`grupo.themeColor`)
-tem prioridade sobre o do nível da rolagem inteira; `d100` precisa de
-`sides: "100"` (string, não número) pro caso especial de dado de face
-única da lib. `dice-box.d.ts` ganhou `DiceBoxGrupoNotacao`/
-`DiceBoxNotacao` pra cobrir essa forma alternativa.
+tem prioridade sobre o do nível da rolagem inteira. `dice-box.d.ts`
+ganhou `DiceBoxGrupoNotacao`/`DiceBoxNotacao` pra cobrir essa forma
+alternativa (`sides` é sempre NÚMERO, ver correção "d100 corrigido"
+abaixo — a 1ª versão desta entrega dizia que d100 precisava de
+`sides: "100"` STRING, o que estava ERRADO e foi a causa do bug
+corrigido logo em seguida).
+
+**d100 corrigido — "só rolava a dezena" (achado testando no celular):**
+a implementação original (Fase A e o B5 acima) passava `sides: "100"`
+STRING pro d100, achando que era o jeito "certo" de pedir um d100 de
+verdade — na real, isso ativa um modo DIFERENTE da lib ("d100 de face
+única", só a dezena — 0, 10, 20...90, nunca as unidades). Lendo o bundle
+do `world.onscreen.js`: com `sides: 100` NÚMERO (sem essa string), a
+lib automaticamente soma um d10 físico "escondido" por trás (não
+aparece na tela, mas roda a física dele) e devolve pro `onRollComplete`
+o valor JÁ somado, 1 a 100 — é assim que se pede um d100 de verdade
+nessa lib. Corrigido em `Dice3dFab.tsx` (`SIDES_POR_TIPO.d100`) e
+`RollContext.tsx` (`rolarDados`, removida a função `ladosParaLib` que
+fazia a conversão errada). **Padrão pra lembrar:** `sides` de QUALQUER
+dado nesta lib (incluindo d100) é sempre NÚMERO puro — nunca precisa de
+tratamento especial por tipo.
 
 O canvas físico continua cobrindo a tela inteira (precisa do espaço
 pra física cair), mas agora com `pointer-events: none` e SEM fundo —

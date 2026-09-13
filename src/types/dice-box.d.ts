@@ -26,12 +26,16 @@ declare module '@3d-dice/dice-box' {
    * com sua própria `themeColor` (a lib usa `grupo.themeColor` antes de
    * cair pro `themeColor` do nível da rolagem) — usado quando dados de
    * tipos diferentes precisam de cor fixa própria na MESMA rolagem
-   * (ver `CORES_POR_TIPO` em `Dice3dFab.tsx`). `sides` é o número de
-   * lados, exceto `"100"` (string), caso especial da lib pro d100 de
-   * face única. */
+   * (ver `CORES_POR_TIPO` em `Dice3dFab.tsx`). `sides` é sempre o
+   * número de lados, INCLUSIVE d100 (100, número) — passar a STRING
+   * "100" faz a lib entrar num modo diferente ("d100 de face única",
+   * só a dezena) que não é o que queremos (achado testando no celular:
+   * "d100 só rolando a dezena"); com número puro, ela soma um d10
+   * físico "escondido" por trás e `onRollComplete` já devolve o valor
+   * certo, 1 a 100. */
   export interface DiceBoxGrupoNotacao {
     qty: number;
-    sides: number | string;
+    sides: number;
     themeColor?: string;
   }
 

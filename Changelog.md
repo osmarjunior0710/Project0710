@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1532
+
+Corrigido: o d100 (no 🎲 avulso e em qualquer rolagem que use d100)
+só rolava múltiplos de 10 (0, 10, 20...90) — agora rola de verdade de
+1 a 100.
+
 ## v202609_1527
 
 Aba Atributos ganhou as 6 Salvaguardas de verdade (Força, Destreza,

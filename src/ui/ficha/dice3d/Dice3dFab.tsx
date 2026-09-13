@@ -20,16 +20,20 @@ const CORES_POR_TIPO: Record<TipoDado, string> = {
 };
 
 // `sides` no formato que a lib espera pra cada grupo de rolagem — d100
-// precisa ser a string "100" (caso especial dela pro dado percentual
-// de face única), os demais são o número de lados.
-const SIDES_POR_TIPO: Record<TipoDado, number | string> = {
+// é NÚMERO puro (100), igual aos outros. Passar STRING "100" faz a lib
+// entrar no modo "d100 de face única" (só a dezena, sem a unidade) —
+// achado testando no celular ("d100 só rolando a dezena"). Número puro
+// aciona o comportamento certo: ela soma um d10 físico "escondido" por
+// trás (a lib mesma gerencia isso, `onRollComplete` só recebe o
+// resultado já somado, 1 a 100).
+const SIDES_POR_TIPO: Record<TipoDado, number> = {
   d4: 4,
   d6: 6,
   d8: 8,
   d10: 10,
   d12: 12,
   d20: 20,
-  d100: '100',
+  d100: 100,
 };
 
 // Painel mostra só ~5 por vez (o resto rola por dentro) — altura por

@@ -412,14 +412,6 @@ function criticoDe(d20: number): CritTipo {
   return d20 === 1 ? 'falha' : d20 === 20 ? 'sucesso' : null;
 }
 
-/** A lib só reconhece "d100 de face única" com `sides` STRING "100"
- * (ver `dice-box.d.ts`/Dice3dFab.tsx) — número puro 100 tentaria achar
- * uma malha de 100 lados que não existe no tema "default". Nenhum dano
- * usa d100 hoje, mas a rolagem de `dados` aceita `LadosDado` genérico,
- * então cobre o caso pra não quebrar se algum dia usar. */
-function ladosParaLib(lados: number): number | string {
-  return lados === 100 ? '100' : lados;
-}
 
 /** Rerola FISICAMENTE o d20 identificado por `resultadoBruto` (Sorte,
  * Inspiração Heroica — ver "Rerolagem" em sdd/sdd-dado-3d.md) — usado
@@ -690,9 +682,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
             await garantirTemaDiceBox3D(box, 'default');
             if (umDadoSo) {
               box.onRollComplete = (resultados) => concluirUmDado(resultados[0].value, true, resultados[0]);
-              box.roll({ qty: 1, sides: ladosParaLib(lados) });
+              box.roll({ qty: 1, sides: lados });
             } else {
-              const grupos = especificacaoDados.map((d) => ({ qty: 1, sides: ladosParaLib(d.lados) }));
+              const grupos = especificacaoDados.map((d) => ({ qty: 1, sides: d.lados }));
               box.onRollComplete = (resultados) =>
                 concluirGrid(
                   resultados.map((r) => r.value),
