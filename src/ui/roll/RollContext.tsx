@@ -137,6 +137,13 @@ export interface RollState {
    * (`escolherVantagemPosRolagem`), o 2º dado continua 2D — fica
    * `true` mesmo assim, só o 1º dado é físico. */
   motor3D?: boolean;
+  /** `true` só quando o 2º dado (Vantagem/Desvantagem PRÉ-declarada,
+   * `box.roll(['1d20','1d20'])`) também veio do motor 3D — diferente
+   * de um 2º dado adicionado DEPOIS via `escolherVantagemPosRolagem`
+   * (ainda 2D nesta fase, ver sdd/sdd-dado-3d.md), que nunca marca
+   * isto. `RollOverlay` usa pra decidir se esconde o `DadoVisual` CSS
+   * dos DOIS dados (par físico) ou só do 1º (2º ainda 2D). */
+  dado2Motor3D?: boolean;
 }
 
 /** 1 linha do histórico de rolagens (últimas 20, mais recente
@@ -408,11 +415,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
   const rolarD20 = useCallback(
     ({ label, formula, mod, vantagem, categoria, onResultado }: RollD20Options) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      // Motor 3D (Fase B, ver sdd/sdd-dado-3d.md) só cobre d20 simples
-      // por enquanto — Vantagem/Desvantagem PRÉ-declarada continua 2D
-      // (mecanismo diferente da lib, `box.roll(['1d20','1d20'])`,
-      // entrega futura).
-      const usar3D = !vantagem && dado3DAtivo;
+      const usar3D = dado3DAtivo;
       setEstado({
         label,
         formula,
@@ -457,16 +460,53 @@ export function RollProvider({ children }: { children: ReactNode }) {
         onResultado?.(total, rolagem1);
       }
 
+      // Vantagem/Desvantagem PRÉ-declarada (2 dados de uma vez) —
+      // `vantagem` só chega aqui truthy, TypeScript não sabe disso.
+      function concluirVantagem(rolagem1: number, rolagem2: number, viaMotor3D: boolean) {
+        const usado = vantagem === 'vantagem' ? Math.max(rolagem1, rolagem2) : Math.min(rolagem1, rolagem2);
+        const total = usado + mod;
+        setEstado({
+          label,
+          formula,
+          fase: 'concluido',
+          tipo: 'd20',
+          valorDado: rolagem1,
+          dado2: rolagem2,
+          vantagem: vantagem ?? null,
+          mod,
+          total,
+          critico: criticoDe(usado),
+          podeEscolherVantagem: false,
+          categoria,
+          bonusExtra: null,
+          sorteUsada: false,
+          inspiracaoHeroicaUsada: false,
+          motor3D: viaMotor3D,
+          dado2Motor3D: viaMotor3D,
+        });
+        onResultado?.(total, usado);
+      }
+
       if (usar3D) {
         (async () => {
           try {
             const box = await carregarDiceBox3D();
             await garantirTemaDiceBox3D(box, 'default');
-            box.onRollComplete = (resultados) => concluirPlano(resultados[0].value, true);
-            box.roll('1d20');
+            if (vantagem) {
+              box.onRollComplete = (resultados) => concluirVantagem(resultados[0].value, resultados[1].value, true);
+              box.roll(['1d20', '1d20']);
+            } else {
+              box.onRollComplete = (resultados) => concluirPlano(resultados[0].value, true);
+              box.roll('1d20');
+            }
           } catch {
             timeoutRef.current = setTimeout(() => {
-              concluirPlano(rolarD20Dado(modoTesteRef, indiceModoTesteRef), false);
+              const rolagem1 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
+              if (vantagem) {
+                concluirVantagem(rolagem1, rolarD20Dado(modoTesteRef, indiceModoTesteRef), false);
+              } else {
+                concluirPlano(rolagem1, false);
+              }
             }, DURACAO_ANIMACAO_MS);
           }
         })();
@@ -476,27 +516,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
       timeoutRef.current = setTimeout(() => {
         const rolagem1 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
         if (vantagem) {
-          const rolagem2 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
-          const usado = vantagem === 'vantagem' ? Math.max(rolagem1, rolagem2) : Math.min(rolagem1, rolagem2);
-          const total = usado + mod;
-          setEstado({
-            label,
-            formula,
-            fase: 'concluido',
-            tipo: 'd20',
-            valorDado: rolagem1,
-            dado2: rolagem2,
-            vantagem,
-            mod,
-            total,
-            critico: criticoDe(usado),
-            podeEscolherVantagem: false,
-            categoria,
-            bonusExtra: null,
-            sorteUsada: false,
-            inspiracaoHeroicaUsada: false,
-          });
-          onResultado?.(total, usado);
+          concluirVantagem(rolagem1, rolarD20Dado(modoTesteRef, indiceModoTesteRef), false);
         } else {
           concluirPlano(rolagem1, false);
         }

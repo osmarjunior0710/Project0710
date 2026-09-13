@@ -85,6 +85,30 @@ este foco roda — não fechado, retomamos depois.
 motor 3D (`box.roll(['1d20','1d20'])`) — hoje continua 2D mesmo com
 `dado3DAtivo` — ver `sdd/sdd-dado-3d.md`.
 
+### B3 — Vantagem/Desvantagem PRÉ-declarada também usa o motor 3D
+
+- [x] `rolarD20`: quando `vantagem` já vem definida na chamada (ex.:
+      Desvantagem por armadura sem treinamento) e `dado3DAtivo`, rola
+      os 2 dados de uma vez (`box.roll(['1d20','1d20'])`) em vez de só
+      o d20 simples — os 2 helpers de conclusão (`concluirPlano`/
+      `concluirVantagem`) evitam duplicar a lógica de total/crítico
+      entre os caminhos 2D e 3D. Falha do motor cai pro 2D igual ao
+      B2 (mesmo par de rolagens, só com `Math.random()`).
+- [x] Novo campo `RollState.dado2Motor3D` distingue "os 2 dados vieram
+      juntos da física" (esta entrega) de "o 2º dado foi ADICIONADO
+      depois, `escolherVantagemPosRolagem`" (ainda 2D, fora de escopo)
+      — sem isso o `RollOverlay` não saberia se devia esconder o
+      `DadoVisual` CSS do 2º dado também ou não.
+      Verificado: `tsc -b`/`npm test` (519)/`npm run build` limpos +
+      Playwright (Mago com Cota de Malha equipada sem treinamento →
+      toca no atributo FOR → 2 dados físicos caem juntos → card mostra
+      "Desvantagem" e o total certo → nenhum `DadoVisual` CSS
+      aparece, os 2 são físicos).
+
+**Próxima entrega (B4):** reroll com o motor 3D (Sorte, Inspiração
+Heroica, Perfurador) e escolha de Vantagem/Desvantagem DEPOIS de ver o
+1º resultado (`box.add('1d20')`) — ver `sdd/sdd-dado-3d.md`.
+
 ## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade) — PAUSADO, retomar depois do Dado 3D
 
 77 talentos ainda sem efeito mecânico, em 5 categorias (Geral 42,

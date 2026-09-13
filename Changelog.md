@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1224
+
+Dado 3D — Vantagem/Desvantagem já decidida de antemão (ex.: com
+armadura sem treinamento) também rola com física de verdade agora,
+não só o d20 simples: os 2 dados caem juntos na tela. Escolher
+Vantagem/Desvantagem só depois de ver o resultado ainda usa o dado
+clássico por enquanto.
+
 ## v202609_1156
 
 Corrigido: Badalar Fúnebre (truque) agora mostra 2 botões de "Rolar

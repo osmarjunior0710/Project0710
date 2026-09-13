@@ -98,13 +98,15 @@ export default function RollOverlay() {
             ))}
           </div>
         ) : (
-          // Motor 3D (ver `RollState.motor3D`): o 1º dado (d20 simples)
-          // já aparece fisicamente caindo no canvas por trás do card
+          // Motor 3D (ver `RollState.motor3D`): dado(s) que vieram da
+          // física já aparecem caindo no canvas por trás do card
           // (Dice3dFab, compartilhado) — não desenha o `DadoVisual` CSS
-          // dele de novo aqui, senão duplica. Se o jogador escolher
-          // Vantagem/Desvantagem DEPOIS (2º dado, ainda 2D nesta
-          // entrega), esse aparece normalmente.
-          (!estado.motor3D || temSegundoDado) && (
+          // deles de novo aqui, senão duplica. Vantagem/Desvantagem
+          // PRÉ-declarada com motor 3D rola os 2 juntos (`dado2Motor3D`,
+          // ver sdd/sdd-dado-3d.md) — os 2 somem daqui. Escolhida DEPOIS
+          // do resultado (`escolherVantagemPosRolagem`) o 2º dado ainda
+          // é 2D nesta entrega e aparece normalmente.
+          (!estado.motor3D || (temSegundoDado && !estado.dado2Motor3D)) && (
             <div className={styles.diceRow}>
               {!estado.motor3D && (
                 <DadoVisual
@@ -113,7 +115,7 @@ export default function RollOverlay() {
                   className={dado1Descartado ? styles.dieDescartado : critClass}
                 />
               )}
-              {temSegundoDado && (
+              {temSegundoDado && !estado.dado2Motor3D && (
                 <DadoVisual valor={estado.dado2 ?? ''} lados={20} className={dado2Descartado ? styles.dieDescartado : critClass} />
               )}
             </div>

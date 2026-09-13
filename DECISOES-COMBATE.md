@@ -413,6 +413,22 @@ individualmente) — usado só pelo `RollOverlay` pra decidir se
 desenha o `DadoVisual` CSS do 1º dado ou deixa o canvas físico mostrar
 sozinho.
 
+**Fase B3 (feito) — Vantagem/Desvantagem PRÉ-declarada também física:**
+quando `vantagem` já vem definida na CHAMADA de `rolarD20` (ex.:
+Desvantagem por armadura sem treinamento — diferente de escolhida
+DEPOIS de ver o resultado), `dado3DAtivo` rola os 2 dados juntos
+(`box.roll(['1d20','1d20'])`), não só 1. Precisou de um 2º campo,
+`RollState.dado2Motor3D`, porque `motor3D` sozinho não bastava mais
+pra decidir a UI: uma rolagem pode ter `motor3D: true` com o 2º dado
+ainda 2D (post-roll `escolherVantagemPosRolagem`, que não mudou nesta
+entrega) — só quando `dado2Motor3D` também é `true` é que o
+`RollOverlay` esconde o `DadoVisual` CSS dos DOIS dados; caso
+contrário, esconde só o 1º e desenha o 2º normal. `concluirPlano`/
+`concluirVantagem` (dentro de `rolarD20`) são os 2 únicos pontos que
+fecham uma rolagem 'd20' — usados pelos 4 caminhos (2D simples, 2D
+Vantagem, 3D simples, 3D Vantagem) evitando duplicar a lógica de
+total/crítico entre eles.
+
 **Data/origem:** 2026-09, pedido do Osmar.
 
 ## Roteamento Ação/Ação Bônus/Reação de magia é só o Tempo de Conjuração da própria magia
