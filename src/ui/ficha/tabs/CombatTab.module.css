@@ -224,24 +224,39 @@
 }
 
 /* Vinheta de Fúria (Bárbaro, pedido do Osmar) — enquanto a Fúria está
-   ativa, as bordas da tela pulsam num vermelho suave (degradê
-   transparente no centro, vermelho nos últimos pixels) com partículas
-   emanando de fora pra dentro. `position: fixed` + `z-index: -1`
-   (mesmo raciocínio do `.piscadaOverlay` acima, só que pro lado
-   oposto da pilha) garante que fica sempre ATRÁS de qualquer
-   botão/conteúdo, mesmo mudando de aba. Puramente decorativo:
-   `pointer-events: none` e `aria-hidden` no componente. */
+   ativa, as bordas da tela pulsam num vermelho suave com partículas
+   emanando de fora pra dentro. 2ª versão (pedido do Osmar): 2 degradês
+   LINEARES em vez de 1 radial — um no eixo horizontal (esquerda pra
+   direita + direita pra esquerda, num só `linear-gradient` simétrico)
+   e outro no eixo vertical (topo pra baixo + baixo pra topo) — cada um
+   fica 100% transparente até 90% da distância e só aparece vermelho
+   nos últimos 10%, igual nas 2 pontas do eixo (diferente do radial
+   anterior, que colorria mais forte nos cantos que no meio de uma
+   borda). `position: fixed` + `z-index: -1` (mesmo raciocínio do
+   `.piscadaOverlay` acima, só que pro lado oposto da pilha) garante
+   que fica sempre ATRÁS de qualquer botão/conteúdo, mesmo mudando de
+   aba. Puramente decorativo: `pointer-events: none` e `aria-hidden`
+   no componente. */
 .furiaVinheta {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(
-    ellipse at center,
-    transparent 60%,
-    rgba(178, 30, 30, 0.14) 85%,
-    rgba(178, 30, 30, 0.5) 100%
-  );
+  background:
+    linear-gradient(
+      to right,
+      rgba(178, 30, 30, 0.55) 0%,
+      transparent 10%,
+      transparent 90%,
+      rgba(178, 30, 30, 0.55) 100%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(178, 30, 30, 0.55) 0%,
+      transparent 10%,
+      transparent 90%,
+      rgba(178, 30, 30, 0.55) 100%
+    );
   animation: furiaPulso 2.4s ease-in-out infinite;
 }
 
