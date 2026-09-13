@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2048
+
+Dado 3D um pouco maior de novo (ainda menor que o tamanho original,
+mas menos do que ficou na publicação passada). Também: por enquanto,
+a área onde o dado cai/quica aparece com um fundo preto translúcido
+temporário — é só pra você ver os limites dela na tela, vou tirar
+assim que confirmarmos que estão certos.
+
 ## v202609_2039
 
 Corrigido: o dado físico tinha ficado minúsculo depois do popup de

@@ -29,7 +29,7 @@ export function carregarDiceBox3D(): Promise<DiceBox> {
       // então um canvas menor sozinho deixava o dado minúsculo. Padrão
       // da lib é 5; achado testando no celular (pedido do Osmar: "uns
       // 20% menor que o tamanho original", não do tamanho que ficou).
-      scale: 6.2,
+      scale: 7,
     });
     await box.init();
     diceBoxRef = box;
