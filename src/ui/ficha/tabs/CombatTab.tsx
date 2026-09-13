@@ -954,6 +954,7 @@ export default function CombatTab({
       >
         {ultimoPainel === 'acao' && (
           <AcaoPanelContent
+            aberto={painelAberto !== null}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             onEscolher={(nome, desc, dano) => escolherNoPainel('acao', nome, desc, dano)}
             onAtacar={registrarAtaque}
@@ -992,6 +993,7 @@ export default function CombatTab({
         )}
         {ultimoPainel === 'bonus' && (
           <BonusPanelContent
+            aberto={painelAberto !== null}
             usosFolegoMaximo={usosFolegoMaximo}
             usosFolegoRestantes={usosFolegoRestantes}
             onUsarRecuperarFolego={usarRecuperarFolego}

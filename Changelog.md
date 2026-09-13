@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2133
+
+Combate — corrigido o popup "Espaços" (contador de espaços de magia)
+ficar preso na tela por cima da ficha depois de abrir "Ação" → "Usar
+Magia" e fechar o painel tocando na área escurecida ao lado do drawer
+(em vez do "← Voltar"). Não afeta a lista de magias em si nem o
+roteamento Ação/Ação Bônus/Reação.
+
 ## v202609_2057
 
 Combate — magias/truques de Ação Bônus (ex.: Danação, do Bruxo) agora

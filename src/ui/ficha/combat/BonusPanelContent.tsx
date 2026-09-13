@@ -82,6 +82,10 @@ interface BonusPanelContentProps {
   pvTempMestreDaMorte: number;
   onUsarMestreDaMorte: (petIds: string[]) => void;
   onEscolher: (nome: string, desc: string, dano?: DanoPendente) => void;
+  /** `SidePanel.open` do drawer — ver comentário em
+   * `useUsarMagiaPainel.tsx` (reseta o picker de "Usar Magia" ao
+   * fechar pela borda/backdrop, não só pelo "← Voltar" dele mesmo). */
+  aberto: boolean;
   /** `true` = Armadura equipada sem treinamento — bloqueia conjurar
    * magia (SDD "Penalidades por Falta de Proficiência", ver
    * `core/proficienciaArmadura.ts`), mesma trava do painel de Ação. */
@@ -161,6 +165,7 @@ export default function BonusPanelContent({
   pvTempMestreDaMorte,
   onUsarMestreDaMorte,
   onEscolher,
+  aberto,
   desvantagemForcaDestreza,
   conjura,
   truques,
@@ -182,6 +187,7 @@ export default function BonusPanelContent({
   const [escolhendoMestreDaMorte, setEscolhendoMestreDaMorte] = useState(false);
   const [petsSelecionados, setPetsSelecionados] = useState<string[]>([]);
   const { picker, abrirLista } = useUsarMagiaPainel({
+    aberto,
     desvantagemForcaDestreza,
     onEscolher,
     onAbrirSalvaguarda,

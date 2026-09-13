@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte } from '../../../core/magiasPersonagem';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
@@ -8,6 +8,15 @@ import EscolherCirculoShell from './EscolherCirculoShell';
 import type { DanoPendente } from './DanoPendente';
 
 interface UsarMagiaPainelParams {
+  /** `SidePanel.open` do drawer que hospeda este painel — o painel de
+   * Ação/Bônus fica MONTADO mesmo depois de fechar o drawer (só
+   * `ultimoPainel` some ao trocar de categoria, `fecharPainel()` não
+   * mexe nisso), então sem isso o picker de "Usar Magia" (e o painel
+   * "Espaços", que sai por Portal pro `document.body` — ver
+   * `SelecionarMagiaShell.tsx`) fica preso no meio da tela mesmo com o
+   * drawer já fechado, se o jogador fechar pela borda/backdrop em vez
+   * do "← Voltar" do próprio picker. */
+  aberto: boolean;
   desvantagemForcaDestreza: boolean;
   onEscolher: (nome: string, desc: string, dano?: DanoPendente) => void;
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
@@ -42,6 +51,14 @@ interface UsarMagiaPainelParams {
 export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
   const [telaMagia, setTelaMagia] = useState<'lista' | { magia: Magia; circulos: number[] } | null>(null);
   const { rolarD20, rolarDados } = useRoll();
+
+  // Fechar o drawer (backdrop/borda) não desmonta o painel — reseta o
+  // picker manualmente pra não deixar `SelecionarMagiaShell`/seu Portal
+  // "Espaços" presos na tela depois do drawer sumir.
+  useEffect(() => {
+    if (!p.aberto) setTelaMagia(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [p.aberto]);
 
   /** `circulo` é o espaço a gastar — pode ser maior que `m.circulo`
    * (upcast, ver `EscolherCirculoShell`); truque passa `null` (não

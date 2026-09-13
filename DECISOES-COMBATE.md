@@ -397,4 +397,29 @@ da linha "✨ Usar Magia". `DanoPendente` saiu de dentro de
 circular (o hook precisa do tipo, e agora `AcaoPanelContent` importa o
 hook).
 
+**Painel que fica MONTADO depois de fechar o drawer precisa resetar sua
+própria navegação interna no fechamento — não só ao clicar "Voltar":**
+`CombatTab.tsx` só zera `painelAberto` ao fechar (`fecharPainel()`),
+nunca desmonta `AcaoPanelContent`/`BonusPanelContent` de verdade
+(`ultimoPainel` guarda o conteúdo pra reabrir sem remontar). Isso é
+seguro pra a maioria dos casos, mas quebra quando o conteúdo interno
+tem seu próprio "sub-picker" com estado (o "Usar Magia" do
+`useUsarMagiaPainel.tsx`) — se o jogador fecha o drawer inteiro
+tocando na área escurecida ao lado (backdrop; o "screen" do picker,
+`position:fixed` dentro do `transform` do drawer, só cobre a LARGURA
+do drawer, não a viewport toda — a área escurecida ao lado continua
+tocável) em vez de usar o "← Voltar" do próprio picker, o picker nunca
+roda seu próprio `onFechar`/reset. Se esse sub-picker também tiver
+conteúdo em Portal pro `document.body` (caso do painel "Espaços" do
+`SelecionarMagiaShell`), ele fica preso na tela por cima do app
+inteiro, mesmo com o drawer já visualmente fechado — bug reportado
+pelo Osmar em 2026-09 ("aperta Ação, usar magia, mostra os slots e
+volta, o popup fica na tela"). **Padrão de correção, vale pra
+qualquer painel parecido no futuro:** o hook/componente que guarda o
+sub-picker recebe um prop `aberto` (mapeado pro `open` do `SidePanel`
+que o hospeda) e um `useEffect` que reseta o próprio estado de
+navegação sempre que `aberto` vira `false` — não depender só do
+`onFechar` interno do sub-picker, porque o drawer pode fechar por
+fora dele.
+
 **Data/origem:** 2026-09, pedido do Osmar.

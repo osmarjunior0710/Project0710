@@ -11,6 +11,10 @@ import styles from './PanelRows.module.css';
 export type { DanoPendente };
 
 interface AcaoPanelContentProps {
+  /** `SidePanel.open` do drawer — ver comentário em
+   * `useUsarMagiaPainel.tsx` (reseta o picker de "Usar Magia" ao
+   * fechar pela borda/backdrop, não só pelo "← Voltar" dele mesmo). */
+  aberto: boolean;
   /** `true` = Armadura equipada sem treinamento — Desvantagem em
    * qualquer ataque com arma/desarmado (SDD "Penalidades por Falta de
    * Proficiência", ver `core/proficienciaArmadura.ts`). Ataque com
@@ -74,6 +78,7 @@ interface AcaoPanelContentProps {
 }
 
 export default function AcaoPanelContent({
+  aberto,
   desvantagemForcaDestreza,
   onEscolher,
   onAtacar,
@@ -111,6 +116,7 @@ export default function AcaoPanelContent({
 }: AcaoPanelContentProps) {
   const { rolarD20, rolarDados } = useRoll();
   const { picker, abrirLista } = useUsarMagiaPainel({
+    aberto,
     desvantagemForcaDestreza,
     onEscolher,
     onAbrirSalvaguarda,
