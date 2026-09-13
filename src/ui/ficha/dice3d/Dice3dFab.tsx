@@ -47,15 +47,6 @@ const CORES = [
   { nome: 'Branco', hex: '#f2f2f2' },
 ] as const;
 
-const MODOS_D20 = ['normal', 'vantagem', 'desvantagem'] as const;
-type ModoD20 = (typeof MODOS_D20)[number];
-
-const ROTULO_MODO_D20: Record<ModoD20, string> = {
-  normal: 'Normal',
-  vantagem: 'Vantagem',
-  desvantagem: 'Desvantagem',
-};
-
 /** Ferramenta avulsa de dado 3D (Fase A do `sdd/sdd-dado-3d.md`) —
  * `@3d-dice/dice-box` (BabylonJS + Ammo.js, roda em Web Worker) é
  * carregado sob demanda (dynamic import) assim que a Ficha abre — não
@@ -80,8 +71,6 @@ export default function Dice3dFab() {
   const [temaId, setTemaId] = useState(TEMAS[0].id);
   const [corHex, setCorHex] = useState<string>(CORES[0].hex);
   const [customAberto, setCustomAberto] = useState(false);
-  const [rotuloD20, setRotuloD20] = useState('');
-  const [modoD20, setModoD20] = useState<ModoD20>('normal');
   const diceBoxRef = useRef<DiceBox | null>(null);
   const carregandoPromiseRef = useRef<Promise<DiceBox> | null>(null);
 
@@ -126,8 +115,6 @@ export default function Dice3dFab() {
     setModoMultiplo(false);
     setSelecoes({});
     setLogAberto(false);
-    setRotuloD20('');
-    setModoD20('normal');
   }
 
   // `roll()` acessa os dados do tema de forma síncrona — precisa
@@ -141,43 +128,10 @@ export default function Dice3dFab() {
     return { theme: temaId, themeColor: corHex };
   }
 
-  // Rolagem de 1d20 avulsa — rótulo e Normal/Vantagem/Desvantagem são
-  // escolhidos manualmente pelo jogador antes de tocar no dado (esta
-  // ferramenta não conhece perícia/ataque nenhum, é avulsa — ver o
-  // SDD). Sem esses dois controles, um dado 3D "puro" não daria pra
-  // registrar Vantagem/Desvantagem no log nem dar nome à rolagem.
-  async function rolarD20() {
-    setResultado(null);
-    setErro(null);
-    const titulo = rotuloD20.trim() || 'Rolagem de 1d20';
-    try {
-      const box = await carregar();
-      await garantirTema(box);
-      if (modoD20 === 'normal') {
-        box.onRollComplete = (resultados) => {
-          const v = resultados[0].value;
-          setResultado(v);
-          adicionarLog({ titulo, valores: [v], total: v, partesTotal: [v] });
-        };
-        box.roll('1d20', opcoesRolagem());
-      } else {
-        box.onRollComplete = (resultados) => {
-          const [v1, v2] = resultados.map((r) => r.value);
-          const mantido = modoD20 === 'vantagem' ? Math.max(v1, v2) : Math.min(v1, v2);
-          const tag = ROTULO_MODO_D20[modoD20];
-          setResultado(mantido);
-          adicionarLog({ titulo, valores: [v1, v2], tag, total: mantido, partesTotal: [mantido] });
-        };
-        box.roll(['1d20', '1d20'], opcoesRolagem());
-      }
-    } catch (e) {
-      setCarregando(false);
-      setErro(e instanceof Error ? e.message : 'Erro desconhecido ao carregar o dado 3D.');
-    }
-  }
-
-  // Rolagem "crua" (sem d20 sozinho envolvido) — usada tanto pro toque
-  // direto num tipo que não seja d20 quanto pro modo Múltiplos. Ordena
+  // Rolagem "crua" — usada tanto pro toque direto em qualquer tipo
+  // (incluindo d20, tratado igual aos outros: sem rótulo nem Vantagem/
+  // Desvantagem, essa ferramenta é avulsa e não conhece perícia/ataque
+  // nenhum) quanto pro modo Múltiplos. Ordena
   // os tipos por tamanho (TIPOS já vem d4→d100) antes de montar a
   // notação e o título.
   async function rolarGenerico(itens: { tipo: TipoDado; qtd: number }[]) {
@@ -209,11 +163,7 @@ export default function Dice3dFab() {
       setSelecoes((prev) => ({ ...prev, [tipo]: (prev[tipo] ?? 0) + 1 }));
       return;
     }
-    if (tipo === 'd20') {
-      rolarD20();
-    } else {
-      rolarGenerico([{ tipo, qtd: 1 }]);
-    }
+    rolarGenerico([{ tipo, qtd: 1 }]);
   }
 
   function tocarBotaoMultiplo() {
@@ -339,28 +289,6 @@ export default function Dice3dFab() {
               <div className={styles.status}>Toque nos dados que quer rolar juntos</div>
             )}
             <div className={styles.controles}>
-              {!modoMultiplo && (
-                <div className={styles.d20Config}>
-                  <input
-                    type="text"
-                    className={styles.d20RotuloInput}
-                    placeholder="Rótulo do d20 (opcional)"
-                    value={rotuloD20}
-                    onChange={(e) => setRotuloD20(e.target.value)}
-                  />
-                  <div className={styles.d20ModoRow}>
-                    {MODOS_D20.map((modo) => (
-                      <div
-                        key={modo}
-                        className={modo === modoD20 ? styles.d20ModoBtnAtivo : styles.d20ModoBtn}
-                        onClick={() => setModoD20(modo)}
-                      >
-                        {ROTULO_MODO_D20[modo]}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
               <div className={styles.tipos}>
                 {TIPOS.map((tipo) => (
                   <div key={tipo} className={styles.tipoBtn} onClick={() => tocarTipo(tipo)}>

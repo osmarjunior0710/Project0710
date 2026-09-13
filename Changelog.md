@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0812
+
+Dado 3D avulso (🎲, botão flutuante): removido o campo de rótulo e os
+botões Normal/Vantagem/Desvantagem do d20 — essa ferramenta é só pra
+rolar dado com física de verdade, sem estar ligada a nenhum teste
+específico da ficha. Rolar d20 volta a funcionar igual aos outros
+dados (sem pedir nada antes).
+
 ## v202609_0102
 
 Menu do avatar (👤) ganhou o switch "🎲 Dado 3D" — preferência pra

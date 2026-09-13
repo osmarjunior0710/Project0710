@@ -359,9 +359,12 @@ um histórico de rolagens **compartilhado com o resto da Ficha**
 `concluido`) E toda rolagem avulsa do FAB aparecem na MESMA lista —
 `RollContext` é o único lugar que os dois mundos enxergam, já que o
 resto da Ficha nem sabe que o dado 3D existe. O d20 avulso do FAB não
-simula perícia mais (era sorteio aleatório só pra testar formato) — o
-jogador escolhe rótulo (texto livre) e Normal/Vantagem/Desvantagem
-manualmente antes de rolar. **Fase B** (em andamento, ver EmDev.md):
+simula perícia mais (era sorteio aleatório só pra testar formato) e
+não pede rótulo nem Normal/Vantagem/Desvantagem (2026-09, removido a
+pedido do Osmar — o campo/botões só faziam sentido pensando na Fase B,
+mas essa ferramenta avulsa não está ligada a nenhum teste específico
+da ficha; rolar d20 aqui é igual a rolar qualquer outro dado, direto).
+**Fase B** (em andamento, ver EmDev.md):
 o motor 3D vira o padrão pra toda rolagem oficial do jogo (Combate/
 Magias/Atributos), com preferência 3D/2D no menu do avatar — ver o
 SDD pra mecânica completa.
