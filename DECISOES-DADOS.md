@@ -387,6 +387,29 @@ dano na hora certa; magias com múltiplos efeitos sorteados (Rajada de
 Mísseis Cintilantes / Muralha Prismática) têm texto de sucesso/falha
 aproximado.
 
+**Dado alternativo condicional (`DanoCondicional_Dado`/
+`DanoCondicional_Texto`, 2026-09):** achado do Osmar testando Badalar
+Fúnebre — 1d8 normal, mas 1d12 se o alvo já estiver ferido (algo que o
+app não rastreia, é o jogador que sabe olhando a cena). Auditoria nas
+391 magias (mesma técnica de regex + revisão manual) confirmou que é a
+ÚNICA com esse padrão exato de "2 dados-base alternativos pro mesmo
+efeito". `core/magiaDano.ts` ganhou `calcularDanoCondicionalMagia`,
+espelhando `calcularDanoMagia` no mesmo `calcularEscalonamento` (a
+condição não muda COMO o dado escala, só qual dado é a base — Badalar
+Fúnebre escala os dois pelo Aprimoramento de Truque igual). UI
+(`MagiaSalvaguardaModal`) mostra os 2 botões de "Rolar Dano" quando o
+campo está preenchido, o jogador escolhe qual bate com a cena — nunca
+tenta adivinhar sozinho qual dado usar.
+
+**Achados relacionados, registrados mas fora de escopo desta correção**
+(padrões DIFERENTES de "dado-base alternativo", não reaproveitam este
+campo — ver Backlog.md): Destruição Divina soma um dado EXTRA (não
+substitui) se o alvo for Ínfero/Morto-vivo; Golpe Certeiro/Bordão
+Místico deixam o TIPO do dano à escolha do jogador (Radiante/Energético
+vs. o tipo normal da arma), não a quantidade; Palavra de Poder: Matar
+só rola dado (12d12) se o alvo tiver mais de 100 PV, senão morre sem
+rolagem nenhuma.
+
 ## Magias — cura reaproveita o motor de Upcast do dano, sem mecanismo próprio
 
 Nenhuma magia de cura rolava dado até essa auditoria — coluna nova

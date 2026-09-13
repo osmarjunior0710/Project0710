@@ -7,6 +7,23 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
+## Magias — dano condicional/à escolha não coberto pelo motor padrão (2026-09)
+
+Achado durante a auditoria do dado alternativo de Badalar Fúnebre (ver
+`DECISOES-DADOS.md` "Dano alternativo condicional") — 3 padrões
+DIFERENTES do dele, cada um precisaria do próprio campo/UI se algum dia
+virar prioridade:
+- **Destruição Divina**: soma um dado EXTRA (1d8, não substitui) se o
+  alvo for Ínfero/Morto-vivo — hoje só rola o dano base, sem esse
+  extra.
+- **Golpe Certeiro / Bordão Místico**: o TIPO do dano (não a
+  quantidade) é à escolha do jogador entre Radiante/Energético ou o
+  tipo normal da arma — hoje só mostra 1 tipo fixo.
+- **Palavra de Poder: Matar**: só rola 12d12 se o alvo tiver mais de
+  100 PV; com 100 ou menos, o alvo simplesmente morre, sem rolagem —
+  hoje sempre mostraria o botão de dano, mesmo quando a regra real é
+  "morte instantânea".
+
 ## Explosão Repulsiva — empurrão de 3m não automatizado (2026-09)
 
 O vínculo (qual truque) e a tag no Perfil já funcionam de verdade —

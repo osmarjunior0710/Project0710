@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1156
+
+Corrigido: Badalar Fúnebre (truque) agora mostra 2 botões de "Rolar
+Dano" — um pro alvo com vida cheia, outro pro alvo já ferido (o app não
+sabe qual é o caso, então você escolhe qual bate com a cena). Conferido
+nas outras 390 magias e essa é a única com esse padrão específico de 2
+dados-base alternativos.
+
 ## v202609_0837
 
 Rolagens de perícia, salvaguarda, ataque e Iniciativa agora usam o

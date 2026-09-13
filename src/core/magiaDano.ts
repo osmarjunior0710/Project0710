@@ -124,6 +124,22 @@ export function calcularDanoMagia(magia: Magia, circuloUsado: number, nivelPerso
   return { ...escalonamento, tipo: magia.danoBaseTipo };
 }
 
+/** Espelha `calcularDanoMagia`, mas pro dado ALTERNATIVO
+ * (`danoCondicionalDado`) — mesmo Upcast/Aprimoramento de Truque por
+ * baixo, já que a condição (ex.: "alvo já ferido") não muda como o
+ * dado escala, só qual dado é a base. `null` quando a magia não tem
+ * dado alternativo (a imensa maioria) — ver comentário de
+ * `danoCondicionalDado` em `magias.ts`. */
+export function calcularDanoCondicionalMagia(
+  magia: Magia,
+  circuloUsado: number,
+  nivelPersonagem: number,
+): CalculoDanoMagia | null {
+  const escalonamento = calcularEscalonamento(magia.danoCondicionalDado, magia, circuloUsado, nivelPersonagem);
+  if (!escalonamento) return null;
+  return { ...escalonamento, tipo: magia.danoBaseTipo };
+}
+
 export interface CalculoCuraMagia {
   quantidade: number;
   lados: number;

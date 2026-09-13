@@ -10,6 +10,14 @@ interface MagiaSalvaguardaModalProps {
   dano: CalculoDanoMagia | null;
   upcastTexto: string | null;
   onRolarDano: () => void;
+  /** Só em magias com `danoCondicionalDado` (ex.: Badalar Fúnebre —
+   * dano diferente se o alvo já estiver ferido) — o app não rastreia
+   * PV do alvo, então mostra os 2 botões e o jogador escolhe qual bate
+   * com a cena. `danoCondicional`/`danoCondicionalTexto` ausentes =
+   * magia comum, sem 2º botão. */
+  danoCondicional?: CalculoDanoMagia | null;
+  danoCondicionalTexto?: string | null;
+  onRolarDanoCondicional?: () => void;
   onFechar: () => void;
 }
 
@@ -33,6 +41,9 @@ export default function MagiaSalvaguardaModal({
   dano,
   upcastTexto,
   onRolarDano,
+  danoCondicional,
+  danoCondicionalTexto,
+  onRolarDanoCondicional,
   onFechar,
 }: MagiaSalvaguardaModalProps) {
   return (
@@ -59,6 +70,12 @@ export default function MagiaSalvaguardaModal({
           </div>
         ) : (
           <div style={{ fontSize: 12, color: 'var(--text-faint)' }}>Veja a descrição da magia (ⓘ) pro efeito.</div>
+        )}
+        {danoCondicional && onRolarDanoCondicional && (
+          <div className="btn btn-primary" style={{ padding: 12, marginTop: 8 }} onClick={onRolarDanoCondicional}>
+            🎲 Rolar Dano — {danoCondicionalTexto} ({danoCondicional.quantidade}d{danoCondicional.lados}
+            {danoCondicional.mod ? ` + ${danoCondicional.mod}` : ''} {danoCondicional.tipo ?? ''})
+          </div>
         )}
         <div className={styles.close} onClick={onFechar}>
           fechar

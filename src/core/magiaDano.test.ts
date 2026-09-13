@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia, atributoSalvaguarda } from './magiaDano';
+import { calcularDanoMagia, calcularDanoCondicionalMagia, calcularCuraMagia, mecanicaDaMagia, atributoSalvaguarda } from './magiaDano';
 import { magias } from '../data/rulesets/dnd2024/magias';
 
 function magia(id: string) {
@@ -103,6 +103,32 @@ describe('calcularDanoMagia', () => {
 
     it('magia preparada (círculo > 0) nunca escala por nível — só Upcast por círculo (Bola de Fogo, nível 20)', () => {
       expect(calcularDanoMagia(magia('boladefogo'), 3, 20)?.quantidade).toBe(8);
+    });
+  });
+});
+
+describe('calcularDanoCondicionalMagia', () => {
+  it('magia sem danoCondicionalDado (imensa maioria) — null', () => {
+    expect(calcularDanoCondicionalMagia(magia('chamasagrada'), 0, 1)).toBeNull();
+  });
+
+  it('Badalar Fúnebre, nível 1 — dado alternativo (1d12) escala igual ao normal', () => {
+    expect(calcularDanoCondicionalMagia(magia('badalarfunebre'), 0, 1)).toEqual({
+      quantidade: 1,
+      lados: 12,
+      mod: 0,
+      tipo: 'Necrótico',
+      upcastNaoAutomatico: false,
+    });
+  });
+
+  it('borda: Badalar Fúnebre, nível 5 (Aprimoramento de Truque) — dado alternativo também ganha +1 dado', () => {
+    expect(calcularDanoCondicionalMagia(magia('badalarfunebre'), 0, 5)).toEqual({
+      quantidade: 2,
+      lados: 12,
+      mod: 0,
+      tipo: 'Necrótico',
+      upcastNaoAutomatico: false,
     });
   });
 });

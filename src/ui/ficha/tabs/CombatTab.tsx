@@ -8,7 +8,7 @@ import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPerson
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
-import { calcularDanoMagia, atributoSalvaguarda } from '../../../core/magiaDano';
+import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import InfoChip from '../../components/InfoChip';
 import LinearProgressBar from '../../components/LinearProgressBar';
@@ -413,6 +413,25 @@ export default function CombatTab({
     if (!dano) return;
     rolarDados({
       label: `Dano — ✨ ${telaSalvaguarda.magia.nome}`,
+      formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+      quantidade: dano.quantidade,
+      lados: dano.lados,
+      mod: dano.mod,
+    });
+  }
+
+  // Ver `danoCondicionalDado` em magias.ts — só Badalar Fúnebre hoje
+  // (dano diferente se o alvo já estiver ferido, algo que o app não
+  // rastreia). Mesmo padrão de `rolarDanoSalvaguarda`, só lendo o dado
+  // alternativo.
+  function rolarDanoCondicionalSalvaguarda() {
+    if (!telaSalvaguarda) return;
+    const dano = calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel);
+    const texto = telaSalvaguarda.magia.danoCondicionalTexto;
+    setTelaSalvaguarda(null);
+    if (!dano) return;
+    rolarDados({
+      label: `Dano (${texto}) — ✨ ${telaSalvaguarda.magia.nome}`,
       formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
       quantidade: dano.quantidade,
       lados: dano.lados,
@@ -1122,6 +1141,9 @@ export default function CombatTab({
           dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}
           upcastTexto={telaSalvaguarda.magia.upcastTexto}
           onRolarDano={rolarDanoSalvaguarda}
+          danoCondicional={calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}
+          danoCondicionalTexto={telaSalvaguarda.magia.danoCondicionalTexto}
+          onRolarDanoCondicional={rolarDanoCondicionalSalvaguarda}
           onFechar={() => setTelaSalvaguarda(null)}
         />
       )}
