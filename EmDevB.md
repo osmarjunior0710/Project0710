@@ -135,6 +135,32 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       (529)/`npm run build` limpos + Playwright: vinheta some ao
       encerrar a Fúria, botão continua clicável através da camada
       decorativa.
+- [x] **B4.0 — Fundação: Salvaguardas de verdade (pré-requisito pro
+      resto do B4).** Achado no caminho ao planejar B4: o app nunca
+      distinguia "teste de atributo" de "salvaguarda" — o box FOR/DES/
+      CON/INT/SAB/CAR sempre rolava só o mod., sem nunca somar o Bônus
+      de Proficiência mesmo pra classe proficiente naquela salvaguarda
+      (ex.: Bárbaro é proficiente em FOR/CON, mas isso nunca entrava
+      em nenhum cálculo). Decisão do Osmar: criar a distinção de
+      verdade agora, não deixar textual/adiado — importa pra Sentido
+      de Perigo, Força Indomável e a própria Vantagem de Força da
+      Fúria (nível 1, hoje só textual no card). Implementado:
+      `core/calculoPersonagem.ts` ganhou `calcularSalvaguardas`
+      (+ tipo `SalvaguardaFinal`, + 3 testes) — soma o Bônus de
+      Proficiência só quando a **classeOriginal** (nunca classe extra
+      de multiclasse) tem aquela salvaguarda; confirmado nos PDFs
+      (Cap. 2 "Multiclasse" + a seção "Como um Personagem Multiclasse"
+      de cada classe no Cap. 3) que salvaguarda NUNCA vem de
+      multiclasse, só da 1ª classe. `AtributosTab.tsx` ganhou 6 linhas
+      novas ("Salvaguarda de Força/Destreza/.../Carisma") no topo da
+      lista de Perícias, mesmo padrão de linha/rolagem/popup "ⓘ" já
+      usado por Perícias. Os 6 boxes de atributo (FOR/DES/.../CAR) no
+      topo continuam iguais — só teste de atributo, sem proficiência.
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (532)/`npm run build` limpos + Playwright num Bárbaro nível 5
+      (FOR 14/CON 17, prof +3): Salvaguarda de Força mostrou 🔵 +5
+      (mod +2 + prof +3), Constituição 🔵 +6, as outras 4 ⚫ sem
+      bônus, popup "ⓘ" com a conta explicada linha a linha.
 - [ ] **B4 — Resto da progressão base (sem subclasse):** Ataque
       Imprudente, Sentido de Perigo, Conhecimento Primordial
       (perícia extra + Força no lugar de outro atributo em Fúria),
