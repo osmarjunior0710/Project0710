@@ -9,6 +9,7 @@ import {
   calcularIniciativa,
   calcularPercepcaoPassiva,
   calcularPericias,
+  calcularSalvaguardas,
   calcularProficienciasFerramenta,
   periciasProficientes,
   ferramentasProficientes,
@@ -190,6 +191,38 @@ describe('calcularPercepcaoPassiva', () => {
   it('com proficiência em Percepção: soma o Bônus de Proficiência do nível', () => {
     const s = selecaoGuerreiro({ periciasClasseEscolhidas: ['Percepção'] });
     expect(calcularPercepcaoPassiva(s, 1)).toBe(11 + 2);
+  });
+});
+
+describe('calcularSalvaguardas', () => {
+  it('soma o Bônus de Proficiência só nas 2 salvaguardas da classeOriginal (Guerreiro: Força e Constituição)', () => {
+    const s = selecaoGuerreiro(); // FOR 15 (mod +2), DES 14 (mod +2), CON 13 (mod +1)
+    const resultado = calcularSalvaguardas(s, guerreiro, 1);
+    const forca = resultado.find((sv) => sv.atributo === 'FOR');
+    const constituicao = resultado.find((sv) => sv.atributo === 'CON');
+    const destreza = resultado.find((sv) => sv.atributo === 'DES');
+    expect(forca?.proficiente).toBe(true);
+    expect(forca?.mod).toBe(2 + bonusProficiencia(guerreiro, 1));
+    expect(constituicao?.proficiente).toBe(true);
+    expect(constituicao?.mod).toBe(1 + bonusProficiencia(guerreiro, 1));
+    expect(destreza?.proficiente).toBe(false);
+    expect(destreza?.mod).toBe(2); // só o mod. de Destreza, sem Bônus de Proficiência
+  });
+
+  it('borda: multiclasse — usa classeOriginal (1ª classe) pra decidir proficiência, nunca a classe ativa/extra (regra real, Livro do Jogador Cap. 2/3)', () => {
+    const s = selecaoGuerreiro(); // mesmos atributos, mas a "classe original" é o Bardo aqui
+    const resultado = calcularSalvaguardas(s, bardo, 1); // Bardo: Destreza e Carisma
+    const forca = resultado.find((sv) => sv.atributo === 'FOR');
+    const destreza = resultado.find((sv) => sv.atributo === 'DES');
+    expect(forca?.proficiente).toBe(false); // Força NÃO é salvaguarda do Bardo
+    expect(destreza?.proficiente).toBe(true);
+    expect(destreza?.mod).toBe(2 + bonusProficiencia(bardo, 1));
+  });
+
+  it('borda: classeOriginal null (personagem ainda sem classe escolhida) devolve todas sem proficiência', () => {
+    const s = selecaoGuerreiro();
+    const resultado = calcularSalvaguardas(s, null, 1);
+    expect(resultado.every((sv) => !sv.proficiente)).toBe(true);
   });
 });
 

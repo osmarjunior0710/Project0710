@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1526
+
+Aba Atributos ganhou as 6 Salvaguardas de verdade (Força, Destreza,
+Constituição, Inteligência, Sabedoria, Carisma) no topo da lista de
+Perícias — cada uma soma o Bônus de Proficiência quando sua classe for
+proficiente naquela salvaguarda (antes, o box de atributo simples
+nunca somava esse bônus pra nada). Fundação pras próximas
+características do Bárbaro que dependem de Vantagem/valor de
+salvaguarda.
+
 ## v202609_1502
 
 Vinheta de Fúria (pedido do Osmar) — removida a faixa vermelha do

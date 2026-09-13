@@ -1,4 +1,4 @@
-import type { AtributoFinal, ExplicacaoCalculo, FerramentaFinal, PericiaFinal } from '../../../core/calculoPersonagem';
+import type { AtributoFinal, ExplicacaoCalculo, FerramentaFinal, PericiaFinal, SalvaguardaFinal } from '../../../core/calculoPersonagem';
 import type { Arma } from '../../../data/rulesets/dnd2024/armas';
 import { buscarDescricaoMaestria } from '../../../data/rulesets/dnd2024/propriedadesMaestria';
 import { NOME_SENTIDO, type TipoSentido } from '../../../data/rulesets/dnd2024/sentidos';
@@ -25,6 +25,12 @@ interface AtributosTabProps {
   explicacaoIniciativa: ExplicacaoCalculo;
   explicacaoPercepcaoPassiva: ExplicacaoCalculo;
   atributos: AtributoFinal[];
+  /** As 6 Salvaguardas (teste de resistência) — diferente do box de
+   * "teste de atributo" logo acima, soma o Bônus de Proficiência
+   * quando a classe original (nunca classe extra de multiclasse,
+   * regra real) tiver aquela salvaguarda. Aparecem no topo da lista
+   * de Perícias (mesmo padrão de linha/rolagem). */
+  salvaguardas: SalvaguardaFinal[];
   pericias: PericiaFinal[];
   /** `true` = Armadura equipada (Leve/Média/Pesada) sem treinamento —
    * Desvantagem em D20 de Força ou Destreza (SDD "Penalidades por
@@ -87,6 +93,7 @@ export default function AtributosTab({
   explicacaoIniciativa,
   explicacaoPercepcaoPassiva,
   atributos,
+  salvaguardas,
   pericias,
   desvantagemForcaDestreza,
   proficienciasFerramenta,
@@ -243,6 +250,31 @@ export default function AtributosTab({
       </div>
 
       <div className="section-title">Perícias</div>
+      {salvaguardas.map((sv) => (
+        <div
+          key={`salvaguarda-${sv.atributo}`}
+          className={styles.skillRow}
+          onClick={() =>
+            rolarD20({
+              label: sv.explicacao.total.label,
+              formula: `1d20 ${sv.mod >= 0 ? '+' : '-'} ${Math.abs(sv.mod)}`,
+              mod: sv.mod,
+              categoria: 'atributoOuSalvaguarda',
+              vantagem:
+                desvantagemForcaDestreza && (sv.atributo === 'FOR' || sv.atributo === 'DES') ? 'desvantagem' : undefined,
+            })
+          }
+        >
+          <span>
+            {sv.proficiente ? '🔵' : '⚫'} {sv.explicacao.total.label} 🎲{' '}
+            <InfoValor titulo={sv.explicacao.total.label} explicacao={sv.explicacao} />
+          </span>
+          <span>
+            {sv.mod >= 0 ? '+' : ''}
+            {sv.mod}
+          </span>
+        </div>
+      ))}
       {pericias.map((p) => (
         <div
           key={p.nome}

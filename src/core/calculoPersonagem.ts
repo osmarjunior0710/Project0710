@@ -27,6 +27,12 @@ const ATRIBUTO_POR_NOME_COMPLETO: Record<string, Atributo> = {
   Carisma: 'CAR',
 };
 
+/** Inverso de `ATRIBUTO_POR_NOME_COMPLETO` — nome completo pra exibir
+ * (ex.: rótulo "Salvaguarda de Força"), a partir da sigla. */
+const NOME_COMPLETO_POR_ATRIBUTO = Object.fromEntries(
+  Object.entries(ATRIBUTO_POR_NOME_COMPLETO).map(([nome, sigla]) => [sigla, nome]),
+) as Record<Atributo, string>;
+
 /** Procura, entre os IDs de talento em `talentosAtuais`, um cujo
  * `efeitoMecanico.tipo` seja `tipo` — devolve o efeito inteiro (já
  * tipado) ou `null`. Usado pelos cálculos da Fase 4 (Alerta, Mestre
@@ -401,6 +407,48 @@ export function periciasProficientes(selection: WizardSelection): string[] {
   return [
     ...new Set<string>([...(origem?.pericias ?? []), ...selection.periciasClasseEscolhidas, ...periciaEspecie, ...periciasDoTalento]),
   ];
+}
+
+export interface SalvaguardaFinal {
+  atributo: Atributo;
+  mod: number;
+  proficiente: boolean;
+  explicacao: ExplicacaoCalculo;
+}
+
+/** As 6 Salvaguardas (teste de resistência), sempre — diferente do
+ * "teste de atributo" simples (`calcularAtributosFinais`), aqui soma
+ * o Bônus de Proficiência quando a classe tiver aquela salvaguarda.
+ *
+ * `classeOriginal` — regra real (Livro do Jogador, Cap. 2
+ * "Multiclasse" + a seção "Como um Personagem Multiclasse" de cada
+ * classe no Cap. 3): proficiência em Salvaguarda só vem da PRIMEIRA
+ * classe, nunca de classe adquirida por multiclasse depois — por
+ * isso este parâmetro é sempre `classeOriginal`, nunca a classe
+ * ativa nem uma classe extra. */
+export function calcularSalvaguardas(selection: WizardSelection, classeOriginal: Classe | null, nivelTotal: number): SalvaguardaFinal[] {
+  const bonus = classeOriginal ? bonusProficiencia(classeOriginal, nivelTotal) : 0;
+  return atributosOrdem
+    .map((atributo) => {
+      const valor = valorFinalAtributo(selection, atributo);
+      if (valor === null) return null;
+      const atribMod = modificador(valor);
+      const proficiente = classeOriginal?.salvaguardas.includes(atributo) ?? false;
+      const bonusFinal = proficiente ? bonus : 0;
+      return {
+        atributo,
+        mod: atribMod + bonusFinal,
+        proficiente,
+        explicacao: {
+          linhas: [
+            { label: `mod. ${atributo}`, valor: fmtMod(atribMod) },
+            ...(proficiente ? [{ label: 'Bônus de Proficiência (proficiente)', valor: fmtMod(bonusFinal) }] : []),
+          ],
+          total: { label: `Salvaguarda de ${NOME_COMPLETO_POR_ATRIBUTO[atributo]}`, valor: fmtMod(atribMod + bonusFinal) },
+        },
+      };
+    })
+    .filter((s): s is SalvaguardaFinal => s !== null);
 }
 
 /** As 18 perícias do jogo, sempre — não só as proficientes. Cada uma

@@ -14,6 +14,7 @@ import {
   calcularIniciativa,
   calcularPercepcaoPassiva,
   calcularPericias,
+  calcularSalvaguardas,
   calcularProficienciasFerramenta,
   calcularPvMaximoNivel1,
   bonusPvPorNivelDaEspecie,
@@ -434,6 +435,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     [...periciasSubclasseBonusAtuais, ...periciasTalentoGeralAtuais, ...periciasMulticlasseAtuais],
     nivelTotalAtual,
   );
+  const salvaguardas = calcularSalvaguardas(selecao, classeOriginal, nivelTotalAtual);
   const proficienciasFerramenta = calcularProficienciasFerramenta(selecao, nivelTotalAtual, ferramentasMulticlasseAtuais);
   const bonusProficienciaAtual = classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
   const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva);
@@ -1760,6 +1762,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             explicacaoPercepcaoPassiva={explicacaoPercepcaoPassiva}
             atributos={atributos}
             pericias={pericias}
+            salvaguardas={salvaguardas}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             proficienciasFerramenta={proficienciasFerramenta}
             onDescansoLongo={() => iniciarDescanso('longo')}
