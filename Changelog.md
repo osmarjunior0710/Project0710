@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1833
+
+Corrigido: usar Sorte (Pequenino) ou Inspiração Heroica pra rerolar um
+d20 físico só trocava o número, sem o dado cair na tela de novo — agora
+o dado reroda fisicamente de verdade. Mesma correção vale pro Perfurador
+(reroll de dano com Dado 3D ligado).
+
 ## v202609_1532
 
 Corrigido: o d100 (no 🎲 avulso e em qualquer rolagem que use d100)

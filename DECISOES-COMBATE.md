@@ -529,6 +529,36 @@ fazia a conversão errada). **Padrão pra lembrar:** `sides` de QUALQUER
 dado nesta lib (incluindo d100) é sempre NÚMERO puro — nunca precisa de
 tratamento especial por tipo.
 
+**Reroll físico corrigido — "Inspiração Heroica só troca o número, não
+rerola" (achado testando no celular):** `onRollComplete`/
+`getRollResults()` devolvem 1 objeto por GRUPO de rolagem, NÃO por
+dado — `.value` do grupo já é a soma certa (por isso os totais sempre
+bateram), mas o `rollId` que `box.reroll()` precisa pra identificar
+QUAL dado físico rerolar só existe um nível mais fundo, em
+`grupo.rolls[0]`. O B4/B5 guardavam o GRUPO inteiro como "resultado
+bruto" (`resultadoBrutoD20`/`DadoIndividual.resultadoBruto`/
+`resultadoBrutoDados`) — `box.reroll()` recebia esse grupo, não achava
+`rollId` no lugar esperado e jogava um erro interno
+(`Cannot set properties of undefined (setting 'removeCollectionId')`),
+caindo no fallback 2D **silenciosamente**; como `RollState.motor3D`
+nunca era resetado nesse fallback, o `RollOverlay` continuava
+escondendo o `DadoVisual` CSS — resultado: o número mudava (o 2D
+rolava de verdade) mas nada aparecia na tela, física nem CSS.
+
+**Padrão pra lembrar (vale pra qualquer uso futuro de `box.reroll()`):**
+nunca guarde o objeto de `onRollComplete` direto — sempre extraia
+`grupo.rolls[0]` primeiro (helper `dadoBruto()` em `RollContext.tsx`).
+Como cada grupo que este app monta sempre tem `qty: 1` (1 grupo por
+dado, ver `especificacaoDados`), isso resolve pra 1 dado OU pra um
+grid de N dados ao mesmo tempo — é o MESMO array por posição
+(`resultados[i]` ↔ `especificacaoDados[i]`), só precisa ler 1 nível
+mais fundo em cada posição, sem lógica separada por caso. Diagnosticado
+com um `console.log` temporário dentro do `try/catch` de
+`rerolarFisico()` (removido depois de confirmar a causa) — vale como
+técnica padrão pra depurar qualquer "cai no fallback silencioso e eu
+não sei por quê" nesta lib: um fallback silencioso sem log é opaco até
+alguém logar o erro real dentro do catch.
+
 O canvas físico continua cobrindo a tela inteira (precisa do espaço
 pra física cair), mas agora com `pointer-events: none` e SEM fundo —
 o dado cai visível por cima do conteúdo normal da Ficha, não mais

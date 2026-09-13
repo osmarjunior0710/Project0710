@@ -1,12 +1,21 @@
 // A biblioteca não publica tipos TypeScript — declaração mínima só com
 // o que o protótipo usa (ver DECISOES-COMBATE.md "Protótipo de dado 3D").
 declare module '@3d-dice/dice-box' {
-  /** `[key: string]: unknown` de propósito — a lib devolve um objeto com
-   * campos internos minificados (`rollId`/`groupId`/etc, ver `reroll`
-   * abaixo) que a gente nunca precisa NOMEAR, só guardar inteiro e
+  /** `onRollComplete`/`getRollResults()` devolvem um objeto por GRUPO de
+   * rolagem (não por dado) — `.value` do grupo já é a soma certa, mas
+   * pra `reroll()` precisa do dado individual de verdade, que mora em
+   * `.rolls[0]` (cada grupo que este app monta sempre tem `qty: 1`, um
+   * grupo por dado — ver `especificacaoDados`/`ordenados` em
+   * `RollContext.tsx`/`Dice3dFab.tsx`). Repassar o GRUPO inteiro pro
+   * `reroll()` (em vez de `.rolls[0]`) faz a lib jogar erro internamente
+   * (rollId no nível errado) — achado depurando "Inspiração Heroica só
+   * troca o número, não rerola" (ver DECISOES-COMBATE.md). `[key:
+   * string]: unknown` de propósito — o resto dos campos internos
+   * minificados a gente nunca precisa NOMEAR, só guardar inteiro e
    * repassar de volta pra `reroll()` depois. */
   export interface DiceBoxResultado {
     value: number;
+    rolls?: DiceBoxResultado[];
     [key: string]: unknown;
   }
 

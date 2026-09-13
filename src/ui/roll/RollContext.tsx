@@ -412,6 +412,14 @@ function criticoDe(d20: number): CritTipo {
   return d20 === 1 ? 'falha' : d20 === 20 ? 'sucesso' : null;
 }
 
+/** `onRollComplete` devolve 1 objeto por GRUPO (não por dado) — o dado
+ * individual de verdade, com o `rollId` que `box.reroll()` precisa,
+ * mora em `grupo.rolls[0]` (todo grupo que este app monta tem
+ * `qty: 1`, ver `DiceBoxResultado`). Usar sempre isso, nunca o grupo
+ * cru, em qualquer lugar que guarde um resultado pra rerolar depois. */
+function dadoBruto(grupo: DiceBoxResultado): DiceBoxResultado {
+  return grupo.rolls?.[0] ?? grupo;
+}
 
 /** Rerola FISICAMENTE o d20 identificado por `resultadoBruto` (Sorte,
  * Inspiração Heroica — ver "Rerolagem" em sdd/sdd-dado-3d.md) — usado
@@ -426,7 +434,7 @@ async function rerolarFisico(
 ) {
   try {
     const box = await carregarDiceBox3D();
-    box.onRollComplete = (resultados) => onSucesso(resultados[0].value, resultados[0]);
+    box.onRollComplete = (resultados) => onSucesso(resultados[0].value, dadoBruto(resultados[0]));
     box.reroll(resultadoBruto, { remove: true });
   } catch {
     onFalha();
@@ -541,7 +549,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
               box.onRollComplete = (resultados) => concluirVantagem(resultados[0].value, resultados[1].value, true);
               box.roll(['1d20', '1d20']);
             } else {
-              box.onRollComplete = (resultados) => concluirPlano(resultados[0].value, true, resultados[0]);
+              box.onRollComplete = (resultados) => concluirPlano(resultados[0].value, true, dadoBruto(resultados[0]));
               box.roll('1d20');
             }
           } catch {
@@ -681,7 +689,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
             const box = await carregarDiceBox3D();
             await garantirTemaDiceBox3D(box, 'default');
             if (umDadoSo) {
-              box.onRollComplete = (resultados) => concluirUmDado(resultados[0].value, true, resultados[0]);
+              box.onRollComplete = (resultados) => concluirUmDado(resultados[0].value, true, dadoBruto(resultados[0]));
               box.roll({ qty: 1, sides: lados });
             } else {
               const grupos = especificacaoDados.map((d) => ({ qty: 1, sides: d.lados }));
@@ -689,7 +697,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
                 concluirGrid(
                   resultados.map((r) => r.value),
                   true,
-                  resultados,
+                  resultados.map(dadoBruto),
                 );
               box.roll(grupos.length === 1 ? grupos[0] : grupos);
             }
