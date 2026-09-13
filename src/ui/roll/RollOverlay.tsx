@@ -73,6 +73,9 @@ export default function RollOverlay() {
   return (
     <div className={`${styles.overlay} ${estado.motor3D ? styles.overlaySemFundo : ''}`} onClick={fechar}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.close} onClick={fechar}>
+          ✕
+        </div>
         <div className={styles.label}>{estado.label}</div>
         {estado.dadosIndividuais ? (
           <div className={styles.diceGridWrap}>
@@ -217,9 +220,6 @@ export default function RollOverlay() {
               🔥 {bonusExtraDisponivel.rotulo} {bonusExtraDisponivel.restantes}/{bonusExtraDisponivel.maximo}
             </div>
           )}
-        <div className={styles.close} onClick={fechar}>
-          FECHAR
-        </div>
       </div>
     </div>
   );

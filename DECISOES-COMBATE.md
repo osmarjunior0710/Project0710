@@ -559,6 +559,51 @@ técnica padrão pra depurar qualquer "cai no fallback silencioso e eu
 não sei por quê" nesta lib: um fallback silencioso sem log é opaco até
 alguém logar o erro real dentro do catch.
 
+**Vantagem/Desvantagem PRÉ-declarada corrigida — "os 2 dados mostraram
+16/17 na tela mas o histórico registrou 16/16" (achado testando no
+celular):** o B3 pedia os 2 d20 como 2 notações SEPARADAS
+(`box.roll(['1d20', '1d20'])`). A lib processa cada notação da
+notation array com um `forEach` cujo callback é `async` mas nunca é
+`await`ado pelo próprio `forEach` — os 2 itens rodam INTERCALADOS, e o
+contador interno de `groupId` só incrementa DEPOIS que cada item
+termina de processar seus dados. Se as 2 chamadas de "carregar tema"
+(mesmo tema, quase sempre já em cache) resolverem próximas o
+suficiente, os 2 itens podem ler o MESMO valor de `groupId` antes que
+o 1º incremente — só 1 grupo sobrevive em `rollGroupData`, e os 2
+dados físicos (cada um com um valor real e diferente) ficam associados
+ao MESMO resultado reportado. **Corrigido eliminando a corrida por
+completo** (não só reduzindo a chance dela): trocar as 2 notações
+separadas por 1 notação SÓ com `qty: 2` (`box.roll('2d20')`) — vira 1
+item só no `forEach`, sem segundo item pra disputar o contador. Os 2
+resultados individuais saem de `resultados[0].rolls[0]`/`rolls[1]` (ver
+`DiceBoxResultado.rolls`) em vez de `resultados[0]`/`resultados[1]`.
+Validado repetindo a rolagem 40x seguidas sem nenhuma colisão (contra
+qualquer chance de reproduzir via automação antes da correção).
+**Risco relacionado, NÃO corrigido ainda** (mesma corrida, superfície
+diferente): o modo Múltiplos do avulso (`Dice3dFab.tsx`, 2+ tipos de
+dado juntos) e o grid de dano (B5, 2+ dados/grupos) TAMBÉM passam um
+array de 2+ itens de notação pra `box.roll()` — a mesma corrida pode,
+em teoria, embaralhar valores entre dados de tipos/posições diferentes
+nesses casos. Não reproduzido nem reportado ainda; registrado aqui
+como ponto de atenção pra abrir como entrega própria se algum dia
+aparecer um sintoma parecido nesses fluxos.
+
+**Popup reancorado embaixo + botão fechar virou ✕ circular (pedido do
+Osmar, 2026-09):** `RollOverlay`'s `.overlay` mudou de centralizado
+pra `align-items: flex-end` com `padding-bottom`, e o antigo botão
+"FECHAR" de largura total virou um círculo `✕` (`position: absolute`,
+canto superior direito do card, `.card` ganhou `position: relative`
+pra isso funcionar) — libera espaço vertical sem perder a área de
+toque mínima (`--touch-target-min`, mesmo padrão do `.back`). O
+canvas físico compartilhado (`Dice3dFab.module.css` `.canvasWrapper`)
+deixou de ser `inset: 5px` uniforme e virou limites por lado: topo
+~72px (abaixo de onde a barra do nome do personagem costuma ficar —
+ela NÃO é fixa/sticky, esse valor é só uma estimativa razoável, igual
+o `bottom: 92px` do FAB já fazia) e base ~340px (acima do card
+reancorado embaixo). Valores fixos por estimativa, não calculados
+dinamicamente — ajustar se algum estado específico do card (muitas
+opções ao mesmo tempo) empurrar o topo do card pra além dessa faixa.
+
 O canvas físico continua cobrindo a tela inteira (precisa do espaço
 pra física cair), mas agora com `pointer-events: none` e SEM fundo —
 o dado cai visível por cima do conteúdo normal da Ficha, não mais

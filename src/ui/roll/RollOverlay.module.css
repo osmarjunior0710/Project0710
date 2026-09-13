@@ -3,8 +3,11 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
+  /* Ancorado embaixo, com margem (pedido do Osmar) — sobra mais espaço
+     em cima pro dado físico cair/quicar antes de chegar no card. */
+  padding-bottom: var(--space-5);
   /* Acima do overlay do dado 3D avulso (Dice3dFab, z-index 100) — uma
      rolagem oficial com motor 3D mostra o canvas físico DELE por
      baixo (ver .overlayMotor3D) e este card precisa continuar visível
@@ -21,10 +24,15 @@
 }
 
 .card {
+  position: relative;
   background: var(--panel);
   border: 1px solid var(--accent);
   border-radius: var(--shape-lg);
-  padding: var(--space-6) var(--space-6);
+  /* Espaço reduzido (pedido do Osmar) — era space-6 nos 4 lados; o
+     canto superior direito também precisa de espaço pro botão ✕
+     (.closeX) não colar no texto. */
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  padding-top: var(--space-6);
   text-align: center;
   min-width: 260px;
   box-shadow: var(--elevation-3);
@@ -276,14 +284,30 @@
   background: var(--panel2);
 }
 
+/* Círculo com ✕ no canto do card (pedido do Osmar) — substitui o
+   antigo botão "FECHAR" de largura total, que ocupava uma linha
+   inteira só pra fechar. Posicionado sobre `.card` (`position:
+   relative` lá), sempre no canto, não empurra o resto do conteúdo. */
 .close {
-  margin-top: var(--space-4);
-  font-size: 11px;
-  color: var(--accent);
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  /* Área de toque mínima (CLAUDE.md seção 5), mesmo padrão do `.back` —
+     visualmente o ✕ em si é pequeno (16px), só a área clicável é
+     grande. */
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  border-radius: var(--shape-full);
+  background: var(--panel2);
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1;
   cursor: pointer;
-  padding: var(--space-2);
-  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.close:active {
+  background: var(--line-soft);
 }

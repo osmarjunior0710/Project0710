@@ -37,7 +37,17 @@
    sem bloquear a visão nem o toque no resto da Ficha. */
 .canvasWrapper {
   position: fixed;
-  inset: 0;
+  /* A física usa o tamanho deste container pra definir a "parede" onde
+     o dado bate — 5px de folga nas laterais/baixo (pedido do Osmar,
+     sem isso o dado, que tem raio próprio, aparecia meio cortado saindo
+     da tela ao bater na borda). Topo mais recuado (~72px, abaixo de
+     onde a barra do nome do personagem costuma ficar) e base recuada
+     o suficiente pra não cair em cima do card de resultado, que agora
+     fica ancorado embaixo (ver RollOverlay.module.css `.overlay`). */
+  top: 72px;
+  right: 5px;
+  bottom: 340px;
+  left: 5px;
   z-index: 90;
   pointer-events: none;
 }
@@ -53,7 +63,10 @@
    tamanho. */
 .canvasWrapperEscondido {
   position: fixed;
-  inset: 0;
+  top: 72px;
+  right: 5px;
+  bottom: 340px;
+  left: 5px;
   z-index: 90;
   visibility: hidden;
   pointer-events: none;

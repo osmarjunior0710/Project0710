@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1911
+
+Dado 3D — corrigido: rolagens com Vantagem/Desvantagem já decidida de
+antemão às vezes registravam os 2 dados com o mesmo valor no histórico,
+mesmo os dois caindo com números diferentes na tela. O popup de
+resultado (perícia/ataque/etc) agora fica ancorado embaixo da tela com
+uma margem, e o botão de fechar virou um ✕ no canto — o dado físico
+ganhou mais espaço pra cair sem ficar cortado nas bordas ou em cima do
+popup.
+
 ## v202609_1833
 
 Corrigido: usar Sorte (Pequenino) ou Inspiração Heroica pra rerolar um

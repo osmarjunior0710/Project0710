@@ -546,8 +546,18 @@ export function RollProvider({ children }: { children: ReactNode }) {
             const box = await carregarDiceBox3D();
             await garantirTemaDiceBox3D(box, 'default');
             if (vantagem) {
-              box.onRollComplete = (resultados) => concluirVantagem(resultados[0].value, resultados[1].value, true);
-              box.roll(['1d20', '1d20']);
+              // 1 grupo só ("2d20", não 2 notações "1d20" separadas) —
+              // achado testando no celular: com 2 itens de notação
+              // concorrentes, a lib tem uma corrida interna (2 forEach
+              // assíncronos disputando o mesmo contador de groupId) que
+              // podia fazer os 2 dados físicos caírem com valores
+              // diferentes na tela mas o mesmo valor no card/histórico.
+              // Com 1 grupo só (qty:2), não tem 2 itens disputando nada.
+              box.onRollComplete = (resultados) => {
+                const [d1, d2] = resultados[0].rolls ?? [];
+                concluirVantagem(d1?.value ?? 0, d2?.value ?? 0, true);
+              };
+              box.roll('2d20');
             } else {
               box.onRollComplete = (resultados) => concluirPlano(resultados[0].value, true, dadoBruto(resultados[0]));
               box.roll('1d20');

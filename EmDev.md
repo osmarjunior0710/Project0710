@@ -184,6 +184,44 @@ entregas no celular.
       garante que nunca trava, mas vale teste manual se o Osmar tiver
       um personagem com Perfurador à mão.
 
+### Correções pós-B5, achadas testando no celular
+
+- [x] **d100 só rolava a dezena** (0/10/.../90) — a lib entende
+      `sides:"100"` STRING como "d100 de face única" (sem unidade);
+      número puro `100` faz ela somar um d10 físico escondido e
+      devolver 1-100 de verdade. Corrigido em `Dice3dFab.tsx`/
+      `RollContext.tsx`. Ver `DECISOES-COMBATE.md`.
+- [x] **Sorte/Inspiração Heroica/Perfurador só trocavam o número, sem
+      o dado cair de novo** — `onRollComplete` devolve 1 objeto por
+      GRUPO, não por dado; o `rollId` que `box.reroll()` precisa mora
+      em `grupo.rolls[0]`. Guardar o grupo inteiro fazia `reroll()`
+      quebrar por dentro e cair no fallback 2D silenciosamente (sem
+      resetar `motor3D`, então nem o CSS aparecia). Corrigido com
+      helper `dadoBruto()`. Validado via Playwright: dado físico cai
+      de novo de verdade.
+- [x] **Vantagem/Desvantagem pré-declarada: os 2 dados na tela
+      mostravam valores diferentes mas o histórico registrava os 2
+      iguais** — 2 notações separadas (`['1d20','1d20']`) competem por
+      um contador interno da lib (corrida entre 2 callbacks `async`
+      não aguardados pelo `forEach`). Corrigido trocando por 1 notação
+      só (`'2d20'`, `qty:2`) — sem 2º item pra competir. Validado 40x
+      seguidas sem colisão. **Risco relacionado, não corrigido**: o
+      modo Múltiplos do avulso e o grid de dano (B5) também passam
+      array de 2+ itens pra `box.roll()` — mesma corrida em teoria,
+      não reproduzida/reportada ainda, registrada no
+      `DECISOES-COMBATE.md` como ponto de atenção.
+- [x] **Dado batendo/saindo um pouco da borda da tela** — canvas físico
+      ganhou 5px de folga nas laterais/embaixo (era `inset: 0` exato).
+- [x] **Popup de rolagem (perícia/ataque/etc) reancorado embaixo com
+      margem** (era centralizado) — botão "FECHAR" de largura total
+      virou um ✕ circular no canto do card. Área de física do dado
+      ajustada: topo ~72px (abaixo da barra do nome), base ~340px
+      (acima do card reancorado). Valores fixos por estimativa, não
+      calculados dinamicamente.
+      Verificado: `tsc -b`/`npm test` (532)/`npm run build` limpos +
+      Playwright (rolagem cai com folga da borda, popup ancorado
+      embaixo, ✕ fecha corretamente).
+
 ### Redesenho do FAB avulso (Fase A) — coluna de botões em vez de overlay escuro
 
 Pedido do Osmar depois do B4: o FAB avulso (🎲, ferramenta solta, não
