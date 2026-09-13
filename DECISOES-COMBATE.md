@@ -383,6 +383,36 @@ QA) — mutuamente exclusivos por design, nunca checar só um dos dois
 isoladamente pra decidir o motor de rolagem, sempre usar `dado3DAtivo`
 (já combina os 3 fatores).
 
+**Fase B2 (feito) — d20 simples usa o motor 3D de verdade, com canvas
+compartilhado:** o `@3d-dice/dice-box` só pode ter 1 instância/canvas
+por vez (mesmo gotcha de sempre, ver "Dado 3D com física" acima) —
+virou módulo próprio (`ui/roll/diceBox3d.ts`, `carregarDiceBox3D`/
+`garantirTemaDiceBox3D`), não mais exclusivo do `Dice3dFab.tsx`.
+`Dice3dFab` agora fica com o wrapper visível (`mostrarWrapper = aberto
+|| estado?.motor3D`) tanto quando o jogador abre o FAB avulso quanto
+quando uma rolagem OFICIAL (`RollOverlay`) está usando física —
+qualquer entrega futura que precise do motor 3D reaproveita esse mesmo
+módulo, nunca cria uma 2ª instância.
+
+**Decisão de UI confirmada com o Osmar antes de codar (seção 6.4):**
+o `RollOverlay` mostra o dado físico de verdade caindo (não mantém a
+animação CSS enquanto rola escondido por trás) — o objetivo da Fase B
+é o jogador SENTIR a física, esconder ela derrotaria o propósito. Fundo
+do `RollOverlay` fica transparente quando `motor3D` (`.overlaySemFundo`)
+pra não escurecer 2x em cima do fundo escuro que já vem do canvas
+compartilhado.
+
+**Escopo desta entrega — só d20 SIMPLES:** Vantagem/Desvantagem
+PRÉ-declarada continua 2D mesmo com o motor 3D ligado (mecanismo
+diferente da lib, `box.roll(['1d20','1d20'])` — entrega futura B3).
+Escolher Vantagem/Desvantagem DEPOIS de ver o resultado
+(`escolherVantagemPosRolagem`) também continua 2D pro 2º dado — o 1º
+(físico) fica como está, o 2º aparece do jeito CSS de sempre ao lado
+dele. `RollState.motor3D` marca a rolagem inteira (não cada dado
+individualmente) — usado só pelo `RollOverlay` pra decidir se
+desenha o `DadoVisual` CSS do 1º dado ou deixa o canvas físico mostrar
+sozinho.
+
 **Data/origem:** 2026-09, pedido do Osmar.
 
 ## Roteamento Ação/Ação Bônus/Reação de magia é só o Tempo de Conjuração da própria magia

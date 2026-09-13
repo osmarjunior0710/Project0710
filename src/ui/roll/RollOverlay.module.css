@@ -5,7 +5,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 60;
+  /* Acima do overlay do dado 3D avulso (Dice3dFab, z-index 100) — uma
+     rolagem oficial com motor 3D mostra o canvas físico DELE por
+     baixo (ver .overlayMotor3D) e este card precisa continuar visível
+     por cima. */
+  z-index: 105;
+}
+
+/* Rolagem usando o motor 3D (ver `RollState.motor3D`) — o fundo
+   escuro já vem do próprio host do canvas (Dice3dFab, compartilhado),
+   então este overlay fica transparente pra não escurecer 2x nem
+   esconder o dado físico caindo atrás do card. */
+.overlaySemFundo {
+  background: transparent;
 }
 
 .card {

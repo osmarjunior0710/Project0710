@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { useColapsavel } from '../hooks/useColapsavel';
 import { suportaWebGL } from '../utils/suportaWebGL';
+import { carregarDiceBox3D, garantirTemaDiceBox3D } from './diceBox3d';
 
 type CritTipo = 'sucesso' | 'falha' | null;
 
@@ -127,6 +128,15 @@ export interface RollState {
   /** `true` = o jogador já usou o `rerollEscolhido` desta rolagem —
    * só 1x, em QUALQUER um dos dados. */
   rerollEscolhidoUsado?: boolean;
+  /** `true` = o 1º dado desta rolagem 'd20' veio do motor 3D (física
+   * de verdade, `@3d-dice/dice-box`) em vez de `Math.random()` — Fase
+   * B do dado 3D (`sdd/sdd-dado-3d.md`), só cobre d20 simples (sem
+   * Vantagem/Desvantagem PRÉ-declarada) por enquanto. `RollOverlay`
+   * usa isso pra mostrar o canvas físico em vez do `DadoVisual` CSS
+   * pro 1º dado. Se o jogador escolher Vantagem/Desvantagem DEPOIS
+   * (`escolherVantagemPosRolagem`), o 2º dado continua 2D — fica
+   * `true` mesmo assim, só o 1º dado é físico. */
+  motor3D?: boolean;
 }
 
 /** 1 linha do histórico de rolagens (últimas 20, mais recente
@@ -395,48 +405,36 @@ export function RollProvider({ children }: { children: ReactNode }) {
   }, [preferenciaDado3D]);
   const dado3DAtivo = preferenciaDado3D && dado3DDisponivel && !modoTeste;
 
-  const rolarD20 = useCallback(({ label, formula, mod, vantagem, categoria, onResultado }: RollD20Options) => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setEstado({
-      label,
-      formula,
-      fase: 'rolando',
-      tipo: 'd20',
-      valorDado: '🎲',
-      dado2: vantagem ? '🎲' : null,
-      vantagem: vantagem ?? null,
-      mod,
-      total: null,
-      critico: null,
-      podeEscolherVantagem: false,
-      categoria,
-      bonusExtra: null,
-    });
-    timeoutRef.current = setTimeout(() => {
-      const rolagem1 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
-      if (vantagem) {
-        const rolagem2 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
-        const usado = vantagem === 'vantagem' ? Math.max(rolagem1, rolagem2) : Math.min(rolagem1, rolagem2);
-        const total = usado + mod;
-        setEstado({
-          label,
-          formula,
-          fase: 'concluido',
-          tipo: 'd20',
-          valorDado: rolagem1,
-          dado2: rolagem2,
-          vantagem,
-          mod,
-          total,
-          critico: criticoDe(usado),
-          podeEscolherVantagem: false,
-          categoria,
-          bonusExtra: null,
-          sorteUsada: false,
-          inspiracaoHeroicaUsada: false,
-        });
-        onResultado?.(total, usado);
-      } else {
+  const rolarD20 = useCallback(
+    ({ label, formula, mod, vantagem, categoria, onResultado }: RollD20Options) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      // Motor 3D (Fase B, ver sdd/sdd-dado-3d.md) só cobre d20 simples
+      // por enquanto — Vantagem/Desvantagem PRÉ-declarada continua 2D
+      // (mecanismo diferente da lib, `box.roll(['1d20','1d20'])`,
+      // entrega futura).
+      const usar3D = !vantagem && dado3DAtivo;
+      setEstado({
+        label,
+        formula,
+        fase: 'rolando',
+        tipo: 'd20',
+        valorDado: '🎲',
+        dado2: vantagem ? '🎲' : null,
+        vantagem: vantagem ?? null,
+        mod,
+        total: null,
+        critico: null,
+        podeEscolherVantagem: false,
+        categoria,
+        bonusExtra: null,
+        motor3D: usar3D,
+      });
+
+      // d20 simples concluído (sem Vantagem/Desvantagem pré-definida) —
+      // usado tanto pelo caminho 2D normal quanto pelo fallback quando
+      // o motor 3D falha (sem WebGL de repente, erro de rede no
+      // `import()` dinâmico) ou nunca completa.
+      function concluirPlano(rolagem1: number, viaMotor3D: boolean) {
         const total = rolagem1 + mod;
         setEstado({
           label,
@@ -454,11 +452,58 @@ export function RollProvider({ children }: { children: ReactNode }) {
           bonusExtra: null,
           sorteUsada: false,
           inspiracaoHeroicaUsada: false,
+          motor3D: viaMotor3D,
         });
         onResultado?.(total, rolagem1);
       }
-    }, DURACAO_ANIMACAO_MS);
-  }, []);
+
+      if (usar3D) {
+        (async () => {
+          try {
+            const box = await carregarDiceBox3D();
+            await garantirTemaDiceBox3D(box, 'default');
+            box.onRollComplete = (resultados) => concluirPlano(resultados[0].value, true);
+            box.roll('1d20');
+          } catch {
+            timeoutRef.current = setTimeout(() => {
+              concluirPlano(rolarD20Dado(modoTesteRef, indiceModoTesteRef), false);
+            }, DURACAO_ANIMACAO_MS);
+          }
+        })();
+        return;
+      }
+
+      timeoutRef.current = setTimeout(() => {
+        const rolagem1 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
+        if (vantagem) {
+          const rolagem2 = rolarD20Dado(modoTesteRef, indiceModoTesteRef);
+          const usado = vantagem === 'vantagem' ? Math.max(rolagem1, rolagem2) : Math.min(rolagem1, rolagem2);
+          const total = usado + mod;
+          setEstado({
+            label,
+            formula,
+            fase: 'concluido',
+            tipo: 'd20',
+            valorDado: rolagem1,
+            dado2: rolagem2,
+            vantagem,
+            mod,
+            total,
+            critico: criticoDe(usado),
+            podeEscolherVantagem: false,
+            categoria,
+            bonusExtra: null,
+            sorteUsada: false,
+            inspiracaoHeroicaUsada: false,
+          });
+          onResultado?.(total, usado);
+        } else {
+          concluirPlano(rolagem1, false);
+        }
+      }, DURACAO_ANIMACAO_MS);
+    },
+    [dado3DAtivo],
+  );
 
   const rolarDados = useCallback(
     ({ label, formula, quantidade, lados, mod, gruposExtras, rerollSe1, rerollEscolhido, onResultado }: RollDadosOptions) => {

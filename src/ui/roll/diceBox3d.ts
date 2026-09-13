@@ -1,0 +1,39 @@
+import type DiceBox from '@3d-dice/dice-box';
+
+/** Dono único do motor `@3d-dice/dice-box` — antes vivia dentro de
+ * `Dice3dFab.tsx` (ferramenta avulsa), agora é compartilhado com
+ * `RollOverlay.tsx` (rolagens oficiais, Fase B — ver
+ * `sdd/sdd-dado-3d.md`) porque só pode existir 1 `<canvas>`/instância
+ * por vez (o container é fixo no DOM, ver `Dice3dCanvasHost.tsx`).
+ * Módulo (não hook/contexto) de propósito: o `DiceBox` não é estado de
+ * React, é uma instância de engine que sobrevive a qualquer
+ * remount de componente. */
+let diceBoxRef: DiceBox | null = null;
+let carregandoPromiseRef: Promise<DiceBox> | null = null;
+
+export const DICE3D_CANVAS_HOST_ID = 'dice3d-canvas-host';
+
+export function carregarDiceBox3D(): Promise<DiceBox> {
+  if (diceBoxRef) return Promise.resolve(diceBoxRef);
+  if (carregandoPromiseRef) return carregandoPromiseRef;
+  const promessa = (async () => {
+    const { default: DiceBoxCtor } = await import('@3d-dice/dice-box');
+    const box = new DiceBoxCtor({
+      container: `#${DICE3D_CANVAS_HOST_ID}`,
+      assetPath: `${import.meta.env.BASE_URL}assets/`,
+      theme: 'default',
+    });
+    await box.init();
+    diceBoxRef = box;
+    return box;
+  })();
+  carregandoPromiseRef = promessa;
+  return promessa;
+}
+
+/** `roll()` acessa os dados do tema de forma síncrona — precisa
+ * garantir que ele já foi baixado/carregado antes (idempotente, só
+ * baixa de verdade na 1ª vez que cada tema é escolhido nesta sessão). */
+export async function garantirTemaDiceBox3D(box: DiceBox, temaId: string) {
+  await box.loadTheme(temaId);
+}

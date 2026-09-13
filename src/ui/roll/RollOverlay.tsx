@@ -71,7 +71,7 @@ export default function RollOverlay() {
   const ladosDadoPrincipal = estado.tipo === 'd20' ? 20 : estado.lados;
 
   return (
-    <div className={styles.overlay} onClick={fechar}>
+    <div className={`${styles.overlay} ${estado.motor3D ? styles.overlaySemFundo : ''}`} onClick={fechar}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
         <div className={styles.label}>{estado.label}</div>
         {estado.dadosIndividuais ? (
@@ -98,16 +98,26 @@ export default function RollOverlay() {
             ))}
           </div>
         ) : (
-          <div className={styles.diceRow}>
-            <DadoVisual
-              valor={estado.valorDado}
-              lados={ladosDadoPrincipal}
-              className={dado1Descartado ? styles.dieDescartado : critClass}
-            />
-            {temSegundoDado && (
-              <DadoVisual valor={estado.dado2 ?? ''} lados={20} className={dado2Descartado ? styles.dieDescartado : critClass} />
-            )}
-          </div>
+          // Motor 3D (ver `RollState.motor3D`): o 1º dado (d20 simples)
+          // já aparece fisicamente caindo no canvas por trás do card
+          // (Dice3dFab, compartilhado) — não desenha o `DadoVisual` CSS
+          // dele de novo aqui, senão duplica. Se o jogador escolher
+          // Vantagem/Desvantagem DEPOIS (2º dado, ainda 2D nesta
+          // entrega), esse aparece normalmente.
+          (!estado.motor3D || temSegundoDado) && (
+            <div className={styles.diceRow}>
+              {!estado.motor3D && (
+                <DadoVisual
+                  valor={estado.valorDado}
+                  lados={ladosDadoPrincipal}
+                  className={dado1Descartado ? styles.dieDescartado : critClass}
+                />
+              )}
+              {temSegundoDado && (
+                <DadoVisual valor={estado.dado2 ?? ''} lados={20} className={dado2Descartado ? styles.dieDescartado : critClass} />
+              )}
+            </div>
+          )
         )}
         {estado.vantagem && (
           <div className={styles.formula}>{estado.vantagem === 'vantagem' ? 'Vantagem' : 'Desvantagem'}</div>

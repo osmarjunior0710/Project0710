@@ -5,6 +5,17 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0837
+
+Rolagens de perícia, salvaguarda, ataque e Iniciativa agora usam o
+Dado 3D de verdade quando o switch "🎲 Dado 3D" está ligado (menu do
+avatar) — o resultado da rolagem passa a ser a física de verdade caindo
+na tela, não mais sorteio. Se você escolher Vantagem/Desvantagem depois
+de ver o resultado, o 2º dado ainda é o clássico (isso vem numa próxima
+entrega). Rolagens com Vantagem/Desvantagem já decidida de antemão
+(ex.: com armadura sem treino) também continuam no clássico por
+enquanto.
+
 ## v202609_0812
 
 Dado 3D avulso (🎲, botão flutuante): removido o campo de rótulo e os

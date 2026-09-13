@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import type DiceBox from '@3d-dice/dice-box';
+import { useEffect, useState } from 'react';
 import { useRoll } from '../../roll/RollContext';
+import { carregarDiceBox3D, garantirTemaDiceBox3D, DICE3D_CANVAS_HOST_ID } from '../../roll/diceBox3d';
 import styles from './Dice3dFab.module.css';
 
 const TIPOS = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'] as const;
@@ -60,7 +60,7 @@ const CORES = [
  * específico ainda.
  */
 export default function Dice3dFab() {
-  const { log, adicionarLog } = useRoll();
+  const { log, adicionarLog, estado } = useRoll();
   const [aberto, setAberto] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -71,41 +71,31 @@ export default function Dice3dFab() {
   const [temaId, setTemaId] = useState(TEMAS[0].id);
   const [corHex, setCorHex] = useState<string>(CORES[0].hex);
   const [customAberto, setCustomAberto] = useState(false);
-  const diceBoxRef = useRef<DiceBox | null>(null);
-  const carregandoPromiseRef = useRef<Promise<DiceBox> | null>(null);
+
+  // `true` = uma rolagem OFICIAL (perícia/ataque/etc, RollOverlay) está
+  // usando o motor 3D agora — o host do canvas (compartilhado, ver
+  // diceBox3d.ts) precisa ficar visível mesmo com este FAB fechado,
+  // senão o RollOverlay não tem onde mostrar o dado físico.
+  const rollOficialUsando3D = estado?.motor3D === true;
+  const mostrarWrapper = aberto || rollOficialUsando3D;
 
   const temaAtual = TEMAS.find((t) => t.id === temaId) ?? TEMAS[0];
 
   const totalSelecionado = Object.values(selecoes).reduce((acc, n) => acc + (n ?? 0), 0);
 
-  function carregar(): Promise<DiceBox> {
-    if (diceBoxRef.current) return Promise.resolve(diceBoxRef.current);
-    if (carregandoPromiseRef.current) return carregandoPromiseRef.current;
-    setCarregando(true);
-    const promessa = (async () => {
-      const { default: DiceBoxCtor } = await import('@3d-dice/dice-box');
-      const box = new DiceBoxCtor({
-        container: '#dice3d-canvas-host',
-        assetPath: `${import.meta.env.BASE_URL}assets/`,
-        theme: 'default',
-      });
-      await box.init();
-      diceBoxRef.current = box;
-      setCarregando(false);
-      return box;
-    })();
-    carregandoPromiseRef.current = promessa;
-    return promessa;
-  }
-
   // Pré-carrega assim que a Ficha abre, pra já estar pronto quando o
-  // jogador tocar o FAB — o host do canvas fica sempre montado (nunca
-  // desmonta ao fechar o overlay), só escondido via CSS, senão a lib
-  // perde a referência do <canvas> e a 2ª rolagem não aparece mais.
+  // jogador tocar o FAB (ou quando a 1ª rolagem oficial 3D acontecer)
+  // — o host do canvas fica sempre montado (nunca desmonta ao fechar o
+  // overlay), só escondido via CSS, senão a lib perde a referência do
+  // <canvas> e a próxima rolagem não aparece mais.
   useEffect(() => {
-    carregar().catch((e) => {
-      setErro(e instanceof Error ? e.message : 'Erro desconhecido ao carregar o dado 3D.');
-    });
+    setCarregando(true);
+    carregarDiceBox3D()
+      .then(() => setCarregando(false))
+      .catch((e) => {
+        setCarregando(false);
+        setErro(e instanceof Error ? e.message : 'Erro desconhecido ao carregar o dado 3D.');
+      });
   }, []);
 
   function abrir() {
@@ -115,13 +105,6 @@ export default function Dice3dFab() {
     setModoMultiplo(false);
     setSelecoes({});
     setLogAberto(false);
-  }
-
-  // `roll()` acessa os dados do tema de forma síncrona — precisa
-  // garantir que ele já foi baixado/carregado antes (idempotente, só
-  // baixa de verdade na 1ª vez que cada tema é escolhido).
-  async function garantirTema(box: DiceBox) {
-    await box.loadTheme(temaId);
   }
 
   function opcoesRolagem(): { theme: string; themeColor: string } {
@@ -137,14 +120,14 @@ export default function Dice3dFab() {
   async function rolarGenerico(itens: { tipo: TipoDado; qtd: number }[]) {
     setResultado(null);
     setErro(null);
-    const ordenados = TIPOS.filter((t) => itens.some((i) => i.tipo === t)).map(
-      (t) => itens.find((i) => i.tipo === t)!,
-    );
-    const notacoes = ordenados.map((i) => `${i.qtd}${i.tipo}`);
-    const titulo = `Rolagem de ${notacoes.join(' + ')}`;
     try {
-      const box = await carregar();
-      await garantirTema(box);
+      const box = await carregarDiceBox3D();
+      await garantirTemaDiceBox3D(box, temaId);
+      const ordenados = TIPOS.filter((t) => itens.some((i) => i.tipo === t)).map(
+        (t) => itens.find((i) => i.tipo === t)!,
+      );
+      const notacoes = ordenados.map((i) => `${i.qtd}${i.tipo}`);
+      const titulo = `Rolagem de ${notacoes.join(' + ')}`;
       box.onRollComplete = (resultados) => {
         const valores = resultados.map((r) => r.value);
         const total = valores.reduce((acc, v) => acc + v, 0);
@@ -203,9 +186,12 @@ export default function Dice3dFab() {
         🎲
       </div>
       {/* Sempre montado (nunca condicional) — a lib do dado 3D fica
-          dona desse nó de verdade; escondido via CSS quando fechado. */}
-      <div className={aberto ? styles.overlay : styles.overlayEscondido}>
-        <div id="dice3d-canvas-host" className={styles.canvasHost} />
+          dona desse nó de verdade; escondido via CSS quando fechado.
+          Também fica visível (sem os controles do FAB) quando uma
+          rolagem OFICIAL está usando o motor 3D (`rollOficialUsando3D`)
+          — é o mesmo canvas físico compartilhado, ver diceBox3d.ts. */}
+      <div className={mostrarWrapper ? styles.overlay : styles.overlayEscondido}>
+        <div id={DICE3D_CANVAS_HOST_ID} className={styles.canvasHost} />
         {aberto && (
           <>
             <div

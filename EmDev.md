@@ -52,8 +52,38 @@ este foco roda — não fechado, retomamos depois.
       página via localStorage, e trava/desliga sozinho ao ligar Modo
       de Teste).
 
-**Próxima entrega (B2):** ler `dado3DAtivo` de verdade no d20 simples
-(perícia/salvaguarda/ataque/iniciativa) — ver `sdd/sdd-dado-3d.md`.
+### B2 — d20 simples (perícia/salvaguarda/ataque/iniciativa) usa o motor 3D de verdade
+
+- [x] Motor `@3d-dice/dice-box` virou compartilhado (`ui/roll/
+      diceBox3d.ts`) — antes só existia dentro de `Dice3dFab.tsx`
+      (ferramenta avulsa); agora tanto o avulso quanto o `RollContext`
+      (rolagem oficial) chamam o MESMO `carregarDiceBox3D()`/
+      `garantirTemaDiceBox3D()`, evitando 2 instâncias/canvas
+      concorrentes.
+- [x] `rolarD20` (`RollContext.tsx`): quando `dado3DAtivo` e a
+      rolagem NÃO tem Vantagem/Desvantagem pré-declarada (d20 simples
+      de verdade), rola via `box.roll('1d20')` e usa o valor físico
+      devolvido em vez de `Math.random()` — resto do motor (mod,
+      total, crítico, `onResultado`) não muda nada. Falha do motor 3D
+      (sem WebGL de repente, erro de rede no `import()` dinâmico) cai
+      pro 2D automaticamente, mesmo timing de sempre. Novo campo
+      `RollState.motor3D` marca qual rolagem usou física de verdade.
+- [x] **Visual confirmado com o Osmar antes de codar:** `RollOverlay`
+      mostra o canvas físico (compartilhado com o `Dice3dFab`) por
+      trás do card em vez do `DadoVisual` CSS pro 1º dado, quando
+      `motor3D` — fundo do overlay fica transparente
+      (`.overlaySemFundo`) pra não escurecer 2x. Escolher Vantagem/
+      Desvantagem DEPOIS de ver o resultado (`escolherVantagemPosRolagem`)
+      continua 2D pro 2º dado (fora de escopo desta entrega) — funciona
+      normalmente ao lado do 1º dado físico já assentado.
+      Verificado: `tsc -b`/`npm test` (516)/`npm run build` limpos +
+      Playwright (perícia com Dado 3D ligado → canvas físico visível
+      rolando → total bate com o resultado da física → escolhe
+      Vantagem depois → 2º dado 2D aparece, total recalcula certo).
+
+**Próxima entrega (B3):** Vantagem/Desvantagem PRÉ-declarada usando o
+motor 3D (`box.roll(['1d20','1d20'])`) — hoje continua 2D mesmo com
+`dado3DAtivo` — ver `sdd/sdd-dado-3d.md`.
 
 ## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade) — PAUSADO, retomar depois do Dado 3D
 
