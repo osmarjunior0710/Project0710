@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1421
+
+Dado 3D — corrigido: tocar rápido nos botões do 🎲 (Múltiplos, tipos de
+dado, Histórico, fechar do popup) às vezes virava seleção de texto/menu
+de copiar no celular. Agora esses toques não disparam mais seleção.
+
 ## v202609_1411
 
 Dado 3D — os botões da coluna expandida (Múltiplos, d4 a d100,
