@@ -238,9 +238,9 @@
   pointer-events: none;
   background: radial-gradient(
     ellipse at center,
-    transparent 45%,
-    rgba(178, 30, 30, 0.3) 78%,
-    rgba(178, 30, 30, 0.8) 100%
+    transparent 60%,
+    rgba(178, 30, 30, 0.14) 85%,
+    rgba(178, 30, 30, 0.5) 100%
   );
   animation: furiaPulso 2.4s ease-in-out infinite;
 }
@@ -248,10 +248,10 @@
 @keyframes furiaPulso {
   0%,
   100% {
-    opacity: 0.6;
+    opacity: 0.5;
   }
   50% {
-    opacity: 1;
+    opacity: 0.85;
   }
 }
 
