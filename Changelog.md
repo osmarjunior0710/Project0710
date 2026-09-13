@@ -5,6 +5,11 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1502
+
+Vinheta de Fúria (pedido do Osmar) — removida a faixa vermelha do
+topo/rodapé, fica só nas bordas esquerda e direita.
+
 ## v202609_1456
 
 Vinheta de Fúria trocou de degradê radial pra 2 degradês lineares
