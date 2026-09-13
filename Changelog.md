@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1431
+
+Corrigido em TODO o app (não só o Dado 3D): tocar rápido em qualquer
+botão/área tocável às vezes virava seleção de texto/menu de copiar no
+celular. Não deve acontecer mais em lugar nenhum. Campos de digitação
+(nome, anotações, etc.) continuam selecionáveis normalmente.
+
 ## v202609_1425
 
 Ajustes no card de Fúria (feedback do Osmar testando no celular): texto

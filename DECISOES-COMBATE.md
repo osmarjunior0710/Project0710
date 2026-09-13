@@ -498,16 +498,9 @@ só mudar a cor dos itens do menu — aqui virou `.fabAberto` (tom mais
 escuro da mesma família, `#1e2a6e`, + `box-shadow: inset` em vez de por
 fora, simulando "pressionado").
 
-Achado depois, testando no celular: toques rápidos nesses `<div>`
-tocáveis (não são `<button>`) estavam virando seleção de texto/menu de
-copiar no Android de vez em quando. **Padrão pra qualquer `<div>` com
-`onClick` fazendo de botão:** `user-select: none` +
-`-webkit-user-select: none` + `-webkit-touch-callout: none` +
-`touch-action: manipulation` — sem isso, o navegador mobile pode
-interpretar um toque um pouco arrastado como início de seleção de
-texto. Aplicado aqui nos 3 elementos tocáveis do FAB
-(`.fab`/`.menuBtn`/`.logPopupFechar`); vale o mesmo tratamento em
-qualquer outro `<div onClick>` do app que apresentar o mesmo sintoma.
+Achado depois, testando no celular, que virou regra padrão do app
+inteiro (não só deste FAB) — ver `DECISOES-DESIGN.md` "Regra padrão:
+nenhum toque no app deve virar seleção de texto".
 
 **Data/origem:** 2026-09, pedido do Osmar.
 
