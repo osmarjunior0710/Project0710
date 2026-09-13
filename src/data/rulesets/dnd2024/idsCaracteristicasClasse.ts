@@ -22,6 +22,13 @@ export const ID_CARACTERISTICA_CLASSE = {
    * implementado ainda) — CA sem armadura vira 10 + DES + CON em vez
    * do padrão 10 + DES. Ver `calcularCAEquipado`. */
   defesaSemArmadura: 'Defesa sem Armadura',
+  /** Bárbaro nível 2 — Vantagem em Salvaguarda de Destreza. Ver
+   * `AtributosTab.tsx`. */
+  sentidoDePerigo: 'Sentido de Perigo',
+  /** Bárbaro nível 2 — toggle na 1ª jogada de ataque do turno, dá
+   * Vantagem em ataques baseados em Força até o Fim do Turno. Ver
+   * `AcaoPanelContent.tsx`/`FichaShell.tsx`. */
+  ataqueImprudente: 'Ataque Imprudente',
 } as const;
 
 export type IdCaracteristicaClasse = keyof typeof ID_CARACTERISTICA_CLASSE;

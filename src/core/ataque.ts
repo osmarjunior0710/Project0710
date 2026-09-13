@@ -61,7 +61,14 @@ export function ataqueDesarmado(
     // Ataque Desarmado sempre usa Força (Apêndice C) — `bonusDanoSeForca`
     // (Dano da Fúria do Bárbaro, ver sdd/sdd-barbaro-furia.md) soma
     // sempre que informado, sem precisar checar atributo.
-    info: { modAcerto: forMod + prof, danoQuantidade, danoLados, danoMod: forMod + bonusDanoSeForca, danoTipo: 'Contundente' },
+    info: {
+      modAcerto: forMod + prof,
+      danoQuantidade,
+      danoLados,
+      danoMod: forMod + bonusDanoSeForca,
+      danoTipo: 'Contundente',
+      usouForca: true,
+    },
   };
 }
 
@@ -139,6 +146,7 @@ export function ataqueComArma(
       danoLados: lados,
       danoMod: danoMod + bonusDuelismo + (usouForca ? bonusDanoSeForca : 0),
       danoTipo: tipo,
+      usouForca,
     },
   };
 }

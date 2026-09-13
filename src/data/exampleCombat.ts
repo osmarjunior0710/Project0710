@@ -26,5 +26,13 @@ export interface AtaqueInfo {
   danoLados: number;
   danoMod: number;
   danoTipo: string;
+  /** `true` = este ataque específico usa Força (Ataque Desarmado
+   * sempre; arma Corpo a Corpo sem Acuidade; arma com Acuidade só
+   * quando Força ≥ Destreza) — nunca à distância, nunca com atributo
+   * forçado (ex.: Pacto da Lâmina). Mesmo cálculo que já decide o
+   * bônus de Dano da Fúria em `core/ataque.ts`, só que exposto pra
+   * fora agora — precisa disso pra decidir Vantagem do Ataque
+   * Imprudente (Bárbaro), que só vale em ataques baseados em Força. */
+  usouForca: boolean;
 }
 

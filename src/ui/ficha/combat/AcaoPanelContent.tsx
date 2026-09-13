@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { acoesBase, type AtaqueInfo } from '../../../data/exampleCombat';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
+import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { useRoll } from '../../roll/RollContext';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import type { DanoPendente } from './DanoPendente';
@@ -54,6 +56,15 @@ interface AcaoPanelContentProps {
   surtoUsadoTurno: boolean;
   onUsarSurto: () => void;
   ataqueAtual: AtaqueResolvido | null;
+  /** Ataque Imprudente (Bárbaro, nível 2+) — `false` = não tem essa
+   * característica. Só na 1ª jogada de ataque do turno
+   * (`ataquesFeitos === 0`), tocar "Atacar" abre um mini-picker
+   * "Ataque Normal"/"Ataque Imprudente" em vez de rolar direto; depois
+   * disso `ataqueImprudenteAtivo` já decide sozinho pros ataques
+   * seguintes do mesmo turno (Ataque Extra). */
+  temAtaqueImprudente: boolean;
+  ataqueImprudenteAtivo: boolean;
+  onAtivarAtaqueImprudente: () => void;
   detalhesAtivo: boolean;
   /** Mãos Curativas (Aasimar) — `false` = espécie não é Aasimar. */
   maosCurativasDisponivel: boolean;
@@ -102,6 +113,9 @@ export default function AcaoPanelContent({
   surtoUsadoTurno,
   onUsarSurto,
   ataqueAtual,
+  temAtaqueImprudente,
+  ataqueImprudenteAtivo,
+  onAtivarAtaqueImprudente,
   detalhesAtivo,
   maosCurativasDisponivel,
   maosCurativasGasto,
@@ -149,12 +163,22 @@ export default function AcaoPanelContent({
     );
   }
 
-  function rolarAtaque(nome: string, ataque: AtaqueInfo, finalizar: (nome: string, desc: string, dano: DanoPendente) => void) {
+  /** `imprudente` — Ataque Imprudente (Bárbaro) já decidido pra esse
+   * ataque (e o turno inteiro, ver `escolherAtaque`); só vira Vantagem
+   * de verdade quando o ataque específico usa Força
+   * (`ataque.usouForca`). Se coincidir com a Desvantagem de Armadura
+   * sem treino, as duas se cancelam (`resolverVantagem`). */
+  function rolarAtaque(
+    nome: string,
+    ataque: AtaqueInfo,
+    finalizar: (nome: string, desc: string, dano: DanoPendente) => void,
+    imprudente: boolean,
+  ) {
     rolarD20({
       label: `Ataque — ${nome}`,
       formula: `1d20 + ${ataque.modAcerto}`,
       mod: ataque.modAcerto,
-      vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
+      vantagem: resolverVantagem(imprudente && ataque.usouForca, desvantagemForcaDestreza),
     });
     finalizar(`🗡 ${nome}`, `Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano ${ataque.danoTipo}.`, {
       label: `Dano — ${nome}`,
@@ -167,18 +191,59 @@ export default function AcaoPanelContent({
 
   const surtoDesabilitado = surtoRestantes <= 0 || surtoUsadoTurno;
 
+  /** `true` quando a 1ª jogada de ataque do turno ainda não decidiu
+   * Normal/Imprudente — some depois de escolhido, pros ataques
+   * seguintes do mesmo turno (Ataque Extra) rolarem direto. */
+  const [escolhendoAtaque, setEscolhendoAtaque] = useState(false);
+
+  /** Toque em "Atacar" — só abre o mini-picker Normal/Imprudente na 1ª
+   * jogada do turno de quem tem Ataque Imprudente; senão rola direto
+   * usando o que já foi decidido esse turno (`ataqueImprudenteAtivo`). */
+  function tocarAtacar() {
+    if (!ataqueAtual) return;
+    if (temAtaqueImprudente && ataquesFeitos === 0) {
+      setEscolhendoAtaque(true);
+      return;
+    }
+    rolarAtaque(`🗡 ${ataqueAtual.nome}`, ataqueAtual.info, onAtacar, ataqueImprudenteAtivo);
+  }
+
+  function escolherAtaque(imprudente: boolean) {
+    if (!ataqueAtual) return;
+    setEscolhendoAtaque(false);
+    if (imprudente) onAtivarAtaqueImprudente();
+    rolarAtaque(`🗡 ${ataqueAtual.nome}`, ataqueAtual.info, onAtacar, imprudente);
+  }
+
   if (picker) return picker;
+
+  if (escolhendoAtaque && ataqueAtual) {
+    return (
+      <>
+        <div className="section-title">Atacar — {ataqueAtual.nome}</div>
+        <div className="opt-card" onClick={() => escolherAtaque(false)}>
+          <div className="opt-card-name">🗡 Ataque Normal</div>
+        </div>
+        <div className="opt-card" onClick={() => escolherAtaque(true)}>
+          <div className="opt-card-name">😤 Ataque Imprudente</div>
+          <div className="opt-card-desc">
+            Vantagem em jogadas de ataque baseadas em Força até o início do seu próximo turno — mas jogadas de ataque
+            contra você também têm Vantagem nesse período (o app não simula ataques de inimigos). Vale pro turno
+            inteiro, não só esse ataque.
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
       {ataqueAtual && (
-        <div
-          className={styles.row}
-          onClick={() => rolarAtaque(`🗡 ${ataqueAtual.nome}`, ataqueAtual.info, onAtacar)}
-        >
+        <div className={styles.row} onClick={tocarAtacar}>
           <div className={styles.rowName}>
             🗡 Atacar — {ataqueAtual.nome}{' '}
             {numAtaques > 1 ? `(ataque ${Math.min(ataquesFeitos + 1, numAtaques)}/${numAtaques})` : ''}
+            {ataqueImprudenteAtivo && ataquesFeitos > 0 ? ' · 😤 Imprudente' : ''}
           </div>
           <div className={styles.rowDesc}>
             {ataqueAtual.descricao}

@@ -161,17 +161,75 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       (FOR 14/CON 17, prof +3): Salvaguarda de Força mostrou 🔵 +5
       (mod +2 + prof +3), Constituição 🔵 +6, as outras 4 ⚫ sem
       bônus, popup "ⓘ" com a conta explicada linha a linha.
-- [ ] **B4 — Resto da progressão base (sem subclasse):** Ataque
-      Imprudente, Sentido de Perigo, Conhecimento Primordial
-      (perícia extra + Força no lugar de outro atributo em Fúria),
-      Ataque Extra, Movimento Rápido, Bote Instintivo, Instintos
-      Primitivos (Vantagem em Iniciativa), Golpe Brutal (nível 9,
-      efeitos Debilitador/Poderoso) + Fortalecido (nível 13/17,
-      Atordoante/Destruidor, dano 1d10→2d10), Fúria Implacável (nível
-      11), Fúria Persistente (nível 15 — vira só "recupera Fúrias na
-      Iniciativa", já que a duração de 10 min já é o padrão desde o
-      B3), Força Indomável (nível 18), Campeão Primitivo (nível 20,
-      FOR/CON +4 até 25), ASI (4/8/12/16).
+- [x] **B4.1 — Ataque Imprudente + Sentido de Perigo (nível 2).**
+      **Regra nova do processo a partir daqui** (pedido do Osmar,
+      2026-09, ver CLAUDE.md §6.4): toda entrega do B4 em diante
+      passa por proposta técnica + "ok" do Osmar antes de codar —
+      B4 vira uma sequência de sub-entregas (B4.1, B4.2, ...), não 1
+      entrega grande só.
+      **Ataque Imprudente:** decidido só na 1ª jogada de ataque do
+      turno — tocar "🗡 Atacar" abre um mini-picker in-panel ("Ataque
+      Normal"/"😤 Ataque Imprudente", mesmo padrão `if (escolhendo)
+      return (...)` já usado pela Revelação Celestial) só quando
+      `ataquesFeitos === 0` e a classe tem a característica; escolher
+      qualquer uma já rola o ataque na hora. Fica ativo o TURNO
+      INTEIRO (reseta no Fim do Turno) — Ataque Extra não pergunta de
+      novo, só aplica a Vantagem sozinho. Exposto `usouForca: boolean`
+      em `AtaqueInfo` (já existia como variável interna em
+      `ataqueComArma`/`ataqueDesarmado`, usada pro bônus da Fúria — só
+      nunca saía pra fora; zero regra nova, só plumbing) — a Vantagem
+      só entra quando o ataque específico usa Força de verdade.
+      **Sentido de Perigo:** passivo, Vantagem na linha "Salvaguarda de
+      Destreza" (mostra "(Vantagem — Sentido de Perigo)" na própria
+      linha) sempre que a classe base tiver a característica.
+      **Nova função `resolverVantagem`** (`core/calculoPersonagem.ts`,
+      + 4 testes): combina 2 fontes de Vantagem/Desvantagem numa rolagem
+      só — regra real, se coincidirem se cancelam. 1ª vez que o app
+      precisa disso (Ataque Imprudente/Sentido de Perigo podem coincidir
+      com a Desvantagem de Armadura sem treino). IDs novos em
+      `idsCaracteristicasClasse.ts` (`sentidoDePerigo`,
+      `ataqueImprudente`). Novo campo persistido
+      `ataqueImprudenteAtivoTurno` (mesmo padrão de `surtoUsadoTurno`).
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (536)/`npm run build` limpos + Playwright: picker aparece só na
+      1ª jogada do turno, 2ª jogada (Ataque Extra) já aplica Vantagem
+      sozinha sem picker de novo, reseta no Fim do Turno (picker
+      reaparece no turno seguinte), Salvaguarda de Destreza rola com
+      Vantagem mostrando o rótulo certo no popup/modal.
+- [ ] **B4.2 — Conhecimento Primordial (nível 3):** perícia extra à
+      escolha + usar Força no lugar de outro atributo (Acrobacia,
+      Furtividade, Intimidação, Percepção, Sobrevivência) enquanto a
+      Fúria estiver ativa.
+- [ ] **B4.3 — Ataque Extra + Movimento Rápido (nível 5):** conferir se
+      já funcionam sozinhos sem código novo (Ataque Extra é genérico
+      por ID já reaproveitado de outras classes; Movimento Rápido
+      provavelmente só textual, já que Deslocamento não é um valor
+      rastreado na Ficha hoje).
+- [ ] **B4.4 — Bote Instintivo + Instintos Primitivos (nível 7):**
+      Instintos Primitivos (Vantagem em Iniciativa) é só ligar o
+      `vantagem` que `rolarD20` da Iniciativa já aceita; Bote
+      Instintivo (mover metade do Deslocamento como parte da Ação
+      Bônus de entrar em Fúria) provavelmente fica textual, mesmo
+      motivo do Movimento Rápido.
+- [ ] **B4.5 — Golpe Brutal (nível 9) + Golpe Brutal Fortalecido
+      (nível 13/17):** dano extra condicional a usar Ataque
+      Imprudente, com escolha de efeito (Debilitador/Poderoso, depois
+      Atordoante/Destruidor). Mais complexo, depende do B4.1 já
+      existir.
+- [ ] **B4.6 — Fúria Implacável (nível 11):** salvaguarda ao cair a 0
+      PV com Fúria ativa — precisa de um gatilho "chegou a 0 PV" que
+      hoje não existe.
+- [ ] **B4.7 — Fúria Persistente (nível 15):** "recupera todas as
+      Fúrias ao rolar Iniciativa" (a duração de 10 min já é o padrão
+      desde o B3, nada novo aí).
+- [ ] **B4.8 — Força Indomável (nível 18):** reroll de teste OU
+      salvaguarda de Força usando o valor cheio, se o resultado for
+      menor.
+- [ ] **B4.9 — Campeão Primitivo (nível 20):** FOR/CON +4 até 25 —
+      mexe no cálculo de atributos finais, ver precedente de "+X até
+      Y" de nível 20 antes de desenhar.
+- [ ] **B4.10 — ASI (4/8/12/16):** conferir se já funciona sozinho
+      (mecanismo genérico por ID, igual Ataque Extra).
 - [ ] **B5 — Trilha do Berserker** (nível 3/6/10/14): Frenesi, Fúria
       Irracional, Retaliação, Presença Intimidante.
 - [ ] **B6 — Trilha do Coração Selvagem:** Arauto da Fauna, Fúria dos

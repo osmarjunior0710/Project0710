@@ -119,6 +119,13 @@ interface CombatTabProps {
     bonusDano: number;
     onUsar: () => boolean;
   };
+  /** Ataque Imprudente (Bárbaro, nível 2+) — decidido só na 1ª jogada
+   * de ataque do turno (o painel de Ação abre um mini-picker "Ataque
+   * Normal"/"Ataque Imprudente" nesse momento), mas `ativo` vale pro
+   * turno inteiro (Ataque Extra não pergunta de novo). Reseta sozinho
+   * no Fim do Turno. `onAtivar` só liga — nunca desliga manualmente
+   * (a regra real não dá esse controle; só acaba no fim do turno). */
+  ataqueImprudente: { disponivel: boolean; ativo: boolean; onAtivar: () => void };
   /** Mãos Curativas (Aasimar) — `disponivel` `false` = espécie não é
    * Aasimar. */
   maosCurativas: { disponivel: boolean; gasto: boolean; dados: number; onUsar: () => boolean };
@@ -304,6 +311,11 @@ export default function CombatTab({
     ativa: furiaAtiva,
     bonusDano: furiaBonusDano,
     onUsar: onUsarFuria,
+  },
+  ataqueImprudente: {
+    disponivel: ataqueImprudenteDisponivel,
+    ativo: ataqueImprudenteAtivo,
+    onAtivar: onAtivarAtaqueImprudente,
   },
   maosCurativas: {
     disponivel: maosCurativasDisponivel,
@@ -1107,6 +1119,9 @@ export default function CombatTab({
             surtoUsadoTurno={surtoUsadoTurno}
             onUsarSurto={usarSurtoDeAcao}
             ataqueAtual={ataqueAtual}
+            temAtaqueImprudente={ataqueImprudenteDisponivel}
+            ataqueImprudenteAtivo={ataqueImprudenteAtivo}
+            onAtivarAtaqueImprudente={onAtivarAtaqueImprudente}
             detalhesAtivo={detalhesAtivo}
             maosCurativasDisponivel={maosCurativasDisponivel}
             maosCurativasGasto={maosCurativasGasto}
