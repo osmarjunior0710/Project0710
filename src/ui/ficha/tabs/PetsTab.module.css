@@ -23,6 +23,30 @@
   color: var(--text-faint);
   cursor: pointer;
   font-size: 16px;
+  border-radius: var(--shape-sm);
+  transition:
+    background var(--motion-standard) var(--ease-standard),
+    color var(--motion-standard) var(--ease-standard);
+}
+
+.removerBtn:active {
+  background: var(--danger-dim);
+}
+
+/* 1º toque arma (vira isso); 2º toque no mesmo botão remove de vez —
+   mesma dupla confirmação de "Apagar personagem", ver
+   DECISOES-FICHA.md. */
+.removerBtnConfirm {
+  background: var(--danger);
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 0 var(--space-2);
+}
+
+.removerBtnConfirm:active {
+  background: var(--danger);
+  opacity: 0.85;
 }
 
 .statsRow {

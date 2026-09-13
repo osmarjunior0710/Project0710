@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2149
+
+Pets — remover um pet agora pede confirmação: 1º toque no ✕ arma o
+botão (vira "Confirmar", vermelho), 2º toque no mesmo botão remove de
+vez. Qualquer outro toque na aba desarma sem remover — mesma dupla
+confirmação já usada pra apagar personagem.
+
 ## v202609_2133
 
 Combate — corrigido o popup "Espaços" (contador de espaços de magia)

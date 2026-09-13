@@ -126,6 +126,11 @@ de checar em todo componente de popup novo.
 vermelho/texto branco); 2º toque no MESMO botão apaga de vez. Qualquer
 outro toque na tela desarma sem apagar.
 
+**Padrão reaproveitado em qualquer outra exclusão do app** (não só
+personagem) — ex.: remover Pet na aba Pets (`PetsTab.tsx`, 2026-09).
+Antes de criar um `window.confirm`/modal novo pra qualquer exclusão
+futura, use esse mesmo botão de 2 toques.
+
 **Histórico:** a versão anterior pedia digitar a palavra "apagar" num
 modal, justamente pra evitar confirmar no automático sem querer — o
 Osmar pediu a troca de volta pra um fluxo de 2 toques mais rápido,

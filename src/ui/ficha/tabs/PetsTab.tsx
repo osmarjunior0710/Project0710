@@ -61,7 +61,10 @@ const CIRCULOS_ESPACO_MAGIA = Array.from({ length: 9 }, (_, i) => i + 1);
 
 interface PetCardProps {
   pet: Pet;
-  onRemover: () => void;
+  /** Botão ✕ "armado" (ver `PetsTab` — mesma dupla confirmação de
+   * "Apagar personagem", `DECISOES-FICHA.md`). */
+  confirmandoRemover: boolean;
+  onClickRemover: (e: React.MouseEvent) => void;
   onAlterarPv: (delta: number) => void;
   /** `false` = característica ainda não desbloqueada, esconde o toggle. */
   legiaoDosMortosDisponivel: boolean;
@@ -73,7 +76,8 @@ interface PetCardProps {
 
 function PetCard({
   pet,
-  onRemover,
+  confirmandoRemover,
+  onClickRemover,
   onAlterarPv,
   legiaoDosMortosDisponivel,
   onAlternarBonusLegiaoDosMortos,
@@ -97,8 +101,11 @@ function PetCard({
             {criatura.nome} · {criatura.tipo} · {criatura.tamanho}
           </div>
         </div>
-        <div className={styles.removerBtn} onClick={onRemover}>
-          ✕
+        <div
+          className={`${styles.removerBtn} ${confirmandoRemover ? styles.removerBtnConfirm : ''}`}
+          onClick={onClickRemover}
+        >
+          {confirmandoRemover ? 'Confirmar' : '✕'}
         </div>
       </div>
 
@@ -256,8 +263,24 @@ export default function PetsTab({
   onAlternarBonusLegiaoDosMortos,
   onAbrirAjustarPet,
 }: PetsTabProps) {
+  /** Id do pet com o ✕ "armado" — mesma dupla confirmação de "Apagar
+   * personagem" (ver `DECISOES-FICHA.md`): 1º toque arma (vira
+   * "Confirmar" vermelho), 2º toque no mesmo botão remove de vez.
+   * Qualquer outro toque na aba desarma sem remover. */
+  const [confirmandoId, setConfirmandoId] = useState<string | null>(null);
+
+  function onClickRemover(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (confirmandoId === id) {
+      onRemoverPet(id);
+      setConfirmandoId(null);
+    } else {
+      setConfirmandoId(id);
+    }
+  }
+
   return (
-    <div>
+    <div onClick={() => setConfirmandoId(null)}>
       <div className="section-title">Pets</div>
       {pets.length === 0 && (
         <div className="box" style={{ padding: 14, textAlign: 'center', color: 'var(--text-faint)', fontSize: 12 }}>
@@ -268,7 +291,8 @@ export default function PetsTab({
         <PetCard
           key={pet.id}
           pet={pet}
-          onRemover={() => onRemoverPet(pet.id)}
+          confirmandoRemover={confirmandoId === pet.id}
+          onClickRemover={(e) => onClickRemover(pet.id, e)}
           onAlterarPv={(delta) => onAlterarPvPet(pet.id, delta)}
           legiaoDosMortosDisponivel={legiaoDosMortosDisponivel}
           onAlternarBonusLegiaoDosMortos={(ligado, circulo) => onAlternarBonusLegiaoDosMortos(pet.id, ligado, circulo)}
