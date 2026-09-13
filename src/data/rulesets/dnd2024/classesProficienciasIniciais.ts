@@ -40,6 +40,32 @@ export interface ProficienciasIniciaisClasse {
 }
 
 export const proficienciasIniciaisClasse: Record<string, ProficienciasIniciaisClasse> = {
+  barbaro: {
+    classeId: 'barbaro',
+    periciasEscolha: {
+      quantidade: 2,
+      opcoes: ['Atletismo', 'Intimidação', 'Lidar com Animais', 'Natureza', 'Percepção', 'Sobrevivência'],
+    },
+    // Sem ferramentasEscolha — Bárbaro não tem proficiência de
+    // ferramenta na criação.
+    equipamentoInicial: [
+      {
+        rotulo: 'A',
+        itens: [
+          { nome: 'Machadinha', quantidade: 4, unidade: null },
+          { nome: 'Machado Grande', quantidade: 1, unidade: null },
+          { nome: 'Kit de Aventureiro', quantidade: 1, unidade: null },
+        ],
+        ouro: 15,
+      },
+      {
+        rotulo: 'B',
+        itens: [],
+        ouro: 75,
+      },
+    ],
+    fonte: 'Livro do Jogador (D&D 5e 2024), Cap. 3, pág. 51',
+  },
   guerreiro: {
     classeId: 'guerreiro',
     periciasEscolha: {

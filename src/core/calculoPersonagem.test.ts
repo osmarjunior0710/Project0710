@@ -21,6 +21,8 @@ const guerreiro = classes.find((c) => c.nome === 'Guerreiro');
 if (!guerreiro) throw new Error('Fixture "Guerreiro" não encontrada em data/rulesets/dnd2024/classes.ts');
 const bardo = classes.find((c) => c.nome === 'Bardo');
 if (!bardo) throw new Error('Fixture "Bardo" não encontrada em data/rulesets/dnd2024/classes.ts');
+const barbaro = classes.find((c) => c.nome === 'Bárbaro');
+if (!barbaro) throw new Error('Fixture "Bárbaro" não encontrada em data/rulesets/dnd2024/classes.ts');
 
 describe('bonusProficiencia', () => {
   it('nível 1 é sempre +2 (regra oficial pra qualquer classe)', () => {
@@ -99,61 +101,74 @@ describe('calcularCA (criação, resumo do wizard)', () => {
 
 describe('calcularCAEquipado (Ficha, pós-criação)', () => {
   it('sem nada equipado: 10 + mod. Destreza (padrão "sem armadura")', () => {
-    expect(calcularCAEquipado([], 14)).toBe(12);
+    expect(calcularCAEquipado([], 14, 10)).toBe(12);
   });
 
   it('armadura Leve sem teto de Destreza: base + mod. Destreza inteiro, mesmo alto', () => {
     const itens = [itemEquipado('Couro Batido', 'armadura')];
-    expect(calcularCAEquipado(itens, 18)).toBe(12 + 4); // DES 18 -> mod +4, Couro Batido não tem teto
+    expect(calcularCAEquipado(itens, 18, 10)).toBe(12 + 4); // DES 18 -> mod +4, Couro Batido não tem teto
   });
 
   it('armadura Média com teto (máx. 2): mod. Destreza capado mesmo com Destreza alta', () => {
     const itens = [itemEquipado('Gibão de Peles', 'armadura')];
-    expect(calcularCAEquipado(itens, 18)).toBe(12 + 2); // capado em +2, não +4
+    expect(calcularCAEquipado(itens, 18, 10)).toBe(12 + 2); // capado em +2, não +4
   });
 
   it('Escudo soma +2 além da armadura', () => {
     const itens = [itemEquipado('Couro Batido', 'armadura'), itemEquipado('Escudo', 'escudo')];
-    expect(calcularCAEquipado(itens, 14)).toBe(12 + 2 + 2); // DES 14 -> mod +2
+    expect(calcularCAEquipado(itens, 14, 10)).toBe(12 + 2 + 2); // DES 14 -> mod +2
   });
 
   it('Estilo de Luta Defensivo soma +1 SÓ quando alguma Armadura está equipada', () => {
     const itens = [itemEquipado('Couro Batido', 'armadura')];
-    expect(calcularCAEquipado(itens, 14, 'Defensivo')).toBe(12 + 2 + 1);
+    expect(calcularCAEquipado(itens, 14, 10, 'Defensivo')).toBe(12 + 2 + 1);
   });
 
   it('Defensivo sem nenhuma Armadura equipada não soma nada (regra real: precisa estar "usando armadura")', () => {
-    expect(calcularCAEquipado([], 14, 'Defensivo')).toBe(12);
+    expect(calcularCAEquipado([], 14, 10, 'Defensivo')).toBe(12);
   });
 
   it('Mestre em Armaduras Médias eleva o teto de Destreza de 2 pra 3, com Armadura Média e Destreza 16+', () => {
     const itens = [itemEquipado('Gibão de Peles', 'armadura')];
-    expect(calcularCAEquipado(itens, 16, null, ['mestre-em-armaduras-medias'])).toBe(12 + 3); // mod +3, dentro do novo teto
+    expect(calcularCAEquipado(itens, 16, 10, null, ['mestre-em-armaduras-medias'])).toBe(12 + 3); // mod +3, dentro do novo teto
   });
 
   it('Mestre em Armaduras Médias não faz efeito se a Destreza for menor que 16', () => {
     const itens = [itemEquipado('Gibão de Peles', 'armadura')];
-    expect(calcularCAEquipado(itens, 14, null, ['mestre-em-armaduras-medias'])).toBe(12 + 2); // continua no teto normal
+    expect(calcularCAEquipado(itens, 14, 10, null, ['mestre-em-armaduras-medias'])).toBe(12 + 2); // continua no teto normal
   });
 
   it('sem `classe` passada (ex.: resumo do wizard): Escudo sempre soma, sem checar proficiência', () => {
     const itens = [itemEquipado('Couro Batido', 'armadura'), itemEquipado('Escudo', 'escudo')];
-    expect(calcularCAEquipado(itens, 14)).toBe(12 + 2 + 2);
+    expect(calcularCAEquipado(itens, 14, 10)).toBe(12 + 2 + 2);
   });
 
   it('Bardo (sem treinamento com Escudos): CA não soma o bônus do Escudo', () => {
     const itens = [itemEquipado('Couro Batido', 'armadura'), itemEquipado('Escudo', 'escudo')];
-    expect(calcularCAEquipado(itens, 14, null, [], bardo)).toBe(12 + 2); // sem os +2 do escudo
+    expect(calcularCAEquipado(itens, 14, 10, null, [], bardo)).toBe(12 + 2); // sem os +2 do escudo
   });
 
   it('Bardo + Especialista em Armaduras Leves (concede Escudos também): volta a somar', () => {
     const itens = [itemEquipado('Couro Batido', 'armadura'), itemEquipado('Escudo', 'escudo')];
-    expect(calcularCAEquipado(itens, 14, null, ['especialista-em-armaduras-leves'], bardo)).toBe(12 + 2 + 2);
+    expect(calcularCAEquipado(itens, 14, 10, null, ['especialista-em-armaduras-leves'], bardo)).toBe(12 + 2 + 2);
   });
 
   it('Guerreiro (com treinamento com Escudos): CA soma o bônus normalmente', () => {
     const itens = [itemEquipado('Couro Batido', 'armadura'), itemEquipado('Escudo', 'escudo')];
-    expect(calcularCAEquipado(itens, 14, null, [], guerreiro)).toBe(12 + 2 + 2);
+    expect(calcularCAEquipado(itens, 14, 10, null, [], guerreiro)).toBe(12 + 2 + 2);
+  });
+
+  it('Bárbaro (Defesa sem Armadura) sem armadura: 10 + mod. Destreza + mod. Constituição', () => {
+    expect(calcularCAEquipado([], 14, 16, null, [], barbaro)).toBe(10 + 2 + 3); // DES 14 -> +2, CON 16 -> +3
+  });
+
+  it('Bárbaro (Defesa sem Armadura) COM armadura equipada: mod. Constituição não soma (só sem armadura)', () => {
+    const itens = [itemEquipado('Couro Batido', 'armadura')];
+    expect(calcularCAEquipado(itens, 14, 16, null, [], barbaro)).toBe(12 + 2); // igual a qualquer outra classe
+  });
+
+  it('Guerreiro (sem Defesa sem Armadura) sem armadura: mod. Constituição NÃO soma', () => {
+    expect(calcularCAEquipado([], 14, 16, null, [], guerreiro)).toBe(12); // só 10 + mod. Destreza
   });
 });
 

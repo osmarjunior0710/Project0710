@@ -18,6 +18,10 @@ export const ID_CARACTERISTICA_CLASSE = {
   ataqueExtra: 'Ataque Extra',
   doisAtaquesExtras: 'Dois Ataques Extras',
   tresAtaquesExtras: 'Três Ataques Extras',
+  /** Bárbaro nível 1 (também existe uma versão do Monge — não
+   * implementado ainda) — CA sem armadura vira 10 + DES + CON em vez
+   * do padrão 10 + DES. Ver `calcularCAEquipado`. */
+  defesaSemArmadura: 'Defesa sem Armadura',
 } as const;
 
 export type IdCaracteristicaClasse = keyof typeof ID_CARACTERISTICA_CLASSE;

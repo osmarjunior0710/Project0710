@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0113
+
+Bárbaro chegou de verdade na criação de personagem — já dá pra criar
+um do zero (perícias, equipamento inicial, Maestria em Arma restrita a
+armas Corpo a Corpo). A Fúria em si (a característica principal da
+classe) ainda não funciona, isso vem na próxima entrega. De bastidor,
+corrigido um cálculo de CA que nenhuma classe expunha ainda: sem
+armadura, Bárbaro soma o modificador de Constituição na Classe de
+Armadura (não só Destreza) — outras classes continuam iguais.
+
 ## v202609_0042
 
 Corrigido: na tela de "Selecione uma classe" (criação de personagem),

@@ -10,6 +10,7 @@ import { pericias } from '../data/rulesets/dnd2024/pericias';
 import { gruposFerramenta } from '../data/rulesets/dnd2024/ferramentas';
 import { talentos, type EfeitoMecanicoTalento } from '../data/rulesets/dnd2024/talentos';
 import { estilosDeLuta } from '../data/rulesets/dnd2024/estilosDeLuta';
+import { ID_CARACTERISTICA_CLASSE } from '../data/rulesets/dnd2024/idsCaracteristicasClasse';
 import { proficienciasIniciaisClasse } from '../data/rulesets/dnd2024/classesProficienciasIniciais';
 import { modificador, valorFinalAtributo, type WizardSelection } from './personagem';
 import { resumoEquipado } from './equipamento';
@@ -222,9 +223,19 @@ function proficienteComEscudo(
   return classeProficienteComArmadura(classe, 'Escudos', talentosAtuais, classesExtrasNomes);
 }
 
+/** `true` = a classe tem "Defesa sem Armadura" (Bárbaro nível 1 —
+ * sem armadura, CA base soma mod. Constituição além de Destreza).
+ * Checado pela progressão em vez do nível atual porque, quando
+ * presente, essa característica sempre é de nível 1 — nunca falta
+ * checar "desbloqueou ainda?" pra quem já existe como personagem. */
+function temDefesaSemArmadura(classe: Classe | null | undefined): boolean {
+  return classe?.progressao.some((p) => p.caracteristicas.includes(ID_CARACTERISTICA_CLASSE.defesaSemArmadura)) ?? false;
+}
+
 export function calcularCAEquipado(
   itensMochila: ItemMochila[],
   desValor: number,
+  conValor: number,
   estiloDeLutaEscolhido?: string | null,
   talentosAtuais?: string[],
   classe?: Classe | null,
@@ -234,7 +245,10 @@ export function calcularCAEquipado(
   const { armadura, escudo } = resumoEquipado(itensMochila);
   const armaduraCatalogo = armadura ? armaduras.find((a) => a.nome === armadura.nome) : undefined;
   const { defensivoBonus, tetoDesOverride } = bonusCaFase4(armaduraCatalogo, desValor, estiloDeLutaEscolhido, talentosAtuais);
-  const base = armaduraCatalogo ? caPelaArmadura(armaduraCatalogo.classeArmadura, desMod, tetoDesOverride) : 10 + desMod;
+  const bonusConSemArmadura = !armaduraCatalogo && temDefesaSemArmadura(classe) ? modificador(conValor) : 0;
+  const base = armaduraCatalogo
+    ? caPelaArmadura(armaduraCatalogo.classeArmadura, desMod, tetoDesOverride)
+    : 10 + desMod + bonusConSemArmadura;
   const escudoCatalogo = escudo ? armaduras.find((a) => a.nome === escudo.nome) : undefined;
   const bonus =
     escudoCatalogo && proficienteComEscudo(classe, talentosAtuais, classesExtrasNomes) ? bonusEscudo(escudoCatalogo.classeArmadura) : 0;
@@ -245,6 +259,7 @@ export function calcularCAEquipado(
 export function explicarCAEquipado(
   itensMochila: ItemMochila[],
   desValor: number,
+  conValor: number,
   estiloDeLutaEscolhido?: string | null,
   talentosAtuais?: string[],
   classe?: Classe | null,
@@ -263,7 +278,11 @@ export function explicarCAEquipado(
   if (!armaduraCatalogo) {
     linhas.push({ label: 'Sem armadura (base)', valor: '10' });
     linhas.push({ label: 'mod. Destreza', valor: fmtMod(desMod) });
-    base = 10 + desMod;
+    const bonusConSemArmadura = temDefesaSemArmadura(classe) ? modificador(conValor) : 0;
+    if (bonusConSemArmadura !== 0 || temDefesaSemArmadura(classe)) {
+      linhas.push({ label: 'mod. Constituição (Defesa sem Armadura)', valor: fmtMod(bonusConSemArmadura) });
+    }
+    base = 10 + desMod + bonusConSemArmadura;
   } else {
     const ca = caPelaArmadura(armaduraCatalogo.classeArmadura, desMod, tetoDesOverride);
     const teto = armaduraCatalogo.classeArmadura.match(/máx\.?\s*(\d+)/i);
