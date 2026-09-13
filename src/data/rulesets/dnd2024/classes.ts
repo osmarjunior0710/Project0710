@@ -456,4 +456,65 @@ export const classes: Classe[] = [
     disponivel: true,
     fonte: FONTE,
   },
+  {
+    id: 'barbaro',
+    nome: 'Bárbaro',
+    atributoPrimario: 'Força',
+    dadoDeVida: 'd12',
+    salvaguardas: ['FOR', 'CON'],
+    nivelSubclasse: 3,
+    recursos: [
+      {
+        nome: 'Fúrias',
+        recuperaEm: '1 uso no Descanso Curto, todos no Descanso Longo',
+        valorPorNivel: {
+          1: 2, 2: 2, 3: 3, 4: 3, 5: 3, 6: 4, 7: 4, 8: 4, 9: 4, 10: 4,
+          11: 4, 12: 5, 13: 5, 14: 5, 15: 5, 16: 5, 17: 6, 18: 6, 19: 6, 20: 6,
+        },
+      },
+      {
+        nome: 'Dano da Fúria (bônus)',
+        recuperaEm: null,
+        valorPorNivel: {
+          1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 2, 9: 3, 10: 3,
+          11: 3, 12: 3, 13: 3, 14: 3, 15: 3, 16: 4, 17: 4, 18: 4, 19: 4, 20: 4,
+        },
+      },
+      {
+        nome: 'Maestria em Arma (nº de tipos de arma)',
+        recuperaEm: null,
+        valorPorNivel: {
+          1: 2, 2: 2, 3: 2, 4: 3, 5: 3, 6: 3, 7: 3, 8: 3, 9: 3, 10: 4,
+          11: 4, 12: 4, 13: 4, 14: 4, 15: 4, 16: 4, 17: 4, 18: 4, 19: 4, 20: 4,
+        },
+      },
+    ],
+    progressao: [
+      { nivel: 1, bonusProficiencia: '+2', caracteristicas: ['Defesa sem Armadura', 'Fúria', 'Maestria em Arma'] },
+      { nivel: 2, bonusProficiencia: '+2', caracteristicas: ['Ataque Imprudente', 'Sentido de Perigo'] },
+      { nivel: 3, bonusProficiencia: '+2', caracteristicas: ['Conhecimento Primordial', 'Subclasse de Bárbaro'] },
+      { nivel: 4, bonusProficiencia: '+2', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 5, bonusProficiencia: '+3', caracteristicas: ['Ataque Extra', 'Movimento Rápido'] },
+      { nivel: 6, bonusProficiencia: '+3', caracteristicas: ['Característica de Subclasse'] },
+      { nivel: 7, bonusProficiencia: '+3', caracteristicas: ['Bote Instintivo', 'Instintos Primitivos'] },
+      { nivel: 8, bonusProficiencia: '+3', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 9, bonusProficiencia: '+4', caracteristicas: ['Golpe Brutal'] },
+      { nivel: 10, bonusProficiencia: '+4', caracteristicas: ['Característica de Subclasse'] },
+      { nivel: 11, bonusProficiencia: '+4', caracteristicas: ['Fúria Implacável'] },
+      { nivel: 12, bonusProficiencia: '+4', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 13, bonusProficiencia: '+5', caracteristicas: ['Golpe Brutal Fortalecido'] },
+      { nivel: 14, bonusProficiencia: '+5', caracteristicas: ['Característica de Subclasse'] },
+      { nivel: 15, bonusProficiencia: '+5', caracteristicas: ['Fúria Persistente'] },
+      { nivel: 16, bonusProficiencia: '+5', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 17, bonusProficiencia: '+6', caracteristicas: ['Golpe Brutal Fortalecido'] },
+      { nivel: 18, bonusProficiencia: '+6', caracteristicas: ['Força Indomável'] },
+      { nivel: 19, bonusProficiencia: '+6', caracteristicas: ['Dádiva Épica'] },
+      { nivel: 20, bonusProficiencia: '+6', caracteristicas: ['Campeão Primitivo'] },
+    ],
+    // B1 feito — dado no banco (progressão, características, as 4
+    // Trilhas em subclasses.ts). Ainda não habilitado no wizard nem
+    // com a Fúria funcionando (B2/B3, ver EmDevB.md).
+    disponivel: false,
+    fonte: FONTE,
+  },
 ];
