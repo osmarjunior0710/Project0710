@@ -73,6 +73,15 @@
   background: var(--panel2);
 }
 
+.menuRowDesabilitado {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.menuRowDesabilitado:active {
+  background: none;
+}
+
 .menuRowText {
   min-width: 0;
 }

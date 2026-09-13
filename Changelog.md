@@ -15,6 +15,15 @@ corrigido um cálculo de CA que nenhuma classe expunha ainda: sem
 armadura, Bárbaro soma o modificador de Constituição na Classe de
 Armadura (não só Destreza) — outras classes continuam iguais.
 
+## v202609_0102
+
+Menu do avatar (👤) ganhou o switch "🎲 Dado 3D" — preferência pra
+rolagens oficiais do jogo (Combate/Magias/Atributos) usarem o dado 3D
+com física de verdade em vez do sorteio de sempre. Por enquanto o
+switch só existe e é salvo (fica desligado se seu aparelho não suporta
+gráficos 3D, ou enquanto o Modo de Teste está ativo) — nenhuma rolagem
+de verdade usa o dado 3D ainda, isso vem numa próxima entrega.
+
 ## v202609_0042
 
 Corrigido: na tela de "Selecione uma classe" (criação de personagem),
