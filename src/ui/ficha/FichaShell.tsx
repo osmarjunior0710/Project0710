@@ -396,6 +396,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [pesoAtivo, setPesoAtivo] = useState(true);
 
   const desValor = valorFinalAtributo(selecao, 'DES') ?? 10;
+  const conValorFinal = valorFinalAtributo(selecao, 'CON') ?? 10;
   // Talentos que entram no cálculo (Fase 4): os escolhidos em Level
   // Up (`talentosGeraisAtuais`) MAIS o Talento de Origem, ganho fixo
   // na criação (ex: Alerta) — nunca passa pelo picker de Level Up,
@@ -407,7 +408,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ...(origemPersonagem ? [origemPersonagem.talentoOrigemId] : []),
     ...(selecao.talentoEspecieEscolhido ? [selecao.talentoEspecieEscolhido] : []),
   ];
-  const ca = calcularCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos, classeOriginal, classesMulticlassadasNomes);
+  const ca = calcularCAEquipado(itensMochila, desValor, conValorFinal, personagem.estiloDeLuta, talentosEfetivos, classeOriginal, classesMulticlassadasNomes);
   // Penalidade de proficiência de Armadura (SDD "Penalidades por Falta
   // de Proficiência") — Desvantagem em D20 de Força/Destreza sempre
   // que a armadura equipada (Leve/Média/Pesada) não tiver treinamento;
@@ -436,7 +437,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva);
   const explicacaoCapacidadeMaxima = explicarCapacidadeMaxima(selecao, formaGrandeAtiva);
   const explicacaoPv = explicarPvMaximo(selecao, personagem.pvMax);
-  const explicacaoCa = explicarCAEquipado(itensMochila, desValor, personagem.estiloDeLuta, talentosEfetivos, classeOriginal, classesMulticlassadasNomes);
+  const explicacaoCa = explicarCAEquipado(itensMochila, desValor, conValorFinal, personagem.estiloDeLuta, talentosEfetivos, classeOriginal, classesMulticlassadasNomes);
   const explicacaoIniciativa = explicarIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);
   const explicacaoPercepcaoPassiva = explicarPercepcaoPassiva(selecao, nivelTotalAtual);
   const estiloDeLuta = estilosDeLuta.find((e) => e.nome === personagem.estiloDeLuta) ?? null;
@@ -451,7 +452,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const ataqueDeSoproDisponivel = selecao.especie === 'Draconato';
   const usosAtaqueDeSoproMaximo = ataqueDeSoproDisponivel && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
   const usosAtaqueDeSoproRestantes = Math.max(0, usosAtaqueDeSoproMaximo - ataqueDeSoproGasto);
-  const conValorFinal = valorFinalAtributo(selecao, 'CON') ?? 10;
   const cdAtaqueDeSopro = 8 + modificador(conValorFinal) + bonusProficienciaAtual;
   const numDadosAtaqueDeSopro = dadosAtaqueDeSopro(nivelTotalAtual);
   const tipoDanoAtaqueDeSopro = especieAtual ? tipoDanoSubescolha(especieAtual, selecao) : null;

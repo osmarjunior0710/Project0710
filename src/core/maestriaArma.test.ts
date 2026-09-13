@@ -29,4 +29,11 @@ describe('armasParaMaestria', () => {
   it('borda: classe com proficiência restrita (Bardo, só Armas Simples) ainda não tem filtro fino — devolve lista vazia, não o catálogo errado', () => {
     expect(armasParaMaestria(classe('Bardo'))).toEqual([]);
   });
+
+  it('Bárbaro (mesma proficiência ampla do Guerreiro) só pode escolher armas Corpo a Corpo — nunca à Distância', () => {
+    const elegiveis = armasParaMaestria(classe('Bárbaro'));
+    expect(elegiveis.length).toBeGreaterThan(0);
+    expect(elegiveis.length).toBeLessThan(armas.length);
+    expect(elegiveis.every((a) => a.categoria.includes('Corpo a Corpo'))).toBe(true);
+  });
 });

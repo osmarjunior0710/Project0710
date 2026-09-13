@@ -13,6 +13,16 @@ rolar dado com física de verdade, sem estar ligada a nenhum teste
 específico da ficha. Rolar d20 volta a funcionar igual aos outros
 dados (sem pedir nada antes).
 
+## v202609_0113
+
+Bárbaro chegou de verdade na criação de personagem — já dá pra criar
+um do zero (perícias, equipamento inicial, Maestria em Arma restrita a
+armas Corpo a Corpo). A Fúria em si (a característica principal da
+classe) ainda não funciona, isso vem na próxima entrega. De bastidor,
+corrigido um cálculo de CA que nenhuma classe expunha ainda: sem
+armadura, Bárbaro soma o modificador de Constituição na Classe de
+Armadura (não só Destreza) — outras classes continuam iguais.
+
 ## v202609_0102
 
 Menu do avatar (👤) ganhou o switch "🎲 Dado 3D" — preferência pra

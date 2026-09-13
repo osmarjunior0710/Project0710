@@ -74,8 +74,8 @@ export default function ClasseStep({ selection, update }: StepProps) {
         </div>
       ))}
       <div className="label" style={{ marginTop: 6 }}>
-        Guerreiro, Bardo, Bruxo e Mago estão prontos por enquanto — as outras classes ainda não
-        foram implementadas de ponta a ponta. Ver <code>PENDENCIAS.md</code>.
+        Bárbaro, Guerreiro, Bardo, Bruxo e Mago estão prontos por enquanto — as outras classes
+        ainda não foram implementadas de ponta a ponta. Ver <code>PENDENCIAS.md</code>.
       </div>
     </>
   );

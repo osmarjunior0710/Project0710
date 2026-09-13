@@ -511,10 +511,10 @@ export const classes: Classe[] = [
       { nivel: 19, bonusProficiencia: '+6', caracteristicas: ['Dádiva Épica'] },
       { nivel: 20, bonusProficiencia: '+6', caracteristicas: ['Campeão Primitivo'] },
     ],
-    // B1 feito — dado no banco (progressão, características, as 4
-    // Trilhas em subclasses.ts). Ainda não habilitado no wizard nem
-    // com a Fúria funcionando (B2/B3, ver EmDevB.md).
-    disponivel: false,
+    // B2 feito — habilitado no wizard de ponta a ponta (perícias,
+    // equipamento inicial). Fúria ainda não funciona de verdade
+    // (B3, ver EmDevB.md).
+    disponivel: true,
     fonte: FONTE,
   },
 ];

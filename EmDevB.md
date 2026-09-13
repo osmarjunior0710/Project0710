@@ -53,12 +53,40 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       `tsc -b`/`npm test` (512)/`npm run build` limpos + tela de
       criação de personagem: "Bárbaro" aparece 1x só (em breve),
       "Mago" aparece 1x só (não mais duplicado), zero erro de console.
-- [ ] **B2 — Habilitar na criação (wizard):** proficiências (armas/
-      armadura já são regra fixa "Simples e Marciais" / "Leve, Média,
-      Escudos"), 2 perícias de {Atletismo, Intimidação, Lidar com
-      Animais, Natureza, Percepção, Sobrevivência}, equipamento
-      inicial (A: 4 Machadinhas + Machado Grande + Kit de Aventureiro
-      + 15 PO; B: 75 PO). Sem Fúria funcionando ainda.
+- [x] **B2 — Habilitado na criação (wizard):** `classesProficienciasIniciais.ts`
+      (2 perícias de {Atletismo, Intimidação, Lidar com Animais,
+      Natureza, Percepção, Sobrevivência}, equipamento A: 4
+      Machadinhas + Machado Grande + Kit de Aventureiro + 15 PO / B:
+      75 PO) + `classes.ts` virou `disponivel: true`. Proficiência de
+      arma/armadura já vinha pronta em `proficienciasArmaArmaduraClasse.ts`
+      (toda a planilha "Proficiências de Classe" já tinha sido
+      importada antes, pras 12 classes de uma vez).
+      **2 achados corrigidos no caminho** (bugs reais, não deixados
+      pra depois):
+      1. `armasParaMaestria` (`core/maestriaArma.ts`) devolvia o
+         catálogo de armas INTEIRO (incluindo à distância) pra
+         qualquer classe com proficiência "Armas Simples e Marciais" —
+         certo pro Guerreiro, errado pro Bárbaro (a característica
+         real restringe a Corpo a Corpo). Filtrado por nome de classe
+         (só essa exceção existe hoje) + teste novo.
+      2. `calcularCAEquipado`/`explicarCAEquipado` (`core/calculoPersonagem.ts`)
+         não tinham NENHUM tratamento pra "Defesa sem Armadura" (CA
+         sem armadura = 10 + DES + CON, não só 10 + DES) — gap nunca
+         exposto antes porque nenhuma classe implementada tinha essa
+         característica. Novo ID estável
+         `ID_CARACTERISTICA_CLASSE.defesaSemArmadura` +
+         `temDefesaSemArmadura(classe)` (checa a progressão, não o
+         nível — a característica é sempre nível 1) + 2 novos params
+         `conValor` nas 2 funções (só 1 call site em `FichaShell.tsx`,
+         atualizado) + 3 testes novos (com/sem armadura, e confirma
+         que Guerreiro continua sem somar CON).
+      Verificado com `tsc -b`/`npm test` (516)/`npm run build` limpos
+      + criado um Bárbaro de verdade pelo wizard (2 Maestrias de
+      arma Corpo a Corpo, 2 perícias, equipamento A) e também via
+      "🎲 Personagem de Teste" (nível 5, Golias) — CA bateu com
+      10+DES+CON sem armadura, popup "ⓘ" mostra a linha "mod.
+      Constituição (Defesa sem Armadura)" certinha, zero erro de
+      console.
 - [ ] **B3 — Motor de Fúria:** ativar (Ação Bônus, gasta 1 uso, banco
       cresce por nível), card fixo em Combat, Resistência a
       Contundente/Cortante/Perfurante, Dano da Fúria somado
