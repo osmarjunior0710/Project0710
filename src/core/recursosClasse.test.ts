@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { valorRecursoClasse, quantidadeRecuperarFolego } from './recursosClasse';
+import { valorRecursoClasse, quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria } from './recursosClasse';
 import { classes } from '../data/rulesets/dnd2024/classes';
 
 function classe(nome: string) {
@@ -31,5 +31,28 @@ describe('quantidadeRecuperarFolego', () => {
 
   it('borda: classe sem esse recurso (Bardo não tem Recuperar Fôlego) devolve 0', () => {
     expect(quantidadeRecuperarFolego(classe('Bardo'), 1)).toBe(0);
+  });
+});
+
+describe('quantidadeFuria', () => {
+  it('Bárbaro nível 1 tem 2 usos, nível 20 tem 6 (progressão real da planilha)', () => {
+    expect(quantidadeFuria(classe('Bárbaro'), 1)).toBe(2);
+    expect(quantidadeFuria(classe('Bárbaro'), 20)).toBe(6);
+  });
+
+  it('borda: classe sem esse recurso (Guerreiro não tem Fúria) devolve 0', () => {
+    expect(quantidadeFuria(classe('Guerreiro'), 1)).toBe(0);
+  });
+});
+
+describe('bonusDanoFuria', () => {
+  it('Bárbaro nível 1 soma +2, nível 9 sobe pra +3, nível 17 sobe pra +4', () => {
+    expect(bonusDanoFuria(classe('Bárbaro'), 1)).toBe(2);
+    expect(bonusDanoFuria(classe('Bárbaro'), 9)).toBe(3);
+    expect(bonusDanoFuria(classe('Bárbaro'), 17)).toBe(4);
+  });
+
+  it('borda: classe sem Fúria devolve 0', () => {
+    expect(bonusDanoFuria(classe('Guerreiro'), 1)).toBe(0);
   });
 });

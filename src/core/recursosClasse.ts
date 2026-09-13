@@ -16,3 +16,15 @@ export function valorRecursoClasse(classe: Classe, prefixoNome: string, nivel: n
 export function quantidadeRecuperarFolego(classe: Classe, nivel: number): number {
   return valorRecursoClasse(classe, 'Recuperar Fôlego', nivel);
 }
+
+/** Nº de usos de Fúria (Bárbaro) no nível atual — banco de ativações,
+ * não de turnos (ver `sdd/sdd-barbaro-furia.md`). */
+export function quantidadeFuria(classe: Classe, nivel: number): number {
+  return valorRecursoClasse(classe, 'Fúrias', nivel);
+}
+
+/** Bônus de dano da Fúria (Bárbaro) no nível atual — soma no dano de
+ * qualquer ataque baseado em Força enquanto a Fúria estiver ativa. */
+export function bonusDanoFuria(classe: Classe, nivel: number): number {
+  return valorRecursoClasse(classe, 'Dano da Fúria', nivel);
+}

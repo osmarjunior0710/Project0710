@@ -70,7 +70,7 @@ import { ataqueAtual, ataqueBonusMaoSecundaria } from '../../core/ataque';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria } from '../../core/maestriaArma';
-import { quantidadeRecuperarFolego } from '../../core/recursosClasse';
+import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria } from '../../core/recursosClasse';
 import { type MagiaGratisDeInvocacao } from '../../core/invocacoesMagiaGratis';
 import { aplicarAlteracaoPv, ganharPvTemporario } from '../../core/pvTemporario';
 import { deveAplicarVigorImplacavel } from '../../core/vigorImplacavel';
@@ -279,6 +279,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   );
   const [formaGrandeGasto, setFormaGrandeGasto] = useState(personagemSalvo.formaGrandeGasto ?? false);
   const [formaGrandeAtiva, setFormaGrandeAtiva] = useState(personagemSalvo.formaGrandeAtiva ?? false);
+  const [furiaGasto, setFuriaGasto] = useState(personagemSalvo.furiaGasto ?? 0);
+  const [furiaAtiva, setFuriaAtiva] = useState(personagemSalvo.furiaAtiva ?? false);
   const [maosCurativasGasto, setMaosCurativasGasto] = useState(personagemSalvo.maosCurativasGasto ?? false);
   const [revelacaoCelestialGasto, setRevelacaoCelestialGasto] = useState(personagemSalvo.revelacaoCelestialGasto ?? false);
   const [revelacaoCelestialFormaAtiva, setRevelacaoCelestialFormaAtiva] = useState(
@@ -443,6 +445,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const estiloDeLuta = estilosDeLuta.find((e) => e.nome === personagem.estiloDeLuta) ?? null;
   const usosFolegoMaximo = classe ? quantidadeRecuperarFolego(classe, personagem.nivel) : 0;
   const usosFolegoRestantes = Math.max(0, usosFolegoMaximo - folegoGasto);
+  // Fúria (Bárbaro) — ver sdd/sdd-barbaro-furia.md. `armaduraPesadaEquipada`
+  // também trava a ATIVAÇÃO (regra real) e força o encerramento
+  // automático ao equipar (ver `equiparItem`).
+  const furiaMaximo = classe ? quantidadeFuria(classe, nivelTotalAtual) : 0;
+  const furiaDisponivel = furiaMaximo > 0;
+  const furiaRestantes = Math.max(0, furiaMaximo - furiaGasto);
+  const furiaBonusDano = classe ? bonusDanoFuria(classe, nivelTotalAtual) : 0;
+  const armaduraPesadaEquipada = armaduraEquipadaCatalogo?.categoria.startsWith('Armadura Pesada') ?? false;
   const temVigorImplacavel = selecao.especie === 'Orc';
   const usosConhecimentoDePedrasMaximo = selecao.especie === 'Anão' && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
   const usosConhecimentoDePedrasRestantes = Math.max(0, usosConhecimentoDePedrasMaximo - conhecimentoDePedrasGasto);
@@ -617,6 +627,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         equipadoAtual.maoSecundaria !== null,
         armaEquipada?.armaDePacto ? carMod : undefined,
         talentosEfetivos,
+        furiaAtiva ? furiaBonusDano : 0,
       )
     : null;
   const numAtaques = Math.max(
@@ -633,6 +644,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         desMod,
         personagem.estiloDeLuta,
         talentosEfetivos,
+        furiaAtiva ? furiaBonusDano : 0,
       )
     : null;
 
@@ -676,6 +688,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ancestralidadeGiganteGasto,
     formaGrandeGasto,
     formaGrandeAtiva,
+    furiaGasto,
+    furiaAtiva,
     maosCurativasGasto,
     revelacaoCelestialGasto,
     revelacaoCelestialFormaAtiva,
@@ -755,6 +769,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       ancestralidadeGiganteGasto,
       formaGrandeGasto,
       formaGrandeAtiva,
+      furiaGasto,
+      furiaAtiva,
       maosCurativasGasto,
       revelacaoCelestialGasto,
       revelacaoCelestialFormaAtiva,
@@ -860,6 +876,24 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (formaGrandeGasto) return false;
     setFormaGrandeGasto(true);
     setFormaGrandeAtiva(true);
+    return true;
+  }
+
+  /** Toggle — ligar (1ª vez, gasta 1 uso do banco) ou desligar (encerrar
+   * manualmente) a Fúria (Bárbaro). Ver sdd/sdd-barbaro-furia.md —
+   * duração simplificada: não expira sozinha por turno, só ao
+   * "Encerrar Fúria" ou ao vestir Armadura Pesada (esse 2º caso é
+   * forçado em `equiparItem`, não aqui). Ativar trava com Armadura
+   * Pesada já equipada (regra real: não entra em Fúria vestindo
+   * Armadura Pesada). */
+  function usarFuria(): boolean {
+    if (furiaAtiva) {
+      setFuriaAtiva(false);
+      return true;
+    }
+    if (furiaRestantes <= 0 || armaduraPesadaEquipada) return false;
+    setFuriaGasto((v) => v + 1);
+    setFuriaAtiva(true);
     return true;
   }
 
@@ -980,6 +1014,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setAncestralidadeGiganteGasto(0);
     setFormaGrandeGasto(false);
     setFormaGrandeAtiva(false);
+    setFuriaGasto(0);
+    setFuriaAtiva(false);
     setMaosCurativasGasto(false);
     setRevelacaoCelestialGasto(false);
     setRevelacaoCelestialFormaAtiva(null);
@@ -998,7 +1034,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setArcanaMisticaGastos([]);
     setMagiasGratisGastas([]);
     fimDoTurno();
-    setRestStatus(`Descanso Longo: PV restaurado para ${personagem.pvMax}/${personagem.pvMax}, Espaços de Magia, Recuperar Fôlego, Indomável, Surto de Ação, Inspiração de Bardo, Pontos de Sorte e traços de espécie recuperados.`);
+    setRestStatus(`Descanso Longo: PV restaurado para ${personagem.pvMax}/${personagem.pvMax}, Espaços de Magia, Recuperar Fôlego, Indomável, Surto de Ação, Inspiração de Bardo, Pontos de Sorte, Fúria e traços de espécie recuperados.`);
   }
 
   function descansoCurto() {
@@ -1035,8 +1071,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setMemorizarMagiaGasta(false);
     setResistenciaInferaGasto(false);
     setPicoDeAdrenalinaGasto(0);
+    setFuriaGasto((v) => Math.max(0, v - 1));
     setRestStatus(
-      `Descanso Curto: ${algumCirculoRecuperou ? 'Espaços de Magia recuperados, ' : ''}${fonteDeInspiracao ? 'Inspiração de Bardo recuperada, ' : ''}1 uso de Recuperar Fôlego devolvido, Pico de Adrenalina recuperado. PV não recupera automaticamente por descanso curto.`,
+      `Descanso Curto: ${algumCirculoRecuperou ? 'Espaços de Magia recuperados, ' : ''}${fonteDeInspiracao ? 'Inspiração de Bardo recuperada, ' : ''}1 uso de Recuperar Fôlego devolvido, Pico de Adrenalina recuperado, 1 uso de Fúria devolvido. PV não recupera automaticamente por descanso curto.`,
     );
   }
 
@@ -1154,6 +1191,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }
 
   function equiparItem(id: string, slot: SlotEquipamento) {
+    // Fúria (Bárbaro) encerra sozinha ao vestir Armadura Pesada — regra
+    // real, ver sdd/sdd-barbaro-furia.md. Só checa quando o slot é
+    // 'armadura' pra não gastar um find() à toa nos outros slots.
+    if (slot === 'armadura' && furiaAtiva) {
+      const item = itensMochila.find((it) => it.id === id);
+      const catalogo = item ? armaduras.find((a) => a.nome === item.nome) : undefined;
+      if (catalogo?.categoria.startsWith('Armadura Pesada')) {
+        setFuriaAtiva(false);
+      }
+    }
     setItensMochila((prev) => equiparNoSlot(prev, id, slot));
   }
 
@@ -1893,6 +1940,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               gasto: formaGrandeGasto,
               ativa: formaGrandeAtiva,
               onUsar: usarFormaGrande,
+            }}
+            furia={{
+              disponivel: furiaDisponivel,
+              maximo: furiaMaximo,
+              restantes: furiaRestantes,
+              ativa: furiaAtiva,
+              bonusDano: furiaBonusDano,
+              onUsar: usarFuria,
             }}
             maosCurativas={{
               disponivel: maosCurativasDisponivel,

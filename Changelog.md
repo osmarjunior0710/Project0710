@@ -5,13 +5,23 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
-## v202609_1334
+## v202609_1339
 
 Dado 3D — mais 2 casos usam física de verdade agora: escolher
 Vantagem/Desvantagem só DEPOIS de ver o resultado do 1º dado (o 2º
 entra fisicamente do lado dele), e rerolar o d20 com Sorte (Pequenino)
 ou Inspiração Heroica. Reroll de dano (Perfurador) continua no dado
 clássico por enquanto.
+
+## v202609_1323
+
+Bárbaro — Fúria ligada: no Combate, painel de Ação Bônus tem "😡
+Fúria" pra ativar (gasta 1 uso, o total cresce com o nível). Enquanto
+ativa, aparece um aviso fixo na tela do Combate com Resistência a
+dano Contundente/Cortante/Perfurante, bônus no dano de ataques de
+Força e Vantagem em testes/salvaguardas de Força — e um botão
+"Encerrar Fúria" ali mesmo. Vestir Armadura Pesada encerra a Fúria
+sozinha. Descanso Curto devolve 1 uso, Descanso Longo devolve todos.
 
 ## v202609_1224
 

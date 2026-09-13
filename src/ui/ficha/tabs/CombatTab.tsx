@@ -102,6 +102,23 @@ interface CombatTabProps {
    * disponível. `ativa` = transformado AGORA (diferente de `gasto` —
    * ver comentário em `armazenamentoPersonagens.ts`). */
   formaGrande: { disponivel: boolean; gasto: boolean; ativa: boolean; onUsar: () => boolean };
+  /** Fúria (Bárbaro) — ver sdd/sdd-barbaro-furia.md. `disponivel` =
+   * classe tem esse recurso (`maximo > 0`). Card fixo sempre visível
+   * nesta aba (não só dentro do painel de Ação Bônus) — decisão
+   * confirmada com o Osmar: ativar consome 1 uso no painel de Bônus,
+   * mas o estado/efeitos ficam num card na tela principal do Combate,
+   * com botão "Encerrar Fúria" ali mesmo. */
+  furia: {
+    disponivel: boolean;
+    maximo: number;
+    restantes: number;
+    ativa: boolean;
+    /** Dano da Fúria no nível atual — soma no dano de ataques baseados
+     * em Força enquanto ativa (já embutido em `ataqueAtual`/
+     * `ataqueBonus` quando `ativa`; aqui só pra exibir no card). */
+    bonusDano: number;
+    onUsar: () => boolean;
+  };
   /** Mãos Curativas (Aasimar) — `disponivel` `false` = espécie não é
    * Aasimar. */
   maosCurativas: { disponivel: boolean; gasto: boolean; dados: number; onUsar: () => boolean };
@@ -254,6 +271,14 @@ export default function CombatTab({
     gasto: formaGrandeGasto,
     ativa: formaGrandeAtiva,
     onUsar: onUsarFormaGrande,
+  },
+  furia: {
+    disponivel: furiaDisponivel,
+    maximo: furiaMaximo,
+    restantes: furiaRestantes,
+    ativa: furiaAtiva,
+    bonusDano: furiaBonusDano,
+    onUsar: onUsarFuria,
   },
   maosCurativas: {
     disponivel: maosCurativasDisponivel,
@@ -476,6 +501,15 @@ export default function CombatTab({
   function usarFormaGrande() {
     if (!onUsarFormaGrande()) return;
     onMarcarUsado('bonus');
+  }
+
+  /** Ativar Fúria gasta a Ação Bônus (marca 'bonus' como usada);
+   * encerrar (o mesmo toggle, quando já ativa) é de graça — a regra
+   * real não cobra nada pra sair da Fúria voluntariamente. */
+  function usarFuria() {
+    const ativandoAgora = !furiaAtiva;
+    if (!onUsarFuria()) return;
+    if (ativandoAgora) onMarcarUsado('bonus');
   }
 
   function usarRevelacaoCelestial(formaEscolhida: string) {
@@ -712,6 +746,30 @@ export default function CombatTab({
           +5
         </div>
       </div>
+
+      {furiaDisponivel && (
+        <div className="opt-card" style={{ marginBottom: 12, borderColor: furiaAtiva ? '#b23b3b' : undefined }}>
+          <div className="opt-card-name">😡 Fúria {furiaAtiva ? 'ATIVA' : ''}</div>
+          {furiaAtiva ? (
+            <>
+              <div className="opt-card-desc">
+                Resistência a dano Contundente, Cortante e Perfurante · +{furiaBonusDano} no dano de ataques baseados
+                em Força · Vantagem em testes/salvaguardas de Força · não pode conjurar magia nem manter Concentração.
+              </div>
+              <div className="label" style={{ marginTop: 4 }}>
+                Encerra sozinha ao vestir Armadura Pesada — ou toque abaixo pra encerrar manualmente.
+              </div>
+              <div className="btn" style={{ marginTop: 8, padding: 8, fontSize: 12 }} onClick={usarFuria}>
+                Encerrar Fúria
+              </div>
+            </>
+          ) : (
+            <div className="opt-card-desc">
+              {furiaRestantes} de {furiaMaximo} usos disponíveis — ative no painel de Ação Bônus.
+            </div>
+          )}
+        </div>
+      )}
 
       {bencaoDoTenebrosoDisponivel && (
         <div className="opt-card" style={{ marginBottom: 12, cursor: 'pointer' }} onClick={onAplicarBencaoDoTenebroso}>
@@ -1036,6 +1094,11 @@ export default function CombatTab({
             formaGrandeGasto={formaGrandeGasto}
             formaGrandeAtiva={formaGrandeAtiva}
             onUsarFormaGrande={usarFormaGrande}
+            furiaDisponivel={furiaDisponivel}
+            furiaMaximo={furiaMaximo}
+            furiaRestantes={furiaRestantes}
+            furiaAtiva={furiaAtiva}
+            onUsarFuria={usarFuria}
             revelacaoCelestialDisponivel={revelacaoCelestialDisponivel}
             revelacaoCelestialGasto={revelacaoCelestialGasto}
             revelacaoCelestialFormaAtiva={revelacaoCelestialFormaAtiva}

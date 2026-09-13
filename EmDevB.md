@@ -87,13 +87,37 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       10+DES+CON sem armadura, popup "ⓘ" mostra a linha "mod.
       Constituição (Defesa sem Armadura)" certinha, zero erro de
       console.
-- [ ] **B3 — Motor de Fúria:** ativar (Ação Bônus, gasta 1 uso, banco
-      cresce por nível), card fixo em Combat, Resistência a
-      Contundente/Cortante/Perfurante, Dano da Fúria somado
-      automaticamente (expõe `atributoUsado` em `AtaqueResolvido`/
-      `AtaqueInfo`, ver SDD seção 5), Vantagem em teste/salvaguarda de
-      Força, encerrar manual + automático ao vestir Armadura Pesada,
-      Descanso Curto recupera 1 uso / Longo recupera todos.
+- [x] **B3 — Motor de Fúria:** `core/recursosClasse.ts` ganhou
+      `quantidadeFuria`/`bonusDanoFuria` (+ testes). `core/ataque.ts`
+      ganhou o parâmetro `bonusDanoSeForca` nas 4 funções de ataque
+      (`ataqueDesarmado`, `ataqueComArma`, `ataqueAtual`,
+      `ataqueBonusMaoSecundaria`) — soma sozinho quando o ataque usa
+      Força de verdade (nunca à distância; em Acuidade só quando Força
+      ≥ Destreza; nunca com `atribForcada`, ex. Pacto da Lâmina) — SDD
+      seção 5 atualizada pra registrar essa escolha de implementação
+      (não precisou expor `atributoUsado` em `AtaqueResolvido`). Novos
+      campos `furiaGasto`/`furiaAtiva` em `PersonagemSalvo`.
+      `FichaShell.tsx`: `usarFuria()` (toggle igual à Forma Grande, mas
+      com banco contado + trava de Armadura Pesada pra ATIVAR),
+      `equiparItem` encerra a Fúria sozinha ao equipar Armadura Pesada
+      enquanto ativa, `descansoCurto` devolve 1 uso (sem desligar),
+      `descansoLongo` zera gasto e desliga. `CombatTab`/
+      `BonusPanelContent`: linha de ativar no painel de Ação Bônus
+      (só ativa — desligar é sempre pelo card fixo) + card fixo sempre
+      visível na tela principal do Combate (decisão já confirmada),
+      mostrando "Fúria: ATIVA" + efeitos + botão "Encerrar Fúria"
+      quando ativa, ou "N de M usos disponíveis" quando não.
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (529)/`npm run build` limpos + Playwright num Bárbaro nível 5 de
+      teste (Modo de Teste ligado pra dado determinístico): card
+      correto antes/depois de ativar, painel de Bônus mostra "já
+      ativa" quando tenta reabrir, dano da Fúria somado de verdade
+      (personagem com FOR −1 rolou "1d1 + 1" com Fúria ativa = −1 + 2,
+      bate com `bonusDanoFuria` no nível 5), equipar Cota de Malha
+      (Armadura Pesada) encerrou a Fúria sozinha sem devolver o uso,
+      Descanso Curto devolveu 1 uso sem desligar a Fúria já ativa,
+      Descanso Longo zerou usos gastos e desligou. Zero erro de
+      console.
 - [ ] **B4 — Resto da progressão base (sem subclasse):** Ataque
       Imprudente, Sentido de Perigo, Conhecimento Primordial
       (perícia extra + Força no lugar de outro atributo em Fúria),
