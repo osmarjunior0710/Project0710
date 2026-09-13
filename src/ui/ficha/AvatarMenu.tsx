@@ -40,7 +40,15 @@ export default function AvatarMenu({
   onRestaurarNivel,
 }: AvatarMenuProps) {
   const [aberto, setAberto] = useState(false);
-  const { modoTeste, alternarModoTeste } = useRoll();
+  const { modoTeste, alternarModoTeste, preferenciaDado3D, alternarPreferenciaDado3D, dado3DDisponivel } = useRoll();
+
+  const descDado3D = !dado3DDisponivel
+    ? 'Seu aparelho não suporta gráficos 3D (WebGL) — usando o dado clássico.'
+    : modoTeste
+      ? 'Desligado enquanto o Modo de Teste está ativo (física de verdade não combina com resultado fixo).'
+      : 'Rolagens oficiais do jogo usam física de verdade em vez de sorteio. Desligado = dado clássico.';
+
+  const dado3DTravado = !dado3DDisponivel || modoTeste;
 
   const preferencias = [
     {
@@ -48,18 +56,28 @@ export default function AvatarMenu({
       desc: 'Mostra a descrição de cada item direto na Mochila',
       valor: itensDetalhados,
       onToggle: onToggleItensDetalhados,
+      desabilitado: false,
     },
     {
       label: 'Peso da Mochila',
       desc: 'Mostra o peso de cada item e a barra de carga',
       valor: pesoAtivo,
       onToggle: onTogglePeso,
+      desabilitado: false,
+    },
+    {
+      label: '🎲 Dado 3D',
+      desc: descDado3D,
+      valor: preferenciaDado3D && dado3DDisponivel && !modoTeste,
+      onToggle: dado3DTravado ? () => {} : alternarPreferenciaDado3D,
+      desabilitado: dado3DTravado,
     },
     {
       label: '🎲 Modo de Teste',
       desc: 'Todo d20 sai fixo em 1, 10, 15, 20 (em sequência) — dano continua de verdade. Desliga sozinho ao recarregar a página.',
       valor: modoTeste,
       onToggle: alternarModoTeste,
+      desabilitado: false,
     },
   ];
 
@@ -75,7 +93,11 @@ export default function AvatarMenu({
           <div className={styles.menu}>
             <div className={styles.menuTitle}>Preferências</div>
             {preferencias.map((p) => (
-              <div key={p.label} className={styles.menuRow} onClick={p.onToggle}>
+              <div
+                key={p.label}
+                className={`${styles.menuRow} ${p.desabilitado ? styles.menuRowDesabilitado : ''}`}
+                onClick={p.onToggle}
+              >
                 <div className={styles.menuRowText}>
                   <div className={styles.menuRowLabel}>{p.label}</div>
                   <div className={styles.menuRowDesc}>{p.desc}</div>

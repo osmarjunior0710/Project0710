@@ -1,4 +1,6 @@
-import { createContext, useCallback, useContext, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
+import { useColapsavel } from '../hooks/useColapsavel';
+import { suportaWebGL } from '../utils/suportaWebGL';
 
 type CritTipo = 'sucesso' | 'falha' | null;
 
@@ -303,6 +305,22 @@ interface RollContextValue {
    * sempre nasce desligado, pra nunca "esquecer ligado" sem perceber. */
   modoTeste: boolean;
   alternarModoTeste: () => void;
+  /** Preferência SALVA do jogador (`localStorage`, mesmo padrão de
+   * `useColapsavel`) — Fase A/B do Dado 3D (`sdd/sdd-dado-3d.md`).
+   * Ainda não é lida por nenhuma rolagem real (isso é a próxima
+   * entrega, B2) — hoje só controla o switch "🎲 Dado 3D" do
+   * `AvatarMenu`. Ligar "Modo de Teste" força essa preferência pra
+   * `false` automaticamente (física de verdade é incompatível com
+   * resultado fixo pra QA) — não use este valor puro pra decidir o
+   * motor de rolagem, use `dado3DAtivo`. */
+  preferenciaDado3D: boolean;
+  alternarPreferenciaDado3D: () => void;
+  /** `false` quando o aparelho não suporta WebGL — calculado 1x
+   * (`suportaWebGL`), não muda durante a sessão. */
+  dado3DDisponivel: boolean;
+  /** Valor DERIVADO pronto pra decidir o motor de rolagem (Fase B):
+   * `preferenciaDado3D && dado3DDisponivel && !modoTeste`. */
+  dado3DAtivo: boolean;
   /** Histórico compartilhado de rolagens (últimas `MAX_LOG`, mais
    * recente primeiro) — alimentado automaticamente por toda rolagem
    * real (`rolarD20`/`rolarDados`, via `fechar()`) E pelo dado 3D
@@ -360,11 +378,22 @@ export function RollProvider({ children }: { children: ReactNode }) {
   const [modoTeste, setModoTesteState] = useState(false);
   const modoTesteRef = useRef(false);
   const indiceModoTesteRef = useRef(0);
+  const [preferenciaDado3D, setPreferenciaDado3D] = useColapsavel('preferencia-dado-3d', true);
+  const dado3DDisponivel = useMemo(() => suportaWebGL(), []);
   const alternarModoTeste = useCallback(() => {
     modoTesteRef.current = !modoTesteRef.current;
     indiceModoTesteRef.current = 0;
     setModoTesteState(modoTesteRef.current);
+    // Física de verdade é incompatível com resultado fixo pra QA — ver
+    // "Modo de Teste" em sdd/sdd-dado-3d.md.
+    if (modoTesteRef.current) setPreferenciaDado3D(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const alternarPreferenciaDado3D = useCallback(() => {
+    setPreferenciaDado3D(!preferenciaDado3D);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preferenciaDado3D]);
+  const dado3DAtivo = preferenciaDado3D && dado3DDisponivel && !modoTeste;
 
   const rolarD20 = useCallback(({ label, formula, mod, vantagem, categoria, onResultado }: RollD20Options) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -685,6 +714,10 @@ export function RollProvider({ children }: { children: ReactNode }) {
         usarInspiracaoHeroica,
         modoTeste,
         alternarModoTeste,
+        preferenciaDado3D,
+        alternarPreferenciaDado3D,
+        dado3DDisponivel,
+        dado3DAtivo,
         log,
         adicionarLog,
       }}

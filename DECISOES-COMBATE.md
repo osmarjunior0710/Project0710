@@ -361,10 +361,24 @@ um histórico de rolagens **compartilhado com o resto da Ficha**
 resto da Ficha nem sabe que o dado 3D existe. O d20 avulso do FAB não
 simula perícia mais (era sorteio aleatório só pra testar formato) — o
 jogador escolhe rótulo (texto livre) e Normal/Vantagem/Desvantagem
-manualmente antes de rolar. **Fase B** (não iniciada): o motor 3D vira
-o padrão pra toda rolagem oficial do jogo (Combate/Magias/Atributos),
-com preferência 3D/2D no menu do avatar — ver o SDD pra mecânica
-completa.
+manualmente antes de rolar. **Fase B** (em andamento, ver EmDev.md):
+o motor 3D vira o padrão pra toda rolagem oficial do jogo (Combate/
+Magias/Atributos), com preferência 3D/2D no menu do avatar — ver o
+SDD pra mecânica completa.
+
+**Fase B1 (feito) — preferência 3D/2D:** `RollContext` ganhou
+`preferenciaDado3D`/`dado3DDisponivel`/`dado3DAtivo` (o último,
+derivado, ainda sem nenhum consumidor — só existe pra B2 ler depois).
+Persistência reaproveitou `useColapsavel` direto (é só um boolean com
+`localStorage`, "expandido/colapsado" vira "3D ligado/desligado" sem
+precisar de hook novo). Suporte a WebGL detectado 1x por sessão via
+`<canvas>` descartável tentando `webgl2`/`webgl`/`experimental-webgl`
+(`ui/utils/suportaWebGL.ts`) — padrão pra qualquer feature 3D futura
+que precise da mesma checagem. `alternarModoTeste` força a preferência
+pra `false` ao ligar (física real é incompatível com resultado fixo de
+QA) — mutuamente exclusivos por design, nunca checar só um dos dois
+isoladamente pra decidir o motor de rolagem, sempre usar `dado3DAtivo`
+(já combina os 3 fatores).
 
 **Data/origem:** 2026-09, pedido do Osmar.
 

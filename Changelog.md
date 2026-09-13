@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0102
+
+Menu do avatar (👤) ganhou o switch "🎲 Dado 3D" — preferência pra
+rolagens oficiais do jogo (Combate/Magias/Atributos) usarem o dado 3D
+com física de verdade em vez do sorteio de sempre. Por enquanto o
+switch só existe e é salvo (fica desligado se seu aparelho não suporta
+gráficos 3D, ou enquanto o Modo de Teste está ativo) — nenhuma rolagem
+de verdade usa o dado 3D ainda, isso vem numa próxima entrega.
+
 ## v202609_2336
 
 Arrumação interna, nada novo pra ver na tela: os recursos de classe/

@@ -15,7 +15,47 @@
 
 ---
 
-## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade)
+## Foco ATIVO: Dado 3D — Fase B (motor 3D vira o padrão de rolagem oficial)
+
+Ver `sdd/sdd-dado-3d.md` pra mecânica completa (mapeamento de cada
+situação de rolagem — Vantagem/Desvantagem, reroll, grupos mistos,
+Modo de Teste, fallbacks). Talentos (abaixo) fica PAUSADO enquanto
+este foco roda — não fechado, retomamos depois.
+
+### B1 — Preferência 3D/2D no menu do avatar (1ª entrega, sem mexer no RollContext ainda)
+
+- [x] Nova preferência global (não por personagem) em `localStorage`,
+      chave própria (`preferencia-dado-3d`), default `true` (3D) —
+      reaproveitou `useColapsavel` (já era genérico o suficiente,
+      "expandido/colapsado" = "3D ligado/desligado" aqui), em vez de
+      escrever um hook novo.
+- [x] Switch "🎲 Dado 3D" no `AvatarMenu.tsx`, junto das outras
+      preferências de exibição (ligado = 3D, desligado = 2D clássico).
+- [x] `suportaWebGL()` (`ui/utils/suportaWebGL.ts`) — cria um
+      `<canvas>` descartável e tenta `webgl2`/`webgl`/
+      `experimental-webgl`, checagem clássica de capability detection.
+      Calculado 1x por sessão (`useMemo`) em `RollContext`, exposto
+      como `dado3DDisponivel`. Sem suporte, a linha do switch fica
+      esmaecida/travada (mesmo tratamento visual de botão desabilitado
+      já usado em outros lugares do app).
+- [x] Modo de Teste força a preferência pra 2D automaticamente
+      (`alternarModoTeste` já chama `setPreferenciaDado3D(false)` ao
+      ligar) e trava/esmaece o switch enquanto ativo — nunca os dois
+      ligados ao mesmo tempo.
+- [x] `RollContext` ganhou `dado3DAtivo` (derivado:
+      `preferenciaDado3D && dado3DDisponivel && !modoTeste`) — pronto
+      pra B2 ler, mas **ainda não é lido em lugar nenhum** —
+      `rolarD20Dado`/`rolarD20`/`rolarDados` continuam 100%
+      `Math.random()`, só a preferência existe e é visível.
+      Verificado: `tsc -b`/`npm test` (512)/`npm run build` limpos +
+      Playwright (switch liga/desliga, persiste depois de recarregar a
+      página via localStorage, e trava/desliga sozinho ao ligar Modo
+      de Teste).
+
+**Próxima entrega (B2):** ler `dado3DAtivo` de verdade no d20 simples
+(perícia/salvaguarda/ataque/iniciativa) — ver `sdd/sdd-dado-3d.md`.
+
+## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade) — PAUSADO, retomar depois do Dado 3D
 
 77 talentos ainda sem efeito mecânico, em 5 categorias (Geral 42,
 Talento Selvagem 10, Dádiva Épica 12, Estilo de Luta 7, Origem 6).
