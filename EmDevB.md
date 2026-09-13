@@ -16,10 +16,8 @@
 
 ---
 
-(nenhum foco em andamento — o último, "Dado 3D — formalização, Fase
-A", fechou com o log de rolagens compartilhado entre o FAB avulso e o
-resto da Ficha; ver `Changelog.md` pro resumo, `sdd/sdd-dado-3d.md`
-pro mapeamento mecânico completo — inclusive da Fase B, ainda não
-iniciada — e `DECISOES-COMBATE.md` pro padrão durável que ficou. O
-foco anterior, "Saúde do projeto", também fechou com G1-G4 concluídos;
-ver `Backlog.md` pro que foi avaliado e adiado por prioridade)
+(nenhum foco em andamento — o último, "`CombatTab.tsx` — agrupar
+props de recurso por característica", fechou com a interface caindo
+de ~93 pra ~52 props de topo; ver `Changelog.md` pro resumo e
+`DECISOES-COMBATE.md` pro padrão durável que ficou pra próximas
+características)

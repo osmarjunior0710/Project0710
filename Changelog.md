@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2336
+
+Arrumação interna, nada novo pra ver na tela: os recursos de classe/
+espécie da aba Combate (Fôlego, Ataque de Sopro, Voo Dracônico,
+Mãos Curativas, Inspiração de Bardo, etc.) foram organizados por trás
+das cortinas, sem mudar nenhum cálculo — testado criando um Guerreiro
+Draconato e usando vários desses recursos, tudo continua igual.
+
 ## v202609_2220
 
 Loja (wizard) — comprar um Kit (ex.: Kit de Diplomata) agora marca cada

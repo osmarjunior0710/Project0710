@@ -423,3 +423,46 @@ navegação sempre que `aberto` vira `false` — não depender só do
 fora dele.
 
 **Data/origem:** 2026-09, pedido do Osmar.
+
+## Recurso novo em `CombatTab.tsx` — 1 prop-objeto agrupado, não 3-4 props soltas
+
+Até 2026-09, cada característica de classe/espécie que "gasta e
+recupera" em Combat (Fôlego, Conhecimento de Pedras, Ataque de Sopro,
+etc.) virava uma quadra de props soltas em `CombatTabProps`
+(`xDisponivel`/`xMaximo`/`xRestantes`/`onUsarX`) — a interface tinha
+chegado a ~93 props (G4.2 do foco de saúde do projeto, ver
+`EmDevB.md`).
+
+**Padrão daqui pra frente:** todo recurso novo desse tipo entra como 1
+prop-objeto só, não como props soltas. 2 formas cobrem quase tudo:
+- **Contador simples** — reusa o tipo `RecursoContado` já definido em
+  `CombatTab.tsx`: `{ maximo, restantes, onUsar: () => boolean }`.
+  Quando o recurso também tem um "existe pro personagem?" (a maioria
+  das características de espécie), soma `disponivel: boolean` (ou,
+  quando a informação em si já serve de flag — caso de
+  Ancestralidade Gigante — um campo com o valor escolhido, ex.
+  `escolhida: string | null`).
+- **Flag de 1 uso** (`disponivel`/`gasto`/`onUsar`, sem contador) —
+  Voo Dracônico, Forma Grande, Mãos Curativas.
+
+Campos extras específicos do recurso (Ataque de Sopro: `cd`/
+`numDados`/`tipoDano`; Revelação Celestial: `formaAtiva`/`opcoes`/
+`danoBonus`/`cdManto`) entram direto no MESMO objeto, sem tentar forçar
+um tipo genérico único pra todo mundo — só o formato
+contador/flag é compartilhado.
+
+`CombatTab` desestrutura cada grupo já renomeando de volta pros nomes
+locais de sempre (`folego: { maximo: usosFolegoMaximo, restantes:
+usosFolegoRestantes, onUsar: onUsarUsoFolego }`) — o corpo do
+componente (JSX, funções internas) nunca precisa saber que o dado
+chegou agrupado. `FichaShell.tsx` monta o objeto na hora de passar
+(`folego={{ maximo: usosFolegoMaximo, ... }}`), lendo as MESMAS
+variáveis de sempre — nenhuma das duas pontas perde nome nenhum.
+
+**Deliberadamente NÃO propagado pros 3 painéis internos**
+(`AcaoPanelContent`/`BonusPanelContent`/`ReacaoPanelContent`) — eles
+continuam recebendo os valores soltos de sempre. Agrupar só a
+fronteira `FichaShell` → `CombatTab` (a que cresce a cada classe/
+espécie nova) manteve o escopo pequeno e a rede de segurança forte
+(`tsc -b --force` sozinho bastou, sem erro nenhum pra corrigir depois
+do regroup, dado que os nomes internos não mudaram).

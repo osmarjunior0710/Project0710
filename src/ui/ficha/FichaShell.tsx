@@ -1842,12 +1842,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             pvAtual={pvAtual}
             pvMax={personagem.pvMax}
             pvTemporario={pvTemporario}
-            bencaoDoTenebrosoDisponivel={bencaoDoTenebrosoDisponivel}
-            onAplicarBencaoDoTenebroso={aplicarBencaoDoTenebroso}
-            lancarNoInfernoDisponivel={lancarNoInfernoDisponivel}
-            lancarNoInfernoGasto={lancarNoInfernoGasto}
-            onUsarLancarNoInferno={usarLancarNoInferno}
-            onRecuperarLancarNoInfernoComEspacoDePacto={recuperarLancarNoInfernoComEspacoDePacto}
+            bencaoDoTenebroso={{ disponivel: bencaoDoTenebrosoDisponivel, onAplicar: aplicarBencaoDoTenebroso }}
+            lancarNoInferno={{
+              disponivel: lancarNoInfernoDisponivel,
+              gasto: lancarNoInfernoGasto,
+              onUsar: usarLancarNoInferno,
+              onRecuperarComEspacoDePacto: recuperarLancarNoInfernoComEspacoDePacto,
+            }}
             onAlterarPv={alterarPv}
             turnState={turnState}
             onMarcarUsado={marcarUsado}
@@ -1859,49 +1860,61 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             ponte={ponte}
             estiloDeLuta={estiloDeLuta}
             nivel={personagem.nivel}
-            usosFolegoMaximo={usosFolegoMaximo}
-            usosFolegoRestantes={usosFolegoRestantes}
-            onUsarUsoFolego={usarUsoFolego}
-            usosConhecimentoDePedrasMaximo={usosConhecimentoDePedrasMaximo}
-            usosConhecimentoDePedrasRestantes={usosConhecimentoDePedrasRestantes}
-            onUsarConhecimentoDePedras={usarConhecimentoDePedras}
-            usosPicoDeAdrenalinaMaximo={usosPicoDeAdrenalinaMaximo}
-            usosPicoDeAdrenalinaRestantes={usosPicoDeAdrenalinaRestantes}
-            onUsarPicoDeAdrenalina={usarPicoDeAdrenalina}
-            ataqueDeSoproDisponivel={ataqueDeSoproDisponivel}
-            usosAtaqueDeSoproMaximo={usosAtaqueDeSoproMaximo}
-            usosAtaqueDeSoproRestantes={usosAtaqueDeSoproRestantes}
-            cdAtaqueDeSopro={cdAtaqueDeSopro}
-            numDadosAtaqueDeSopro={numDadosAtaqueDeSopro}
-            tipoDanoAtaqueDeSopro={tipoDanoAtaqueDeSopro}
-            onUsarAtaqueDeSopro={usarAtaqueDeSopro}
-            vooDraconicoDisponivel={vooDraconicoDisponivel}
-            vooDraconicoGasto={vooDraconicoGasto}
-            onUsarVooDraconico={usarVooDraconico}
-            ancestralidadeGiganteEscolhida={ancestralidadeGiganteEscolhida}
-            usosAncestralidadeGiganteMaximo={usosAncestralidadeGiganteMaximo}
-            usosAncestralidadeGiganteRestantes={usosAncestralidadeGiganteRestantes}
-            onUsarAncestralidadeGigante={usarAncestralidadeGigante}
+            folego={{ maximo: usosFolegoMaximo, restantes: usosFolegoRestantes, onUsar: usarUsoFolego }}
+            conhecimentoDePedras={{
+              maximo: usosConhecimentoDePedrasMaximo,
+              restantes: usosConhecimentoDePedrasRestantes,
+              onUsar: usarConhecimentoDePedras,
+            }}
+            picoDeAdrenalina={{
+              maximo: usosPicoDeAdrenalinaMaximo,
+              restantes: usosPicoDeAdrenalinaRestantes,
+              onUsar: usarPicoDeAdrenalina,
+            }}
+            ataqueDeSopro={{
+              disponivel: ataqueDeSoproDisponivel,
+              maximo: usosAtaqueDeSoproMaximo,
+              restantes: usosAtaqueDeSoproRestantes,
+              cd: cdAtaqueDeSopro,
+              numDados: numDadosAtaqueDeSopro,
+              tipoDano: tipoDanoAtaqueDeSopro,
+              onUsar: usarAtaqueDeSopro,
+            }}
+            vooDraconico={{ disponivel: vooDraconicoDisponivel, gasto: vooDraconicoGasto, onUsar: usarVooDraconico }}
+            ancestralidadeGigante={{
+              escolhida: ancestralidadeGiganteEscolhida,
+              maximo: usosAncestralidadeGiganteMaximo,
+              restantes: usosAncestralidadeGiganteRestantes,
+              onUsar: usarAncestralidadeGigante,
+            }}
             modConstituicaoAtual={modConstituicaoAtual}
-            formaGrandeDisponivel={formaGrandeDisponivel}
-            formaGrandeGasto={formaGrandeGasto}
-            formaGrandeAtiva={formaGrandeAtiva}
-            onUsarFormaGrande={usarFormaGrande}
-            maosCurativasDisponivel={maosCurativasDisponivel}
-            maosCurativasGasto={maosCurativasGasto}
-            dadosMaosCurativas={dadosMaosCurativas}
-            onUsarMaosCurativas={usarMaosCurativas}
-            revelacaoCelestialDisponivel={revelacaoCelestialDisponivel}
-            revelacaoCelestialGasto={revelacaoCelestialGasto}
-            revelacaoCelestialFormaAtiva={revelacaoCelestialFormaAtiva}
-            opcoesRevelacaoCelestial={opcoesRevelacaoCelestial}
-            danoBonusRevelacaoCelestial={danoBonusRevelacaoCelestial}
-            cdMantoNecrotico={cdMantoNecrotico}
-            onUsarRevelacaoCelestial={usarRevelacaoCelestial}
-            falarComAnimaisGnomoDisponivel={falarComAnimaisGnomoDisponivel}
-            usosFalarComAnimaisGnomoMaximo={usosFalarComAnimaisGnomoMaximo}
-            usosFalarComAnimaisGnomoRestantes={usosFalarComAnimaisGnomoRestantes}
-            onUsarFalarComAnimaisGnomo={usarFalarComAnimaisGnomo}
+            formaGrande={{
+              disponivel: formaGrandeDisponivel,
+              gasto: formaGrandeGasto,
+              ativa: formaGrandeAtiva,
+              onUsar: usarFormaGrande,
+            }}
+            maosCurativas={{
+              disponivel: maosCurativasDisponivel,
+              gasto: maosCurativasGasto,
+              dados: dadosMaosCurativas,
+              onUsar: usarMaosCurativas,
+            }}
+            revelacaoCelestial={{
+              disponivel: revelacaoCelestialDisponivel,
+              gasto: revelacaoCelestialGasto,
+              formaAtiva: revelacaoCelestialFormaAtiva,
+              opcoes: opcoesRevelacaoCelestial,
+              danoBonus: danoBonusRevelacaoCelestial,
+              cdManto: cdMantoNecrotico,
+              onUsar: usarRevelacaoCelestial,
+            }}
+            falarComAnimaisGnomo={{
+              disponivel: falarComAnimaisGnomoDisponivel,
+              maximo: usosFalarComAnimaisGnomoMaximo,
+              restantes: usosFalarComAnimaisGnomoRestantes,
+              onUsar: usarFalarComAnimaisGnomo,
+            }}
             conjura={conjura}
             truquesAcao={truquesAcao}
             truquesBonus={truquesBonus}
@@ -1912,46 +1925,47 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}
             modCarisma={carMod}
             numAtaques={numAtaques}
-            indomavelMaximo={indomavelMaximo}
-            indomavelRestantes={indomavelRestantes}
-            onUsarIndomavel={usarIndomavel}
-            pontosDeSorteMaximo={pontosDeSorteMaximo}
-            pontosDeSorteRestantes={pontosDeSorteRestantes}
-            onUsarPontoDeSorte={usarPontoDeSorte}
+            indomavel={{ maximo: indomavelMaximo, restantes: indomavelRestantes, onUsar: usarIndomavel }}
+            pontosDeSorte={{ maximo: pontosDeSorteMaximo, restantes: pontosDeSorteRestantes, onUsar: usarPontoDeSorte }}
             danoDesarmadoRerollDisponivel={danoDesarmadoRerollDisponivel}
             perfuradorDisponivel={perfuradorDisponivel}
-            surtoMaximo={surtoMaximo}
-            surtoRestantes={surtoRestantes}
-            surtoUsadoTurno={surtoUsadoTurno}
-            onUsarSurto={usarSurto}
+            surto={{ maximo: surtoMaximo, restantes: surtoRestantes, usadoTurno: surtoUsadoTurno, onUsar: usarSurto }}
             mestreTatico={mestreTatico}
             ataquesEstudados={ataquesEstudados}
             ajusteTatico={ajusteTatico}
             ataqueAtual={ataque}
             ataqueBonus={ataqueBonus}
-            usosInspiracaoMaximo={usosInspiracaoMax}
-            usosInspiracaoRestantes={usosInspiracaoRestantes}
-            tamanhoDadoInspiracao={tamanhoDadoInspiracao}
-            fonteDeInspiracao={fonteDeInspiracao}
-            onUsarInspiracao={usarInspiracao}
-            onRecuperarInspiracaoComEspaco={recuperarInspiracaoComEspaco}
+            inspiracao={{
+              maximo: usosInspiracaoMax,
+              restantes: usosInspiracaoRestantes,
+              tamanhoDado: tamanhoDadoInspiracao,
+              fonteDeInspiracao,
+              onUsar: usarInspiracao,
+              onRecuperarComEspaco: recuperarInspiracaoComEspaco,
+              onDevolverUso: devolverUsoInspiracao,
+            }}
             contraEncantamentoDisponivel={contraEncantamentoDisponivel}
             palavrasDeInterrupcaoDisponivel={palavrasDeInterrupcaoDisponivel}
             periciaInigualavelDisponivel={periciaInigualavelDisponivel}
-            onDevolverUsoInspiracao={devolverUsoInspiracao}
             iniciativaMod={iniciativa}
             onRolarIniciativa={aoRolarIniciativa}
-            colheitaMacabraDisponivel={colheitaMacabraDisponivel}
-            onColheitaMacabraDisponivel={(cura) => setColheitaMacabraPendente({ cura })}
-            colheitaDosMortosDisponivel={colheitaDosMortosDisponivel}
-            personagemEnsanguentado={personagemEstaEnsanguentado}
-            opcoesColheitaDosMortos={opcoesColheitaDosMortosAtuais}
-            onColheitaDosMortos={usarColheitaDosMortos}
-            mestreDaMorteDisponivel={mestreDaMorteDisponivel}
-            petsMortoVivo={petsMortoVivoAtuais}
-            pvTempMestreDaMorte={pvTempMestreDaMorteAtual}
-            onUsarMestreDaMorte={usarMestreDaMorte}
-            mestreDaMorteExplosaoLiberada={mestreDaMorteExplosaoLiberadaAtual}
+            colheitaMacabra={{
+              disponivel: colheitaMacabraDisponivel,
+              onDisponivel: (cura) => setColheitaMacabraPendente({ cura }),
+            }}
+            colheitaDosMortos={{
+              disponivel: colheitaDosMortosDisponivel,
+              personagemEnsanguentado: personagemEstaEnsanguentado,
+              opcoes: opcoesColheitaDosMortosAtuais,
+              onEscolher: usarColheitaDosMortos,
+            }}
+            mestreDaMorte={{
+              disponivel: mestreDaMorteDisponivel,
+              pets: petsMortoVivoAtuais,
+              pvTemp: pvTempMestreDaMorteAtual,
+              onUsar: usarMestreDaMorte,
+              explosaoLiberada: mestreDaMorteExplosaoLiberadaAtual,
+            }}
             modIntAtual={modIntAtual}
           />
         )}

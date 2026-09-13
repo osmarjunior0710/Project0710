@@ -29,6 +29,16 @@ const DURACAO_PISCADA_MS = 500;
 export type RecursoTurno = 'acao' | 'bonus' | 'reacao';
 export type EstadoRecurso = 'disponivel' | 'usada';
 
+/** Forma repetida por boa parte dos recursos "gasta e recupera" da
+ * ficha (G4.2 do foco de saúde do projeto, ver `EmDevB.md`) — cada
+ * característica nova de classe/espécie que só soma/consome usos
+ * reaproveita esta forma em vez de 3 props soltas. */
+interface RecursoContado {
+  maximo: number;
+  restantes: number;
+  onUsar: () => boolean;
+}
+
 interface CombatTabProps {
   /** `true` = Armadura equipada (Leve/Média/Pesada) sem treinamento —
    * Desvantagem em D20 de Força ou Destreza (SDD "Penalidades por
@@ -42,16 +52,16 @@ interface CombatTabProps {
    * dano antes do PV normal. 0 = nenhum, linha some. */
   pvTemporario: number;
   onAlterarPv: (delta: number) => void;
-  /** `true` só quando o personagem já tem Bênção do Tenebroso (Bruxo,
-   * Patrono Ínfero, nível 3+) — controla se o botão manual aparece. */
-  bencaoDoTenebrosoDisponivel: boolean;
-  onAplicarBencaoDoTenebroso: () => void;
+  /** Bênção do Tenebroso (Bruxo, Patrono Ínfero, nível 3+). */
+  bencaoDoTenebroso: { disponivel: boolean; onAplicar: () => void };
   /** Lançar no Inferno (Bruxo, Patrono Ínfero, nível 14) — 1x por
    * Descanso Longo, ou gasta 1 Espaço de Pacto pra recuperar o uso. */
-  lancarNoInfernoDisponivel: boolean;
-  lancarNoInfernoGasto: boolean;
-  onUsarLancarNoInferno: () => boolean;
-  onRecuperarLancarNoInfernoComEspacoDePacto: () => boolean;
+  lancarNoInferno: {
+    disponivel: boolean;
+    gasto: boolean;
+    onUsar: () => boolean;
+    onRecuperarComEspacoDePacto: () => boolean;
+  };
   turnState: Record<RecursoTurno, EstadoRecurso>;
   onMarcarUsado: (categoria: RecursoTurno) => void;
   onFimDoTurno: () => void;
@@ -65,71 +75,57 @@ interface CombatTabProps {
   ponte: PoolDePonte | null;
   estiloDeLuta: EstiloDeLuta | null;
   nivel: number;
-  usosFolegoMaximo: number;
-  usosFolegoRestantes: number;
-  onUsarUsoFolego: () => boolean;
-  /** Conhecimento de Pedras (Anão) — 0 = espécie não é Anão. */
-  usosConhecimentoDePedrasMaximo: number;
-  usosConhecimentoDePedrasRestantes: number;
-  onUsarConhecimentoDePedras: () => boolean;
-  /** Pico de Adrenalina (Orc) — 0 = espécie não é Orc. */
-  usosPicoDeAdrenalinaMaximo: number;
-  usosPicoDeAdrenalinaRestantes: number;
-  onUsarPicoDeAdrenalina: () => boolean;
-  /** Ataque de Sopro (Draconato) — `false` = espécie não é Draconato. */
-  ataqueDeSoproDisponivel: boolean;
-  usosAtaqueDeSoproMaximo: number;
-  usosAtaqueDeSoproRestantes: number;
-  cdAtaqueDeSopro: number;
-  numDadosAtaqueDeSopro: number;
-  tipoDanoAtaqueDeSopro: string | null;
-  onUsarAtaqueDeSopro: () => boolean;
-  /** Voo Dracônico (Draconato, nível 5+) — `false` = não disponível. */
-  vooDraconicoDisponivel: boolean;
-  vooDraconicoGasto: boolean;
-  onUsarVooDraconico: () => boolean;
-  /** Ancestralidade Gigante (Golias) — nome da opção escolhida na
-   * criação (ex.: "Arrepio do Gelo (Gigante do Gelo)"), `null` = não é
-   * Golias. Mesmo contador de usos pras 6 opções possíveis. */
-  ancestralidadeGiganteEscolhida: string | null;
-  usosAncestralidadeGiganteMaximo: number;
-  usosAncestralidadeGiganteRestantes: number;
-  onUsarAncestralidadeGigante: () => boolean;
+  /** Recuperar Fôlego / Mente Tática (Guerreiro). */
+  folego: RecursoContado;
+  /** Conhecimento de Pedras (Anão) — `maximo` 0 = espécie não é Anão. */
+  conhecimentoDePedras: RecursoContado;
+  /** Pico de Adrenalina (Orc) — `maximo` 0 = espécie não é Orc. */
+  picoDeAdrenalina: RecursoContado;
+  /** Ataque de Sopro (Draconato) — `disponivel` `false` = espécie não
+   * é Draconato. */
+  ataqueDeSopro: RecursoContado & {
+    disponivel: boolean;
+    cd: number;
+    numDados: number;
+    tipoDano: string | null;
+  };
+  /** Voo Dracônico (Draconato, nível 5+) — `disponivel` `false` = não
+   * disponível. */
+  vooDraconico: { disponivel: boolean; gasto: boolean; onUsar: () => boolean };
+  /** Ancestralidade Gigante (Golias) — `escolhida` é o nome da opção
+   * escolhida na criação (ex.: "Arrepio do Gelo (Gigante do Gelo)"),
+   * `null` = não é Golias. Mesmo contador de usos pras 6 opções
+   * possíveis. */
+  ancestralidadeGigante: RecursoContado & { escolhida: string | null };
   modConstituicaoAtual: number;
-  /** Forma Grande (Golias, nível 5+) — `false` = não disponível. */
-  formaGrandeDisponivel: boolean;
-  formaGrandeGasto: boolean;
-  /** `true` = transformado agora (diferente de `formaGrandeGasto` —
+  /** Forma Grande (Golias, nível 5+) — `disponivel` `false` = não
+   * disponível. `ativa` = transformado AGORA (diferente de `gasto` —
    * ver comentário em `armazenamentoPersonagens.ts`). */
-  formaGrandeAtiva: boolean;
-  onUsarFormaGrande: () => boolean;
-  /** Mãos Curativas (Aasimar) — `false` = espécie não é Aasimar. */
-  maosCurativasDisponivel: boolean;
-  maosCurativasGasto: boolean;
-  dadosMaosCurativas: number;
-  onUsarMaosCurativas: () => boolean;
+  formaGrande: { disponivel: boolean; gasto: boolean; ativa: boolean; onUsar: () => boolean };
+  /** Mãos Curativas (Aasimar) — `disponivel` `false` = espécie não é
+   * Aasimar. */
+  maosCurativas: { disponivel: boolean; gasto: boolean; dados: number; onUsar: () => boolean };
   /** Revelação Celestial (Aasimar, nível 3+) — escolhida de novo a
    * cada uso (natureza `escolha_reutilizavel`), por isso a lista de
-   * opções vem daqui, não do wizard. */
-  revelacaoCelestialDisponivel: boolean;
-  revelacaoCelestialGasto: boolean;
-  revelacaoCelestialFormaAtiva: string | null;
-  opcoesRevelacaoCelestial: OpcaoSubescolha[];
-  danoBonusRevelacaoCelestial: number;
-  cdMantoNecrotico: number;
-  onUsarRevelacaoCelestial: (formaEscolhida: string) => boolean;
+   * `opcoes` vem daqui, não do wizard. */
+  revelacaoCelestial: {
+    disponivel: boolean;
+    gasto: boolean;
+    formaAtiva: string | null;
+    opcoes: OpcaoSubescolha[];
+    danoBonus: number;
+    cdManto: number;
+    onUsar: (formaEscolhida: string) => boolean;
+  };
   /** Ações genéricas do Cap. 1 (ex.: Procurar/Analisar) que algum
    * Talento Geral (Analítico/Mente Aguçada) também libera como Ação
    * Bônus — continuam disponíveis na lista de Ação normal também, o
    * jogador escolhe qual usar a cada turno. Vazio = nenhum talento
    * desse tipo. */
   acoesGenericasBonus: AcaoBase[];
-  /** Falar com Animais - Traço de Gnomo (Gnomo do Bosque) — `false` =
-   * não é essa sub-escolha. */
-  falarComAnimaisGnomoDisponivel: boolean;
-  usosFalarComAnimaisGnomoMaximo: number;
-  usosFalarComAnimaisGnomoRestantes: number;
-  onUsarFalarComAnimaisGnomo: () => boolean;
+  /** Falar com Animais - Traço de Gnomo (Gnomo do Bosque) —
+   * `disponivel` `false` = não é essa sub-escolha. */
+  falarComAnimaisGnomo: RecursoContado & { disponivel: boolean };
   conjura: boolean;
   /** Truques/Magias Preparadas já roteados por Tempo de Conjuração
    * (Ação/Ação Bônus/Reação) — ver `useMagiasEConjuracao.ts`. Cada
@@ -145,58 +141,54 @@ interface CombatTabProps {
   truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
   numAtaques: number;
-  indomavelMaximo: number;
-  indomavelRestantes: number;
-  onUsarIndomavel: () => boolean;
-  pontosDeSorteMaximo: number;
-  pontosDeSorteRestantes: number;
-  onUsarPontoDeSorte: () => boolean;
+  indomavel: RecursoContado;
+  pontosDeSorte: RecursoContado;
   /** Valentão de Taverna (Dano Garantido) — `true` = pode rerolar 1 no
    * dano do Ataque Desarmado. */
   danoDesarmadoRerollDisponivel: boolean;
   /** Perfurador — `true` = pode rerolar 1 dado à escolha quando o dano
    * causado for Perfurante (ver `core/rerollDanoTalento.ts`). */
   perfuradorDisponivel: boolean;
-  surtoMaximo: number;
-  surtoRestantes: number;
-  surtoUsadoTurno: boolean;
-  onUsarSurto: () => boolean;
+  surto: RecursoContado & { usadoTurno: boolean };
   mestreTatico: CaracteristicaNivel | null;
   ataquesEstudados: CaracteristicaNivel | null;
   ajusteTatico: CaracteristicaNivel | null;
   ataqueAtual: AtaqueResolvido | null;
   ataqueBonus: AtaqueResolvido | null;
-  usosInspiracaoMaximo: number;
-  usosInspiracaoRestantes: number;
-  tamanhoDadoInspiracao: number;
-  fonteDeInspiracao: boolean;
-  onUsarInspiracao: () => boolean;
-  onRecuperarInspiracaoComEspaco: () => boolean;
+  /** Inspiração de Bardo / Perícia Inigualável — mesmo banco de usos. */
+  inspiracao: RecursoContado & {
+    tamanhoDado: number;
+    fonteDeInspiracao: boolean;
+    onRecuperarComEspaco: () => boolean;
+    onDevolverUso: () => void;
+  };
   contraEncantamentoDisponivel: boolean;
   palavrasDeInterrupcaoDisponivel: boolean;
   periciaInigualavelDisponivel: boolean;
-  onDevolverUsoInspiracao: () => void;
   iniciativaMod: number | null;
   onRolarIniciativa?: () => void;
   /** Colheita Macabra (Necromante, nível 3+) — o modal de verdade mora
    * no `FichaShell.tsx` (sobrevive à troca de aba); aqui só repassa pro
    * painel de Ação avisar quando a conjuração se qualifica, ver
    * `core/necromante.ts`. */
-  colheitaMacabraDisponivel: boolean;
-  onColheitaMacabraDisponivel: (cura: number) => void;
+  colheitaMacabra: { disponivel: boolean; onDisponivel: (cura: number) => void };
   /** Colheita dos Mortos (Necromante, nível 10) — passo de escolha de
    * pet fica dentro do próprio painel de Reação (não precisa
    * sobreviver a troca de aba, diferente da Colheita Macabra: a
    * Reação inteira acontece sem fechar o painel no meio). */
-  colheitaDosMortosDisponivel: boolean;
-  personagemEnsanguentado: boolean;
-  opcoesColheitaDosMortos: { pet: Pet; cura: number }[];
-  onColheitaDosMortos: (petId: string, cura: number) => void;
-  mestreDaMorteDisponivel: boolean;
-  petsMortoVivo: Pet[];
-  pvTempMestreDaMorte: number;
-  onUsarMestreDaMorte: (petIds: string[]) => void;
-  mestreDaMorteExplosaoLiberada: boolean;
+  colheitaDosMortos: {
+    disponivel: boolean;
+    personagemEnsanguentado: boolean;
+    opcoes: { pet: Pet; cura: number }[];
+    onEscolher: (petId: string, cura: number) => void;
+  };
+  mestreDaMorte: {
+    disponivel: boolean;
+    pets: Pet[];
+    pvTemp: number;
+    onUsar: (petIds: string[]) => void;
+    explosaoLiberada: boolean;
+  };
   modIntAtual: number;
 }
 
@@ -212,12 +204,13 @@ export default function CombatTab({
   pvMax,
   pvTemporario,
   onAlterarPv,
-  bencaoDoTenebrosoDisponivel,
-  onAplicarBencaoDoTenebroso,
-  lancarNoInfernoDisponivel,
-  lancarNoInfernoGasto,
-  onUsarLancarNoInferno,
-  onRecuperarLancarNoInfernoComEspacoDePacto,
+  bencaoDoTenebroso: { disponivel: bencaoDoTenebrosoDisponivel, onAplicar: onAplicarBencaoDoTenebroso },
+  lancarNoInferno: {
+    disponivel: lancarNoInfernoDisponivel,
+    gasto: lancarNoInfernoGasto,
+    onUsar: onUsarLancarNoInferno,
+    onRecuperarComEspacoDePacto: onRecuperarLancarNoInfernoComEspacoDePacto,
+  },
   turnState,
   onMarcarUsado,
   onFimDoTurno,
@@ -228,50 +221,62 @@ export default function CombatTab({
   ponte,
   estiloDeLuta,
   nivel,
-  usosFolegoMaximo,
-  usosFolegoRestantes,
-  onUsarUsoFolego,
-  usosConhecimentoDePedrasMaximo,
-  usosConhecimentoDePedrasRestantes,
-  onUsarConhecimentoDePedras,
-  usosPicoDeAdrenalinaMaximo,
-  usosPicoDeAdrenalinaRestantes,
-  onUsarPicoDeAdrenalina,
-  ataqueDeSoproDisponivel,
-  usosAtaqueDeSoproMaximo,
-  usosAtaqueDeSoproRestantes,
-  cdAtaqueDeSopro,
-  numDadosAtaqueDeSopro,
-  tipoDanoAtaqueDeSopro,
-  onUsarAtaqueDeSopro,
-  vooDraconicoDisponivel,
-  vooDraconicoGasto,
-  onUsarVooDraconico,
-  ancestralidadeGiganteEscolhida,
-  usosAncestralidadeGiganteMaximo,
-  usosAncestralidadeGiganteRestantes,
-  onUsarAncestralidadeGigante,
+  folego: { maximo: usosFolegoMaximo, restantes: usosFolegoRestantes, onUsar: onUsarUsoFolego },
+  conhecimentoDePedras: {
+    maximo: usosConhecimentoDePedrasMaximo,
+    restantes: usosConhecimentoDePedrasRestantes,
+    onUsar: onUsarConhecimentoDePedras,
+  },
+  picoDeAdrenalina: {
+    maximo: usosPicoDeAdrenalinaMaximo,
+    restantes: usosPicoDeAdrenalinaRestantes,
+    onUsar: onUsarPicoDeAdrenalina,
+  },
+  ataqueDeSopro: {
+    disponivel: ataqueDeSoproDisponivel,
+    maximo: usosAtaqueDeSoproMaximo,
+    restantes: usosAtaqueDeSoproRestantes,
+    cd: cdAtaqueDeSopro,
+    numDados: numDadosAtaqueDeSopro,
+    tipoDano: tipoDanoAtaqueDeSopro,
+    onUsar: onUsarAtaqueDeSopro,
+  },
+  vooDraconico: { disponivel: vooDraconicoDisponivel, gasto: vooDraconicoGasto, onUsar: onUsarVooDraconico },
+  ancestralidadeGigante: {
+    escolhida: ancestralidadeGiganteEscolhida,
+    maximo: usosAncestralidadeGiganteMaximo,
+    restantes: usosAncestralidadeGiganteRestantes,
+    onUsar: onUsarAncestralidadeGigante,
+  },
   modConstituicaoAtual,
-  formaGrandeDisponivel,
-  formaGrandeGasto,
-  formaGrandeAtiva,
-  onUsarFormaGrande,
-  maosCurativasDisponivel,
-  maosCurativasGasto,
-  dadosMaosCurativas,
-  onUsarMaosCurativas,
-  revelacaoCelestialDisponivel,
-  revelacaoCelestialGasto,
-  revelacaoCelestialFormaAtiva,
-  opcoesRevelacaoCelestial,
-  danoBonusRevelacaoCelestial,
-  cdMantoNecrotico,
-  onUsarRevelacaoCelestial,
+  formaGrande: {
+    disponivel: formaGrandeDisponivel,
+    gasto: formaGrandeGasto,
+    ativa: formaGrandeAtiva,
+    onUsar: onUsarFormaGrande,
+  },
+  maosCurativas: {
+    disponivel: maosCurativasDisponivel,
+    gasto: maosCurativasGasto,
+    dados: dadosMaosCurativas,
+    onUsar: onUsarMaosCurativas,
+  },
+  revelacaoCelestial: {
+    disponivel: revelacaoCelestialDisponivel,
+    gasto: revelacaoCelestialGasto,
+    formaAtiva: revelacaoCelestialFormaAtiva,
+    opcoes: opcoesRevelacaoCelestial,
+    danoBonus: danoBonusRevelacaoCelestial,
+    cdManto: cdMantoNecrotico,
+    onUsar: onUsarRevelacaoCelestial,
+  },
   acoesGenericasBonus,
-  falarComAnimaisGnomoDisponivel,
-  usosFalarComAnimaisGnomoMaximo,
-  usosFalarComAnimaisGnomoRestantes,
-  onUsarFalarComAnimaisGnomo,
+  falarComAnimaisGnomo: {
+    disponivel: falarComAnimaisGnomoDisponivel,
+    maximo: usosFalarComAnimaisGnomoMaximo,
+    restantes: usosFalarComAnimaisGnomoRestantes,
+    onUsar: onUsarFalarComAnimaisGnomo,
+  },
   conjura,
   truquesAcao,
   truquesBonus,
@@ -282,46 +287,44 @@ export default function CombatTab({
   truqueVinculadoAgonizante,
   modCarisma,
   numAtaques,
-  indomavelMaximo,
-  indomavelRestantes,
-  onUsarIndomavel,
-  pontosDeSorteMaximo,
-  pontosDeSorteRestantes,
-  onUsarPontoDeSorte,
+  indomavel: { maximo: indomavelMaximo, restantes: indomavelRestantes, onUsar: onUsarIndomavel },
+  pontosDeSorte: { maximo: pontosDeSorteMaximo, restantes: pontosDeSorteRestantes, onUsar: onUsarPontoDeSorte },
   danoDesarmadoRerollDisponivel,
   perfuradorDisponivel,
-  surtoMaximo,
-  surtoRestantes,
-  surtoUsadoTurno,
-  onUsarSurto,
+  surto: { maximo: surtoMaximo, restantes: surtoRestantes, usadoTurno: surtoUsadoTurno, onUsar: onUsarSurto },
   mestreTatico,
   ataquesEstudados,
   ajusteTatico,
   ataqueAtual,
   ataqueBonus,
-  usosInspiracaoMaximo,
-  usosInspiracaoRestantes,
-  tamanhoDadoInspiracao,
-  fonteDeInspiracao,
-  onUsarInspiracao,
-  onRecuperarInspiracaoComEspaco,
+  inspiracao: {
+    maximo: usosInspiracaoMaximo,
+    restantes: usosInspiracaoRestantes,
+    tamanhoDado: tamanhoDadoInspiracao,
+    fonteDeInspiracao,
+    onUsar: onUsarInspiracao,
+    onRecuperarComEspaco: onRecuperarInspiracaoComEspaco,
+    onDevolverUso: onDevolverUsoInspiracao,
+  },
   contraEncantamentoDisponivel,
   palavrasDeInterrupcaoDisponivel,
   periciaInigualavelDisponivel,
-  onDevolverUsoInspiracao,
   iniciativaMod,
   onRolarIniciativa,
-  colheitaMacabraDisponivel,
-  onColheitaMacabraDisponivel,
-  colheitaDosMortosDisponivel,
-  personagemEnsanguentado,
-  opcoesColheitaDosMortos,
-  onColheitaDosMortos,
-  mestreDaMorteDisponivel,
-  petsMortoVivo,
-  pvTempMestreDaMorte,
-  onUsarMestreDaMorte,
-  mestreDaMorteExplosaoLiberada,
+  colheitaMacabra: { disponivel: colheitaMacabraDisponivel, onDisponivel: onColheitaMacabraDisponivel },
+  colheitaDosMortos: {
+    disponivel: colheitaDosMortosDisponivel,
+    personagemEnsanguentado,
+    opcoes: opcoesColheitaDosMortos,
+    onEscolher: onColheitaDosMortos,
+  },
+  mestreDaMorte: {
+    disponivel: mestreDaMorteDisponivel,
+    pets: petsMortoVivo,
+    pvTemp: pvTempMestreDaMorte,
+    onUsar: onUsarMestreDaMorte,
+    explosaoLiberada: mestreDaMorteExplosaoLiberada,
+  },
   modIntAtual,
 }: CombatTabProps) {
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
