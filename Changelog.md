@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1425
+
+Ajustes no card de Fúria (feedback do Osmar testando no celular): texto
+dos efeitos agora quebra em linhas separadas (Resistência / Dano da
+Fúria / Vantagem) em vez de um parágrafo só; botão "Encerrar Fúria"
+ganhou um destaque vermelho suave. E um charme novo: enquanto a Fúria
+está ativa, as bordas da tela pulsam num vermelho suave com partículas
+emanando de fora pra dentro.
+
 ## v202609_1421
 
 Dado 3D — corrigido: tocar rápido nos botões do 🎲 (Múltiplos, tipos de

@@ -215,6 +215,31 @@ const LABELS: Record<RecursoTurno, { icone: string; nome: string }> = {
   reacao: { icone: '🛡', nome: 'Reação' },
 };
 
+/** Partículas decorativas da vinheta de Fúria (pedido do Osmar) —
+ * posições fixas espalhadas pelas 4 bordas da tela, cada uma com seu
+ * próprio `dx`/`dy` (direção "pra dentro" da tela, ver
+ * `.furiaParticula` no CSS) e atraso/duração pra não pulsarem todas
+ * juntas. Lista fixa (não sorteada) — decoração puramente visual, não
+ * precisa variar entre renders. */
+const PARTICULAS_FURIA: { top: string; left: string; dx: string; dy: string; delay: string; duration: string }[] = [
+  { top: '4%', left: '0%', dx: '46px', dy: '10px', delay: '0s', duration: '3.1s' },
+  { top: '18%', left: '0%', dx: '50px', dy: '-6px', delay: '0.6s', duration: '2.6s' },
+  { top: '38%', left: '0%', dx: '42px', dy: '4px', delay: '1.4s', duration: '3.4s' },
+  { top: '62%', left: '0%', dx: '48px', dy: '-8px', delay: '0.2s', duration: '2.9s' },
+  { top: '82%', left: '0%', dx: '44px', dy: '6px', delay: '1.8s', duration: '3.2s' },
+  { top: '4%', left: '100%', dx: '-46px', dy: '10px', delay: '0.9s', duration: '2.8s' },
+  { top: '24%', left: '100%', dx: '-50px', dy: '-4px', delay: '0.3s', duration: '3.3s' },
+  { top: '48%', left: '100%', dx: '-42px', dy: '8px', delay: '1.6s', duration: '2.7s' },
+  { top: '70%', left: '100%', dx: '-48px', dy: '-6px', delay: '1.1s', duration: '3.0s' },
+  { top: '90%', left: '100%', dx: '-44px', dy: '4px', delay: '0.5s', duration: '2.5s' },
+  { top: '0%', left: '15%', dx: '6px', dy: '46px', delay: '0.4s', duration: '3.1s' },
+  { top: '0%', left: '45%', dx: '-4px', dy: '50px', delay: '1.3s', duration: '2.7s' },
+  { top: '0%', left: '75%', dx: '5px', dy: '44px', delay: '0.8s', duration: '3.4s' },
+  { top: '100%', left: '25%', dx: '-6px', dy: '-48px', delay: '1.7s', duration: '2.9s' },
+  { top: '100%', left: '55%', dx: '4px', dy: '-44px', delay: '0.1s', duration: '3.2s' },
+  { top: '100%', left: '85%', dx: '-5px', dy: '-50px', delay: '1.0s', duration: '2.6s' },
+];
+
 export default function CombatTab({
   desvantagemForcaDestreza,
   pvAtual,
@@ -685,6 +710,24 @@ export default function CombatTab({
           <div className={styles.piscadaBase} />
         </div>
       )}
+      {furiaAtiva && (
+        <div className={styles.furiaVinheta} aria-hidden="true">
+          {PARTICULAS_FURIA.map((p, i) => (
+            <span
+              key={i}
+              className={styles.furiaParticula}
+              style={{
+                top: p.top,
+                left: p.left,
+                animationDelay: p.delay,
+                animationDuration: p.duration,
+                ['--fp-dx' as string]: p.dx,
+                ['--fp-dy' as string]: p.dy,
+              }}
+            />
+          ))}
+        </div>
+      )}
       <div className={styles.splitBtns}>
         <div
           className={`${styles.splitBtn} ${styles.splitBtnIniciativa}`}
@@ -753,13 +796,19 @@ export default function CombatTab({
           {furiaAtiva ? (
             <>
               <div className="opt-card-desc">
-                Resistência a dano Contundente, Cortante e Perfurante · +{furiaBonusDano} no dano de ataques baseados
-                em Força · Vantagem em testes/salvaguardas de Força · não pode conjurar magia nem manter Concentração.
+                Resistência a dano Contundente, Cortante e Perfurante
+                <br />+{furiaBonusDano} no dano de ataques baseados em Força
+                <br />
+                Vantagem em testes/salvaguardas de Força · não pode conjurar magia nem manter Concentração.
               </div>
               <div className="label" style={{ marginTop: 4 }}>
                 Encerra sozinha ao vestir Armadura Pesada — ou toque abaixo pra encerrar manualmente.
               </div>
-              <div className="btn" style={{ marginTop: 8, padding: 8, fontSize: 12 }} onClick={usarFuria}>
+              <div
+                className="btn"
+                style={{ marginTop: 8, background: 'rgba(178, 59, 59, 0.16)', borderColor: '#b23b3b' }}
+                onClick={usarFuria}
+              >
                 Encerrar Fúria
               </div>
             </>
