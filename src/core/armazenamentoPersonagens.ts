@@ -266,6 +266,11 @@ export interface PersonagemSalvo {
    * Descanso (isso é `surtoGasto`, contador de usos por Descanso
    * Curto, campo diferente). Mesma motivação de persistência acima. */
   surtoUsadoTurnoAtual?: boolean;
+  /** `true` = Ataque Imprudente (Bárbaro) decidido NESTE turno — reseta
+   * junto com `turnStateAtual` (Fim do Turno). Decidido só na 1ª jogada
+   * de ataque do turno (regra real), mas vale pros ataques seguintes
+   * do mesmo turno (Ataque Extra) sem perguntar de novo. */
+  ataqueImprudenteAtivoTurno?: boolean;
   /** Vigor Implacável (Orc) já disparou desde o último Descanso Longo
    * — só ele reseta. Ver `core/vigorImplacavel.ts`. */
   vigorImplacavelGasto?: boolean;

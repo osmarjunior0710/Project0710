@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1914
+
+Bárbaro — Ataque Imprudente e Sentido de Perigo (nível 2) chegaram. No
+Combate, tocar "🗡 Atacar" na 1ª jogada do turno agora pergunta "Ataque
+Normal" ou "😤 Ataque Imprudente" (Vantagem nos ataques de Força até o
+fim do turno, vale pros ataques seguintes do Ataque Extra sem
+perguntar de novo). Na aba Atributos, "Salvaguarda de Destreza" ganha
+Vantagem automática.
+
 ## v202609_1911
 
 Dado 3D — corrigido: rolagens com Vantagem/Desvantagem já decidida de

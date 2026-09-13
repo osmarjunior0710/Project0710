@@ -10,6 +10,7 @@ import {
   calcularPercepcaoPassiva,
   calcularPericias,
   calcularSalvaguardas,
+  resolverVantagem,
   calcularProficienciasFerramenta,
   periciasProficientes,
   ferramentasProficientes,
@@ -223,6 +224,24 @@ describe('calcularSalvaguardas', () => {
     const s = selecaoGuerreiro();
     const resultado = calcularSalvaguardas(s, null, 1);
     expect(resultado.every((sv) => !sv.proficiente)).toBe(true);
+  });
+});
+
+describe('resolverVantagem', () => {
+  it('só Vantagem: devolve "vantagem"', () => {
+    expect(resolverVantagem(true, false)).toBe('vantagem');
+  });
+
+  it('só Desvantagem: devolve "desvantagem"', () => {
+    expect(resolverVantagem(false, true)).toBe('desvantagem');
+  });
+
+  it('borda: as duas juntas se cancelam (nem Vantagem, nem Desvantagem)', () => {
+    expect(resolverVantagem(true, true)).toBeUndefined();
+  });
+
+  it('borda: nenhuma das duas devolve undefined', () => {
+    expect(resolverVantagem(false, false)).toBeUndefined();
   });
 });
 

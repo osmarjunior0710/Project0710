@@ -1,4 +1,11 @@
-import type { AtributoFinal, ExplicacaoCalculo, FerramentaFinal, PericiaFinal, SalvaguardaFinal } from '../../../core/calculoPersonagem';
+import {
+  resolverVantagem,
+  type AtributoFinal,
+  type ExplicacaoCalculo,
+  type FerramentaFinal,
+  type PericiaFinal,
+  type SalvaguardaFinal,
+} from '../../../core/calculoPersonagem';
 import type { Arma } from '../../../data/rulesets/dnd2024/armas';
 import { buscarDescricaoMaestria } from '../../../data/rulesets/dnd2024/propriedadesMaestria';
 import { NOME_SENTIDO, type TipoSentido } from '../../../data/rulesets/dnd2024/sentidos';
@@ -38,6 +45,10 @@ interface AtributosTabProps {
    * Afeta o box de atributo FOR/DES, perícias de FOR/DES e Iniciativa
    * — não afeta INT/SAB/CAR nem outras perícias. */
   desvantagemForcaDestreza: boolean;
+  /** Sentido de Perigo (Bárbaro, nível 2+) — Vantagem na Salvaguarda
+   * de Destreza. Se coincidir com `desvantagemForcaDestreza` na mesma
+   * rolagem, as duas se cancelam (`resolverVantagem`). */
+  temSentidoDePerigo: boolean;
   proficienciasFerramenta: FerramentaFinal[];
   onDescansoLongo: () => void;
   onDescansoCurto: () => void;
@@ -96,6 +107,7 @@ export default function AtributosTab({
   salvaguardas,
   pericias,
   desvantagemForcaDestreza,
+  temSentidoDePerigo,
   proficienciasFerramenta,
   onDescansoLongo,
   onDescansoCurto,
@@ -260,13 +272,21 @@ export default function AtributosTab({
               formula: `1d20 ${sv.mod >= 0 ? '+' : '-'} ${Math.abs(sv.mod)}`,
               mod: sv.mod,
               categoria: 'atributoOuSalvaguarda',
-              vantagem:
-                desvantagemForcaDestreza && (sv.atributo === 'FOR' || sv.atributo === 'DES') ? 'desvantagem' : undefined,
+              vantagem: resolverVantagem(
+                temSentidoDePerigo && sv.atributo === 'DES',
+                desvantagemForcaDestreza && (sv.atributo === 'FOR' || sv.atributo === 'DES'),
+              ),
             })
           }
         >
           <span>
-            {sv.proficiente ? '🔵' : '⚫'} {sv.explicacao.total.label} 🎲{' '}
+            {sv.proficiente ? '🔵' : '⚫'} {sv.explicacao.total.label}
+            {temSentidoDePerigo && sv.atributo === 'DES' && (
+              <span className="label" style={{ marginLeft: 4 }}>
+                (Vantagem — Sentido de Perigo)
+              </span>
+            )}{' '}
+            🎲{' '}
             <InfoValor titulo={sv.explicacao.total.label} explicacao={sv.explicacao} />
           </span>
           <span>

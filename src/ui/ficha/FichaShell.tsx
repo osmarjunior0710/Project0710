@@ -96,6 +96,7 @@ import {
 } from '../../core/magiasPersonagem';
 import { usosInspiracaoMaximo, dadoInspiracao, fonteDeInspiracaoDesbloqueada } from '../../core/inspiracaoBardo';
 import { caracteristicaDesbloqueada, contarRepeticoesCaracteristica, numeroDeAtaques } from '../../core/levelUp';
+import { ID_CARACTERISTICA_CLASSE } from '../../data/rulesets/dnd2024/idsCaracteristicasClasse';
 import { estilosDeLuta } from '../../data/rulesets/dnd2024/estilosDeLuta';
 import { armaduras } from '../../data/rulesets/dnd2024/armaduras';
 import { origens } from '../../data/rulesets/dnd2024/origens';
@@ -282,6 +283,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [formaGrandeAtiva, setFormaGrandeAtiva] = useState(personagemSalvo.formaGrandeAtiva ?? false);
   const [furiaGasto, setFuriaGasto] = useState(personagemSalvo.furiaGasto ?? 0);
   const [furiaAtiva, setFuriaAtiva] = useState(personagemSalvo.furiaAtiva ?? false);
+  const [ataqueImprudenteAtivo, setAtaqueImprudenteAtivo] = useState(personagemSalvo.ataqueImprudenteAtivoTurno ?? false);
   const [maosCurativasGasto, setMaosCurativasGasto] = useState(personagemSalvo.maosCurativasGasto ?? false);
   const [revelacaoCelestialGasto, setRevelacaoCelestialGasto] = useState(personagemSalvo.revelacaoCelestialGasto ?? false);
   const [revelacaoCelestialFormaAtiva, setRevelacaoCelestialFormaAtiva] = useState(
@@ -610,6 +612,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const ajusteTatico = classe ? caracteristicaDesbloqueada(classe, 'Ajuste Tático', personagem.nivel) : null;
   const contraEncantamentoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contra-Encantamento', personagem.nivel) !== null : false;
   const inspiracaoSuperiorDesbloqueada = classe ? caracteristicaDesbloqueada(classe, 'Inspiração Superior', personagem.nivel) !== null : false;
+  const temSentidoDePerigo = classe
+    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.sentidoDePerigo, personagem.nivel) !== null
+    : false;
+  const temAtaqueImprudente = classe
+    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.ataqueImprudente, personagem.nivel) !== null
+    : false;
   const forMod = atributos.find((a) => a.atributo === 'FOR')?.mod ?? 0;
   const desMod = atributos.find((a) => a.atributo === 'DES')?.mod ?? 0;
   const carMod = atributos.find((a) => a.atributo === 'CAR')?.mod ?? 0;
@@ -676,6 +684,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     pvAtual,
     turnStateAtual: turnState,
     surtoUsadoTurnoAtual: surtoUsadoTurno,
+    ataqueImprudenteAtivoTurno: ataqueImprudenteAtivo,
     pvMax: personagem.pvMax,
     pvTemporarioAtual: pvTemporario,
     subclasseAtual: personagem.subclasse,
@@ -760,6 +769,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       pvAtual,
       turnState,
       surtoUsadoTurno,
+      ataqueImprudenteAtivo,
       pvTemporario,
       maestriaArma,
       folegoGasto,
@@ -923,6 +933,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   function fimDoTurno() {
     setTurnState(turnoInicial);
     setSurtoUsadoTurno(false);
+    setAtaqueImprudenteAtivo(false);
   }
 
   /** `classeNome` — omitido = gasta do pool "principal" em foco agora
@@ -1763,6 +1774,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             atributos={atributos}
             pericias={pericias}
             salvaguardas={salvaguardas}
+            temSentidoDePerigo={temSentidoDePerigo}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             proficienciasFerramenta={proficienciasFerramenta}
             onDescansoLongo={() => iniciarDescanso('longo')}
@@ -1951,6 +1963,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               ativa: furiaAtiva,
               bonusDano: furiaBonusDano,
               onUsar: usarFuria,
+            }}
+            ataqueImprudente={{
+              disponivel: temAtaqueImprudente,
+              ativo: ataqueImprudenteAtivo,
+              onAtivar: () => setAtaqueImprudenteAtivo(true),
             }}
             maosCurativas={{
               disponivel: maosCurativasDisponivel,

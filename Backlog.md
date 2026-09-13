@@ -7,6 +7,25 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
+## Ferramenta genérica de tracking de status/efeitos ativos (2026-09)
+
+Sugestão do Osmar ao planejar Ataque Imprudente (Bárbaro, B4.1): em vez
+de cada característica nova inventar seu próprio par de estado/UI
+ad-hoc (Fúria, Forma Grande, Ataque Imprudente hoje já são 3 versões
+parecidas-mas-não-iguais de "liga/desliga, afeta X"), construir uma
+ferramenta central que rastreie "status ativos" na Ficha (nome,
+duração/gatilho de fim, o que cada um afeta — Vantagem em tal coisa,
+Resistência a tal dano, bônus de dano condicional, etc.) e aplique
+esses efeitos automaticamente em qualquer rolagem/cálculo relevante.
+
+Decidido (com o Osmar) NÃO fazer agora, em cima só do Ataque
+Imprudente — vale a pena como foco próprio depois, com PM+SDD direito:
+precisa decidir o modelo de duração (turno/minutos/até condição X),
+como N status simultâneos aparecem na tela sem virar bagunça, e olhar
+pra frente pros próximos casos conhecidos que ela precisaria cobrir
+(Golpe Brutal, as 4 Trilhas do Bárbaro, futuro Ataque Furtivo do
+Ladino) antes de fixar a forma genérica.
+
 ## Magias — dano condicional/à escolha não coberto pelo motor padrão (2026-09)
 
 Achado durante a auditoria do dado alternativo de Badalar Fúnebre (ver

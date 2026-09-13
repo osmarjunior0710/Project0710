@@ -451,6 +451,18 @@ export function calcularSalvaguardas(selection: WizardSelection, classeOriginal:
     .filter((s): s is SalvaguardaFinal => s !== null);
 }
 
+/** Combina 2 fontes independentes de Vantagem/Desvantagem na MESMA
+ * rolagem numa só — regra real (Cap. 1, "Vantagem e Desvantagem"): se
+ * a mesma jogada tiver as duas ao mesmo tempo, elas se cancelam (não
+ * vira nem Vantagem nem Desvantagem). 1ª vez que o app precisa disso
+ * — Ataque Imprudente/Sentido de Perigo (Bárbaro) podem coincidir com
+ * a Desvantagem de Armadura sem treino (`desvantagemForcaDestreza`)
+ * na mesma rolagem. */
+export function resolverVantagem(temVantagem: boolean, temDesvantagem: boolean): 'vantagem' | 'desvantagem' | undefined {
+  if (temVantagem === temDesvantagem) return undefined;
+  return temVantagem ? 'vantagem' : 'desvantagem';
+}
+
 /** As 18 perícias do jogo, sempre — não só as proficientes. Cada uma
  * traz o Bônus de Proficiência certo pro estado do personagem:
  * dobrado se for Especialista, inteiro se só proficiente, metade
