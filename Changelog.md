@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2039
+
+Corrigido: o dado físico tinha ficado minúsculo depois do popup de
+rolagem mudar de lugar (efeito colateral não percebido antes). Ajustado
+pra ficar um pouco menor que o tamanho de antes, mas nada perto do
+tamanho minúsculo que apareceu.
+
 ## v202609_1914
 
 Bárbaro — Ataque Imprudente e Sentido de Perigo (nível 2) chegaram. No

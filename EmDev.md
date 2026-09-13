@@ -221,6 +221,12 @@ entregas no celular.
       Verificado: `tsc -b`/`npm test` (532)/`npm run build` limpos +
       Playwright (rolagem cai com folga da borda, popup ancorado
       embaixo, ✕ fecha corretamente).
+- [x] **Dado ficou minúsculo** — efeito colateral do canvas menor
+      acima (a lib escala o dado pelo tamanho do container). Corrigido
+      com `scale: 6.2` explícito em `diceBox3d.ts` (padrão da lib é 5),
+      calibrado visualmente via Playwright pra ficar uns 20% menor que
+      o tamanho original (não o tamanho minúsculo que tinha ficado).
+      Ver `DECISOES-COMBATE.md`.
 
 ### Redesenho do FAB avulso (Fase A) — coluna de botões em vez de overlay escuro
 

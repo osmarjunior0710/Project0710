@@ -23,6 +23,13 @@ export function carregarDiceBox3D(): Promise<DiceBox> {
       container: `#${DICE3D_CANVAS_HOST_ID}`,
       assetPath: `${import.meta.env.BASE_URL}assets/`,
       theme: 'default',
+      // Compensa o canvas ter ficado menor (área de física ajustada
+      // pro popup reancorado embaixo, ver Dice3dFab.module.css) — a
+      // lib recalcula o tamanho do dado com base no espaço disponível,
+      // então um canvas menor sozinho deixava o dado minúsculo. Padrão
+      // da lib é 5; achado testando no celular (pedido do Osmar: "uns
+      // 20% menor que o tamanho original", não do tamanho que ficou).
+      scale: 6.2,
     });
     await box.init();
     diceBoxRef = box;

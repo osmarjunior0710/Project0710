@@ -604,6 +604,20 @@ reancorado embaixo). Valores fixos por estimativa, não calculados
 dinamicamente — ajustar se algum estado específico do card (muitas
 opções ao mesmo tempo) empurrar o topo do card pra além dessa faixa.
 
+**Efeito colateral do canvas menor — dado ficou minúsculo (achado
+testando no celular logo depois):** a lib calcula o tamanho visual do
+dado com base no espaço disponível do container (`config.scale`,
+padrão `5`) — encolher o canvas pro popup reancorado (acima) também
+encolheu o dado sem querer, bem mais do que os ~20% menores que o
+Osmar quis. Corrigido passando `scale: 6.2` explícito em
+`diceBox3d.ts` (`carregarDiceBox3D`) pra compensar — valor calibrado
+visualmente via Playwright (não tem fórmula exata pra "20% menor que
+o tamanho antigo", foi ajuste por olho comparando screenshots).
+**Padrão pra lembrar:** qualquer mudança futura no TAMANHO do
+container do canvas físico (`Dice3dFab.module.css` `.canvasWrapper`)
+pode precisar recalibrar esse `scale` junto — os dois não são
+independentes nesta lib.
+
 O canvas físico continua cobrindo a tela inteira (precisa do espaço
 pra física cair), mas agora com `pointer-events: none` e SEM fundo —
 o dado cai visível por cima do conteúdo normal da Ficha, não mais
