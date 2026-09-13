@@ -429,6 +429,30 @@ fecham uma rolagem 'd20' — usados pelos 4 caminhos (2D simples, 2D
 Vantagem, 3D simples, 3D Vantagem) evitando duplicar a lógica de
 total/crítico entre eles.
 
+**Fase B4 (feito) — 2º dado pós-resultado e reroll físicos:**
+`@3d-dice/dice-box` não publica `.d.ts` — os tipos de `add()`/
+`reroll()` em `types/dice-box.d.ts` foram lidos direto do bundle
+minificado da lib (`node_modules/@3d-dice/dice-box/dist/
+dice-box.es.js`), já que a doc pública não cobre esses 2 métodos.
+`DiceBoxResultado` ganhou `[key: string]: unknown` de propósito — o
+objeto que a lib devolve em `onRollComplete` tem campos internos
+minificados (`rollId`/`groupId`/etc.) que o app nunca precisa NOMEAR,
+só guardar inteiro (`RollState.resultadoBrutoD20`) e repassar de volta
+pra `reroll()` — casar contra o formato exato desses campos seria
+frágil (a lib pode mudá-los numa atualização) e desnecessário.
+
+- **`escolherVantagemPosRolagem`** (Vantagem/Desvantagem escolhida SÓ
+  depois de ver o resultado): usa `box.add('1d20')` — diferente de
+  `.roll()`, não limpa o dado que já está parado na cena, então o 2º
+  cai do lado do 1º.
+- **`usarSorte`/`usarInspiracaoHeroica`**: usam `box.reroll(resultadoBruto,
+  {remove: true})` pra rerolar FISICAMENTE só aquele dado específico,
+  removendo o antigo da cena.
+- **Fora de escopo, registrado no Backlog quando for a vez:** reroll de
+  DANO (Perfurador) continua 2D — `rolarDados` em si ainda não usa o
+  motor 3D pra nenhum tipo de dado (só d20 até aqui), então não tem
+  resultado físico pra rerolar ainda.
+
 **Data/origem:** 2026-09, pedido do Osmar.
 
 ## Roteamento Ação/Ação Bônus/Reação de magia é só o Tempo de Conjuração da própria magia

@@ -1,4 +1,5 @@
 import type DiceBox from '@3d-dice/dice-box';
+export type { DiceBoxResultado } from '@3d-dice/dice-box';
 
 /** Dono único do motor `@3d-dice/dice-box` — antes vivia dentro de
  * `Dice3dFab.tsx` (ferramenta avulsa), agora é compartilhado com

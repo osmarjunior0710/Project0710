@@ -109,6 +109,38 @@ motor 3D (`box.roll(['1d20','1d20'])`) — hoje continua 2D mesmo com
 Heroica, Perfurador) e escolha de Vantagem/Desvantagem DEPOIS de ver o
 1º resultado (`box.add('1d20')`) — ver `sdd/sdd-dado-3d.md`.
 
+### B4 — Escolha de Vantagem/Desvantagem DEPOIS do resultado, e reroll (Sorte/Inspiração Heroica) físicos
+
+- [x] `escolherVantagemPosRolagem`: quando o 1º dado já veio do motor
+      3D (`estado.motor3D`) e `dado3DAtivo`, o 2º dado (escolhido só
+      DEPOIS de ver o resultado) usa `box.add('1d20')` — joga um dado
+      A MAIS na cena SEM limpar o que já parou (diferente de
+      `.roll()`). Cai pro 2D se o motor 3D falhar.
+- [x] `usarSorte`/`usarInspiracaoHeroica`: quando o d20 sendo rerolado
+      veio do motor 3D, usa `box.reroll(resultadoBruto, {remove:
+      true})` — rerola FISICAMENTE só aquele dado, removendo o
+      antigo da cena. Precisou guardar o objeto BRUTO que a lib
+      devolve (`RollState.resultadoBrutoD20`, tipo `DiceBoxResultado`
+      com `[key: string]: unknown` — o app nunca lê os campos
+      internos dele, só repassa de volta pra `reroll()`).
+      `dice-box.d.ts` ganhou os tipos de `add()`/`reroll()` (lidos
+      direto do bundle minificado da lib, que não publica `.d.ts`).
+- **Fora de escopo (Perfurador):** reroll de dano (`rerollDadoEscolhido`/
+  `usarRerollSe1`) continua 2D — dano com múltiplos dados em si ainda
+  não usa o motor 3D (`rolarDados` 100% `Math.random()`), então não
+  tem o que rerolar fisicamente ainda; só entra quando o motor 3D
+  cobrir rolagem de dano também (fora do escopo do SDD atual, focado
+  em d20).
+  Verificado: `tsc -b`/`npm test` (519)/`npm run build` limpos +
+  Playwright (atributo sem Vantagem pré-declarada → rola físico →
+  escolhe "Vantagem" depois do resultado → 2º dado físico entra na
+  cena via `box.add`, sem `DadoVisual` CSS, total recalcula certo).
+  Sorte/Inspiração Heroica não testados via Playwright (dependem de um
+  d20 físico sair 1 ou de uma característica específica — evento raro
+  de forçar num teste automatizado) — o fallback pro 2D em caso de erro
+  garante que nunca trava, mas vale um teste manual no celular com um
+  Pequenino antes de considerar 100% validado.
+
 ## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade) — PAUSADO, retomar depois do Dado 3D
 
 77 talentos ainda sem efeito mecânico, em 5 categorias (Geral 42,

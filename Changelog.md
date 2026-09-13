@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1334
+
+Dado 3D — mais 2 casos usam física de verdade agora: escolher
+Vantagem/Desvantagem só DEPOIS de ver o resultado do 1º dado (o 2º
+entra fisicamente do lado dele), e rerolar o d20 com Sorte (Pequenino)
+ou Inspiração Heroica. Reroll de dano (Perfurador) continua no dado
+clássico por enquanto.
+
 ## v202609_1224
 
 Dado 3D — Vantagem/Desvantagem já decidida de antemão (ex.: com
