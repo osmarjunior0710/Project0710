@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1432
+
+Vinheta de Fúria mais suave (feedback do Osmar: "ficou muito
+vermelho") — o vermelho nas bordas da tela começa mais pra fora e a
+opacidade máxima caiu bem, tanto no degradê quanto no pulso.
+
 ## v202609_1424
 
 Ajustes no card de Fúria (feedback do Osmar testando no celular): texto
