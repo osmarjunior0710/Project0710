@@ -6,6 +6,7 @@ import {
   calcularModAtaque,
   classeEhProficiente,
   construirCatalogoLoja,
+  itensAdquiridosPorKits,
   type GrupoLoja,
   type LojaItem,
 } from './loja';
@@ -65,6 +66,62 @@ describe('calcularCustoCarrinho', () => {
 
   it('borda: carrinho vazio soma 0', () => {
     expect(calcularCustoCarrinho([], catalogo)).toBe(0);
+  });
+});
+
+describe('itensAdquiridosPorKits', () => {
+  const catalogo: GrupoLoja[] = [
+    {
+      id: 'kits',
+      titulo: 'Kits',
+      itens: [
+        {
+          nome: 'Kit de Aventureiro',
+          grupo: 'kits',
+          custoTexto: '10 PO',
+          custoPO: 10,
+          peso: '27,5 kg',
+          conteudoKit: [
+            { nome: 'Corda', quantidade: 1 },
+            { nome: 'Óleo', quantidade: 2 },
+          ],
+        } as LojaItem,
+        {
+          nome: 'Kit de Sacerdote',
+          grupo: 'kits',
+          custoTexto: '33 PO',
+          custoPO: 33,
+          peso: '14,5 kg',
+          conteudoKit: [{ nome: 'Óleo', quantidade: 1 }],
+        } as LojaItem,
+      ],
+    },
+    {
+      id: 'equipamento-aventura',
+      titulo: 'Equipamento de Aventura',
+      itens: [{ nome: 'Corda', grupo: 'equipamento-aventura', custoTexto: '1 PO', custoPO: 1, peso: '2,5 kg' } as LojaItem],
+    },
+  ];
+
+  it('marca os itens do kit comprado, multiplicando pela quantidade de kits', () => {
+    const resultado = itensAdquiridosPorKits([{ nome: 'Kit de Aventureiro', quantidade: 2 }], catalogo);
+    expect(resultado.get('Corda')).toEqual({ quantidade: 2, kits: ['Kit de Aventureiro'] });
+    expect(resultado.get('Óleo')).toEqual({ quantidade: 4, kits: ['Kit de Aventureiro'] });
+  });
+
+  it('soma e lista os 2 kits quando o mesmo item vem de mais de 1 kit no carrinho', () => {
+    const resultado = itensAdquiridosPorKits(
+      [
+        { nome: 'Kit de Aventureiro', quantidade: 1 },
+        { nome: 'Kit de Sacerdote', quantidade: 1 },
+      ],
+      catalogo,
+    );
+    expect(resultado.get('Óleo')).toEqual({ quantidade: 3, kits: ['Kit de Aventureiro', 'Kit de Sacerdote'] });
+  });
+
+  it('borda: nenhum kit no carrinho devolve mapa vazio', () => {
+    expect(itensAdquiridosPorKits([], catalogo).size).toBe(0);
   });
 });
 

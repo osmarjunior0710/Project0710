@@ -775,3 +775,23 @@ schema diferente).
 
 **Data/origem:** 2026-09. Pedido do Osmar pra implementar a Origem
 Nobre.
+
+## Loja — Kit marca os itens que ele já inclui (reaproveita `DESAGREGACAO_KITS`, não duplica)
+
+**Decisão:** comprar um Kit (ex.: Kit de Diplomata) marca cada item
+individual da Loja que já veio incluído nele — "Nx adquirido por Kit
+de X" abaixo do stepper `-`/`+`, mesmo tratamento visual do "já
+possui" das Perícias/Ferramentas (`<span className="tag">`). Se o
+item vier de mais de 1 Kit comprado ao mesmo tempo, soma a quantidade
+e lista os Kits (`core/loja.ts` `itensAdquiridosPorKits`). Não bloqueia
+comprar o item de novo por fora do Kit — só avisa que já tem.
+
+**Fonte do conteúdo do Kit — reaproveitada, não recriada:**
+`core/mochila.ts` já tinha `DESAGREGACAO_KITS` (criado antes, pra
+desagregar o Kit em itens de verdade na Mochila) com a mesma lista
+item-a-item verificada contra a aba "Kits — Conteúdo" da planilha
+mestra. `loja.ts` importa essa mesma constante em vez de duplicar a
+lista em `data/` — evita 2 cópias divergindo se um Kit for corrigido
+depois (só teve que exportar a constante que já existia).
+
+**Data/origem:** 2026-09, pedido do Osmar.

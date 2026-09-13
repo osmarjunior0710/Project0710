@@ -5,7 +5,9 @@ import {
   classeEhProficiente,
   construirCatalogoLoja,
   formatarPO,
+  itensAdquiridosPorKits,
   type GrupoLoja,
+  type ItemAdquiridoPorKit,
   type LojaItem,
 } from '../../../core/loja';
 import { calcularOuroInicial } from '../../../core/calculoPersonagem';
@@ -33,7 +35,19 @@ function quantidadeNoCarrinho(selection: StepProps['selection'], nome: string): 
   return selection.itens.find((i) => i.nome === nome)?.quantidade ?? 0;
 }
 
-function ItemCard({ item, selection, update, ouroRestante }: { item: LojaItem; selection: StepProps['selection']; update: StepProps['update']; ouroRestante: number }) {
+function ItemCard({
+  item,
+  selection,
+  update,
+  ouroRestante,
+  adquiridoPorKit,
+}: {
+  item: LojaItem;
+  selection: StepProps['selection'];
+  update: StepProps['update'];
+  ouroRestante: number;
+  adquiridoPorKit?: ItemAdquiridoPorKit;
+}) {
   const qtd = quantidadeNoCarrinho(selection, item.nome);
   const podeComprar = item.custoPO !== null && item.custoPO <= ouroRestante;
 
@@ -121,6 +135,13 @@ function ItemCard({ item, selection, update, ouroRestante }: { item: LojaItem; s
           +
         </button>
       </div>
+      {adquiridoPorKit && (
+        <div className={styles.adquiridoPorKitRow}>
+          <span className="tag">
+            {adquiridoPorKit.quantidade}x adquirido por {adquiridoPorKit.kits.join(', ')}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -158,7 +179,21 @@ function EquipadoResumo({ titulo, itens }: { titulo: string; itens: ItemMochila[
   );
 }
 
-function Grupo({ grupo, selection, update, ouroRestante, soProficiente }: { grupo: GrupoLoja; selection: StepProps['selection']; update: StepProps['update']; ouroRestante: number; soProficiente: boolean }) {
+function Grupo({
+  grupo,
+  selection,
+  update,
+  ouroRestante,
+  soProficiente,
+  adquiridosPorKits,
+}: {
+  grupo: GrupoLoja;
+  selection: StepProps['selection'];
+  update: StepProps['update'];
+  ouroRestante: number;
+  soProficiente: boolean;
+  adquiridosPorKits: Map<string, ItemAdquiridoPorKit>;
+}) {
   const [aberto, setAberto] = useState(false);
   const itensVisiveis = soProficiente && GRUPOS_ARMA_ARMADURA.has(grupo.id) ? grupo.itens.filter((it) => classeEhProficiente(selection, it)) : grupo.itens;
 
@@ -193,7 +228,14 @@ function Grupo({ grupo, selection, update, ouroRestante, soProficiente }: { grup
 
       {aberto &&
         itensVisiveis.map((item) => (
-          <ItemCard key={item.nome} item={item} selection={selection} update={update} ouroRestante={ouroRestante} />
+          <ItemCard
+            key={item.nome}
+            item={item}
+            selection={selection}
+            update={update}
+            ouroRestante={ouroRestante}
+            adquiridoPorKit={adquiridosPorKits.get(item.nome)}
+          />
         ))}
     </div>
   );
@@ -204,6 +246,7 @@ export default function LojaStep({ selection, update }: StepProps) {
   const ouroInicial = calcularOuroInicial(selection);
   const custoCarrinho = calcularCustoCarrinho(selection.itens, catalogo);
   const ouroRestante = Math.round((ouroInicial - custoCarrinho) * 100) / 100;
+  const adquiridosPorKits = itensAdquiridosPorKits(selection.itens, catalogo);
 
   const itensMochila = calcularItensIniciais(selection);
   const carga = calcularCargaTotal(itensMochila);
@@ -251,7 +294,15 @@ export default function LojaStep({ selection, update }: StepProps) {
 
       <div className="section-title">Itens à venda</div>
       {catalogo.map((grupo) => (
-        <Grupo key={grupo.id} grupo={grupo} selection={selection} update={update} ouroRestante={ouroRestante} soProficiente={soProficiente} />
+        <Grupo
+          key={grupo.id}
+          grupo={grupo}
+          selection={selection}
+          update={update}
+          ouroRestante={ouroRestante}
+          soProficiente={soProficiente}
+          adquiridosPorKits={adquiridosPorKits}
+        />
       ))}
     </>
   );

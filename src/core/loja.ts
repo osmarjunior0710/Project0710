@@ -12,6 +12,7 @@ import { equipamentoAventura } from '../data/rulesets/dnd2024/equipamentoAventur
 import { gruposFerramenta } from '../data/rulesets/dnd2024/ferramentas';
 import { proficienciasArmaArmaduraClasse } from '../data/rulesets/dnd2024/proficienciasArmaArmaduraClasse';
 import { classeDaSelecao } from './calculoPersonagem';
+import { DESAGREGACAO_KITS } from './mochila';
 import { modificador, valorFinalAtributo, type WizardSelection } from './personagem';
 
 export interface ItemCarrinho {
@@ -47,6 +48,10 @@ export interface LojaItem {
   furtividade?: string;
   atributo?: string;
   efeito?: string;
+  /** Só em Kits — mesma desagregação já usada pra montar a Mochila
+   * quando o kit é comprado (`core/mochila.ts` `DESAGREGACAO_KITS`),
+   * reaproveitada aqui em vez de duplicar a lista. */
+  conteudoKit?: { nome: string; quantidade: number }[];
 }
 
 export interface GrupoLoja {
@@ -163,6 +168,7 @@ export function construirCatalogoLoja(): GrupoLoja[] {
       custoPO: parseCustoPO(it.custo),
       peso: it.peso,
       efeito: it.descricaoCurta ?? undefined,
+      conteudoKit: DESAGREGACAO_KITS[it.nome],
     });
   }
 
@@ -240,6 +246,40 @@ export function classeEhProficiente(selection: WizardSelection, item: LojaItem):
   if (item.grupo === 'armadura-pesada') return linha.treinamentoArmadura.includes('Pesada');
   if (item.grupo === 'escudos') return linha.treinamentoArmadura.includes('Escudo');
   return true;
+}
+
+export interface ItemAdquiridoPorKit {
+  quantidade: number;
+  kits: string[];
+}
+
+/** Pra cada item da Loja que faz parte de algum Kit já no carrinho
+ * (quantidade > 0), soma quanto veio de kit (kits repetidos multiplicam
+ * a quantidade do kit) e lista os kits que contribuíram — mesmo item
+ * pode vir de mais de um Kit ao mesmo tempo (ex.: Caixa para Fogo está
+ * em quase todos). Usado pra marcar "Nx adquirido pelo kit X" na Loja,
+ * mesmo tratamento visual do "já possui" das Perícias. */
+export function itensAdquiridosPorKits(carrinho: ItemCarrinho[], catalogo: GrupoLoja[]): Map<string, ItemAdquiridoPorKit> {
+  const resultado = new Map<string, ItemAdquiridoPorKit>();
+  const kitsNoCarrinho = catalogo
+    .flatMap((g) => g.itens)
+    .filter((item) => item.conteudoKit && item.conteudoKit.length > 0)
+    .map((item) => ({ item, qtdComprada: carrinho.find((c) => c.nome === item.nome)?.quantidade ?? 0 }))
+    .filter((x) => x.qtdComprada > 0);
+
+  for (const { item: kit, qtdComprada } of kitsNoCarrinho) {
+    for (const { nome: nomeItem, quantidade } of kit.conteudoKit!) {
+      const existente = resultado.get(nomeItem);
+      const somado = quantidade * qtdComprada;
+      if (existente) {
+        existente.quantidade += somado;
+        existente.kits.push(kit.nome);
+      } else {
+        resultado.set(nomeItem, { quantidade: somado, kits: [kit.nome] });
+      }
+    }
+  }
+  return resultado;
 }
 
 /** Soma o custo (em PO) dos itens no carrinho, usando o catálogo pra

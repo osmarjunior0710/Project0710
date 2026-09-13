@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2220
+
+Loja (wizard) — comprar um Kit (ex.: Kit de Diplomata) agora marca cada
+item individual que já vem incluído nele, com uma tag "Nx adquirido
+por Kit de X" abaixo do +/- do item. Se o item vier de mais de um Kit
+comprado ao mesmo tempo, mostra a soma e lista os Kits.
+
 ## v202609_2149
 
 Pets — remover um pet agora pede confirmação: 1º toque no ✕ arma o

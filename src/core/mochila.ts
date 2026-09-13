@@ -143,7 +143,7 @@ const PLACEHOLDERS_FERRAMENTA = ['Instrumento Musical', 'Ferramentas de Artesão
  * desagregáveis (são item único de uso próprio, não um saco de itens)
  * — confirmado pela mesma aba, que não lista itens pra eles.
  */
-const DESAGREGACAO_KITS: Record<string, { nome: string; quantidade: number }[]> = {
+export const DESAGREGACAO_KITS: Record<string, { nome: string; quantidade: number }[]> = {
   'Kit de Explorador de Masmorras': [
     { nome: 'Caixa para Fogo', quantidade: 1 },
     { nome: 'Cantil (cheio)', quantidade: 1 },

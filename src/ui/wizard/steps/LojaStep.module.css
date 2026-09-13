@@ -199,6 +199,12 @@
   margin-top: var(--space-2);
 }
 
+.adquiridoPorKitRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-1);
+}
+
 .stepperBtn {
   width: 32px;
   height: 32px;
