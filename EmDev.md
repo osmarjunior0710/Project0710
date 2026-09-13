@@ -141,6 +141,49 @@ Heroica, Perfurador) e escolha de Vantagem/Desvantagem DEPOIS de ver o
   garante que nunca trava, mas vale um teste manual no celular com um
   Pequenino antes de considerar 100% validado.
 
+### B5 — Rolagem de DANO também usa o motor 3D (Perfurador físico)
+
+Pedido do Osmar: fechar a lacuna que o B4 deixou de fora (`rolarDados`
+continuava 100% `Math.random()`) enquanto ele testava as outras
+entregas no celular.
+
+- [x] `rolarDados`: com `dado3DAtivo`, rola fisicamente tanto o caso de
+      1 dado só (`box.roll({qty:1, sides})`) quanto o grid de 2+ dados/
+      grupos mistos (`box.roll([{qty:1,sides},...])`, um grupo `qty:1`
+      por dado — precisa ser assim, não `qty:N`, pra conseguir mapear
+      `resultados[i]` de volta pro `DadoIndividual` certo). Cai pro 2D
+      se o motor 3D falhar, mesmo padrão de `rolarD20`.
+- [x] **Decisão de UI sem precisar perguntar de novo** (já é o padrão
+      estabelecido no B2/B3 pro `RollOverlay`): dado ÚNICO some da UI
+      (CSS) igual ao d20 simples — o físico é a única coisa visível.
+      GRID (2+ dados) é DIFERENTE de propósito: continua desenhando os
+      ícones normalmente MESMO com `motor3D` — o grid não é "o mesmo
+      dado duplicado" (motivo de esconder no d20), é a UI de escolher
+      QUAL dado rerolar (Perfurador); esconder ele quebraria essa
+      interação, já que não dá pra saber em qual dado físico específico
+      o jogador tocou na tela. O dado físico caindo vira só reforço
+      visual atrás do card, o grid continua sendo a fonte de verdade
+      clicável — não precisou inventar nenhuma interação nova.
+- [x] `rerollDadoEscolhido`/`usarRerollSe1`: quando o dado (do grid,
+      por `id`, ou o único da rolagem sem grid) tinha vindo do motor
+      3D, usa `box.reroll(resultadoBruto, {remove:true})` — mesmo
+      padrão do B4 pro d20. Precisou de `DadoIndividual.resultadoBruto`
+      (bruto por dado, pro caso do grid) e `RollState.resultadoBrutoDados`
+      (bruto único, pro caso sem grid) — os 2 novos campos espelham o
+      `resultadoBrutoD20` que já existia.
+- [x] `ladosParaLib()`: d100 de dano (nunca usado hoje, mas o tipo
+      `LadosDado` permite) precisa de `sides: "100"` (string) igual o
+      avulso — sem isso quebraria se algum dia usado.
+      Verificado: `tsc -b`/`npm test` (529)/`npm run build` limpos +
+      Playwright (Guerreiro com Espada Grande equipada, 2d6+1 físico:
+      2 dados caem no fundo, grid mostra os 2 valores, total bate;
+      Ataque Desarmado, 1d1-1 físico: nenhum `DadoVisual` CSS aparece,
+      só o total). Perfurador/reroll físico do grid não testado via
+      Playwright (precisa de personagem com o talento — mesma limitação
+      de forçar cenário raro já registrada no B4) — o fallback 2D
+      garante que nunca trava, mas vale teste manual se o Osmar tiver
+      um personagem com Perfurador à mão.
+
 ### Redesenho do FAB avulso (Fase A) — coluna de botões em vez de overlay escuro
 
 Pedido do Osmar depois do B4: o FAB avulso (🎲, ferramenta solta, não

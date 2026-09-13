@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1518
+
+Dado 3D — a rolagem de DANO (ataque/magia/talento) também usa física de
+verdade agora, com Dado 3D ligado: 1 dado só cai fisicamente na tela
+(sem o dado de mentirinha aparecendo mais); 2+ dados (Espada Grande,
+etc.) caem fisicamente ATRÁS do card, que continua mostrando o valor de
+cada um pra você conferir/escolher qual rerolar (Perfurador). Total bate
+igual sempre.
+
 ## v202609_1502
 
 Vinheta de Fúria (pedido do Osmar) — removida a faixa vermelha do

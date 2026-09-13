@@ -453,6 +453,38 @@ frágil (a lib pode mudá-los numa atualização) e desnecessário.
   motor 3D pra nenhum tipo de dado (só d20 até aqui), então não tem
   resultado físico pra rerolar ainda.
 
+**Fase B5 (feito) — rolagem de DANO também física:** `rolarDados`
+ganhou o mesmo tratamento do d20 (B2/B3), com uma diferença de UI
+importante — **padrão pra qualquer rolagem futura com "grid de dados
+individuais" (`RollState.dadosIndividuais`):**
+
+- **1 dado só:** esconde o `DadoVisual` CSS igual ao d20 simples — o
+  físico é a única coisa visível, sem ambiguidade nenhuma de "qual
+  dado" (só existe 1).
+- **Grid de 2+ dados:** o grid CONTINUA desenhando os ícones
+  normalmente, mesmo com `motor3D: true` — **diferente** do d20/dado
+  único. Motivo: pro d20, esconder o CSS evita "2 dados iguais na
+  tela" (duplicação); pro grid, os ícones NÃO são duplicação — são a
+  UI de ESCOLHER qual dado rerolar (Perfurador). Esconder o grid
+  quebraria essa interação (não tem como saber em qual dado FÍSICO
+  específico o jogador tocou na tela, a lib não expõe picking por
+  clique). Solução: o dado físico cai como reforço visual atrás do
+  card, o grid continua sendo a fonte de verdade clicável, com os
+  MESMOS valores da física — nenhuma interação nova, nenhuma pergunta
+  pro Osmar necessária, só uma leitura cuidadosa do padrão já existente
+  (B2/B3) antes de aplicar em cima do grid.
+- Reroll físico (`rerollDadoEscolhido`/`usarRerollSe1`) segue o mesmo
+  `box.reroll(resultadoBruto, {remove:true})` do B4, só que por-dado:
+  `DadoIndividual` ganhou `resultadoBruto?: DiceBoxResultado` (grid) e
+  `RollState` ganhou `resultadoBrutoDados?: DiceBoxResultado` (dado
+  único, espelha `resultadoBrutoD20`) — cada grupo de notação vai pro
+  motor como `{qty:1, sides}` (um grupo por dado, nunca `qty:N`), única
+  forma de mapear `resultados[i]` de volta pro dado certo do grid.
+- Dado d100 (não usado em dano hoje, mas o tipo `LadosDado` permite)
+  precisa de `sides: "100"` STRING pro caso especial de face única da
+  lib — mesmo detalhe do avulso (`Dice3dFab.tsx`), agora extraído pra
+  `ladosParaLib()` compartilhada.
+
 **Redesenho do FAB avulso (Fase A) — coluna de botões, sem overlay
 escuro, cor fixa por tipo de dado:** o `Dice3dFab.tsx` (ferramenta
 avulsa) trocou o overlay preto cobrindo a tela toda por uma coluna de
