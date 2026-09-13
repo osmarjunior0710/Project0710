@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1456
+
+Vinheta de Fúria trocou de degradê radial pra 2 degradês lineares
+(horizontal e vertical, pedido do Osmar) — a faixa vermelha agora fica
+uniforme ao longo de toda a borda (não só mais forte nos cantos),
+transparente até 90% da tela e só aparecendo nos últimos 10%.
+
 ## v202609_1432
 
 Vinheta de Fúria mais suave (feedback do Osmar: "ficou muito
