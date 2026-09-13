@@ -118,6 +118,23 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       Descanso Curto devolveu 1 uso sem desligar a Fúria já ativa,
       Descanso Longo zerou usos gastos e desligou. Zero erro de
       console.
+- [x] **B3.1 — Ajustes de UI no card de Fúria (feedback do Osmar
+      testando no celular):** texto dos efeitos quebrado em 3 linhas
+      (Resistência / Dano da Fúria / Vantagem, em vez de 1 parágrafo
+      só); botão "Encerrar Fúria" perdeu o `padding`/`fontSize`
+      reduzidos que deixavam ele "maior que o texto" (volta ao `.btn`
+      padrão) e ganhou destaque vermelho suave (fundo/borda). Charme
+      novo pedido pelo Osmar: enquanto a Fúria está ativa, uma vinheta
+      vermelha pulsa nas bordas da tela (degradê transparente no
+      centro → vermelho nos últimos pixels) com 16 partículas fixas
+      emanando de fora pra dentro pelas 4 bordas — tudo
+      `position: fixed`/`pointer-events: none`/`z-index: -1` (mesmo
+      raciocínio do `.piscadaOverlay` já existente, só que atrás de
+      tudo em vez de na frente), então nunca atrapalha toque em botão.
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (529)/`npm run build` limpos + Playwright: vinheta some ao
+      encerrar a Fúria, botão continua clicável através da camada
+      decorativa.
 - [ ] **B4 — Resto da progressão base (sem subclasse):** Ataque
       Imprudente, Sentido de Perigo, Conhecimento Primordial
       (perícia extra + Força no lugar de outro atributo em Fúria),
