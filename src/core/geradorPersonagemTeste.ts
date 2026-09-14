@@ -234,8 +234,15 @@ function aplicarLevelUpsAleatorios(
   for (let nivel = 2; nivel <= nivelAlvo; nivel++) {
     pvMax += mediaPvPorNivel;
 
-    if (classe.nivelSubclasse === nivel && !subclasseAtual && subclassesDaClasse.length > 0) {
-      subclasseAtual = subclasseForcada ?? sorteiaUm(subclassesDaClasse)?.nome ?? null;
+    if (classe.nivelSubclasse === nivel && !subclasseAtual) {
+      // Mesma regra de `sortearLevelUpRapido`/`LevelUpShell` (ver
+      // CLAUDE.md/EmDevB.md B4.2.1): nunca sorteia uma subclasse sem
+      // característica mecânica implementada ainda — fica `null` até
+      // a subclasse de verdade existir. `subclasseForcada` (escolha
+      // manual no dropdown de teste) continua valendo sempre — o
+      // dropdown já só oferece as implementadas.
+      const implementadas = subclassesDaClasse.filter((s) => subclasseImplementada(s.nome));
+      subclasseAtual = subclasseForcada ?? sorteiaUm(implementadas)?.nome ?? null;
     }
 
     if (temEstiloDeLutaTrocavel(classe, nivel) && !estiloDeLutaAtual) {

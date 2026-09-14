@@ -237,20 +237,41 @@ funcionar".
 
 **Data/origem:** 2026-08, plano "Colégio do Conhecimento".
 
-## Escolha de subclasse — versão placeholder até ganhar mecânica real
+## Escolha de subclasse — trava o passo (não deixa escolher) enquanto NENHUMA opção da classe tem mecânica real
 
-**Decisão:** o step de escolha de subclasse no Level Up sempre deixa
-escolher entre as opções REAIS da classe e salva o nome
-(`PersonagemSalvo.subclasseAtual`), mesmo sem nenhuma característica
-mecânica ainda — com aviso `[PH]` explícito (regra 12 do `CLAUDE.md`).
-Trocar o ícone do personagem na Lista já funciona desde a escolha,
-independente de mecânica implementada.
+**Decisão atual (substitui a versão "placeholder" de 2026-08 abaixo):**
+cada card de subclasse sem característica mecânica implementada
+(`subclasseImplementada(nome)`) aparece travado (`opacity`/
+`pointerEvents: none`, aviso `[PH]` "ainda não implementada") — não dá
+mais pra escolher uma subclasse sem mecânica, mesmo só como
+placeholder. Consequência direta: **o passo de escolha de subclasse só
+entra na sequência do Level Up (e só bloqueia o "Avançar") se sobrar
+PELO MENOS 1 opção da classe já implementada.** Enquanto nenhuma
+estiver pronta, o personagem segue pro próximo nível com subclasse
+`null` — sem tela, sem trava — e o passo reaparece sozinho (pro
+próximo Level Up de quem ainda não escolheu) assim que a 1ª subclasse
+da classe ganhar mecânica de verdade. Mesma regra vale pra qualquer
+lugar que auto-atribui subclasse sem passar pela tela (sorteio do "🎲
+Personagem de Teste" e do "⚡ Inst. Level Up") — nunca sorteia uma
+subclasse sem mecânica, sempre filtra por `subclasseImplementada`
+antes de sortear.
 
-**Prioridade do ícone na Lista de Personagens:** imagem própria do
-jogador > ícone da subclasse > ícone da classe > empate de nível,
-classe mais atual (últimos 2 critérios só relevantes com multiclasse).
+**Por que mudou:** a versão anterior (permitir escolher/salvar
+qualquer subclasse, mesmo travada, só como nome) nunca tinha sido
+exercitada de verdade até o Bárbaro (B4, 2026-09) — as classes
+anteriores sempre tiveram pelo menos 1 subclasse implementada antes de
+alguém chegar no nível de escolher. O Bárbaro chegou com as 4 Trilhas
+cadastradas (nome/id) e ZERO com mecânica ao mesmo tempo — travando o
+Level Up de verdade no nível 3 (todo card aparecia travado, sem opção
+de avançar). Ver `EmDevB.md` B4.2.1.
 
-**Data/origem:** 2026-08.
+**Prioridade do ícone na Lista de Personagens** (continua valendo,
+independente da regra acima): imagem própria do jogador > ícone da
+subclasse > ícone da classe > empate de nível, classe mais atual
+(últimos 2 critérios só relevantes com multiclasse).
+
+**Data/origem:** 2026-08 (decisão original) → 2026-09 (corrigida, ver
+acima).
 
 ## Talentos — arquitetura final (schema, classificador, motor de escolha)
 

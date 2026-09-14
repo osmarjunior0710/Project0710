@@ -264,6 +264,35 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       "⬆️ Level Up" que aparece — o passo de Subclasse não deve mais
       travar o avanço. Quando a 1ª Trilha (B5) entrar, o passo volta a
       aparecer normalmente pra quem ainda não escolheu.
+- [x] **B4.2.2 — Generaliza a correção do B4.2.1 (pedido do Osmar:
+      "faz isso com todas as anteriores e deixa como regra pras novas
+      também").** A correção do B4.2.1 (`LevelUpShell.tsx`) já era
+      genérica — não é código específico de Bárbaro, vale pra
+      qualquer classe/subclasse futura automaticamente. Conferido:
+      nenhuma classe anterior (Guerreiro/Bardo/Bruxo/Mago) tinha esse
+      bug — Guerreiro não tem NENHUMA subclasse cadastrada ainda
+      (nunca entrava no passo) e Bardo/Bruxo/Mago sempre têm pelo
+      menos 1 subclasse implementada. **Achado uma 2ª inconsistência
+      no caminho, corrigida junto:** `core/geradorPersonagemTeste.ts`
+      ("🎲 Personagem de Teste") sorteava subclasse de QUALQUER uma da
+      classe, sem filtrar por `subclasseImplementada` — diferente de
+      `sortearLevelUpRapido` ("⚡ Inst. Level Up"), que já filtrava
+      certinho. Corrigido pra usar o mesmo filtro (2 testes novos em
+      `geradorPersonagemTeste.test.ts`, esse módulo não tinha teste
+      nenhum antes). **Decisão registrada em `DECISOES-CLASSES.md`**
+      ("Escolha de subclasse — trava o passo..."), substituindo uma
+      entrada de 2026-08 que dizia o oposto (deixar escolher qualquer
+      subclasse como placeholder) — a UI já tinha divergido dessa
+      decisão antiga (cards travados) antes do Bárbaro expor o bug;
+      a entrada antiga nunca tinha sido corrigida pra refletir isso.
+      Essa é agora a regra permanente pra qualquer classe/subclasse
+      nova: nunca escolher/sortear (tela real ou ferramenta de teste)
+      uma subclasse sem mecânica implementada — nem como placeholder.
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (545)/`npm run build` limpos + Playwright: "🎲 Personagem de
+      Teste" gerando um Bárbaro nível 5 não mostra mais "(Trilha do
+      Berserker)" no cabeçalho da Ficha (antes mostrava, mesmo sem
+      nenhuma mecânica da Trilha funcionar).
 - [ ] **B4.3 — Ataque Extra + Movimento Rápido (nível 5):** conferir se
       já funcionam sozinhos sem código novo (Ataque Extra é genérico
       por ID já reaproveitado de outras classes; Movimento Rápido

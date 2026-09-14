@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0829
+
+Ajuste no "🎲 Personagem de Teste": gerar um Bárbaro de nível 3+ não
+atribui mais uma Trilha aleatória no nome da ficha (nenhuma tem
+mecânica pronta ainda) — mesma correção da publicação anterior,
+aplicada também nessa ferramenta.
+
 ## v202609_0759
 
 Corrigido: subir um Bárbaro de nível 2 pra 3 pelo Level Up normal (a
