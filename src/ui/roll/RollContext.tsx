@@ -1,7 +1,13 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { useColapsavel } from '../hooks/useColapsavel';
 import { suportaWebGL } from '../utils/suportaWebGL';
-import { carregarDiceBox3D, COR_POR_LADOS, garantirTemaDiceBox3D, type DiceBoxResultado } from './diceBox3d';
+import {
+  carregarDiceBox3D,
+  COR_POR_LADOS,
+  garantirTemaDiceBox3D,
+  lancarGrupos,
+  type DiceBoxResultado,
+} from './diceBox3d';
 
 type CritTipo = 'sucesso' | 'falha' | null;
 
@@ -556,8 +562,6 @@ export function RollProvider({ children }: { children: ReactNode }) {
       if (usar3D) {
         (async () => {
           try {
-            const box = await carregarDiceBox3D();
-            await garantirTemaDiceBox3D(box, 'default');
             if (vantagem) {
               // 1 grupo só ("2d20", não 2 notações "1d20" separadas) —
               // achado testando no celular: com 2 itens de notação
@@ -566,14 +570,12 @@ export function RollProvider({ children }: { children: ReactNode }) {
               // podia fazer os 2 dados físicos caírem com valores
               // diferentes na tela mas o mesmo valor no card/histórico.
               // Com 1 grupo só (qty:2), não tem 2 itens disputando nada.
-              box.onRollComplete = (resultados) => {
-                const [d1, d2] = resultados[0].rolls ?? [];
-                concluirVantagem(d1?.value ?? 0, d2?.value ?? 0, true);
-              };
-              box.roll({ qty: 2, sides: 20, themeColor: COR_POR_LADOS[20] });
+              const [grupo] = await lancarGrupos({ qty: 2, sides: 20 });
+              const [d1, d2] = grupo.rolls ?? [];
+              concluirVantagem(d1?.value ?? 0, d2?.value ?? 0, true);
             } else {
-              box.onRollComplete = (resultados) => concluirPlano(resultados[0].value, true, dadoBruto(resultados[0]));
-              box.roll({ qty: 1, sides: 20, themeColor: COR_POR_LADOS[20] });
+              const [grupo] = await lancarGrupos({ qty: 1, sides: 20 });
+              concluirPlano(grupo.value, true, dadoBruto(grupo));
             }
           } catch {
             timeoutRef.current = setTimeout(() => {
