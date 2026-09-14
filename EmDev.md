@@ -353,9 +353,17 @@ aprovado pelo Osmar:
       já registrada no B4/B6.4); é migração mecânica idêntica ao ramo
       `umDadoSo` já validado, risco baixo. Vale teste manual com uma
       arma de 2+ dados quando o Osmar tiver a chance.
-- [ ] **B6.6** — migrar o FAB avulso (`Dice3dFab.tsx`) — os "2 mundos"
-      (oficial e avulso) passam a usar a MESMA função, fim da
-      duplicação.
+- [x] **B6.6** — migrar o FAB avulso (`Dice3dFab.tsx`) pra
+      `lancarGrupos()` — os "2 mundos" (oficial e avulso) agora usam a
+      MESMA função, fim da duplicação. `rolarGenerico` caiu de ~25
+      linhas pra 13 (cor por tipo e fade já vêm de dentro da função
+      central, não precisa mais montar `themeColor`/`cancelarFadeDados`/
+      `agendarFadeDados` na mão). B6 fechado — todo o motor de dado 3D
+      (oficial e avulso) passa por `lancarGrupos()`/`rerolarGrupo()`.
+      Verificado: `tsc -b`/`npm test` (546)/`npm run build` limpos +
+      Playwright (d6 avulso → resultado 1; Múltiplos d6+d20 → 2 dados
+      físicos com cor certa — vermelho/d20, teal/d6 — total 18, Histórico
+      com as 2 entradas).
 
 Cada sub-entrega é uma troca "por trás", sem mudar nada visível —
 risco baixo, checklist de sempre a cada uma.
