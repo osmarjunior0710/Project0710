@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2109
+
+Corrigido: quando o dado 3D falhava de rolar 1 vez, o app ficava preso
+no dado clássico (2D) pelo resto da sessão, mesmo a área de física
+continuando visível. Agora, depois de qualquer falha, a próxima
+rolagem tenta o motor 3D de novo normalmente.
+
 ## v202609_2101
 
 Ajustado: a área preta de debug (temporária) tava deixando um espaço

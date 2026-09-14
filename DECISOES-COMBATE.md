@@ -618,6 +618,23 @@ container do canvas físico (`Dice3dFab.module.css` `.canvasWrapper`)
 pode precisar recalibrar esse `scale` junto — os dois não são
 independentes nesta lib.
 
+**Falha de init "gruda" pra sempre até recarregar a página (achado
+testando no celular: "chama o quadrado preto mas não vem o dado 3D e
+puxa o 2D"):** `carregarDiceBox3D()` guarda a promise de
+`box.init()` em `carregandoPromiseRef` (singleton, pra não criar 2
+instâncias) — mas se `box.init()` rejeitar por QUALQUER motivo
+passageiro (ex.: container com altura momentaneamente 0 durante uma
+mudança de layout do navegador mobile, erro de rede pontual), essa
+`ref` ficava presa na mesma promise REJEITADA pra sempre — toda
+rolagem seguinte, na mesma sessão de página, reusava essa promise já
+rejeitada e caía pro 2D sem nunca mais tentar o motor 3D de novo
+(só um refresh de página "resolvia"). **Corrigido:** ao rejeitar, a
+função limpa a própria `ref` (`promessa.catch(() => { carregandoPromiseRef
+= null; })`), então a PRÓXIMA chamada tenta inicializar do zero em vez
+de reusar o erro antigo. **Padrão pra lembrar:** qualquer cache de
+promise "carrega 1x, guarda o resultado" precisa desse mesmo cuidado —
+sem isso, um erro transitório vira permanente pro resto da sessão.
+
 O canvas físico continua cobrindo a tela inteira (precisa do espaço
 pra física cair), mas agora com `pointer-events: none` e SEM fundo —
 o dado cai visível por cima do conteúdo normal da Ficha, não mais

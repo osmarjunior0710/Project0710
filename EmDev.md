@@ -227,6 +227,26 @@ entregas no celular.
       calibrado visualmente via Playwright pra ficar uns 20% menor que
       o tamanho original (não o tamanho minúsculo que tinha ficado).
       Ver `DECISOES-COMBATE.md`.
+- [x] Escala ajustada de novo (6.2 → 7, "tá pequeno, aumenta um
+      pouco") + debug visual temporário no canvas (fundo preto 50%)
+      pro Osmar visualizar os limites da área de física — ainda ativo,
+      remover depois de confirmar os limites certos.
+- [x] Base da área de física reduzida de novo (340px → 265px, sobrava
+      espaço entre o preto de debug e o popup).
+- [x] **Bug sério achado no celular: depois de alguma rolagem falhar
+      1x, o app nunca mais conseguia usar o motor 3D na mesma sessão**
+      (ficava sempre no 2D, mesmo a área preta de debug aparecendo
+      normal). Causa: `carregarDiceBox3D()` guardava a promise de
+      inicialização como singleton, mas nunca limpava essa referência
+      se a inicialização REJEITASSE — a mesma promise rejeitada era
+      reusada pra sempre. Corrigido: no erro, a referência é limpa, e a
+      PRÓXIMA rolagem tenta inicializar o motor do zero em vez de
+      reusar o erro antigo. Não reproduzi o gatilho ORIGINAL da falha
+      (não reproduziu via Playwright headless) — mas o bug de "nunca
+      mais tenta de novo" em si é real e está corrigido; vale confirmar
+      no celular se o 3D volta a funcionar depois de qualquer falha
+      pontual.
+      Verificado: `tsc -b`/`npm test` (536)/`npm run build` limpos.
 
 ### Redesenho do FAB avulso (Fase A) — coluna de botões em vez de overlay escuro
 

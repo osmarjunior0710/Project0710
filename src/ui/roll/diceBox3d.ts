@@ -36,6 +36,16 @@ export function carregarDiceBox3D(): Promise<DiceBox> {
     return box;
   })();
   carregandoPromiseRef = promessa;
+  // Achado testando no celular: se `box.init()` falhar 1x por qualquer
+  // motivo passageiro (ex.: container com altura momentaneamente 0
+  // durante uma mudança de layout), a promise ficava guardada pra
+  // sempre — toda rolagem seguinte reusava essa MESMA promise rejeitada
+  // e caía pro 2D sem nunca mais tentar o motor 3D de novo na mesma
+  // sessão (só um refresh de página "resolvia"). Limpar a referência no
+  // erro deixa a PRÓXIMA rolagem tentar inicializar de novo do zero.
+  promessa.catch(() => {
+    carregandoPromiseRef = null;
+  });
   return promessa;
 }
 
