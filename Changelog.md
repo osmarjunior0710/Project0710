@@ -5,6 +5,11 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1059
+
+Dado físico agora some sozinho depois de parar: espera 3s parado, some
+suavemente em mais 2s. Vale pra toda rolagem (oficial e o 🎲 avulso).
+
 ## v202609_0950
 
 Corrigido: fechar o popup de rolagem (✕ ou tocar fora) antes do dado

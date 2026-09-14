@@ -850,3 +850,34 @@ motor 3D de verdade) tem teste automatizado (`diceBox3d.test.ts`) —
 `@3d-dice/dice-box` de verdade (Web Worker + canvas), mesmo padrão já
 aceito pro resto do motor de dado 3D (validado por Playwright manual,
 não Vitest).
+
+## Dado 3D — fade automático depois de parar (sem shader por dado)
+
+Pedido do Osmar: o dado físico ficava parado na tela pra sempre até a
+próxima rolagem limpar a cena — melhor ele sumir sozinho depois de um
+tempo (3s parado, depois 2s de fade até sumir).
+
+**Por que não dá pra fazer fade por dado individual:** `@3d-dice/
+dice-box` roda a física/render (BabylonJS) dentro de um Web Worker —
+`box.roll()`/`add()`/`reroll()` só mandam mensagens pro worker
+(`postMessage`), o app principal nunca tem acesso ao mesh/material de
+cada dado pra animar opacidade um por um. O único controle exposto no
+lado principal é o `<canvas>` inteiro (um elemento DOM normal). Contornar
+isso exigiria estender o protocolo interno do worker (não documentado,
+quebra fácil em atualização da lib) — decidido não fazer.
+
+**Solução aceita:** fade no HOST do canvas inteiro (`agendarFadeDados`/
+`cancelarFadeDados`, `diceBox3d.ts`), via `opacity`/`transition` direto
+no DOM (`getElementById`, não um componente React — evita acoplar um
+módulo genérico, usado por 2 consumidores diferentes, ao CSS Module de
+um deles). `cancelarFadeDados()` roda antes de qualquer `roll()`/
+`add()`/`reroll()` novo; `agendarFadeDados()` roda dentro de TODO
+`onRollComplete` de qualquer rolagem (mesmo as que ainda não migraram
+pra `lancarGrupos()`, ver B6 acima) — quando um 2º dado assenta antes
+do fade do 1º terminar, o timer reinicia do zero pros dois juntos.
+
+**Padrão pra lembrar:** qualquer novo call site do motor 3D (`roll`/
+`add`/`reroll`) precisa chamar os dois — `cancelarFadeDados()` antes de
+disparar a física, `agendarFadeDados()` dentro do `onRollComplete` —
+até que o B6 termine de consolidar tudo em `lancarGrupos()` (que já
+chama os dois sozinho).

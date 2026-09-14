@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRoll } from '../../roll/RollContext';
-import { carregarDiceBox3D, COR_POR_LADOS, DICE3D_CANVAS_HOST_ID } from '../../roll/diceBox3d';
+import { agendarFadeDados, cancelarFadeDados, carregarDiceBox3D, COR_POR_LADOS, DICE3D_CANVAS_HOST_ID } from '../../roll/diceBox3d';
 import styles from './Dice3dFab.module.css';
 
 const TIPOS = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'] as const;
@@ -132,7 +132,9 @@ export default function Dice3dFab() {
         themeColor: COR_POR_LADOS[SIDES_POR_TIPO[i.tipo]],
       }));
       const titulo = `Rolagem de ${ordenados.map((i) => `${i.qtd}${i.tipo}`).join(' + ')}`;
+      cancelarFadeDados();
       box.onRollComplete = (resultados) => {
+        agendarFadeDados();
         const valores = resultados.map((r) => r.value);
         const total = valores.reduce((acc, v) => acc + v, 0);
         setResultado(total);

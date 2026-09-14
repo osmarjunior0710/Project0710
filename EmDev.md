@@ -362,6 +362,35 @@ resultado reabria o popup do zero, mesmo já fechado antes.
       "não dá ainda" em vez de sumir sem explicação). Verificado:
       `tsc -b`/`npm test` (543)/`npm run build` limpos.
 
+### Fade automático do dado físico depois de parar
+
+Pedido do Osmar: dado físico ficava parado na tela pra sempre (até a
+próxima rolagem limpar a cena) — melhor ele sumir sozinho depois de um
+tempo. Mecânica combinada: espera 3s depois que a física de TODOS os
+dados da rolagem assenta, depois some suavemente em mais 2s (opacity
+100→0 de 3s a 5s). Shader/fade por dado individual não é viável — a
+física roda dentro de um Web Worker da lib, sem acesso a mesh/material
+de fora (ver comentário em `diceBox3d.ts`); o fade aplica no canvas
+inteiro.
+
+- [x] `diceBox3d.ts`: `agendarFadeDados()`/`cancelarFadeDados()` —
+      manipulam `opacity`/`transition` direto no host do canvas via
+      `getElementById` (não um componente React, pra não acoplar este
+      módulo genérico ao CSS Module de um consumidor específico).
+      `cancelarFadeDados()` sempre roda ANTES de um `roll()`/`add()`/
+      `reroll()` novo (devolve opacidade a 100% na hora, sem
+      transição); `agendarFadeDados()` sempre roda dentro do
+      `onRollComplete` de QUALQUER rolagem (oficial via `lancarGrupos`,
+      e os 3 call sites que ainda não migraram pro B6:
+      `rerolarFisico`, `escolherVantagemPosRolagem`, `rolarDados`, mais
+      o FAB avulso) — se um 2º dado assentar antes do fade do 1º
+      terminar (ex.: Vantagem escolhida DEPOIS do resultado), o timer
+      reinicia do zero pros dois juntos, nunca um sumindo enquanto o
+      outro ainda nem caiu.
+      Verificado: `tsc -b`/`npm test` (546)/`npm run build` limpos +
+      Playwright (rolagem física → opacity fica 1 até ~3s → cai
+      suavemente → chega em 0 por volta de 5s).
+
 ### Redesenho do FAB avulso (Fase A) — coluna de botões em vez de overlay escuro
 
 Pedido do Osmar depois do B4: o FAB avulso (🎲, ferramenta solta, não

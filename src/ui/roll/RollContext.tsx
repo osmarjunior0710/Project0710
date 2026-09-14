@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState, type
 import { useColapsavel } from '../hooks/useColapsavel';
 import { suportaWebGL } from '../utils/suportaWebGL';
 import {
+  agendarFadeDados,
+  cancelarFadeDados,
   carregarDiceBox3D,
   COR_POR_LADOS,
   garantirTemaDiceBox3D,
@@ -450,7 +452,9 @@ async function rerolarFisico(
 ) {
   try {
     const box = await carregarDiceBox3D();
+    cancelarFadeDados();
     box.onRollComplete = (resultados) => {
+      agendarFadeDados();
       const grupo = resultados.find((g) => g.id === resultadoBruto.groupId) ?? resultados[resultados.length - 1];
       onSucesso(grupo.value, dadoBruto(grupo));
     };
@@ -713,17 +717,23 @@ export function RollProvider({ children }: { children: ReactNode }) {
           try {
             const box = await carregarDiceBox3D();
             await garantirTemaDiceBox3D(box, 'default');
+            cancelarFadeDados();
             if (umDadoSo) {
-              box.onRollComplete = (resultados) => concluirUmDado(resultados[0].value, true, dadoBruto(resultados[0]));
+              box.onRollComplete = (resultados) => {
+                agendarFadeDados();
+                concluirUmDado(resultados[0].value, true, dadoBruto(resultados[0]));
+              };
               box.roll({ qty: 1, sides: lados, themeColor: COR_POR_LADOS[lados] });
             } else {
               const grupos = especificacaoDados.map((d) => ({ qty: 1, sides: d.lados, themeColor: COR_POR_LADOS[d.lados] }));
-              box.onRollComplete = (resultados) =>
+              box.onRollComplete = (resultados) => {
+                agendarFadeDados();
                 concluirGrid(
                   resultados.map((r) => r.value),
                   true,
                   resultados.map(dadoBruto),
                 );
+              };
               box.roll(grupos.length === 1 ? grupos[0] : grupos);
             }
           } catch {
@@ -846,6 +856,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           try {
             const box = await carregarDiceBox3D();
             await garantirTemaDiceBox3D(box, 'default');
+            cancelarFadeDados();
             // `onRollComplete`/`getRollResults()` devolve TODOS os
             // grupos acumulados desde o último `.clear()` — `.roll()`
             // limpa, `.add()` NÃO. Como o 1º dado já criou um grupo
@@ -855,7 +866,10 @@ export function RollProvider({ children }: { children: ReactNode }) {
             // `resultados[0]` pegava sempre o dado velho de novo —
             // bug real, achado testando no celular ("o segundo dado
             // não é reconhecido").
-            box.onRollComplete = (resultados) => concluir(resultados[resultados.length - 1].value, true);
+            box.onRollComplete = (resultados) => {
+              agendarFadeDados();
+              concluir(resultados[resultados.length - 1].value, true);
+            };
             box.add({ qty: 1, sides: 20, themeColor: COR_POR_LADOS[20] });
           } catch {
             timeoutRef.current = setTimeout(() => {
