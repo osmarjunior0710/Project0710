@@ -321,8 +321,13 @@ aprovado pelo Osmar:
       (B6.1). Vale o Osmar confirmar no celular: perícia/ataque/
       salvaguarda simples E Vantagem/Desvantagem pré-declarada (ex.:
       Desvantagem por armadura sem treinamento) continuam certas.
-- [ ] **B6.3** — migrar `escolherVantagemPosRolagem` (o `add()`, foi o
-      bug mais recente).
+- [x] **B6.3** — migrar `escolherVantagemPosRolagem` (o `add()`, foi o
+      bug mais recente) pra `lancarGrupos({...}, {modo:'add'})` —
+      código do call site caiu de ~15 linhas (montar `box`, tema,
+      cancelar fade, `onRollComplete` com o comentário de "resultados[
+      length-1]") pra 2. Verificado: `tsc -b`/`npm test` (546)/`npm run
+      build` limpos + Playwright (2º dado reconhecido certo: 1º dado 3
+      → Vantagem → 2º dado 9 físico visível → total 14 = 9+5, bate).
 - [ ] **B6.4** — migrar `rerolarFisico` (Sorte/Inspiração Heroica/
       Perfurador).
 - [ ] **B6.5** — migrar `rolarDados` (dano, 1 dado e grid).

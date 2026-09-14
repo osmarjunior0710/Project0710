@@ -854,23 +854,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
       if (usar3D) {
         (async () => {
           try {
-            const box = await carregarDiceBox3D();
-            await garantirTemaDiceBox3D(box, 'default');
-            cancelarFadeDados();
-            // `onRollComplete`/`getRollResults()` devolve TODOS os
-            // grupos acumulados desde o último `.clear()` — `.roll()`
-            // limpa, `.add()` NÃO. Como o 1º dado já criou um grupo
-            // antes, `resultados` chega com 2 posições aqui: a [0] é o
-            // grupo VELHO (1º dado, já mostrado), o novo (o que
-            // acabou de cair) é sempre o ÚLTIMO da lista. Ler
-            // `resultados[0]` pegava sempre o dado velho de novo —
-            // bug real, achado testando no celular ("o segundo dado
-            // não é reconhecido").
-            box.onRollComplete = (resultados) => {
-              agendarFadeDados();
-              concluir(resultados[resultados.length - 1].value, true);
-            };
-            box.add({ qty: 1, sides: 20, themeColor: COR_POR_LADOS[20] });
+            const [grupo] = await lancarGrupos({ qty: 1, sides: 20 }, { modo: 'add' });
+            concluir(grupo.value, true);
           } catch {
             timeoutRef.current = setTimeout(() => {
               concluir(rolarD20Dado(modoTesteRef, indiceModoTesteRef), false);
