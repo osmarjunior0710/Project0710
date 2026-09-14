@@ -246,6 +246,7 @@ export default function AtributosTab({
                 label: a.atributo,
                 formula: `1d20 ${a.mod >= 0 ? '+' : '-'} ${Math.abs(a.mod)}`,
                 mod: a.mod,
+                explicacaoMod: a.explicacao,
                 categoria: 'atributoOuSalvaguarda',
                 vantagem:
                   desvantagemForcaDestreza && (a.atributo === 'FOR' || a.atributo === 'DES') ? 'desvantagem' : undefined,

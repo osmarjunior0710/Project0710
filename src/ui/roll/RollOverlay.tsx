@@ -140,7 +140,18 @@ export default function RollOverlay() {
         {estado.vantagem && (
           <div className={styles.formula}>{estado.vantagem === 'vantagem' ? 'Vantagem' : 'Desvantagem'}</div>
         )}
-        <div className={styles.total}>{estado.fase === 'rolando' ? '—' : estado.total}</div>
+        <div className={styles.total}>
+          {estado.fase === 'rolando' ? (
+            <span className={styles.rolando}>
+              Rolando
+              <span className={styles.rolandoPonto}>.</span>
+              <span className={styles.rolandoPonto}>.</span>
+              <span className={styles.rolandoPonto}>.</span>
+            </span>
+          ) : (
+            estado.total
+          )}
+        </div>
         {/* Fórmula desce pra baixo do total (pedido do Osmar, B7) — o
             número grande é a resposta, a fórmula é só o "como
             cheguei nele", secundário. Ganha o ⓘ (mesmo `InfoValor` de

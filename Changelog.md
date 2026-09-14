@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1819
+
+2 ajustes no popup de rolagem: atributo puro (FOR/DES/etc., sem ser
+perícia) também ganhou o ⓘ com a quebra do modificador; e enquanto o
+dado ainda tá caindo, o "—" virou "Rolando..." com os pontinhos
+animados em cascata.
+
 ## v202609_1600
 
 Popup de rolagem de perícia/salvaguarda/iniciativa: o total grande

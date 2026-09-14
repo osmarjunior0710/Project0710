@@ -398,13 +398,26 @@ componentes nomeados antes.
       iniciativa (`AtributosTab.tsx`, reaproveitando `sv.explicacao`/
       `p.explicacao`/`explicacaoIniciativa` que já existiam pro ⓘ) e
       Iniciativa do painel de Combate (`CombatTab.tsx` ganhou a prop
-      `explicacaoIniciativa`, repassada por `FichaShell.tsx`). Atributo
-      puro (FOR/DES/etc. sem perícia) ficou de fora de propósito — é 1
-      termo só, não tem o que quebrar. Verificado: `tsc -b`/`npm test`
-      (546)/`npm run build` limpos + Playwright (Salvaguarda de Força
-      → total 16 grande, `1d20 + 2 ⓘ` embaixo → toca no ⓘ → popup
-      mostra "mod. FOR +0 / Bônus de Proficiência (proficiente) +2 /
-      Salvaguarda de Força +2").
+      `explicacaoIniciativa`, repassada por `FichaShell.tsx`).
+      Verificado: `tsc -b`/`npm test` (546)/`npm run build` limpos +
+      Playwright (Salvaguarda de Força → total 16 grande, `1d20 + 2 ⓘ`
+      embaixo → toca no ⓘ → popup mostra "mod. FOR +0 / Bônus de
+      Proficiência (proficiente) +2 / Salvaguarda de Força +2").
+- [x] **Correções pós-Entregas 1+2, achadas testando no celular:**
+  - **Atributo puro (FOR/DES/etc. sem perícia) também ganhou o ⓘ** —
+    o Osmar apontou que mesmo sendo 1 termo só HOJE, no futuro algo
+    pode somar em cima (ex.: item mágico "+2 em Testes de Força") e o
+    popup já devia estar pronto pra isso sem precisar mexer de novo.
+    `AtributoFinal` (`core/calculoPersonagem.ts`) ganhou
+    `explicacao: ExplicacaoCalculo` (1 linha só, "mod. FOR"), testado
+    (`calculoPersonagem.test.ts`, 2 casos: normal e borda mod.
+    negativo). Plugado em `AtributosTab.tsx`.
+  - **"Rolando..." no lugar do "—"** enquanto o dado ainda cai —
+    3 pontinhos entram em cascata (CSS puro, `@keyframes`), fonte
+    menor que o total numérico pra não estourar a largura do card.
+    Verificado: `tsc -b`/`npm test` (548)/`npm run build` limpos +
+    Playwright (atributo puro FOR → "Rolando..." aparece → resolve →
+    total 12 → ⓘ mostra "mod. FOR +1 / FOR +1").
 - [ ] **Entrega 3** — Ataque com arma/desarmado: expor componentes
       nomeados em `core/ataque.ts` (atributo usado, rotulado FOR ou
       DES; Bônus de Proficiência só quando soma; bônus de Estilo de
