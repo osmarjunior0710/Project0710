@@ -5,6 +5,11 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2101
+
+Ajustado: a área preta de debug (temporária) tava deixando um espaço
+sobrando antes do popup — encostada mais perto agora.
+
 ## v202609_2048
 
 Dado 3D um pouco maior de novo (ainda menor que o tamanho original,
