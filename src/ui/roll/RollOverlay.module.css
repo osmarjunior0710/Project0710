@@ -311,3 +311,17 @@
 .close:active {
   background: var(--line-soft);
 }
+
+/* Enquanto o dado ainda tá rolando, fechar fica travado (ver
+   RollOverlay.tsx) — achado testando no celular: fechar antes do dado
+   parar fazia o popup reabrir sozinho quando o resultado chegava.
+   Esmaecido em vez de sumir, pra sinalizar "travado por enquanto" em
+   vez de ficar sem nenhum controle visível no canto do card. */
+.closeDesabilitado {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.closeDesabilitado:active {
+  background: var(--panel2);
+}

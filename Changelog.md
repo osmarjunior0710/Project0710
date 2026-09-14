@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0950
+
+Corrigido: fechar o popup de rolagem (✕ ou tocar fora) antes do dado
+parar de cair fazia ele reabrir sozinho quando o resultado chegava.
+Agora fechar só funciona depois que o dado já parou — enquanto ainda
+tá rolando, o ✕ fica esmaecido.
+
 ## v202609_0844
 
 Corrigido: Conhecimento Primordial (Bárbaro) trocava sempre pro mod.

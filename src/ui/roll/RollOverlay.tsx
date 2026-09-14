@@ -69,11 +69,23 @@ export default function RollOverlay() {
   // Só 'd20' tem par de dados (Vantagem/Desvantagem) — o 2º dado é
   // sempre outro d20, nunca guardado à parte no estado.
   const ladosDadoPrincipal = estado.tipo === 'd20' ? 20 : estado.lados;
+  // Travado enquanto o dado ainda tá rolando — fechar (✕ ou tocar
+  // fora) antes do resultado chegar fazia o popup reabrir sozinho
+  // quando a rolagem terminava (achado testando no celular: o motor,
+  // físico ou não, continua em andamento por trás mesmo com o popup
+  // fechado, e o `setEstado` do resultado reabria do zero).
+  const podeFechar = estado.fase === 'concluido';
 
   return (
-    <div className={`${styles.overlay} ${estado.motor3D ? styles.overlaySemFundo : ''}`} onClick={fechar}>
+    <div
+      className={`${styles.overlay} ${estado.motor3D ? styles.overlaySemFundo : ''}`}
+      onClick={podeFechar ? fechar : undefined}
+    >
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.close} onClick={fechar}>
+        <div
+          className={`${styles.close} ${podeFechar ? '' : styles.closeDesabilitado}`}
+          onClick={podeFechar ? fechar : undefined}
+        >
           ✕
         </div>
         <div className={styles.label}>{estado.label}</div>

@@ -349,6 +349,19 @@ mesmo tempo no mesmo código).
       `CombatTab`, `AcaoPanelContent`) antes de propor o plano
       detalhado, quando chegar a vez do B7.
 
+### Correção: fechar o popup antes do dado parar reabria sozinho
+
+Achado testando no celular: fechar o popup de rolagem (✕ ou tocar
+fora) enquanto o dado ainda tava caindo (físico ou 2D) não cancelava a
+rolagem em andamento — quando o resultado chegava, o `setEstado` do
+resultado reabria o popup do zero, mesmo já fechado antes.
+
+- [x] `RollOverlay`: fechar (✕ e tocar fora do card) só funciona
+      quando `estado.fase === 'concluido'` — enquanto `'rolando'`, os
+      dois ficam travados (✕ esmaecido, 35% de opacidade, sinalizando
+      "não dá ainda" em vez de sumir sem explicação). Verificado:
+      `tsc -b`/`npm test` (543)/`npm run build` limpos.
+
 ### Redesenho do FAB avulso (Fase A) — coluna de botões em vez de overlay escuro
 
 Pedido do Osmar depois do B4: o FAB avulso (🎲, ferramenta solta, não
