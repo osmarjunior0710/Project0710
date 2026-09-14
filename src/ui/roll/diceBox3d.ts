@@ -137,6 +137,29 @@ export function agendarFadeDados() {
   }, ESPERA_ANTES_DO_FADE_MS);
 }
 
+/** Rerola FISICAMENTE o grupo identificado por `resultadoBruto` (Sorte,
+ * Inspiração Heroica, Perfurador — ver "Rerolagem" em
+ * sdd/sdd-dado-3d.md) — irmã de `lancarGrupos()`, mas pra `reroll()`
+ * em vez de `roll()`/`add()`: `box.reroll()` REAPROVEITA o `groupId` do
+ * dado original (é assim que a lib "sabe" que é o mesmo dado, não um
+ * novo), então `gruposNovos()` não se aplica aqui — o grupo rerolado
+ * pode estar em QUALQUER posição no array que `onRollComplete` devolve
+ * (a cena pode ter 2+ dados vivos, ex.: grid do Perfurador), nunca só
+ * o último. Por isso acha pelo `id` de volta, com fallback pro último
+ * item só se por algum motivo o id não bater (não deveria acontecer).
+ * `remove: true` tira o dado antigo da cena no lugar do novo. */
+export async function rerolarGrupo(resultadoBruto: DiceBoxResultado): Promise<DiceBoxResultado> {
+  const box = await carregarDiceBox3D();
+  cancelarFadeDados();
+  return new Promise((resolve) => {
+    box.onRollComplete = (resultados) => {
+      agendarFadeDados();
+      resolve(resultados.find((g) => g.id === resultadoBruto.groupId) ?? resultados[resultados.length - 1]);
+    };
+    box.reroll(resultadoBruto, { remove: true });
+  });
+}
+
 export type ModoLancamento = 'roll' | 'add';
 
 /** Ponto único de entrada pra jogar dado(s) físico(s) na cena (`B6` —

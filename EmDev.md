@@ -328,8 +328,20 @@ aprovado pelo Osmar:
       length-1]") pra 2. Verificado: `tsc -b`/`npm test` (546)/`npm run
       build` limpos + Playwright (2º dado reconhecido certo: 1º dado 3
       → Vantagem → 2º dado 9 físico visível → total 14 = 9+5, bate).
-- [ ] **B6.4** — migrar `rerolarFisico` (Sorte/Inspiração Heroica/
-      Perfurador).
+- [x] **B6.4** — migrar `rerolarFisico` (Sorte/Inspiração Heroica/
+      Perfurador) — `box.reroll()` reaproveita o `groupId` do dado
+      original em vez de criar um novo, então `gruposNovos()` (B6.1)
+      não se aplica; ganhou uma irmã, `rerolarGrupo()` em
+      `diceBox3d.ts`, com a mesma lógica de achar o grupo certo por
+      `id` (não por posição) que já existia, só realocada — call site
+      em `RollContext.tsx` caiu de ~14 linhas pra 5. Verificado: `tsc
+      -b`/`npm test` (546)/`npm run build` limpos. **Sem validação
+      Playwright** — Sorte/Perfurador dependem de sair 1 no d20 ou de
+      um personagem com talento específico, caro de forçar num teste
+      automatizado (mesma limitação já registrada no B4); é
+      realocação quase literal do código já testado, risco baixo. Vale
+      teste manual no celular com Sorte/Inspiração Heroica/Perfurador
+      quando o Osmar tiver a chance.
 - [ ] **B6.5** — migrar `rolarDados` (dano, 1 dado e grid).
 - [ ] **B6.6** — migrar o FAB avulso (`Dice3dFab.tsx`) — os "2 mundos"
       (oficial e avulso) passam a usar a MESMA função, fim da

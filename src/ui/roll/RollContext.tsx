@@ -8,6 +8,7 @@ import {
   COR_POR_LADOS,
   garantirTemaDiceBox3D,
   lancarGrupos,
+  rerolarGrupo,
   type DiceBoxResultado,
 } from './diceBox3d';
 
@@ -432,33 +433,18 @@ function dadoBruto(grupo: DiceBoxResultado): DiceBoxResultado {
 /** Rerola FISICAMENTE o dado identificado por `resultadoBruto` (Sorte,
  * Inspiração Heroica, Perfurador — ver "Rerolagem" em
  * sdd/sdd-dado-3d.md) — usado só quando o dado original já veio do
- * motor 3D. `remove: true` tira o dado antigo da cena no lugar do
- * novo (senão os 2 ficariam visíveis juntos). Cai pro `onFalha` (2D)
- * se o motor 3D falhar por qualquer motivo — mesmo espírito do
- * fallback de `rolarD20`.
- *
- * `box.reroll()` reaproveita o MESMO `groupId` do dado original (é
- * assim que ele "sabe" que é o mesmo dado, não um novo) — mas
- * `onRollComplete` continua devolvendo TODOS os grupos vivos na cena
- * (grid de 2+ dados tem 1 grupo por dado), não só o rerolado. Achado
- * testando no celular ("2º dado não reconhecido", mesmo bug do
- * `escolherVantagemPosRolagem` abaixo): tem que achar o grupo com o
- * `id` igual ao `groupId` do dado original, nunca assumir posição
- * fixa no array. */
+ * motor 3D. Cai pro `onFalha` (2D) se o motor 3D falhar por qualquer
+ * motivo — mesmo espírito do fallback de `rolarD20`. A parte de
+ * "achar o grupo certo mesmo com 2+ dados vivos na cena" mora em
+ * `rerolarGrupo()` (`diceBox3d.ts`, B6.4). */
 async function rerolarFisico(
   resultadoBruto: DiceBoxResultado,
   onSucesso: (novoValor: number, novoResultado: DiceBoxResultado) => void,
   onFalha: () => void,
 ) {
   try {
-    const box = await carregarDiceBox3D();
-    cancelarFadeDados();
-    box.onRollComplete = (resultados) => {
-      agendarFadeDados();
-      const grupo = resultados.find((g) => g.id === resultadoBruto.groupId) ?? resultados[resultados.length - 1];
-      onSucesso(grupo.value, dadoBruto(grupo));
-    };
-    box.reroll(resultadoBruto, { remove: true });
+    const grupo = await rerolarGrupo(resultadoBruto);
+    onSucesso(grupo.value, dadoBruto(grupo));
   } catch {
     onFalha();
   }
