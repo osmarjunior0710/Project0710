@@ -1,3 +1,4 @@
+import InfoValor from '../components/InfoValor';
 import { useRoll } from './RollContext';
 import styles from './RollOverlay.module.css';
 import { artePorLados } from './dadosArte';
@@ -139,8 +140,17 @@ export default function RollOverlay() {
         {estado.vantagem && (
           <div className={styles.formula}>{estado.vantagem === 'vantagem' ? 'Vantagem' : 'Desvantagem'}</div>
         )}
-        <div className={styles.formula}>{estado.formula}</div>
         <div className={styles.total}>{estado.fase === 'rolando' ? '—' : estado.total}</div>
+        {/* Fórmula desce pra baixo do total (pedido do Osmar, B7) — o
+            número grande é a resposta, a fórmula é só o "como
+            cheguei nele", secundário. Ganha o ⓘ (mesmo `InfoValor` de
+            CA/perícia/iniciativa) só quando a rolagem já tem a quebra
+            pronta (`explicacaoMod`) — sem isso, mostra só a fórmula
+            simples, igual sempre foi. */}
+        <div className={styles.formulaComInfo}>
+          <span className={styles.formula}>{estado.formula}</span>
+          {estado.explicacaoMod && <InfoValor titulo={estado.label} explicacao={estado.explicacaoMod} />}
+        </div>
         {estado.critico === 'falha' && <div className={`${styles.feedback} ${styles.feedbackCritFail}`}>😢 FALHA CRÍTICA</div>}
         {estado.critico === 'sucesso' && <div className={`${styles.feedback} ${styles.feedbackCritSuccess}`}>🎉 ACERTO CRÍTICO!</div>}
         {estado.podeEscolherVantagem && (

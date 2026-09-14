@@ -2049,6 +2049,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             palavrasDeInterrupcaoDisponivel={palavrasDeInterrupcaoDisponivel}
             periciaInigualavelDisponivel={periciaInigualavelDisponivel}
             iniciativaMod={iniciativa}
+            explicacaoIniciativa={explicacaoIniciativa}
             onRolarIniciativa={aoRolarIniciativa}
             colheitaMacabra={{
               disponivel: colheitaMacabraDisponivel,

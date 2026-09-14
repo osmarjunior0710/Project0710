@@ -4,6 +4,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { AtaqueResolvido } from '../../../core/ataque';
+import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
@@ -190,6 +191,9 @@ interface CombatTabProps {
   palavrasDeInterrupcaoDisponivel: boolean;
   periciaInigualavelDisponivel: boolean;
   iniciativaMod: number | null;
+  /** Quebra do `iniciativaMod` (mesmo `ExplicacaoCalculo` já usado no
+   * "ⓘ" de `AtributosTab`) — passada pro popup de rolagem (B7). */
+  explicacaoIniciativa: ExplicacaoCalculo;
   onRolarIniciativa?: () => void;
   /** Colheita Macabra (Necromante, nível 3+) — o modal de verdade mora
    * no `FichaShell.tsx` (sobrevive à troca de aba); aqui só repassa pro
@@ -372,6 +376,7 @@ export default function CombatTab({
   palavrasDeInterrupcaoDisponivel,
   periciaInigualavelDisponivel,
   iniciativaMod,
+  explicacaoIniciativa,
   onRolarIniciativa,
   colheitaMacabra: { disponivel: colheitaMacabraDisponivel, onDisponivel: onColheitaMacabraDisponivel },
   colheitaDosMortos: {
@@ -422,6 +427,7 @@ export default function CombatTab({
       label: 'Iniciativa',
       formula: `1d20 + ${iniciativaMod}`,
       mod: iniciativaMod,
+      explicacaoMod: explicacaoIniciativa,
       vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
       onResultado: (total) => setIniciativaValor(total),
     });

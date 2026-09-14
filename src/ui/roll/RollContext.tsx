@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
+import type { ExplicacaoCalculo } from '../../core/calculoPersonagem';
 import { useColapsavel } from '../hooks/useColapsavel';
 import { suportaWebGL } from '../utils/suportaWebGL';
 import { lancarGrupos, rerolarGrupo, type DiceBoxResultado } from './diceBox3d';
@@ -93,6 +94,10 @@ export interface RollState {
   /** Categoria opcional — `undefined`/ausente = nenhum bônus extra
    * pode se aplicar a esta rolagem. */
   categoria?: CategoriaRolagemD20;
+  /** Quebra do `mod` em partes nomeadas — ver `RollD20Options.
+   * explicacaoMod`. Ausente = a rolagem só mostra a fórmula simples,
+   * sem ⓘ. */
+  explicacaoMod?: ExplicacaoCalculo;
   /** Preenchido quando o jogador já aplicou o `BonusExtraProvider`
    * registrado — guarda rótulo + valor rolado, pra mostrar a quebra
    * do total e travar o botão (regra real: no máximo 1x por jogada).
@@ -256,6 +261,13 @@ interface RollD20Options {
   /** Ver `CategoriaRolagemD20` — omitido = nenhum bônus extra
    * registrado pode se aplicar a esta rolagem. */
   categoria?: CategoriaRolagemD20;
+  /** Quebra do `mod` em partes nomeadas (ex.: FOR +3, Bônus de
+   * Proficiência +2) — mesmo formato do popup "ⓘ" que já existe em
+   * CA/perícia/iniciativa (`ExplicacaoCalculo`, `core/
+   * calculoPersonagem.ts`). Omitido = a rolagem só mostra a fórmula
+   * simples (`1d20 + N`), sem ⓘ — nem toda rolagem tem a quebra pronta
+   * ainda (ver B7, `EmDev.md`). */
+  explicacaoMod?: ExplicacaoCalculo;
   onResultado?: (total: number, d20: number) => void;
 }
 
@@ -465,7 +477,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
   const dado3DAtivo = preferenciaDado3D && dado3DDisponivel && !modoTeste;
 
   const rolarD20 = useCallback(
-    ({ label, formula, mod, vantagem, categoria, onResultado }: RollD20Options) => {
+    ({ label, formula, mod, vantagem, categoria, explicacaoMod, onResultado }: RollD20Options) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       const usar3D = dado3DAtivo;
       setEstado({
@@ -481,6 +493,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         critico: null,
         podeEscolherVantagem: false,
         categoria,
+        explicacaoMod,
         bonusExtra: null,
         motor3D: usar3D,
       });
@@ -504,6 +517,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           critico: criticoDe(rolagem1),
           podeEscolherVantagem: true,
           categoria,
+          explicacaoMod,
           bonusExtra: null,
           sorteUsada: false,
           inspiracaoHeroicaUsada: false,
@@ -531,6 +545,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           critico: criticoDe(usado),
           podeEscolherVantagem: false,
           categoria,
+          explicacaoMod,
           bonusExtra: null,
           sorteUsada: false,
           inspiracaoHeroicaUsada: false,

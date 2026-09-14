@@ -377,11 +377,41 @@ já somado) — ele quer ver cada parte que compõe esse `+7` (ex.: "FOR
 B6 (consolidação do motor primeiro, menos risco de mexer 2 coisas ao
 mesmo tempo no mesmo código).
 
-- [ ] Ainda sem quebra em sub-entregas — fazer o levantamento (chapéu
-      de Product Manager: mapear todo lugar que hoje monta um `mod`
-      já somado antes de chamar `rolarD20`, ex. `AtributosTab`,
-      `CombatTab`, `AcaoPanelContent`) antes de propor o plano
-      detalhado, quando chegar a vez do B7.
+**Levantamento (chapéu de Product Manager):** já existe o mecanismo
+certo pronto — `ExplicacaoCalculo` (`core/calculoPersonagem.ts`), hoje
+usado só no popup "ⓘ" de CA/perícia/salvaguarda/iniciativa (linhas
+label+valor + total). Perícia/salvaguarda/atributo/iniciativa já têm
+essa quebra pronta; ataque com arma (`core/ataque.ts`, `modAcerto` já
+vem somado: atributo + Bônus de Proficiência + Estilo de Luta) e
+ataque/CD de Magia (`modAcertoConjuracao`) NÃO têm — precisam expor os
+componentes nomeados antes.
+
+- [x] **Entregas 1+2 — fundação + perícia/salvaguarda/atributo/
+      iniciativa**: `RollD20Options`/`RollState` ganharam
+      `explicacaoMod?: ExplicacaoCalculo` opcional. `RollOverlay`
+      reordenado (pedido do Osmar, chapéu de UX): total grande continua
+      onde estava, fórmula pequena (`1d20 + N`) desce pra ABAIXO do
+      total (é o "como cheguei nele", secundário) e ganha um ⓘ ao lado
+      — reaproveita o `InfoValor` já existente (mesmo popup do CA),
+      não um componente novo; sem `explicacaoMod`, mostra só a fórmula
+      simples, sem ⓘ, igual sempre foi. Plugado em perícia/salvaguarda/
+      iniciativa (`AtributosTab.tsx`, reaproveitando `sv.explicacao`/
+      `p.explicacao`/`explicacaoIniciativa` que já existiam pro ⓘ) e
+      Iniciativa do painel de Combate (`CombatTab.tsx` ganhou a prop
+      `explicacaoIniciativa`, repassada por `FichaShell.tsx`). Atributo
+      puro (FOR/DES/etc. sem perícia) ficou de fora de propósito — é 1
+      termo só, não tem o que quebrar. Verificado: `tsc -b`/`npm test`
+      (546)/`npm run build` limpos + Playwright (Salvaguarda de Força
+      → total 16 grande, `1d20 + 2 ⓘ` embaixo → toca no ⓘ → popup
+      mostra "mod. FOR +0 / Bônus de Proficiência (proficiente) +2 /
+      Salvaguarda de Força +2").
+- [ ] **Entrega 3** — Ataque com arma/desarmado: expor componentes
+      nomeados em `core/ataque.ts` (atributo usado, rotulado FOR ou
+      DES; Bônus de Proficiência só quando soma; bônus de Estilo de
+      Luta) e plugar no ataque principal + mão secundária.
+- [ ] **Entrega 4** — Ataque/CD de Magia (`modAcertoConjuracao`): mesma
+      ideia, atributo de conjuração nomeado (ex. "Carisma") + Bônus de
+      Proficiência.
 
 ### Correção: fechar o popup antes do dado parar reabria sozinho
 

@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1600
+
+Popup de rolagem de perícia/salvaguarda/iniciativa: o total grande
+continua igual, mas agora a fórmula pequena embaixo dele ganhou um ⓘ —
+toca pra ver de onde vem o número (atributo, Bônus de Proficiência,
+etc.), mesmo popup que já existia no CA. Ataque/dano ainda não tem
+essa quebra (vem numa próxima entrega).
+
 ## v202609_1119
 
 Dado 3D 10% menor.
