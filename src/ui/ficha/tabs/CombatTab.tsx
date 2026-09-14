@@ -87,6 +87,7 @@ interface CombatTabProps {
   ataqueDeSopro: RecursoContado & {
     disponivel: boolean;
     cd: number;
+    explicacaoCd: ExplicacaoCalculo;
     numDados: number;
     tipoDano: string | null;
   };
@@ -164,6 +165,10 @@ interface CombatTabProps {
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
+  /** Quebra da CD de magia (B8) — usada nos popups de Salvaguarda de
+   * Magia e Lançar no Inferno (mesma CD, ver `cdConjuracao`). `null`
+   * nos mesmos casos que `modAcertoConjuracao`. */
+  explicacaoCdConjuracao: ExplicacaoCalculo | null;
   /** NOME do truque vinculado a Explosão Agonizante + mod. de Carisma
    * — ver `MagiasTab.tsx`/`core/invocacoesMisticas.ts`. */
   truqueVinculadoAgonizante: string | undefined;
@@ -293,6 +298,7 @@ export default function CombatTab({
     maximo: usosAtaqueDeSoproMaximo,
     restantes: usosAtaqueDeSoproRestantes,
     cd: cdAtaqueDeSopro,
+    explicacaoCd: explicacaoCdAtaqueDeSopro,
     numDados: numDadosAtaqueDeSopro,
     tipoDano: tipoDanoAtaqueDeSopro,
     onUsar: onUsarAtaqueDeSopro,
@@ -354,6 +360,7 @@ export default function CombatTab({
   magiasPreparadasReacao,
   modAcertoConjuracao,
   explicacaoAcertoConjuracao,
+  explicacaoCdConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
   numAtaques,
@@ -489,6 +496,7 @@ export default function CombatTab({
       quantidade: dano.quantidade,
       lados: dano.lados,
       mod: dano.mod,
+      explicacaoMod: dano.explicacao,
     });
   }
 
@@ -508,6 +516,7 @@ export default function CombatTab({
       quantidade: dano.quantidade,
       lados: dano.lados,
       mod: dano.mod,
+      explicacaoMod: dano.explicacao,
     });
   }
 
@@ -707,6 +716,7 @@ export default function CombatTab({
       mod: danoPendente.mod,
       rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
       rerollEscolhido: perfuradorDisponivel && danoPendente.tipoDano === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
+      explicacaoMod: danoPendente.explicacaoMod,
     });
   }
 
@@ -1259,6 +1269,7 @@ export default function CombatTab({
       {lancarNoInfernoAberto && (
         <LancarNoInfernoModal
           cd={cdLancarNoInferno}
+          explicacaoCd={explicacaoCdConjuracao}
           onRolarDano={rolarDanoLancarNoInferno}
           onFechar={() => setLancarNoInfernoAberto(false)}
         />
@@ -1266,6 +1277,7 @@ export default function CombatTab({
       {ataqueDeSoproAberto && (
         <AtaqueDeSoproModal
           cd={cdAtaqueDeSopro}
+          explicacaoCd={explicacaoCdAtaqueDeSopro}
           tipoDano={tipoDanoAtaqueDeSopro}
           numDados={numDadosAtaqueDeSopro}
           onRolarDano={rolarDanoAtaqueDeSopro}
@@ -1277,6 +1289,7 @@ export default function CombatTab({
           nomeMagia={telaSalvaguarda.magia.nome}
           atributo={atributoSalvaguarda(telaSalvaguarda.magia)}
           cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
+          explicacaoCd={explicacaoCdConjuracao}
           textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
           textoFalha={telaSalvaguarda.magia.salvaguardaFalha}
           dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}

@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1941
+
+CD de magia, CD do Ataque de Sopro (Draconato) e CD de "Lançar no
+Inferno" (Bruxo) ganharam o ⓘ mostrando de onde vem o número. Rolagens
+de dano e cura de magia também: toca no ⓘ ao lado do dado rolado pra
+ver Dado Base, Aprimoramento de Truque (quando o truque escala por
+nível) e Upcast (quando conjurada num espaço de círculo maior)
+separados.
+
 ## v202609_1855
 
 Popup de rolagem de Ataque de MAGIA (truque/magia com ataque, ex. Raio

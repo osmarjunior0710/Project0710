@@ -881,3 +881,38 @@ do fade do 1º terminar, o timer reinicia do zero pros dois juntos.
 disparar a física, `agendarFadeDados()` dentro do `onRollComplete` —
 até que o B6 termine de consolidar tudo em `lancarGrupos()` (que já
 chama os dois sozinho).
+
+## `ExplicacaoCalculo` também serve pra notação de dado (não só número resolvido)
+
+O popup "ⓘ" (`ExplicacaoCalculo`/`InfoValor`) nasceu pra valores que já
+resolvem num número (CA, perícia, modificador de ataque, CD). Ao levar
+esse popup pra dano/cura de magia (B8), o "total" não é um número — só
+existe como notação de dado (ex. "10d6"), porque o valor de verdade só
+sai depois de rolar de verdade. Decidido reaproveitar o MESMO tipo
+(`total: {label, valor}`, `valor` como string) em vez de criar uma
+variante nova — `valor` já era string, só o CONTEÚDO passa a ser uma
+notação em vez de um número formatado. `fmtDado(quantidade, lados, mod,
+comSinal?)` (`core/magiaDano.ts`) formata essa notação, com "+" na
+frente quando a linha é um incremento (Aprimoramento de Truque,
+Upcast) — mesma função central de formatação pras duas pontas (a linha
+extra e o total somado).
+
+**Padrão pra lembrar:** ao expor a quebra de qualquer cálculo cujo
+resultado final só existe como fórmula de dado (não como número), não
+criar um tipo de popup novo — usar `ExplicacaoCalculo` normalmente,
+com `total.valor` como notação de dado.
+
+## CD de magia é compartilhada entre features que usam a mesma fórmula
+
+Ao dar ⓘ pra CD (B8): Salvaguarda de Magia e "Lançar no Inferno"
+(Bruxo, Patrono Ínfero) usam EXATAMENTE a mesma fórmula (`cdConjuracao(
+modAcertoConjuracao)`) — só o alvo/efeito da salvaguarda muda, não o
+número. "Ataque de Sopro" (Draconato) é uma CD DIFERENTE (baseada em
+Constituição, Apêndice C: 8 + mod. CON + Bônus de Proficiência), não a
+de conjuração.
+
+**Padrão pra lembrar:** antes de computar/expor a quebra de uma CD (ou
+qualquer valor) nova, checar se ela já é a MESMA fórmula de algo que já
+existe no app — reaproveitar 1 valor calculado 1x (`explicarCdConjuracao`,
+calculado em `FichaShell.tsx`) pra alimentar todos os popups que mostram
+essa CD, em vez de recalcular por feature.

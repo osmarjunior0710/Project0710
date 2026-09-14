@@ -6,6 +6,7 @@ import {
   cdConjuracao,
   modAcertoConjuracao,
   explicarModAcertoConjuracao,
+  explicarCdConjuracao,
   usaRedefinicaoPorDescanso,
   completarListaDeMagias,
   memorizarMagiaValida,
@@ -170,6 +171,27 @@ describe('memorizarMagiaValida', () => {
   it('borda: muda o tamanho total (não é troca, é crescimento/redução) — inválido mesmo com 1 "trocada"', () => {
     expect(memorizarMagiaValida(['Alarme', 'Sono'], ['Alarme', 'Sono', 'Graxa'])).toBe(false);
     expect(memorizarMagiaValida(['Alarme', 'Sono'], ['Alarme'])).toBe(false);
+  });
+});
+
+describe('explicarCdConjuracao (B8 — quebra da CD de magia/Lançar no Inferno)', () => {
+  it('Mago (Inteligência): "CD base" + as linhas do bônus de acerto, total bate com cdConjuracao(modAcertoConjuracao)', () => {
+    const selecao = { ...criarSelecaoInicial(), atributos: { ...criarSelecaoInicial().atributos, INT: 16 } };
+    const explicacao = explicarCdConjuracao(selecao, mago, 1);
+    expect(explicacao?.linhas).toEqual([
+      { label: 'CD base', valor: '8' },
+      { label: 'mod. Inteligência', valor: '+3' },
+      { label: 'Bônus de Proficiência', valor: '+2' },
+    ]);
+    expect(explicacao?.total).toEqual({ label: 'CD', valor: '13' }); // bate com cdConjuracao(5)
+  });
+
+  it('borda: classe null, ou atributo primário sem mapeamento (Guerreiro), devolve null — mesmos casos que modAcertoConjuracao', () => {
+    const selecao = criarSelecaoInicial();
+    expect(explicarCdConjuracao(selecao, null, 1)).toBeNull();
+    const guerreiro = classes.find((c) => c.nome === 'Guerreiro');
+    if (!guerreiro) throw new Error('Fixture "Guerreiro" não encontrada em data/rulesets/dnd2024/classes.ts');
+    expect(explicarCdConjuracao(selecao, guerreiro, 1)).toBeNull();
   });
 });
 

@@ -290,6 +290,12 @@ interface RollDadosOptions {
   /** Ver `RollState.rerollEscolhido` — só tem efeito com 2+ dados no
    * total (`quantidade` + soma de `gruposExtras`). */
   rerollEscolhido?: { rotulo: string };
+  /** Quebra do dado base/Aprimoramento de Truque/Upcast (dano/cura de
+   * magia, B8) — mesmo formato do "ⓘ" de CA/perícia/ataque, mas com
+   * notação de dado em vez de número resolvido (ver
+   * `CalculoDanoMagia.explicacao`, `core/magiaDano.ts`). Omitido = a
+   * rolagem só mostra a fórmula simples, sem ⓘ. */
+  explicacaoMod?: ExplicacaoCalculo;
   onResultado?: (total: number) => void;
 }
 
@@ -600,7 +606,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
   );
 
   const rolarDados = useCallback(
-    ({ label, formula, quantidade, lados, mod, gruposExtras, rerollSe1, rerollEscolhido, onResultado }: RollDadosOptions) => {
+    ({ label, formula, quantidade, lados, mod, gruposExtras, rerollSe1, rerollEscolhido, explicacaoMod, onResultado }: RollDadosOptions) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       const usar3D = dado3DAtivo;
       // "reroll se 1"/reroll de 1 dado só fazem sentido sabendo o
@@ -630,6 +636,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         dadosIndividuais: umDadoSo
           ? undefined
           : especificacaoDados.map((d, i) => ({ id: `d${i}`, lados: d.lados, valor: '🎲' })),
+        explicacaoMod,
         motor3D: usar3D,
       });
 
@@ -657,6 +664,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           // dado" com 1 só). Ver `rerollDadoEscolhido`.
           rerollEscolhido: rerollEscolhido ?? null,
           rerollEscolhidoUsado: false,
+          explicacaoMod,
           motor3D: viaMotor3D,
           resultadoBrutoDados: resultadoBruto,
         });
@@ -688,6 +696,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           dadosIndividuais,
           rerollEscolhido: rerollEscolhido ?? null,
           rerollEscolhidoUsado: false,
+          explicacaoMod,
           motor3D: viaMotor3D,
         });
         onResultado?.(total);

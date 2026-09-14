@@ -368,6 +368,22 @@ export function explicarModAcertoConjuracao(selecao: WizardSelection, classe: Cl
   };
 }
 
+/** Quebra da CD de magia/Lançar no Inferno (Bruxo) — regra fixa "8 +
+ * bônus de acerto de conjuração" (ver `cdConjuracao`), com o próprio
+ * bônus de acerto já quebrado em `explicarModAcertoConjuracao` (B8,
+ * ver DECISOES-COMBATE.md). `null` nos mesmos casos que
+ * `explicarModAcertoConjuracao`. */
+export function explicarCdConjuracao(selecao: WizardSelection, classe: Classe | null, nivel: number): ExplicacaoCalculo | null {
+  const base = explicarModAcertoConjuracao(selecao, classe, nivel);
+  if (!base) return null;
+  const modAcerto = modAcertoConjuracao(selecao, classe, nivel);
+  if (modAcerto === null) return null;
+  return {
+    linhas: [{ label: 'CD base', valor: '8' }, ...base.linhas],
+    total: { label: 'CD', valor: String(8 + modAcerto) },
+  };
+}
+
 /** CD pra evitar a magia/característica de conjuração (salvaguarda do
  * alvo) — regra fixa: 8 + bônus de acerto de conjuração
  * (`modAcertoConjuracao`, já soma mod. de atributo + Bônus de

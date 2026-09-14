@@ -574,6 +574,65 @@ próprio FAB pra cima, alinhada à direita, sem fundo escuro nenhum.
       "Customizar"; clicar fora colapsa; d20 rola físico vermelho;
       Histórico abre em popup com ✕ que fecha só ele).
 
+### B8 — ⓘ na CD de magia/Sopro/Inferno + quebra do dado de dano/cura de magia
+
+Pedido do Osmar: "Seria bom colocar ⓘ no CD e rolagens de magia/cura".
+Perguntado e confirmado com ele: o ⓘ na CD vai nas 3 CDs que existem
+hoje (Salvaguarda de Magia, Ataque de Sopro do Draconato, Lançar no
+Inferno do Bruxo), e a quebra de dado entra pra dano E cura de magia
+juntas nesta mesma entrega (não só cura).
+
+- [x] **CD** — `explicarCdConjuracao` (`core/magiasPersonagem.ts`, "CD
+      base" 8 + as mesmas linhas de `explicarModAcertoConjuracao`) e
+      `explicarCdAtaqueDeSopro` (`core/ataqueDeSopro.ts`, "CD base" 8 +
+      mod. CON + Bônus de Proficiência — fórmula própria do Apêndice C,
+      diferente da de conjuração). Salvaguarda de Magia e Lançar no
+      Inferno usam a MESMA CD (`cdConjuracao(modAcertoConjuracao)`) —
+      1 valor só (`explicacaoCdConjuracao`, calculado 1x em
+      `FichaShell.tsx`) alimenta os dois popups; Ataque de Sopro usa a
+      fórmula própria à parte. `MagiaSalvaguardaModal`/
+      `LancarNoInfernoModal`/`AtaqueDeSoproModal` ganharam prop
+      `explicacaoCd` e o ⓘ (`InfoValor`) ao lado do número da CD.
+- [x] **Dano/Cura de magia** — a composição de dado de magia
+      (`core/magiaDano.ts`) nunca teve nomes pras partes: Dado Base +
+      Aprimoramento de Truque (escala por nível, truque) + Upcast
+      (dado/flat/alvo por círculo) já eram somados direto num
+      `quantidade`/`lados`/`mod` final, sem rastro de qual parte veio
+      de onde. `calcularEscalonamento()` reescrito pra montar as linhas
+      progressivamente e devolver `explicacao: ExplicacaoCalculo` junto
+      do resultado de sempre — como o total só existe como notação de
+      dado (ex. "10d6"), não um número resolvido, o `total.valor`
+      guarda a notação, não um número (uso novo do mesmo tipo
+      `ExplicacaoCalculo`, ver `DECISOES-COMBATE.md`). Novo helper
+      `fmtDado(quantidade, lados, mod, comSinal?)` formata a notação
+      (com "+" na frente pras linhas de incremento). `RollDadosOptions`/
+      `rolarDados` (`RollContext.tsx`) ganharam `explicacaoMod?`
+      (mesmo padrão do `RollD20Options` do B7) — `RollOverlay` já
+      renderiza isso de forma genérica, não precisou mexer lá.
+      Explosão Agonizante (`conjurarMagia.ts`) ganhou uma linha própria
+      quando aplica o bônus. Roteado em TODOS os pontos que rolam dano/
+      cura de magia: `MagiasTab.tsx` e `CombatTab.tsx` (cada um tem sua
+      própria cópia de `rolarDanoSalvaguarda`/
+      `rolarDanoCondicionalSalvaguarda` — as duas cópias corrigidas) +
+      dano pendente (`DanoPendente.ts` ganhou `explicacaoMod?`) + cura
+      pendente.
+      Testado: `magiaDano.test.ts` (13 casos existentes migrados pra
+      `toMatchObject` — o `explicacao` novo não fazia parte do
+      `toEqual` antigo — + 4 casos novos cobrindo Dado Base sozinho,
+      Aprimoramento de Truque, Upcast dado-por-círculo em dano e em
+      cura), `ataqueDeSopro.test.ts` (2 casos novos pra
+      `explicarCdAtaqueDeSopro`), `magiasPersonagem.test.ts` (2 casos
+      novos pra `explicarCdConjuracao`), `conjurarMagia.test.ts`
+      (1 caso novo confirmando a linha extra da Explosão Agonizante).
+      Verificado: `tsc -b`/`npm test` (563)/`npm run build` limpos.
+      **Sem validação Playwright** — mesma limitação já documentada nas
+      Entregas B7 (personagem de teste é gerado aleatório, forçar um
+      cenário específico de magia com upcast/truque é caro de
+      automatizar); reaproveita o mesmo padrão já validado (`InfoValor`/
+      `explicacaoMod` opcional, sem quebra quando ausente), risco baixo
+      — vale teste manual no celular com uma magia de dano/cura E os
+      3 popups de CD.
+
 ## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade) — PAUSADO, retomar depois do Dado 3D
 
 77 talentos ainda sem efeito mecânico, em 5 categorias (Geral 42,

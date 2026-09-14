@@ -11,8 +11,8 @@
 // difere entre os 3 e não faz sentido forçar igual.
 
 import type { Magia } from '../data/rulesets/dnd2024/magias';
-import type { ExplicacaoCalculo } from './calculoPersonagem';
-import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia, type MecanicaMagia } from './magiaDano';
+import { fmtMod, type ExplicacaoCalculo } from './calculoPersonagem';
+import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia, fmtDado, type MecanicaMagia } from './magiaDano';
 import { curaColheitaMacabra } from './necromante';
 import { bonusExplosaoAgonizante } from './invocacoesMisticas';
 
@@ -36,6 +36,8 @@ export interface RollDadosSpec {
   quantidade: number;
   lados: number;
   mod: number;
+  /** Ver `RollAcertoSpec.explicacaoMod` — quebra do dado de cura (B8). */
+  explicacaoMod?: ExplicacaoCalculo;
 }
 
 export interface DanoPendenteMagia {
@@ -43,6 +45,10 @@ export interface DanoPendenteMagia {
   quantidade: number;
   lados: number;
   mod: number;
+  /** Ver `RollAcertoSpec.explicacaoMod`/`CalculoDanoMagia.explicacao`
+   * — quebra do dado de dano (B8), com a linha extra de Explosão
+   * Agonizante somada quando aplicável. */
+  explicacaoMod?: ExplicacaoCalculo;
 }
 
 export interface ConjuracaoDecidida {
@@ -96,7 +102,17 @@ export function decidirConjuracao(
   if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
     const dano = calcularDanoMagia(m, circuloUsado, nivelPersonagem);
     const bonusAgonizante = bonusExplosaoAgonizante(m.nome, truqueVinculadoAgonizante, modCarisma);
-    const danoFinal = dano && bonusAgonizante !== 0 ? { ...dano, mod: dano.mod + bonusAgonizante } : dano;
+    const danoFinal =
+      dano && bonusAgonizante !== 0
+        ? {
+            ...dano,
+            mod: dano.mod + bonusAgonizante,
+            explicacao: {
+              linhas: [...dano.explicacao.linhas, { label: 'Explosão Agonizante', valor: fmtMod(bonusAgonizante) }],
+              total: { ...dano.explicacao.total, valor: fmtDado(dano.quantidade, dano.lados, dano.mod + bonusAgonizante) },
+            },
+          }
+        : dano;
     return {
       mecanica,
       rollAcerto: {
@@ -106,7 +122,13 @@ export function decidirConjuracao(
         explicacaoMod: explicacaoAcertoConjuracao ?? undefined,
       },
       danoPendente: danoFinal
-        ? { label: `Dano — ✨ ${m.nome}`, quantidade: danoFinal.quantidade, lados: danoFinal.lados, mod: danoFinal.mod }
+        ? {
+            label: `Dano — ✨ ${m.nome}`,
+            quantidade: danoFinal.quantidade,
+            lados: danoFinal.lados,
+            mod: danoFinal.mod,
+            explicacaoMod: danoFinal.explicacao,
+          }
         : undefined,
       textoFeedback: danoFinal
         ? 'Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano.'
@@ -134,6 +156,7 @@ export function decidirConjuracao(
           quantidade: cura.quantidade,
           lados: cura.lados,
           mod: cura.mod,
+          explicacaoMod: cura.explicacao,
         },
         textoFeedback: 'Cura rolada — aplique o total no alvo.',
         curaColheitaMacabra: curaMacabra,
