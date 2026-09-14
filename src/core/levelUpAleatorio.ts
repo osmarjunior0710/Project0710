@@ -13,11 +13,14 @@ import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { subclasses } from '../data/rulesets/dnd2024/subclasses';
 import { estilosDeLuta } from '../data/rulesets/dnd2024/estilosDeLuta';
 import { ID_CARACTERISTICA_SUBCLASSE } from '../data/rulesets/dnd2024/idsCaracteristicasSubclasse';
+import { ID_CARACTERISTICA_CLASSE } from '../data/rulesets/dnd2024/idsCaracteristicasClasse';
 import { pericias } from '../data/rulesets/dnd2024/pericias';
+import { proficienciasIniciaisClasse } from '../data/rulesets/dnd2024/classesProficienciasIniciais';
 import { magiasDaClasse } from '../data/rulesets/dnd2024/magias';
 import { talentos } from '../data/rulesets/dnd2024/talentos';
 import type { InvocacaoMistica } from '../data/rulesets/dnd2024/invocacoesMisticas';
 import {
+  caracteristicaDesbloqueada,
   caracteristicaSubclasseDesbloqueada,
   niveisComASI,
   niveisComDadivaEpica,
@@ -71,6 +74,10 @@ export interface ParamsLevelUpRapido {
   magiasDescobertasMagicasAtuais: string[];
   atributosFinaisAtuais: Record<Atributo, number>;
   talentosGeraisAtuais: string[];
+  /** Bárbaro nível 3 — Conhecimento Primordial já escolhida (`null` se
+   * ainda não escolheu, mesmo sentido de `periciasSubclasseBonusAtuais`
+   * vazio). Ver `LevelUpShell.tsx`. */
+  conhecimentoPrimordialPericiaAtual: string | null;
 }
 
 export interface ResultadoLevelUpRapido {
@@ -104,6 +111,11 @@ export interface ResultadoLevelUpRapido {
    * `escolhaMagiaTalentoGeral` acima) — sempre `null` aqui. */
   periciaLivreTalentoEscolhida: string | null;
   periciaRestritaTalentoEscolhida: string | null;
+  /** Bárbaro nível 3 — Conhecimento Primordial. Diferente de
+   * `periciaRestritaTalentoEscolhida` acima, essa é sorteada de verdade
+   * (lista fixa e pequena, mesmo padrão de `periciasSubclasseBonusEscolhidas`
+   * — não precisa ficar `null` esperando escolha manual). */
+  conhecimentoPrimordialPericiaEscolhida: string | null;
 }
 
 /** Escolhe Invocações Místicas respeitando pré-requisito (uma pode
@@ -156,6 +168,17 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
       .filter((p) => !params.periciasProficientesDoPersonagem.includes(p.nome))
       .map((p) => p.nome);
     periciasSubclasseBonusEscolhidas = embaralhar(periciasNaoProficientes).slice(0, 3);
+  }
+
+  let conhecimentoPrimordialPericiaEscolhida: string | null = null;
+  if (
+    caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.conhecimentoPrimordial, novoNivel) !== null &&
+    !params.conhecimentoPrimordialPericiaAtual
+  ) {
+    const opcoes = (proficienciasIniciaisClasse[classe.id]?.periciasEscolha.opcoes ?? []).filter(
+      (nome) => !params.periciasProficientesDoPersonagem.includes(nome),
+    );
+    conhecimentoPrimordialPericiaEscolhida = sorteiaUm(opcoes) ?? null;
   }
 
   const estiloDeLutaEscolhido = temEstiloDeLutaTrocavel(classe, novoNivel)
@@ -313,5 +336,6 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     escolhaMagiaTalentoGeral: null,
     periciaLivreTalentoEscolhida: null,
     periciaRestritaTalentoEscolhida: null,
+    conhecimentoPrimordialPericiaEscolhida,
   };
 }

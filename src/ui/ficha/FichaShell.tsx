@@ -284,6 +284,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [furiaGasto, setFuriaGasto] = useState(personagemSalvo.furiaGasto ?? 0);
   const [furiaAtiva, setFuriaAtiva] = useState(personagemSalvo.furiaAtiva ?? false);
   const [ataqueImprudenteAtivo, setAtaqueImprudenteAtivo] = useState(personagemSalvo.ataqueImprudenteAtivoTurno ?? false);
+  const [conhecimentoPrimordialPericiaEscolhida, setConhecimentoPrimordialPericiaEscolhida] = useState(
+    personagemSalvo.conhecimentoPrimordialPericiaEscolhida ?? null,
+  );
   const [maosCurativasGasto, setMaosCurativasGasto] = useState(personagemSalvo.maosCurativasGasto ?? false);
   const [revelacaoCelestialGasto, setRevelacaoCelestialGasto] = useState(personagemSalvo.revelacaoCelestialGasto ?? false);
   const [revelacaoCelestialFormaAtiva, setRevelacaoCelestialFormaAtiva] = useState(
@@ -430,12 +433,30 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const atributosFinaisAtuais = Object.fromEntries(
     atributosOrdem.map((a) => [a, valorFinalAtributo(selecao, a) ?? 10]),
   ) as Record<Atributo, number>;
+  const forMod = atributos.find((a) => a.atributo === 'FOR')?.mod ?? 0;
+  const desMod = atributos.find((a) => a.atributo === 'DES')?.mod ?? 0;
+  const carMod = atributos.find((a) => a.atributo === 'CAR')?.mod ?? 0;
+  // Conhecimento Primordial (Bárbaro, nível 3) — enquanto a Fúria
+  // estiver ativa, essas 5 perícias usam o mod. de Força em vez do
+  // atributo normal (ver `calcularPericias`, parâmetro
+  // `substituicaoForca`). Lista fixa da própria característica (Livro
+  // do Jogador), não vem da planilha.
+  const temConhecimentoPrimordial = classe
+    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.conhecimentoPrimordial, personagem.nivel) !== null
+    : false;
+  const PERICIAS_CONHECIMENTO_PRIMORDIAL = ['Acrobacia', 'Furtividade', 'Intimidação', 'Percepção', 'Sobrevivência'];
   const pericias = calcularPericias(
     selecao,
     personagem.nivel,
     periciasEspecialistaAtuais,
-    [...periciasSubclasseBonusAtuais, ...periciasTalentoGeralAtuais, ...periciasMulticlasseAtuais],
+    [
+      ...periciasSubclasseBonusAtuais,
+      ...periciasTalentoGeralAtuais,
+      ...periciasMulticlasseAtuais,
+      ...(conhecimentoPrimordialPericiaEscolhida ? [conhecimentoPrimordialPericiaEscolhida] : []),
+    ],
     nivelTotalAtual,
+    { ativa: temConhecimentoPrimordial && furiaAtiva, mod: forMod, pericias: PERICIAS_CONHECIMENTO_PRIMORDIAL },
   );
   const salvaguardas = calcularSalvaguardas(selecao, classeOriginal, nivelTotalAtual);
   const proficienciasFerramenta = calcularProficienciasFerramenta(selecao, nivelTotalAtual, ferramentasMulticlasseAtuais);
@@ -618,9 +639,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const temAtaqueImprudente = classe
     ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.ataqueImprudente, personagem.nivel) !== null
     : false;
-  const forMod = atributos.find((a) => a.atributo === 'FOR')?.mod ?? 0;
-  const desMod = atributos.find((a) => a.atributo === 'DES')?.mod ?? 0;
-  const carMod = atributos.find((a) => a.atributo === 'CAR')?.mod ?? 0;
   const sorteDoTenebrosoMaximo = sorteDoTenebrosoDisponivel ? usosSorteDoTenebroso(carMod) : 0;
   const sorteDoTenebrosoRestantes = Math.max(0, sorteDoTenebrosoMaximo - sorteDoTenebrosoGasto);
   const equipadoAtual = resumoEquipado(itensMochila);
@@ -685,6 +703,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     turnStateAtual: turnState,
     surtoUsadoTurnoAtual: surtoUsadoTurno,
     ataqueImprudenteAtivoTurno: ataqueImprudenteAtivo,
+    conhecimentoPrimordialPericiaEscolhida,
     pvMax: personagem.pvMax,
     pvTemporarioAtual: pvTemporario,
     subclasseAtual: personagem.subclasse,
@@ -770,6 +789,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       turnState,
       surtoUsadoTurno,
       ataqueImprudenteAtivo,
+      conhecimentoPrimordialPericiaEscolhida,
       pvTemporario,
       maestriaArma,
       folegoGasto,
@@ -1385,6 +1405,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     escolhaMagiaTalentoGeral: Record<string, string[]> | null;
     periciaLivreTalentoEscolhida: string | null;
     periciaRestritaTalentoEscolhida: string | null;
+    conhecimentoPrimordialPericiaEscolhida: string | null;
   }) {
     const novosAtributos = resultado.atributosAumentados
       ? aumentarAtributos(selecao.atributos, resultado.atributosAumentados)
@@ -1459,6 +1480,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         setPericiasTalentoGeralAtuais((prev) => [...prev, resultado.periciaRestritaTalentoEscolhida!]);
       }
     }
+    if (resultado.conhecimentoPrimordialPericiaEscolhida) {
+      setConhecimentoPrimordialPericiaEscolhida(resultado.conhecimentoPrimordialPericiaEscolhida);
+    }
     setLevelUpHpModo(null);
     setLevelUpHpRolado(null);
     setLevelUpAberto(false);
@@ -1486,6 +1510,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       magiasDescobertasMagicasAtuais,
       atributosFinaisAtuais,
       talentosGeraisAtuais,
+      conhecimentoPrimordialPericiaAtual: conhecimentoPrimordialPericiaEscolhida,
     });
     confirmarLevelUp(resultado);
   }
@@ -1570,6 +1595,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           ...periciasMulticlasseAtuais,
         ]}
         periciasSubclasseBonusAtuais={periciasSubclasseBonusAtuais}
+        conhecimentoPrimordialPericiaAtual={conhecimentoPrimordialPericiaEscolhida}
         magiasDescobertasMagicasAtuais={magiasDescobertasMagicasAtuais}
         poolDescobertasMagicas={poolDescobertasMagicas(9)}
         atributosAtuais={selecao.atributos}

@@ -196,10 +196,52 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       sozinha sem picker de novo, reseta no Fim do Turno (picker
       reaparece no turno seguinte), Salvaguarda de Destreza rola com
       Vantagem mostrando o rótulo certo no popup/modal.
-- [ ] **B4.2 — Conhecimento Primordial (nível 3):** perícia extra à
-      escolha + usar Força no lugar de outro atributo (Acrobacia,
-      Furtividade, Intimidação, Percepção, Sobrevivência) enquanto a
-      Fúria estiver ativa.
+- [x] **B4.2 — Conhecimento Primordial (nível 3).** Perícia extra à
+      escolha (lista de `proficienciasIniciaisClasse[Bárbaro].periciasEscolha.opcoes`
+      reaproveitada — mesma do nível 1 — filtrada contra o que já é
+      proficiente) + usar Força no lugar do atributo normal em
+      Acrobacia/Furtividade/Intimidação/Percepção/Sobrevivência
+      enquanto a Fúria estiver ativa.
+      `core/calculoPersonagem.ts`: `calcularPericias` ganhou o
+      parâmetro `substituicaoForca?: { ativa, mod, pericias }` — troca
+      só o mod. usado (Bônus de Proficiência continua igual), com
+      rótulo próprio no popup ("mod. Força (Conhecimento Primordial)")
+      + 4 testes novos. `LevelUpShell.tsx`: novo passo
+      `conhecimentoPrimordial` (mesmo padrão de tela de
+      `proficienciasBonus`), único, permanente, só aparece se a classe
+      desbloqueou a característica e ainda não tem a perícia
+      escolhida. `FichaShell.tsx`: novo estado
+      `conhecimentoPrimordialPericiaEscolhida` (persistido), computa
+      `temConhecimentoPrimordial` e passa `substituicaoForca` pro
+      `calcularPericias` com `ativa: temConhecimentoPrimordial &&
+      furiaAtiva`. Novo ID `ID_CARACTERISTICA_CLASSE.conhecimentoPrimordial`.
+      **Achado no caminho, corrigido junto:** a ferramenta "⚡ Inst.
+      Level Up" (`core/levelUpAleatorio.ts`, sorteia todo Level Up pra
+      teste rápido) não sabia dessa escolha nova — sem o ajuste, todo
+      Bárbaro criado por ali ficaria pra sempre sem a perícia extra.
+      Adicionado `conhecimentoPrimordialPericiaEscolhida` no sorteio,
+      mesmo padrão já usado ali pra `periciasSubclasseBonusEscolhidas`
+      (lista fixa pequena, sorteia 1 de verdade em vez de deixar
+      `null`).
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (540)/`npm run build` limpos + Playwright: Bárbaro nível 2 →
+      "⚡ Inst. Level Up" → nível 3 ganhou "Sobrevivência" como nova
+      perícia proficiente (⚫→🔵); ativar Fúria trocou as 5 perícias
+      pra "(FOR)" na lista, com o mod. de Força certo (bônus de
+      proficiência preservado onde já tinha); "Encerrar Fúria" reverteu
+      as 5 de volta pro atributo/mod. original.
+      **Achado à parte, não é bug desta entrega:** o fluxo real de
+      Level Up (setinha ⬆️, não o raio de teste) trava no passo
+      "Escolha sua Subclasse" ao chegar no nível 3 — nenhuma das 4
+      Trilhas do Bárbaro está implementada ainda (isso é o B5-B8), e
+      o passo de subclasse não deixa avançar sem escolher uma. Ou
+      seja: hoje não dá pra levar um Bárbaro de verdade (criado pelo
+      wizard) do nível 2 pro 3 pela tela normal — só via "🎲
+      Personagem de Teste" (que já nasce num nível alto) ou "⚡ Inst.
+      Level Up" (que sorteia sem passar pela trava). Osmar: pra
+      testar B4.2 no celular, usa um desses 2 atalhos por enquanto;
+      o fluxo normal de Level Up volta a funcionar pro Bárbaro assim
+      que a 1ª Trilha (B5) entrar.
 - [ ] **B4.3 — Ataque Extra + Movimento Rápido (nível 5):** conferir se
       já funcionam sozinhos sem código novo (Ataque Extra é genérico
       por ID já reaproveitado de outras classes; Movimento Rápido

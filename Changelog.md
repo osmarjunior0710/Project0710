@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0112
+
+Bárbaro — Conhecimento Primordial (nível 3) chegou. No Level Up de
+nível 3, escolha 1 perícia extra entre as disponíveis pra Bárbaros
+(uma vez só, permanente). Além disso, com a Fúria ativa, as perícias
+Acrobacia, Furtividade, Intimidação, Percepção e Sobrevivência passam
+a usar o mod. de Força em vez do atributo normal — some sozinho ao
+encerrar a Fúria.
+
 ## v202609_1914
 
 Bárbaro — Ataque Imprudente e Sentido de Perigo (nível 2) chegaram. No

@@ -311,6 +311,10 @@ export interface PersonagemSalvo {
    * até "Encerrar Fúria" ou vestir Armadura Pesada, não expira sozinha
    * por turno. */
   furiaAtiva?: boolean;
+  /** Conhecimento Primordial (Bárbaro, nível 3) — perícia extra
+   * escolhida no Level Up, permanente (nunca reseta). `null`/ausente =
+   * ainda não escolhida (o passo aparece de novo no próximo Level Up). */
+  conhecimentoPrimordialPericiaEscolhida?: string | null;
   /** `true` = Mãos Curativas (Aasimar) já usada desde o último Descanso
    * Longo — só ele reseta. */
   maosCurativasGasto?: boolean;

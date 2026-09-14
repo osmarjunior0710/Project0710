@@ -245,6 +245,45 @@ describe('resolverVantagem', () => {
   });
 });
 
+describe('calcularPericias (substituicaoForca — Conhecimento Primordial do Bárbaro)', () => {
+  it('perícia da lista: troca mod. de Destreza pelo mod. de Força fornecido', () => {
+    const s = selecaoGuerreiro(); // DES 14 -> mod +2, classe Guerreiro só pra ter atributos, não afeta a conta
+    const semSubstituicao = calcularPericias(s, 1);
+    const comSubstituicao = calcularPericias(s, 1, [], [], undefined, {
+      ativa: true,
+      mod: 5,
+      pericias: ['Furtividade'],
+    });
+    const furtividadeSem = semSubstituicao.find((p) => p.nome === 'Furtividade');
+    const furtividadeCom = comSubstituicao.find((p) => p.nome === 'Furtividade');
+    expect(furtividadeSem?.atributo).toBe('DES');
+    expect(furtividadeCom?.atributo).toBe('FOR');
+    expect(furtividadeCom?.mod).toBe(5); // mod. de Força fornecido, não mais o mod. de Destreza
+  });
+
+  it('perícia FORA da lista: continua usando o atributo normal, mesmo com a substituição ativa', () => {
+    const s = selecaoGuerreiro();
+    const resultado = calcularPericias(s, 1, [], [], undefined, { ativa: true, mod: 5, pericias: ['Furtividade'] });
+    const arcanismo = resultado.find((p) => p.nome === 'Arcanismo'); // Inteligência, não está na lista
+    expect(arcanismo?.atributo).toBe('INT');
+  });
+
+  it('borda: ativa: false não muda nada, mesmo com a lista de perícias preenchida', () => {
+    const s = selecaoGuerreiro();
+    const resultado = calcularPericias(s, 1, [], [], undefined, { ativa: false, mod: 5, pericias: ['Furtividade'] });
+    const furtividade = resultado.find((p) => p.nome === 'Furtividade');
+    expect(furtividade?.atributo).toBe('DES');
+  });
+
+  it('proficiência continua somando o Bônus de Proficiência normalmente com a substituição ativa', () => {
+    const s = selecaoGuerreiro({ periciasClasseEscolhidas: ['Furtividade'] });
+    const resultado = calcularPericias(s, 1, [], [], undefined, { ativa: true, mod: 5, pericias: ['Furtividade'] });
+    const furtividade = resultado.find((p) => p.nome === 'Furtividade');
+    expect(furtividade?.proficiente).toBe(true);
+    expect(furtividade?.mod).toBe(5 + bonusProficiencia(guerreiro, 1));
+  });
+});
+
 describe('calcularPericias (periciasBonusExtras — ex: "Proficiências Bônus" do Colégio do Conhecimento)', () => {
   it('perícia fora de periciasBonusExtras continua "Sem proficiência"', () => {
     const s = selecaoGuerreiro();

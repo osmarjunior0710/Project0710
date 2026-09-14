@@ -482,6 +482,12 @@ export function calcularPericias(
    * NA CLASSE ativa — é ele que decide se "Pau pra Toda Obra" (Bardo)
    * já desbloqueou, nunca o total. */
   nivelTotal?: number,
+  /** Conhecimento Primordial (Bárbaro, nível 3) — enquanto a Fúria
+   * estiver ativa, as perícias em `pericias` usam o mod. de Força em
+   * vez do atributo normal (a proficiência continua contando igual).
+   * `undefined`/`ativa: false` = nenhuma substituição (comportamento
+   * de sempre). */
+  substituicaoForca?: { ativa: boolean; mod: number; pericias: string[] },
 ): PericiaFinal[] {
   const classe = classeDaSelecao(selection);
   if (!classe) return [];
@@ -490,10 +496,12 @@ export function calcularPericias(
   const temPauParaTodaObra = caracteristicaDesbloqueada(classe, 'Pau pra Toda Obra', nivel) !== null;
   const resultado: PericiaFinal[] = [];
   for (const pericia of pericias) {
-    const atributo = ATRIBUTO_POR_NOME_COMPLETO[pericia.atributo];
-    const valorAtributo = atributo ? valorFinalAtributo(selection, atributo) : null;
-    if (!atributo || valorAtributo === null) continue;
-    const atribMod = modificador(valorAtributo);
+    const atributoOriginal = ATRIBUTO_POR_NOME_COMPLETO[pericia.atributo];
+    const valorAtributo = atributoOriginal ? valorFinalAtributo(selection, atributoOriginal) : null;
+    if (!atributoOriginal || valorAtributo === null) continue;
+    const usaForca = (substituicaoForca?.ativa ?? false) && substituicaoForca!.pericias.includes(pericia.nome);
+    const atributo = usaForca ? 'FOR' : atributoOriginal;
+    const atribMod = usaForca ? substituicaoForca!.mod : modificador(valorAtributo);
     const proficiente = proficientes.has(pericia.nome);
     const especialista = proficiente && periciasEspecialista.includes(pericia.nome);
     let bonusFinal = 0;
@@ -516,7 +524,7 @@ export function calcularPericias(
       especialista,
       explicacao: {
         linhas: [
-          { label: `mod. ${atributo}`, valor: fmtMod(atribMod) },
+          { label: usaForca ? 'mod. Força (Conhecimento Primordial)' : `mod. ${atributo}`, valor: fmtMod(atribMod) },
           ...(bonusFinal !== 0 ? [{ label: labelBonus, valor: fmtMod(bonusFinal) }] : []),
         ],
         total: { label: pericia.nome, valor: fmtMod(atribMod + bonusFinal) },

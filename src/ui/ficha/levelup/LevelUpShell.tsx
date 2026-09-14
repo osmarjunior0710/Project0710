@@ -8,6 +8,8 @@ import { magiasDaClasse, type Magia } from '../../../data/rulesets/dnd2024/magia
 import { subclasses } from '../../../data/rulesets/dnd2024/subclasses';
 import { estilosDeLuta } from '../../../data/rulesets/dnd2024/estilosDeLuta';
 import { ID_CARACTERISTICA_SUBCLASSE } from '../../../data/rulesets/dnd2024/idsCaracteristicasSubclasse';
+import { ID_CARACTERISTICA_CLASSE } from '../../../data/rulesets/dnd2024/idsCaracteristicasClasse';
+import { proficienciasIniciaisClasse } from '../../../data/rulesets/dnd2024/classesProficienciasIniciais';
 import {
   caracteristicasDoNivel,
   caracteristicasDoNivelComSubclasse,
@@ -17,6 +19,7 @@ import {
   niveisComEspecialista,
   temEstiloDeLutaTrocavel,
   subclasseImplementada,
+  caracteristicaDesbloqueada,
   caracteristicaSubclasseDesbloqueada,
   NOMES_ESPECIALISTA,
 } from '../../../core/levelUp';
@@ -125,6 +128,10 @@ interface LevelUpShellProps {
      * ANTES desse level-up). `null` = talento não escolhido nesse
      * level-up. */
     periciaRestritaTalentoEscolhida: string | null;
+    /** Conhecimento Primordial (Bárbaro, nível 3) — perícia extra
+     * escolhida NESTE level-up. `null` = passo não apareceu (já tinha
+     * sido escolhida antes, ou personagem não é Bárbaro nível 3+). */
+    conhecimentoPrimordialPericiaEscolhida: string | null;
   }) => void;
   /** Controlado pelo `FichaShell` (persistido junto com o resto do
    * progresso) em vez de estado local — uma vez rolado o dado de
@@ -183,6 +190,10 @@ interface LevelUpShellProps {
    * Conhecimento, nível 3) — escolha única, feita 1 vez só (quando o
    * array chega a 3, o passo não aparece mais). */
   periciasSubclasseBonusAtuais: string[];
+  /** Conhecimento Primordial (Bárbaro, nível 3) — perícia extra já
+   * escolhida (permanente, `null` = ainda não escolhida — o passo
+   * aparece de novo até o jogador escolher). */
+  conhecimentoPrimordialPericiaAtual: string | null;
   /** "Descobertas Mágicas" (Colégio do Conhecimento, nível 6) — 2
    * magias já escolhidas (pré-marcadas, trocável 1 por level-up, mesmo
    * padrão de Truques). */
@@ -218,6 +229,7 @@ type LuStep =
   | 'features'
   | 'subclasse'
   | 'proficienciasBonus'
+  | 'conhecimentoPrimordial'
   | 'estiloDeLuta'
   | 'truques'
   | 'livroDeMagias'
@@ -263,6 +275,7 @@ export default function LevelUpShell({
   periciasEspecialistaAtuais,
   periciasProficientesDoPersonagem,
   periciasSubclasseBonusAtuais,
+  conhecimentoPrimordialPericiaAtual,
   magiasDescobertasMagicasAtuais,
   poolDescobertasMagicas,
   atributosAtuais,
@@ -474,6 +487,16 @@ export default function LevelUpShell({
   const opcoesPericiaRestritaAtual = talentoObjEscolhido ? opcoesPericiaRestrita(talentoObjEscolhido.id) : [];
   const [periciaRestritaEscolhida, setPericiaRestritaEscolhida] = useState<string | null>(null);
 
+  // Conhecimento Primordial (Bárbaro, nível 3) — "outra perícia à sua
+  // escolha da lista de perícias disponíveis pra Bárbaros no nível 1"
+  // (Livro do Jogador) — reaproveita a MESMA lista de
+  // `proficienciasIniciaisClasse` usada na criação (não duplica um
+  // catálogo próprio), menos as que o personagem já é proficiente.
+  const opcoesConhecimentoPrimordialAtual = (proficienciasIniciaisClasse[classe.id]?.periciasEscolha.opcoes ?? []).filter(
+    (nome) => !periciasProficientesDoPersonagem.includes(nome),
+  );
+  const [conhecimentoPrimordialEscolhida, setConhecimentoPrimordialEscolhida] = useState<string | null>(null);
+
   const luSteps: LuStep[] = ['pv', 'features'];
   if (classe.nivelSubclasse === novoNivel && !personagem.subclasse) luSteps.push('subclasse');
   // Subclasse do PRÓPRIO level-up (se acabou de ser escolhida no passo
@@ -485,6 +508,18 @@ export default function LevelUpShell({
     periciasSubclasseBonusAtuais.length === 0
   ) {
     luSteps.push('proficienciasBonus');
+  }
+  // Conhecimento Primordial (Bárbaro, nível 3) — escolha única,
+  // permanente (mesmo padrão de "Proficiências Bônus" acima, só que é
+  // característica de CLASSE base, não de subclasse). Se não sobrar
+  // nenhuma opção (já proficiente em todas as 6), o passo simplesmente
+  // não aparece — não tem nada pra escolher.
+  if (
+    caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.conhecimentoPrimordial, novoNivel) !== null &&
+    !conhecimentoPrimordialPericiaAtual &&
+    opcoesConhecimentoPrimordialAtual.length > 0
+  ) {
+    luSteps.push('conhecimentoPrimordial');
   }
   if (temEstiloDeLutaTrocavel(classe, novoNivel)) luSteps.push('estiloDeLuta');
   if (maxTruques > 0) luSteps.push('truques');
@@ -755,6 +790,7 @@ export default function LevelUpShell({
     features: 'Novas Características',
     subclasse: 'Escolha de Subclasse',
     proficienciasBonus: 'Proficiências Bônus',
+    conhecimentoPrimordial: 'Conhecimento Primordial',
     estiloDeLuta: 'Estilo de Luta',
     truques: 'Truques',
     livroDeMagias: 'Livro de Magias',
@@ -800,6 +836,10 @@ export default function LevelUpShell({
     }
     if (step === 'proficienciasBonus' && !proficienciasBonusValido) {
       setAviso('Escolha exatamente 3 perícias pra Proficiências Bônus antes de avançar.');
+      return;
+    }
+    if (step === 'conhecimentoPrimordial' && conhecimentoPrimordialEscolhida === null) {
+      setAviso('Escolha a perícia do Conhecimento Primordial antes de avançar.');
       return;
     }
     if (step === 'truques' && !truquesValido) {
@@ -946,6 +986,7 @@ export default function LevelUpShell({
             : null,
         periciaLivreTalentoEscolhida: luSteps.includes('periciaLivreTalento') ? periciaLivreEscolhida : null,
         periciaRestritaTalentoEscolhida: luSteps.includes('periciaRestritaTalento') ? periciaRestritaEscolhida : null,
+        conhecimentoPrimordialPericiaEscolhida: luSteps.includes('conhecimentoPrimordial') ? conhecimentoPrimordialEscolhida : null,
       });
       return;
     }
@@ -1533,6 +1574,25 @@ export default function LevelUpShell({
           </>
         )}
 
+        {step === 'conhecimentoPrimordial' && (
+          <>
+            <div className="section-title">Conhecimento Primordial — escolha 1 perícia</div>
+            <div className="label" style={{ marginBottom: 8 }}>
+              Proficiência em outra perícia à sua escolha, entre as disponíveis pra Bárbaros no nível 1. Escolha
+              única e permanente.
+            </div>
+            {opcoesConhecimentoPrimordialAtual.map((nome) => (
+              <div
+                key={nome}
+                className={`opt-card ${conhecimentoPrimordialEscolhida === nome ? 'selected' : ''}`}
+                onClick={() => setConhecimentoPrimordialEscolhida(nome)}
+              >
+                <div className="opt-card-name">{nome}</div>
+              </div>
+            ))}
+          </>
+        )}
+
         {step === 'especialista' && (
           <>
             <div className="section-title">
@@ -1949,6 +2009,12 @@ export default function LevelUpShell({
               <div className="summary-row">
                 <span>Proficiências Bônus</span>
                 <span>{proficienciasBonusEscolhidas.join(', ') || 'nenhuma escolhida'}</span>
+              </div>
+            )}
+            {luSteps.includes('conhecimentoPrimordial') && (
+              <div className="summary-row">
+                <span>Conhecimento Primordial</span>
+                <span>{conhecimentoPrimordialEscolhida ?? 'nenhuma escolhida'}</span>
               </div>
             )}
             {luSteps.includes('arcanaMistica') && (

@@ -29,6 +29,12 @@ export const ID_CARACTERISTICA_CLASSE = {
    * Vantagem em ataques baseados em Força até o Fim do Turno. Ver
    * `AcaoPanelContent.tsx`/`FichaShell.tsx`. */
   ataqueImprudente: 'Ataque Imprudente',
+  /** Bárbaro nível 3 — perícia extra escolhida no Level Up (uma vez só,
+   * ver `LevelUpShell.tsx` passo `conhecimentoPrimordial`) + Força no
+   * lugar de outro atributo em Acrobacia/Furtividade/Intimidação/
+   * Percepção/Sobrevivência enquanto a Fúria estiver ativa (ver
+   * `calcularPericias`, parâmetro `substituicaoForca`). */
+  conhecimentoPrimordial: 'Conhecimento Primordial',
 } as const;
 
 export type IdCaracteristicaClasse = keyof typeof ID_CARACTERISTICA_CLASSE;
