@@ -293,6 +293,27 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       Teste" gerando um Bárbaro nível 5 não mostra mais "(Trilha do
       Berserker)" no cabeçalho da Ficha (antes mostrava, mesmo sem
       nenhuma mecânica da Trilha funcionar).
+- [x] **B4.2.3 — Corrige regra do Conhecimento Primordial: Força não é
+      obrigatório (pergunta do Osmar, testando o B4.2).** O texto real
+      ("Sempre que realizar um teste de atributo usando uma das
+      seguintes perícias, **pode** realizá-lo como um teste de Força")
+      é escolha do jogador a cada rolagem, não substituição automática
+      — a implementação original trocava sempre, mesmo quando o
+      atributo normal era melhor (ex.: DES +2 vs. FOR +1 — ficava com
+      FOR +1, pior). **Decisão do Osmar:** em vez de perguntar a cada
+      rolagem (fiel à regra, mas 1 toque a mais em toda rolagem
+      dessas 5 perícias), usa sempre o MAIOR mod. entre o atributo
+      normal e Força — ninguém escolheria o pior de propósito, mesmo
+      resultado prático da escolha manual sem a fricção extra.
+      `core/calculoPersonagem.ts`: `calcularPericias` só troca pra
+      Força quando `substituicaoForca.mod > modOriginal` (antes trocava
+      sempre que `ativa` e a perícia estava na lista, sem comparar) +
+      1 teste novo confirmando que DES melhor continua DES mesmo com a
+      substituição "ativa" (Fúria ligada). Verificado com `tsc -b
+      --force`/`npm test -- --run` (546)/`npm run build` limpos +
+      Playwright: Bárbaro com FOR -1 e Fúria ativa — as 5 perícias
+      continuam usando DES/SAB/CAR (todas melhores que FOR -1), nenhuma
+      trocou pra Força.
 - [ ] **B4.3 — Ataque Extra + Movimento Rápido (nível 5):** conferir se
       já funcionam sozinhos sem código novo (Ataque Extra é genérico
       por ID já reaproveitado de outras classes; Movimento Rápido

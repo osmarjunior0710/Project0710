@@ -282,6 +282,15 @@ describe('calcularPericias (substituicaoForca — Conhecimento Primordial do Bá
     expect(furtividade?.proficiente).toBe(true);
     expect(furtividade?.mod).toBe(5 + bonusProficiencia(guerreiro, 1));
   });
+
+  it('regra real é "PODE usar Força" (escolha do jogador, não obrigatório) — se o atributo normal for MELHOR, mantém ele', () => {
+    // DES 18 (mod +4) claramente melhor que o mod. de Força fornecido (+1)
+    const s = selecaoGuerreiro({ atributos: { FOR: 12, DES: 18, CON: 13, INT: 10, SAB: 12, CAR: 8 } });
+    const resultado = calcularPericias(s, 1, [], [], undefined, { ativa: true, mod: 1, pericias: ['Furtividade'] });
+    const furtividade = resultado.find((p) => p.nome === 'Furtividade');
+    expect(furtividade?.atributo).toBe('DES');
+    expect(furtividade?.mod).toBe(4); // mod. de Destreza (+4), não o de Força (+1) — Força seria pior
+  });
 });
 
 describe('calcularPericias (periciasBonusExtras — ex: "Proficiências Bônus" do Colégio do Conhecimento)', () => {

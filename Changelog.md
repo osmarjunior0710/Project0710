@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0844
+
+Corrigido: Conhecimento Primordial (Bárbaro) trocava sempre pro mod.
+de Força nas 5 perícias (Acrobacia/Furtividade/Intimidação/Percepção/
+Sobrevivência) com a Fúria ativa, mesmo quando o atributo normal era
+melhor. Agora usa sempre o maior dos dois — nunca fica pior por causa
+da característica.
+
 ## v202609_0829
 
 Ajuste no "🎲 Personagem de Teste": gerar um Bárbaro de nível 3+ não

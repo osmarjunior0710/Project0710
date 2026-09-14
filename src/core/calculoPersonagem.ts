@@ -482,11 +482,15 @@ export function calcularPericias(
    * NA CLASSE ativa — é ele que decide se "Pau pra Toda Obra" (Bardo)
    * já desbloqueou, nunca o total. */
   nivelTotal?: number,
-  /** Conhecimento Primordial (Bárbaro, nível 3) — enquanto a Fúria
-   * estiver ativa, as perícias em `pericias` usam o mod. de Força em
-   * vez do atributo normal (a proficiência continua contando igual).
-   * `undefined`/`ativa: false` = nenhuma substituição (comportamento
-   * de sempre). */
+  /** Conhecimento Primordial (Bárbaro, nível 3) — regra real é "PODE
+   * realizar como teste de Força" (escolha do jogador a cada rolagem,
+   * não substituição automática — livro/planilha, característica de
+   * nível 3). Simplificação aprovada pelo Osmar (2026-09): em vez de
+   * perguntar a cada rolagem, usa sempre o MAIOR mod. entre o
+   * atributo normal e Força (ninguém escolheria o pior de propósito).
+   * Só entra em jogo enquanto a Fúria estiver ativa; a proficiência
+   * continua contando igual dos dois lados. `undefined`/`ativa:
+   * false` = nenhuma substituição (comportamento de sempre). */
   substituicaoForca?: { ativa: boolean; mod: number; pericias: string[] },
 ): PericiaFinal[] {
   const classe = classeDaSelecao(selection);
@@ -499,9 +503,11 @@ export function calcularPericias(
     const atributoOriginal = ATRIBUTO_POR_NOME_COMPLETO[pericia.atributo];
     const valorAtributo = atributoOriginal ? valorFinalAtributo(selection, atributoOriginal) : null;
     if (!atributoOriginal || valorAtributo === null) continue;
-    const usaForca = (substituicaoForca?.ativa ?? false) && substituicaoForca!.pericias.includes(pericia.nome);
+    const modOriginal = modificador(valorAtributo);
+    const elegivelParaForca = (substituicaoForca?.ativa ?? false) && substituicaoForca!.pericias.includes(pericia.nome);
+    const usaForca = elegivelParaForca && substituicaoForca!.mod > modOriginal;
     const atributo = usaForca ? 'FOR' : atributoOriginal;
-    const atribMod = usaForca ? substituicaoForca!.mod : modificador(valorAtributo);
+    const atribMod = usaForca ? substituicaoForca!.mod : modOriginal;
     const proficiente = proficientes.has(pericia.nome);
     const especialista = proficiente && periciasEspecialista.includes(pericia.nome);
     let bonusFinal = 0;
