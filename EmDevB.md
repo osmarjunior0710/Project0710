@@ -314,11 +314,20 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       Playwright: Bárbaro com FOR -1 e Fúria ativa — as 5 perícias
       continuam usando DES/SAB/CAR (todas melhores que FOR -1), nenhuma
       trocou pra Força.
-- [ ] **B4.3 — Ataque Extra + Movimento Rápido (nível 5):** conferir se
-      já funcionam sozinhos sem código novo (Ataque Extra é genérico
-      por ID já reaproveitado de outras classes; Movimento Rápido
-      provavelmente só textual, já que Deslocamento não é um valor
-      rastreado na Ficha hoje).
+- [x] **B4.3 — Ataque Extra + Movimento Rápido (nível 5): confirmado
+      que já funcionam sozinhos, zero código novo.** Ataque Extra é o
+      mecanismo genérico por ID (`numeroDeAtaques`/`CONTAGEM_ATAQUE_EXTRA`
+      em `core/levelUp.ts`) já reaproveitado de outras classes — lê
+      `classe.progressao` (que já tinha `'Ataque Extra'` na entrada de
+      nível 5 do Bárbaro desde o B1) sem precisar de nada específico.
+      Movimento Rápido é só textual — o app nunca trackeia Deslocamento
+      numérico do PERSONAGEM em lugar nenhum (só de Pets), então "+3m"
+      não tem onde ser aplicado; a descrição real já aparece na aba
+      Perfil (`caracteristicasAcumuladas`, dado que já existe desde o
+      B1) sem precisar de nada novo. Verificado com Playwright: Bárbaro
+      nível 5 já mostra "🗡 Atacar — Ataque Desarmado (ataque 1/2)" no
+      Combate (2 ataques reconhecidos automaticamente) e "Movimento
+      Rápido" com a descrição completa na aba Perfil.
 - [ ] **B4.4 — Bote Instintivo + Instintos Primitivos (nível 7):**
       Instintos Primitivos (Vantagem em Iniciativa) é só ligar o
       `vantagem` que `rolarD20` da Iniciativa já aceita; Bote
