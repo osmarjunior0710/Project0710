@@ -91,6 +91,7 @@ import { podeLevelUpPorXp, proximoMarcoXp } from '../../core/experiencia';
 import {
   espacosDeMagiaAtivos,
   modAcertoConjuracao as calcularModAcertoConjuracao,
+  explicarModAcertoConjuracao,
   magiasDisponiveisParaPreparar,
   poolDescobertasMagicas,
 } from '../../core/magiasPersonagem';
@@ -614,6 +615,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasPactoDoInferoDisponivel,
   });
   const modAcertoConjuracao = calcularModAcertoConjuracao(selecao, classe, nivelTotalAtual);
+  const explicacaoAcertoConjuracao = explicarModAcertoConjuracao(selecao, classe, nivelTotalAtual);
   const usosInspiracaoMax = usosInspiracaoMaximo(selecao, classe, personagem.nivel);
   const usosInspiracaoRestantes = Math.max(0, usosInspiracaoMax - inspiracaoGasto);
   const tamanhoDadoInspiracao = dadoInspiracao(classe, personagem.nivel);
@@ -1873,6 +1875,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             espacosParaConjurar={espacosParaConjurar}
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}
+            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}
             modCarisma={carMod}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
@@ -2023,6 +2026,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             magiasPreparadasBonus={magiasPreparadasBonus}
             magiasPreparadasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
+            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}
             modCarisma={carMod}
             numAtaques={numAtaques}

@@ -161,6 +161,9 @@ interface CombatTabProps {
   magiasPreparadasBonus: Magia[];
   magiasPreparadasReacao: Magia[];
   modAcertoConjuracao: number | null;
+  /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
+   * `null` nos mesmos casos que `modAcertoConjuracao`. */
+  explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
   /** NOME do truque vinculado a Explosão Agonizante + mod. de Carisma
    * — ver `MagiasTab.tsx`/`core/invocacoesMisticas.ts`. */
   truqueVinculadoAgonizante: string | undefined;
@@ -350,6 +353,7 @@ export default function CombatTab({
   magiasPreparadasBonus,
   magiasPreparadasReacao,
   modAcertoConjuracao,
+  explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
   numAtaques,
@@ -1117,6 +1121,7 @@ export default function CombatTab({
             truques={truquesAcao}
             magiasPreparadas={magiasPreparadasAcao}
             modAcertoConjuracao={modAcertoConjuracao}
+            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             truqueVinculadoAgonizante={truqueVinculadoAgonizante}
             modCarisma={modCarisma}
             numAtaques={numAtaques}
@@ -1194,6 +1199,7 @@ export default function CombatTab({
             ponte={ponte}
             nivel={nivel}
             modAcertoConjuracao={modAcertoConjuracao}
+            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             truqueVinculadoAgonizante={truqueVinculadoAgonizante}
             modCarisma={modCarisma}
             onAbrirSalvaguarda={abrirSalvaguarda}
@@ -1222,6 +1228,7 @@ export default function CombatTab({
             conjura={conjura}
             magiasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
+            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             truqueVinculadoAgonizante={truqueVinculadoAgonizante}
             modCarisma={modCarisma}
             colheitaMacabraDisponivel={colheitaMacabraDisponivel}

@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1855
+
+Popup de rolagem de Ataque de MAGIA (truque/magia com ataque, ex. Raio
+de Fogo) também ganhou o ⓘ com a quebra do modificador. Com isso, toda
+rolagem de d20 do app (perícia, salvaguarda, iniciativa, ataque com
+arma, ataque de magia) já mostra de onde vem o número.
+
 ## v202609_1826
 
 Popup de rolagem de ATAQUE (arma ou desarmado) também ganhou o ⓘ com a

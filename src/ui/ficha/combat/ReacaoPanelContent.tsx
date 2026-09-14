@@ -4,6 +4,7 @@ import type { Pet } from '../../../core/pets';
 import { iconesMagia } from '../../../core/classificarMagia';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
+import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TickPips from '../../components/TickPips';
@@ -31,6 +32,9 @@ interface ReacaoPanelContentProps {
   conjura: boolean;
   magiasReacao: Magia[];
   modAcertoConjuracao: number | null;
+  /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
+   * `null` nos mesmos casos que `modAcertoConjuracao`. */
+  explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
   /** NOME do truque vinculado a Explosão Agonizante + mod. de Carisma
    * — ver `MagiasTab.tsx`/`core/invocacoesMisticas.ts`. Nenhum truque
    * de ataque de Bruxo é Reação hoje, mas o parâmetro é obrigatório em
@@ -91,6 +95,7 @@ export default function ReacaoPanelContent({
   conjura,
   magiasReacao,
   modAcertoConjuracao,
+  explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
   detalhesAtivo,
@@ -145,6 +150,7 @@ export default function ReacaoPanelContent({
       m.circulo > 0,
       truqueVinculadoAgonizante,
       modCarisma,
+      explicacaoAcertoConjuracao,
     );
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);

@@ -441,9 +441,36 @@ componentes nomeados antes.
       verdade (não desarmado) não testada via Playwright — mesma
       limitação de sempre (ferramenta de teste não equipa arma
       automaticamente) — mas a lógica é idêntica, risco baixo.
-- [ ] **Entrega 4** — Ataque/CD de Magia (`modAcertoConjuracao`): mesma
-      ideia, atributo de conjuração nomeado (ex. "Carisma") + Bônus de
-      Proficiência.
+- [x] **Entrega 4** — Ataque de Magia: nova função
+      `explicarModAcertoConjuracao` (`core/magiasPersonagem.ts`),
+      irmã de `modAcertoConjuracao`, sempre 2 linhas (mod. do atributo
+      de conjuração, nomeado pelo `atributoPrimario` da classe — ex.
+      "mod. Inteligência" — + Bônus de Proficiência, nunca isento).
+      `RollAcertoSpec` (`core/conjurarMagia.ts`) ganhou
+      `explicacaoMod?`; `decidirConjuracao` ganhou o parâmetro
+      `explicacaoAcertoConjuracao` (opcional, default `null`, não
+      quebra chamadas antigas). Prop `explicacaoAcertoConjuracao`
+      roteada de `FichaShell.tsx` até os 3 pontos que conjuram
+      ataque de magia: `MagiasTab.tsx` (direto), e
+      `AcaoPanelContent.tsx`/`BonusPanelContent.tsx` (via
+      `useUsarMagiaPainel.tsx`, hook compartilhado) +
+      `ReacaoPanelContent.tsx` (direto). **CD de Magia (a outra metade
+      do nome da entrega) ficou de fora** — CD é só um número exibido
+      pro alvo salvar contra, não uma rolagem DESTE personagem, então
+      não tem popup de `RollOverlay` pra plugar; não existe ⓘ nenhum
+      hoje na exibição da CD em lugar nenhum — vira item de Backlog
+      separado se o Osmar quiser esse ⓘ no futuro. Testado
+      (`magiasPersonagem.test.ts`, 2 casos: normal Mago + borda
+      classe/atributo sem mapeamento). Verificado: `tsc -b`/`npm test`
+      (554)/`npm run build` limpos. **Sem validação Playwright** — a
+      ferramenta de teste gera magias aleatórias por personagem, achar
+      uma magia de ataque de verdade num personagem gerado ficou caro
+      de automatizar nesta sessão (múltiplas tentativas travaram no
+      clique); é reaproveitamento do mesmo padrão já validado nas
+      Entregas 1-3 (`explicacaoMod` opcional, popup cai pro texto
+      simples sem ela), risco baixo — vale teste manual no celular com
+      um Mago/Bruxo/Feiticeiro/Clérigo/Druida/Bardo usando um truque
+      de ataque (⚔️ na lista de magias).
 
 ### Correção: fechar o popup antes do dado parar reabria sozinho
 

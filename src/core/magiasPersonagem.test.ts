@@ -5,6 +5,7 @@ import {
   poolDescobertasMagicas,
   cdConjuracao,
   modAcertoConjuracao,
+  explicarModAcertoConjuracao,
   usaRedefinicaoPorDescanso,
   completarListaDeMagias,
   memorizarMagiaValida,
@@ -103,6 +104,26 @@ describe('modAcertoConjuracao', () => {
     const guerreiro = classes.find((c) => c.nome === 'Guerreiro');
     if (!guerreiro) throw new Error('Fixture "Guerreiro" não encontrada em data/rulesets/dnd2024/classes.ts');
     expect(modAcertoConjuracao(selecao, guerreiro, 1)).toBeNull();
+  });
+});
+
+describe('explicarModAcertoConjuracao (B7 — quebra do modificador no popup de rolagem)', () => {
+  it('Mago (Inteligência): 2 linhas (mod. Inteligência + Bônus de Proficiência), total bate com modAcertoConjuracao', () => {
+    const selecao = { ...criarSelecaoInicial(), atributos: { ...criarSelecaoInicial().atributos, INT: 16 } };
+    const explicacao = explicarModAcertoConjuracao(selecao, mago, 1);
+    expect(explicacao?.linhas).toEqual([
+      { label: 'mod. Inteligência', valor: '+3' },
+      { label: 'Bônus de Proficiência', valor: '+2' },
+    ]);
+    expect(explicacao?.total.valor).toBe('+5'); // bate com modAcertoConjuracao (mesma conta, ver teste acima)
+  });
+
+  it('borda: classe null, ou atributo primário sem mapeamento (Guerreiro), devolve null — mesmos casos que modAcertoConjuracao', () => {
+    const selecao = criarSelecaoInicial();
+    expect(explicarModAcertoConjuracao(selecao, null, 1)).toBeNull();
+    const guerreiro = classes.find((c) => c.nome === 'Guerreiro');
+    if (!guerreiro) throw new Error('Fixture "Guerreiro" não encontrada em data/rulesets/dnd2024/classes.ts');
+    expect(explicarModAcertoConjuracao(selecao, guerreiro, 1)).toBeNull();
   });
 });
 

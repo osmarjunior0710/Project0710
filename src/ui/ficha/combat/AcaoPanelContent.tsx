@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { acoesBase, type AtaqueInfo } from '../../../data/exampleCombat';
+import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
@@ -45,6 +46,9 @@ interface AcaoPanelContentProps {
   truques: Magia[];
   magiasPreparadas: Magia[];
   modAcertoConjuracao: number | null;
+  /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
+   * `null` nos mesmos casos que `modAcertoConjuracao`. */
+  explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
   /** NOME do truque vinculado a Explosão Agonizante + mod. de Carisma
    * — ver `MagiasTab.tsx`/`core/invocacoesMisticas.ts`. */
   truqueVinculadoAgonizante: string | undefined;
@@ -104,6 +108,7 @@ export default function AcaoPanelContent({
   truques,
   magiasPreparadas,
   modAcertoConjuracao,
+  explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
   numAtaques,
@@ -143,6 +148,7 @@ export default function AcaoPanelContent({
     truques,
     magiasPreparadas,
     modAcertoConjuracao,
+    explicacaoAcertoConjuracao,
     truqueVinculadoAgonizante,
     modCarisma,
     colheitaMacabraDisponivel,

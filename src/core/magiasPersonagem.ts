@@ -4,7 +4,7 @@
 import type { Atributo } from '../data/wizardFixtures';
 import type { Classe, RecursoClasse } from '../data/rulesets/dnd2024/classes';
 import { magias, magiasDaClasse, type Magia } from '../data/rulesets/dnd2024/magias';
-import { bonusProficiencia } from './calculoPersonagem';
+import { bonusProficiencia, fmtMod, type ExplicacaoCalculo } from './calculoPersonagem';
 import { caracteristicaDesbloqueada } from './levelUp';
 import { modificador, valorFinalAtributo, type WizardSelection } from './personagem';
 import { valorRecursoClasse } from './recursosClasse';
@@ -343,6 +343,29 @@ export function modAcertoConjuracao(selecao: WizardSelection, classe: Classe | n
   const valor = valorFinalAtributo(selecao, atributo);
   if (valor === null) return null;
   return modificador(valor) + bonusProficiencia(classe, nivel);
+}
+
+/** Quebra do `modAcertoConjuracao` (mod. do atributo de conjuração +
+ * Bônus de Proficiência, sempre soma — conjuração nunca é "sem
+ * proficiência" como arma pode ser) — mesmo formato do "ⓘ" de
+ * CA/perícia/ataque, pro popup de rolagem de Ataque de Magia (B7).
+ * `null` nos mesmos casos que `modAcertoConjuracao` (classe sem
+ * atributo de conjuração mapeado). */
+export function explicarModAcertoConjuracao(selecao: WizardSelection, classe: Classe | null, nivel: number): ExplicacaoCalculo | null {
+  if (!classe) return null;
+  const atributo = ATRIBUTO_POR_NOME[classe.atributoPrimario];
+  if (!atributo) return null;
+  const valor = valorFinalAtributo(selecao, atributo);
+  if (valor === null) return null;
+  const atribMod = modificador(valor);
+  const prof = bonusProficiencia(classe, nivel);
+  return {
+    linhas: [
+      { label: `mod. ${classe.atributoPrimario}`, valor: fmtMod(atribMod) },
+      { label: 'Bônus de Proficiência', valor: fmtMod(prof) },
+    ],
+    total: { label: 'Ataque de Magia', valor: fmtMod(atribMod + prof) },
+  };
 }
 
 /** CD pra evitar a magia/característica de conjuração (salvaguarda do

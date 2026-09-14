@@ -11,6 +11,7 @@
 // difere entre os 3 e não faz sentido forçar igual.
 
 import type { Magia } from '../data/rulesets/dnd2024/magias';
+import type { ExplicacaoCalculo } from './calculoPersonagem';
 import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia, type MecanicaMagia } from './magiaDano';
 import { curaColheitaMacabra } from './necromante';
 import { bonusExplosaoAgonizante } from './invocacoesMisticas';
@@ -21,6 +22,10 @@ export interface RollAcertoSpec {
   label: string;
   formula: string;
   mod: number;
+  /** Quebra do `mod` (mesmo formato do "ⓘ" de CA/perícia/ataque) —
+   * `undefined` quando `explicarModAcertoConjuracao` não pôde
+   * calcular (mesmos casos de `modAcertoConjuracao` null). */
+  explicacaoMod?: ExplicacaoCalculo;
 }
 
 /** Rolagem de dano/cura (N dados) — mesmo formato mínimo de
@@ -81,6 +86,7 @@ export function decidirConjuracao(
   gastouEspacoDeVerdade: boolean,
   truqueVinculadoAgonizante: string | undefined,
   modCarisma: number,
+  explicacaoAcertoConjuracao: ExplicacaoCalculo | null = null,
 ): ConjuracaoDecidida {
   const curaMacabra =
     colheitaMacabraDisponivel && gastouEspacoDeVerdade && m.escola === 'Necromancia' ? curaColheitaMacabra(circuloUsado) : null;
@@ -93,7 +99,12 @@ export function decidirConjuracao(
     const danoFinal = dano && bonusAgonizante !== 0 ? { ...dano, mod: dano.mod + bonusAgonizante } : dano;
     return {
       mecanica,
-      rollAcerto: { label: `Ataque de Magia — ${m.nome}`, formula: `1d20 + ${modAcertoConjuracao}`, mod: modAcertoConjuracao },
+      rollAcerto: {
+        label: `Ataque de Magia — ${m.nome}`,
+        formula: `1d20 + ${modAcertoConjuracao}`,
+        mod: modAcertoConjuracao,
+        explicacaoMod: explicacaoAcertoConjuracao ?? undefined,
+      },
       danoPendente: danoFinal
         ? { label: `Dano — ✨ ${m.nome}`, quantidade: danoFinal.quantidade, lados: danoFinal.lados, mod: danoFinal.mod }
         : undefined,

@@ -5,6 +5,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
+import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import type { DanoPendente } from './DanoPendente';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
@@ -116,6 +117,9 @@ interface BonusPanelContentProps {
   /** Nível do personagem — pro Aprimoramento de Truque. */
   nivel: number;
   modAcertoConjuracao: number | null;
+  /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
+   * `null` nos mesmos casos que `modAcertoConjuracao`. */
+  explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
   /** NOME do truque vinculado a Explosão Agonizante + mod. de Carisma
    * — ver `MagiasTab.tsx`/`core/invocacoesMisticas.ts`. */
   truqueVinculadoAgonizante: string | undefined;
@@ -191,6 +195,7 @@ export default function BonusPanelContent({
   ponte,
   nivel,
   modAcertoConjuracao,
+  explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
   onAbrirSalvaguarda,
@@ -214,6 +219,7 @@ export default function BonusPanelContent({
     truques,
     magiasPreparadas,
     modAcertoConjuracao,
+    explicacaoAcertoConjuracao,
     truqueVinculadoAgonizante,
     modCarisma,
     colheitaMacabraDisponivel,

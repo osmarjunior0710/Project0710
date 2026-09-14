@@ -3,6 +3,7 @@ import type { Classe } from '../../../data/rulesets/dnd2024/classes';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { armas } from '../../../data/rulesets/dnd2024/armas';
 import type { ItemMochila } from '../../../core/mochila';
+import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import {
   espacosDeMagiaAtivos,
   truquesDoPersonagem,
@@ -50,6 +51,9 @@ interface MagiasTabProps {
   espacosParaConjurar?: EspacoDeMagiaAtivo[];
   onGastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
   modAcertoConjuracao: number | null;
+  /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
+   * `null` nos mesmos casos que `modAcertoConjuracao`. */
+  explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
   /** `true` = Armadura equipada sem treinamento — bloqueia qualquer
    * conjuração feita direto por aqui (SDD "Penalidades por Falta de
    * Proficiência", ver `core/proficienciaArmadura.ts`). O bloqueio de
@@ -191,6 +195,7 @@ export default function MagiasTab({
   espacosParaConjurar,
   onGastarSlotCirculo,
   modAcertoConjuracao,
+  explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
   desvantagemForcaDestreza,
@@ -288,6 +293,7 @@ export default function MagiasTab({
       gastouEspacoDeVerdade,
       truqueVinculadoAgonizante,
       modCarisma,
+      explicacaoAcertoConjuracao,
     );
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
