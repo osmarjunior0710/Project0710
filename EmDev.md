@@ -229,8 +229,8 @@ entregas no celular.
       Ver `DECISOES-COMBATE.md`.
 - [x] Escala ajustada de novo (6.2 → 7, "tá pequeno, aumenta um
       pouco") + debug visual temporário no canvas (fundo preto 50%)
-      pro Osmar visualizar os limites da área de física — ainda ativo,
-      remover depois de confirmar os limites certos.
+      pro Osmar visualizar os limites da área de física — removido
+      depois de confirmar os limites certos (transparente de novo).
 - [x] Base da área de física reduzida de novo (340px → 265px, sobrava
       espaço entre o preto de debug e o popup).
 - [x] **Bug sério achado no celular: depois de alguma rolagem falhar
@@ -268,8 +268,7 @@ entregas no celular.
       5px)` (5px acima do topo do FAB) em vez de um valor fixo chutado
       (340px → 265px antes) — como os dois usam `position: fixed` a
       partir da base da tela, acompanha qualquer altura de tela
-      sozinho. Ainda ativa (preto 50%), aguardando confirmação final
-      dos limites pra remover.
+      sozinho. Preto de debug removido depois, limites confirmados.
 - [x] **Escala do dado aumentada de novo** (7 → 7.5, "aumenta só mais
       um pouquinho").
 - [x] **Cor por tipo de dado nas rolagens OFICIAIS** (d20/dano) — só o
@@ -361,6 +360,14 @@ resultado reabria o popup do zero, mesmo já fechado antes.
       dois ficam travados (✕ esmaecido, 35% de opacidade, sinalizando
       "não dá ainda" em vez de sumir sem explicação). Verificado:
       `tsc -b`/`npm test` (543)/`npm run build` limpos.
+
+### Remoção do preto de debug (limites da área de física confirmados)
+
+- [x] `.canvasWrapper`/`.canvasWrapperEscondido` voltaram a
+      `background` transparente (removido `rgba(0, 0, 0, 0.5)`) —
+      Osmar confirmou os limites (`top: 72px`, `bottom: calc(92px +
+      52px + 5px)`, `left/right: 5px`) certos. Verificado: `tsc -b`/
+      `npm test` (546)/`npm run build` limpos.
 
 ### Fade automático do dado físico depois de parar
 

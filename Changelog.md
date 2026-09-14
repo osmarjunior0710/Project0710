@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1102
+
+Removida a área preta translúcida (era só debug temporário pra
+visualizar onde o dado cai) — a área de física agora fica 100%
+transparente de novo.
+
 ## v202609_1059
 
 Dado físico agora some sozinho depois de parar: espera 3s parado, some

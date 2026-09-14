@@ -54,10 +54,6 @@
   left: 5px;
   z-index: 90;
   pointer-events: none;
-  /* DEBUG TEMPORÁRIO (pedido do Osmar) — preto 50% só pra visualizar
-     onde esse retângulo cai na tela de verdade. Remover depois de
-     confirmar os limites certos. */
-  background: rgba(0, 0, 0, 0.5);
 }
 
 /* Mesmo container, só escondido — o host do canvas (dentro dele)
