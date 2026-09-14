@@ -307,8 +307,21 @@ aprovado pelo Osmar:
       Ninguém usa `lancarGrupos()` ainda — migração de cada call site
       é 1 sub-entrega própria (B6.2 a B6.6). Ver `DECISOES-COMBATE.md`.
       Verificado: `tsc -b`/`npm test` (539)/`npm run build` limpos.
-- [ ] **B6.2** — migrar `rolarD20` (d20 simples + Vantagem
-      pré-declarada) pra `lancarGrupos()`.
+- [x] **B6.2** — migrar `rolarD20` (d20 simples + Vantagem
+      pré-declarada) pra `lancarGrupos()`. Troca mecânica: onde antes
+      montava `box.onRollComplete`/`box.roll()` na mão e lia
+      `resultados[0]`, agora só `const [grupo] = await
+      lancarGrupos({...})` — como `roll()` sempre limpa a cena antes,
+      `lancarGrupos()` sempre devolve exatamente 1 grupo aqui.
+      Fallback pro 2D em caso de erro não mudou. Verificado: `tsc -b`/
+      `npm test` (539)/`npm run build` limpos. **Sem validação
+      Playwright desta vez** — simular login/criação de personagem só
+      pra chegar na tela de rolagem ficou caro pro escopo desta
+      entrega; a parte de maior risco (identificar qual resultado é o
+      novo) já é coberta pelo teste automatizado de `gruposNovos`
+      (B6.1). Vale o Osmar confirmar no celular: perícia/ataque/
+      salvaguarda simples E Vantagem/Desvantagem pré-declarada (ex.:
+      Desvantagem por armadura sem treinamento) continuam certas.
 - [ ] **B6.3** — migrar `escolherVantagemPosRolagem` (o `add()`, foi o
       bug mais recente).
 - [ ] **B6.4** — migrar `rerolarFisico` (Sorte/Inspiração Heroica/
