@@ -109,6 +109,280 @@ motor 3D (`box.roll(['1d20','1d20'])`) — hoje continua 2D mesmo com
 Heroica, Perfurador) e escolha de Vantagem/Desvantagem DEPOIS de ver o
 1º resultado (`box.add('1d20')`) — ver `sdd/sdd-dado-3d.md`.
 
+### B4 — Escolha de Vantagem/Desvantagem DEPOIS do resultado, e reroll (Sorte/Inspiração Heroica) físicos
+
+- [x] `escolherVantagemPosRolagem`: quando o 1º dado já veio do motor
+      3D (`estado.motor3D`) e `dado3DAtivo`, o 2º dado (escolhido só
+      DEPOIS de ver o resultado) usa `box.add('1d20')` — joga um dado
+      A MAIS na cena SEM limpar o que já parou (diferente de
+      `.roll()`). Cai pro 2D se o motor 3D falhar.
+- [x] `usarSorte`/`usarInspiracaoHeroica`: quando o d20 sendo rerolado
+      veio do motor 3D, usa `box.reroll(resultadoBruto, {remove:
+      true})` — rerola FISICAMENTE só aquele dado, removendo o
+      antigo da cena. Precisou guardar o objeto BRUTO que a lib
+      devolve (`RollState.resultadoBrutoD20`, tipo `DiceBoxResultado`
+      com `[key: string]: unknown` — o app nunca lê os campos
+      internos dele, só repassa de volta pra `reroll()`).
+      `dice-box.d.ts` ganhou os tipos de `add()`/`reroll()` (lidos
+      direto do bundle minificado da lib, que não publica `.d.ts`).
+- **Fora de escopo (Perfurador):** reroll de dano (`rerollDadoEscolhido`/
+  `usarRerollSe1`) continua 2D — dano com múltiplos dados em si ainda
+  não usa o motor 3D (`rolarDados` 100% `Math.random()`), então não
+  tem o que rerolar fisicamente ainda; só entra quando o motor 3D
+  cobrir rolagem de dano também (fora do escopo do SDD atual, focado
+  em d20).
+  Verificado: `tsc -b`/`npm test` (519)/`npm run build` limpos +
+  Playwright (atributo sem Vantagem pré-declarada → rola físico →
+  escolhe "Vantagem" depois do resultado → 2º dado físico entra na
+  cena via `box.add`, sem `DadoVisual` CSS, total recalcula certo).
+  Sorte/Inspiração Heroica não testados via Playwright (dependem de um
+  d20 físico sair 1 ou de uma característica específica — evento raro
+  de forçar num teste automatizado) — o fallback pro 2D em caso de erro
+  garante que nunca trava, mas vale um teste manual no celular com um
+  Pequenino antes de considerar 100% validado.
+
+### B5 — Rolagem de DANO também usa o motor 3D (Perfurador físico)
+
+Pedido do Osmar: fechar a lacuna que o B4 deixou de fora (`rolarDados`
+continuava 100% `Math.random()`) enquanto ele testava as outras
+entregas no celular.
+
+- [x] `rolarDados`: com `dado3DAtivo`, rola fisicamente tanto o caso de
+      1 dado só (`box.roll({qty:1, sides})`) quanto o grid de 2+ dados/
+      grupos mistos (`box.roll([{qty:1,sides},...])`, um grupo `qty:1`
+      por dado — precisa ser assim, não `qty:N`, pra conseguir mapear
+      `resultados[i]` de volta pro `DadoIndividual` certo). Cai pro 2D
+      se o motor 3D falhar, mesmo padrão de `rolarD20`.
+- [x] **Decisão de UI sem precisar perguntar de novo** (já é o padrão
+      estabelecido no B2/B3 pro `RollOverlay`): dado ÚNICO some da UI
+      (CSS) igual ao d20 simples — o físico é a única coisa visível.
+      GRID (2+ dados) é DIFERENTE de propósito: continua desenhando os
+      ícones normalmente MESMO com `motor3D` — o grid não é "o mesmo
+      dado duplicado" (motivo de esconder no d20), é a UI de escolher
+      QUAL dado rerolar (Perfurador); esconder ele quebraria essa
+      interação, já que não dá pra saber em qual dado físico específico
+      o jogador tocou na tela. O dado físico caindo vira só reforço
+      visual atrás do card, o grid continua sendo a fonte de verdade
+      clicável — não precisou inventar nenhuma interação nova.
+- [x] `rerollDadoEscolhido`/`usarRerollSe1`: quando o dado (do grid,
+      por `id`, ou o único da rolagem sem grid) tinha vindo do motor
+      3D, usa `box.reroll(resultadoBruto, {remove:true})` — mesmo
+      padrão do B4 pro d20. Precisou de `DadoIndividual.resultadoBruto`
+      (bruto por dado, pro caso do grid) e `RollState.resultadoBrutoDados`
+      (bruto único, pro caso sem grid) — os 2 novos campos espelham o
+      `resultadoBrutoD20` que já existia.
+- [x] `ladosParaLib()`: d100 de dano (nunca usado hoje, mas o tipo
+      `LadosDado` permite) precisa de `sides: "100"` (string) igual o
+      avulso — sem isso quebraria se algum dia usado.
+      Verificado: `tsc -b`/`npm test` (529)/`npm run build` limpos +
+      Playwright (Guerreiro com Espada Grande equipada, 2d6+1 físico:
+      2 dados caem no fundo, grid mostra os 2 valores, total bate;
+      Ataque Desarmado, 1d1-1 físico: nenhum `DadoVisual` CSS aparece,
+      só o total). Perfurador/reroll físico do grid não testado via
+      Playwright (precisa de personagem com o talento — mesma limitação
+      de forçar cenário raro já registrada no B4) — o fallback 2D
+      garante que nunca trava, mas vale teste manual se o Osmar tiver
+      um personagem com Perfurador à mão.
+
+### Correções pós-B5, achadas testando no celular
+
+- [x] **d100 só rolava a dezena** (0/10/.../90) — a lib entende
+      `sides:"100"` STRING como "d100 de face única" (sem unidade);
+      número puro `100` faz ela somar um d10 físico escondido e
+      devolver 1-100 de verdade. Corrigido em `Dice3dFab.tsx`/
+      `RollContext.tsx`. Ver `DECISOES-COMBATE.md`.
+- [x] **Sorte/Inspiração Heroica/Perfurador só trocavam o número, sem
+      o dado cair de novo** — `onRollComplete` devolve 1 objeto por
+      GRUPO, não por dado; o `rollId` que `box.reroll()` precisa mora
+      em `grupo.rolls[0]`. Guardar o grupo inteiro fazia `reroll()`
+      quebrar por dentro e cair no fallback 2D silenciosamente (sem
+      resetar `motor3D`, então nem o CSS aparecia). Corrigido com
+      helper `dadoBruto()`. Validado via Playwright: dado físico cai
+      de novo de verdade.
+- [x] **Vantagem/Desvantagem pré-declarada: os 2 dados na tela
+      mostravam valores diferentes mas o histórico registrava os 2
+      iguais** — 2 notações separadas (`['1d20','1d20']`) competem por
+      um contador interno da lib (corrida entre 2 callbacks `async`
+      não aguardados pelo `forEach`). Corrigido trocando por 1 notação
+      só (`'2d20'`, `qty:2`) — sem 2º item pra competir. Validado 40x
+      seguidas sem colisão. **Risco relacionado, não corrigido**: o
+      modo Múltiplos do avulso e o grid de dano (B5) também passam
+      array de 2+ itens pra `box.roll()` — mesma corrida em teoria,
+      não reproduzida/reportada ainda, registrada no
+      `DECISOES-COMBATE.md` como ponto de atenção.
+- [x] **Dado batendo/saindo um pouco da borda da tela** — canvas físico
+      ganhou 5px de folga nas laterais/embaixo (era `inset: 0` exato).
+- [x] **Popup de rolagem (perícia/ataque/etc) reancorado embaixo com
+      margem** (era centralizado) — botão "FECHAR" de largura total
+      virou um ✕ circular no canto do card. Área de física do dado
+      ajustada: topo ~72px (abaixo da barra do nome), base ~340px
+      (acima do card reancorado). Valores fixos por estimativa, não
+      calculados dinamicamente.
+      Verificado: `tsc -b`/`npm test` (532)/`npm run build` limpos +
+      Playwright (rolagem cai com folga da borda, popup ancorado
+      embaixo, ✕ fecha corretamente).
+- [x] **Dado ficou minúsculo** — efeito colateral do canvas menor
+      acima (a lib escala o dado pelo tamanho do container). Corrigido
+      com `scale: 6.2` explícito em `diceBox3d.ts` (padrão da lib é 5),
+      calibrado visualmente via Playwright pra ficar uns 20% menor que
+      o tamanho original (não o tamanho minúsculo que tinha ficado).
+      Ver `DECISOES-COMBATE.md`.
+- [x] Escala ajustada de novo (6.2 → 7, "tá pequeno, aumenta um
+      pouco") + debug visual temporário no canvas (fundo preto 50%)
+      pro Osmar visualizar os limites da área de física — ainda ativo,
+      remover depois de confirmar os limites certos.
+- [x] Base da área de física reduzida de novo (340px → 265px, sobrava
+      espaço entre o preto de debug e o popup).
+- [x] **Bug sério achado no celular: depois de alguma rolagem falhar
+      1x, o app nunca mais conseguia usar o motor 3D na mesma sessão**
+      (ficava sempre no 2D, mesmo a área preta de debug aparecendo
+      normal). Causa: `carregarDiceBox3D()` guardava a promise de
+      inicialização como singleton, mas nunca limpava essa referência
+      se a inicialização REJEITASSE — a mesma promise rejeitada era
+      reusada pra sempre. Corrigido: no erro, a referência é limpa, e a
+      PRÓXIMA rolagem tenta inicializar o motor do zero em vez de
+      reusar o erro antigo. Não reproduzi o gatilho ORIGINAL da falha
+      (não reproduziu via Playwright headless) — mas o bug de "nunca
+      mais tenta de novo" em si é real e está corrigido; vale confirmar
+      no celular se o 3D volta a funcionar depois de qualquer falha
+      pontual.
+      Verificado: `tsc -b`/`npm test` (536)/`npm run build` limpos.
+- [x] **Bug real desde o B4: "2º dado não reconhecido" ao escolher
+      Vantagem/Desvantagem DEPOIS de ver o resultado** —
+      `escolherVantagemPosRolagem` lia `resultados[0]` depois de
+      `box.add('1d20')`, mas `add()` não limpa os grupos antigos:
+      `resultados[0]` era sempre o 1º dado (já mostrado antes), nunca o
+      2º de verdade. Corrigido lendo o ÚLTIMO item do array (onde o
+      grupo recém-adicionado sempre cai). **Mesmo padrão, achado
+      revisando o código:** `rerolarFisico()` (Sorte/Inspiração
+      Heroica/Perfurador) assumia `resultados[0]` também — errado com
+      2+ dados vivos na cena (grid do Perfurador); corrigido achando o
+      grupo certo por `id === groupId` do dado original, em vez de
+      posição fixa. Ver `DECISOES-COMBATE.md`.
+      Verificado: `tsc -b`/`npm test` (536)/`npm run build` limpos +
+      Playwright (Vantagem escolhida depois do 1º resultado: total
+      corrigido de 6 pra 19, batendo com o maior dos 2 dados físicos
+      visíveis na tela).
+- [x] **Área preta de debug reancorada de vez em quanto o Osmar não
+      confirma os limites finais** — base virou `calc(92px + 52px +
+      5px)` (5px acima do topo do FAB) em vez de um valor fixo chutado
+      (340px → 265px antes) — como os dois usam `position: fixed` a
+      partir da base da tela, acompanha qualquer altura de tela
+      sozinho. Ainda ativa (preto 50%), aguardando confirmação final
+      dos limites pra remover.
+- [x] **Escala do dado aumentada de novo** (7 → 7.5, "aumenta só mais
+      um pouquinho").
+- [x] **Cor por tipo de dado nas rolagens OFICIAIS** (d20/dano) — só o
+      FAB avulso respeitava `CORES_POR_TIPO`; as rolagens de verdade
+      (d20 simples, Vantagem/Desvantagem, dano com 1 ou mais dados)
+      caíam sempre na cor padrão do tema, sem `themeColor` nenhum.
+      Tabela movida pra `diceBox3d.ts` (`COR_POR_LADOS`, por número de
+      lados em vez de por rótulo `TipoDado`, já que `RollContext` não
+      tem esse tipo) e usada em todo `box.roll()`/`box.add()` de
+      `RollContext.tsx`. Verificado: `tsc -b`/`npm test` (536)/`npm run
+      build` limpos — vale confirmar visualmente no celular (d20
+      vermelho, dano por tipo) já que não deu pra reproduzir via
+      Playwright headless sem simular login/criação de personagem.
+
+### B6 — Consolidação do motor de dado 3D (1 função central, fim da duplicação)
+
+Pedido do Osmar depois de ver os bugs de grupo/posição se repetirem em
+lugares diferentes (B4/B5/correções pós-B5): cada ponto de entrada
+(`rolarD20`, `escolherVantagemPosRolagem`, `rerolarFisico`,
+`rolarDados`, FAB avulso) reimplementa sozinho "chamar `box.roll`/
+`add`/`reroll`, adivinhar qual resultado é o novo, aplicar cor, cair
+pro 2D" — é essa duplicação que gerou os bugs recorrentes. Plano
+aprovado pelo Osmar:
+
+- [x] **B6.1 — `lancarGrupos()` central em `diceBox3d.ts`**: guarda o
+      conjunto de `groupId`s já na cena ANTES de `box.roll()`/`add()`
+      (`box.getRollResults()`, método síncrono da lib que a gente não
+      tinha nos tipos ainda, adicionado em `dice-box.d.ts`), e no
+      `onRollComplete` devolve só os grupos que NÃO existiam antes —
+      elimina de vez a classe de bug "adivinhar posição no array" (não
+      só os casos de hoje, qualquer um futuro também). Cor por tipo
+      (`COR_POR_LADOS`) entra dentro dela também. Núcleo de filtro
+      (`gruposNovos`) é função pura, isolada e testada
+      (`diceBox3d.test.ts`, 3 casos: roll/add/borda-tudo-já-existia).
+      Ninguém usa `lancarGrupos()` ainda — migração de cada call site
+      é 1 sub-entrega própria (B6.2 a B6.6). Ver `DECISOES-COMBATE.md`.
+      Verificado: `tsc -b`/`npm test` (539)/`npm run build` limpos.
+- [ ] **B6.2** — migrar `rolarD20` (d20 simples + Vantagem
+      pré-declarada) pra `lancarGrupos()`.
+- [ ] **B6.3** — migrar `escolherVantagemPosRolagem` (o `add()`, foi o
+      bug mais recente).
+- [ ] **B6.4** — migrar `rerolarFisico` (Sorte/Inspiração Heroica/
+      Perfurador).
+- [ ] **B6.5** — migrar `rolarDados` (dano, 1 dado e grid).
+- [ ] **B6.6** — migrar o FAB avulso (`Dice3dFab.tsx`) — os "2 mundos"
+      (oficial e avulso) passam a usar a MESMA função, fim da
+      duplicação.
+
+Cada sub-entrega é uma troca "por trás", sem mudar nada visível —
+risco baixo, checklist de sempre a cada uma.
+
+### B7 — Popup de rolagem mostra a quebra do modificador (não só o total já somado)
+
+Pedido do Osmar: hoje o card de resultado mostra só `1d20 + 7` (número
+já somado) — ele quer ver cada parte que compõe esse `+7` (ex.: "FOR
++3, Bônus de Proficiência +2, Fúria +2"), pra QUALQUER rolagem de d20
+(perícia, salvaguarda, ataque, iniciativa) — decidido rodar DEPOIS do
+B6 (consolidação do motor primeiro, menos risco de mexer 2 coisas ao
+mesmo tempo no mesmo código).
+
+- [ ] Ainda sem quebra em sub-entregas — fazer o levantamento (chapéu
+      de Product Manager: mapear todo lugar que hoje monta um `mod`
+      já somado antes de chamar `rolarD20`, ex. `AtributosTab`,
+      `CombatTab`, `AcaoPanelContent`) antes de propor o plano
+      detalhado, quando chegar a vez do B7.
+
+### Redesenho do FAB avulso (Fase A) — coluna de botões em vez de overlay escuro
+
+Pedido do Osmar depois do B4: o FAB avulso (🎲, ferramenta solta, não
+official roll) tinha um overlay preto cobrindo a tela inteira com os
+controles dentro. Trocado por uma coluna de botões que expande do
+próprio FAB pra cima, alinhada à direita, sem fundo escuro nenhum.
+
+- [x] Botões, de baixo (perto do FAB) pra cima: Múltiplos, d4, d6, d8,
+      d10, d12, d20, d100, Histórico — cada um um pill (`.menuBtn`),
+      coluna com `flex-direction: column-reverse` +
+      `align-items: flex-end`. Ordem corrigida no caminho: `column-
+      reverse` bota o 1º item do DOM embaixo (perto do FAB) e o último
+      em cima — pra Múltiplos ficar embaixo, ele precisa vir PRIMEIRO
+      no JSX, não por último.
+- [x] Pills mudaram de branco pra `var(--accent)` (mesmo tom do 🎲) —
+      branco puro contra o resto da tela ficou estranho (pedido do
+      Osmar). O próprio 🎲 ganhou um estado "afundado"/selecionado
+      (`.fabAberto`, azul-marinho `#1e2a6e` + sombra por dentro) enquanto
+      a coluna está expandida — ele não tem função de rolar nesse
+      momento (só fecha), o visual "pressionado" deixa isso claro.
+- [x] Removida a Customização de tema/cor (`temaId`/`corHex`/
+      `TEMAS`/`CORES`) — o tema fica sempre "default" e cada TIPO de
+      dado ganhou cor FIXA própria (`CORES_POR_TIPO`): d4 azul, d6
+      cian, d8 verde, d10 amarelo, d12 laranja, d20 vermelho, d100
+      roxo. Pra dar cor por tipo numa MESMA rolagem (ex.: Múltiplos com
+      d6+d20 juntos), a notação virou array de objetos
+      `{ qty, sides, themeColor }` em vez de string — a lib já suporta
+      isso (`Z.themeColor || d.themeColor`, lido direto do bundle
+      minificado), só não estava documentado no `dice-box.d.ts` (agora
+      tem `DiceBoxGrupoNotacao`/`DiceBoxNotacao`).
+- [x] Canvas físico do dado (`#dice3d-canvas-host`) continua cobrindo a
+      tela inteira (precisa do espaço pra física), mas agora
+      TRANSPARENTE (`pointer-events: none`) — o dado cai visível por
+      cima da tela normal, sem nenhum fundo escondendo o app atrás.
+- [x] Resultado/erro/carregando viraram uma pílula flutuante no topo da
+      tela (`.statusFlutuante`), independente da coluna de botões.
+- [x] Histórico virou popup central com botão de fechar (✕) explícito
+      (`.logPopup`/`.logPopupFechar`) — pedido à parte do Osmar,
+      diferente do resto (que só fecha clicando fora).
+- [x] Clicar fora do FAB + coluna + popup de log colapsa tudo de volta
+      pro FAB (`pointerdown` no `document`, ignorado se o alvo está
+      dentro do wrapper que embrulha FAB/coluna/popup).
+      Verificado: `tsc -b`/`npm test` (529)/`npm run build` limpos +
+      Playwright em 390px (coluna expande com a ordem certa, sem
+      "Customizar"; clicar fora colapsa; d20 rola físico vermelho;
+      Histórico abre em popup com ✕ que fecha só ele).
+
 ## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade) — PAUSADO, retomar depois do Dado 3D
 
 77 talentos ainda sem efeito mecânico, em 5 categorias (Geral 42,

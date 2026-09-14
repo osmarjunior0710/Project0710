@@ -1,4 +1,6 @@
 import type DiceBox from '@3d-dice/dice-box';
+import type { DiceBoxGrupoNotacao, DiceBoxResultado } from '@3d-dice/dice-box';
+export type { DiceBoxResultado };
 
 /** Dono único do motor `@3d-dice/dice-box` — antes vivia dentro de
  * `Dice3dFab.tsx` (ferramenta avulsa), agora é compartilhado com
@@ -13,6 +15,20 @@ let carregandoPromiseRef: Promise<DiceBox> | null = null;
 
 export const DICE3D_CANVAS_HOST_ID = 'dice3d-canvas-host';
 
+/** Cor fixa por número de lados do dado (pedido do Osmar) — mesma tabela
+ * que o FAB avulso (`Dice3dFab.tsx`) já usava, agora compartilhada aqui
+ * pra qualquer rolagem OFICIAL (`RollContext.tsx`) também respeitar a
+ * mesma cor por tipo, em vez de cair na cor padrão do tema. */
+export const COR_POR_LADOS: Record<number, string> = {
+  4: '#2e6da4',
+  6: '#0097a7',
+  8: '#2e8555',
+  10: '#d4ac0d',
+  12: '#d4690d',
+  20: '#c0392b',
+  100: '#7d3c98',
+};
+
 export function carregarDiceBox3D(): Promise<DiceBox> {
   if (diceBoxRef) return Promise.resolve(diceBoxRef);
   if (carregandoPromiseRef) return carregandoPromiseRef;
@@ -22,12 +38,29 @@ export function carregarDiceBox3D(): Promise<DiceBox> {
       container: `#${DICE3D_CANVAS_HOST_ID}`,
       assetPath: `${import.meta.env.BASE_URL}assets/`,
       theme: 'default',
+      // Compensa o canvas ter ficado menor (área de física ajustada
+      // pro popup reancorado embaixo, ver Dice3dFab.module.css) — a
+      // lib recalcula o tamanho do dado com base no espaço disponível,
+      // então um canvas menor sozinho deixava o dado minúsculo. Padrão
+      // da lib é 5; achado testando no celular (pedido do Osmar: "uns
+      // 20% menor que o tamanho original", não do tamanho que ficou).
+      scale: 7.5,
     });
     await box.init();
     diceBoxRef = box;
     return box;
   })();
   carregandoPromiseRef = promessa;
+  // Achado testando no celular: se `box.init()` falhar 1x por qualquer
+  // motivo passageiro (ex.: container com altura momentaneamente 0
+  // durante uma mudança de layout), a promise ficava guardada pra
+  // sempre — toda rolagem seguinte reusava essa MESMA promise rejeitada
+  // e caía pro 2D sem nunca mais tentar o motor 3D de novo na mesma
+  // sessão (só um refresh de página "resolvia"). Limpar a referência no
+  // erro deixa a PRÓXIMA rolagem tentar inicializar de novo do zero.
+  promessa.catch(() => {
+    carregandoPromiseRef = null;
+  });
   return promessa;
 }
 
@@ -36,4 +69,51 @@ export function carregarDiceBox3D(): Promise<DiceBox> {
  * baixa de verdade na 1ª vez que cada tema é escolhido nesta sessão). */
 export async function garantirTemaDiceBox3D(box: DiceBox, temaId: string) {
   await box.loadTheme(temaId);
+}
+
+/** Filtra `resultados` (o array que `onRollComplete` acabou de
+ * entregar) pra devolver só os grupos que NÃO estavam em `idsAntes` —
+ * puro/testável separado de `lancarGrupos()` de propósito (o resto da
+ * função depende do motor 3D de verdade, não dá pra testar sem
+ * mockar). Base do B6 (ver DECISOES-COMBATE.md "Consolidação do motor
+ * de dado 3D"): pra `.roll()` (que sempre limpa a cena antes),
+ * `idsAntes` chega vazio e todo mundo em `resultados` é novo — pra
+ * `.add()`, só o(s) grupo(s) recém-criado(s) sobra(m). Se por algum
+ * motivo nada sobrar (`idsAntes` continha TODOS os ids — não deveria
+ * acontecer numa rolagem de verdade), devolve `resultados` inteiro em
+ * vez de array vazio, pra nunca deixar quem chamou sem nada pra ler. */
+export function gruposNovos(idsAntes: ReadonlySet<unknown>, resultados: DiceBoxResultado[]): DiceBoxResultado[] {
+  const novos = resultados.filter((r) => !idsAntes.has(r.id));
+  return novos.length > 0 ? novos : resultados;
+}
+
+export type ModoLancamento = 'roll' | 'add';
+
+/** Ponto único de entrada pra jogar dado(s) físico(s) na cena (`B6` —
+ * ver DECISOES-COMBATE.md) — cor por tipo (`COR_POR_LADOS`) e a
+ * identificação de "qual resultado é o novo" (`gruposNovos`) ficam
+ * aqui, não em cada chamador. Devolve só os grupos NOVOS desta
+ * chamada, na ordem que a lib os criou — quem chama não precisa saber
+ * se foi `roll()` (limpa tudo, tudo é novo) ou `add()` (soma um grupo
+ * a mais, só ele é novo).
+ *
+ * Não cobre `reroll()` (Sorte/Inspiração Heroica/Perfurador) — esse
+ * caso reaproveita o `groupId` de um dado já existente em vez de criar
+ * um novo, então "o que é novo" não se aplica; migra pra cá só na B6.4
+ * junto de `rerolarFisico()`. */
+export async function lancarGrupos(
+  grupos: DiceBoxGrupoNotacao | DiceBoxGrupoNotacao[],
+  opcoes: { modo?: ModoLancamento; tema?: string } = {},
+): Promise<DiceBoxResultado[]> {
+  const box = await carregarDiceBox3D();
+  await garantirTemaDiceBox3D(box, opcoes.tema ?? 'default');
+  const lista = Array.isArray(grupos) ? grupos : [grupos];
+  const comCor = lista.map((g) => ({ ...g, themeColor: g.themeColor ?? COR_POR_LADOS[g.sides] }));
+  const idsAntes = new Set(box.getRollResults().map((r) => r.id));
+  return new Promise((resolve) => {
+    box.onRollComplete = (resultados) => resolve(gruposNovos(idsAntes, resultados));
+    const notacao = comCor.length === 1 ? comCor[0] : comCor;
+    if (opcoes.modo === 'add') box.add(notacao);
+    else box.roll(notacao);
+  });
 }

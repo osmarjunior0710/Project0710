@@ -14,6 +14,49 @@ Acrobacia, Furtividade, Intimidação, Percepção e Sobrevivência passam
 a usar o mod. de Força em vez do atributo normal — some sozinho ao
 encerrar a Fúria.
 
+## v202609_2211
+
+Ajustes no dado 3D: área preta de debug reancorada 5px acima do botão
+🎲 flutuante (acompanha qualquer tamanho de tela agora); dado um
+pouquinho maior de novo; e as rolagens oficiais (perícia, ataque, dano,
+etc.) passaram a usar a mesma cor fixa por tipo de dado que o dado
+avulso já usava (d20 vermelho, d4 azul, d6 cian, e assim por diante).
+
+## v202609_2124
+
+Corrigido: escolher "Vantagem" ou "Desvantagem" DEPOIS de ver o
+resultado do 1º d20 físico não estava usando o valor de verdade do 2º
+dado — o total ficava igual ao 1º dado mesmo o 2º caindo com outro
+número na tela. Mesma correção aplicada no reroll do Perfurador (grid
+de dados de dano) quando tem mais de 1 dado na cena.
+
+## v202609_2109
+
+Corrigido: quando o dado 3D falhava de rolar 1 vez, o app ficava preso
+no dado clássico (2D) pelo resto da sessão, mesmo a área de física
+continuando visível. Agora, depois de qualquer falha, a próxima
+rolagem tenta o motor 3D de novo normalmente.
+
+## v202609_2101
+
+Ajustado: a área preta de debug (temporária) tava deixando um espaço
+sobrando antes do popup — encostada mais perto agora.
+
+## v202609_2048
+
+Dado 3D um pouco maior de novo (ainda menor que o tamanho original,
+mas menos do que ficou na publicação passada). Também: por enquanto,
+a área onde o dado cai/quica aparece com um fundo preto translúcido
+temporário — é só pra você ver os limites dela na tela, vou tirar
+assim que confirmarmos que estão certos.
+
+## v202609_2039
+
+Corrigido: o dado físico tinha ficado minúsculo depois do popup de
+rolagem mudar de lugar (efeito colateral não percebido antes). Ajustado
+pra ficar um pouco menor que o tamanho de antes, mas nada perto do
+tamanho minúsculo que apareceu.
+
 ## v202609_1914
 
 Bárbaro — Ataque Imprudente e Sentido de Perigo (nível 2) chegaram. No
@@ -23,7 +66,30 @@ fim do turno, vale pros ataques seguintes do Ataque Extra sem
 perguntar de novo). Na aba Atributos, "Salvaguarda de Destreza" ganha
 Vantagem automática.
 
-## v202609_1526
+## v202609_1911
+
+Dado 3D — corrigido: rolagens com Vantagem/Desvantagem já decidida de
+antemão às vezes registravam os 2 dados com o mesmo valor no histórico,
+mesmo os dois caindo com números diferentes na tela. O popup de
+resultado (perícia/ataque/etc) agora fica ancorado embaixo da tela com
+uma margem, e o botão de fechar virou um ✕ no canto — o dado físico
+ganhou mais espaço pra cair sem ficar cortado nas bordas ou em cima do
+popup.
+
+## v202609_1833
+
+Corrigido: usar Sorte (Pequenino) ou Inspiração Heroica pra rerolar um
+d20 físico só trocava o número, sem o dado cair na tela de novo — agora
+o dado reroda fisicamente de verdade. Mesma correção vale pro Perfurador
+(reroll de dano com Dado 3D ligado).
+
+## v202609_1532
+
+Corrigido: o d100 (no 🎲 avulso e em qualquer rolagem que use d100)
+só rolava múltiplos de 10 (0, 10, 20...90) — agora rola de verdade de
+1 a 100.
+
+## v202609_1527
 
 Aba Atributos ganhou as 6 Salvaguardas de verdade (Força, Destreza,
 Constituição, Inteligência, Sabedoria, Carisma) no topo da lista de
@@ -32,6 +98,15 @@ proficiente naquela salvaguarda (antes, o box de atributo simples
 nunca somava esse bônus pra nada). Fundação pras próximas
 características do Bárbaro que dependem de Vantagem/valor de
 salvaguarda.
+
+## v202609_1518
+
+Dado 3D — a rolagem de DANO (ataque/magia/talento) também usa física de
+verdade agora, com Dado 3D ligado: 1 dado só cai fisicamente na tela
+(sem o dado de mentirinha aparecendo mais); 2+ dados (Espada Grande,
+etc.) caem fisicamente ATRÁS do card, que continua mostrando o valor de
+cada um pra você conferir/escolher qual rerolar (Perfurador). Total bate
+igual sempre.
 
 ## v202609_1502
 
@@ -51,7 +126,14 @@ Vinheta de Fúria mais suave (feedback do Osmar: "ficou muito
 vermelho") — o vermelho nas bordas da tela começa mais pra fora e a
 opacidade máxima caiu bem, tanto no degradê quanto no pulso.
 
-## v202609_1424
+## v202609_1431
+
+Corrigido em TODO o app (não só o Dado 3D): tocar rápido em qualquer
+botão/área tocável às vezes virava seleção de texto/menu de copiar no
+celular. Não deve acontecer mais em lugar nenhum. Campos de digitação
+(nome, anotações, etc.) continuam selecionáveis normalmente.
+
+## v202609_1425
 
 Ajustes no card de Fúria (feedback do Osmar testando no celular): texto
 dos efeitos agora quebra em linhas separadas (Resistência / Dano da
@@ -59,6 +141,38 @@ Fúria / Vantagem) em vez de um parágrafo só; botão "Encerrar Fúria"
 ganhou um destaque vermelho suave. E um charme novo: enquanto a Fúria
 está ativa, as bordas da tela pulsam num vermelho suave com partículas
 emanando de fora pra dentro.
+
+## v202609_1421
+
+Dado 3D — corrigido: tocar rápido nos botões do 🎲 (Múltiplos, tipos de
+dado, Histórico, fechar do popup) às vezes virava seleção de texto/menu
+de copiar no celular. Agora esses toques não disparam mais seleção.
+
+## v202609_1411
+
+Dado 3D — os botões da coluna expandida (Múltiplos, d4 a d100,
+Histórico) mudaram de branco pra azul (mesmo tom do 🎲). Enquanto a
+coluna está aberta, o próprio 🎲 fica com visual "afundado"/azul-marinho
+(ele só fecha nesse momento, não tem função de rolar).
+
+## v202609_1400
+
+Dado 3D — o botão 🎲 avulso mudou de visual: em vez de abrir uma tela
+preta cobrindo tudo, agora os botões de dado expandem numa coluna
+saindo do próprio 🎲, alinhada à direita (Múltiplos, d4 até d100,
+Histórico), sem escurecer a tela — o dado cai por cima do conteúdo
+normal. Cada tipo de dado tem cor fixa (d4 azul, d6 cian, d8 verde,
+d10 amarelo, d12 laranja, d20 vermelho, d100 roxo) — a customização de
+cor/textura saiu. Tocar fora da coluna fecha ela. Histórico agora abre
+num popup com botão de fechar (✕).
+
+## v202609_1339
+
+Dado 3D — mais 2 casos usam física de verdade agora: escolher
+Vantagem/Desvantagem só DEPOIS de ver o resultado do 1º dado (o 2º
+entra fisicamente do lado dele), e rerolar o d20 com Sorte (Pequenino)
+ou Inspiração Heroica. Reroll de dano (Perfurador) continua no dado
+clássico por enquanto.
 
 ## v202609_1323
 

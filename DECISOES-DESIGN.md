@@ -663,3 +663,26 @@ pra caber no padrão:
    mudaria o CONTRATO entre 2 componentes (props de um pra outro, ou
    formato salvo) — tratar como um refactor à parte, de escopo/risco
    maior, não emendar na mesma entrega (ver Backlog.md).
+
+## Regra padrão: nenhum toque no app deve virar seleção de texto
+
+Achado 2026-09 testando o FAB de Dado 3D no celular, mas o sintoma é
+geral: quase toda área tocável do app é um `<div onClick>` (não
+`<button>`), e um toque um pouco arrastado nesses elementos era
+interpretado pelo navegador mobile (Android/Chrome) como início de
+seleção de texto/menu de copiar. Resolvido de uma vez pra tudo em
+`src/index.css`, no `body`: `user-select: none` +
+`-webkit-user-select: none` + `-webkit-touch-callout: none` +
+`touch-action: manipulation` (o último também tira o delay de ~300ms
+que o navegador usa esperando confirmar que não é um double-tap de
+zoom). `input`/`textarea`/`[contenteditable="true"]` reativam a
+seleção normal por cima disso — são os únicos lugares do app onde
+selecionar texto de verdade é uma ação válida.
+
+**Regra permanente pra qualquer tela/componente novo:** não precisa
+adicionar `user-select`/`touch-action` de novo em CSS module nenhum —
+já é o padrão herdado do `body`. Só reative seleção normal
+(`user-select: text`) se o componente novo for genuinamente um campo
+de digitação — nesse caso, prefira `input`/`textarea`/
+`contentEditable` de verdade (a regra já cobre esses seletores
+automaticamente) em vez de escrever uma exceção nova.

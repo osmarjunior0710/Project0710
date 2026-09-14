@@ -16,44 +16,77 @@
   font-size: 24px;
   box-shadow: var(--elevation-3);
   cursor: pointer;
-  z-index: 35;
+  z-index: 101;
 }
 
 .fab:active {
   opacity: 0.85;
 }
 
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(0, 0, 0, 0.55);
-  display: flex;
-  flex-direction: column;
+/* Enquanto a coluna está expandida, o próprio 🎲 não tem função de
+   rolar (só fecha) — fica visualmente "afundado"/selecionado, num tom
+   mais escuro (azul-marinho) da mesma família do --accent, com sombra
+   por dentro em vez de por fora, pra parecer pressionado. */
+.fabAberto {
+  background: #1e2a6e;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45);
 }
 
-/* Mesmo container do overlay, só escondido — o host do canvas (dentro
-   dele) precisa continuar montado no DOM entre uma rolagem e outra,
-   senão a lib do dado 3D perde a referência do <canvas> e a 2ª
-   rolagem não aparece mais (só um refresh de página "resolvia" isso).
+/* Sem fundo escuro (pedido do Osmar) — o canvas fica transparente,
+   cobrindo a tela inteira só pra dar espaço físico ao dado cair, mas
+   sem bloquear a visão nem o toque no resto da Ficha. */
+.canvasWrapper {
+  position: fixed;
+  /* A física usa o tamanho deste container pra definir a "parede" onde
+     o dado bate — 5px de folga nas laterais/baixo (pedido do Osmar,
+     sem isso o dado, que tem raio próprio, aparecia meio cortado saindo
+     da tela ao bater na borda). Topo mais recuado (~72px, abaixo de
+     onde a barra do nome do personagem costuma ficar) e base recuada
+     o suficiente pra não cair em cima do card de resultado, que agora
+     fica ancorado embaixo (ver RollOverlay.module.css `.overlay`). */
+  top: 72px;
+  right: 5px;
+  /* 5px acima do topo do FAB (bottom: 92px + height: 52px) — como os
+     dois usam `position: fixed` a partir da base da tela, acompanha
+     qualquer altura de tela sozinho, sem precisar de valor calculado
+     na mão de novo se o FAB mudar de tamanho/posição no futuro. */
+  bottom: calc(92px + 52px + 5px);
+  left: 5px;
+  z-index: 90;
+  pointer-events: none;
+  /* DEBUG TEMPORÁRIO (pedido do Osmar) — preto 50% só pra visualizar
+     onde esse retângulo cai na tela de verdade. Remover depois de
+     confirmar os limites certos. */
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Mesmo container, só escondido — o host do canvas (dentro dele)
+   precisa continuar montado no DOM entre uma rolagem e outra, senão a
+   lib do dado 3D perde a referência do <canvas> e a 2ª rolagem não
+   aparece mais (só um refresh de página "resolvia" isso).
    IMPORTANTE: usa `visibility:hidden`, não `display:none` — o
    `display:none` zera a largura/altura do container, e a lib inicia o
    motor 3D com o canvas em 0x0 (nunca mais mostra nada depois disso,
    nem quando reaberto). `visibility:hidden` esconde sem zerar o
    tamanho. */
-.overlayEscondido {
+.canvasWrapperEscondido {
   position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(0, 0, 0, 0.55);
-  display: flex;
-  flex-direction: column;
+  top: 72px;
+  right: 5px;
+  /* 5px acima do topo do FAB (bottom: 92px + height: 52px) — como os
+     dois usam `position: fixed` a partir da base da tela, acompanha
+     qualquer altura de tela sozinho, sem precisar de valor calculado
+     na mão de novo se o FAB mudar de tamanho/posição no futuro. */
+  bottom: calc(92px + 52px + 5px);
+  left: 5px;
+  z-index: 90;
   visibility: hidden;
   pointer-events: none;
 }
 
 .canvasHost {
-  flex: 1;
+  width: 100%;
+  height: 100%;
   position: relative;
 }
 
@@ -67,109 +100,133 @@
   display: block;
 }
 
-.status {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff;
-  font-size: 13px;
-  text-align: center;
-  padding: var(--space-3) var(--space-4);
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: var(--shape-md);
-  max-width: 80%;
-}
-
-.customToggle {
-  position: absolute;
-  top: var(--space-4);
-  left: var(--space-4);
-  color: #000;
-  font-size: 13px;
-  font-weight: bold;
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: var(--shape-full);
-  background: #fff;
-  cursor: pointer;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-}
-
-.customToggle:active {
-  background: #e0e0e0;
-}
-
-.customPanel {
-  position: absolute;
-  top: 64px;
-  left: var(--space-4);
+/* Coluna de botões que expande do FAB pra cima, alinhada à direita —
+   sem overlay escuro; clicar fora dela colapsa de volta pro FAB (ver
+   listener de pointerdown no componente). */
+.coluna {
+  position: fixed;
   right: var(--space-4);
-  background: #fff;
-  border-radius: var(--shape-md);
-  box-shadow: var(--elevation-3);
-  padding: var(--space-4);
+  bottom: calc(92px + 52px + var(--space-3));
+  z-index: 100;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.customLabel {
-  color: #000;
-  font-size: 13px;
-  font-weight: bold;
-  display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
+  align-items: flex-end;
   gap: var(--space-2);
 }
 
-.customSelect {
-  color: #000;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  border-radius: var(--shape-sm, 4px);
-  padding: var(--space-2) var(--space-3);
-  font-size: 14px;
-  min-height: 44px;
-}
-
-.customSelect:disabled {
-  opacity: 0.5;
-}
-
-.logToggle {
-  position: absolute;
-  top: var(--space-4);
-  right: var(--space-4);
-  color: #000;
-  font-size: 13px;
+/* Mesmo tom do 🎲 (--accent) — pedido do Osmar, o branco puro dos
+   pills ficou estranho contra o resto da tela. */
+.menuBtn {
+  position: relative;
+  color: #fff;
+  font-size: 15px;
   font-weight: bold;
   padding: var(--space-2) var(--space-4);
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: var(--shape-full);
-  background: #fff;
+  background: var(--accent);
   cursor: pointer;
   min-height: 44px;
+  min-width: 44px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  box-shadow: var(--elevation-2);
+  white-space: nowrap;
 }
 
-.logToggle:active {
+.menuBtn:active {
+  background: #1e2a6e;
+}
+
+.tipoBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #fff;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: bold;
+  min-width: 18px;
+  height: 18px;
+  border-radius: var(--shape-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+/* Resultado/status flutuante — fica no topo da tela (longe da coluna
+   de botões, que cresce do FAB pra cima), com fundo escuro só na
+   própria pílula pra ficar legível sem precisar de overlay atrás. */
+.statusFlutuante {
+  position: fixed;
+  top: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+  font-weight: bold;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--shape-full);
+  box-shadow: var(--elevation-2);
+  max-width: 80vw;
+  text-align: center;
+}
+
+.logPopup {
+  position: fixed;
+  right: var(--space-4);
+  left: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 102;
+  background: #fff;
+  border-radius: var(--shape-md);
+  box-shadow: var(--elevation-3);
+  overflow: hidden;
+}
+
+.logPopupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.logPopupFechar {
+  color: #000;
+  font-size: 16px;
+  font-weight: bold;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: var(--shape-full);
+}
+
+.logPopupFechar:active {
   background: #e0e0e0;
 }
 
 .logPanel {
-  position: absolute;
-  top: 64px;
-  right: var(--space-4);
-  left: var(--space-4);
-  background: #fff;
-  border-radius: var(--shape-md);
-  box-shadow: var(--elevation-3);
   overflow-y: auto;
   padding: var(--space-2) 0;
+}
+
+.logVazio {
+  color: #555;
+  font-size: 13px;
+  padding: var(--space-4);
+  text-align: center;
 }
 
 .logItem {
@@ -191,112 +248,4 @@
   color: #555;
   font-size: 12px;
   padding-left: var(--space-4);
-}
-
-.resultado {
-  position: absolute;
-  top: var(--space-6);
-  left: 50%;
-  transform: translateX(-50%);
-  color: #fff;
-  font-size: 39px;
-  font-weight: bold;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
-}
-
-/* Todos os controles de baixo (tipos, múltiplos, fechar) empilhados
-   numa coluna só, ancorada no fundo — evita ter que calcular offset
-   fixo pra cada linha na mão. */
-.controles {
-  position: absolute;
-  bottom: var(--space-6);
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-  max-width: 92%;
-}
-
-.tipos {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-2);
-}
-
-/* Fundo branco/texto preto (pedido do Osmar — texto branco em cima do
-   overlay escuro translúcido tava difícil de ler). */
-.tipoBtn {
-  position: relative;
-  color: #000;
-  font-size: 15px;
-  font-weight: bold;
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: var(--shape-full);
-  background: #fff;
-  cursor: pointer;
-  min-height: 44px;
-  min-width: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tipoBtn:active {
-  background: #e0e0e0;
-}
-
-.tipoBadge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 11px;
-  font-weight: bold;
-  min-width: 18px;
-  height: 18px;
-  border-radius: var(--shape-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 4px;
-}
-
-.multiploBtn {
-  color: #000;
-  font-size: 14px;
-  font-weight: bold;
-  padding: var(--space-3) var(--space-6);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: var(--shape-full);
-  background: #fff;
-  cursor: pointer;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-}
-
-.multiploBtn:active {
-  background: #e0e0e0;
-}
-
-.fechar {
-  color: #000;
-  font-size: 13px;
-  padding: var(--space-3) var(--space-6);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: var(--shape-full);
-  background: #fff;
-  cursor: pointer;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-}
-
-.fechar:active {
-  background: #e0e0e0;
 }
