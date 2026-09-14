@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2211
+
+Ajustes no dado 3D: área preta de debug reancorada 5px acima do botão
+🎲 flutuante (acompanha qualquer tamanho de tela agora); dado um
+pouquinho maior de novo; e as rolagens oficiais (perícia, ataque, dano,
+etc.) passaram a usar a mesma cor fixa por tipo de dado que o dado
+avulso já usava (d20 vermelho, d4 azul, d6 cian, e assim por diante).
+
 ## v202609_2124
 
 Corrigido: escolher "Vantagem" ou "Desvantagem" DEPOIS de ver o

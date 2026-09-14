@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { useColapsavel } from '../hooks/useColapsavel';
 import { suportaWebGL } from '../utils/suportaWebGL';
-import { carregarDiceBox3D, garantirTemaDiceBox3D, type DiceBoxResultado } from './diceBox3d';
+import { carregarDiceBox3D, COR_POR_LADOS, garantirTemaDiceBox3D, type DiceBoxResultado } from './diceBox3d';
 
 type CritTipo = 'sucesso' | 'falha' | null;
 
@@ -570,10 +570,10 @@ export function RollProvider({ children }: { children: ReactNode }) {
                 const [d1, d2] = resultados[0].rolls ?? [];
                 concluirVantagem(d1?.value ?? 0, d2?.value ?? 0, true);
               };
-              box.roll('2d20');
+              box.roll({ qty: 2, sides: 20, themeColor: COR_POR_LADOS[20] });
             } else {
               box.onRollComplete = (resultados) => concluirPlano(resultados[0].value, true, dadoBruto(resultados[0]));
-              box.roll('1d20');
+              box.roll({ qty: 1, sides: 20, themeColor: COR_POR_LADOS[20] });
             }
           } catch {
             timeoutRef.current = setTimeout(() => {
@@ -713,9 +713,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
             await garantirTemaDiceBox3D(box, 'default');
             if (umDadoSo) {
               box.onRollComplete = (resultados) => concluirUmDado(resultados[0].value, true, dadoBruto(resultados[0]));
-              box.roll({ qty: 1, sides: lados });
+              box.roll({ qty: 1, sides: lados, themeColor: COR_POR_LADOS[lados] });
             } else {
-              const grupos = especificacaoDados.map((d) => ({ qty: 1, sides: d.lados }));
+              const grupos = especificacaoDados.map((d) => ({ qty: 1, sides: d.lados, themeColor: COR_POR_LADOS[d.lados] }));
               box.onRollComplete = (resultados) =>
                 concluirGrid(
                   resultados.map((r) => r.value),
@@ -854,7 +854,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
             // bug real, achado testando no celular ("o segundo dado
             // não é reconhecido").
             box.onRollComplete = (resultados) => concluir(resultados[resultados.length - 1].value, true);
-            box.add('1d20');
+            box.add({ qty: 1, sides: 20, themeColor: COR_POR_LADOS[20] });
           } catch {
             timeoutRef.current = setTimeout(() => {
               concluir(rolarD20Dado(modoTesteRef, indiceModoTesteRef), false);

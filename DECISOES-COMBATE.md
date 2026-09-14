@@ -789,3 +789,22 @@ fronteira `FichaShell` → `CombatTab` (a que cresce a cada classe/
 espécie nova) manteve o escopo pequeno e a rede de segurança forte
 (`tsc -b --force` sozinho bastou, sem erro nenhum pra corrigir depois
 do regroup, dado que os nomes internos não mudaram).
+
+## Dado 3D — cor fixa por tipo também nas rolagens oficiais
+
+Até 2026-09, `CORES_POR_TIPO` (cor fixa por tipo de dado, ex.: d20
+vermelho) só existia dentro de `Dice3dFab.tsx` (dado avulso) — as
+rolagens OFICIAIS (`RollContext.tsx`: d20 simples, Vantagem/
+Desvantagem, dano) nunca passavam `themeColor` nenhum pro `box.roll()`/
+`box.add()`, caindo sempre na cor padrão do tema. Corrigido movendo a
+tabela pra `diceBox3d.ts` (`COR_POR_LADOS`, indexada por número de
+lados — `RollContext` não tem o tipo `TipoDado` do FAB, só `LadosDado`/
+`sides` numérico) e usando em todo `box.roll()`/`box.add()` das duas
+pontas.
+
+**Padrão pra lembrar:** qualquer coisa "decidida uma vez pro dado 3D"
+(cor, escala, tema) deve morar em `diceBox3d.ts` desde o início, não
+dentro de um dos 2 consumidores (`Dice3dFab.tsx` ou `RollContext.tsx`)
+— os dois sempre compartilham o mesmo motor/canvas, então duplicar (ou
+esquecer de propagar) a decisão num dos dois lados é o bug natural que
+essa arquitetura convida.

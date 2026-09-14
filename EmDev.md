@@ -263,6 +263,26 @@ entregas no celular.
       Playwright (Vantagem escolhida depois do 1º resultado: total
       corrigido de 6 pra 19, batendo com o maior dos 2 dados físicos
       visíveis na tela).
+- [x] **Área preta de debug reancorada de vez em quanto o Osmar não
+      confirma os limites finais** — base virou `calc(92px + 52px +
+      5px)` (5px acima do topo do FAB) em vez de um valor fixo chutado
+      (340px → 265px antes) — como os dois usam `position: fixed` a
+      partir da base da tela, acompanha qualquer altura de tela
+      sozinho. Ainda ativa (preto 50%), aguardando confirmação final
+      dos limites pra remover.
+- [x] **Escala do dado aumentada de novo** (7 → 7.5, "aumenta só mais
+      um pouquinho").
+- [x] **Cor por tipo de dado nas rolagens OFICIAIS** (d20/dano) — só o
+      FAB avulso respeitava `CORES_POR_TIPO`; as rolagens de verdade
+      (d20 simples, Vantagem/Desvantagem, dano com 1 ou mais dados)
+      caíam sempre na cor padrão do tema, sem `themeColor` nenhum.
+      Tabela movida pra `diceBox3d.ts` (`COR_POR_LADOS`, por número de
+      lados em vez de por rótulo `TipoDado`, já que `RollContext` não
+      tem esse tipo) e usada em todo `box.roll()`/`box.add()` de
+      `RollContext.tsx`. Verificado: `tsc -b`/`npm test` (536)/`npm run
+      build` limpos — vale confirmar visualmente no celular (d20
+      vermelho, dano por tipo) já que não deu pra reproduzir via
+      Playwright headless sem simular login/criação de personagem.
 
 ### Redesenho do FAB avulso (Fase A) — coluna de botões em vez de overlay escuro
 

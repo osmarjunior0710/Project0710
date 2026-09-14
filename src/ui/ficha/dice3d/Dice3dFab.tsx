@@ -1,23 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRoll } from '../../roll/RollContext';
-import { carregarDiceBox3D, DICE3D_CANVAS_HOST_ID } from '../../roll/diceBox3d';
+import { carregarDiceBox3D, COR_POR_LADOS, DICE3D_CANVAS_HOST_ID } from '../../roll/diceBox3d';
 import styles from './Dice3dFab.module.css';
 
 const TIPOS = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'] as const;
 type TipoDado = (typeof TIPOS)[number];
-
-// Cor fixa por tipo de dado (pedido do Osmar) — substitui a
-// customização de tema/cor que existia antes; o tema em si é sempre
-// "default" (`diceBox3d.ts` já inicializa com ele).
-const CORES_POR_TIPO: Record<TipoDado, string> = {
-  d4: '#2e6da4',
-  d6: '#0097a7',
-  d8: '#2e8555',
-  d10: '#d4ac0d',
-  d12: '#d4690d',
-  d20: '#c0392b',
-  d100: '#7d3c98',
-};
 
 // `sides` no formato que a lib espera pra cada grupo de rolagem — d100
 // é NÚMERO puro (100), igual aos outros. Passar STRING "100" faz a lib
@@ -142,7 +129,7 @@ export default function Dice3dFab() {
       const grupos = ordenados.map((i) => ({
         qty: i.qtd,
         sides: SIDES_POR_TIPO[i.tipo],
-        themeColor: CORES_POR_TIPO[i.tipo],
+        themeColor: COR_POR_LADOS[SIDES_POR_TIPO[i.tipo]],
       }));
       const titulo = `Rolagem de ${ordenados.map((i) => `${i.qtd}${i.tipo}`).join(' + ')}`;
       box.onRollComplete = (resultados) => {

@@ -35,7 +35,7 @@ declare module '@3d-dice/dice-box' {
    * com sua própria `themeColor` (a lib usa `grupo.themeColor` antes de
    * cair pro `themeColor` do nível da rolagem) — usado quando dados de
    * tipos diferentes precisam de cor fixa própria na MESMA rolagem
-   * (ver `CORES_POR_TIPO` em `Dice3dFab.tsx`). `sides` é sempre o
+   * (ver `COR_POR_LADOS` em `diceBox3d.ts`). `sides` é sempre o
    * número de lados, INCLUSIVE d100 (100, número) — passar a STRING
    * "100" faz a lib entrar num modo diferente ("d100 de face única",
    * só a dezena) que não é o que queremos (achado testando no celular:

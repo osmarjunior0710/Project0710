@@ -46,7 +46,11 @@
      fica ancorado embaixo (ver RollOverlay.module.css `.overlay`). */
   top: 72px;
   right: 5px;
-  bottom: 265px;
+  /* 5px acima do topo do FAB (bottom: 92px + height: 52px) — como os
+     dois usam `position: fixed` a partir da base da tela, acompanha
+     qualquer altura de tela sozinho, sem precisar de valor calculado
+     na mão de novo se o FAB mudar de tamanho/posição no futuro. */
+  bottom: calc(92px + 52px + 5px);
   left: 5px;
   z-index: 90;
   pointer-events: none;
@@ -69,7 +73,11 @@
   position: fixed;
   top: 72px;
   right: 5px;
-  bottom: 265px;
+  /* 5px acima do topo do FAB (bottom: 92px + height: 52px) — como os
+     dois usam `position: fixed` a partir da base da tela, acompanha
+     qualquer altura de tela sozinho, sem precisar de valor calculado
+     na mão de novo se o FAB mudar de tamanho/posição no futuro. */
+  bottom: calc(92px + 52px + 5px);
   left: 5px;
   z-index: 90;
   visibility: hidden;

@@ -14,6 +14,20 @@ let carregandoPromiseRef: Promise<DiceBox> | null = null;
 
 export const DICE3D_CANVAS_HOST_ID = 'dice3d-canvas-host';
 
+/** Cor fixa por número de lados do dado (pedido do Osmar) — mesma tabela
+ * que o FAB avulso (`Dice3dFab.tsx`) já usava, agora compartilhada aqui
+ * pra qualquer rolagem OFICIAL (`RollContext.tsx`) também respeitar a
+ * mesma cor por tipo, em vez de cair na cor padrão do tema. */
+export const COR_POR_LADOS: Record<number, string> = {
+  4: '#2e6da4',
+  6: '#0097a7',
+  8: '#2e8555',
+  10: '#d4ac0d',
+  12: '#d4690d',
+  20: '#c0392b',
+  100: '#7d3c98',
+};
+
 export function carregarDiceBox3D(): Promise<DiceBox> {
   if (diceBoxRef) return Promise.resolve(diceBoxRef);
   if (carregandoPromiseRef) return carregandoPromiseRef;
@@ -29,7 +43,7 @@ export function carregarDiceBox3D(): Promise<DiceBox> {
       // então um canvas menor sozinho deixava o dado minúsculo. Padrão
       // da lib é 5; achado testando no celular (pedido do Osmar: "uns
       // 20% menor que o tamanho original", não do tamanho que ficou).
-      scale: 7,
+      scale: 7.5,
     });
     await box.init();
     diceBoxRef = box;
