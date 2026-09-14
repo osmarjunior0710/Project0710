@@ -72,6 +72,13 @@ declare module '@3d-dice/dice-box' {
      * de forma síncrona e quebra se ele não estiver carregado ainda.
      * Idempotente: retorna na hora se o tema já foi carregado antes. */
     loadTheme(tema: string): Promise<unknown>;
+    /** Snapshot SÍNCRONO de todos os grupos vivos na cena agora (mesmo
+     * formato do `onRollComplete`) — usado por `lancarGrupos()`
+     * (`diceBox3d.ts`) pra saber, ANTES de `roll()`/`add()`, quais
+     * `id`s já existiam, e assim identificar com certeza quais são os
+     * grupos NOVOS quando o resultado chegar (em vez de adivinhar
+     * posição no array). */
+    getRollResults(): DiceBoxResultado[];
     onRollComplete?: (resultados: DiceBoxResultado[]) => void;
   }
 }

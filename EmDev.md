@@ -284,6 +284,58 @@ entregas no celular.
       vermelho, dano por tipo) já que não deu pra reproduzir via
       Playwright headless sem simular login/criação de personagem.
 
+### B6 — Consolidação do motor de dado 3D (1 função central, fim da duplicação)
+
+Pedido do Osmar depois de ver os bugs de grupo/posição se repetirem em
+lugares diferentes (B4/B5/correções pós-B5): cada ponto de entrada
+(`rolarD20`, `escolherVantagemPosRolagem`, `rerolarFisico`,
+`rolarDados`, FAB avulso) reimplementa sozinho "chamar `box.roll`/
+`add`/`reroll`, adivinhar qual resultado é o novo, aplicar cor, cair
+pro 2D" — é essa duplicação que gerou os bugs recorrentes. Plano
+aprovado pelo Osmar:
+
+- [x] **B6.1 — `lancarGrupos()` central em `diceBox3d.ts`**: guarda o
+      conjunto de `groupId`s já na cena ANTES de `box.roll()`/`add()`
+      (`box.getRollResults()`, método síncrono da lib que a gente não
+      tinha nos tipos ainda, adicionado em `dice-box.d.ts`), e no
+      `onRollComplete` devolve só os grupos que NÃO existiam antes —
+      elimina de vez a classe de bug "adivinhar posição no array" (não
+      só os casos de hoje, qualquer um futuro também). Cor por tipo
+      (`COR_POR_LADOS`) entra dentro dela também. Núcleo de filtro
+      (`gruposNovos`) é função pura, isolada e testada
+      (`diceBox3d.test.ts`, 3 casos: roll/add/borda-tudo-já-existia).
+      Ninguém usa `lancarGrupos()` ainda — migração de cada call site
+      é 1 sub-entrega própria (B6.2 a B6.6). Ver `DECISOES-COMBATE.md`.
+      Verificado: `tsc -b`/`npm test` (539)/`npm run build` limpos.
+- [ ] **B6.2** — migrar `rolarD20` (d20 simples + Vantagem
+      pré-declarada) pra `lancarGrupos()`.
+- [ ] **B6.3** — migrar `escolherVantagemPosRolagem` (o `add()`, foi o
+      bug mais recente).
+- [ ] **B6.4** — migrar `rerolarFisico` (Sorte/Inspiração Heroica/
+      Perfurador).
+- [ ] **B6.5** — migrar `rolarDados` (dano, 1 dado e grid).
+- [ ] **B6.6** — migrar o FAB avulso (`Dice3dFab.tsx`) — os "2 mundos"
+      (oficial e avulso) passam a usar a MESMA função, fim da
+      duplicação.
+
+Cada sub-entrega é uma troca "por trás", sem mudar nada visível —
+risco baixo, checklist de sempre a cada uma.
+
+### B7 — Popup de rolagem mostra a quebra do modificador (não só o total já somado)
+
+Pedido do Osmar: hoje o card de resultado mostra só `1d20 + 7` (número
+já somado) — ele quer ver cada parte que compõe esse `+7` (ex.: "FOR
++3, Bônus de Proficiência +2, Fúria +2"), pra QUALQUER rolagem de d20
+(perícia, salvaguarda, ataque, iniciativa) — decidido rodar DEPOIS do
+B6 (consolidação do motor primeiro, menos risco de mexer 2 coisas ao
+mesmo tempo no mesmo código).
+
+- [ ] Ainda sem quebra em sub-entregas — fazer o levantamento (chapéu
+      de Product Manager: mapear todo lugar que hoje monta um `mod`
+      já somado antes de chamar `rolarD20`, ex. `AtributosTab`,
+      `CombatTab`, `AcaoPanelContent`) antes de propor o plano
+      detalhado, quando chegar a vez do B7.
+
 ### Redesenho do FAB avulso (Fase A) — coluna de botões em vez de overlay escuro
 
 Pedido do Osmar depois do B4: o FAB avulso (🎲, ferramenta solta, não

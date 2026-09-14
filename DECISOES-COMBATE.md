@@ -808,3 +808,45 @@ dentro de um dos 2 consumidores (`Dice3dFab.tsx` ou `RollContext.tsx`)
 — os dois sempre compartilham o mesmo motor/canvas, então duplicar (ou
 esquecer de propagar) a decisão num dos dois lados é o bug natural que
 essa arquitetura convida.
+
+## Consolidação do motor de dado 3D (B6) — `lancarGrupos()` central
+
+Pedido do Osmar depois de ver a MESMA classe de bug (adivinhar qual
+resultado do `onRollComplete` é o novo) aparecer 2x em lugares
+diferentes (`escolherVantagemPosRolagem` e `rerolarFisico`, ver
+correções pós-B5 acima) — cada ponto de entrada (`rolarD20`,
+`escolherVantagemPosRolagem`, `rerolarFisico`, `rolarDados`, FAB
+avulso) reimplementava sozinho "chamar `box.roll`/`add`/`reroll`,
+adivinhar a posição certa no array, aplicar cor, cair pro 2D".
+
+**Solução, `lancarGrupos()` em `diceBox3d.ts`:** em vez de adivinhar
+por posição (`[0]`/último) ou por `id` conhecido de antemão, a função
+tira um SNAPSHOT dos `groupId`s já na cena (`box.getRollResults()`,
+método síncrono da lib, não documentado nos tipos que a gente já tinha
+— adicionado em `dice-box.d.ts`) ANTES de chamar `roll()`/`add()`; no
+`onRollComplete`, filtra e devolve só os grupos que NÃO estavam nesse
+snapshot. Isso vale igual pra `roll()` (limpa tudo antes, então
+`idsAntes` chega vazio e tudo é novo) e `add()` (só o grupo
+recém-criado sobra) — quem chama nunca mais precisa saber qual dos
+dois foi usado por trás. Cor por tipo (`COR_POR_LADOS`) também entra
+aqui dentro, aplicada a cada grupo antes de mandar pra lib.
+
+**Por que não bastava só "usar sempre o último item"?** Porque
+`reroll()` (Sorte/Inspiração Heroica/Perfurador) REAPROVEITA um
+`groupId` já existente em vez de criar um novo — pra esse caso "o que é
+novo" não existe, o filtro de `lancarGrupos()` não se aplica. Fica de
+fora de propósito (migra separado, junto de `rerolarFisico()`).
+
+**Migração incremental, não big-bang:** a função nasceu isolada (B6.1,
+sem ninguém chamando ainda) — cada call site (`rolarD20`,
+`escolherVantagemPosRolagem`, `rerolarFisico`, `rolarDados`, FAB
+avulso) migra na sua própria entrega pequena depois, trocando só a
+"cabeça" de cada função sem mudar nada visível. Ver `EmDev.md` (B6.2 a
+B6.6) pro estado de cada migração.
+
+O núcleo puro (`gruposNovos`, a função de filtro em si, sem depender do
+motor 3D de verdade) tem teste automatizado (`diceBox3d.test.ts`) —
+`lancarGrupos()` em volta dele não, porque depende do
+`@3d-dice/dice-box` de verdade (Web Worker + canvas), mesmo padrão já
+aceito pro resto do motor de dado 3D (validado por Playwright manual,
+não Vitest).
