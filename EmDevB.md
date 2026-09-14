@@ -230,18 +230,40 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       pra "(FOR)" na lista, com o mod. de Força certo (bônus de
       proficiência preservado onde já tinha); "Encerrar Fúria" reverteu
       as 5 de volta pro atributo/mod. original.
-      **Achado à parte, não é bug desta entrega:** o fluxo real de
-      Level Up (setinha ⬆️, não o raio de teste) trava no passo
-      "Escolha sua Subclasse" ao chegar no nível 3 — nenhuma das 4
-      Trilhas do Bárbaro está implementada ainda (isso é o B5-B8), e
-      o passo de subclasse não deixa avançar sem escolher uma. Ou
-      seja: hoje não dá pra levar um Bárbaro de verdade (criado pelo
-      wizard) do nível 2 pro 3 pela tela normal — só via "🎲
-      Personagem de Teste" (que já nasce num nível alto) ou "⚡ Inst.
-      Level Up" (que sorteia sem passar pela trava). Osmar: pra
-      testar B4.2 no celular, usa um desses 2 atalhos por enquanto;
-      o fluxo normal de Level Up volta a funcionar pro Bárbaro assim
-      que a 1ª Trilha (B5) entrar.
+      **Achado à parte, corrigido em seguida (ver B4.2.1 abaixo):** o
+      fluxo real de Level Up (setinha ⬆️, não o raio de teste) travava
+      no passo "Escolha sua Subclasse" ao chegar no nível 3 — nenhuma
+      das 4 Trilhas do Bárbaro está implementada ainda (isso é o
+      B5-B8), e o passo de subclasse não deixava avançar sem escolher
+      uma travada. Corrigido pra pular o passo em vez de travar — ver
+      B4.2.1.
+- [x] **B4.2.1 — Corrige o Level Up travando no passo de Subclasse
+      (pedido do Osmar, testando o B4.2).** `LevelUpShell.tsx`: o
+      passo `'subclasse'` só entra na sequência (`luSteps`) se sobrar
+      pelo menos 1 subclasse da classe com `subclasseImplementada(...)
+      === true` — antes checava só se a classe tinha ALGUMA subclasse
+      cadastrada (implementada ou não), o que trava pra sempre quando
+      todas estão travadas (caso do Bárbaro hoje: as 4 Trilhas têm
+      dado mas nenhuma tem mecânica). A validação do botão "Avançar"
+      (mesma tela) ganhou a mesma checagem, pra ficar consistente.
+      Continua null até a 1ª Trilha ser implementada (a condição já
+      cobre isso: só pula quando `!personagem.subclasse`) — quando
+      isso acontecer, o passo reaparece sozinho pro próximo Level Up
+      de quem ainda não escolheu. Mesmo padrão que `sortearLevelUpRapido`
+      (raio de teste) já usava (filtra por implementada, deixa `null`
+      se nenhuma). Verificado com `tsc -b --force`/`npm test --
+      run`/`npm run build` limpos + Playwright: Bárbaro nível 2 → XP
+      até o marco → "⬆️ Level Up" de verdade (não o raio) → PV →
+      "Novas Características" → pula direto pra "Conhecimento
+      Primordial" (sem tela de Subclasse no meio) → Resumo (sem linha
+      de Subclasse) → Confirmar → ficha em nível 3, sem travar em
+      nenhum passo.
+      Osmar: pra testar essa correção no celular, usa um Bárbaro de
+      nível 2, abre o popup de XP (toca no texto "X/Y XP" na aba
+      Atributos), "➕ Adicionar" 900 XP, fecha o popup, toca a setinha
+      "⬆️ Level Up" que aparece — o passo de Subclasse não deve mais
+      travar o avanço. Quando a 1ª Trilha (B5) entrar, o passo volta a
+      aparecer normalmente pra quem ainda não escolheu.
 - [ ] **B4.3 — Ataque Extra + Movimento Rápido (nível 5):** conferir se
       já funcionam sozinhos sem código novo (Ataque Extra é genérico
       por ID já reaproveitado de outras classes; Movimento Rápido

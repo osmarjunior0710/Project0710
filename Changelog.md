@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0759
+
+Corrigido: subir um Bárbaro de nível 2 pra 3 pelo Level Up normal (a
+setinha ⬆️) travava no passo "Escolha sua Subclasse", sem deixar
+avançar — nenhuma das 4 Trilhas do Bárbaro tem mecânica pronta ainda.
+Agora esse passo é pulado quando isso acontece; volta a aparecer
+normalmente assim que a 1ª Trilha entrar.
+
 ## v202609_0112
 
 Bárbaro — Conhecimento Primordial (nível 3) chegou. No Level Up de

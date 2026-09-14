@@ -498,7 +498,14 @@ export default function LevelUpShell({
   const [conhecimentoPrimordialEscolhida, setConhecimentoPrimordialEscolhida] = useState<string | null>(null);
 
   const luSteps: LuStep[] = ['pv', 'features'];
-  if (classe.nivelSubclasse === novoNivel && !personagem.subclasse) luSteps.push('subclasse');
+  // Só entra na sequência se sobrar pelo menos 1 subclasse IMPLEMENTADA
+  // pra escolher — senão o passo travaria o Level Up pra sempre (todo
+  // card aparece travado, sem opção de avançar). Continua null até a
+  // 1ª Trilha da classe ser implementada; nesse momento o passo volta
+  // a aparecer (condição já cobre isso: `!personagem.subclasse`).
+  if (classe.nivelSubclasse === novoNivel && !personagem.subclasse && subclassesDaClasse.some((s) => subclasseImplementada(s.nome))) {
+    luSteps.push('subclasse');
+  }
   // Subclasse do PRÓPRIO level-up (se acabou de ser escolhida no passo
   // acima) ou já escolhida antes — os dois casos podem disparar
   // "Proficiências Bônus" (Colégio do Conhecimento, nível 3), sempre 1
@@ -830,7 +837,11 @@ export default function LevelUpShell({
         onHpRoladoChange(hpManualNumero);
       }
     }
-    if (step === 'subclasse' && subclassesDaClasse.length > 0 && subclasseEscolhida === null) {
+    if (
+      step === 'subclasse' &&
+      subclassesDaClasse.some((s) => subclasseImplementada(s.nome)) &&
+      subclasseEscolhida === null
+    ) {
       setAviso('Escolha uma subclasse antes de avançar.');
       return;
     }
