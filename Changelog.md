@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1119
+
+Dado 3D 10% menor.
+
 ## v202609_1102
 
 Removida a área preta translúcida (era só debug temporário pra

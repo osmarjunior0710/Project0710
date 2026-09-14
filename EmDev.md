@@ -361,6 +361,11 @@ resultado reabria o popup do zero, mesmo já fechado antes.
       "não dá ainda" em vez de sumir sem explicação). Verificado:
       `tsc -b`/`npm test` (543)/`npm run build` limpos.
 
+### Escala do dado reduzida 10%
+
+- [x] `scale` em `diceBox3d.ts`: 7.5 → 6.75 (pedido do Osmar).
+      Verificado: `tsc -b`/`npm test` (546)/`npm run build` limpos.
+
 ### Remoção do preto de debug (limites da área de física confirmados)
 
 - [x] `.canvasWrapper`/`.canvasWrapperEscondido` voltaram a
