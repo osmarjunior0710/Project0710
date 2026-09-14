@@ -88,3 +88,33 @@ describe('ataqueComArma — bonusDanoSeForca (Dano da Fúria do Bárbaro)', () =
     expect(r.info.usouForca).toBe(false);
   });
 });
+
+describe('explicacaoAcerto (B7 — quebra do modificador no popup de rolagem)', () => {
+  it('Ataque Desarmado: sempre 2 linhas (mod. FOR + Bônus de Proficiência)', () => {
+    const r = ataqueDesarmado(guerreiro, 1, 3);
+    expect(r.info.explicacaoAcerto.linhas).toEqual([
+      { label: 'mod. FOR', valor: '+3' },
+      { label: 'Bônus de Proficiência', valor: '+2' },
+    ]);
+    expect(r.info.explicacaoAcerto.total.valor).toBe('+5');
+  });
+
+  it('arma sem proficiência: some a linha de Bônus de Proficiência em vez de mostrar +0', () => {
+    const semTalento = ataqueComArma(rapieira, bruxo, 1, 1, 3, false, false, null, false, undefined, []);
+    const labels = semTalento.info.explicacaoAcerto.linhas.map((l) => l.label);
+    expect(labels).not.toContain('Bônus de Proficiência');
+  });
+
+  it('borda: atribForcada (Pacto da Lâmina) rotula a linha como CAR, não FOR/DES', () => {
+    const r = ataqueComArma(rapieira, bruxo, 1, 1, 3, false, false, null, false, 5);
+    expect(r.info.explicacaoAcerto.linhas[0].label).toBe('mod. CAR (Pacto da Lâmina)');
+    expect(r.info.explicacaoAcerto.linhas[0].valor).toBe('+5');
+  });
+
+  it('borda: arma com Acuidade rotula qual atributo venceu (FOR vs DES)', () => {
+    const usouDes = ataqueComArma(rapieira, barbaro, 1, 1, 3, false, false, null, false);
+    expect(usouDes.info.explicacaoAcerto.linhas[0].label).toBe('mod. DES (Acuidade)');
+    const usouFor = ataqueComArma(rapieira, barbaro, 1, 4, 2, false, false, null, false);
+    expect(usouFor.info.explicacaoAcerto.linhas[0].label).toBe('mod. FOR (Acuidade)');
+  });
+});

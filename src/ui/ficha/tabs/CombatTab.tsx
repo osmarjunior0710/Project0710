@@ -611,6 +611,7 @@ export default function CombatTab({
       label: `Ataque — ${ataqueBonus.nome} (Mão Secundária)`,
       formula: `1d20 + ${ataqueBonus.info.modAcerto}`,
       mod: ataqueBonus.info.modAcerto,
+      explicacaoMod: ataqueBonus.info.explicacaoAcerto,
       vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
     });
     onMarcarUsado('bonus');

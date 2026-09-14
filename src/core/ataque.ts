@@ -7,7 +7,7 @@
 import { armas, type Arma } from '../data/rulesets/dnd2024/armas';
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { estilosDeLuta } from '../data/rulesets/dnd2024/estilosDeLuta';
-import { bonusProficiencia, efeitoMecanicoDoTalento } from './calculoPersonagem';
+import { bonusProficiencia, efeitoMecanicoDoTalento, fmtMod } from './calculoPersonagem';
 import { identificarEquipamento } from './equipamento';
 import { classeProficienteComArma } from './proficienciaArma';
 import type { AtaqueInfo } from '../data/exampleCombat';
@@ -63,6 +63,13 @@ export function ataqueDesarmado(
     // sempre que informado, sem precisar checar atributo.
     info: {
       modAcerto: forMod + prof,
+      explicacaoAcerto: {
+        linhas: [
+          { label: 'mod. FOR', valor: fmtMod(forMod) },
+          { label: 'Bônus de Proficiência', valor: fmtMod(prof) },
+        ],
+        total: { label: 'Ataque Desarmado', valor: fmtMod(forMod + prof) },
+      },
       danoQuantidade,
       danoLados,
       danoMod: forMod + bonusDanoSeForca,
@@ -137,11 +144,26 @@ export function ataqueComArma(
   const podeDuelismo = !distancia && !duasMaosAtivo && !outraArmaNaMaoSecundaria;
   const bonusDuelismo = podeDuelismo && efeitoEstilo?.tipo === 'bonus-dano-uma-mao-sem-outra-arma' ? efeitoEstilo.bonus : 0;
 
+  // Rótulo do atributo usado no acerto, pro popup de rolagem (B7) —
+  // mesma lógica de `atribMod` acima, só nomeando a fonte. `atribForcada`
+  // só existe pro Pacto da Lâmina hoje (ver doc da função), sempre
+  // Carisma — se ganhar outro chamador no futuro, precisa virar
+  // parâmetro em vez de fixo.
+  const rotuloAtributo = atribForcada !== undefined ? 'mod. CAR (Pacto da Lâmina)' : acuidade ? `mod. ${usouForca ? 'FOR' : 'DES'} (Acuidade)` : `mod. ${usouForca ? 'FOR' : 'DES'}`;
+
   return {
     nome: arma.nome,
     descricao: `${usaVersatil ? `${dadoVersatil} ${tipo}` : arma.dano}${descPropriedades}${usaVersatil ? ' (empunhada com 2 mãos)' : ''}.`,
     info: {
       modAcerto: atribMod + prof + bonusArquearia,
+      explicacaoAcerto: {
+        linhas: [
+          { label: rotuloAtributo, valor: fmtMod(atribMod) },
+          ...(prof !== 0 ? [{ label: 'Bônus de Proficiência', valor: fmtMod(prof) }] : []),
+          ...(bonusArquearia !== 0 ? [{ label: 'Arquearia (Estilo de Luta)', valor: fmtMod(bonusArquearia) }] : []),
+        ],
+        total: { label: `Ataque — ${arma.nome}`, valor: fmtMod(atribMod + prof + bonusArquearia) },
+      },
       danoQuantidade: quantidade,
       danoLados: lados,
       danoMod: danoMod + bonusDuelismo + (usouForca ? bonusDanoSeForca : 0),

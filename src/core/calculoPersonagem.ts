@@ -394,7 +394,7 @@ export interface ExplicacaoCalculo {
   total: LinhaExplicacao;
 }
 
-function fmtMod(n: number): string {
+export function fmtMod(n: number): string {
   return n >= 0 ? `+${n}` : `${n}`;
 }
 

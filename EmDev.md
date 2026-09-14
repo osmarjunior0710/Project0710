@@ -418,10 +418,29 @@ componentes nomeados antes.
     Verificado: `tsc -b`/`npm test` (548)/`npm run build` limpos +
     Playwright (atributo puro FOR → "Rolando..." aparece → resolve →
     total 12 → ⓘ mostra "mod. FOR +1 / FOR +1").
-- [ ] **Entrega 3** — Ataque com arma/desarmado: expor componentes
-      nomeados em `core/ataque.ts` (atributo usado, rotulado FOR ou
-      DES; Bônus de Proficiência só quando soma; bônus de Estilo de
-      Luta) e plugar no ataque principal + mão secundária.
+- [x] **Entrega 3** — Ataque com arma/desarmado: `AtaqueInfo` ganhou
+      `explicacaoAcerto: ExplicacaoCalculo`. `ataqueDesarmado` sempre
+      2 linhas (mod. FOR + Bônus de Proficiência, nunca é isento).
+      `ataqueComArma` rotula dinamicamente qual atributo venceu
+      ("mod. FOR (Acuidade)"/"mod. DES (Acuidade)"/"mod. FOR"/"mod.
+      DES"/"mod. CAR (Pacto da Lâmina)" pro `atribForcada`), Bônus de
+      Proficiência só aparece quando > 0 (arma fora da proficiência
+      não mostra "+0" à toa), Arquearia (Estilo de Luta) só quando
+      ativa. `fmtMod` (antes privada) virou exportada de
+      `calculoPersonagem.ts` pra não duplicar a formatação de sinal.
+      Plugado no ataque principal (`AcaoPanelContent.tsx`) e mão
+      secundária (`CombatTab.tsx`). `ataqueAtual`/
+      `ataqueBonusMaoSecundaria` ganham de graça (só chamam
+      `ataqueComArma`/`ataqueDesarmado` por baixo). Testado
+      (`ataque.test.ts`, 4 casos novos: desarmado sempre 2 linhas, sem
+      proficiência esconde a linha, Pacto da Lâmina rotula CAR,
+      Acuidade rotula o atributo que venceu). Verificado: `tsc -b`/
+      `npm test` (552)/`npm run build` limpos + Playwright (Guerreiro,
+      Ataque Desarmado → ⓘ aparece → popup mostra "mod. FOR +1 /
+      Bônus de Proficiência +2 / Ataque Desarmado +3"). Arma de
+      verdade (não desarmado) não testada via Playwright — mesma
+      limitação de sempre (ferramenta de teste não equipa arma
+      automaticamente) — mas a lógica é idêntica, risco baixo.
 - [ ] **Entrega 4** — Ataque/CD de Magia (`modAcertoConjuracao`): mesma
       ideia, atributo de conjuração nomeado (ex. "Carisma") + Bônus de
       Proficiência.

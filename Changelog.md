@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1826
+
+Popup de rolagem de ATAQUE (arma ou desarmado) também ganhou o ⓘ com a
+quebra do modificador — atributo usado, Bônus de Proficiência (quando
+soma), bônus de Estilo de Luta. Ataque/CD de Magia ainda faltam.
+
 ## v202609_1819
 
 2 ajustes no popup de rolagem: atributo puro (FOR/DES/etc., sem ser

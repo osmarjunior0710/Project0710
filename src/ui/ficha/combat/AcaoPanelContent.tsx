@@ -178,6 +178,7 @@ export default function AcaoPanelContent({
       label: `Ataque — ${nome}`,
       formula: `1d20 + ${ataque.modAcerto}`,
       mod: ataque.modAcerto,
+      explicacaoMod: ataque.explicacaoAcerto,
       vantagem: resolverVantagem(imprudente && ataque.usouForca, desvantagemForcaDestreza),
     });
     finalizar(`🗡 ${nome}`, `Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano ${ataque.danoTipo}.`, {
