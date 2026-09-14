@@ -342,7 +342,17 @@ aprovado pelo Osmar:
       realocação quase literal do código já testado, risco baixo. Vale
       teste manual no celular com Sorte/Inspiração Heroica/Perfurador
       quando o Osmar tiver a chance.
-- [ ] **B6.5** — migrar `rolarDados` (dano, 1 dado e grid).
+- [x] **B6.5** — migrar `rolarDados` (dano, 1 dado e grid) pra
+      `lancarGrupos()` — os dois ramos (`umDadoSo`/grid) caíram de ~15
+      linhas juntas pra 6. Verificado: `tsc -b`/`npm test` (546)/`npm
+      run build` limpos + Playwright (Ataque Desarmado, 1 dado só:
+      ataque 1d20+2 físico → "Rolar Dano" → dano físico resolve certo,
+      total 3). Grid (2+ dados, ex.: Espada Grande 2d6) não testado via
+      Playwright — a ferramenta "Personagem de Teste" não equipa arma
+      de dano múltiplo automaticamente, caro de forçar (mesma limitação
+      já registrada no B4/B6.4); é migração mecânica idêntica ao ramo
+      `umDadoSo` já validado, risco baixo. Vale teste manual com uma
+      arma de 2+ dados quando o Osmar tiver a chance.
 - [ ] **B6.6** — migrar o FAB avulso (`Dice3dFab.tsx`) — os "2 mundos"
       (oficial e avulso) passam a usar a MESMA função, fim da
       duplicação.

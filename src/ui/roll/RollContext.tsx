@@ -1,16 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { useColapsavel } from '../hooks/useColapsavel';
 import { suportaWebGL } from '../utils/suportaWebGL';
-import {
-  agendarFadeDados,
-  cancelarFadeDados,
-  carregarDiceBox3D,
-  COR_POR_LADOS,
-  garantirTemaDiceBox3D,
-  lancarGrupos,
-  rerolarGrupo,
-  type DiceBoxResultado,
-} from './diceBox3d';
+import { lancarGrupos, rerolarGrupo, type DiceBoxResultado } from './diceBox3d';
 
 type CritTipo = 'sucesso' | 'falha' | null;
 
@@ -701,26 +692,17 @@ export function RollProvider({ children }: { children: ReactNode }) {
       if (usar3D) {
         (async () => {
           try {
-            const box = await carregarDiceBox3D();
-            await garantirTemaDiceBox3D(box, 'default');
-            cancelarFadeDados();
             if (umDadoSo) {
-              box.onRollComplete = (resultados) => {
-                agendarFadeDados();
-                concluirUmDado(resultados[0].value, true, dadoBruto(resultados[0]));
-              };
-              box.roll({ qty: 1, sides: lados, themeColor: COR_POR_LADOS[lados] });
+              const [grupo] = await lancarGrupos({ qty: 1, sides: lados });
+              concluirUmDado(grupo.value, true, dadoBruto(grupo));
             } else {
-              const grupos = especificacaoDados.map((d) => ({ qty: 1, sides: d.lados, themeColor: COR_POR_LADOS[d.lados] }));
-              box.onRollComplete = (resultados) => {
-                agendarFadeDados();
-                concluirGrid(
-                  resultados.map((r) => r.value),
-                  true,
-                  resultados.map(dadoBruto),
-                );
-              };
-              box.roll(grupos.length === 1 ? grupos[0] : grupos);
+              const grupos = especificacaoDados.map((d) => ({ qty: 1, sides: d.lados }));
+              const resultados = await lancarGrupos(grupos);
+              concluirGrid(
+                resultados.map((r) => r.value),
+                true,
+                resultados.map(dadoBruto),
+              );
             }
           } catch {
             timeoutRef.current = setTimeout(rolar2D, DURACAO_ANIMACAO_MS);
