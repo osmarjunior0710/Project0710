@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2124
+
+Corrigido: escolher "Vantagem" ou "Desvantagem" DEPOIS de ver o
+resultado do 1º d20 físico não estava usando o valor de verdade do 2º
+dado — o total ficava igual ao 1º dado mesmo o 2º caindo com outro
+número na tela. Mesma correção aplicada no reroll do Perfurador (grid
+de dados de dano) quando tem mais de 1 dado na cena.
+
 ## v202609_2109
 
 Corrigido: quando o dado 3D falhava de rolar 1 vez, o app ficava preso

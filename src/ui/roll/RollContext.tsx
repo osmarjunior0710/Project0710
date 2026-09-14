@@ -421,12 +421,22 @@ function dadoBruto(grupo: DiceBoxResultado): DiceBoxResultado {
   return grupo.rolls?.[0] ?? grupo;
 }
 
-/** Rerola FISICAMENTE o d20 identificado por `resultadoBruto` (Sorte,
- * Inspiração Heroica — ver "Rerolagem" em sdd/sdd-dado-3d.md) — usado
- * só quando o d20 original já veio do motor 3D. `remove: true` tira o
- * dado antigo da cena no lugar do novo (senão os 2 ficariam visíveis
- * juntos). Cai pro `onFalha` (2D) se o motor 3D falhar por qualquer
- * motivo — mesmo espírito do fallback de `rolarD20`. */
+/** Rerola FISICAMENTE o dado identificado por `resultadoBruto` (Sorte,
+ * Inspiração Heroica, Perfurador — ver "Rerolagem" em
+ * sdd/sdd-dado-3d.md) — usado só quando o dado original já veio do
+ * motor 3D. `remove: true` tira o dado antigo da cena no lugar do
+ * novo (senão os 2 ficariam visíveis juntos). Cai pro `onFalha` (2D)
+ * se o motor 3D falhar por qualquer motivo — mesmo espírito do
+ * fallback de `rolarD20`.
+ *
+ * `box.reroll()` reaproveita o MESMO `groupId` do dado original (é
+ * assim que ele "sabe" que é o mesmo dado, não um novo) — mas
+ * `onRollComplete` continua devolvendo TODOS os grupos vivos na cena
+ * (grid de 2+ dados tem 1 grupo por dado), não só o rerolado. Achado
+ * testando no celular ("2º dado não reconhecido", mesmo bug do
+ * `escolherVantagemPosRolagem` abaixo): tem que achar o grupo com o
+ * `id` igual ao `groupId` do dado original, nunca assumir posição
+ * fixa no array. */
 async function rerolarFisico(
   resultadoBruto: DiceBoxResultado,
   onSucesso: (novoValor: number, novoResultado: DiceBoxResultado) => void,
@@ -434,7 +444,10 @@ async function rerolarFisico(
 ) {
   try {
     const box = await carregarDiceBox3D();
-    box.onRollComplete = (resultados) => onSucesso(resultados[0].value, dadoBruto(resultados[0]));
+    box.onRollComplete = (resultados) => {
+      const grupo = resultados.find((g) => g.id === resultadoBruto.groupId) ?? resultados[resultados.length - 1];
+      onSucesso(grupo.value, dadoBruto(grupo));
+    };
     box.reroll(resultadoBruto, { remove: true });
   } catch {
     onFalha();
@@ -831,7 +844,16 @@ export function RollProvider({ children }: { children: ReactNode }) {
           try {
             const box = await carregarDiceBox3D();
             await garantirTemaDiceBox3D(box, 'default');
-            box.onRollComplete = (resultados) => concluir(resultados[0].value, true);
+            // `onRollComplete`/`getRollResults()` devolve TODOS os
+            // grupos acumulados desde o último `.clear()` — `.roll()`
+            // limpa, `.add()` NÃO. Como o 1º dado já criou um grupo
+            // antes, `resultados` chega com 2 posições aqui: a [0] é o
+            // grupo VELHO (1º dado, já mostrado), o novo (o que
+            // acabou de cair) é sempre o ÚLTIMO da lista. Ler
+            // `resultados[0]` pegava sempre o dado velho de novo —
+            // bug real, achado testando no celular ("o segundo dado
+            // não é reconhecido").
+            box.onRollComplete = (resultados) => concluir(resultados[resultados.length - 1].value, true);
             box.add('1d20');
           } catch {
             timeoutRef.current = setTimeout(() => {

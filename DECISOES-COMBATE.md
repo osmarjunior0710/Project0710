@@ -635,6 +635,38 @@ de reusar o erro antigo. **Padrão pra lembrar:** qualquer cache de
 promise "carrega 1x, guarda o resultado" precisa desse mesmo cuidado —
 sem isso, um erro transitório vira permanente pro resto da sessão.
 
+**Bug real, desde o B4 — "2º dado não reconhecido" (achado testando no
+celular, Vantagem/Desvantagem escolhida DEPOIS do resultado):**
+`onRollComplete`/`getRollResults()` devolve TODOS os grupos vivos na
+cena desde o último `.clear()` — `box.roll()` limpa (`this.clear()` no
+topo da função), `box.add()` NÃO. `escolherVantagemPosRolagem` usa
+exatamente `box.add('1d20')` de propósito (pra não apagar o 1º dado já
+parado) — mas isso significa que, quando o 2º dado cai, `resultados`
+chega com 2 posições: `[0]` é o grupo VELHO (1º dado, já mostrado
+antes) e o novo dado (o que acabou de cair) é sempre o ÚLTIMO da
+lista. O código lia `resultados[0]` — pegava o 1º dado de novo, nunca
+o 2º. Como `Math.max`/`Math.min` de um valor contra ELE MESMO só
+devolve esse mesmo valor, o total parecia "plausível" (igual ao 1º
+dado) e passou despercebido até o Osmar comparar o número na tela
+contra os dois dados físicos visíveis. Corrigido lendo
+`resultados[resultados.length - 1]`. **Mesmo bug, superfície
+diferente, achado revisando o código:** `rerolarFisico()` (Sorte/
+Inspiração Heroica/Perfurador) assumia `resultados[0]` também — errado
+quando tem 2+ dados vivos (grid do Perfurador): `box.reroll()`
+REAPROVEITA o `groupId` do dado original (por isso "sabe" que é o
+mesmo dado), mas o array de resultados ainda lista TODOS os grupos —
+o grupo rerolado pode estar em QUALQUER posição, não só a última.
+Corrigido achando o grupo certo por `id === groupId` do dado original,
+em vez de assumir posição fixa.
+
+**Padrão pra lembrar (vale pra `box.add()` e `box.reroll()`
+igualmente):** depois de qualquer chamada que NÃO seja `box.roll()`
+(que limpa tudo), `onRollComplete` devolve o histórico INTEIRO de
+grupos da cena, não só o que acabou de mudar — nunca assumir
+`resultados[0]`. Pra `add()` (grupo novo, sempre no fim): use o
+ÚLTIMO item. Pra `reroll()` (grupo existente, reaproveitado): ache
+pelo `id`/`groupId` do dado original.
+
 O canvas físico continua cobrindo a tela inteira (precisa do espaço
 pra física cair), mas agora com `pointer-events: none` e SEM fundo —
 o dado cai visível por cima do conteúdo normal da Ficha, não mais

@@ -247,6 +247,22 @@ entregas no celular.
       no celular se o 3D volta a funcionar depois de qualquer falha
       pontual.
       Verificado: `tsc -b`/`npm test` (536)/`npm run build` limpos.
+- [x] **Bug real desde o B4: "2º dado não reconhecido" ao escolher
+      Vantagem/Desvantagem DEPOIS de ver o resultado** —
+      `escolherVantagemPosRolagem` lia `resultados[0]` depois de
+      `box.add('1d20')`, mas `add()` não limpa os grupos antigos:
+      `resultados[0]` era sempre o 1º dado (já mostrado antes), nunca o
+      2º de verdade. Corrigido lendo o ÚLTIMO item do array (onde o
+      grupo recém-adicionado sempre cai). **Mesmo padrão, achado
+      revisando o código:** `rerolarFisico()` (Sorte/Inspiração
+      Heroica/Perfurador) assumia `resultados[0]` também — errado com
+      2+ dados vivos na cena (grid do Perfurador); corrigido achando o
+      grupo certo por `id === groupId` do dado original, em vez de
+      posição fixa. Ver `DECISOES-COMBATE.md`.
+      Verificado: `tsc -b`/`npm test` (536)/`npm run build` limpos +
+      Playwright (Vantagem escolhida depois do 1º resultado: total
+      corrigido de 6 pra 19, batendo com o maior dos 2 dados físicos
+      visíveis na tela).
 
 ### Redesenho do FAB avulso (Fase A) — coluna de botões em vez de overlay escuro
 
