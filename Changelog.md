@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0946
+
+Novo botão "🧪 Char de Teste Fixo" na Lista de Personagens — cria (ou
+recria do zero) sempre o MESMO personagem de teste (Mago nível 1,
+atributos extremos, magias variadas), em vez de sortear um novo toda
+vez. Fica ao lado do "🎲 Personagem de Teste" de sempre, que continua
+igual.
+
 ## v202609_1941
 
 CD de magia, CD do Ataque de Sopro (Draconato) e CD de "Lançar no
