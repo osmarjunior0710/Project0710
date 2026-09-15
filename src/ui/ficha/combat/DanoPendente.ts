@@ -20,4 +20,12 @@ export interface DanoPendente {
    * ainda não tem essa quebra (fora de escopo por enquanto, ver
    * EmDev.md). */
   explicacaoMod?: ExplicacaoCalculo;
+  /** Golpe Brutal (Bárbaro nível 9+) — dado extra condicional a
+   * acertar, só na jogada de ataque que renunciou à Vantagem do
+   * Ataque Imprudente (`AcaoPanelContent.tsx`, `usarGolpeBrutal`).
+   * Rola separado do dano normal (2 botões — mesmo padrão do dano
+   * condicional de Badalar Fúnebre), sem mod. próprio (mesmo tipo de
+   * dano da arma, já em `tipoDano` acima). `null`/ausente = ataque
+   * comum, sem Golpe Brutal. */
+  golpeBrutal?: { quantidade: number; lados: number } | null;
 }

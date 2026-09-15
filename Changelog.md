@@ -15,6 +15,16 @@ verdade) e os 4 Aumentos de Atributo já aplicados. Clérigo (ideia
 original) ainda não existe no app — trocado por Bardo, que já cobre
 cura e já suporta multiclasse.
 
+## v202609_1117
+
+Bárbaro — Golpe Brutal (nível 9) chegou. No Combate, com Ataque
+Imprudente ativo, tocar "🔨 Golpe Brutal" (aparece ao lado de "🗡
+Atacar" a partir do 2º ataque do turno) renuncia à Vantagem nessa
+jogada — se acertar, aparece um 2º botão de dano extra e você escolhe
+o efeito (empurrão, redução de Deslocamento, e mais 2 opções a partir
+do nível 13; no 17 o dado extra dobra e dá pra escolher 2 efeitos de
+uma vez). 1x por turno.
+
 ## v202609_0946
 
 Novo botão "🧪 Char de Teste Fixo" na Lista de Personagens — cria (ou

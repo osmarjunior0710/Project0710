@@ -345,11 +345,35 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       Primitivos" e "Bote Instintivo" com a descrição completa →
       Combate → tocar "Iniciativa" rola 2 d20 físicos com a tag
       "Vantagem" no popup.
-- [ ] **B4.5 — Golpe Brutal (nível 9) + Golpe Brutal Fortalecido
-      (nível 13/17):** dano extra condicional a usar Ataque
-      Imprudente, com escolha de efeito (Debilitador/Poderoso, depois
-      Atordoante/Destruidor). Mais complexo, depende do B4.1 já
-      existir.
+- [x] **B4.5 — Golpe Brutal (nível 9) + Golpe Brutal Fortalecido
+      (nível 13/17).** Nota completa em `sdd/sdd-barbaro-furia.md`
+      seção 7. Resumo: nova linha "🔨 Golpe Brutal" ao lado de "🗡
+      Atacar" no painel de Ação (`AcaoPanelContent.tsx`) — aparece em
+      qualquer ataque do turno (não só o 1º) enquanto o Ataque
+      Imprudente já estiver ativo e Golpe Brutal ainda não usado nesse
+      turno (1x/turno, `golpeBrutalUsadoTurno`, reseta no Fim do
+      Turno, mesmo padrão de `ataqueImprudenteAtivoTurno`). Renuncia à
+      Vantagem NESSA jogada (`rolarAtaque` ganhou o parâmetro
+      `golpeBrutal`). `DanoPendente` ganhou o campo opcional
+      `golpeBrutal: { quantidade; lados } | null` — 2º botão de dano
+      "🔨 Rolar Golpe Brutal" ao lado de "🎲 Rolar Dano" (mesmo padrão
+      de Badalar Fúnebre), some do estado assim que rolado. Depois de
+      rolar, `CombatTab.tsx` abre um picker de efeito (Debilitador/
+      Poderoso desde o nível 9; +Atordoante/Destruidor no 13; escolhe
+      2 de uma vez e dado vira 2d10 no 17 —
+      `contarRepeticoesCaracteristica` em "Golpe Brutal Fortalecido",
+      mesmo padrão de Indomável/Surto de Ação pra distinguir os 2
+      níveis com o MESMO nome) — escolher só atualiza o feedback com o
+      lembrete da regra (o app não rastreia alvo/status de inimigo,
+      decisão já registrada no Backlog.md). Novos IDs
+      `ID_CARACTERISTICA_CLASSE.golpeBrutal`/`golpeBrutalFortalecido`.
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (563)/`npm run build` limpos + Playwright em 2 níveis: nível 9
+      (2 efeitos, 1d10, escolhe 1) e nível 17 (4 efeitos, 2d10, escolhe
+      2 antes do "Confirmar" habilitar) — picker de ataque na 1ª
+      jogada, linha "Golpe Brutal" só aparece a partir da 2ª, feedback
+      de renúncia correto, 2 botões de dano, efeito(s) escolhido(s)
+      aparecem certinhos no feedback final.
 - [ ] **B4.6 — Fúria Implacável (nível 11):** salvaguarda ao cair a 0
       PV com Fúria ativa — precisa de um gatilho "chegou a 0 PV" que
       hoje não existe.
