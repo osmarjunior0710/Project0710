@@ -328,12 +328,23 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       nível 5 já mostra "🗡 Atacar — Ataque Desarmado (ataque 1/2)" no
       Combate (2 ataques reconhecidos automaticamente) e "Movimento
       Rápido" com a descrição completa na aba Perfil.
-- [ ] **B4.4 — Bote Instintivo + Instintos Primitivos (nível 7):**
-      Instintos Primitivos (Vantagem em Iniciativa) é só ligar o
-      `vantagem` que `rolarD20` da Iniciativa já aceita; Bote
-      Instintivo (mover metade do Deslocamento como parte da Ação
-      Bônus de entrar em Fúria) provavelmente fica textual, mesmo
-      motivo do Movimento Rápido.
+- [x] **B4.4 — Bote Instintivo + Instintos Primitivos (nível 7).**
+      **Instintos Primitivos** (Vantagem em Iniciativa): novo ID
+      `ID_CARACTERISTICA_CLASSE.instintosPrimitivos`, novo
+      `temInstintosPrimitivos` (`FichaShell.tsx`, mesmo padrão de
+      `temSentidoDePerigo`) passado pro `CombatTab`, que combina com
+      `desvantagemForcaDestreza` via `resolverVantagem` (já existia
+      desde o B4.1) na rolagem de Iniciativa — se coincidirem,
+      cancelam, regra real. **Bote Instintivo** (mover metade do
+      Deslocamento ao entrar em Fúria): confirmado que fica só textual
+      — o app não rastreia Deslocamento do personagem em lugar
+      nenhum, então a descrição real já aparece sozinha na aba Perfil
+      (dado que já existe desde o B1), zero código. Verificado com
+      `tsc -b --force`/`npm test -- --run` (563)/`npm run build`
+      limpos + Playwright: Bárbaro nível 7 → Perfil mostra "Instintos
+      Primitivos" e "Bote Instintivo" com a descrição completa →
+      Combate → tocar "Iniciativa" rola 2 d20 físicos com a tag
+      "Vantagem" no popup.
 - [ ] **B4.5 — Golpe Brutal (nível 9) + Golpe Brutal Fortalecido
       (nível 13/17):** dano extra condicional a usar Ataque
       Imprudente, com escolha de efeito (Debilitador/Poderoso, depois

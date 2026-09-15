@@ -644,6 +644,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const temAtaqueImprudente = classe
     ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.ataqueImprudente, personagem.nivel) !== null
     : false;
+  const temInstintosPrimitivos = classe
+    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.instintosPrimitivos, personagem.nivel) !== null
+    : false;
   const sorteDoTenebrosoMaximo = sorteDoTenebrosoDisponivel ? usosSorteDoTenebroso(carMod) : 0;
   const sorteDoTenebrosoRestantes = Math.max(0, sorteDoTenebrosoMaximo - sorteDoTenebrosoGasto);
   const equipadoAtual = resumoEquipado(itensMochila);
@@ -1933,6 +1936,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         {tab === 'combat' && (
           <CombatTab
             desvantagemForcaDestreza={desvantagemForcaDestreza}
+            temInstintosPrimitivos={temInstintosPrimitivos}
             acoesGenericasBonus={acoesGenericasBonus}
             pvAtual={pvAtual}
             pvMax={personagem.pvMax}

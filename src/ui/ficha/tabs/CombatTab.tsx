@@ -5,6 +5,7 @@ import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
+import { resolverVantagem } from '../../../core/calculoPersonagem';
 import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
@@ -47,6 +48,10 @@ interface CombatTabProps {
    * Afeta Iniciativa e qualquer rolagem de ataque (todo ataque com
    * arma/desarmado usa Força ou Destreza). */
   desvantagemForcaDestreza: boolean;
+  /** Bárbaro nível 7 (Instintos Primitivos) — Vantagem em Iniciativa.
+   * Combinada com `desvantagemForcaDestreza` via `resolverVantagem`
+   * (se coincidirem, cancelam — regra real). */
+  temInstintosPrimitivos: boolean;
   pvAtual: number;
   pvMax: number;
   /** PV Temporário atual (ex: Vigor Ínfero/Vitalidade Vazia) — absorve
@@ -261,6 +266,7 @@ const PARTICULAS_FURIA: { top: string; left: string; dx: string; dy: string; del
 
 export default function CombatTab({
   desvantagemForcaDestreza,
+  temInstintosPrimitivos,
   pvAtual,
   pvMax,
   pvTemporario,
@@ -439,7 +445,7 @@ export default function CombatTab({
       formula: `1d20 + ${iniciativaMod}`,
       mod: iniciativaMod,
       explicacaoMod: explicacaoIniciativa,
-      vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
+      vantagem: resolverVantagem(temInstintosPrimitivos, desvantagemForcaDestreza),
       onResultado: (total) => setIniciativaValor(total),
     });
     onRolarIniciativa?.();
