@@ -283,6 +283,10 @@ export interface PersonagemSalvo {
    * resetam pra 0) — decide a CD (10 + 5×isso). Ver
    * `core/furiaImplacavel.ts`. */
   furiaImplacavelUsosDesdeDescanso?: number;
+  /** Fúria Persistente (Bárbaro nível 15+) — `true` = já recuperou os
+   * usos gastos de Fúria desde o último Descanso Longo (só 1x, regra
+   * real) — só o Descanso Longo reseta pra `false`. */
+  furiaPersistenteUsada?: boolean;
   /** Usos gastos de Conhecimento de Pedras (Anão) desde o último
    * Descanso Longo — só ele reseta. Máximo = Bônus de Proficiência. */
   conhecimentoDePedrasGasto?: number;

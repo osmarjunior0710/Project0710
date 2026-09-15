@@ -416,9 +416,28 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       popup de dado padrão fecha → 'resultado' falha ("🩸
       Inconsciente") → Fechar; PV a 0 de novo (CD já escalada pra 15) →
       rola → 'resultado' sucesso → "Curar 22 PV" → PV vira 22/82.
-- [ ] **B4.7 — Fúria Persistente (nível 15):** "recupera todas as
-      Fúrias ao rolar Iniciativa" (a duração de 10 min já é o padrão
-      desde o B3, nada novo aí).
+- [x] **B4.7 — Fúria Persistente (nível 15).** Regra: "recupera todos
+      os usos gastos de Fúria ao rolar Iniciativa, só 1x até completar
+      um Descanso Longo" (a duração de 10 min já é o padrão desde o
+      B3, nada novo aí). Decisão de implementação: em vez de travar a
+      oferta no instante exato de rolar Iniciativa (exigiria popup
+      novo), virou um botão sempre visível no próprio card de Fúria —
+      "🔥 Recuperar Fúria (Fúria Persistente)" — aparece só quando: tem
+      a característica (nível 15+), já gastou ≥1 uso de Fúria, e ainda
+      não usou desde o último Descanso Longo. Ao tocar: zera
+      `furiaGasto` e marca `furiaPersistenteUsada`. Novo campo
+      persistido `furiaPersistenteUsada` (reseta só no Descanso Longo,
+      igual outros "1x até descanso"), novo ID
+      `ID_CARACTERISTICA_CLASSE.furiaPersistente`. Sem função nova em
+      `core/` (é só estado + condição, reaproveitando o padrão de
+      botão condicional em opt-card, ex. Bênção do Tenebroso) — não
+      precisou de teste Vitest novo.
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (572)/`npm run build` limpos + Playwright num Bárbaro nível 15:
+      gastou 2 usos → botão aparece (3/5) → toca → volta a 5/5, botão
+      some; gasta mais 1 uso → botão NÃO aparece de novo (já usado);
+      Descanso Longo → usos voltam a 5/5 E o botão volta a ficar
+      disponível na próxima vez que gastar um uso.
 - [ ] **B4.8 — Força Indomável (nível 18):** reroll de teste OU
       salvaguarda de Força usando o valor cheio, se o resultado for
       menor.

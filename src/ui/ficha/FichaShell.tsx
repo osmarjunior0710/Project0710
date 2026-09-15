@@ -277,6 +277,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [folegoGasto, setFolegoGasto] = useState(personagemSalvo.folegoGasto ?? 0);
   const [vigorImplacavelGasto, setVigorImplacavelGasto] = useState(personagemSalvo.vigorImplacavelGasto ?? false);
   const [furiaImplacavelUsos, setFuriaImplacavelUsos] = useState(personagemSalvo.furiaImplacavelUsosDesdeDescanso ?? 0);
+  const [furiaPersistenteUsada, setFuriaPersistenteUsada] = useState(personagemSalvo.furiaPersistenteUsada ?? false);
   const [furiaImplacavelPendente, setFuriaImplacavelPendente] = useState(false);
   /** `null` = ainda oferecendo (fase 'oferta' do modal), esperando o
    * jogador tocar em rolar; `true`/`false` = dado já rolado, resultado
@@ -677,6 +678,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * `rolarFuriaImplacavel`), em vez de mandar o jogador pra aba
    * Atributos. */
   const salvaguardaCon = salvaguardas.find((s) => s.atributo === 'CON') ?? null;
+  const temFuriaPersistente = classe
+    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.furiaPersistente, personagem.nivel) !== null
+    : false;
+  /** Botão "Recuperar Fúria" só aparece com a característica, pelo
+   * menos 1 uso gasto pra recuperar de verdade, e ainda não usada
+   * desde o último Descanso Longo — regra real não trava no instante
+   * exato de rolar Iniciativa (ver `EmDevB.md`, B4.7). */
+  const furiaPersistenteDisponivel = temFuriaPersistente && furiaGasto > 0 && !furiaPersistenteUsada;
   const sorteDoTenebrosoMaximo = sorteDoTenebrosoDisponivel ? usosSorteDoTenebroso(carMod) : 0;
   const sorteDoTenebrosoRestantes = Math.max(0, sorteDoTenebrosoMaximo - sorteDoTenebrosoGasto);
   const equipadoAtual = resumoEquipado(itensMochila);
@@ -751,6 +760,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     folegoGasto,
     vigorImplacavelGasto,
     furiaImplacavelUsosDesdeDescanso: furiaImplacavelUsos,
+    furiaPersistenteUsada,
     conhecimentoDePedrasGasto,
     picoDeAdrenalinaGasto,
     ataqueDeSoproGasto,
@@ -836,6 +846,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       folegoGasto,
       vigorImplacavelGasto,
       furiaImplacavelUsos,
+      furiaPersistenteUsada,
       conhecimentoDePedrasGasto,
       picoDeAdrenalinaGasto,
       ataqueDeSoproGasto,
@@ -1012,6 +1023,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return true;
   }
 
+  /** Fúria Persistente (Bárbaro nível 15+) — zera os usos gastos de
+   * Fúria e marca como usada até o próximo Descanso Longo. */
+  function recuperarFuriaPersistente() {
+    setFuriaGasto(0);
+    setFuriaPersistenteUsada(true);
+  }
+
   const maosCurativas = recursoFlagUnica(maosCurativasGasto, setMaosCurativasGasto);
   function usarMaosCurativas(): boolean {
     return maosCurativas.usar();
@@ -1125,6 +1143,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setFolegoGasto(0);
     setVigorImplacavelGasto(false);
     setFuriaImplacavelUsos(0);
+    setFuriaPersistenteUsada(false);
     setConhecimentoDePedrasGasto(0);
     setPicoDeAdrenalinaGasto(0);
     setAtaqueDeSoproGasto(0);
@@ -2097,6 +2116,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               ativa: furiaAtiva,
               bonusDano: furiaBonusDano,
               onUsar: usarFuria,
+              persistenteDisponivel: furiaPersistenteDisponivel,
+              onRecuperarPersistente: recuperarFuriaPersistente,
             }}
             ataqueImprudente={{
               disponivel: temAtaqueImprudente,

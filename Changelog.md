@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1917
+
+Bárbaro — Fúria Persistente (nível 15) chegou. Depois de gastar pelo
+menos 1 uso de Fúria, o card de Fúria (aba Combate) ganha um botão "🔥
+Recuperar Fúria" que zera os usos gastos — disponível só 1x até o
+próximo Descanso Longo.
+
 ## v202609_1847
 
 Bárbaro — Fúria Implacável (nível 11) ficou mais direta: em vez de
