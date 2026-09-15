@@ -125,6 +125,14 @@ interface CombatTabProps {
      * `ataqueBonus` quando `ativa`; aqui só pra exibir no card). */
     bonusDano: number;
     onUsar: () => boolean;
+    /** Fúria Persistente (Bárbaro nível 15+) — `true` só quando: tem a
+     * característica, já gastou pelo menos 1 uso de Fúria, e ainda não
+     * usou essa recuperação desde o último Descanso Longo. Não trava
+     * no instante exato de rolar Iniciativa (regra real) — vira um
+     * botão sempre visível no card enquanto disponível, mesma ideia de
+     * outros botões condicionais de card (ex.: Bênção do Tenebroso). */
+    persistenteDisponivel: boolean;
+    onRecuperarPersistente: () => void;
   };
   /** Ataque Imprudente (Bárbaro, nível 2+) — decidido só na 1ª jogada
    * de ataque do turno (o painel de Ação abre um mini-picker "Ataque
@@ -378,6 +386,8 @@ export default function CombatTab({
     ativa: furiaAtiva,
     bonusDano: furiaBonusDano,
     onUsar: onUsarFuria,
+    persistenteDisponivel: furiaPersistenteDisponivel,
+    onRecuperarPersistente: onRecuperarFuriaPersistente,
   },
   ataqueImprudente: {
     disponivel: ataqueImprudenteDisponivel,
@@ -960,6 +970,11 @@ export default function CombatTab({
           ) : (
             <div className="opt-card-desc">
               {furiaRestantes} de {furiaMaximo} usos disponíveis — ative no painel de Ação Bônus.
+            </div>
+          )}
+          {furiaPersistenteDisponivel && (
+            <div className="btn" style={{ marginTop: 8 }} onClick={onRecuperarFuriaPersistente}>
+              🔥 Recuperar Fúria (Fúria Persistente)
             </div>
           )}
         </div>

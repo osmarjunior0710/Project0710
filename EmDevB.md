@@ -382,19 +382,27 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       `deveOferecerFuriaImplacavel` (mesma transição PV>0→PV=0 de
       `deveAplicarVigorImplacavel`, mas com `furiaAtiva` em vez de
       "já gasto" — pode disparar de novo a cada queda, só a CD escala),
-      `cdFuriaImplacavel` (10 + 5×tentativas desde o último descanso)
-      e `pvFuriaImplacavel` (2× nível NA CLASSE Bárbaro) — 9 testes
-      novos. Diferente de Vigor Implacável (aplica sozinho), Fúria
-      Implacável é OPCIONAL e envolve uma rolagem — o app nunca
-      compara contra CD sozinho (mesmo princípio de "o jogador decide
-      se acertou"), então novo `FuriaImplacavelModal.tsx` (mesmo
-      padrão visual/estrutural de `ColheitaMacabraModal`, vive no
-      `FichaShell` pra sobreviver troca de aba) mostra a CD e pede pra
-      rolar a Salvaguarda de Constituição (a mesma linha que já existe
-      na aba Atributos) — 2 botões: "✅ Passou" (PV vira o dobro do
-      nível, soma 1 tentativa) e "Dispensar" (nada muda). Novo
-      contador persistido `furiaImplacavelUsosDesdeDescanso`, resetado
-      no Descanso Curto E Longo (os 2, regra real). Novo ID
+      `cdFuriaImplacavel` (10 + 5×TENTATIVAS desde o último descanso,
+      passe ou falhe — regra real: "a cada vez que usar essa
+      característica após a primeira", usar = tentar) e
+      `pvFuriaImplacavel` (2× nível NA CLASSE Bárbaro) — 9 testes
+      novos.
+      `FuriaImplacavelModal.tsx` (mesmo padrão visual/estrutural de
+      `ColheitaMacabraModal`, vive no `FichaShell` pra sobreviver troca
+      de aba) tem 2 fases: 'oferta' (mostra CD + fórmula da
+      Salvaguarda de Constituição + botão "🎲 Rolar Salvaguarda", que
+      dispara o MESMO `rolarD20` de qualquer rolagem real — reaproveita
+      o popup de dado padrão, ganha Sorte/Inspiração Heroica de graça)
+      e 'resultado' (após o popup de dado fechar: sucesso mostra botão
+      verde "Curar N PV"; falha mostra "🩸 Inconsciente" + Fechar).
+      Diferente de uma salvaguarda-vs-CD normal de OUTRA criatura (onde
+      o app nunca modela a comparação, só mostra a CD e deixa o
+      jogador dizer o resultado), aqui a Salvaguarda É a própria
+      rolagem do personagem — o app já tem o modificador certo
+      (mesmo `SalvaguardaFinal` de Constituição da aba Atributos), então
+      resolve sozinho. Novo contador persistido
+      `furiaImplacavelUsosDesdeDescanso`, resetado no Descanso Curto E
+      Longo (os 2, regra real). Novo ID
       `ID_CARACTERISTICA_CLASSE.furiaImplacavel`.
       **Achado no caminho (pergunta do Osmar):** hoje só a aba Combate
       tem controles de alterar o PV do personagem — o gatilho vive em
@@ -404,12 +412,32 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       sentido).
       Verificado com `tsc -b --force`/`npm test -- --run`
       (572)/`npm run build` limpos + Playwright num Bárbaro nível 11:
-      Fúria ativa + PV a 0 → modal aparece com "CD 10" → "Passou" → PV
-      vira 22 (2×11) → PV a 0 de novo → modal mostra "CD 15" (escalou)
-      → "Dispensar" → PV fica em 0, nada muda.
-- [ ] **B4.7 — Fúria Persistente (nível 15):** "recupera todas as
-      Fúrias ao rolar Iniciativa" (a duração de 10 min já é o padrão
-      desde o B3, nada novo aí).
+      Fúria ativa + PV a 0 → modal 'oferta' (CD 10, 1d20+4) → rola →
+      popup de dado padrão fecha → 'resultado' falha ("🩸
+      Inconsciente") → Fechar; PV a 0 de novo (CD já escalada pra 15) →
+      rola → 'resultado' sucesso → "Curar 22 PV" → PV vira 22/82.
+- [x] **B4.7 — Fúria Persistente (nível 15).** Regra: "recupera todos
+      os usos gastos de Fúria ao rolar Iniciativa, só 1x até completar
+      um Descanso Longo" (a duração de 10 min já é o padrão desde o
+      B3, nada novo aí). Decisão de implementação: em vez de travar a
+      oferta no instante exato de rolar Iniciativa (exigiria popup
+      novo), virou um botão sempre visível no próprio card de Fúria —
+      "🔥 Recuperar Fúria (Fúria Persistente)" — aparece só quando: tem
+      a característica (nível 15+), já gastou ≥1 uso de Fúria, e ainda
+      não usou desde o último Descanso Longo. Ao tocar: zera
+      `furiaGasto` e marca `furiaPersistenteUsada`. Novo campo
+      persistido `furiaPersistenteUsada` (reseta só no Descanso Longo,
+      igual outros "1x até descanso"), novo ID
+      `ID_CARACTERISTICA_CLASSE.furiaPersistente`. Sem função nova em
+      `core/` (é só estado + condição, reaproveitando o padrão de
+      botão condicional em opt-card, ex. Bênção do Tenebroso) — não
+      precisou de teste Vitest novo.
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (572)/`npm run build` limpos + Playwright num Bárbaro nível 15:
+      gastou 2 usos → botão aparece (3/5) → toca → volta a 5/5, botão
+      some; gasta mais 1 uso → botão NÃO aparece de novo (já usado);
+      Descanso Longo → usos voltam a 5/5 E o botão volta a ficar
+      disponível na próxima vez que gastar um uso.
 - [ ] **B4.8 — Força Indomável (nível 18):** reroll de teste OU
       salvaguarda de Força usando o valor cheio, se o resultado for
       menor.

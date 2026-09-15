@@ -169,7 +169,7 @@ export default function FichaShell() {
 
 function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }) {
   const navigate = useNavigate();
-  const { registrarBonusExtra, registrarSorte, registrarInspiracaoHeroica, estado: rollEmAndamento } = useRoll();
+  const { registrarBonusExtra, registrarSorte, registrarInspiracaoHeroica, estado: rollEmAndamento, rolarD20 } = useRoll();
   const [selecao, setSelecao] = useState<WizardSelection>(personagemSalvo.selecao);
 
   // Multiclasse (Fase M2/M3, ver EmDevB.md e SDD Multiclasse) —
@@ -282,7 +282,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [folegoGasto, setFolegoGasto] = useState(personagemSalvo.folegoGasto ?? 0);
   const [vigorImplacavelGasto, setVigorImplacavelGasto] = useState(personagemSalvo.vigorImplacavelGasto ?? false);
   const [furiaImplacavelUsos, setFuriaImplacavelUsos] = useState(personagemSalvo.furiaImplacavelUsosDesdeDescanso ?? 0);
+  const [furiaPersistenteUsada, setFuriaPersistenteUsada] = useState(personagemSalvo.furiaPersistenteUsada ?? false);
   const [furiaImplacavelPendente, setFuriaImplacavelPendente] = useState(false);
+  /** `null` = ainda oferecendo (fase 'oferta' do modal), esperando o
+   * jogador tocar em rolar; `true`/`false` = dado já rolado, resultado
+   * decidido (fase 'resultado'). */
+  const [furiaImplacavelResultado, setFuriaImplacavelResultado] = useState<boolean | null>(null);
   const [conhecimentoDePedrasGasto, setConhecimentoDePedrasGasto] = useState(personagemSalvo.conhecimentoDePedrasGasto ?? 0);
   const [picoDeAdrenalinaGasto, setPicoDeAdrenalinaGasto] = useState(personagemSalvo.picoDeAdrenalinaGasto ?? 0);
   const [ataqueDeSoproGasto, setAtaqueDeSoproGasto] = useState(personagemSalvo.ataqueDeSoproGasto ?? 0);
@@ -678,6 +683,19 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const temFuriaImplacavel = classe
     ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.furiaImplacavel, personagem.nivel) !== null
     : false;
+  /** Salvaguarda de Constituição do personagem — reaproveitada pela
+   * própria Fúria Implacável pra rolar o d20 dela (ver
+   * `rolarFuriaImplacavel`), em vez de mandar o jogador pra aba
+   * Atributos. */
+  const salvaguardaCon = salvaguardas.find((s) => s.atributo === 'CON') ?? null;
+  const temFuriaPersistente = classe
+    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.furiaPersistente, personagem.nivel) !== null
+    : false;
+  /** Botão "Recuperar Fúria" só aparece com a característica, pelo
+   * menos 1 uso gasto pra recuperar de verdade, e ainda não usada
+   * desde o último Descanso Longo — regra real não trava no instante
+   * exato de rolar Iniciativa (ver `EmDevB.md`, B4.7). */
+  const furiaPersistenteDisponivel = temFuriaPersistente && furiaGasto > 0 && !furiaPersistenteUsada;
   const sorteDoTenebrosoMaximo = sorteDoTenebrosoDisponivel ? usosSorteDoTenebroso(carMod) : 0;
   const sorteDoTenebrosoRestantes = Math.max(0, sorteDoTenebrosoMaximo - sorteDoTenebrosoGasto);
   const equipadoAtual = resumoEquipado(itensMochila);
@@ -752,6 +770,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     folegoGasto,
     vigorImplacavelGasto,
     furiaImplacavelUsosDesdeDescanso: furiaImplacavelUsos,
+    furiaPersistenteUsada,
     conhecimentoDePedrasGasto,
     picoDeAdrenalinaGasto,
     ataqueDeSoproGasto,
@@ -838,6 +857,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       folegoGasto,
       vigorImplacavelGasto,
       furiaImplacavelUsos,
+      furiaPersistenteUsada,
       conhecimentoDePedrasGasto,
       picoDeAdrenalinaGasto,
       ataqueDeSoproGasto,
@@ -909,18 +929,42 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
   }
 
-  /** Fúria Implacável (Bárbaro nível 11+) — "Passou" aplica o PV
-   * cheio (2× nível NA CLASSE Bárbaro) e soma 1 tentativa (escalando a
-   * CD da próxima vez, ver `cdFuriaImplacavel`); "Dispensar" só fecha
-   * o modal, PV continua em 0. Nenhum dos dois some/gasta um "uso" no
-   * sentido de recurso — a característica pode ser oferecida de novo
-   * a cada queda a 0 PV, só a CD sobe. */
-  function confirmarFuriaImplacavel(passou: boolean) {
-    if (passou) {
-      setPvAtual(pvFuriaImplacavel(personagem.nivel));
-      setFuriaImplacavelUsos((v) => v + 1);
-    }
+  /** Fúria Implacável (Bárbaro nível 11+) — rola a própria Salvaguarda
+   * de Constituição pelo `rolarD20` de sempre (mesmo popup de dado
+   * padrão) e decide sozinho se passou, comparando com a CD atual. A
+   * CD sobe (+5) a cada TENTATIVA (passe ou falhe — regra real: "a
+   * cada vez que usar essa característica após a primeira", usar =
+   * tentar, não só ter sucesso), volta a 10 no Descanso Curto/Longo. */
+  function rolarFuriaImplacavel() {
+    const mod = salvaguardaCon?.mod ?? 0;
+    const cdAtual = cdFuriaImplacavel(furiaImplacavelUsos);
+    rolarD20({
+      label: 'Salvaguarda de Constituição — Fúria Implacável',
+      formula: `1d20 ${mod >= 0 ? '+' : '-'} ${Math.abs(mod)}`,
+      mod,
+      explicacaoMod: salvaguardaCon?.explicacao,
+      categoria: 'atributoOuSalvaguarda',
+      onResultado: (total) => {
+        setFuriaImplacavelUsos((v) => v + 1);
+        setFuriaImplacavelResultado(total >= cdAtual);
+      },
+    });
+  }
+
+  /** "Curar" (fase 'resultado', sucesso) — aplica o PV cheio (2× nível
+   * NA CLASSE Bárbaro) e fecha o modal. */
+  function curarFuriaImplacavel() {
+    setPvAtual(pvFuriaImplacavel(personagem.nivel));
     setFuriaImplacavelPendente(false);
+    setFuriaImplacavelResultado(null);
+  }
+
+  /** Fecha o modal sem curar — tanto "Dispensar" (fase 'oferta', nunca
+   * rolou) quanto "Fechar" (fase 'resultado', falhou). PV continua
+   * como estava (0). */
+  function fecharFuriaImplacavel() {
+    setFuriaImplacavelPendente(false);
+    setFuriaImplacavelResultado(null);
   }
 
   // G3.2 (foco de saúde do projeto, ver EmDevB.md): `recursoContado`/
@@ -989,6 +1033,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setFuriaGasto((v) => v + 1);
     setFuriaAtiva(true);
     return true;
+  }
+
+  /** Fúria Persistente (Bárbaro nível 15+) — zera os usos gastos de
+   * Fúria e marca como usada até o próximo Descanso Longo. */
+  function recuperarFuriaPersistente() {
+    setFuriaGasto(0);
+    setFuriaPersistenteUsada(true);
   }
 
   const maosCurativas = recursoFlagUnica(maosCurativasGasto, setMaosCurativasGasto);
@@ -1104,6 +1155,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setFolegoGasto(0);
     setVigorImplacavelGasto(false);
     setFuriaImplacavelUsos(0);
+    setFuriaPersistenteUsada(false);
     setConhecimentoDePedrasGasto(0);
     setPicoDeAdrenalinaGasto(0);
     setAtaqueDeSoproGasto(0);
@@ -1803,12 +1855,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         />
       )}
       {/* Mesmo motivo do Colheita Macabra acima (não "espiar" atrás do
-          RollOverlay da própria rolagem de dano que zerou o PV). */}
+          RollOverlay da própria rolagem de dano que zerou o PV, NEM da
+          própria rolagem da Salvaguarda de Constituição que este modal
+          dispara — ver `rolarFuriaImplacavel`). */}
       {furiaImplacavelPendente && rollEmAndamento === null && (
         <FuriaImplacavelModal
+          fase={furiaImplacavelResultado === null ? 'oferta' : 'resultado'}
           cd={cdFuriaImplacavel(furiaImplacavelUsos)}
-          onPassou={() => confirmarFuriaImplacavel(true)}
-          onDispensar={() => confirmarFuriaImplacavel(false)}
+          mod={salvaguardaCon?.mod ?? 0}
+          explicacaoMod={salvaguardaCon?.explicacao ?? { linhas: [], total: { label: '', valor: '' } }}
+          passou={furiaImplacavelResultado ?? false}
+          pvCura={pvFuriaImplacavel(personagem.nivel)}
+          onRolar={rolarFuriaImplacavel}
+          onDispensar={fecharFuriaImplacavel}
+          onCurar={curarFuriaImplacavel}
+          onFechar={fecharFuriaImplacavel}
         />
       )}
       {xpPopupAberto && (
@@ -2071,6 +2132,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               ativa: furiaAtiva,
               bonusDano: furiaBonusDano,
               onUsar: usarFuria,
+              persistenteDisponivel: furiaPersistenteDisponivel,
+              onRecuperarPersistente: recuperarFuriaPersistente,
             }}
             ataqueImprudente={{
               disponivel: temAtaqueImprudente,

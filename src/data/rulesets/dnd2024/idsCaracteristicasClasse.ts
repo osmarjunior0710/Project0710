@@ -52,6 +52,10 @@ export const ID_CARACTERISTICA_CLASSE = {
    * uma salvaguarda de Constituição (CD escalando) pra voltar com PV.
    * Ver `core/furiaImplacavel.ts`, `FichaShell.tsx` (`alterarPv`). */
   furiaImplacavel: 'Fúria Implacável',
+  /** Bárbaro nível 15 — recupera todos os usos gastos de Fúria 1x
+   * entre Descansos Longos. Ver `FichaShell.tsx`
+   * (`recuperarFuriaPersistente`). */
+  furiaPersistente: 'Fúria Persistente',
 } as const;
 
 export type IdCaracteristicaClasse = keyof typeof ID_CARACTERISTICA_CLASSE;

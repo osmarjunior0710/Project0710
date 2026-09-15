@@ -12,6 +12,21 @@ Talento "Resiliente" chegou: ao escolher esse talento no Level Up
 os que você ainda não tem Salvaguarda proficiente — ele ganha +1 e vira
 Salvaguarda proficiente na hora.
 
+## v202609_1917
+
+Bárbaro — Fúria Persistente (nível 15) chegou. Depois de gastar pelo
+menos 1 uso de Fúria, o card de Fúria (aba Combate) ganha um botão "🔥
+Recuperar Fúria" que zera os usos gastos — disponível só 1x até o
+próximo Descanso Longo.
+
+## v202609_1847
+
+Bárbaro — Fúria Implacável (nível 11) ficou mais direta: em vez de
+mandar rolar a Salvaguarda de Constituição na aba Atributos, agora o
+próprio aviso já mostra a CD e a fórmula do dado e tem um botão "🎲
+Rolar Salvaguarda" — o app rola e já resolve sozinho. Passou, aparece
+"Curar N PV" (toque pra aplicar); falhou, aparece "Inconsciente".
+
 ## v202609_1731
 
 Corrigido: escolher Vantagem/Desvantagem DEPOIS de ver o resultado do
