@@ -14,6 +14,14 @@ precisar comprar nada na Loja primeiro. A Carga aparece acima do
 máximo de propósito (carregando tudo de uma vez). Com isso, o foco do
 Char de Teste Fixo fecha — próximo foco: Talentos.
 
+## v202609_1239
+
+Corrigido: no popup de rolagem, um título comprido (ex.: "Ataque —
+Ataque Desarmado (Golpe Brutal)") corria por baixo do botão ✕ de
+fechar. O ✕ ficou menor e foi pro vértice do canto do card — nunca
+mais fica embaixo do texto, não importa quantas linhas o título
+quebrar.
+
 ## v202609_1141
 
 O "🧪 Char de Teste Fixo" agora nasce direto no nível 20 — Mago 17

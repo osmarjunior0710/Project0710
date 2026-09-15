@@ -330,28 +330,42 @@
 /* Círculo com ✕ no canto do card (pedido do Osmar) — substitui o
    antigo botão "FECHAR" de largura total, que ocupava uma linha
    inteira só pra fechar. Posicionado sobre `.card` (`position:
-   relative` lá), sempre no canto, não empurra o resto do conteúdo. */
+   relative` lá), sempre no canto, não empurra o resto do conteúdo.
+   Ajuste (feedback do Osmar, testando Golpe Brutal): um título longo
+   ("Ataque — Ataque Desarmado (Golpe Brutal)") quebra em 2+ linhas e
+   a 1ª linha corria por baixo do ✕, que ficava só "colado" no canto
+   interno do card. Corrigido colocando o CENTRO do ✕ exatamente no
+   vértice superior direito do card (metade fora, metade dentro) — a
+   área de toque continua com `--touch-target-min` (CLAUDE.md seção 5),
+   só o círculo VISÍVEL (`.closeIcon` abaixo) encolheu, então o título
+   nunca mais alcança essa região por dentro do card. */
 .close {
   position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
-  /* Área de toque mínima (CLAUDE.md seção 5), mesmo padrão do `.back` —
-     visualmente o ✕ em si é pequeno (16px), só a área clicável é
-     grande. */
+  top: calc(var(--touch-target-min) / -2);
+  right: calc(var(--touch-target-min) / -2);
   width: var(--touch-target-min);
   height: var(--touch-target-min);
-  border-radius: var(--shape-full);
-  background: var(--panel2);
-  color: var(--text-dim);
-  font-size: 16px;
-  line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.close:active {
+.closeIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--shape-full);
+  background: var(--panel2);
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--elevation-2);
+}
+
+.close:active .closeIcon {
   background: var(--line-soft);
 }
 
@@ -361,10 +375,13 @@
    Esmaecido em vez de sumir, pra sinalizar "travado por enquanto" em
    vez de ficar sem nenhum controle visível no canto do card. */
 .closeDesabilitado {
-  opacity: 0.35;
   cursor: default;
 }
 
-.closeDesabilitado:active {
+.closeDesabilitado .closeIcon {
+  opacity: 0.35;
+}
+
+.closeDesabilitado:active .closeIcon {
   background: var(--panel2);
 }

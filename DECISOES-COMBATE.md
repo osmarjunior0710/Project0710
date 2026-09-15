@@ -594,7 +594,17 @@ pra `align-items: flex-end` com `padding-bottom`, e o antigo botão
 "FECHAR" de largura total virou um círculo `✕` (`position: absolute`,
 canto superior direito do card, `.card` ganhou `position: relative`
 pra isso funcionar) — libera espaço vertical sem perder a área de
-toque mínima (`--touch-target-min`, mesmo padrão do `.back`). O
+toque mínima (`--touch-target-min`, mesmo padrão do `.back`). **Ajuste
+posterior (feedback do Osmar, testando o Golpe Brutal do Bárbaro):**
+título comprido (2+ linhas, ex. "Ataque — Ataque Desarmado (Golpe
+Brutal)") corria por baixo do ✕. Corrigido separando a área de toque
+(`.close`, ainda `--touch-target-min`) do círculo VISÍVEL
+(`.closeIcon`, menor, ~28px) — o centro do `.close` agora fica no
+VÉRTICE do canto do card (metade fora, metade dentro:
+`top/right: calc(var(--touch-target-min) / -2)`), então o título
+nunca mais alcança essa região por dentro do card, não importa quantas
+linhas quebrar. Padrão a reaproveitar em qualquer botão circular de
+canto futuro que precise conviver com texto de tamanho variável. O
 canvas físico compartilhado (`Dice3dFab.module.css` `.canvasWrapper`)
 deixou de ser `inset: 5px` uniforme e virou limites por lado: topo
 ~72px (abaixo de onde a barra do nome do personagem costuma ficar —
