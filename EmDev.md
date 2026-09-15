@@ -633,7 +633,42 @@ juntas nesta mesma entrega (não só cura).
       — vale teste manual no celular com uma magia de dano/cura E os
       3 popups de CD.
 
-## Foco ATIVO: Personagem de Teste Fixo — sempre o mesmo char, pra parar de depender do gerador aleatório
+### Correção: "Rolando..." padronizado pra todo reroll físico (Vantagem/Desvantagem escolhida depois, Sorte, Inspiração Heroica, Perfurador de 1 dado só)
+
+Achado pelo Osmar: o popup já mostra "Rolando..." com os 3 pontinhos
+enquanto o dado 3D cai — mas só na rolagem PRINCIPAL. Vantagem/
+Desvantagem escolhida DEPOIS de ver o 1º resultado
+(`escolherVantagemPosRolagem`) ainda mostrava o 2º dado com o visual 2D
+antigo (ícone 🎲 girando) por cima do dado físico caindo atrás — porque
+`fase` ficava travada em `'concluido'` (herdada do 1º dado) durante
+todo o reroll, e `dado2Motor3D` só virava `true` quando o dado
+TERMINAVA de cair, não quando começava.
+
+- [x] `escolherVantagemPosRolagem`/`usarSorte`/`usarInspiracaoHeroica`/
+      `rerollDadoEscolhido` (caso de 1 dado só, sem `dadosIndividuais`)
+      — todos os 4 têm o mesmo padrão de "reroll físico via
+      `rerolarFisico`/`lancarGrupos`": agora, sempre que o reroll é
+      físico de verdade (`usar3D`/`resultadoBruto` truthy), a `fase`
+      volta pra `'rolando'` no MESMO `setEstado` que já marcava o
+      placeholder `'🎲'`, e volta pra `'concluido'` dentro de cada
+      `concluir()`. `dado2Motor3D` (Vantagem/Desvantagem) também virou
+      `true` desde o início do reroll, não só no fim — esconde o
+      `DadoVisual` CSS do 2º dado o tempo todo, não só depois de
+      resolvido. Sem 3D (fallback 2D), nada mudou — mesmo ícone
+      girando de sempre. **Fora de propósito:** o grid de dados
+      individuais (`dadosIndividuais`, Perfurador com 2+ dados) — esse
+      caso é a UI de ESCOLHER qual dado rerolar, não um dado duplicado
+      por engano (decisão já registrada em `DECISOES-COMBATE.md` "Grid
+      de dados individuais"), continua mostrando "🎲" dentro da célula
+      tocada. `aplicarBonusExtra` (Sorte do Tenebroso) também ficou de
+      fora — nunca teve suporte a motor 3D pra começo de conversa (sempre
+      `Math.random()`), nada a corrigir aqui. Verificado: `tsc -b`/`npm
+      test` (563)/`npm run build` limpos + Playwright (Salvaguarda de
+      Força 3D → Vantagem → popup mostra "Rolando.." com os 2 dados
+      físicos caindo na cena, sem nenhum dado 2D por cima → resolve
+      certo, usando o maior dos dois).
+
+## Foco: Personagem de Teste Fixo — sempre o mesmo char, pra parar de depender do gerador aleatório — COMPLETO
 
 Pedido do Osmar: montar na mão um personagem de teste FIXO (não
 sorteado), salvo sempre igual, cobrindo atributos extremos e as

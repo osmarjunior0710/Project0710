@@ -117,11 +117,13 @@ export default function RollOverlay() {
           // Motor 3D (ver `RollState.motor3D`): dado(s) que vieram da
           // física já aparecem caindo no canvas por trás do card
           // (Dice3dFab, compartilhado) — não desenha o `DadoVisual` CSS
-          // deles de novo aqui, senão duplica. Vantagem/Desvantagem
-          // PRÉ-declarada com motor 3D rola os 2 juntos (`dado2Motor3D`,
-          // ver sdd/sdd-dado-3d.md) — os 2 somem daqui. Escolhida DEPOIS
-          // do resultado (`escolherVantagemPosRolagem`) o 2º dado ainda
-          // é 2D nesta entrega e aparece normalmente.
+          // deles de novo aqui, senão duplica. Vale pra Vantagem/
+          // Desvantagem PRÉ-declarada (rola os 2 juntos) E escolhida
+          // DEPOIS do resultado (`escolherVantagemPosRolagem`, entra na
+          // mesma cena via `box.add()`) — os dois casos marcam
+          // `dado2Motor3D` assim que o 2º dado começa a cair, não só
+          // quando termina, pra nunca aparecer um dado 2D por cima do
+          // físico enquanto ele ainda tá rolando.
           (!estado.motor3D || (temSegundoDado && !estado.dado2Motor3D)) && (
             <div className={styles.diceRow}>
               {!estado.motor3D && (

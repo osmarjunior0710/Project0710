@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1731
+
+Corrigido: escolher Vantagem/Desvantagem DEPOIS de ver o resultado do
+1º dado físico mostrava o 2º dado com o ícone 2D antigo por cima do
+dado de verdade caindo atrás. Agora mostra "Rolando..." como o resto —
+mesma correção aplicada a Sorte (Pequenino), Inspiração Heroica e o
+reroll do Perfurador quando é 1 dado só.
+
 ## v202609_1322
 
 Mochila do "🧪 Char de Teste Fixo" agora vem com 1 de cada item do

@@ -140,25 +140,24 @@ export interface RollState {
   rerollEscolhidoUsado?: boolean;
   /** `true` = esta rolagem usou o motor 3D (física de verdade,
    * `@3d-dice/dice-box`) em vez de `Math.random()` — Fase B do dado 3D
-   * (`sdd/sdd-dado-3d.md`). Pra 'd20': só cobre d20 simples (sem
-   * Vantagem/Desvantagem PRÉ-declarada) por enquanto — `RollOverlay`
-   * usa isso pra mostrar o canvas físico em vez do `DadoVisual` CSS
-   * pro 1º dado; se o jogador escolher Vantagem/Desvantagem DEPOIS
-   * (`escolherVantagemPosRolagem`), o 2º dado continua 2D, fica `true`
-   * mesmo assim (só o 1º é físico). Pra 'dados' (dano/outros, B5):
-   * cobre TANTO o dado único quanto o grid de 2+ dados — mas o grid
-   * (`dadosIndividuais`) continua desenhando o `DadoVisual` CSS normal
-   * mesmo com `motor3D`, DIFERENTE do 'd20' — o grid não é "o mesmo
-   * dado duplicado", é a UI de escolher qual rerolar (Perfurador), tem
-   * que continuar clicável mesmo com o dado físico caindo por trás
-   * como reforço visual. */
+   * (`sdd/sdd-dado-3d.md`). Pra 'd20': cobre o d20 simples E o 2º dado
+   * de Vantagem/Desvantagem, pré-declarada ou escolhida DEPOIS do
+   * resultado (`escolherVantagemPosRolagem`) — `RollOverlay` usa isso
+   * pra mostrar o canvas físico em vez do `DadoVisual` CSS. Pra 'dados'
+   * (dano/outros, B5): cobre TANTO o dado único quanto o grid de 2+
+   * dados — mas o grid (`dadosIndividuais`) continua desenhando o
+   * `DadoVisual` CSS normal mesmo com `motor3D`, DIFERENTE do 'd20' —
+   * o grid não é "o mesmo dado duplicado", é a UI de escolher qual
+   * rerolar (Perfurador), tem que continuar clicável mesmo com o dado
+   * físico caindo por trás como reforço visual. */
   motor3D?: boolean;
-  /** `true` só quando o 2º dado (Vantagem/Desvantagem PRÉ-declarada,
-   * `box.roll(['1d20','1d20'])`) também veio do motor 3D — diferente
-   * de um 2º dado adicionado DEPOIS via `escolherVantagemPosRolagem`
-   * (ainda 2D nesta fase, ver sdd/sdd-dado-3d.md), que nunca marca
-   * isto. `RollOverlay` usa pra decidir se esconde o `DadoVisual` CSS
-   * dos DOIS dados (par físico) ou só do 1º (2º ainda 2D). */
+  /** `true` quando o 2º dado d20 (Vantagem/Desvantagem, pré-declarada
+   * OU escolhida DEPOIS via `escolherVantagemPosRolagem`) veio do
+   * motor 3D — já fica `true` DESDE que o 2º dado começa a cair
+   * (não só quando termina), pra `RollOverlay` esconder o `DadoVisual`
+   * CSS dele e mostrar "Rolando..." em vez de um dado 2D duplicado por
+   * cima do físico. Correção de 2026-09 (pedido do Osmar: padronizar
+   * "Rolando..." pra toda rolagem que usa o motor 3D de verdade). */
   dado2Motor3D?: boolean;
   /** Objeto BRUTO devolvido pelo motor 3D pro d20 simples atual
    * (`concluirPlano` em `rolarD20`) — só existe quando `motor3D` é
@@ -801,12 +800,14 @@ export function RollProvider({ children }: { children: ReactNode }) {
       if (typeof estado.valorDado !== 'number' || estado.lados === undefined) return;
       const lados = estado.lados;
       const resultadoBruto = usar3D ? estado.resultadoBrutoDados : undefined;
-      setEstado((prev) => (prev ? { ...prev, valorDado: '🎲', rerollEscolhidoUsado: true } : prev));
+      setEstado((prev) =>
+        prev ? { ...prev, valorDado: '🎲', rerollEscolhidoUsado: true, fase: resultadoBruto ? 'rolando' : prev.fase } : prev,
+      );
 
       function concluirUnico(novoValor: number, novoResultadoBruto?: DiceBoxResultado) {
         setEstado((prev) =>
           prev
-            ? { ...prev, valorDado: novoValor, total: novoValor + (prev.mod ?? 0), resultadoBrutoDados: novoResultadoBruto }
+            ? { ...prev, fase: 'concluido', valorDado: novoValor, total: novoValor + (prev.mod ?? 0), resultadoBrutoDados: novoResultadoBruto }
             : prev,
         );
       }
@@ -831,7 +832,24 @@ export function RollProvider({ children }: { children: ReactNode }) {
       // .roll()) em vez de Math.random(). Ver "Escolha PÓS-rolagem" em
       // sdd/sdd-dado-3d.md.
       const usar3D = !!estado.motor3D && dado3DAtivo;
-      setEstado((prev) => (prev ? { ...prev, dado2: '🎲', vantagem: tipo, podeEscolherVantagem: false } : prev));
+      // Enquanto o 2º dado é físico de verdade, a fase volta pra
+      // 'rolando' (mesmo texto "Rolando..." do 1º dado) e `dado2Motor3D`
+      // já fica `true` de antemão — esconde o `DadoVisual` CSS do 2º
+      // dado (que senão apareceria com "🎲" por cima do dado físico
+      // caindo atrás, duplicado). Sem 3D, mantém o comportamento de
+      // sempre (2D com o ícone girando, fase continua 'concluido').
+      setEstado((prev) =>
+        prev
+          ? {
+              ...prev,
+              dado2: '🎲',
+              vantagem: tipo,
+              podeEscolherVantagem: false,
+              fase: usar3D ? 'rolando' : prev.fase,
+              dado2Motor3D: usar3D,
+            }
+          : prev,
+      );
 
       function concluir(rolagem2: number, viaMotor3D: boolean) {
         setEstado((prev) => {
@@ -839,7 +857,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           const rolagem1 = typeof prev.valorDado === 'number' ? prev.valorDado : 0;
           const usado = prev.vantagem === 'vantagem' ? Math.max(rolagem1, rolagem2) : Math.min(rolagem1, rolagem2);
           const total = usado + (prev.mod ?? 0);
-          return { ...prev, dado2: rolagem2, total, critico: criticoDe(usado), dado2Motor3D: viaMotor3D };
+          return { ...prev, fase: 'concluido', dado2: rolagem2, total, critico: criticoDe(usado), dado2Motor3D: viaMotor3D };
         });
       }
 
@@ -905,13 +923,16 @@ export function RollProvider({ children }: { children: ReactNode }) {
     if (!estado || estado.fase !== 'concluido' || estado.tipo !== 'd20') return;
     if (estado.valorDado !== 1 || estado.dado2 || estado.sorteUsada) return;
     const resultadoBruto = estado.motor3D && dado3DAtivo ? estado.resultadoBrutoD20 : undefined;
-    setEstado((prev) => (prev ? { ...prev, valorDado: '🎲', sorteUsada: true } : prev));
+    // Fase volta pra 'rolando' (texto "Rolando...") só quando o reroll é
+    // físico de verdade — sem 3D, mantém 'concluido' com o ícone 2D
+    // girando, comportamento de sempre.
+    setEstado((prev) => (prev ? { ...prev, valorDado: '🎲', sorteUsada: true, fase: resultadoBruto ? 'rolando' : prev.fase } : prev));
 
     function concluir(novaRolagem: number, novoResultadoBruto?: DiceBoxResultado) {
       setEstado((prev) => {
         if (!prev || prev.tipo !== 'd20') return prev;
         const total = novaRolagem + (prev.mod ?? 0) + (typeof prev.bonusExtra?.valor === 'number' ? prev.bonusExtra.valor : 0);
-        return { ...prev, valorDado: novaRolagem, total, critico: criticoDe(novaRolagem), resultadoBrutoD20: novoResultadoBruto };
+        return { ...prev, fase: 'concluido', valorDado: novaRolagem, total, critico: criticoDe(novaRolagem), resultadoBrutoD20: novoResultadoBruto };
       });
     }
 
@@ -938,12 +959,14 @@ export function RollProvider({ children }: { children: ReactNode }) {
     if (estado.valorDado !== 1 || estado.lados === undefined) return;
     const lados = estado.lados;
     const resultadoBruto = estado.motor3D && dado3DAtivo ? estado.resultadoBrutoDados : undefined;
-    setEstado((prev) => (prev ? { ...prev, valorDado: '🎲', rerollSe1Usado: true } : prev));
+    setEstado((prev) =>
+      prev ? { ...prev, valorDado: '🎲', rerollSe1Usado: true, fase: resultadoBruto ? 'rolando' : prev.fase } : prev,
+    );
 
     function concluir(novaRolagem: number, novoResultadoBruto?: DiceBoxResultado) {
       setEstado((prev) =>
         prev
-          ? { ...prev, valorDado: novaRolagem, total: novaRolagem + (prev.mod ?? 0), resultadoBrutoDados: novoResultadoBruto }
+          ? { ...prev, fase: 'concluido', valorDado: novaRolagem, total: novaRolagem + (prev.mod ?? 0), resultadoBrutoDados: novoResultadoBruto }
           : prev,
       );
     }
@@ -970,13 +993,15 @@ export function RollProvider({ children }: { children: ReactNode }) {
     if (estado.dado2 || estado.inspiracaoHeroicaUsada) return;
     const resultadoBruto = estado.motor3D && dado3DAtivo ? estado.resultadoBrutoD20 : undefined;
     inspiracaoHeroicaProvider.usar();
-    setEstado((prev) => (prev ? { ...prev, valorDado: '🎲', inspiracaoHeroicaUsada: true } : prev));
+    setEstado((prev) =>
+      prev ? { ...prev, valorDado: '🎲', inspiracaoHeroicaUsada: true, fase: resultadoBruto ? 'rolando' : prev.fase } : prev,
+    );
 
     function concluir(novaRolagem: number, novoResultadoBruto?: DiceBoxResultado) {
       setEstado((prev) => {
         if (!prev || prev.tipo !== 'd20') return prev;
         const total = novaRolagem + (prev.mod ?? 0) + (typeof prev.bonusExtra?.valor === 'number' ? prev.bonusExtra.valor : 0);
-        return { ...prev, valorDado: novaRolagem, total, critico: criticoDe(novaRolagem), resultadoBrutoD20: novoResultadoBruto };
+        return { ...prev, fase: 'concluido', valorDado: novaRolagem, total, critico: criticoDe(novaRolagem), resultadoBrutoD20: novoResultadoBruto };
       });
     }
 
