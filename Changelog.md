@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1322
+
+Mochila do "🧪 Char de Teste Fixo" agora vem com 1 de cada item do
+catálogo (todas as armas, armaduras/escudos e equipamento de
+aventura/ferramentas) — dá pra abrir qualquer popup de item sem
+precisar comprar nada na Loja primeiro. A Carga aparece acima do
+máximo de propósito (carregando tudo de uma vez). Com isso, o foco do
+Char de Teste Fixo fecha — próximo foco: Talentos.
+
 ## v202609_1141
 
 O "🧪 Char de Teste Fixo" agora nasce direto no nível 20 — Mago 17

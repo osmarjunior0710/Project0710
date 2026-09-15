@@ -733,6 +733,57 @@ sem passar pela Lista nem pelo wizard antes.
 
 **Data/origem:** 2026-09.
 
+## Char de Teste Fixo — sempre o mesmo personagem, pra validar cenário específico sem depender de sorteio
+
+**O que é:** botão "🧪 Char de Teste Fixo" (Lista de Personagens),
+separado do "🎲 Personagem de Teste" aleatório — recria sempre o MESMO
+personagem (Mago 17/Necromante multiclasse com Bardo 3/Colégio do
+Conhecimento, nível 20, atributos extremos INT 20/FOR 8), escolhido à
+mão pra cobrir de propósito: ataque de magia que escala por nível
+(truque), salvaguarda com Upcast, magia sem ataque/salvaguarda, cura de
+verdade, Multiclasse, e todo o catálogo de equipamento na Mochila.
+
+**Por que existe:** o gerador aleatório (`core/geradorPersonagemTeste.ts`)
+já tinha travado validação Playwright várias vezes na mesma sessão
+(B7 Entrega 4, B8) por não dar pra mirar numa magia/cenário específico
+— cada tentativa gerava um personagem diferente, às vezes sem nenhuma
+magia do tipo que precisava testar.
+
+**Padrão: personagem PARCIALMENTE congelado, não 100% como o Demo.**
+Diferente do Personagem de Demonstração (acima, 100% congelado —
+tudo, incluindo Mochila, é literal fixo), o Char de Teste Fixo separa
+2 partes:
+- **Identidade fixa de verdade** (`data/personagemTesteFixo.ts`):
+  classes/níveis/subclasses, atributos, magias conhecidas/preparadas,
+  talentos — tudo que faz sentido ficar estável entre uma sessão de
+  teste e outra.
+- **Catálogo de equipamento, calculado na hora** (`core/
+  personagemTesteFixo.ts`'s `itensCatalogoCompleto()`) — em vez de
+  congelar a lista de ~150 itens como literal (ficaria desatualizada
+  toda vez que a planilha ganhar item novo), monta `selecao.itens` na
+  hora a partir de `armas`/`armaduras`/`equipamentoAventura`/
+  `gruposFerramenta` de verdade, 1 de cada. **Padrão pra lembrar:**
+  quando um dado de teste precisa refletir "o catálogo INTEIRO" (não
+  uma amostra fixa), calcule a partir do catálogo real em vez de
+  congelar uma cópia — o catálogo muda mais rápido que o personagem de
+  teste deveria precisar de manutenção.
+- Efeito colateral aceito: a Carga sempre aparece acima da capacidade
+  máxima (carrega 1 de cada item do jogo) — esperado, não é bug.
+
+**Antes de prometer uma classe pra Multiclasse num personagem de
+teste, confirme que ela EXISTE no app.** A proposta original era Mago
++ Clérigo (pra cobrir cura) — só na hora de montar a Entrega 2 que
+apareceu que Clérigo não está implementado (só Guerreiro/Bardo/Bruxo/
+Mago/Bárbaro existem, e só essas 4 primeiras têm entrada de
+multiclasse mapeada em `proficienciasEntradaMulticlasse.ts`). Trocado
+por Bardo (já cobre cura via Curar Ferimentos/Palavra Curativa).
+Vale como lembrete geral: `data/rulesets/dnd2024/classes.ts` é a
+fonte de verdade de "quais classes existem", não a lista completa das
+12 do livro — sempre confira antes de propor algo que dependa de uma
+classe específica ainda não confirmada como implementada.
+
+**Data/origem:** 2026-09.
+
 ## Passo condicional no wizard + escolha livre de proficiência (Talento de Origem)
 
 **Padrão pra passo do wizard que só existe pra algumas escolhas

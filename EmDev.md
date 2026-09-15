@@ -704,9 +704,27 @@ foco fechar.
       "Usar" no Raio de Fogo dá `1d20 + 11` (INT+5 + Prof+6, bate com
       nível 20). Verificado: `tsc -b`/`npm test` (563)/`npm run build`
       limpos.
-- [ ] **Entrega 3** — Mochila populada com o catálogo completo de
-      arma/armadura/equipamento (não só o inicial da classe), pra abrir
-      qualquer popup sem precisar comprar nada na mão.
+- [x] **Entrega 3 — Mochila com o catálogo completo**: diferente das
+      Entregas 1/2 (dado 100% congelado), a lista de itens é CALCULADA
+      em `core/personagemTesteFixo.ts` (`itensCatalogoCompleto()`, 1 de
+      cada arma/armadura/item de `armas.ts`/`armaduras.ts`/
+      `equipamentoAventura.ts`/`ferramentas.ts`) em vez de congelada em
+      `data/` — assim nunca fica desatualizada quando a planilha ganhar
+      item novo, ao custo de este personagem não ser 100% estático
+      (ver DECISOES-DESIGN.md). `recriarPersonagemTesteFixo()` monta
+      `selecao.itens` na hora, por cima do congelado. Resultado: 3
+      grupos na Mochila (Armas 40, Armadura 13 — inclui Escudo — e
+      Outros 207 — Equipamento de Aventura + Ferramentas/Instrumentos).
+      **Carga fica sempre acima da capacidade máxima** (~719 kg vs. 56
+      kg) — esperado e aceito: o personagem carrega 1 de cada item do
+      catálogo de propósito, nenhum jogador de verdade faria isso.
+      Verificado: `tsc -b`/`npm test` (563)/`npm run build` limpos +
+      Playwright (Mochila abre com os 3 grupos, populando a contagem
+      certa, sem erro de console).
+
+Foco fechado — as 3 entregas do Char de Teste Fixo (nível 1 → nível 20
+multiclasse → Mochila completa) estão prontas. Aprendizados registrados
+em `DECISOES-WIZARD.md`. Volta o foco de Talentos — Fase 4 (abaixo).
 
 ## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade) — PAUSADO, retomar depois do Personagem de Teste Fixo
 
