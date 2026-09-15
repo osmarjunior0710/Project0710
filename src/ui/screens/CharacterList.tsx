@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { armazenamentoPersonagens } from '../../core/armazenamentoPersonagens';
 import { ID_PERSONAGEM_DEMO } from '../../core/personagemDemo';
+import { recriarPersonagemTesteFixo, ID_PERSONAGEM_TESTE_FIXO } from '../../core/personagemTesteFixo';
 import { calcularPvMaximoNivel1 } from '../../core/calculoPersonagem';
 import { classesDoPersonagem } from '../../core/multiclasse';
 import { classes } from '../../data/rulesets/dnd2024/classes';
@@ -81,6 +82,17 @@ export default function CharacterList() {
 
       <div className="btn" style={{ marginBottom: 10 }} onClick={() => setModalTesteAberto(true)}>
         🎲 Personagem de Teste — gera uma ficha completa na hora, pra testar rápido
+      </div>
+
+      <div
+        className="btn"
+        style={{ marginBottom: 10 }}
+        onClick={() => {
+          recriarPersonagemTesteFixo();
+          navigate(`/ficha/${ID_PERSONAGEM_TESTE_FIXO}`);
+        }}
+      >
+        🧪 Char de Teste Fixo — sempre o mesmo personagem, pra testar sem depender de sorteio
       </div>
 
       {personagens.length === 0 && (

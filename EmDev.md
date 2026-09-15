@@ -15,7 +15,7 @@
 
 ---
 
-## Foco ATIVO: Dado 3D — Fase B (motor 3D vira o padrão de rolagem oficial)
+## Foco: Dado 3D — Fase B (motor 3D vira o padrão de rolagem oficial) — COMPLETO
 
 Ver `sdd/sdd-dado-3d.md` pra mecânica completa (mapeamento de cada
 situação de rolagem — Vantagem/Desvantagem, reroll, grupos mistos,
@@ -633,7 +633,53 @@ juntas nesta mesma entrega (não só cura).
       — vale teste manual no celular com uma magia de dano/cura E os
       3 popups de CD.
 
-## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade) — PAUSADO, retomar depois do Dado 3D
+## Foco ATIVO: Personagem de Teste Fixo — sempre o mesmo char, pra parar de depender do gerador aleatório
+
+Pedido do Osmar: montar na mão um personagem de teste FIXO (não
+sorteado), salvo sempre igual, cobrindo atributos extremos e as
+situações de regra mais usadas em teste — pra não depender do gerador
+aleatório (`core/geradorPersonagemTeste.ts`) toda vez que precisa forçar
+um cenário específico (já travou validação Playwright várias vezes,
+ex.: B7 Entrega 4, B8). Decisões aprovadas pelo Osmar: soma um botão
+novo (não substitui o aleatório), 1 personagem só (Mago multiclasse com
+Clérigo — cobre ataque/salvaguarda/cura/upcast/truque escalável +
+Multiclasse), nível 20. Talentos (abaixo) continua pausado até este
+foco fechar.
+
+- [x] **Entrega 1 — nível 1, Mago só**: `data/personagemTesteFixo.ts`
+      (`PersonagemSalvo` congelado, mesmo padrão de
+      `data/personagemDemo.ts` — escolhas feitas à mão, não sorteadas,
+      não gerado em tempo de execução) + `core/personagemTesteFixo.ts`
+      (`recriarPersonagemTesteFixo()`, sempre sobrescreve do zero —
+      diferente do Demo, que só cria na 1ª visita). Botão "🧪 Char de
+      Teste Fixo" novo em `CharacterList.tsx`, ao lado do "🎲
+      Personagem de Teste" aleatório. Perfil: Anão/Mago/Origem Sábio,
+      atributos extremos (INT 20, FOR/CAR 8), 3 truques (Raio de Fogo —
+      ataque que escala por nível — + 2 utilidade), Livro de Magias (6)
+      e Magias Preparadas (4) incluindo Mãos Flamejantes (salvaguarda +
+      Upcast dado-por-círculo) e Mísseis Mágicos (sem ataque/
+      salvaguarda, Upcast alvo-por-círculo) — cobre os 3 formatos de
+      escalonamento testados no B8. Origem Sábio também exercita
+      Iniciado em Magia (2 truques + 1 magia de graça). Verificado:
+      `tsc -b`/`npm test` (563)/`npm run build` limpos + Playwright
+      (390px: botão cria e abre a ficha → atributos/PV batem com o
+      congelado → aba Magias mostra truques/preparadas/Iniciado em
+      Magia certos → "Usar" no Raio de Fogo dispara "Ataque de Magia —
+      Raio de Fogo", `1d20 + 7 ⓘ`). **Rolagem até o fim (Rolar Dano)
+      não confirmada via Playwright** — o dado físico 3D não assenta de
+      forma confiável em Chromium headless (mesma limitação já
+      documentada nas Entregas do B7/B8); a lógica por trás é a mesma
+      já validada manualmente, risco baixo.
+- [ ] **Entrega 2** — Level Ups reais (não sorteados) até nível 17
+      Mago, depois multiclassa 3 níveis de Clérigo pelo mesmo fluxo de
+      escolha de classe que um jogador usaria (`EscolherClasseLevelUp.tsx`),
+      adicionando magias de cura (Curar Ferimentos/Palavra Curativa) e
+      talentos gerais.
+- [ ] **Entrega 3** — Mochila populada com o catálogo completo de
+      arma/armadura/equipamento (não só o inicial da classe), pra abrir
+      qualquer popup sem precisar comprar nada na mão.
+
+## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade) — PAUSADO, retomar depois do Personagem de Teste Fixo
 
 77 talentos ainda sem efeito mecânico, em 5 categorias (Geral 42,
 Talento Selvagem 10, Dádiva Épica 12, Estilo de Luta 7, Origem 6).

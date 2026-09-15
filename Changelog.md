@@ -15,6 +15,14 @@ o efeito (empurrão, redução de Deslocamento, e mais 2 opções a partir
 do nível 13; no 17 o dado extra dobra e dá pra escolher 2 efeitos de
 uma vez). 1x por turno.
 
+## v202609_0946
+
+Novo botão "🧪 Char de Teste Fixo" na Lista de Personagens — cria (ou
+recria do zero) sempre o MESMO personagem de teste (Mago nível 1,
+atributos extremos, magias variadas), em vez de sortear um novo toda
+vez. Fica ao lado do "🎲 Personagem de Teste" de sempre, que continua
+igual.
+
 ## v202609_0053
 
 Bárbaro — Instintos Primitivos (nível 7) chegou: rolagem de Iniciativa
