@@ -13,6 +13,13 @@ atributos extremos, magias variadas), em vez de sortear um novo toda
 vez. Fica ao lado do "🎲 Personagem de Teste" de sempre, que continua
 igual.
 
+## v202609_0053
+
+Bárbaro — Instintos Primitivos (nível 7) chegou: rolagem de Iniciativa
+agora tem Vantagem automática. Bote Instintivo (mesmo nível) fica só
+textual na aba Perfil, já que o app não rastreia Deslocamento do
+personagem.
+
 ## v202609_1941
 
 CD de magia, CD do Ataque de Sopro (Draconato) e CD de "Lançar no

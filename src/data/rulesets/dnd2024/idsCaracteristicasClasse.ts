@@ -35,6 +35,9 @@ export const ID_CARACTERISTICA_CLASSE = {
    * Percepção/Sobrevivência enquanto a Fúria estiver ativa (ver
    * `calcularPericias`, parâmetro `substituicaoForca`). */
   conhecimentoPrimordial: 'Conhecimento Primordial',
+  /** Bárbaro nível 7 — Vantagem em jogadas de Iniciativa. Ver
+   * `CombatTab.tsx` (`alternarIniciativa`). */
+  instintosPrimitivos: 'Instintos Primitivos',
 } as const;
 
 export type IdCaracteristicaClasse = keyof typeof ID_CARACTERISTICA_CLASSE;
