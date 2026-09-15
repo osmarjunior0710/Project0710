@@ -278,6 +278,11 @@ export interface PersonagemSalvo {
   /** Vigor Implacável (Orc) já disparou desde o último Descanso Longo
    * — só ele reseta. Ver `core/vigorImplacavel.ts`. */
   vigorImplacavelGasto?: boolean;
+  /** Fúria Implacável (Bárbaro nível 11+) — quantas vezes já tentou a
+   * salvaguarda desde o último Descanso (Curto OU Longo, os dois
+   * resetam pra 0) — decide a CD (10 + 5×isso). Ver
+   * `core/furiaImplacavel.ts`. */
+  furiaImplacavelUsosDesdeDescanso?: number;
   /** Usos gastos de Conhecimento de Pedras (Anão) desde o último
    * Descanso Longo — só ele reseta. Máximo = Bônus de Proficiência. */
   conhecimentoDePedrasGasto?: number;

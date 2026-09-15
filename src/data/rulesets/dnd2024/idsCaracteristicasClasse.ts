@@ -48,6 +48,10 @@ export const ID_CARACTERISTICA_CLASSE = {
    * Ação) pra distinguir os 2 patamares, nunca `caracteristicaDesbloqueada`
    * sozinho. */
   golpeBrutalFortalecido: 'Golpe Brutal Fortalecido',
+  /** Bárbaro nível 11 — ao cair a 0 PV com a Fúria ativa, pode tentar
+   * uma salvaguarda de Constituição (CD escalando) pra voltar com PV.
+   * Ver `core/furiaImplacavel.ts`, `FichaShell.tsx` (`alterarPv`). */
+  furiaImplacavel: 'Fúria Implacável',
 } as const;
 
 export type IdCaracteristicaClasse = keyof typeof ID_CARACTERISTICA_CLASSE;
