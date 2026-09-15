@@ -11,9 +11,11 @@ interface TickPipsProps {
   /** `'especial'` = pip roxo/lavanda em vez do azul padrão, pra
    * recurso que NÃO é o Espaço de Magia normal (ex.: pool
    * compartilhado de 1 uso do Ritual Rápido) — evita confundir com
-   * contador de recurso base na mesma tela. Cinza de "já gasto"
-   * continua igual nos 2 casos. */
-  variante?: 'padrao' | 'especial';
+   * contador de recurso base na mesma tela. `'vermelho'` = pip
+   * vermelho (`--danger`), pra recurso com tema de cor própria
+   * vermelho já estabelecido em outra parte da tela (ex.: Fúria, card
+   * fixo do Combate). Cinza de "já gasto" continua igual nos 3 casos. */
+  variante?: 'padrao' | 'especial' | 'vermelho';
 }
 
 /** Ticks/pips padronizados pra qualquer recurso "N usos, alguns já
@@ -31,7 +33,9 @@ export default function TickPips({ total, usados, tamanho = 'sm', variante = 'pa
         return (
           <div
             key={i}
-            className={`${styles.pip} ${styles[tamanho]} ${gasto ? styles.pipUsado : variante === 'especial' ? styles.pipEspecial : ''}`}
+            className={`${styles.pip} ${styles[tamanho]} ${
+              gasto ? styles.pipUsado : variante === 'especial' ? styles.pipEspecial : variante === 'vermelho' ? styles.pipVermelho : ''
+            }`}
           />
         );
       })}

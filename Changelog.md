@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1959
+
+O painel Ação Bônus agora mostra o contador de usos de Fúria (pips
+vermelhos) acima do toggle de ativar, mesmo padrão que Salto da Nuvem/
+Fôlego já tinham.
+
 ## v202609_1917
 
 Bárbaro — Fúria Persistente (nível 15) chegou. Depois de gastar pelo

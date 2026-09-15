@@ -27,3 +27,7 @@
 .pipEspecial {
   background: var(--accent-especial);
 }
+
+.pipVermelho {
+  background: var(--danger);
+}

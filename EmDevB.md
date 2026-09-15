@@ -438,6 +438,21 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       some; gasta mais 1 uso → botão NÃO aparece de novo (já usado);
       Descanso Longo → usos voltam a 5/5 E o botão volta a ficar
       disponível na próxima vez que gastar um uso.
+- [x] **B4.7.1 — Contador de usos de Fúria no painel Bônus (pedido do
+      Osmar, testando no celular).** O painel Bônus mostrava a Fúria só
+      como toggle liga/desliga, sem contador visual de usos restantes
+      (só o card fixo do Combate tinha isso, em texto) — outros
+      recursos do painel (Salto da Nuvem, Fôlego, etc.) já têm uma
+      linha de pips acima do toggle. Reaproveitado o mesmo padrão:
+      linha "Fúria: 🔴🔴🔴🔴🔴🔴 N/M disponíveis" acima do toggle,
+      usando `TickPips`. Novo variante `vermelho` em `TickPips.tsx`
+      (`--danger`) — generalizado, não amarrado só à Fúria, pra
+      qualquer recurso futuro com tema vermelho já estabelecido em
+      outra parte da tela.
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (572)/`npm run build` limpos + Playwright: painel Bônus mostra
+      "6/6 disponíveis" com 6 pips vermelhos cheios; depois de gastar 1
+      uso, "5/6 disponíveis" com o último pip cinza.
 - [ ] **B4.8 — Força Indomável (nível 18):** reroll de teste OU
       salvaguarda de Força usando o valor cheio, se o resultado for
       menor.
