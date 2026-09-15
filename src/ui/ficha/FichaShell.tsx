@@ -75,6 +75,7 @@ import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria } from '../.
 import { type MagiaGratisDeInvocacao } from '../../core/invocacoesMagiaGratis';
 import { aplicarAlteracaoPv, ganharPvTemporario } from '../../core/pvTemporario';
 import { deveAplicarVigorImplacavel } from '../../core/vigorImplacavel';
+import { deveOferecerFuriaImplacavel, cdFuriaImplacavel, pvFuriaImplacavel } from '../../core/furiaImplacavel';
 import { tipoDanoSubescolha, opcoesEscolhaReutilizavel } from '../../core/especieSubescolha';
 import { dadosAtaqueDeSopro, explicarCdAtaqueDeSopro } from '../../core/ataqueDeSopro';
 import { valorBencaoDoTenebroso } from '../../core/bencaoDoTenebroso';
@@ -114,6 +115,7 @@ import CombatTab, { type EstadoRecurso, type RecursoTurno } from './tabs/CombatT
 import PetsTab from './tabs/PetsTab';
 import AjustarPetShell from './pets/AjustarPetShell';
 import ColheitaMacabraModal from '../components/ColheitaMacabraModal';
+import FuriaImplacavelModal from '../components/FuriaImplacavelModal';
 import Dice3dFab from './dice3d/Dice3dFab';
 import LevelUpShell, { type PersonagemNivel } from './levelup/LevelUpShell';
 import CompletarMagiasShell from './levelup/CompletarMagiasShell';
@@ -274,6 +276,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [talentosFavoritos, setTalentosFavoritos] = useState<string[]>(personagemSalvo.talentosFavoritosAtual ?? []);
   const [folegoGasto, setFolegoGasto] = useState(personagemSalvo.folegoGasto ?? 0);
   const [vigorImplacavelGasto, setVigorImplacavelGasto] = useState(personagemSalvo.vigorImplacavelGasto ?? false);
+  const [furiaImplacavelUsos, setFuriaImplacavelUsos] = useState(personagemSalvo.furiaImplacavelUsosDesdeDescanso ?? 0);
+  const [furiaImplacavelPendente, setFuriaImplacavelPendente] = useState(false);
   const [conhecimentoDePedrasGasto, setConhecimentoDePedrasGasto] = useState(personagemSalvo.conhecimentoDePedrasGasto ?? 0);
   const [picoDeAdrenalinaGasto, setPicoDeAdrenalinaGasto] = useState(personagemSalvo.picoDeAdrenalinaGasto ?? 0);
   const [ataqueDeSoproGasto, setAtaqueDeSoproGasto] = useState(personagemSalvo.ataqueDeSoproGasto ?? 0);
@@ -661,6 +665,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const golpeBrutalDados = golpeBrutalFortalecidoCount >= 2 ? 2 : 1;
   const golpeBrutalEfeitosNivel13 = golpeBrutalFortalecidoCount >= 1;
   const golpeBrutalEscolhas = golpeBrutalFortalecidoCount >= 2 ? 2 : 1;
+  const temFuriaImplacavel = classe
+    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.furiaImplacavel, personagem.nivel) !== null
+    : false;
   const sorteDoTenebrosoMaximo = sorteDoTenebrosoDisponivel ? usosSorteDoTenebroso(carMod) : 0;
   const sorteDoTenebrosoRestantes = Math.max(0, sorteDoTenebrosoMaximo - sorteDoTenebrosoGasto);
   const equipadoAtual = resumoEquipado(itensMochila);
@@ -734,6 +741,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     maestriaArmaAtual: maestriaArma,
     folegoGasto,
     vigorImplacavelGasto,
+    furiaImplacavelUsosDesdeDescanso: furiaImplacavelUsos,
     conhecimentoDePedrasGasto,
     picoDeAdrenalinaGasto,
     ataqueDeSoproGasto,
@@ -818,6 +826,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       maestriaArma,
       folegoGasto,
       vigorImplacavelGasto,
+      furiaImplacavelUsos,
       conhecimentoDePedrasGasto,
       picoDeAdrenalinaGasto,
       ataqueDeSoproGasto,
@@ -883,6 +892,23 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
     setPvAtual(resultado.pvAtual);
     setPvTemporario(resultado.pvTemporario);
+    if (temFuriaImplacavel && deveOferecerFuriaImplacavel(pvAtual, resultado.pvAtual, furiaAtiva)) {
+      setFuriaImplacavelPendente(true);
+    }
+  }
+
+  /** Fúria Implacável (Bárbaro nível 11+) — "Passou" aplica o PV
+   * cheio (2× nível NA CLASSE Bárbaro) e soma 1 tentativa (escalando a
+   * CD da próxima vez, ver `cdFuriaImplacavel`); "Dispensar" só fecha
+   * o modal, PV continua em 0. Nenhum dos dois some/gasta um "uso" no
+   * sentido de recurso — a característica pode ser oferecida de novo
+   * a cada queda a 0 PV, só a CD sobe. */
+  function confirmarFuriaImplacavel(passou: boolean) {
+    if (passou) {
+      setPvAtual(pvFuriaImplacavel(personagem.nivel));
+      setFuriaImplacavelUsos((v) => v + 1);
+    }
+    setFuriaImplacavelPendente(false);
   }
 
   // G3.2 (foco de saúde do projeto, ver EmDevB.md): `recursoContado`/
@@ -1065,6 +1091,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setEspacosGastosPorClasseECirculo({});
     setFolegoGasto(0);
     setVigorImplacavelGasto(false);
+    setFuriaImplacavelUsos(0);
     setConhecimentoDePedrasGasto(0);
     setPicoDeAdrenalinaGasto(0);
     setAtaqueDeSoproGasto(0);
@@ -1130,6 +1157,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setResistenciaInferaGasto(false);
     setPicoDeAdrenalinaGasto(0);
     setFuriaGasto((v) => Math.max(0, v - 1));
+    setFuriaImplacavelUsos(0);
     setRestStatus(
       `Descanso Curto: ${algumCirculoRecuperou ? 'Espaços de Magia recuperados, ' : ''}${fonteDeInspiracao ? 'Inspiração de Bardo recuperada, ' : ''}1 uso de Recuperar Fôlego devolvido, Pico de Adrenalina recuperado, 1 uso de Fúria devolvido. PV não recupera automaticamente por descanso curto.`,
     );
@@ -1756,6 +1784,15 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             setColheitaMacabraPendente(null);
           }}
           onFechar={() => setColheitaMacabraPendente(null)}
+        />
+      )}
+      {/* Mesmo motivo do Colheita Macabra acima (não "espiar" atrás do
+          RollOverlay da própria rolagem de dano que zerou o PV). */}
+      {furiaImplacavelPendente && rollEmAndamento === null && (
+        <FuriaImplacavelModal
+          cd={cdFuriaImplacavel(furiaImplacavelUsos)}
+          onPassou={() => confirmarFuriaImplacavel(true)}
+          onDispensar={() => confirmarFuriaImplacavel(false)}
         />
       )}
       {xpPopupAberto && (

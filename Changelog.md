@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1728
+
+Bárbaro — Fúria Implacável (nível 11) chegou. Se o PV cair a 0 com a
+Fúria ativa, aparece um aviso pra rolar a Salvaguarda de Constituição
+(aba Atributos) contra uma CD — se passar, o PV volta pro dobro do seu
+nível de Bárbaro. A CD sobe a cada vez que isso acontecer, e só volta
+ao normal num Descanso Curto ou Longo.
+
 ## v202609_1322
 
 Mochila do "🧪 Char de Teste Fixo" agora vem com 1 de cada item do

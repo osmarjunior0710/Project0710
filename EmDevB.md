@@ -374,9 +374,39 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       jogada, linha "Golpe Brutal" só aparece a partir da 2ª, feedback
       de renúncia correto, 2 botões de dano, efeito(s) escolhido(s)
       aparecem certinhos no feedback final.
-- [ ] **B4.6 — Fúria Implacável (nível 11):** salvaguarda ao cair a 0
-      PV com Fúria ativa — precisa de um gatilho "chegou a 0 PV" que
-      hoje não existe.
+- [x] **B4.6 — Fúria Implacável (nível 11).** O gatilho "chegou a 0
+      PV" já existia — achado ao investigar: Vigor Implacável (Orc)
+      resolve exatamente isso dentro de `alterarPv` (`FichaShell.tsx`),
+      então reaproveitado o mesmo formato em vez do bloqueio que eu
+      esperava. Novo `core/furiaImplacavel.ts`:
+      `deveOferecerFuriaImplacavel` (mesma transição PV>0→PV=0 de
+      `deveAplicarVigorImplacavel`, mas com `furiaAtiva` em vez de
+      "já gasto" — pode disparar de novo a cada queda, só a CD escala),
+      `cdFuriaImplacavel` (10 + 5×tentativas desde o último descanso)
+      e `pvFuriaImplacavel` (2× nível NA CLASSE Bárbaro) — 9 testes
+      novos. Diferente de Vigor Implacável (aplica sozinho), Fúria
+      Implacável é OPCIONAL e envolve uma rolagem — o app nunca
+      compara contra CD sozinho (mesmo princípio de "o jogador decide
+      se acertou"), então novo `FuriaImplacavelModal.tsx` (mesmo
+      padrão visual/estrutural de `ColheitaMacabraModal`, vive no
+      `FichaShell` pra sobreviver troca de aba) mostra a CD e pede pra
+      rolar a Salvaguarda de Constituição (a mesma linha que já existe
+      na aba Atributos) — 2 botões: "✅ Passou" (PV vira o dobro do
+      nível, soma 1 tentativa) e "Dispensar" (nada muda). Novo
+      contador persistido `furiaImplacavelUsosDesdeDescanso`, resetado
+      no Descanso Curto E Longo (os 2, regra real). Novo ID
+      `ID_CARACTERISTICA_CLASSE.furiaImplacavel`.
+      **Achado no caminho (pergunta do Osmar):** hoje só a aba Combate
+      tem controles de alterar o PV do personagem — o gatilho vive em
+      `alterarPv` (não dentro do componente da aba) de propósito, pra
+      não precisar duplicar a lógica quando outras abas ganharem
+      controle de PV no futuro (Osmar confirmou que tem planos nesse
+      sentido).
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (572)/`npm run build` limpos + Playwright num Bárbaro nível 11:
+      Fúria ativa + PV a 0 → modal aparece com "CD 10" → "Passou" → PV
+      vira 22 (2×11) → PV a 0 de novo → modal mostra "CD 15" (escalou)
+      → "Dispensar" → PV fica em 0, nada muda.
 - [ ] **B4.7 — Fúria Persistente (nível 15):** "recupera todas as
       Fúrias ao rolar Iniciativa" (a duração de 10 min já é o padrão
       desde o B3, nada novo aí).
