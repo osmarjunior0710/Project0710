@@ -439,23 +439,45 @@ wizard (desconto) ou se o Osmar sentir falta do corte por preço
 (filtro adicional, fácil de adicionar depois — só falta calcular o
 teto de ouro por Origem+Classe).
 
-**O que falta pra polir (não travou nenhuma das entregas, mas ficou
-pendente):**
-- PV atual/nível não são salvos de volta no armazenamento quando você
-  sobe de nível ou toma dano na Ficha — só muda na sessão aberta. Só
-  importa de verdade quando a ficha for algo que se volta a abrir depois
-  de fechar o navegador esperando ver o estado exato de antes.
-- **Estilo de Luta é só informativo, não entra nos cálculos** — o chip
-  na aba Combat mostra o texto do efeito, mas `calcularCA` (CA) e
-  `calcularModAtaque` (Loja, Mod. de Ataque) não somam o bônus
-  mecânico de nenhum dos 10 estilos ainda. Achado do Osmar ao perguntar
-  se o efeito era considerado na Ficha — não era. Os que afetam número
-  calculado hoje na Ficha: "Defensivo" (+1 CA com armadura equipada) e
-  "Arquearia" (+2 no ataque à distância). Os outros 8 (Duelismo, Combate
-  com Armas Grandes, etc.) afetam dano ou têm mecânica própria de
-  combate (Interceptação, Protetivo) — esses só fazem sentido quando o
-  motor de dano/ataque de verdade existir na aba Combat (ainda não
-  existe, é fixture).
+## Talentos — validação de UI pendente pros 23 já implementados
+
+**O que é:** revisão de código (2026-09, foco Talentos — Fase 4) dos
+23 talentos/Estilos de Luta que já têm `efeitoMecanico`/mecanismo
+próprio (Alerta, Sortudo, Valentão de Taverna, Vigoroso, Habilidoso,
+Iniciado em Magia, Analítico, Conjurador Ritualista, Especialista em
+Armaduras Leve/Média/Pesada, Especialista em Perícia, Mente Aguçada,
+Mestre em Armaduras Médias, Perfurador, Telecinético, Telepático,
+Tocado pela Sombra/Fadas, Treinamento com Armas Marciais, Arquearia,
+Defensivo, Duelismo) não achou nada quebrado na leitura do código —
+Multiclasse (`classesExtrasNomes`/nível total) e a quebra do popup de
+rolagem (B7/B8) continuam encaixando certo em todos eles.
+
+**Por que ainda fica aqui:** a revisão foi só de código, sem clicar na
+tela — nenhum dos 23 é testável com o Char de Teste Fixo atual (Mago/
+Bardo), que não tem talento de arma/armadura nenhum. Falta a validação
+visual de verdade.
+
+**O que falta pra resolver:** quando existir um personagem de teste
+marcial (Guerreiro/Bárbaro — ver Backlog.md se/quando o Osmar quiser
+essa 2ª ferramenta), validar cada um dos 23 na tela de verdade, um a
+um, e só então mover pra `DECISOES-CLASSES.md` como confirmado.
+
+## Estilo de Luta — Interceptação/Protetivo precisam de consciência multi-combatente
+
+**O que é:** nota antiga (2026-08) dizia que os 2 esperavam "o motor
+de dano/ataque de verdade existir" — esse motor já existe hoje
+(Combat tem ataque/dano reais desde então), a nota tava desatualizada,
+corrigida aqui. O bloqueio de verdade é outro: os dois dependem de
+saber quando OUTRA criatura (não o próprio personagem) é atacada
+(Interceptação, pra interceptar o golpe) ou precisa de proteção
+(Protetivo, pra impor Desvantagem no atacante) — a Ficha é individual,
+sem noção de outros combatentes/mapa, mesma trava já registrada em
+Backlog.md pro talento Sentinela (mesmíssimo tipo de gatilho).
+
+**O que falta pra resolver:** só faz sentido quando existir algum
+conceito de "outros personagens/inimigos na cena" — mesmo motivo já
+bloqueando Sentinela, Líder Inspirador e Inspiração Heroica pra
+terceiros.
 ## Itens "sem peso cadastrado" na Mochila/Loja — auditoria completa (2026-08)
 
 **O que é:** o Osmar notou "Balde de Ferro" sem peso na Mochila e pediu
