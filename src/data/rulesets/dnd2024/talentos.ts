@@ -169,7 +169,19 @@ export type EfeitoMecanicoTalento =
    * parte do talento — "+1 dado extra no crítico" fica de fora
    * (depende de dano em crítico geral, que o app ainda não modela —
    * ver Backlog.md). */
-  | { tipo: 'reroll-um-dado-de-dano'; tipoDano: string };
+  | { tipo: 'reroll-um-dado-de-dano'; tipoDano: string }
+  /** Resiliente: +1 num atributo à escolha (dentre os que o personagem
+   * AINDA não é proficiente em Salvaguarda) + ganha proficiência de
+   * Salvaguarda nesse mesmo atributo. Diferente de `ConcedeAsiTalento`
+   * (que também soma +1 mas nunca dá proficiência de salvaguarda) —
+   * este talento não usa `concedeAsi` (fica `'nenhum'`), o próprio
+   * efeito já é o "+1". A escolha de QUAL atributo fica em
+   * `PersonagemSalvo.escolhaAtributoTalentoGeral` (chave = id do
+   * talento, mesmo padrão de `escolhaMagiaTalentoGeral`), preenchida
+   * por uma sub-tela nova no passo "Talento" do Level Up. Ver
+   * `core/periciaTalentoGeral.ts` (`opcoesAtributoResiliente`) e
+   * `core/calculoPersonagem.ts` (`calcularSalvaguardas`). */
+  | { tipo: 'atributo-e-salvaguarda-escolhidos' };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -718,6 +730,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Escolha atributo sem proficiência em salvaguarda" },
     concedeAsi: { tipo: 'nenhum' },
+    efeitoMecanico: { tipo: 'atributo-e-salvaguarda-escolhidos' },
     beneficios: "+1 no atributo escolhido (sem proficiência de salvaguarda ainda) + ganha proficiência em salvaguarda desse atributo.",
     pagina: 207,
     fonte: "PHB 2024",

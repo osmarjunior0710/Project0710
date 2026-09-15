@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1933
+
+Talento "Resiliente" chegou: ao escolher esse talento no Level Up
+(nível 4/8/12/16/19), um passo novo pede pra escolher 1 atributo entre
+os que você ainda não tem Salvaguarda proficiente — ele ganha +1 e vira
+Salvaguarda proficiente na hora.
+
 ## v202609_1731
 
 Corrigido: escolher Vantagem/Desvantagem DEPOIS de ver o resultado do
