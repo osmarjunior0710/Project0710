@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1847
+
+Bárbaro — Fúria Implacável (nível 11) ficou mais direta: em vez de
+mandar rolar a Salvaguarda de Constituição na aba Atributos, agora o
+próprio aviso já mostra a CD e a fórmula do dado e tem um botão "🎲
+Rolar Salvaguarda" — o app rola e já resolve sozinho. Passou, aparece
+"Curar N PV" (toque pra aplicar); falhou, aparece "Inconsciente".
+
 ## v202609_1731
 
 Corrigido: escolher Vantagem/Desvantagem DEPOIS de ver o resultado do
