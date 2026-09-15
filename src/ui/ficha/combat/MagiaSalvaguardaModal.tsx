@@ -1,10 +1,14 @@
 import styles from '../../components/TrocarArmaMaestria.module.css';
 import type { CalculoDanoMagia } from '../../../core/magiaDano';
+import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
+import InfoValor from '../../components/InfoValor';
 
 interface MagiaSalvaguardaModalProps {
   nomeMagia: string;
   atributo: string;
   cd: number | null;
+  /** Quebra da CD (B8) — `null` quando `cd` também é `null`. */
+  explicacaoCd: ExplicacaoCalculo | null;
   textoSucesso: string | null;
   textoFalha: string | null;
   dano: CalculoDanoMagia | null;
@@ -36,6 +40,7 @@ export default function MagiaSalvaguardaModal({
   nomeMagia,
   atributo,
   cd,
+  explicacaoCd,
   textoSucesso,
   textoFalha,
   dano,
@@ -51,7 +56,9 @@ export default function MagiaSalvaguardaModal({
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
         <div className={styles.title}>{nomeMagia}</div>
         <div style={{ fontSize: 13, marginBottom: 6 }}>Alvo faz salvaguarda de {atributo}</div>
-        <div style={{ fontSize: 26, fontWeight: 'bold', marginBottom: 12 }}>CD {cd ?? '—'}</div>
+        <div style={{ fontSize: 26, fontWeight: 'bold', marginBottom: 12 }}>
+          CD {cd ?? '—'} {explicacaoCd && <InfoValor titulo={nomeMagia} explicacao={explicacaoCd} />}
+        </div>
         {textoSucesso && (
           <div style={{ fontSize: 12, color: 'var(--good)', marginBottom: 4 }}>✅ Sucesso: {textoSucesso}</div>
         )}

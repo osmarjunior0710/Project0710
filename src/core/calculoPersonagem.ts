@@ -354,13 +354,29 @@ export interface AtributoFinal {
   atributo: Atributo;
   valor: number;
   mod: number;
+  /** Só 1 linha hoje (o mod. do atributo, sem Bônus de Proficiência —
+   * teste de atributo puro nunca soma isso) — existe pro popup "ⓘ"/
+   * quebra do popup de rolagem (B7) já funcionar de graça no dia que
+   * algo passar a somar aqui (ex.: item mágico "+2 em Testes de
+   * FOR"), sem precisar mexer na tela de novo. */
+  explicacao: ExplicacaoCalculo;
 }
 
 export function calcularAtributosFinais(selection: WizardSelection): AtributoFinal[] {
   return atributosOrdem
     .map((atributo) => {
       const valor = valorFinalAtributo(selection, atributo);
-      return valor === null ? null : { atributo, valor, mod: modificador(valor) };
+      if (valor === null) return null;
+      const mod = modificador(valor);
+      return {
+        atributo,
+        valor,
+        mod,
+        explicacao: {
+          linhas: [{ label: `mod. ${atributo}`, valor: fmtMod(mod) }],
+          total: { label: `${atributo}`, valor: fmtMod(mod) },
+        },
+      };
     })
     .filter((a): a is AtributoFinal => a !== null);
 }
@@ -378,7 +394,7 @@ export interface ExplicacaoCalculo {
   total: LinhaExplicacao;
 }
 
-function fmtMod(n: number): string {
+export function fmtMod(n: number): string {
   return n >= 0 ? `+${n}` : `${n}`;
 }
 

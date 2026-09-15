@@ -14,7 +14,7 @@ describe('calcularDanoMagia', () => {
   });
 
   it('magia sem upcast, conjurada no próprio círculo (Chama Sagrada, truque, nível 1) — Dano Base sem alteração', () => {
-    expect(calcularDanoMagia(magia('chamasagrada'), 0, 1)).toEqual({
+    expect(calcularDanoMagia(magia('chamasagrada'), 0, 1)).toMatchObject({
       quantidade: 1,
       lados: 8,
       mod: 0,
@@ -24,7 +24,7 @@ describe('calcularDanoMagia', () => {
   });
 
   it('upcast "Dado por Círculo" acima do círculo base (Bola de Fogo, 3º círculo base, +1d6/círculo) — soma corretamente', () => {
-    expect(calcularDanoMagia(magia('boladefogo'), 5, 1)).toEqual({
+    expect(calcularDanoMagia(magia('boladefogo'), 5, 1)).toMatchObject({
       quantidade: 10,
       lados: 6,
       mod: 0,
@@ -34,7 +34,7 @@ describe('calcularDanoMagia', () => {
   });
 
   it('upcast "Dado por Círculo" conjurada no próprio círculo base — sem bônus (níveisAcima = 0)', () => {
-    expect(calcularDanoMagia(magia('boladefogo'), 3, 1)).toEqual({
+    expect(calcularDanoMagia(magia('boladefogo'), 3, 1)).toMatchObject({
       quantidade: 8,
       lados: 6,
       mod: 0,
@@ -53,7 +53,7 @@ describe('calcularDanoMagia', () => {
 
   it('upcast tipo "outro", conjurada no próprio círculo base — Dano Base normal, sem aviso', () => {
     const resultado = calcularDanoMagia(magia('danacao'), 1, 1);
-    expect(resultado).toEqual({
+    expect(resultado).toMatchObject({
       quantidade: 1,
       lados: 6,
       mod: 0,
@@ -68,7 +68,7 @@ describe('calcularDanoMagia', () => {
     });
 
     it('nível 5-10 (1º patamar) — +1 dado (Chama Sagrada, 1d8 → 2d8)', () => {
-      expect(calcularDanoMagia(magia('chamasagrada'), 0, 5)).toEqual({
+      expect(calcularDanoMagia(magia('chamasagrada'), 0, 5)).toMatchObject({
         quantidade: 2,
         lados: 8,
         mod: 0,
@@ -92,7 +92,7 @@ describe('calcularDanoMagia', () => {
       expect(calcularDanoMagia(magia('raiomistico'), 0, 1)?.quantidade).toBe(1);
       expect(calcularDanoMagia(magia('raiomistico'), 0, 5)?.quantidade).toBe(2);
       expect(calcularDanoMagia(magia('raiomistico'), 0, 11)?.quantidade).toBe(3);
-      expect(calcularDanoMagia(magia('raiomistico'), 0, 17)).toEqual({
+      expect(calcularDanoMagia(magia('raiomistico'), 0, 17)).toMatchObject({
         quantidade: 4,
         lados: 10,
         mod: 0,
@@ -113,7 +113,7 @@ describe('calcularDanoCondicionalMagia', () => {
   });
 
   it('Badalar Fúnebre, nível 1 — dado alternativo (1d12) escala igual ao normal', () => {
-    expect(calcularDanoCondicionalMagia(magia('badalarfunebre'), 0, 1)).toEqual({
+    expect(calcularDanoCondicionalMagia(magia('badalarfunebre'), 0, 1)).toMatchObject({
       quantidade: 1,
       lados: 12,
       mod: 0,
@@ -123,7 +123,7 @@ describe('calcularDanoCondicionalMagia', () => {
   });
 
   it('borda: Badalar Fúnebre, nível 5 (Aprimoramento de Truque) — dado alternativo também ganha +1 dado', () => {
-    expect(calcularDanoCondicionalMagia(magia('badalarfunebre'), 0, 5)).toEqual({
+    expect(calcularDanoCondicionalMagia(magia('badalarfunebre'), 0, 5)).toMatchObject({
       quantidade: 2,
       lados: 12,
       mod: 0,
@@ -139,7 +139,7 @@ describe('calcularCuraMagia', () => {
   });
 
   it('sem upcast, conjurada no próprio círculo (Aura de Vitalidade, 3º círculo, sem Upcast) — Cura Base sem alteração', () => {
-    expect(calcularCuraMagia(magia('auradevitalidade'), 3, 1)).toEqual({
+    expect(calcularCuraMagia(magia('auradevitalidade'), 3, 1)).toMatchObject({
       quantidade: 2,
       lados: 6,
       mod: 0,
@@ -148,7 +148,7 @@ describe('calcularCuraMagia', () => {
   });
 
   it('mod fixo somado ao dado (Regeneração, "4d8 + 15")', () => {
-    expect(calcularCuraMagia(magia('regeneracao'), 7, 1)).toEqual({
+    expect(calcularCuraMagia(magia('regeneracao'), 7, 1)).toMatchObject({
       quantidade: 4,
       lados: 8,
       mod: 15,
@@ -157,7 +157,7 @@ describe('calcularCuraMagia', () => {
   });
 
   it('upcast "Dado por Círculo" acima do círculo base (Palavra Curativa, 1º círculo base, +2d4/círculo) — soma corretamente', () => {
-    expect(calcularCuraMagia(magia('palavracurativa'), 3, 1)).toEqual({
+    expect(calcularCuraMagia(magia('palavracurativa'), 3, 1)).toMatchObject({
       quantidade: 6,
       lados: 4,
       mod: 0,
@@ -166,7 +166,7 @@ describe('calcularCuraMagia', () => {
   });
 
   it('upcast com dado de tamanho diferente do dado base (Oração de Cura: base 2d8, upcast 1d8) — soma normalmente (mesmo lados)', () => {
-    expect(calcularCuraMagia(magia('oracaodecura'), 4, 1)).toEqual({
+    expect(calcularCuraMagia(magia('oracaodecura'), 4, 1)).toMatchObject({
       quantidade: 4,
       lados: 8,
       mod: 0,
@@ -175,11 +175,54 @@ describe('calcularCuraMagia', () => {
   });
 
   it('conjurada no próprio círculo base — sem bônus (níveisAcima = 0)', () => {
-    expect(calcularCuraMagia(magia('curarferimentos'), 1, 1)).toEqual({
+    expect(calcularCuraMagia(magia('curarferimentos'), 1, 1)).toMatchObject({
       quantidade: 2,
       lados: 8,
       mod: 0,
       upcastNaoAutomatico: false,
+    });
+  });
+});
+
+describe('explicacao (quebra do dado — B8)', () => {
+  it('Dano Base sem escalonamento (Danação, círculo base) — só a linha "Dado Base"', () => {
+    const resultado = calcularDanoMagia(magia('danacao'), 1, 1);
+    expect(resultado?.explicacao).toEqual({
+      linhas: [{ label: 'Dado Base', valor: '1d6' }],
+      total: { label: 'Dano', valor: '1d6' },
+    });
+  });
+
+  it('Aprimoramento de Truque soma uma linha própria (Chama Sagrada, nível 5)', () => {
+    const resultado = calcularDanoMagia(magia('chamasagrada'), 0, 5);
+    expect(resultado?.explicacao).toEqual({
+      linhas: [
+        { label: 'Dado Base', valor: '1d8' },
+        { label: 'Aprimoramento de Truque', valor: '+1d8' },
+      ],
+      total: { label: 'Dano', valor: '2d8' },
+    });
+  });
+
+  it('Upcast "Dado por Círculo" soma uma linha própria (Bola de Fogo, +2 círculos)', () => {
+    const resultado = calcularDanoMagia(magia('boladefogo'), 5, 1);
+    expect(resultado?.explicacao).toEqual({
+      linhas: [
+        { label: 'Dado Base', valor: '8d6' },
+        { label: 'Upcast (+2 círculos)', valor: '+2d6' },
+      ],
+      total: { label: 'Dano', valor: '10d6' },
+    });
+  });
+
+  it('Upcast "Dado por Círculo" pra cura (Palavra Curativa, +2 círculos)', () => {
+    const resultado = calcularCuraMagia(magia('palavracurativa'), 3, 1);
+    expect(resultado?.explicacao).toEqual({
+      linhas: [
+        { label: 'Dado Base', valor: '2d4' },
+        { label: 'Upcast (+2 círculos)', valor: '+4d4' },
+      ],
+      total: { label: 'Cura', valor: '6d4' },
     });
   });
 });

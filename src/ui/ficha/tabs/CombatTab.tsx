@@ -4,6 +4,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { AtaqueResolvido } from '../../../core/ataque';
+import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
@@ -86,6 +87,7 @@ interface CombatTabProps {
   ataqueDeSopro: RecursoContado & {
     disponivel: boolean;
     cd: number;
+    explicacaoCd: ExplicacaoCalculo;
     numDados: number;
     tipoDano: string | null;
   };
@@ -160,6 +162,13 @@ interface CombatTabProps {
   magiasPreparadasBonus: Magia[];
   magiasPreparadasReacao: Magia[];
   modAcertoConjuracao: number | null;
+  /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
+   * `null` nos mesmos casos que `modAcertoConjuracao`. */
+  explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
+  /** Quebra da CD de magia (B8) — usada nos popups de Salvaguarda de
+   * Magia e Lançar no Inferno (mesma CD, ver `cdConjuracao`). `null`
+   * nos mesmos casos que `modAcertoConjuracao`. */
+  explicacaoCdConjuracao: ExplicacaoCalculo | null;
   /** NOME do truque vinculado a Explosão Agonizante + mod. de Carisma
    * — ver `MagiasTab.tsx`/`core/invocacoesMisticas.ts`. */
   truqueVinculadoAgonizante: string | undefined;
@@ -190,6 +199,9 @@ interface CombatTabProps {
   palavrasDeInterrupcaoDisponivel: boolean;
   periciaInigualavelDisponivel: boolean;
   iniciativaMod: number | null;
+  /** Quebra do `iniciativaMod` (mesmo `ExplicacaoCalculo` já usado no
+   * "ⓘ" de `AtributosTab`) — passada pro popup de rolagem (B7). */
+  explicacaoIniciativa: ExplicacaoCalculo;
   onRolarIniciativa?: () => void;
   /** Colheita Macabra (Necromante, nível 3+) — o modal de verdade mora
    * no `FichaShell.tsx` (sobrevive à troca de aba); aqui só repassa pro
@@ -286,6 +298,7 @@ export default function CombatTab({
     maximo: usosAtaqueDeSoproMaximo,
     restantes: usosAtaqueDeSoproRestantes,
     cd: cdAtaqueDeSopro,
+    explicacaoCd: explicacaoCdAtaqueDeSopro,
     numDados: numDadosAtaqueDeSopro,
     tipoDano: tipoDanoAtaqueDeSopro,
     onUsar: onUsarAtaqueDeSopro,
@@ -346,6 +359,8 @@ export default function CombatTab({
   magiasPreparadasBonus,
   magiasPreparadasReacao,
   modAcertoConjuracao,
+  explicacaoAcertoConjuracao,
+  explicacaoCdConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
   numAtaques,
@@ -372,6 +387,7 @@ export default function CombatTab({
   palavrasDeInterrupcaoDisponivel,
   periciaInigualavelDisponivel,
   iniciativaMod,
+  explicacaoIniciativa,
   onRolarIniciativa,
   colheitaMacabra: { disponivel: colheitaMacabraDisponivel, onDisponivel: onColheitaMacabraDisponivel },
   colheitaDosMortos: {
@@ -422,6 +438,7 @@ export default function CombatTab({
       label: 'Iniciativa',
       formula: `1d20 + ${iniciativaMod}`,
       mod: iniciativaMod,
+      explicacaoMod: explicacaoIniciativa,
       vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
       onResultado: (total) => setIniciativaValor(total),
     });
@@ -479,6 +496,7 @@ export default function CombatTab({
       quantidade: dano.quantidade,
       lados: dano.lados,
       mod: dano.mod,
+      explicacaoMod: dano.explicacao,
     });
   }
 
@@ -498,6 +516,7 @@ export default function CombatTab({
       quantidade: dano.quantidade,
       lados: dano.lados,
       mod: dano.mod,
+      explicacaoMod: dano.explicacao,
     });
   }
 
@@ -605,6 +624,7 @@ export default function CombatTab({
       label: `Ataque — ${ataqueBonus.nome} (Mão Secundária)`,
       formula: `1d20 + ${ataqueBonus.info.modAcerto}`,
       mod: ataqueBonus.info.modAcerto,
+      explicacaoMod: ataqueBonus.info.explicacaoAcerto,
       vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
     });
     onMarcarUsado('bonus');
@@ -696,6 +716,7 @@ export default function CombatTab({
       mod: danoPendente.mod,
       rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
       rerollEscolhido: perfuradorDisponivel && danoPendente.tipoDano === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
+      explicacaoMod: danoPendente.explicacaoMod,
     });
   }
 
@@ -1110,6 +1131,7 @@ export default function CombatTab({
             truques={truquesAcao}
             magiasPreparadas={magiasPreparadasAcao}
             modAcertoConjuracao={modAcertoConjuracao}
+            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             truqueVinculadoAgonizante={truqueVinculadoAgonizante}
             modCarisma={modCarisma}
             numAtaques={numAtaques}
@@ -1187,6 +1209,7 @@ export default function CombatTab({
             ponte={ponte}
             nivel={nivel}
             modAcertoConjuracao={modAcertoConjuracao}
+            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             truqueVinculadoAgonizante={truqueVinculadoAgonizante}
             modCarisma={modCarisma}
             onAbrirSalvaguarda={abrirSalvaguarda}
@@ -1215,6 +1238,7 @@ export default function CombatTab({
             conjura={conjura}
             magiasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
+            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             truqueVinculadoAgonizante={truqueVinculadoAgonizante}
             modCarisma={modCarisma}
             colheitaMacabraDisponivel={colheitaMacabraDisponivel}
@@ -1245,6 +1269,7 @@ export default function CombatTab({
       {lancarNoInfernoAberto && (
         <LancarNoInfernoModal
           cd={cdLancarNoInferno}
+          explicacaoCd={explicacaoCdConjuracao}
           onRolarDano={rolarDanoLancarNoInferno}
           onFechar={() => setLancarNoInfernoAberto(false)}
         />
@@ -1252,6 +1277,7 @@ export default function CombatTab({
       {ataqueDeSoproAberto && (
         <AtaqueDeSoproModal
           cd={cdAtaqueDeSopro}
+          explicacaoCd={explicacaoCdAtaqueDeSopro}
           tipoDano={tipoDanoAtaqueDeSopro}
           numDados={numDadosAtaqueDeSopro}
           onRolarDano={rolarDanoAtaqueDeSopro}
@@ -1263,6 +1289,7 @@ export default function CombatTab({
           nomeMagia={telaSalvaguarda.magia.nome}
           atributo={atributoSalvaguarda(telaSalvaguarda.magia)}
           cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
+          explicacaoCd={explicacaoCdConjuracao}
           textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
           textoFalha={telaSalvaguarda.magia.salvaguardaFalha}
           dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}

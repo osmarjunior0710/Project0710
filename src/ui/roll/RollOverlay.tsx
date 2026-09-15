@@ -1,3 +1,4 @@
+import InfoValor from '../components/InfoValor';
 import { useRoll } from './RollContext';
 import styles from './RollOverlay.module.css';
 import { artePorLados } from './dadosArte';
@@ -69,11 +70,23 @@ export default function RollOverlay() {
   // Só 'd20' tem par de dados (Vantagem/Desvantagem) — o 2º dado é
   // sempre outro d20, nunca guardado à parte no estado.
   const ladosDadoPrincipal = estado.tipo === 'd20' ? 20 : estado.lados;
+  // Travado enquanto o dado ainda tá rolando — fechar (✕ ou tocar
+  // fora) antes do resultado chegar fazia o popup reabrir sozinho
+  // quando a rolagem terminava (achado testando no celular: o motor,
+  // físico ou não, continua em andamento por trás mesmo com o popup
+  // fechado, e o `setEstado` do resultado reabria do zero).
+  const podeFechar = estado.fase === 'concluido';
 
   return (
-    <div className={`${styles.overlay} ${estado.motor3D ? styles.overlaySemFundo : ''}`} onClick={fechar}>
+    <div
+      className={`${styles.overlay} ${estado.motor3D ? styles.overlaySemFundo : ''}`}
+      onClick={podeFechar ? fechar : undefined}
+    >
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.close} onClick={fechar}>
+        <div
+          className={`${styles.close} ${podeFechar ? '' : styles.closeDesabilitado}`}
+          onClick={podeFechar ? fechar : undefined}
+        >
           ✕
         </div>
         <div className={styles.label}>{estado.label}</div>
@@ -127,8 +140,28 @@ export default function RollOverlay() {
         {estado.vantagem && (
           <div className={styles.formula}>{estado.vantagem === 'vantagem' ? 'Vantagem' : 'Desvantagem'}</div>
         )}
-        <div className={styles.formula}>{estado.formula}</div>
-        <div className={styles.total}>{estado.fase === 'rolando' ? '—' : estado.total}</div>
+        <div className={styles.total}>
+          {estado.fase === 'rolando' ? (
+            <span className={styles.rolando}>
+              Rolando
+              <span className={styles.rolandoPonto}>.</span>
+              <span className={styles.rolandoPonto}>.</span>
+              <span className={styles.rolandoPonto}>.</span>
+            </span>
+          ) : (
+            estado.total
+          )}
+        </div>
+        {/* Fórmula desce pra baixo do total (pedido do Osmar, B7) — o
+            número grande é a resposta, a fórmula é só o "como
+            cheguei nele", secundário. Ganha o ⓘ (mesmo `InfoValor` de
+            CA/perícia/iniciativa) só quando a rolagem já tem a quebra
+            pronta (`explicacaoMod`) — sem isso, mostra só a fórmula
+            simples, igual sempre foi. */}
+        <div className={styles.formulaComInfo}>
+          <span className={styles.formula}>{estado.formula}</span>
+          {estado.explicacaoMod && <InfoValor titulo={estado.label} explicacao={estado.explicacaoMod} />}
+        </div>
         {estado.critico === 'falha' && <div className={`${styles.feedback} ${styles.feedbackCritFail}`}>😢 FALHA CRÍTICA</div>}
         {estado.critico === 'sucesso' && <div className={`${styles.feedback} ${styles.feedbackCritSuccess}`}>🎉 ACERTO CRÍTICO!</div>}
         {estado.podeEscolherVantagem && (

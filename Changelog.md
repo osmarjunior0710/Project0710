@@ -5,6 +5,65 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1941
+
+CD de magia, CD do Ataque de Sopro (Draconato) e CD de "Lançar no
+Inferno" (Bruxo) ganharam o ⓘ mostrando de onde vem o número. Rolagens
+de dano e cura de magia também: toca no ⓘ ao lado do dado rolado pra
+ver Dado Base, Aprimoramento de Truque (quando o truque escala por
+nível) e Upcast (quando conjurada num espaço de círculo maior)
+separados.
+
+## v202609_1855
+
+Popup de rolagem de Ataque de MAGIA (truque/magia com ataque, ex. Raio
+de Fogo) também ganhou o ⓘ com a quebra do modificador. Com isso, toda
+rolagem de d20 do app (perícia, salvaguarda, iniciativa, ataque com
+arma, ataque de magia) já mostra de onde vem o número.
+
+## v202609_1826
+
+Popup de rolagem de ATAQUE (arma ou desarmado) também ganhou o ⓘ com a
+quebra do modificador — atributo usado, Bônus de Proficiência (quando
+soma), bônus de Estilo de Luta. Ataque/CD de Magia ainda faltam.
+
+## v202609_1819
+
+2 ajustes no popup de rolagem: atributo puro (FOR/DES/etc., sem ser
+perícia) também ganhou o ⓘ com a quebra do modificador; e enquanto o
+dado ainda tá caindo, o "—" virou "Rolando..." com os pontinhos
+animados em cascata.
+
+## v202609_1600
+
+Popup de rolagem de perícia/salvaguarda/iniciativa: o total grande
+continua igual, mas agora a fórmula pequena embaixo dele ganhou um ⓘ —
+toca pra ver de onde vem o número (atributo, Bônus de Proficiência,
+etc.), mesmo popup que já existia no CA. Ataque/dano ainda não tem
+essa quebra (vem numa próxima entrega).
+
+## v202609_1119
+
+Dado 3D 10% menor.
+
+## v202609_1102
+
+Removida a área preta translúcida (era só debug temporário pra
+visualizar onde o dado cai) — a área de física agora fica 100%
+transparente de novo.
+
+## v202609_1059
+
+Dado físico agora some sozinho depois de parar: espera 3s parado, some
+suavemente em mais 2s. Vale pra toda rolagem (oficial e o 🎲 avulso).
+
+## v202609_0950
+
+Corrigido: fechar o popup de rolagem (✕ ou tocar fora) antes do dado
+parar de cair fazia ele reabrir sozinho quando o resultado chegava.
+Agora fechar só funciona depois que o dado já parou — enquanto ainda
+tá rolando, o ✕ fica esmaecido.
+
 ## v202609_0844
 
 Corrigido: Conhecimento Primordial (Bárbaro) trocava sempre pro mod.

@@ -66,6 +66,13 @@ describe('decidirConjuracao', () => {
     expect(semVinculo.danoPendente?.mod).toBe(0);
   });
 
+  it('Explosão Agonizante — a linha extra aparece na quebra (explicacaoMod) e o total reflete o bônus', () => {
+    const comVinculo = decidirConjuracao(magia('raiomistico'), 0, 1, 5, false, false, 'Raio Místico', 3);
+    const linhas = comVinculo.danoPendente?.explicacaoMod?.linhas ?? [];
+    expect(linhas[linhas.length - 1]).toEqual({ label: 'Explosão Agonizante', valor: '+3' });
+    expect(comVinculo.danoPendente?.explicacaoMod?.total.valor).toBe('1d10 + 3');
+  });
+
   it('Explosão Agonizante NÃO se aplica a um truque diferente do vinculado', () => {
     const resultado = decidirConjuracao(magia('toquenecrotico'), 0, 1, 5, false, false, 'Raio Místico', 3);
     expect(resultado.danoPendente?.mod).toBe(0);

@@ -229,8 +229,8 @@ entregas no celular.
       Ver `DECISOES-COMBATE.md`.
 - [x] Escala ajustada de novo (6.2 → 7, "tá pequeno, aumenta um
       pouco") + debug visual temporário no canvas (fundo preto 50%)
-      pro Osmar visualizar os limites da área de física — ainda ativo,
-      remover depois de confirmar os limites certos.
+      pro Osmar visualizar os limites da área de física — removido
+      depois de confirmar os limites certos (transparente de novo).
 - [x] Base da área de física reduzida de novo (340px → 265px, sobrava
       espaço entre o preto de debug e o popup).
 - [x] **Bug sério achado no celular: depois de alguma rolagem falhar
@@ -268,8 +268,7 @@ entregas no celular.
       5px)` (5px acima do topo do FAB) em vez de um valor fixo chutado
       (340px → 265px antes) — como os dois usam `position: fixed` a
       partir da base da tela, acompanha qualquer altura de tela
-      sozinho. Ainda ativa (preto 50%), aguardando confirmação final
-      dos limites pra remover.
+      sozinho. Preto de debug removido depois, limites confirmados.
 - [x] **Escala do dado aumentada de novo** (7 → 7.5, "aumenta só mais
       um pouquinho").
 - [x] **Cor por tipo de dado nas rolagens OFICIAIS** (d20/dano) — só o
@@ -322,14 +321,49 @@ aprovado pelo Osmar:
       (B6.1). Vale o Osmar confirmar no celular: perícia/ataque/
       salvaguarda simples E Vantagem/Desvantagem pré-declarada (ex.:
       Desvantagem por armadura sem treinamento) continuam certas.
-- [ ] **B6.3** — migrar `escolherVantagemPosRolagem` (o `add()`, foi o
-      bug mais recente).
-- [ ] **B6.4** — migrar `rerolarFisico` (Sorte/Inspiração Heroica/
-      Perfurador).
-- [ ] **B6.5** — migrar `rolarDados` (dano, 1 dado e grid).
-- [ ] **B6.6** — migrar o FAB avulso (`Dice3dFab.tsx`) — os "2 mundos"
-      (oficial e avulso) passam a usar a MESMA função, fim da
-      duplicação.
+- [x] **B6.3** — migrar `escolherVantagemPosRolagem` (o `add()`, foi o
+      bug mais recente) pra `lancarGrupos({...}, {modo:'add'})` —
+      código do call site caiu de ~15 linhas (montar `box`, tema,
+      cancelar fade, `onRollComplete` com o comentário de "resultados[
+      length-1]") pra 2. Verificado: `tsc -b`/`npm test` (546)/`npm run
+      build` limpos + Playwright (2º dado reconhecido certo: 1º dado 3
+      → Vantagem → 2º dado 9 físico visível → total 14 = 9+5, bate).
+- [x] **B6.4** — migrar `rerolarFisico` (Sorte/Inspiração Heroica/
+      Perfurador) — `box.reroll()` reaproveita o `groupId` do dado
+      original em vez de criar um novo, então `gruposNovos()` (B6.1)
+      não se aplica; ganhou uma irmã, `rerolarGrupo()` em
+      `diceBox3d.ts`, com a mesma lógica de achar o grupo certo por
+      `id` (não por posição) que já existia, só realocada — call site
+      em `RollContext.tsx` caiu de ~14 linhas pra 5. Verificado: `tsc
+      -b`/`npm test` (546)/`npm run build` limpos. **Sem validação
+      Playwright** — Sorte/Perfurador dependem de sair 1 no d20 ou de
+      um personagem com talento específico, caro de forçar num teste
+      automatizado (mesma limitação já registrada no B4); é
+      realocação quase literal do código já testado, risco baixo. Vale
+      teste manual no celular com Sorte/Inspiração Heroica/Perfurador
+      quando o Osmar tiver a chance.
+- [x] **B6.5** — migrar `rolarDados` (dano, 1 dado e grid) pra
+      `lancarGrupos()` — os dois ramos (`umDadoSo`/grid) caíram de ~15
+      linhas juntas pra 6. Verificado: `tsc -b`/`npm test` (546)/`npm
+      run build` limpos + Playwright (Ataque Desarmado, 1 dado só:
+      ataque 1d20+2 físico → "Rolar Dano" → dano físico resolve certo,
+      total 3). Grid (2+ dados, ex.: Espada Grande 2d6) não testado via
+      Playwright — a ferramenta "Personagem de Teste" não equipa arma
+      de dano múltiplo automaticamente, caro de forçar (mesma limitação
+      já registrada no B4/B6.4); é migração mecânica idêntica ao ramo
+      `umDadoSo` já validado, risco baixo. Vale teste manual com uma
+      arma de 2+ dados quando o Osmar tiver a chance.
+- [x] **B6.6** — migrar o FAB avulso (`Dice3dFab.tsx`) pra
+      `lancarGrupos()` — os "2 mundos" (oficial e avulso) agora usam a
+      MESMA função, fim da duplicação. `rolarGenerico` caiu de ~25
+      linhas pra 13 (cor por tipo e fade já vêm de dentro da função
+      central, não precisa mais montar `themeColor`/`cancelarFadeDados`/
+      `agendarFadeDados` na mão). B6 fechado — todo o motor de dado 3D
+      (oficial e avulso) passa por `lancarGrupos()`/`rerolarGrupo()`.
+      Verificado: `tsc -b`/`npm test` (546)/`npm run build` limpos +
+      Playwright (d6 avulso → resultado 1; Múltiplos d6+d20 → 2 dados
+      físicos com cor certa — vermelho/d20, teal/d6 — total 18, Histórico
+      com as 2 entradas).
 
 Cada sub-entrega é uma troca "por trás", sem mudar nada visível —
 risco baixo, checklist de sempre a cada uma.
@@ -343,11 +377,155 @@ já somado) — ele quer ver cada parte que compõe esse `+7` (ex.: "FOR
 B6 (consolidação do motor primeiro, menos risco de mexer 2 coisas ao
 mesmo tempo no mesmo código).
 
-- [ ] Ainda sem quebra em sub-entregas — fazer o levantamento (chapéu
-      de Product Manager: mapear todo lugar que hoje monta um `mod`
-      já somado antes de chamar `rolarD20`, ex. `AtributosTab`,
-      `CombatTab`, `AcaoPanelContent`) antes de propor o plano
-      detalhado, quando chegar a vez do B7.
+**Levantamento (chapéu de Product Manager):** já existe o mecanismo
+certo pronto — `ExplicacaoCalculo` (`core/calculoPersonagem.ts`), hoje
+usado só no popup "ⓘ" de CA/perícia/salvaguarda/iniciativa (linhas
+label+valor + total). Perícia/salvaguarda/atributo/iniciativa já têm
+essa quebra pronta; ataque com arma (`core/ataque.ts`, `modAcerto` já
+vem somado: atributo + Bônus de Proficiência + Estilo de Luta) e
+ataque/CD de Magia (`modAcertoConjuracao`) NÃO têm — precisam expor os
+componentes nomeados antes.
+
+- [x] **Entregas 1+2 — fundação + perícia/salvaguarda/atributo/
+      iniciativa**: `RollD20Options`/`RollState` ganharam
+      `explicacaoMod?: ExplicacaoCalculo` opcional. `RollOverlay`
+      reordenado (pedido do Osmar, chapéu de UX): total grande continua
+      onde estava, fórmula pequena (`1d20 + N`) desce pra ABAIXO do
+      total (é o "como cheguei nele", secundário) e ganha um ⓘ ao lado
+      — reaproveita o `InfoValor` já existente (mesmo popup do CA),
+      não um componente novo; sem `explicacaoMod`, mostra só a fórmula
+      simples, sem ⓘ, igual sempre foi. Plugado em perícia/salvaguarda/
+      iniciativa (`AtributosTab.tsx`, reaproveitando `sv.explicacao`/
+      `p.explicacao`/`explicacaoIniciativa` que já existiam pro ⓘ) e
+      Iniciativa do painel de Combate (`CombatTab.tsx` ganhou a prop
+      `explicacaoIniciativa`, repassada por `FichaShell.tsx`).
+      Verificado: `tsc -b`/`npm test` (546)/`npm run build` limpos +
+      Playwright (Salvaguarda de Força → total 16 grande, `1d20 + 2 ⓘ`
+      embaixo → toca no ⓘ → popup mostra "mod. FOR +0 / Bônus de
+      Proficiência (proficiente) +2 / Salvaguarda de Força +2").
+- [x] **Correções pós-Entregas 1+2, achadas testando no celular:**
+  - **Atributo puro (FOR/DES/etc. sem perícia) também ganhou o ⓘ** —
+    o Osmar apontou que mesmo sendo 1 termo só HOJE, no futuro algo
+    pode somar em cima (ex.: item mágico "+2 em Testes de Força") e o
+    popup já devia estar pronto pra isso sem precisar mexer de novo.
+    `AtributoFinal` (`core/calculoPersonagem.ts`) ganhou
+    `explicacao: ExplicacaoCalculo` (1 linha só, "mod. FOR"), testado
+    (`calculoPersonagem.test.ts`, 2 casos: normal e borda mod.
+    negativo). Plugado em `AtributosTab.tsx`.
+  - **"Rolando..." no lugar do "—"** enquanto o dado ainda cai —
+    3 pontinhos entram em cascata (CSS puro, `@keyframes`), fonte
+    menor que o total numérico pra não estourar a largura do card.
+    Verificado: `tsc -b`/`npm test` (548)/`npm run build` limpos +
+    Playwright (atributo puro FOR → "Rolando..." aparece → resolve →
+    total 12 → ⓘ mostra "mod. FOR +1 / FOR +1").
+- [x] **Entrega 3** — Ataque com arma/desarmado: `AtaqueInfo` ganhou
+      `explicacaoAcerto: ExplicacaoCalculo`. `ataqueDesarmado` sempre
+      2 linhas (mod. FOR + Bônus de Proficiência, nunca é isento).
+      `ataqueComArma` rotula dinamicamente qual atributo venceu
+      ("mod. FOR (Acuidade)"/"mod. DES (Acuidade)"/"mod. FOR"/"mod.
+      DES"/"mod. CAR (Pacto da Lâmina)" pro `atribForcada`), Bônus de
+      Proficiência só aparece quando > 0 (arma fora da proficiência
+      não mostra "+0" à toa), Arquearia (Estilo de Luta) só quando
+      ativa. `fmtMod` (antes privada) virou exportada de
+      `calculoPersonagem.ts` pra não duplicar a formatação de sinal.
+      Plugado no ataque principal (`AcaoPanelContent.tsx`) e mão
+      secundária (`CombatTab.tsx`). `ataqueAtual`/
+      `ataqueBonusMaoSecundaria` ganham de graça (só chamam
+      `ataqueComArma`/`ataqueDesarmado` por baixo). Testado
+      (`ataque.test.ts`, 4 casos novos: desarmado sempre 2 linhas, sem
+      proficiência esconde a linha, Pacto da Lâmina rotula CAR,
+      Acuidade rotula o atributo que venceu). Verificado: `tsc -b`/
+      `npm test` (552)/`npm run build` limpos + Playwright (Guerreiro,
+      Ataque Desarmado → ⓘ aparece → popup mostra "mod. FOR +1 /
+      Bônus de Proficiência +2 / Ataque Desarmado +3"). Arma de
+      verdade (não desarmado) não testada via Playwright — mesma
+      limitação de sempre (ferramenta de teste não equipa arma
+      automaticamente) — mas a lógica é idêntica, risco baixo.
+- [x] **Entrega 4** — Ataque de Magia: nova função
+      `explicarModAcertoConjuracao` (`core/magiasPersonagem.ts`),
+      irmã de `modAcertoConjuracao`, sempre 2 linhas (mod. do atributo
+      de conjuração, nomeado pelo `atributoPrimario` da classe — ex.
+      "mod. Inteligência" — + Bônus de Proficiência, nunca isento).
+      `RollAcertoSpec` (`core/conjurarMagia.ts`) ganhou
+      `explicacaoMod?`; `decidirConjuracao` ganhou o parâmetro
+      `explicacaoAcertoConjuracao` (opcional, default `null`, não
+      quebra chamadas antigas). Prop `explicacaoAcertoConjuracao`
+      roteada de `FichaShell.tsx` até os 3 pontos que conjuram
+      ataque de magia: `MagiasTab.tsx` (direto), e
+      `AcaoPanelContent.tsx`/`BonusPanelContent.tsx` (via
+      `useUsarMagiaPainel.tsx`, hook compartilhado) +
+      `ReacaoPanelContent.tsx` (direto). **CD de Magia (a outra metade
+      do nome da entrega) ficou de fora** — CD é só um número exibido
+      pro alvo salvar contra, não uma rolagem DESTE personagem, então
+      não tem popup de `RollOverlay` pra plugar; não existe ⓘ nenhum
+      hoje na exibição da CD em lugar nenhum — vira item de Backlog
+      separado se o Osmar quiser esse ⓘ no futuro. Testado
+      (`magiasPersonagem.test.ts`, 2 casos: normal Mago + borda
+      classe/atributo sem mapeamento). Verificado: `tsc -b`/`npm test`
+      (554)/`npm run build` limpos. **Sem validação Playwright** — a
+      ferramenta de teste gera magias aleatórias por personagem, achar
+      uma magia de ataque de verdade num personagem gerado ficou caro
+      de automatizar nesta sessão (múltiplas tentativas travaram no
+      clique); é reaproveitamento do mesmo padrão já validado nas
+      Entregas 1-3 (`explicacaoMod` opcional, popup cai pro texto
+      simples sem ela), risco baixo — vale teste manual no celular com
+      um Mago/Bruxo/Feiticeiro/Clérigo/Druida/Bardo usando um truque
+      de ataque (⚔️ na lista de magias).
+
+### Correção: fechar o popup antes do dado parar reabria sozinho
+
+Achado testando no celular: fechar o popup de rolagem (✕ ou tocar
+fora) enquanto o dado ainda tava caindo (físico ou 2D) não cancelava a
+rolagem em andamento — quando o resultado chegava, o `setEstado` do
+resultado reabria o popup do zero, mesmo já fechado antes.
+
+- [x] `RollOverlay`: fechar (✕ e tocar fora do card) só funciona
+      quando `estado.fase === 'concluido'` — enquanto `'rolando'`, os
+      dois ficam travados (✕ esmaecido, 35% de opacidade, sinalizando
+      "não dá ainda" em vez de sumir sem explicação). Verificado:
+      `tsc -b`/`npm test` (543)/`npm run build` limpos.
+
+### Escala do dado reduzida 10%
+
+- [x] `scale` em `diceBox3d.ts`: 7.5 → 6.75 (pedido do Osmar).
+      Verificado: `tsc -b`/`npm test` (546)/`npm run build` limpos.
+
+### Remoção do preto de debug (limites da área de física confirmados)
+
+- [x] `.canvasWrapper`/`.canvasWrapperEscondido` voltaram a
+      `background` transparente (removido `rgba(0, 0, 0, 0.5)`) —
+      Osmar confirmou os limites (`top: 72px`, `bottom: calc(92px +
+      52px + 5px)`, `left/right: 5px`) certos. Verificado: `tsc -b`/
+      `npm test` (546)/`npm run build` limpos.
+
+### Fade automático do dado físico depois de parar
+
+Pedido do Osmar: dado físico ficava parado na tela pra sempre (até a
+próxima rolagem limpar a cena) — melhor ele sumir sozinho depois de um
+tempo. Mecânica combinada: espera 3s depois que a física de TODOS os
+dados da rolagem assenta, depois some suavemente em mais 2s (opacity
+100→0 de 3s a 5s). Shader/fade por dado individual não é viável — a
+física roda dentro de um Web Worker da lib, sem acesso a mesh/material
+de fora (ver comentário em `diceBox3d.ts`); o fade aplica no canvas
+inteiro.
+
+- [x] `diceBox3d.ts`: `agendarFadeDados()`/`cancelarFadeDados()` —
+      manipulam `opacity`/`transition` direto no host do canvas via
+      `getElementById` (não um componente React, pra não acoplar este
+      módulo genérico ao CSS Module de um consumidor específico).
+      `cancelarFadeDados()` sempre roda ANTES de um `roll()`/`add()`/
+      `reroll()` novo (devolve opacidade a 100% na hora, sem
+      transição); `agendarFadeDados()` sempre roda dentro do
+      `onRollComplete` de QUALQUER rolagem (oficial via `lancarGrupos`,
+      e os 3 call sites que ainda não migraram pro B6:
+      `rerolarFisico`, `escolherVantagemPosRolagem`, `rolarDados`, mais
+      o FAB avulso) — se um 2º dado assentar antes do fade do 1º
+      terminar (ex.: Vantagem escolhida DEPOIS do resultado), o timer
+      reinicia do zero pros dois juntos, nunca um sumindo enquanto o
+      outro ainda nem caiu.
+      Verificado: `tsc -b`/`npm test` (546)/`npm run build` limpos +
+      Playwright (rolagem física → opacity fica 1 até ~3s → cai
+      suavemente → chega em 0 por volta de 5s).
 
 ### Redesenho do FAB avulso (Fase A) — coluna de botões em vez de overlay escuro
 
@@ -395,6 +573,65 @@ próprio FAB pra cima, alinhada à direita, sem fundo escuro nenhum.
       Playwright em 390px (coluna expande com a ordem certa, sem
       "Customizar"; clicar fora colapsa; d20 rola físico vermelho;
       Histórico abre em popup com ✕ que fecha só ele).
+
+### B8 — ⓘ na CD de magia/Sopro/Inferno + quebra do dado de dano/cura de magia
+
+Pedido do Osmar: "Seria bom colocar ⓘ no CD e rolagens de magia/cura".
+Perguntado e confirmado com ele: o ⓘ na CD vai nas 3 CDs que existem
+hoje (Salvaguarda de Magia, Ataque de Sopro do Draconato, Lançar no
+Inferno do Bruxo), e a quebra de dado entra pra dano E cura de magia
+juntas nesta mesma entrega (não só cura).
+
+- [x] **CD** — `explicarCdConjuracao` (`core/magiasPersonagem.ts`, "CD
+      base" 8 + as mesmas linhas de `explicarModAcertoConjuracao`) e
+      `explicarCdAtaqueDeSopro` (`core/ataqueDeSopro.ts`, "CD base" 8 +
+      mod. CON + Bônus de Proficiência — fórmula própria do Apêndice C,
+      diferente da de conjuração). Salvaguarda de Magia e Lançar no
+      Inferno usam a MESMA CD (`cdConjuracao(modAcertoConjuracao)`) —
+      1 valor só (`explicacaoCdConjuracao`, calculado 1x em
+      `FichaShell.tsx`) alimenta os dois popups; Ataque de Sopro usa a
+      fórmula própria à parte. `MagiaSalvaguardaModal`/
+      `LancarNoInfernoModal`/`AtaqueDeSoproModal` ganharam prop
+      `explicacaoCd` e o ⓘ (`InfoValor`) ao lado do número da CD.
+- [x] **Dano/Cura de magia** — a composição de dado de magia
+      (`core/magiaDano.ts`) nunca teve nomes pras partes: Dado Base +
+      Aprimoramento de Truque (escala por nível, truque) + Upcast
+      (dado/flat/alvo por círculo) já eram somados direto num
+      `quantidade`/`lados`/`mod` final, sem rastro de qual parte veio
+      de onde. `calcularEscalonamento()` reescrito pra montar as linhas
+      progressivamente e devolver `explicacao: ExplicacaoCalculo` junto
+      do resultado de sempre — como o total só existe como notação de
+      dado (ex. "10d6"), não um número resolvido, o `total.valor`
+      guarda a notação, não um número (uso novo do mesmo tipo
+      `ExplicacaoCalculo`, ver `DECISOES-COMBATE.md`). Novo helper
+      `fmtDado(quantidade, lados, mod, comSinal?)` formata a notação
+      (com "+" na frente pras linhas de incremento). `RollDadosOptions`/
+      `rolarDados` (`RollContext.tsx`) ganharam `explicacaoMod?`
+      (mesmo padrão do `RollD20Options` do B7) — `RollOverlay` já
+      renderiza isso de forma genérica, não precisou mexer lá.
+      Explosão Agonizante (`conjurarMagia.ts`) ganhou uma linha própria
+      quando aplica o bônus. Roteado em TODOS os pontos que rolam dano/
+      cura de magia: `MagiasTab.tsx` e `CombatTab.tsx` (cada um tem sua
+      própria cópia de `rolarDanoSalvaguarda`/
+      `rolarDanoCondicionalSalvaguarda` — as duas cópias corrigidas) +
+      dano pendente (`DanoPendente.ts` ganhou `explicacaoMod?`) + cura
+      pendente.
+      Testado: `magiaDano.test.ts` (13 casos existentes migrados pra
+      `toMatchObject` — o `explicacao` novo não fazia parte do
+      `toEqual` antigo — + 4 casos novos cobrindo Dado Base sozinho,
+      Aprimoramento de Truque, Upcast dado-por-círculo em dano e em
+      cura), `ataqueDeSopro.test.ts` (2 casos novos pra
+      `explicarCdAtaqueDeSopro`), `magiasPersonagem.test.ts` (2 casos
+      novos pra `explicarCdConjuracao`), `conjurarMagia.test.ts`
+      (1 caso novo confirmando a linha extra da Explosão Agonizante).
+      Verificado: `tsc -b`/`npm test` (563)/`npm run build` limpos.
+      **Sem validação Playwright** — mesma limitação já documentada nas
+      Entregas B7 (personagem de teste é gerado aleatório, forçar um
+      cenário específico de magia com upcast/truque é caro de
+      automatizar); reaproveita o mesmo padrão já validado (`InfoValor`/
+      `explicacaoMod` opcional, sem quebra quando ausente), risco baixo
+      — vale teste manual no celular com uma magia de dano/cura E os
+      3 popups de CD.
 
 ## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade) — PAUSADO, retomar depois do Dado 3D
 

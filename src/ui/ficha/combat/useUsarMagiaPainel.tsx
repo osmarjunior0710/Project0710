@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte } from '../../../core/magiasPersonagem';
+import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { useRoll } from '../../roll/RollContext';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
@@ -34,6 +35,9 @@ interface UsarMagiaPainelParams {
   truques: Magia[];
   magiasPreparadas: Magia[];
   modAcertoConjuracao: number | null;
+  /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
+   * `null` nos mesmos casos que `modAcertoConjuracao`. */
+  explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
   truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
   colheitaMacabraDisponivel: boolean;
@@ -85,6 +89,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
       circulo !== null,
       p.truqueVinculadoAgonizante,
       p.modCarisma,
+      p.explicacaoAcertoConjuracao,
     );
     if (resultado.curaColheitaMacabra !== null) {
       p.onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);

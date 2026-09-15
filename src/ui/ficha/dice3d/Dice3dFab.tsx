@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRoll } from '../../roll/RollContext';
-import { carregarDiceBox3D, COR_POR_LADOS, DICE3D_CANVAS_HOST_ID } from '../../roll/diceBox3d';
+import { carregarDiceBox3D, DICE3D_CANVAS_HOST_ID, lancarGrupos } from '../../roll/diceBox3d';
 import styles from './Dice3dFab.module.css';
 
 const TIPOS = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'] as const;
@@ -115,30 +115,22 @@ export default function Dice3dFab() {
   }
 
   // Rolagem "crua" — usada tanto pro toque direto em qualquer tipo
-  // quanto pro modo Múltiplos. Cada grupo leva a cor fixa do seu tipo
-  // (ver CORES_POR_TIPO) — passado como objeto (não notação em texto)
-  // pra lib aceitar `themeColor` por grupo na mesma rolagem.
+  // quanto pro modo Múltiplos. Cor por tipo já vem de `lancarGrupos()`
+  // (`COR_POR_LADOS`, `diceBox3d.ts`), não precisa montar aqui.
   async function rolarGenerico(itens: { tipo: TipoDado; qtd: number }[]) {
     setResultado(null);
     setErro(null);
     try {
-      const box = await carregarDiceBox3D();
       const ordenados = TIPOS.filter((t) => itens.some((i) => i.tipo === t)).map(
         (t) => itens.find((i) => i.tipo === t)!,
       );
-      const grupos = ordenados.map((i) => ({
-        qty: i.qtd,
-        sides: SIDES_POR_TIPO[i.tipo],
-        themeColor: COR_POR_LADOS[SIDES_POR_TIPO[i.tipo]],
-      }));
+      const grupos = ordenados.map((i) => ({ qty: i.qtd, sides: SIDES_POR_TIPO[i.tipo] }));
       const titulo = `Rolagem de ${ordenados.map((i) => `${i.qtd}${i.tipo}`).join(' + ')}`;
-      box.onRollComplete = (resultados) => {
-        const valores = resultados.map((r) => r.value);
-        const total = valores.reduce((acc, v) => acc + v, 0);
-        setResultado(total);
-        adicionarLog({ titulo, valores, total, partesTotal: valores });
-      };
-      box.roll(grupos.length === 1 ? grupos[0] : grupos, { theme: 'default' });
+      const resultados = await lancarGrupos(grupos);
+      const valores = resultados.map((r) => r.value);
+      const total = valores.reduce((acc, v) => acc + v, 0);
+      setResultado(total);
+      adicionarLog({ titulo, valores, total, partesTotal: valores });
     } catch (e) {
       setCarregando(false);
       setErro(e instanceof Error ? e.message : 'Erro desconhecido ao carregar o dado 3D.');

@@ -194,11 +194,54 @@
 .formula {
   font-size: 12px;
   color: var(--text-faint);
-  margin-bottom: 4px;
 }
 
 .total {
   font-size: 31px;
+}
+
+/* "Rolando..." no lugar do "—" enquanto o dado ainda cai (pedido do
+   Osmar) — fonte menor que o total numérico pra não estourar a
+   largura mínima do card, os 3 pontinhos entram em cascata como um
+   loading clássico. */
+.rolando {
+  font-size: 20px;
+  color: var(--text-dim);
+}
+
+.rolandoPonto {
+  opacity: 0;
+  animation: rolandoPontoFade 1.4s infinite;
+}
+
+.rolandoPonto:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.rolandoPonto:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes rolandoPontoFade {
+  0%,
+  80%,
+  100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+/* Fórmula + ⓘ (B7) — fica ABAIXO do total (número grande é a
+   resposta, isso aqui é só o "como cheguei nele"), centralizado, com
+   o ícone colado ao texto. */
+.formulaComInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 2px;
 }
 
 .feedback {
@@ -310,4 +353,18 @@
 
 .close:active {
   background: var(--line-soft);
+}
+
+/* Enquanto o dado ainda tá rolando, fechar fica travado (ver
+   RollOverlay.tsx) — achado testando no celular: fechar antes do dado
+   parar fazia o popup reabrir sozinho quando o resultado chegava.
+   Esmaecido em vez de sumir, pra sinalizar "travado por enquanto" em
+   vez de ficar sem nenhum controle visível no canto do card. */
+.closeDesabilitado {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.closeDesabilitado:active {
+  background: var(--panel2);
 }

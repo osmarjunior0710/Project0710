@@ -2,6 +2,8 @@
 // (não são placeholder, ver CLAUDE.md "Marcação de conteúdo
 // placeholder" — regra real, mesmo sem cálculo por trás ainda).
 
+import type { ExplicacaoCalculo } from '../core/calculoPersonagem';
+
 export interface AcaoBase {
   nome: string;
   desc: string;
@@ -22,6 +24,11 @@ export const acoesBase: AcaoBase[] = [
 
 export interface AtaqueInfo {
   modAcerto: number;
+  /** Quebra do `modAcerto` (mod. do atributo usado, Bônus de
+   * Proficiência quando soma, bônus de Estilo de Luta) — mesmo
+   * formato do "ⓘ" de CA/perícia (`core/calculoPersonagem.ts`), pro
+   * popup de rolagem de ataque (B7). */
+  explicacaoAcerto: ExplicacaoCalculo;
   danoQuantidade: number;
   danoLados: number;
   danoMod: number;

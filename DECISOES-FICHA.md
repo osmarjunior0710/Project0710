@@ -409,3 +409,27 @@ mais simples e confiável do que duplicar essa lógica de inicialização
 num "resetar tudo na mão".
 
 **Data/origem:** 2026-09, pedido do Osmar.
+
+## Popup de rolagem (RollOverlay) mostra a quebra do modificador via InfoValor reaproveitado
+
+Pedido do Osmar (B7, `EmDev.md`): o popup de resultado (`RollOverlay`)
+mostrava só a fórmula já somada (`1d20 + 7`) — sem dizer de onde vinha
+o `+7`. Em vez de desenhar uma tabela nova dentro do card, o popup
+reaproveita o `InfoValor` (ícone "ⓘ" + popup com linhas
+label/valor + total) que já existia pro CA/perícia/salvaguarda/
+iniciativa — mesmo tipo `ExplicacaoCalculo` (`core/
+calculoPersonagem.ts`), passado agora também como `RollD20Options.
+explicacaoMod`/`RollState.explicacaoMod`.
+
+**Layout (chapéu de UX, não só encanamento):** total grande continua
+sendo a resposta principal; a fórmula pequena (secundária, "como
+cheguei nele") desceu pra ABAIXO do total (antes ficava acima) e
+ganhou o ⓘ do lado. Sem `explicacaoMod` (rolagem que ainda não tem a
+quebra pronta, ex.: ataque com arma antes da Entrega 3/4 do B7), o ⓘ
+simplesmente não aparece — só a fórmula simples, comportamento
+idêntico a antes.
+
+**Padrão pra lembrar:** qualquer rolagem de d20 nova que já tenha um
+`ExplicacaoCalculo` calculado em algum lugar (mesmo que só pro ⓘ de
+outra tela) deve passar esse MESMO objeto pra `explicacaoMod` — nunca
+recalcular ou duplicar a conta só pra alimentar o popup de rolagem.

@@ -1,4 +1,5 @@
 import type { Magia } from '../data/rulesets/dnd2024/magias';
+import type { ExplicacaoCalculo } from './calculoPersonagem';
 
 export interface CalculoDanoMagia {
   quantidade: number;
@@ -13,6 +14,15 @@ export interface CalculoDanoMagia {
    * esse círculo é maior e mostrar `magia.upcastTexto` em vez de somar
    * sozinha. */
   upcastNaoAutomatico: boolean;
+  /** Quebra "Dado Base (NdM) + Aprimoramento de Truque + Upcast" —
+   * mesmo formato do "ⓘ" de CA/perícia/ataque (B7/B8), mas com a
+   * notação de dado (ex.: "2d6") em vez de número já resolvido no
+   * `valor` de cada linha/total, já que dano/cura de magia só vira
+   * número de verdade depois da rolagem física. Quando
+   * `upcastNaoAutomatico` é `true`, só cobre a parte que FOI somada
+   * automaticamente (Base + Aprimoramento de Truque) — a UI já avisa
+   * separadamente que o upcast real precisa ser somado na mão. */
+  explicacao: ExplicacaoCalculo;
 }
 
 interface DadoParseado {
@@ -43,6 +53,16 @@ interface EscalonamentoBase {
   lados: number;
   mod: number;
   upcastNaoAutomatico: boolean;
+  explicacao: ExplicacaoCalculo;
+}
+
+/** Notação de dado pra uma linha do popup "ⓘ" (ex.: "2d6 + 3") —
+ * `comSinal` prefixa "+" pra linhas de ACRÉSCIMO (Aprimoramento de
+ * Truque/Upcast), nunca pra Dado Base. */
+export function fmtDado(quantidade: number, lados: number, mod: number, comSinal = false): string {
+  const sinal = comSinal && quantidade >= 0 ? '+' : '';
+  const parteMod = mod !== 0 ? ` ${mod >= 0 ? '+' : '-'} ${Math.abs(mod)}` : '';
+  return `${sinal}${quantidade}d${lados}${parteMod}`;
 }
 
 /** Motor genérico de "dado base + Upcast + Aprimoramento de Truque" —
@@ -55,59 +75,89 @@ interface EscalonamentoBase {
  * Aprimoramento de Truque (nível) nunca coexistem na mesma magia hoje
  * (truque nunca tem `upcastTipo`), mas a ordem abaixo — truque
  * primeiro, upcast depois — deixa o resultado certo mesmo se isso
- * mudar. */
+ * mudar.
+ *
+ * `rotuloTotal` (ex.: "Dano"/"Cura") só decide o label da última linha
+ * da `explicacao` devolvida (B8, ver DECISOES-COMBATE.md) — não afeta
+ * quantidade/lados/mod, que continuam iguais a antes desta entrega. */
 function calcularEscalonamento(
   dadoBase: string | null,
   magia: Magia,
   circuloUsado: number,
   nivelPersonagem: number,
+  rotuloTotal: string,
 ): EscalonamentoBase | null {
   if (!dadoBase) return null;
   const base = parsearDado(dadoBase);
   if (!base) return null;
 
-  const baseEscalada: DadoParseado =
-    magia.escalaTruqueTipo === 'dado'
-      ? { ...base, quantidade: base.quantidade + tiersDeAprimoramentoTruque(nivelPersonagem) }
-      : base;
+  const linhas: ExplicacaoCalculo['linhas'] = [{ label: 'Dado Base', valor: fmtDado(base.quantidade, base.lados, base.mod) }];
 
-  const resultadoBase: EscalonamentoBase = { ...baseEscalada, upcastNaoAutomatico: false };
+  const tier = magia.escalaTruqueTipo === 'dado' ? tiersDeAprimoramentoTruque(nivelPersonagem) : 0;
+  const baseEscalada: DadoParseado = tier > 0 ? { ...base, quantidade: base.quantidade + tier } : base;
+  if (tier > 0) {
+    linhas.push({ label: 'Aprimoramento de Truque', valor: fmtDado(tier, base.lados, 0, true) });
+  }
 
-  if (!magia.upcastTipo) return resultadoBase;
+  function comExplicacao(resultado: Omit<EscalonamentoBase, 'explicacao'>, linhasExtras: ExplicacaoCalculo['linhas'] = []): EscalonamentoBase {
+    const todasLinhas = [...linhas, ...linhasExtras];
+    return {
+      ...resultado,
+      explicacao: {
+        linhas: todasLinhas,
+        total: { label: rotuloTotal, valor: fmtDado(resultado.quantidade, resultado.lados, resultado.mod) },
+      },
+    };
+  }
+
+  const resultadoBase = { ...baseEscalada, upcastNaoAutomatico: false };
+
+  if (!magia.upcastTipo) return comExplicacao(resultadoBase);
 
   const circuloBase = magia.upcastCirculoBase ?? magia.circulo;
   const niveisAcima = circuloUsado - circuloBase;
-  if (niveisAcima <= 0) return resultadoBase;
+  if (niveisAcima <= 0) return comExplicacao(resultadoBase);
 
   if (magia.upcastTipo === 'dado-por-circulo' && magia.upcastDado) {
     const extra = parsearDado(magia.upcastDado);
     if (extra && extra.lados === baseEscalada.lados) {
-      return {
-        quantidade: baseEscalada.quantidade + extra.quantidade * niveisAcima,
-        lados: baseEscalada.lados,
-        mod: baseEscalada.mod + extra.mod * niveisAcima,
-        upcastNaoAutomatico: false,
-      };
+      const quantidadeExtra = extra.quantidade * niveisAcima;
+      const modExtra = extra.mod * niveisAcima;
+      return comExplicacao(
+        {
+          quantidade: baseEscalada.quantidade + quantidadeExtra,
+          lados: baseEscalada.lados,
+          mod: baseEscalada.mod + modExtra,
+          upcastNaoAutomatico: false,
+        },
+        [{ label: `Upcast (+${niveisAcima} círculo${niveisAcima > 1 ? 's' : ''})`, valor: fmtDado(quantidadeExtra, baseEscalada.lados, modExtra, true) }],
+      );
     }
   }
 
   if (magia.upcastTipo === 'flat-por-circulo' && magia.upcastFlat != null) {
-    return {
-      quantidade: baseEscalada.quantidade,
-      lados: baseEscalada.lados,
-      mod: baseEscalada.mod + magia.upcastFlat * niveisAcima,
-      upcastNaoAutomatico: false,
-    };
+    const flatExtra = magia.upcastFlat * niveisAcima;
+    return comExplicacao(
+      {
+        quantidade: baseEscalada.quantidade,
+        lados: baseEscalada.lados,
+        mod: baseEscalada.mod + flatExtra,
+        upcastNaoAutomatico: false,
+      },
+      [{ label: `Upcast (+${niveisAcima} círculo${niveisAcima > 1 ? 's' : ''})`, valor: `${flatExtra >= 0 ? '+' : ''}${flatExtra}` }],
+    );
   }
 
   // 'alvo-por-circulo' só aumenta o nº de alvos atingidos — o dado por
   // alvo não muda, então o Dano/Cura Base (já escalado por truque, se
   // for o caso) já é o resultado final.
-  if (magia.upcastTipo === 'alvo-por-circulo') return resultadoBase;
+  if (magia.upcastTipo === 'alvo-por-circulo') return comExplicacao(resultadoBase);
 
   // 'formula-propria' | 'outro', ou 'dado-por-circulo'/'flat-por-circulo'
   // com dado incompatível pro Dano/Cura Base: não dá pra somar sozinho.
-  return { ...resultadoBase, upcastNaoAutomatico: true };
+  // A explicação cobre só a parte automática (Base + Aprimoramento de
+  // Truque) — ver comentário de `upcastNaoAutomatico` em `CalculoDanoMagia`.
+  return comExplicacao({ ...resultadoBase, upcastNaoAutomatico: true });
 }
 
 /** Combina `danoBaseDado`/`danoBaseTipo` da magia com o Upcast
@@ -119,7 +169,7 @@ function calcularEscalonamento(
  * ausente) ou o texto do dado não segue o formato "NdM" / "NdM + F"
  * esperado. */
 export function calcularDanoMagia(magia: Magia, circuloUsado: number, nivelPersonagem: number): CalculoDanoMagia | null {
-  const escalonamento = calcularEscalonamento(magia.danoBaseDado, magia, circuloUsado, nivelPersonagem);
+  const escalonamento = calcularEscalonamento(magia.danoBaseDado, magia, circuloUsado, nivelPersonagem, 'Dano');
   if (!escalonamento) return null;
   return { ...escalonamento, tipo: magia.danoBaseTipo };
 }
@@ -135,7 +185,7 @@ export function calcularDanoCondicionalMagia(
   circuloUsado: number,
   nivelPersonagem: number,
 ): CalculoDanoMagia | null {
-  const escalonamento = calcularEscalonamento(magia.danoCondicionalDado, magia, circuloUsado, nivelPersonagem);
+  const escalonamento = calcularEscalonamento(magia.danoCondicionalDado, magia, circuloUsado, nivelPersonagem, 'Dano');
   if (!escalonamento) return null;
   return { ...escalonamento, tipo: magia.danoBaseTipo };
 }
@@ -147,6 +197,9 @@ export interface CalculoCuraMagia {
   /** Ver `CalculoDanoMagia.upcastNaoAutomatico` — mesmo conceito,
    * aplicado à cura. */
   upcastNaoAutomatico: boolean;
+  /** Ver `CalculoDanoMagia.explicacao` — mesmo formato, aplicado à
+   * cura (B8). */
+  explicacao: ExplicacaoCalculo;
 }
 
 /** Espelha `calcularDanoMagia`, mas pra `curaBaseDado` — mesmo motor
@@ -155,7 +208,7 @@ export interface CalculoCuraMagia {
  * formato de dado único (ver comentário de `curaBaseDado` em
  * `magias.ts`). */
 export function calcularCuraMagia(magia: Magia, circuloUsado: number, nivelPersonagem: number): CalculoCuraMagia | null {
-  return calcularEscalonamento(magia.curaBaseDado, magia, circuloUsado, nivelPersonagem);
+  return calcularEscalonamento(magia.curaBaseDado, magia, circuloUsado, nivelPersonagem, 'Cura');
 }
 
 export type MecanicaMagia = 'ataque' | 'salvaguarda' | 'cura' | 'nenhuma';

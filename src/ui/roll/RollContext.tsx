@@ -1,13 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
+import type { ExplicacaoCalculo } from '../../core/calculoPersonagem';
 import { useColapsavel } from '../hooks/useColapsavel';
 import { suportaWebGL } from '../utils/suportaWebGL';
-import {
-  carregarDiceBox3D,
-  COR_POR_LADOS,
-  garantirTemaDiceBox3D,
-  lancarGrupos,
-  type DiceBoxResultado,
-} from './diceBox3d';
+import { lancarGrupos, rerolarGrupo, type DiceBoxResultado } from './diceBox3d';
 
 type CritTipo = 'sucesso' | 'falha' | null;
 
@@ -99,6 +94,10 @@ export interface RollState {
   /** Categoria opcional — `undefined`/ausente = nenhum bônus extra
    * pode se aplicar a esta rolagem. */
   categoria?: CategoriaRolagemD20;
+  /** Quebra do `mod` em partes nomeadas — ver `RollD20Options.
+   * explicacaoMod`. Ausente = a rolagem só mostra a fórmula simples,
+   * sem ⓘ. */
+  explicacaoMod?: ExplicacaoCalculo;
   /** Preenchido quando o jogador já aplicou o `BonusExtraProvider`
    * registrado — guarda rótulo + valor rolado, pra mostrar a quebra
    * do total e travar o botão (regra real: no máximo 1x por jogada).
@@ -262,6 +261,13 @@ interface RollD20Options {
   /** Ver `CategoriaRolagemD20` — omitido = nenhum bônus extra
    * registrado pode se aplicar a esta rolagem. */
   categoria?: CategoriaRolagemD20;
+  /** Quebra do `mod` em partes nomeadas (ex.: FOR +3, Bônus de
+   * Proficiência +2) — mesmo formato do popup "ⓘ" que já existe em
+   * CA/perícia/iniciativa (`ExplicacaoCalculo`, `core/
+   * calculoPersonagem.ts`). Omitido = a rolagem só mostra a fórmula
+   * simples (`1d20 + N`), sem ⓘ — nem toda rolagem tem a quebra pronta
+   * ainda (ver B7, `EmDev.md`). */
+  explicacaoMod?: ExplicacaoCalculo;
   onResultado?: (total: number, d20: number) => void;
 }
 
@@ -284,6 +290,12 @@ interface RollDadosOptions {
   /** Ver `RollState.rerollEscolhido` — só tem efeito com 2+ dados no
    * total (`quantidade` + soma de `gruposExtras`). */
   rerollEscolhido?: { rotulo: string };
+  /** Quebra do dado base/Aprimoramento de Truque/Upcast (dano/cura de
+   * magia, B8) — mesmo formato do "ⓘ" de CA/perícia/ataque, mas com
+   * notação de dado em vez de número resolvido (ver
+   * `CalculoDanoMagia.explicacao`, `core/magiaDano.ts`). Omitido = a
+   * rolagem só mostra a fórmula simples, sem ⓘ. */
+  explicacaoMod?: ExplicacaoCalculo;
   onResultado?: (total: number) => void;
 }
 
@@ -430,31 +442,18 @@ function dadoBruto(grupo: DiceBoxResultado): DiceBoxResultado {
 /** Rerola FISICAMENTE o dado identificado por `resultadoBruto` (Sorte,
  * Inspiração Heroica, Perfurador — ver "Rerolagem" em
  * sdd/sdd-dado-3d.md) — usado só quando o dado original já veio do
- * motor 3D. `remove: true` tira o dado antigo da cena no lugar do
- * novo (senão os 2 ficariam visíveis juntos). Cai pro `onFalha` (2D)
- * se o motor 3D falhar por qualquer motivo — mesmo espírito do
- * fallback de `rolarD20`.
- *
- * `box.reroll()` reaproveita o MESMO `groupId` do dado original (é
- * assim que ele "sabe" que é o mesmo dado, não um novo) — mas
- * `onRollComplete` continua devolvendo TODOS os grupos vivos na cena
- * (grid de 2+ dados tem 1 grupo por dado), não só o rerolado. Achado
- * testando no celular ("2º dado não reconhecido", mesmo bug do
- * `escolherVantagemPosRolagem` abaixo): tem que achar o grupo com o
- * `id` igual ao `groupId` do dado original, nunca assumir posição
- * fixa no array. */
+ * motor 3D. Cai pro `onFalha` (2D) se o motor 3D falhar por qualquer
+ * motivo — mesmo espírito do fallback de `rolarD20`. A parte de
+ * "achar o grupo certo mesmo com 2+ dados vivos na cena" mora em
+ * `rerolarGrupo()` (`diceBox3d.ts`, B6.4). */
 async function rerolarFisico(
   resultadoBruto: DiceBoxResultado,
   onSucesso: (novoValor: number, novoResultado: DiceBoxResultado) => void,
   onFalha: () => void,
 ) {
   try {
-    const box = await carregarDiceBox3D();
-    box.onRollComplete = (resultados) => {
-      const grupo = resultados.find((g) => g.id === resultadoBruto.groupId) ?? resultados[resultados.length - 1];
-      onSucesso(grupo.value, dadoBruto(grupo));
-    };
-    box.reroll(resultadoBruto, { remove: true });
+    const grupo = await rerolarGrupo(resultadoBruto);
+    onSucesso(grupo.value, dadoBruto(grupo));
   } catch {
     onFalha();
   }
@@ -484,7 +483,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
   const dado3DAtivo = preferenciaDado3D && dado3DDisponivel && !modoTeste;
 
   const rolarD20 = useCallback(
-    ({ label, formula, mod, vantagem, categoria, onResultado }: RollD20Options) => {
+    ({ label, formula, mod, vantagem, categoria, explicacaoMod, onResultado }: RollD20Options) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       const usar3D = dado3DAtivo;
       setEstado({
@@ -500,6 +499,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         critico: null,
         podeEscolherVantagem: false,
         categoria,
+        explicacaoMod,
         bonusExtra: null,
         motor3D: usar3D,
       });
@@ -523,6 +523,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           critico: criticoDe(rolagem1),
           podeEscolherVantagem: true,
           categoria,
+          explicacaoMod,
           bonusExtra: null,
           sorteUsada: false,
           inspiracaoHeroicaUsada: false,
@@ -550,6 +551,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           critico: criticoDe(usado),
           podeEscolherVantagem: false,
           categoria,
+          explicacaoMod,
           bonusExtra: null,
           sorteUsada: false,
           inspiracaoHeroicaUsada: false,
@@ -604,7 +606,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
   );
 
   const rolarDados = useCallback(
-    ({ label, formula, quantidade, lados, mod, gruposExtras, rerollSe1, rerollEscolhido, onResultado }: RollDadosOptions) => {
+    ({ label, formula, quantidade, lados, mod, gruposExtras, rerollSe1, rerollEscolhido, explicacaoMod, onResultado }: RollDadosOptions) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       const usar3D = dado3DAtivo;
       // "reroll se 1"/reroll de 1 dado só fazem sentido sabendo o
@@ -634,6 +636,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         dadosIndividuais: umDadoSo
           ? undefined
           : especificacaoDados.map((d, i) => ({ id: `d${i}`, lados: d.lados, valor: '🎲' })),
+        explicacaoMod,
         motor3D: usar3D,
       });
 
@@ -661,6 +664,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           // dado" com 1 só). Ver `rerollDadoEscolhido`.
           rerollEscolhido: rerollEscolhido ?? null,
           rerollEscolhidoUsado: false,
+          explicacaoMod,
           motor3D: viaMotor3D,
           resultadoBrutoDados: resultadoBruto,
         });
@@ -692,6 +696,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           dadosIndividuais,
           rerollEscolhido: rerollEscolhido ?? null,
           rerollEscolhidoUsado: false,
+          explicacaoMod,
           motor3D: viaMotor3D,
         });
         onResultado?.(total);
@@ -711,20 +716,17 @@ export function RollProvider({ children }: { children: ReactNode }) {
       if (usar3D) {
         (async () => {
           try {
-            const box = await carregarDiceBox3D();
-            await garantirTemaDiceBox3D(box, 'default');
             if (umDadoSo) {
-              box.onRollComplete = (resultados) => concluirUmDado(resultados[0].value, true, dadoBruto(resultados[0]));
-              box.roll({ qty: 1, sides: lados, themeColor: COR_POR_LADOS[lados] });
+              const [grupo] = await lancarGrupos({ qty: 1, sides: lados });
+              concluirUmDado(grupo.value, true, dadoBruto(grupo));
             } else {
-              const grupos = especificacaoDados.map((d) => ({ qty: 1, sides: d.lados, themeColor: COR_POR_LADOS[d.lados] }));
-              box.onRollComplete = (resultados) =>
-                concluirGrid(
-                  resultados.map((r) => r.value),
-                  true,
-                  resultados.map(dadoBruto),
-                );
-              box.roll(grupos.length === 1 ? grupos[0] : grupos);
+              const grupos = especificacaoDados.map((d) => ({ qty: 1, sides: d.lados }));
+              const resultados = await lancarGrupos(grupos);
+              concluirGrid(
+                resultados.map((r) => r.value),
+                true,
+                resultados.map(dadoBruto),
+              );
             }
           } catch {
             timeoutRef.current = setTimeout(rolar2D, DURACAO_ANIMACAO_MS);
@@ -844,19 +846,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
       if (usar3D) {
         (async () => {
           try {
-            const box = await carregarDiceBox3D();
-            await garantirTemaDiceBox3D(box, 'default');
-            // `onRollComplete`/`getRollResults()` devolve TODOS os
-            // grupos acumulados desde o último `.clear()` — `.roll()`
-            // limpa, `.add()` NÃO. Como o 1º dado já criou um grupo
-            // antes, `resultados` chega com 2 posições aqui: a [0] é o
-            // grupo VELHO (1º dado, já mostrado), o novo (o que
-            // acabou de cair) é sempre o ÚLTIMO da lista. Ler
-            // `resultados[0]` pegava sempre o dado velho de novo —
-            // bug real, achado testando no celular ("o segundo dado
-            // não é reconhecido").
-            box.onRollComplete = (resultados) => concluir(resultados[resultados.length - 1].value, true);
-            box.add({ qty: 1, sides: 20, themeColor: COR_POR_LADOS[20] });
+            const [grupo] = await lancarGrupos({ qty: 1, sides: 20 }, { modo: 'add' });
+            concluir(grupo.value, true);
           } catch {
             timeoutRef.current = setTimeout(() => {
               concluir(rolarD20Dado(modoTesteRef, indiceModoTesteRef), false);

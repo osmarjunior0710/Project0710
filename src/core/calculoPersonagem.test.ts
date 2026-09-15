@@ -3,6 +3,7 @@ import {
   bonusProficiencia,
   bonusPvPorNivelDaEspecie,
   bonusPvPorNivelDoTalento,
+  calcularAtributosFinais,
   calcularCA,
   calcularCAEquipado,
   calcularPvMaximoNivel1,
@@ -224,6 +225,25 @@ describe('calcularSalvaguardas', () => {
     const s = selecaoGuerreiro();
     const resultado = calcularSalvaguardas(s, null, 1);
     expect(resultado.every((sv) => !sv.proficiente)).toBe(true);
+  });
+});
+
+describe('calcularAtributosFinais', () => {
+  it('explicacao tem só 1 linha (mod. do atributo), sem Bônus de Proficiência — teste de atributo puro nunca soma isso', () => {
+    const s = selecaoGuerreiro(); // FOR 15 (mod +2)
+    const resultado = calcularAtributosFinais(s);
+    const forca = resultado.find((a) => a.atributo === 'FOR');
+    expect(forca?.mod).toBe(2);
+    expect(forca?.explicacao.linhas).toEqual([{ label: 'mod. FOR', valor: '+2' }]);
+    expect(forca?.explicacao.total).toEqual({ label: 'FOR', valor: '+2' });
+  });
+
+  it('borda: atributo com mod. negativo formata o sinal certo (CAR 8 = mod -1)', () => {
+    const s = selecaoGuerreiro(); // CAR 8 (mod -1)
+    const resultado = calcularAtributosFinais(s);
+    const carisma = resultado.find((a) => a.atributo === 'CAR');
+    expect(carisma?.mod).toBe(-1);
+    expect(carisma?.explicacao.total.valor).toBe('-1');
   });
 });
 

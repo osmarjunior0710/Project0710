@@ -44,7 +44,7 @@ export function carregarDiceBox3D(): Promise<DiceBox> {
       // então um canvas menor sozinho deixava o dado minúsculo. Padrão
       // da lib é 5; achado testando no celular (pedido do Osmar: "uns
       // 20% menor que o tamanho original", não do tamanho que ficou).
-      scale: 7.5,
+      scale: 6.75,
     });
     await box.init();
     diceBoxRef = box;
@@ -87,6 +87,79 @@ export function gruposNovos(idsAntes: ReadonlySet<unknown>, resultados: DiceBoxR
   return novos.length > 0 ? novos : resultados;
 }
 
+/** Espera depois do último dado assentar antes de começar a sumir
+ * (pedido do Osmar: "conta 3s, e de 3s até 5s eles vão de 100 a 0"). */
+const ESPERA_ANTES_DO_FADE_MS = 3000;
+/** Duração do fade em si (3s → 5s = 2000ms). Precisa bater com a
+ * `transition` aplicada em `agendarFadeDados()` — os dois valores só
+ * existem aqui, não tem CSS separado pra manter em sincronia. */
+const DURACAO_FADE_MS = 2000;
+
+let fadeTimeoutRef: ReturnType<typeof setTimeout> | null = null;
+
+/** Cancela um fade agendado e devolve o canvas físico pro 100% de
+ * opacidade na hora (sem transição) — chamado ANTES de qualquer
+ * `roll()`/`add()`/`reroll()` novo, pra nunca começar uma rolagem nova
+ * com o dado anterior ainda sumindo ou já invisível. Direto no DOM (via
+ * `getElementById`, não um componente React) porque quem dispara isso
+ * é o motor 3D (`diceBox3d.ts`), fora da árvore de componentes — e pra
+ * não acoplar este módulo genérico ao CSS Module de um consumidor
+ * específico (`Dice3dFab.module.css`). */
+export function cancelarFadeDados() {
+  if (fadeTimeoutRef) {
+    clearTimeout(fadeTimeoutRef);
+    fadeTimeoutRef = null;
+  }
+  const host = document.getElementById(DICE3D_CANVAS_HOST_ID);
+  if (host) {
+    host.style.transition = 'none';
+    host.style.opacity = '1';
+  }
+}
+
+/** Agenda o dado físico sumir sozinho — chamado no `onRollComplete` de
+ * QUALQUER rolagem (roll/add/reroll, oficial ou avulsa) depois que a
+ * física de todo mundo já assentou. Sempre cancela/reinicia o timer
+ * anterior primeiro (`cancelarFadeDados`) — se um 2º dado assentar
+ * antes do fade do 1º terminar (ex.: Vantagem/Desvantagem escolhida
+ * DEPOIS do resultado, `box.add()`), o relógio dos 3s recomeça do zero
+ * pros dois juntos, em vez de um sumir enquanto o outro ainda nem
+ * apareceu. */
+export function agendarFadeDados() {
+  cancelarFadeDados();
+  fadeTimeoutRef = setTimeout(() => {
+    const host = document.getElementById(DICE3D_CANVAS_HOST_ID);
+    if (host) {
+      host.style.transition = `opacity ${DURACAO_FADE_MS}ms linear`;
+      host.style.opacity = '0';
+    }
+    fadeTimeoutRef = null;
+  }, ESPERA_ANTES_DO_FADE_MS);
+}
+
+/** Rerola FISICAMENTE o grupo identificado por `resultadoBruto` (Sorte,
+ * Inspiração Heroica, Perfurador — ver "Rerolagem" em
+ * sdd/sdd-dado-3d.md) — irmã de `lancarGrupos()`, mas pra `reroll()`
+ * em vez de `roll()`/`add()`: `box.reroll()` REAPROVEITA o `groupId` do
+ * dado original (é assim que a lib "sabe" que é o mesmo dado, não um
+ * novo), então `gruposNovos()` não se aplica aqui — o grupo rerolado
+ * pode estar em QUALQUER posição no array que `onRollComplete` devolve
+ * (a cena pode ter 2+ dados vivos, ex.: grid do Perfurador), nunca só
+ * o último. Por isso acha pelo `id` de volta, com fallback pro último
+ * item só se por algum motivo o id não bater (não deveria acontecer).
+ * `remove: true` tira o dado antigo da cena no lugar do novo. */
+export async function rerolarGrupo(resultadoBruto: DiceBoxResultado): Promise<DiceBoxResultado> {
+  const box = await carregarDiceBox3D();
+  cancelarFadeDados();
+  return new Promise((resolve) => {
+    box.onRollComplete = (resultados) => {
+      agendarFadeDados();
+      resolve(resultados.find((g) => g.id === resultadoBruto.groupId) ?? resultados[resultados.length - 1]);
+    };
+    box.reroll(resultadoBruto, { remove: true });
+  });
+}
+
 export type ModoLancamento = 'roll' | 'add';
 
 /** Ponto único de entrada pra jogar dado(s) físico(s) na cena (`B6` —
@@ -110,8 +183,12 @@ export async function lancarGrupos(
   const lista = Array.isArray(grupos) ? grupos : [grupos];
   const comCor = lista.map((g) => ({ ...g, themeColor: g.themeColor ?? COR_POR_LADOS[g.sides] }));
   const idsAntes = new Set(box.getRollResults().map((r) => r.id));
+  cancelarFadeDados();
   return new Promise((resolve) => {
-    box.onRollComplete = (resultados) => resolve(gruposNovos(idsAntes, resultados));
+    box.onRollComplete = (resultados) => {
+      agendarFadeDados();
+      resolve(gruposNovos(idsAntes, resultados));
+    };
     const notacao = comCor.length === 1 ? comCor[0] : comCor;
     if (opcoes.modo === 'add') box.add(notacao);
     else box.roll(notacao);

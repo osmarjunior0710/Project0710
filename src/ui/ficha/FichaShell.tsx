@@ -76,7 +76,7 @@ import { type MagiaGratisDeInvocacao } from '../../core/invocacoesMagiaGratis';
 import { aplicarAlteracaoPv, ganharPvTemporario } from '../../core/pvTemporario';
 import { deveAplicarVigorImplacavel } from '../../core/vigorImplacavel';
 import { tipoDanoSubescolha, opcoesEscolhaReutilizavel } from '../../core/especieSubescolha';
-import { dadosAtaqueDeSopro } from '../../core/ataqueDeSopro';
+import { dadosAtaqueDeSopro, explicarCdAtaqueDeSopro } from '../../core/ataqueDeSopro';
 import { valorBencaoDoTenebroso } from '../../core/bencaoDoTenebroso';
 import {
   CHAVE_RITUAL_RAPIDO,
@@ -91,6 +91,8 @@ import { podeLevelUpPorXp, proximoMarcoXp } from '../../core/experiencia';
 import {
   espacosDeMagiaAtivos,
   modAcertoConjuracao as calcularModAcertoConjuracao,
+  explicarModAcertoConjuracao,
+  explicarCdConjuracao,
   magiasDisponiveisParaPreparar,
   poolDescobertasMagicas,
 } from '../../core/magiasPersonagem';
@@ -488,6 +490,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const usosAtaqueDeSoproMaximo = ataqueDeSoproDisponivel && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
   const usosAtaqueDeSoproRestantes = Math.max(0, usosAtaqueDeSoproMaximo - ataqueDeSoproGasto);
   const cdAtaqueDeSopro = 8 + modificador(conValorFinal) + bonusProficienciaAtual;
+  const explicacaoCdAtaqueDeSopro = explicarCdAtaqueDeSopro(modificador(conValorFinal), bonusProficienciaAtual);
   const numDadosAtaqueDeSopro = dadosAtaqueDeSopro(nivelTotalAtual);
   const tipoDanoAtaqueDeSopro = especieAtual ? tipoDanoSubescolha(especieAtual, selecao) : null;
   const vooDraconicoDisponivel = selecao.especie === 'Draconato' && nivelTotalAtual >= 5;
@@ -614,6 +617,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasPactoDoInferoDisponivel,
   });
   const modAcertoConjuracao = calcularModAcertoConjuracao(selecao, classe, nivelTotalAtual);
+  const explicacaoAcertoConjuracao = explicarModAcertoConjuracao(selecao, classe, nivelTotalAtual);
+  const explicacaoCdConjuracao = explicarCdConjuracao(selecao, classe, nivelTotalAtual);
   const usosInspiracaoMax = usosInspiracaoMaximo(selecao, classe, personagem.nivel);
   const usosInspiracaoRestantes = Math.max(0, usosInspiracaoMax - inspiracaoGasto);
   const tamanhoDadoInspiracao = dadoInspiracao(classe, personagem.nivel);
@@ -1873,6 +1878,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             espacosParaConjurar={espacosParaConjurar}
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}
+            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
+            explicacaoCdConjuracao={explicacaoCdConjuracao}
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}
             modCarisma={carMod}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
@@ -1964,6 +1971,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               maximo: usosAtaqueDeSoproMaximo,
               restantes: usosAtaqueDeSoproRestantes,
               cd: cdAtaqueDeSopro,
+              explicacaoCd: explicacaoCdAtaqueDeSopro,
               numDados: numDadosAtaqueDeSopro,
               tipoDano: tipoDanoAtaqueDeSopro,
               onUsar: usarAtaqueDeSopro,
@@ -2023,6 +2031,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             magiasPreparadasBonus={magiasPreparadasBonus}
             magiasPreparadasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
+            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
+            explicacaoCdConjuracao={explicacaoCdConjuracao}
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}
             modCarisma={carMod}
             numAtaques={numAtaques}
@@ -2049,6 +2059,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             palavrasDeInterrupcaoDisponivel={palavrasDeInterrupcaoDisponivel}
             periciaInigualavelDisponivel={periciaInigualavelDisponivel}
             iniciativaMod={iniciativa}
+            explicacaoIniciativa={explicacaoIniciativa}
             onRolarIniciativa={aoRolarIniciativa}
             colheitaMacabra={{
               disponivel: colheitaMacabraDisponivel,

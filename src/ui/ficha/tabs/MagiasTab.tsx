@@ -3,6 +3,7 @@ import type { Classe } from '../../../data/rulesets/dnd2024/classes';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { armas } from '../../../data/rulesets/dnd2024/armas';
 import type { ItemMochila } from '../../../core/mochila';
+import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import {
   espacosDeMagiaAtivos,
   truquesDoPersonagem,
@@ -50,6 +51,12 @@ interface MagiasTabProps {
   espacosParaConjurar?: EspacoDeMagiaAtivo[];
   onGastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
   modAcertoConjuracao: number | null;
+  /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
+   * `null` nos mesmos casos que `modAcertoConjuracao`. */
+  explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
+  /** Quebra da CD de magia (B8) — usada no popup de Salvaguarda de
+   * Magia. `null` nos mesmos casos que `modAcertoConjuracao`. */
+  explicacaoCdConjuracao: ExplicacaoCalculo | null;
   /** `true` = Armadura equipada sem treinamento — bloqueia qualquer
    * conjuração feita direto por aqui (SDD "Penalidades por Falta de
    * Proficiência", ver `core/proficienciaArmadura.ts`). O bloqueio de
@@ -191,6 +198,8 @@ export default function MagiasTab({
   espacosParaConjurar,
   onGastarSlotCirculo,
   modAcertoConjuracao,
+  explicacaoAcertoConjuracao,
+  explicacaoCdConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
   desvantagemForcaDestreza,
@@ -248,6 +257,7 @@ export default function MagiasTab({
     quantidade: number;
     lados: number;
     mod: number;
+    explicacaoMod?: ExplicacaoCalculo;
   } | null>(null);
   const [telaSalvaguarda, setTelaSalvaguarda] = useState<{ magia: Magia; circuloUsado: number } | null>(null);
 
@@ -288,6 +298,7 @@ export default function MagiasTab({
       gastouEspacoDeVerdade,
       truqueVinculadoAgonizante,
       modCarisma,
+      explicacaoAcertoConjuracao,
     );
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
@@ -315,6 +326,7 @@ export default function MagiasTab({
       quantidade: danoPendenteMagia.quantidade,
       lados: danoPendenteMagia.lados,
       mod: danoPendenteMagia.mod,
+      explicacaoMod: danoPendenteMagia.explicacaoMod,
     });
     setDanoPendenteMagia(null);
   }
@@ -330,6 +342,7 @@ export default function MagiasTab({
       quantidade: dano.quantidade,
       lados: dano.lados,
       mod: dano.mod,
+      explicacaoMod: dano.explicacao,
     });
   }
 
@@ -349,6 +362,7 @@ export default function MagiasTab({
       quantidade: dano.quantidade,
       lados: dano.lados,
       mod: dano.mod,
+      explicacaoMod: dano.explicacao,
     });
   }
 
@@ -409,6 +423,7 @@ export default function MagiasTab({
           nomeMagia={telaSalvaguarda.magia.nome}
           atributo={atributoSalvaguarda(telaSalvaguarda.magia)}
           cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
+          explicacaoCd={explicacaoCdConjuracao}
           textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
           textoFalha={telaSalvaguarda.magia.salvaguardaFalha}
           dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}

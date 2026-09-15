@@ -223,6 +223,7 @@ export default function AtributosTab({
               label: 'Iniciativa',
               formula: `1d20 + ${iniciativa}`,
               mod: iniciativa,
+              explicacaoMod: explicacaoIniciativa,
               vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
             });
             onRolarIniciativa?.();
@@ -245,6 +246,7 @@ export default function AtributosTab({
                 label: a.atributo,
                 formula: `1d20 ${a.mod >= 0 ? '+' : '-'} ${Math.abs(a.mod)}`,
                 mod: a.mod,
+                explicacaoMod: a.explicacao,
                 categoria: 'atributoOuSalvaguarda',
                 vantagem:
                   desvantagemForcaDestreza && (a.atributo === 'FOR' || a.atributo === 'DES') ? 'desvantagem' : undefined,
@@ -271,6 +273,7 @@ export default function AtributosTab({
               label: sv.explicacao.total.label,
               formula: `1d20 ${sv.mod >= 0 ? '+' : '-'} ${Math.abs(sv.mod)}`,
               mod: sv.mod,
+              explicacaoMod: sv.explicacao,
               categoria: 'atributoOuSalvaguarda',
               vantagem: resolverVantagem(
                 temSentidoDePerigo && sv.atributo === 'DES',
@@ -304,6 +307,7 @@ export default function AtributosTab({
               label: p.nome,
               formula: `1d20 ${p.mod >= 0 ? '+' : '-'} ${Math.abs(p.mod)}`,
               mod: p.mod,
+              explicacaoMod: p.explicacao,
               categoria: 'atributoOuSalvaguarda',
               vantagem:
                 desvantagemForcaDestreza && (p.atributo === 'FOR' || p.atributo === 'DES') ? 'desvantagem' : undefined,
