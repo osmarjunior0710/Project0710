@@ -50,10 +50,14 @@ técnico e "confie". Isso muda como você deve trabalhar:
 - Nunca entregue mudanças grandes de uma vez. Prefira sempre a menor
   entrega que já seja testável sozinha.
 - Ao final de toda entrega relevante, responda sem que ele precise pedir:
-  1. O que exatamente mudou (lista de arquivos, 1 frase cada)
-  2. Como testar isso sozinho, sem ler código (passo a passo na tela)
-  3. Isso quebra algo que já funcionava antes?
-  4. Isso foi testado em largura de celular (~390px) primeiro? Tem algo
+  1. A versão publicada (`APP_VERSION` de `src/version.ts` no momento
+     desse push, ex.: `v202609_1728`) — só quando a entrega passou pelo
+     fluxo de publicação da seção 20 (mexeu em `src/`); pule esta linha
+     numa resposta que não publicou nada novo (ex.: só decisão/processo).
+  2. O que exatamente mudou (lista de arquivos, 1 frase cada)
+  3. Como testar isso sozinho, sem ler código (passo a passo na tela)
+  4. Isso quebra algo que já funcionava antes?
+  5. Isso foi testado em largura de celular (~390px) primeiro? Tem algo
      pequeno demais pra tocar com o dedo?
 
 ## 2. Fonte de verdade de comportamento: o wireframe
