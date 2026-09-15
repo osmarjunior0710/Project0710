@@ -13,6 +13,16 @@ fechar. O ✕ ficou menor e foi pro vértice do canto do card — nunca
 mais fica embaixo do texto, não importa quantas linhas o título
 quebrar.
 
+## v202609_1141
+
+O "🧪 Char de Teste Fixo" agora nasce direto no nível 20 — Mago 17
+(Necromante) multiclasse com Bardo 3 (Colégio do Conhecimento), com
+espaços de magia até o 9º círculo, Livro de Magias e Magias Preparadas
+cheios (incluindo Curar Ferimentos/Palavra Curativa, pra testar cura de
+verdade) e os 4 Aumentos de Atributo já aplicados. Clérigo (ideia
+original) ainda não existe no app — trocado por Bardo, que já cobre
+cura e já suporta multiclasse.
+
 ## v202609_1117
 
 Bárbaro — Golpe Brutal (nível 9) chegou. No Combate, com Ataque

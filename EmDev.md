@@ -670,11 +670,40 @@ foco fechar.
       forma confiável em Chromium headless (mesma limitação já
       documentada nas Entregas do B7/B8); a lógica por trás é a mesma
       já validada manualmente, risco baixo.
-- [ ] **Entrega 2** — Level Ups reais (não sorteados) até nível 17
-      Mago, depois multiclassa 3 níveis de Clérigo pelo mesmo fluxo de
-      escolha de classe que um jogador usaria (`EscolherClasseLevelUp.tsx`),
-      adicionando magias de cura (Curar Ferimentos/Palavra Curativa) e
-      talentos gerais.
+- [x] **Entrega 2 — nível 20, multiclasse**: Clérigo (proposta
+      original) **não existe no app ainda** (só Guerreiro/Bardo/Bruxo/
+      Mago/Bárbaro estão implementados, e só essas 4 primeiras têm
+      entrada de multiclasse em `proficienciasEntradaMulticlasse.ts`)
+      — achado no meio da entrega, perguntado ao Osmar, decidido trocar
+      por **Bardo** (já conjurador, já tem Curar Ferimentos/Palavra
+      Curativa na própria lista, multiclasse já suportada). Personagem
+      final: Mago 17 (Necromante) / Bardo 3 (Colégio do Conhecimento),
+      nível 20. Contagens de truques/Livro de Magias/Magias Preparadas
+      por nível calculadas com as fórmulas reais de
+      `core/recursosClasse.ts` (não a UI de Level Up de verdade — ver
+      nota abaixo), escolha de QUAL magia sempre feita à mão: Livro de
+      Magias do Mago com 38 magias do 1º ao 9º círculo (inclui Bola de
+      Fogo, Contramagia, Teleporte, Dominar Monstro, Chuva de
+      Meteoros...), Magias Preparadas combinadas (22 Mago + 6 Bardo,
+      lista única — mesmo padrão flat já usado no resto do app pra
+      multiclasse) incluindo Curar Ferimentos/Palavra Curativa (cura de
+      verdade, o motivo de somar o Bardo). 4 ASI de Mago (níveis 4/8/
+      12/16) foram pra CON (até o teto 20) e DES. `classes`/
+      `classeAtivaAtual`/`periciasMulticlasseAtual`/
+      `ferramentasMulticlasseAtual` preenchidos igual um Level Up de
+      verdade preencheria. PV somado nível a nível com a mesma fórmula
+      de `aplicarLevelUpsAleatorios` (dado médio + mod CON correspondente
+      + bônus da Tenacidade Anã), sem rolar de verdade = 193.
+      **Nota de risco:** construído calculando os números com as
+      MESMAS funções do motor real, mas sem passar pela UI de Level Up
+      de verdade (custaria clicar através de ~19 telas) — validado
+      visualmente (não com Vitest, já que é dado estático, não lógica)
+      via Playwright: pill Mago/Bardo aparece e alterna, 9 círculos de
+      Espaço de Magia ativos (combinado), PV/atributos/Bônus de
+      Proficiência batem, Perfil/Mochila/Combate renderizam sem erro,
+      "Usar" no Raio de Fogo dá `1d20 + 11` (INT+5 + Prof+6, bate com
+      nível 20). Verificado: `tsc -b`/`npm test` (563)/`npm run build`
+      limpos.
 - [ ] **Entrega 3** — Mochila populada com o catálogo completo de
       arma/armadura/equipamento (não só o inicial da classe), pra abrir
       qualquer popup sem precisar comprar nada na mão.
