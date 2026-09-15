@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1141
+
+O "🧪 Char de Teste Fixo" agora nasce direto no nível 20 — Mago 17
+(Necromante) multiclasse com Bardo 3 (Colégio do Conhecimento), com
+espaços de magia até o 9º círculo, Livro de Magias e Magias Preparadas
+cheios (incluindo Curar Ferimentos/Palavra Curativa, pra testar cura de
+verdade) e os 4 Aumentos de Atributo já aplicados. Clérigo (ideia
+original) ainda não existe no app — trocado por Bardo, que já cobre
+cura e já suporta multiclasse.
+
 ## v202609_0946
 
 Novo botão "🧪 Char de Teste Fixo" na Lista de Personagens — cria (ou
