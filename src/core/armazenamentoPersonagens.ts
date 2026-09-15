@@ -271,6 +271,10 @@ export interface PersonagemSalvo {
    * de ataque do turno (regra real), mas vale pros ataques seguintes
    * do mesmo turno (Ataque Extra) sem perguntar de novo. */
   ataqueImprudenteAtivoTurno?: boolean;
+  /** `true` = Golpe Brutal (Bárbaro nível 9+) já usado NESTE turno —
+   * reseta junto com `turnStateAtual` (Fim do Turno). Só 1x por turno
+   * (regra real: "uma jogada de ataque à sua escolha no seu turno"). */
+  golpeBrutalUsadoTurno?: boolean;
   /** Vigor Implacável (Orc) já disparou desde o último Descanso Longo
    * — só ele reseta. Ver `core/vigorImplacavel.ts`. */
   vigorImplacavelGasto?: boolean;

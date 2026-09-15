@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1117
+
+Bárbaro — Golpe Brutal (nível 9) chegou. No Combate, com Ataque
+Imprudente ativo, tocar "🔨 Golpe Brutal" (aparece ao lado de "🗡
+Atacar" a partir do 2º ataque do turno) renuncia à Vantagem nessa
+jogada — se acertar, aparece um 2º botão de dano extra e você escolhe
+o efeito (empurrão, redução de Deslocamento, e mais 2 opções a partir
+do nível 13; no 17 o dado extra dobra e dá pra escolher 2 efeitos de
+uma vez). 1x por turno.
+
 ## v202609_0053
 
 Bárbaro — Instintos Primitivos (nível 7) chegou: rolagem de Iniciativa

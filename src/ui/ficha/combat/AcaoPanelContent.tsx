@@ -69,6 +69,16 @@ interface AcaoPanelContentProps {
   temAtaqueImprudente: boolean;
   ataqueImprudenteAtivo: boolean;
   onAtivarAtaqueImprudente: () => void;
+  /** Golpe Brutal (Bárbaro nível 9+) — só aparece como linha própria
+   * (ao lado de "🗡 Atacar") quando o Ataque Imprudente já está ativo
+   * nesse turno e ainda não foi usado. `golpeBrutalDados` = 1 (nível
+   * 9-16) ou 2 (17+, "2d10"). Escolha do EFEITO (Debilitador/Poderoso/
+   * etc.) acontece depois, no `CombatTab` (junto com o botão de rolar
+   * o dado extra) — aqui só decide/rola o ataque em si. */
+  temGolpeBrutal: boolean;
+  golpeBrutalDados: number;
+  golpeBrutalUsadoTurno: boolean;
+  onUsarGolpeBrutal: () => void;
   detalhesAtivo: boolean;
   /** Mãos Curativas (Aasimar) — `false` = espécie não é Aasimar. */
   maosCurativasDisponivel: boolean;
@@ -121,6 +131,10 @@ export default function AcaoPanelContent({
   temAtaqueImprudente,
   ataqueImprudenteAtivo,
   onAtivarAtaqueImprudente,
+  temGolpeBrutal,
+  golpeBrutalDados,
+  golpeBrutalUsadoTurno,
+  onUsarGolpeBrutal,
   detalhesAtivo,
   maosCurativasDisponivel,
   maosCurativasGasto,
@@ -173,27 +187,39 @@ export default function AcaoPanelContent({
    * ataque (e o turno inteiro, ver `escolherAtaque`); só vira Vantagem
    * de verdade quando o ataque específico usa Força
    * (`ataque.usouForca`). Se coincidir com a Desvantagem de Armadura
-   * sem treino, as duas se cancelam (`resolverVantagem`). */
+   * sem treino, as duas se cancelam (`resolverVantagem`).
+   * `golpeBrutal` (Bárbaro nível 9+, ver `usarGolpeBrutal`) — renuncia
+   * à Vantagem NESSA jogada especificamente (ignora `imprudente`) e
+   * anexa o dado extra no `DanoPendente`, pro `CombatTab` mostrar o 2º
+   * botão de dano. */
   function rolarAtaque(
     nome: string,
     ataque: AtaqueInfo,
     finalizar: (nome: string, desc: string, dano: DanoPendente) => void,
     imprudente: boolean,
+    golpeBrutal = false,
   ) {
     rolarD20({
-      label: `Ataque — ${nome}`,
+      label: `Ataque — ${nome}${golpeBrutal ? ' (Golpe Brutal)' : ''}`,
       formula: `1d20 + ${ataque.modAcerto}`,
       mod: ataque.modAcerto,
       explicacaoMod: ataque.explicacaoAcerto,
-      vantagem: resolverVantagem(imprudente && ataque.usouForca, desvantagemForcaDestreza),
+      vantagem: resolverVantagem(!golpeBrutal && imprudente && ataque.usouForca, desvantagemForcaDestreza),
     });
-    finalizar(`🗡 ${nome}`, `Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano ${ataque.danoTipo}.`, {
-      label: `Dano — ${nome}`,
-      quantidade: ataque.danoQuantidade,
-      lados: ataque.danoLados,
-      mod: ataque.danoMod,
-      tipoDano: ataque.danoTipo,
-    });
+    finalizar(
+      `🗡 ${nome}`,
+      golpeBrutal
+        ? `Rolagem de acerto feita — renunciou à Vantagem do Ataque Imprudente pro Golpe Brutal. Toque "Rolar Dano" pro dano normal e "Rolar Golpe Brutal" pro dado extra se acertou.`
+        : `Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano ${ataque.danoTipo}.`,
+      {
+        label: `Dano — ${nome}`,
+        quantidade: ataque.danoQuantidade,
+        lados: ataque.danoLados,
+        mod: ataque.danoMod,
+        tipoDano: ataque.danoTipo,
+        golpeBrutal: golpeBrutal ? { quantidade: golpeBrutalDados, lados: 10 } : null,
+      },
+    );
   }
 
   const surtoDesabilitado = surtoRestantes <= 0 || surtoUsadoTurno;
@@ -220,6 +246,17 @@ export default function AcaoPanelContent({
     setEscolhendoAtaque(false);
     if (imprudente) onAtivarAtaqueImprudente();
     rolarAtaque(`🗡 ${ataqueAtual.nome}`, ataqueAtual.info, onAtacar, imprudente);
+  }
+
+  /** Golpe Brutal (Bárbaro nível 9+) — linha própria, separada de
+   * "Atacar" (o jogador escolhe qual das duas tocar em cada ataque do
+   * turno, mesmo padrão de "Usar Magia" ao lado de "Atacar"). Só
+   * aparece com o Ataque Imprudente já ativo nesse turno (regra real)
+   * e ainda não usado — 1x por turno, reseta no Fim do Turno. */
+  function usarGolpeBrutal() {
+    if (!ataqueAtual) return;
+    onUsarGolpeBrutal();
+    rolarAtaque(`🗡 ${ataqueAtual.nome}`, ataqueAtual.info, onAtacar, false, true);
   }
 
   if (picker) return picker;
@@ -263,6 +300,18 @@ export default function AcaoPanelContent({
               </>
             )}
           </div>
+        </div>
+      )}
+
+      {ataqueAtual && temGolpeBrutal && ataqueImprudenteAtivo && !golpeBrutalUsadoTurno && (
+        <div className={styles.row} onClick={usarGolpeBrutal}>
+          <div className={styles.rowName}>🔨 Golpe Brutal — {ataqueAtual.nome}</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Renuncia à Vantagem do Ataque Imprudente NESSE ataque. Se acertar, +{golpeBrutalDados}d10 de dano e você
+              escolhe o efeito depois de rolar. 1x por turno.
+            </div>
+          )}
         </div>
       )}
 

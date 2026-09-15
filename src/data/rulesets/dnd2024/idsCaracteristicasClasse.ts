@@ -38,6 +38,16 @@ export const ID_CARACTERISTICA_CLASSE = {
   /** Bárbaro nível 7 — Vantagem em jogadas de Iniciativa. Ver
    * `CombatTab.tsx` (`alternarIniciativa`). */
   instintosPrimitivos: 'Instintos Primitivos',
+  /** Bárbaro nível 9 — com Ataque Imprudente ativo, renuncia à
+   * Vantagem numa jogada de ataque pra ganhar dado extra + efeito à
+   * escolha. Ver `AcaoPanelContent.tsx`/`CombatTab.tsx`. */
+  golpeBrutal: 'Golpe Brutal',
+  /** Bárbaro nível 13 (mais 2 efeitos) e 17 (2d10 + 2 efeitos de uma
+   * vez) — MESMO nome nos 2 níveis, conte repetições com
+   * `contarRepeticoesCaracteristica` (padrão de Indomável/Surto de
+   * Ação) pra distinguir os 2 patamares, nunca `caracteristicaDesbloqueada`
+   * sozinho. */
+  golpeBrutalFortalecido: 'Golpe Brutal Fortalecido',
 } as const;
 
 export type IdCaracteristicaClasse = keyof typeof ID_CARACTERISTICA_CLASSE;

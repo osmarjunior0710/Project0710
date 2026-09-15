@@ -286,6 +286,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [furiaGasto, setFuriaGasto] = useState(personagemSalvo.furiaGasto ?? 0);
   const [furiaAtiva, setFuriaAtiva] = useState(personagemSalvo.furiaAtiva ?? false);
   const [ataqueImprudenteAtivo, setAtaqueImprudenteAtivo] = useState(personagemSalvo.ataqueImprudenteAtivoTurno ?? false);
+  const [golpeBrutalUsadoTurno, setGolpeBrutalUsadoTurno] = useState(personagemSalvo.golpeBrutalUsadoTurno ?? false);
   const [conhecimentoPrimordialPericiaEscolhida, setConhecimentoPrimordialPericiaEscolhida] = useState(
     personagemSalvo.conhecimentoPrimordialPericiaEscolhida ?? null,
   );
@@ -647,6 +648,19 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const temInstintosPrimitivos = classe
     ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.instintosPrimitivos, personagem.nivel) !== null
     : false;
+  const temGolpeBrutal = classe
+    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.golpeBrutal, personagem.nivel) !== null
+    : false;
+  /** 0 = ainda não chegou no nível 13; 1 = nível 13-16 (+2 efeitos);
+   * 2 = nível 17+ (2d10, escolhe 2 efeitos de uma vez) — mesmo padrão
+   * de "conta repetições do mesmo nome" já usado por Indomável/Surto
+   * de Ação (2 níveis de característica com o MESMO nome). */
+  const golpeBrutalFortalecidoCount = classe
+    ? contarRepeticoesCaracteristica(classe, ID_CARACTERISTICA_CLASSE.golpeBrutalFortalecido, personagem.nivel)
+    : 0;
+  const golpeBrutalDados = golpeBrutalFortalecidoCount >= 2 ? 2 : 1;
+  const golpeBrutalEfeitosNivel13 = golpeBrutalFortalecidoCount >= 1;
+  const golpeBrutalEscolhas = golpeBrutalFortalecidoCount >= 2 ? 2 : 1;
   const sorteDoTenebrosoMaximo = sorteDoTenebrosoDisponivel ? usosSorteDoTenebroso(carMod) : 0;
   const sorteDoTenebrosoRestantes = Math.max(0, sorteDoTenebrosoMaximo - sorteDoTenebrosoGasto);
   const equipadoAtual = resumoEquipado(itensMochila);
@@ -711,6 +725,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     turnStateAtual: turnState,
     surtoUsadoTurnoAtual: surtoUsadoTurno,
     ataqueImprudenteAtivoTurno: ataqueImprudenteAtivo,
+    golpeBrutalUsadoTurno,
     conhecimentoPrimordialPericiaEscolhida,
     pvMax: personagem.pvMax,
     pvTemporarioAtual: pvTemporario,
@@ -797,6 +812,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       turnState,
       surtoUsadoTurno,
       ataqueImprudenteAtivo,
+      golpeBrutalUsadoTurno,
       conhecimentoPrimordialPericiaEscolhida,
       pvTemporario,
       maestriaArma,
@@ -962,6 +978,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setTurnState(turnoInicial);
     setSurtoUsadoTurno(false);
     setAtaqueImprudenteAtivo(false);
+    setGolpeBrutalUsadoTurno(false);
   }
 
   /** `classeNome` — omitido = gasta do pool "principal" em foco agora
@@ -2006,6 +2023,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               disponivel: temAtaqueImprudente,
               ativo: ataqueImprudenteAtivo,
               onAtivar: () => setAtaqueImprudenteAtivo(true),
+            }}
+            golpeBrutal={{
+              disponivel: temGolpeBrutal,
+              dados: golpeBrutalDados,
+              efeitosNivel13: golpeBrutalEfeitosNivel13,
+              escolhas: golpeBrutalEscolhas,
+              usadoTurno: golpeBrutalUsadoTurno,
+              onUsar: () => setGolpeBrutalUsadoTurno(true),
             }}
             maosCurativas={{
               disponivel: maosCurativasDisponivel,

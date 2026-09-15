@@ -160,3 +160,49 @@ confirmar ou pedir o Caminho B.
    "Indomável"/"Pontos de Sorte"), mostra "🔥 Fúria: ATIVA" + os bônus
    ativos (resistência, dano, vantagem em Força) + botão "Encerrar
    Fúria" enquanto ativa.
+
+## 7. Golpe Brutal (nível 9) + Golpe Brutal Fortalecido (13/17) — B4.5
+
+Nota adicionada depois (a característica se revelou mais complexa que
+Bote Instintivo/Instintos Primitivos, seguindo o aviso no topo deste
+arquivo).
+
+**Regra real:** com Ataque Imprudente ativo, o jogador pode renunciar
+à Vantagem em UMA jogada de ataque à sua escolha no turno. Se acertar:
++1d10 de dano (mesmo tipo da arma) e escolhe 1 efeito (Golpe
+Debilitador/Poderoso). Nível 13 desbloqueia +2 efeitos (Atordoante/
+Destruidor). Nível 17: dado vira 2d10 e escolhe 2 efeitos de uma vez.
+
+**Decisões de implementação:**
+- **Linha própria, não picker.** Em vez de reaproveitar o mini-picker
+  "Ataque Normal/Imprudente" (que só decide 1x por turno, na 1ª
+  jogada), Golpe Brutal ganhou uma linha SEPARADA "🔨 Golpe Brutal" ao
+  lado de "🗡 Atacar" no painel de Ação — aparece em QUALQUER ataque do
+  turno (não só o 1º) enquanto o Ataque Imprudente já estiver ativo e
+  Golpe Brutal ainda não tiver sido usado nesse turno. Isso casa melhor
+  com a regra real ("uma jogada à sua escolha", não necessariamente a
+  1ª) e evita reabrir/complicar o picker existente.
+- **Escopo aceito, fora de propósito:** não dá pra usar Golpe Brutal na
+  MESMA jogada que ativa o Ataque Imprudente (o picker já rola o
+  ataque direto ao escolher "Imprudente", sem devolver pra tela onde a
+  linha "Golpe Brutal" apareceria). Na prática isso não trava nada —
+  Bárbaro só pega Golpe Brutal no nível 9, quando Ataque Extra (nível
+  5) já garante pelo menos 2 ataques por turno, então Golpe Brutal
+  sempre tem uma 2ª jogada disponível pra usar.
+- **Dado extra = 2º botão de dano**, mesmo padrão já usado por Badalar
+  Fúnebre (`danoCondicionalDado`) — `DanoPendente` ganhou o campo
+  opcional `golpeBrutal: { quantidade; lados } | null`. "🎲 Rolar Dano"
+  (dano normal) e "🔨 Rolar Golpe Brutal" (dado extra) aparecem lado a
+  lado; o extra some do estado assim que rolado (não dá pra rolar 2x).
+- **Efeito é só texto, nunca aplicado de verdade.** O app não rastreia
+  alvo/Deslocamento/status de inimigo (decisão já registrada — ver
+  Backlog.md, "ferramenta de tracking de status" parada de propósito).
+  Escolher um efeito só atualiza o feedback com o lembrete da regra
+  pro jogador aplicar na mesa — mesmo padrão já usado pelos efeitos de
+  Ancestralidade Gigante (ex.: Arrepio do Gelo).
+- **Nível 13/17 distinguidos por contagem, não por nome.** "Golpe
+  Brutal Fortalecido" aparece 2x na progressão (13 e 17) com o MESMO
+  nome — `contarRepeticoesCaracteristica` (padrão já usado por
+  Indomável/Surto de Ação) resolve pra 0/1/2, decidindo tanto o nº de
+  efeitos disponíveis quanto o nº de escolhas simultâneas e o dado
+  (1d10 vs 2d10).
