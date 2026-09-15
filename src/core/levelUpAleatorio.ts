@@ -106,6 +106,11 @@ export interface ResultadoLevelUpRapido {
    * FIXA (Invisibilidade/Passo Nebuloso) até escolher a outra
    * manualmente num level-up de verdade. */
   escolhaMagiaTalentoGeral: Record<string, string[]> | null;
+  /** Level Up Rápido nunca sorteia o atributo do Resiliente (mesma
+   * lógica de `escolhaMagiaTalentoGeral` acima) — sempre `null` aqui.
+   * Se o talento sorteado for Resiliente, o personagem fica sem o +1/
+   * proficiência de Salvaguarda até escolher manualmente depois. */
+  escolhaAtributoTalentoGeral: Record<string, string> | null;
   /** Level Up Rápido nunca sorteia a perícia livre/restrita de
    * Especialista em Perícia/Analítico/Mente Aguçada (mesma lógica de
    * `escolhaMagiaTalentoGeral` acima) — sempre `null` aqui. */
@@ -334,6 +339,7 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     arcanaMisticaAlteracoes,
     magiaIniciadaAlteracoes: null,
     escolhaMagiaTalentoGeral: null,
+    escolhaAtributoTalentoGeral: null,
     periciaLivreTalentoEscolhida: null,
     periciaRestritaTalentoEscolhida: null,
     conhecimentoPrimordialPericiaEscolhida,

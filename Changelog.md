@@ -11,6 +11,13 @@ O painel Ação Bônus agora mostra o contador de usos de Fúria (pips
 vermelhos) acima do toggle de ativar, mesmo padrão que Salto da Nuvem/
 Fôlego já tinham.
 
+## v202609_1933
+
+Talento "Resiliente" chegou: ao escolher esse talento no Level Up
+(nível 4/8/12/16/19), um passo novo pede pra escolher 1 atributo entre
+os que você ainda não tem Salvaguarda proficiente — ele ganha +1 e vira
+Salvaguarda proficiente na hora.
+
 ## v202609_1917
 
 Bárbaro — Fúria Persistente (nível 15) chegou. Depois de gastar pelo

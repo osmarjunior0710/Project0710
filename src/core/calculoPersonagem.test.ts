@@ -226,6 +226,23 @@ describe('calcularSalvaguardas', () => {
     const resultado = calcularSalvaguardas(s, null, 1);
     expect(resultado.every((sv) => !sv.proficiente)).toBe(true);
   });
+
+  it('Resiliente (4º parâmetro) soma proficiência extra num atributo que a classe não dá — linha própria na explicação', () => {
+    const s = selecaoGuerreiro(); // Guerreiro: FOR e CON, sem SAB (SAB 12, mod +1)
+    const resultado = calcularSalvaguardas(s, guerreiro, 1, ['SAB']);
+    const sabedoria = resultado.find((sv) => sv.atributo === 'SAB');
+    expect(sabedoria?.proficiente).toBe(true);
+    expect(sabedoria?.mod).toBe(modificador(12) + bonusProficiencia(guerreiro, 1));
+    expect(sabedoria?.explicacao.linhas.some((l) => l.label === 'Bônus de Proficiência (Resiliente)')).toBe(true);
+  });
+
+  it('borda: Resiliente num atributo que a classe JÁ dá proficiência não soma 2x nem duplica a linha', () => {
+    const s = selecaoGuerreiro();
+    const resultado = calcularSalvaguardas(s, guerreiro, 1, ['FOR']);
+    const forca = resultado.find((sv) => sv.atributo === 'FOR');
+    expect(forca?.mod).toBe(2 + bonusProficiencia(guerreiro, 1));
+    expect(forca?.explicacao.linhas.filter((l) => l.label.startsWith('Bônus de Proficiência')).length).toBe(1);
+  });
 });
 
 describe('calcularAtributosFinais', () => {

@@ -29,6 +29,7 @@ import {
   periciasProficientes,
 } from '../../core/calculoPersonagem';
 import { aumentarAtributos, modificador, valorFinalAtributo, type WizardSelection } from '../../core/personagem';
+import { atributosResilienteEscolhidos } from '../../core/talentoAtributo';
 import { atributosOrdem, type Atributo } from '../../data/wizardFixtures';
 import {
   classesDoPersonagem,
@@ -273,6 +274,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [escolhaMagiaTalentoGeral, setEscolhaMagiaTalentoGeral] = useState<Record<string, string[]>>(
     personagemSalvo.escolhaMagiaTalentoGeral ?? {},
   );
+  // Escolha de atributo do Resiliente — ver `core/talentoAtributo.ts`.
+  const [escolhaAtributoTalentoGeral, setEscolhaAtributoTalentoGeral] = useState<Record<string, string>>(
+    personagemSalvo.escolhaAtributoTalentoGeral ?? {},
+  );
   const [talentosFavoritos, setTalentosFavoritos] = useState<string[]>(personagemSalvo.talentosFavoritosAtual ?? []);
   const [folegoGasto, setFolegoGasto] = useState(personagemSalvo.folegoGasto ?? 0);
   const [vigorImplacavelGasto, setVigorImplacavelGasto] = useState(personagemSalvo.vigorImplacavelGasto ?? false);
@@ -470,7 +475,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     nivelTotalAtual,
     { ativa: temConhecimentoPrimordial && furiaAtiva, mod: forMod, pericias: PERICIAS_CONHECIMENTO_PRIMORDIAL },
   );
-  const salvaguardas = calcularSalvaguardas(selecao, classeOriginal, nivelTotalAtual);
+  const salvaguardas = calcularSalvaguardas(
+    selecao,
+    classeOriginal,
+    nivelTotalAtual,
+    atributosResilienteEscolhidos(talentosEfetivos, escolhaAtributoTalentoGeral),
+  );
   const proficienciasFerramenta = calcularProficienciasFerramenta(selecao, nivelTotalAtual, ferramentasMulticlasseAtuais);
   const bonusProficienciaAtual = classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
   const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva);
@@ -803,6 +813,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasGratisInvocacoesGastas: magiasGratisGastas,
     talentosGeraisAtual: talentosGeraisAtuais,
     escolhaMagiaTalentoGeral,
+    escolhaAtributoTalentoGeral,
     talentosFavoritosAtual: talentosFavoritos,
     itensMochilaAtual: itensMochila,
     petsAtual: pets,
@@ -889,6 +900,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       magiasGratisGastas,
       talentosGeraisAtuais,
       escolhaMagiaTalentoGeral,
+      escolhaAtributoTalentoGeral,
       talentosFavoritos,
       itensMochila,
       levelUpHpModo,
@@ -1508,6 +1520,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     arcanaMisticaAlteracoes: Record<number, string> | null;
     magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
     escolhaMagiaTalentoGeral: Record<string, string[]> | null;
+    escolhaAtributoTalentoGeral: Record<string, string> | null;
     periciaLivreTalentoEscolhida: string | null;
     periciaRestritaTalentoEscolhida: string | null;
     conhecimentoPrimordialPericiaEscolhida: string | null;
@@ -1564,6 +1577,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
     if (resultado.escolhaMagiaTalentoGeral) {
       setEscolhaMagiaTalentoGeral((prev) => ({ ...prev, ...resultado.escolhaMagiaTalentoGeral }));
+    }
+    if (resultado.escolhaAtributoTalentoGeral) {
+      setEscolhaAtributoTalentoGeral((prev) => ({ ...prev, ...resultado.escolhaAtributoTalentoGeral }));
     }
     if (resultado.periciaLivreTalentoEscolhida) {
       setPericiasTalentoGeralAtuais((prev) => [...prev, resultado.periciaLivreTalentoEscolhida!]);

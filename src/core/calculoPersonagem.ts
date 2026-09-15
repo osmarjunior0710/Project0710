@@ -442,14 +442,24 @@ export interface SalvaguardaFinal {
  * classe, nunca de classe adquirida por multiclasse depois — por
  * isso este parâmetro é sempre `classeOriginal`, nunca a classe
  * ativa nem uma classe extra. */
-export function calcularSalvaguardas(selection: WizardSelection, classeOriginal: Classe | null, nivelTotal: number): SalvaguardaFinal[] {
+export function calcularSalvaguardas(
+  selection: WizardSelection,
+  classeOriginal: Classe | null,
+  nivelTotal: number,
+  /** Atributos com proficiência de Salvaguarda extra, concedida por
+   * talento (ex.: Resiliente) — soma na proficiência normal da classe,
+   * nunca remove nenhuma. Ver `core/talentoAtributo.ts`. */
+  atributosExtrasProficientes: Atributo[] = [],
+): SalvaguardaFinal[] {
   const bonus = classeOriginal ? bonusProficiencia(classeOriginal, nivelTotal) : 0;
   return atributosOrdem
     .map((atributo) => {
       const valor = valorFinalAtributo(selection, atributo);
       if (valor === null) return null;
       const atribMod = modificador(valor);
-      const proficiente = classeOriginal?.salvaguardas.includes(atributo) ?? false;
+      const proficientePelaClasse = classeOriginal?.salvaguardas.includes(atributo) ?? false;
+      const proficientePeloTalento = !proficientePelaClasse && atributosExtrasProficientes.includes(atributo);
+      const proficiente = proficientePelaClasse || proficientePeloTalento;
       const bonusFinal = proficiente ? bonus : 0;
       return {
         atributo,
@@ -458,7 +468,8 @@ export function calcularSalvaguardas(selection: WizardSelection, classeOriginal:
         explicacao: {
           linhas: [
             { label: `mod. ${atributo}`, valor: fmtMod(atribMod) },
-            ...(proficiente ? [{ label: 'Bônus de Proficiência (proficiente)', valor: fmtMod(bonusFinal) }] : []),
+            ...(proficientePelaClasse ? [{ label: 'Bônus de Proficiência (proficiente)', valor: fmtMod(bonusFinal) }] : []),
+            ...(proficientePeloTalento ? [{ label: 'Bônus de Proficiência (Resiliente)', valor: fmtMod(bonusFinal) }] : []),
           ],
           total: { label: `Salvaguarda de ${NOME_COMPLETO_POR_ATRIBUTO[atributo]}`, valor: fmtMod(atribMod + bonusFinal) },
         },

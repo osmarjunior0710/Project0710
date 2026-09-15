@@ -51,6 +51,7 @@ import { useAvisoTemporario } from '../../hooks/useAvisoTemporario';
 import { talentos } from '../../../data/rulesets/dnd2024/talentos';
 import { opcoesMagiaEscolhidaPorEscola, opcoesMagiasRituais, quantidadeMagiasRituais } from '../../../core/magiaTalentoGeral';
 import { opcoesPericiaRestrita } from '../../../core/periciaTalentoGeral';
+import { opcoesAtributoResiliente } from '../../../core/talentoAtributo';
 import TelaEscolherTalento from './TelaEscolherTalento';
 import TrocarValorSimples from '../../components/TrocarValorSimples';
 import { useEscolhaMultipla } from '../hooks/useEscolhaMultipla';
@@ -116,6 +117,11 @@ interface LevelUpShellProps {
      * 1 entrada `{ [talentoId]: magiasEscolhidas }`. `null` = nenhuma
      * escolha desse tipo nesse level-up. */
     escolhaMagiaTalentoGeral: Record<string, string[]> | null;
+    /** Só preenchido quando o Talento Geral ESCOLHIDO NESTE level-up
+     * for Resiliente (`atributo-e-salvaguarda-escolhidos`) — 1 entrada
+     * `{ [talentoId]: atributoEscolhido }`. `null` = nenhuma escolha
+     * desse tipo nesse level-up. */
+    escolhaAtributoTalentoGeral: Record<string, string> | null;
     /** Só preenchido quando o Talento Geral ESCOLHIDO NESTE level-up
      * for Especialista em Perícia — 1 perícia LIVRE (qualquer uma,
      * ainda não proficiente) que vira proficiência de verdade. `null`
@@ -244,6 +250,7 @@ type LuStep =
   | 'talentoMagia'
   | 'periciaLivreTalento'
   | 'periciaRestritaTalento'
+  | 'resilienteAtributo'
   | 'dadivaEpica'
   | 'arcanaMistica'
   | 'iniciadoEmMagia'
@@ -438,6 +445,12 @@ export default function LevelUpShell({
   const tipoEfeitoTalentoEscolhido = talentoObjEscolhido?.efeitoMecanico?.tipo;
   const precisaEscolherMagiaDoTalentoNovo =
     tipoEfeitoTalentoEscolhido === 'magia-escolhida-por-escola' || tipoEfeitoTalentoEscolhido === 'magias-rituais-por-proficiencia';
+  // Resiliente (`atributo-e-salvaguarda-escolhidos`) — mesmo padrão de
+  // `precisaEscolherAtributoDoTalento`/`precisaEscolherMagiaDoTalentoNovo`,
+  // só entra quando o talento ESCOLHIDO NESTE level-up for esse.
+  const precisaEscolherAtributoResiliente = tipoEfeitoTalentoEscolhido === 'atributo-e-salvaguarda-escolhidos';
+  const opcoesAtributoResilienteAtual = talentoObjEscolhido ? opcoesAtributoResiliente(talentoObjEscolhido.id, classe) : [];
+  const [atributoResilienteEscolhido, setAtributoResilienteEscolhido] = useState<Atributo | null>(null);
   // Crescimento do Conjurador Ritualista: mesmo passo `talentoMagia`,
   // mas disparado num level-up POSTERIOR ao que concedeu o talento —
   // sempre que o Bônus de Proficiência sobe, o total de magias Rituais
@@ -562,6 +575,7 @@ export default function LevelUpShell({
     if (precisaEscolherMagiaDoTalentoNovo) luSteps.push('talentoMagia');
     if (concedeEspecializacaoExtra) luSteps.push('periciaLivreTalento');
     if (opcoesPericiaRestritaAtual.length > 0) luSteps.push('periciaRestritaTalento');
+    if (precisaEscolherAtributoResiliente && opcoesAtributoResilienteAtual.length > 0) luSteps.push('resilienteAtributo');
   }
   if (especialistaDisparaAgora || concedeEspecializacaoExtra) luSteps.push('especialista');
   // Fora do bloco de ASI — o crescimento de magias Rituais acompanha o
@@ -812,6 +826,7 @@ export default function LevelUpShell({
     talentoMagia: 'Magia do Talento',
     periciaLivreTalento: 'Perícia do Talento',
     periciaRestritaTalento: 'Perícia do Talento',
+    resilienteAtributo: 'Atributo (Resiliente)',
     dadivaEpica: 'Dádiva Épica',
     arcanaMistica: 'Arcana Mística',
     iniciadoEmMagia: 'Iniciado em Magia',
@@ -962,6 +977,10 @@ export default function LevelUpShell({
       setAviso('Escolha a perícia do talento antes de avançar.');
       return;
     }
+    if (step === 'resilienteAtributo' && atributoResilienteEscolhido === null) {
+      setAviso('Escolha o atributo do talento antes de avançar.');
+      return;
+    }
     setAviso(null);
     if (step === 'resumo') {
       onConfirmar({
@@ -994,6 +1013,10 @@ export default function LevelUpShell({
         escolhaMagiaTalentoGeral:
           luSteps.includes('talentoMagia') && talentoMagiaAlvo && magiasEscolhidasTalento.length > 0
             ? { [talentoMagiaAlvo.id]: magiasEscolhidasTalento }
+            : null,
+        escolhaAtributoTalentoGeral:
+          luSteps.includes('resilienteAtributo') && talentoObjEscolhido && atributoResilienteEscolhido
+            ? { [talentoObjEscolhido.id]: atributoResilienteEscolhido }
             : null,
         periciaLivreTalentoEscolhida: luSteps.includes('periciaLivreTalento') ? periciaLivreEscolhida : null,
         periciaRestritaTalentoEscolhida: luSteps.includes('periciaRestritaTalento') ? periciaRestritaEscolhida : null,
@@ -1781,6 +1804,28 @@ export default function LevelUpShell({
           </>
         )}
 
+        {step === 'resilienteAtributo' && talentoObjEscolhido && (
+          <>
+            <div className="section-title">{talentoObjEscolhido.nome} — escolha 1 atributo</div>
+            <div className="label" style={{ marginBottom: 8 }}>
+              +1 nesse atributo e ganha proficiência de Salvaguarda nele — só atributos em que você ainda não é
+              proficiente aparecem aqui.
+            </div>
+            {opcoesAtributoResilienteAtual.map((atributo) => (
+              <div
+                key={atributo}
+                className={`opt-card ${atributoResilienteEscolhido === atributo ? 'selected' : ''}`}
+                onClick={() => {
+                  setAtributoResilienteEscolhido(atributo);
+                  setAsiEscolhas([atributo]);
+                }}
+              >
+                <div className="opt-card-name">{atributo}</div>
+              </div>
+            ))}
+          </>
+        )}
+
         {step === 'dadivaEpica' && (
           <>
             <div className="section-title">Dádiva Épica</div>
@@ -2064,6 +2109,12 @@ export default function LevelUpShell({
               <div className="summary-row">
                 <span>Perícia do talento</span>
                 <span>{periciaRestritaEscolhida ?? 'nenhuma escolhida'}</span>
+              </div>
+            )}
+            {luSteps.includes('resilienteAtributo') && (
+              <div className="summary-row">
+                <span>Atributo (Resiliente)</span>
+                <span>{atributoResilienteEscolhido ?? 'nenhum escolhido'}</span>
               </div>
             )}
             {luSteps.includes('asi') && (

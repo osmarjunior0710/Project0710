@@ -230,6 +230,12 @@ export interface PersonagemSalvo {
    * Ausente/vazio = nenhuma escolha desse tipo feita ainda (talento
    * ainda não pego, ou pego antes dessa entrega existir). */
   escolhaMagiaTalentoGeral?: Record<string, string[]>;
+  /** Escolha de atributo de Talento Geral do tipo `atributo-e-
+   * salvaguarda-escolhidos` (Resiliente) — chave é o `id` do talento,
+   * valor é o código do atributo escolhido (ex.: "SAB"). Ausente =
+   * nenhuma escolha desse tipo feita ainda. Ver
+   * `core/talentoAtributo.ts`. */
+  escolhaAtributoTalentoGeral?: Record<string, string>;
   /** IDs de talentos marcados com 📌 na tela de escolha do Level Up —
    * planejamento de build ("quero pegar isso num level up futuro"),
    * não afeta nenhuma regra. Ausente/vazio = nenhum favoritado. */

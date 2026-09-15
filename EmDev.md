@@ -761,7 +761,7 @@ Foco fechado — as 3 entregas do Char de Teste Fixo (nível 1 → nível 20
 multiclasse → Mochila completa) estão prontas. Aprendizados registrados
 em `DECISOES-WIZARD.md`. Volta o foco de Talentos — Fase 4 (abaixo).
 
-## Foco: Talentos — Fase 4 completa (efeito mecânico de verdade) — PAUSADO, retomar depois do Personagem de Teste Fixo
+## Foco ATIVO: Talentos — Fase 4 completa (efeito mecânico de verdade)
 
 77 talentos ainda sem efeito mecânico, em 5 categorias (Geral 42,
 Talento Selvagem 10, Dádiva Épica 12, Estilo de Luta 7, Origem 6).
@@ -1110,4 +1110,70 @@ Grupos aprovados pelo Osmar (do mais isolado pro mais espalhado):
       test`/`npm run build` limpos + Playwright (painel de Ação com
       Cota de Malha equipada mostra a linha bloqueada).
 
-Grupo C fechado — volta o B.3 (pausado acima).
+Grupo C fechado.
+
+### D. Geral — reaudit 2026-09 (19 sobras) + revisão dos 23 já implementados
+
+Retomado depois do foco "Personagem de Teste Fixo". Reaudit de código
+(sem clicar na tela, ver PENDENCIAS.md "Talentos — validação de UI
+pendente") dos 23 talentos/Estilos de Luta já implementados não achou
+nada quebrado — Multiclasse e a quebra do popup de rolagem (B7/B8)
+continuam encaixando certo em todos.
+
+Dos 19 Talentos Gerais sem `efeitoMecanico` que sobraram de antes,
+triagem (chapéu de Product Manager) separou os que dão pra fazer
+(rodada de entregas abaixo) dos que travam na mesma trava de sempre
+(Deslocamento/estado de inimigo/monta/posição, que o app não modela) —
+estes últimos tratados como "decidido não implementar", registrados em
+Backlog.md junto dos outros já lá (Agressor/Esmagador/Sentinela/
+Talhador/Velocista/etc): Atleta, Ator, Combatente Montado, Conjurador
+Bélico, Duelista Defensivo, Especialista em Besta, Exterminador de
+Conjuradores, Imobilizador, Mestre em Armas de Haste, Mestre em
+Armaduras Pesadas, Mestre-Atirador.
+
+Os 5 viáveis, na ordem que forem entregues:
+
+- [x] **D.1 — Resiliente**: novo `efeitoMecanico: 'atributo-e-
+      salvaguarda-escolhidos'` (`core/talentoAtributo.ts`,
+      `opcoesAtributoResiliente`/`atributosResilienteEscolhidos`) — só
+      atributos em que o personagem AINDA não é proficiente em
+      Salvaguarda aparecem como opção. Diferente de todo talento com
+      ASI já existente: este não usa `ConcedeAsiTalento` (fica
+      `'nenhum'`), o próprio efeito já É o "+1" — escolher o atributo
+      no novo passo `resilienteAtributo` do Level Up também alimenta
+      `asiEscolhas` direto (reaproveita 100% o mesmo mecanismo de
+      aplicar ASI que qualquer outro talento usa, `aumentarAtributos`
+      em `FichaShell.tsx`). A proficiência de Salvaguarda em si é
+      campo novo (`PersonagemSalvo.escolhaAtributoTalentoGeral`, mesmo
+      padrão de `escolhaMagiaTalentoGeral`) — `calcularSalvaguardas`
+      ganhou um 4º parâmetro opcional (`atributosExtrasProficientes`)
+      que soma essa proficiência extra sem nunca duplicar/remover a da
+      classe. Testado (`calculoPersonagem.test.ts` — 2 casos novos:
+      soma proficiência extra num atributo que a classe não dava, e
+      não duplica quando a classe já dava; `talentoAtributo.test.ts` —
+      3 casos). Verificado: `tsc -b`/`npm test` (579)/`npm run build`
+      limpos + Playwright (Guerreiro nível 3→4 real, escolhe Resiliente
+      no passo de talento → passo novo "Atributo (Resiliente)" oferece
+      só DES/INT/SAB/CAR, nunca FOR/CON — já proficientes → escolhe SAB
+      → Resumo mostra "Atributo (Resiliente): SAB" + "Atributo do
+      talento: SAB +1" → ficha final: SAB sobe de 14 pra 15, vira
+      Salvaguarda de Sabedoria proficiente com popup "mod. SAB +2 /
+      Bônus de Proficiência (Resiliente) +2 / +4").
+- [ ] **D.2 — Especialista Ambidestro**: remove a exigência de a arma
+      da mão secundária ter propriedade Leve em `ataqueBonusMaoSecundaria`
+      (só a principal precisa) + ganha ASI (mecanismo genérico já
+      existente).
+- [ ] **D.3 — Mestre das Armas**: escolhe 1 tipo de arma Simples/
+      Marcial pra usar a propriedade de Maestria mesmo sem ser nativo,
+      trocável em Descanso Longo — reaproveita `TrocarArmaMaestria.tsx`
+      como um slot ADICIONAL (não substitui a Maestria normal da
+      classe).
+- [ ] **D.4 — Mestre em Armas Grandes**: dano extra fixo (=Bônus de
+      Proficiência) com arma Pesada + ataque bônus extra após Crítico
+      (`estado.critico`, já existe) ou reduzir o alvo a 0 PV (botão de
+      confirmação manual, já que o app não sabe o PV do inimigo).
+- [ ] **D.5 — Mestre em Escudos** (só o golpe de escudo — a Reação de
+      anular dano fica de fora, gatilho externo que o app não modela):
+      golpe ativo após acertar corpo a corpo, Salv. Força CD 8+mod.FOR+
+      Bônus Prof. (mesmo padrão de CD do B8), empurra 1,5m ou derruba,
+      1x/turno.

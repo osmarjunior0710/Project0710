@@ -234,3 +234,47 @@ Perfurante — mas esse SIM vai ser implementado, ver EmDev.md B.6).
   ainda trata ataque de magia como 1 rolagem simples, sem hooks pra
   Cobertura/alcance/Desvantagem condicional).
 
+
+## Talentos Gerais — reaudit 2026-09, decidido não implementar por ora (11 talentos)
+
+Mesmo espírito das entradas acima (trava de Deslocamento/estado de
+inimigo/monta/posição, que o app não modela) — achados na reaudit do
+Grupo D (Talentos — Fase 4).
+
+- **Atleta** (p.203) — Deslocamento de Escalada = normal, levantar de
+  Caído com 1,5m, saltar após só 1,5m de movimento — mesma trava do
+  Velocista/Agressor: a Ficha não tem campo de Deslocamento.
+- **Ator** (p.203) — Vantagem em Atuação/Enganação pra disfarce +
+  imitar sons/fala (CD pro ouvinte perceber) — mecanicamente é quase
+  todo narrativo; baixo valor pra virar cálculo de verdade.
+- **Combatente Montado** (p.204) — depende de sistema de montaria
+  (PV/salvaguarda da montaria, redirecionar ataque), que não existe.
+- **Conjurador Bélico** (p.204) — Reação de conjurar magia ao ser
+  provocado (evitar Ataque de Oportunidade) — depende de saber quando
+  o personagem É atacado/provocado, gatilho externo que o app não
+  modela.
+- **Duelista Defensivo** (p.205) — Reação ao SER acertado corpo a
+  corpo (soma Bônus de Proficiência na CA) — mesma trava: o app não
+  sabe quando um inimigo acerta o personagem.
+- **Especialista em Besta** (p.206) — ataque bônus com besta Leve
+  (parecido com Especialista Ambidestro, ver EmDev.md D.2), mas
+  também ignora Recarga/desvantagem a queima-roupa — regras
+  situacionais que a aba Combat não modela ainda; reconsiderar junto
+  de Mestre-Atirador abaixo se esses conceitos entrarem no futuro.
+- **Exterminador de Conjuradores** (p.206) — Desvantagem na
+  salvaguarda de Concentração de um alvo — depende de saber se o
+  ALVO está concentrando, estado de inimigo que o app não rastreia.
+- **Imobilizador** (p.206) — Ataque Desarmado aplica a condição
+  Imobilizado no alvo — condição de INIMIGO, que o app não rastreia
+  (mesma trava do Esmagador/Talhador).
+- **Mestre em Armas de Haste** (p.207) — ataque bônus com a outra
+  ponta da arma + Reação quando alguém entra no alcance — a 2ª parte
+  depende de posição/movimento de inimigo, que o app não modela.
+- **Mestre em Armaduras Pesadas** (p.207) — reduz dano recebido em
+  Bônus de Proficiência — depende de rastrear "dano recebido" como
+  evento (hoje PV é só ajustado manualmente com +/-, sem hook nenhum
+  pra aplicar redução automática nele).
+- **Mestre-Atirador** (p.207) — ignora Cobertura Parcial/¾, sem
+  Desvantagem a queima-roupa ou no alcance máximo — Cobertura e as
+  faixas de alcance com Desvantagem não são conceitos modelados na
+  aba Combat hoje (ataque à distância é 1 rolagem simples).
