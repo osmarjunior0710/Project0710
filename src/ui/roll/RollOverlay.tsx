@@ -87,7 +87,7 @@ export default function RollOverlay() {
           className={`${styles.close} ${podeFechar ? '' : styles.closeDesabilitado}`}
           onClick={podeFechar ? fechar : undefined}
         >
-          ✕
+          <span className={styles.closeIcon}>✕</span>
         </div>
         <div className={styles.label}>{estado.label}</div>
         {estado.dadosIndividuais ? (

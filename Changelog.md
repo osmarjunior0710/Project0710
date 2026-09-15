@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1239
+
+Corrigido: no popup de rolagem, um título comprido (ex.: "Ataque —
+Ataque Desarmado (Golpe Brutal)") corria por baixo do botão ✕ de
+fechar. O ✕ ficou menor e foi pro vértice do canto do card — nunca
+mais fica embaixo do texto, não importa quantas linhas o título
+quebrar.
+
 ## v202609_1117
 
 Bárbaro — Golpe Brutal (nível 9) chegou. No Combate, com Ataque
