@@ -1811,18 +1811,23 @@ export default function LevelUpShell({
               +1 nesse atributo e ganha proficiência de Salvaguarda nele — só atributos em que você ainda não é
               proficiente aparecem aqui.
             </div>
-            {opcoesAtributoResilienteAtual.map((atributo) => (
-              <div
-                key={atributo}
-                className={`opt-card ${atributoResilienteEscolhido === atributo ? 'selected' : ''}`}
-                onClick={() => {
-                  setAtributoResilienteEscolhido(atributo);
-                  setAsiEscolhas([atributo]);
-                }}
-              >
-                <div className="opt-card-name">{atributo}</div>
-              </div>
-            ))}
+            {opcoesAtributoResilienteAtual.map((atributo) => {
+              const base = atributosAtuais[atributo] ?? 10;
+              return (
+                <div
+                  key={atributo}
+                  className={`opt-card ${atributoResilienteEscolhido === atributo ? 'selected' : ''}`}
+                  onClick={() => {
+                    setAtributoResilienteEscolhido(atributo);
+                    setAsiEscolhas([atributo]);
+                  }}
+                >
+                  <div className="opt-card-name">
+                    {atributo} {base} → {Math.min(base + 1, 20)}
+                  </div>
+                </div>
+              );
+            })}
           </>
         )}
 
