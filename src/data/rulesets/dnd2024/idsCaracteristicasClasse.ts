@@ -60,6 +60,9 @@ export const ID_CARACTERISTICA_CLASSE = {
    * o valor de Força vira automaticamente esse valor. Ver
    * `core/forcaIndomavel.ts`, `RollContext.tsx`. */
   forcaIndomavel: 'Força Indomável',
+  /** Bárbaro nível 20 — Força e Constituição sobem +4, até no máximo
+   * 25. Ver `core/campeaoPrimitivo.ts`. */
+  campeaoPrimitivo: 'Campeão Primitivo',
 } as const;
 
 export type IdCaracteristicaClasse = keyof typeof ID_CARACTERISTICA_CLASSE;

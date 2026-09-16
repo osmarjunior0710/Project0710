@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0946
+
+Bárbaro — Campeão Primitivo (nível 20) chegou: Força e Constituição
+sobem +4 cada (até no máximo 25), automático. Junto veio uma correção
+que vale pra qualquer classe: quando o mod. de Constituição sobe (por
+esse ou por um Aumento no Valor de Atributo normal), o PV Máximo agora
+é ajustado corretamente, incluindo retroativo — antes esse ajuste não
+acontecia.
+
 ## v202609_0114
 
 Bárbaro — Força Indomável (nível 18) chegou. Em qualquer teste ou

@@ -15,6 +15,7 @@ import { proficienciasIniciaisClasse } from '../data/rulesets/dnd2024/classesPro
 import { modificador, valorFinalAtributo, type WizardSelection } from './personagem';
 import { resumoEquipado } from './equipamento';
 import { caracteristicaDesbloqueada } from './levelUp';
+import { aplicarCampeaoPrimitivo } from './campeaoPrimitivo';
 import type { ItemMochila } from './mochila';
 import { classeProficienteComArmadura } from './proficienciaArmadura';
 
@@ -362,18 +363,28 @@ export interface AtributoFinal {
   explicacao: ExplicacaoCalculo;
 }
 
-export function calcularAtributosFinais(selection: WizardSelection): AtributoFinal[] {
+/** `temCampeaoPrimitivo` — Bárbaro nível 20 (ver `core/campeaoPrimitivo.ts`).
+ * `false`/omitido = comportamento de sempre, sem bônus. */
+export function calcularAtributosFinais(selection: WizardSelection, temCampeaoPrimitivo = false): AtributoFinal[] {
   return atributosOrdem
     .map((atributo) => {
-      const valor = valorFinalAtributo(selection, atributo);
-      if (valor === null) return null;
+      const valorBase = valorFinalAtributo(selection, atributo);
+      if (valorBase === null) return null;
+      const valor = aplicarCampeaoPrimitivo(valorBase, atributo, temCampeaoPrimitivo);
       const mod = modificador(valor);
+      const aplicouCampeao = valor !== valorBase;
       return {
         atributo,
         valor,
         mod,
         explicacao: {
-          linhas: [{ label: `mod. ${atributo}`, valor: fmtMod(mod) }],
+          linhas: aplicouCampeao
+            ? [
+                { label: `${atributo} base`, valor: `${valorBase}` },
+                { label: 'Campeão Primitivo', valor: fmtMod(valor - valorBase) },
+                { label: `mod. ${atributo}`, valor: fmtMod(mod) },
+              ]
+            : [{ label: `mod. ${atributo}`, valor: fmtMod(mod) }],
           total: { label: `${atributo}`, valor: fmtMod(mod) },
         },
       };
@@ -450,12 +461,16 @@ export function calcularSalvaguardas(
    * talento (ex.: Resiliente) — soma na proficiência normal da classe,
    * nunca remove nenhuma. Ver `core/talentoAtributo.ts`. */
   atributosExtrasProficientes: Atributo[] = [],
+  /** Campeão Primitivo (Bárbaro nível 20, ver `core/campeaoPrimitivo.ts`)
+   * — `false`/omitido = comportamento de sempre. */
+  temCampeaoPrimitivo = false,
 ): SalvaguardaFinal[] {
   const bonus = classeOriginal ? bonusProficiencia(classeOriginal, nivelTotal) : 0;
   return atributosOrdem
     .map((atributo) => {
-      const valor = valorFinalAtributo(selection, atributo);
-      if (valor === null) return null;
+      const valorBase = valorFinalAtributo(selection, atributo);
+      if (valorBase === null) return null;
+      const valor = aplicarCampeaoPrimitivo(valorBase, atributo, temCampeaoPrimitivo);
       const atribMod = modificador(valor);
       const proficientePelaClasse = classeOriginal?.salvaguardas.includes(atributo) ?? false;
       const proficientePeloTalento = !proficientePelaClasse && atributosExtrasProficientes.includes(atributo);
@@ -467,6 +482,7 @@ export function calcularSalvaguardas(
         proficiente,
         explicacao: {
           linhas: [
+            ...(valor !== valorBase ? [{ label: 'Campeão Primitivo', valor: fmtMod(valor - valorBase) }] : []),
             { label: `mod. ${atributo}`, valor: fmtMod(atribMod) },
             ...(proficientePelaClasse ? [{ label: 'Bônus de Proficiência (proficiente)', valor: fmtMod(bonusFinal) }] : []),
             ...(proficientePeloTalento ? [{ label: 'Bônus de Proficiência (Resiliente)', valor: fmtMod(bonusFinal) }] : []),
@@ -519,6 +535,13 @@ export function calcularPericias(
    * continua contando igual dos dois lados. `undefined`/`ativa:
    * false` = nenhuma substituição (comportamento de sempre). */
   substituicaoForca?: { ativa: boolean; mod: number; pericias: string[] },
+  /** Campeão Primitivo (Bárbaro nível 20, ver `core/campeaoPrimitivo.ts`)
+   * — só afeta perícia baseada em Força de verdade (hoje, só
+   * Atletismo); as substituídas por `substituicaoForca` (Conhecimento
+   * Primordial) já recebem o mod. de Força correto de quem chama esta
+   * função (o `atributos`/`forMod` de `FichaShell.tsx` já vem
+   * ajustado). `false`/omitido = comportamento de sempre. */
+  temCampeaoPrimitivo = false,
 ): PericiaFinal[] {
   const classe = classeDaSelecao(selection);
   if (!classe) return [];
@@ -528,8 +551,9 @@ export function calcularPericias(
   const resultado: PericiaFinal[] = [];
   for (const pericia of pericias) {
     const atributoOriginal = ATRIBUTO_POR_NOME_COMPLETO[pericia.atributo];
-    const valorAtributo = atributoOriginal ? valorFinalAtributo(selection, atributoOriginal) : null;
-    if (!atributoOriginal || valorAtributo === null) continue;
+    const valorAtributoBase = atributoOriginal ? valorFinalAtributo(selection, atributoOriginal) : null;
+    if (!atributoOriginal || valorAtributoBase === null) continue;
+    const valorAtributo = aplicarCampeaoPrimitivo(valorAtributoBase, atributoOriginal, temCampeaoPrimitivo);
     const modOriginal = modificador(valorAtributo);
     const elegivelParaForca = (substituicaoForca?.ativa ?? false) && substituicaoForca!.pericias.includes(pericia.nome);
     const usaForca = elegivelParaForca && substituicaoForca!.mod > modOriginal;

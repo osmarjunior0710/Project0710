@@ -478,9 +478,49 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       escolher Vantagem depois (2º dado 10, total 10 = FOR 10 exato)
       → NÃO aplica (regra é "menor que", não "menor ou igual") —
       confirma que reavalia certo em vez de ficar "grudado".
-- [ ] **B4.9 — Campeão Primitivo (nível 20):** FOR/CON +4 até 25 —
-      mexe no cálculo de atributos finais, ver precedente de "+X até
-      Y" de nível 20 antes de desenhar.
+- [x] **B4.9 — Campeão Primitivo (nível 20).** FOR/CON +4 cada, até
+      máximo 25 — automático, sem escolha do jogador (feedback do
+      Osmar: "por que teria opção, se o jogador nunca ia recusar?").
+      Novo `core/campeaoPrimitivo.ts` (`aplicarCampeaoPrimitivo`, pura,
+      +4 capado em 25, só afeta FOR/CON) + testes. Aplicado nos
+      lugares que já calculam o valor final de FOR/CON pra exibir algo
+      — `calcularAtributosFinais`/`calcularPericias`/`calcularSalvaguardas`
+      (`calculoPersonagem.ts`, novo parâmetro opcional
+      `temCampeaoPrimitivo`), `calcularCapacidadeMaxima`/
+      `explicarCapacidadeMaxima` (`mochila.ts`), e os `conValorFinal`/
+      `forValorFinal` locais do `FichaShell.tsx` (usados por CA sem
+      Armadura, CD de Ataque de Sopro, Força Indomável). `temCampeaoPrimitivo`
+      calculado 1x no `FichaShell` checando TODAS as classes do
+      personagem (não só a ativa) — a característica é do personagem
+      inteiro, não da classe em foco.
+      **Achado no caminho, investigado a pedido do Osmar antes de
+      codar:** a regra real diz que, quando o mod. de Constituição
+      sobe, o PV Máximo recalcula retroativamente (como se o mod. novo
+      já valesse desde sempre) — e isso **já era um bug hoje**, não só
+      do Campeão Primitivo: um Aumento no Valor de Atributo em
+      Constituição em qualquer Level Up normal nunca ajustava PV
+      retroativo, só o ganho do próprio nível (e olhe que nem esse
+      ganho usava o mod. novo — usava o antigo). Corrigido com uma
+      função só, reaproveitada nos dois casos (ASI em CON E Campeão
+      Primitivo): novo `core/pvRetroativo.ts`
+      (`ajustarPvMaximoPorMudancaDeCon`) — o ajuste é sempre
+      `(mod. novo − mod. antigo) × nível total` (matematicamente igual
+      a recalcular tudo do zero, já que a parcela "dado de vida" de
+      cada nível nunca dependeu de CON). Usado no
+      `FichaShell.tsx`'s `confirmarLevelUp` (cobre a tela de Level Up
+      de verdade E o "⚡ Inst. Level Up", que reaproveita o mesmo
+      handler) e no `core/geradorPersonagemTeste.ts` (que também tinha
+      esse mesmo gap — `mediaPvPorNivel` congelado antes do loop,
+      nunca reagia a ASI/Campeão Primitivo durante a simulação).
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (587)/`npm run build` limpos + Playwright: Bárbaro nível 19
+      (FOR 9, CON 15, PV 176) → "⚡ Inst. Level Up" pro nível 20 → FOR
+      13/CON 19 (+4 nos dois), Salvaguardas/Atletismo/Capacidade de
+      Carga todos refletindo o novo valor (63kg → 91kg), PV Máximo
+      225 — bate exatamente com a conta manual (176 + ganho do nível
+      com o mod. antigo + ajuste retroativo de 20 níveis × delta de
+      mod.). Popup "ⓘ" do atributo mostra a quebra "FOR base 10 +
+      Campeão Primitivo +4 = mod. FOR +2".
 - [ ] **B4.10 — ASI (4/8/12/16):** conferir se já funciona sozinho
       (mecanismo genérico por ID, igual Ataque Extra).
 - [ ] **B5 — Trilha do Berserker** (nível 3/6/10/14): Frenesi, Fúria
