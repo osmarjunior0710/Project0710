@@ -433,3 +433,36 @@ idêntico a antes.
 `ExplicacaoCalculo` calculado em algum lugar (mesmo que só pro ⓘ de
 outra tela) deve passar esse MESMO objeto pra `explicacaoMod` — nunca
 recalcular ou duplicar a conta só pra alimentar o popup de rolagem.
+
+## PV Máximo precisa recalcular retroativamente quando o mod. de Constituição muda depois da criação
+
+**Achado (foco Bárbaro, Campeão Primitivo — ver `aprendizados/classes/barbaro.md`):**
+PV Máximo é um acumulador persistido (`pvMax`), incrementado 1x por
+Level Up — nunca recalculado do zero a partir dos atributos atuais.
+Isso significa que QUALQUER coisa que aumente o mod. de Constituição
+depois de um nível já ganho (Aumento no Valor de Atributo em
+Constituição, uma característica de espécie tipo Tenacidade Anã, ou
+Campeão Primitivo) precisa de um ajuste retroativo explícito — sem
+isso, o PV Máximo fica baixo pra sempre, como se o mod. novo só
+valesse a partir de agora. Isso era um bug pré-existente antes do
+Bárbaro (nenhum ASI em CON nunca ajustava PV retroativo, nem o ganho
+do PRÓPRIO nível do ASI, que usava o mod. antigo).
+
+**Função única e correta, reaproveitável por qualquer fonte de mudança
+de CON:** `core/pvRetroativo.ts`'s `ajustarPvMaximoPorMudancaDeCon(pvMaxAtual,
+conModAntigo, conModNovo, nivelTotalComEsseNivel)` = `pvMaxAtual +
+(conModNovo − conModAntigo) × nivelTotalComEsseNivel` —
+matematicamente idêntico a recalcular tudo do zero, porque a parcela
+"dado de vida" de cada nível nunca dependeu de Constituição, só a
+parcela "mod. CON × nível". O multiplicador é o nível total INCLUINDO
+o nível que acabou de ser ganho nesse mesmo Level Up (mesmo quando é
+esse próprio Level Up que mudou o CON), porque o ganho de PV desse
+nível já foi calculado com o mod. ANTIGO antes de qualquer ASI do
+mesmo nível ser aplicado.
+
+**Regra pra qualquer fonte futura que altere Constituição depois da
+criação:** sempre chamar essa função (nunca inventar um ajuste
+pontual/local) nos dois lugares que resolvem Level Up
+(`FichaShell.tsx`'s `confirmarLevelUp`, que cobre tanto o fluxo real
+quanto "⚡ Inst. Level Up", e `core/geradorPersonagemTeste.ts`, que
+simula toda a progressão de uma vez).

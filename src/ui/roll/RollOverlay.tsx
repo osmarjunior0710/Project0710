@@ -166,6 +166,9 @@ export default function RollOverlay() {
         </div>
         {estado.critico === 'falha' && <div className={`${styles.feedback} ${styles.feedbackCritFail}`}>😢 FALHA CRÍTICA</div>}
         {estado.critico === 'sucesso' && <div className={`${styles.feedback} ${styles.feedbackCritSuccess}`}>🎉 ACERTO CRÍTICO!</div>}
+        {estado.fase === 'concluido' && estado.forcaIndomavelAplicada && (
+          <div className={styles.feedback}>💪 Força Indomável — total virou seu valor de Força</div>
+        )}
         {estado.podeEscolherVantagem && (
           <div className={styles.vantagemButtons}>
             <div

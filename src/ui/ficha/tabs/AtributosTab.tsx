@@ -248,6 +248,7 @@ export default function AtributosTab({
                 mod: a.mod,
                 explicacaoMod: a.explicacao,
                 categoria: 'atributoOuSalvaguarda',
+                permiteForcaIndomavel: a.atributo === 'FOR',
                 vantagem:
                   desvantagemForcaDestreza && (a.atributo === 'FOR' || a.atributo === 'DES') ? 'desvantagem' : undefined,
               })
@@ -275,6 +276,7 @@ export default function AtributosTab({
               mod: sv.mod,
               explicacaoMod: sv.explicacao,
               categoria: 'atributoOuSalvaguarda',
+              permiteForcaIndomavel: sv.atributo === 'FOR',
               vantagem: resolverVantagem(
                 temSentidoDePerigo && sv.atributo === 'DES',
                 desvantagemForcaDestreza && (sv.atributo === 'FOR' || sv.atributo === 'DES'),
@@ -309,6 +311,7 @@ export default function AtributosTab({
               mod: p.mod,
               explicacaoMod: p.explicacao,
               categoria: 'atributoOuSalvaguarda',
+              permiteForcaIndomavel: p.atributo === 'FOR',
               vantagem:
                 desvantagemForcaDestreza && (p.atributo === 'FOR' || p.atributo === 'DES') ? 'desvantagem' : undefined,
             })

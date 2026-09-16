@@ -585,6 +585,13 @@ export default function BonusPanelContent({
       )}
       {furiaDisponivel && (
         <>
+          <div className={styles.slotCounter}>
+            <span>Fúria:</span>
+            <TickPips total={furiaMaximo} usados={furiaMaximo - furiaRestantes} variante="vermelho" />
+            <span style={{ color: 'var(--text-faint)' }}>
+              {furiaRestantes}/{furiaMaximo} disponíveis
+            </span>
+          </div>
           <div
             className={`${styles.row} ${styles.toggleRowLine}`}
             style={furiaAtiva || furiaRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}

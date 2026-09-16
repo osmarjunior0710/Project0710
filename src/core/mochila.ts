@@ -8,6 +8,7 @@ import { buscarPesoItem } from '../data/rulesets/dnd2024/buscarDescricaoItem';
 import { classeDaSelecao, type ExplicacaoCalculo } from './calculoPersonagem';
 import { valorFinalAtributo, type WizardSelection } from './personagem';
 import { identificarEquipamento } from './equipamento';
+import { aplicarCampeaoPrimitivo } from './campeaoPrimitivo';
 
 /**
  * Capacidade máxima de carga — confirmada na planilha mestra, aba
@@ -43,19 +44,34 @@ function multiplicadorCarga(passosAcima: number): number {
  * Grande como ativa na Ficha agora (ver `combat/BonusPanelContent`);
  * ausente/`false` em todo outro contexto (ex.: resumo do wizard, onde
  * a característica nem existe ainda). */
-export function calcularCapacidadeMaxima(selection: WizardSelection, formaGrandeAtiva = false): number | null {
-  const forValor = valorFinalAtributo(selection, 'FOR');
-  if (forValor === null) return null;
+export function calcularCapacidadeMaxima(
+  selection: WizardSelection,
+  formaGrandeAtiva = false,
+  /** Campeão Primitivo (Bárbaro nível 20, ver `core/campeaoPrimitivo.ts`)
+   * — `false`/omitido = comportamento de sempre. */
+  temCampeaoPrimitivo = false,
+): number | null {
+  const forValorBase = valorFinalAtributo(selection, 'FOR');
+  if (forValorBase === null) return null;
+  const forValor = aplicarCampeaoPrimitivo(forValorBase, 'FOR', temCampeaoPrimitivo);
   const multiplicador = multiplicadorCarga(passosTamanhoAcimaParaCarga(selection, formaGrandeAtiva));
   return Math.round(forValor * multiplicador);
 }
 
-export function explicarCapacidadeMaxima(selection: WizardSelection, formaGrandeAtiva = false): ExplicacaoCalculo {
-  const forValor = valorFinalAtributo(selection, 'FOR');
-  if (forValor === null) return { linhas: [], total: { label: 'Capacidade máxima de carga', valor: '—' } };
+export function explicarCapacidadeMaxima(
+  selection: WizardSelection,
+  formaGrandeAtiva = false,
+  temCampeaoPrimitivo = false,
+): ExplicacaoCalculo {
+  const forValorBase = valorFinalAtributo(selection, 'FOR');
+  if (forValorBase === null) return { linhas: [], total: { label: 'Capacidade máxima de carga', valor: '—' } };
+  const forValor = aplicarCampeaoPrimitivo(forValorBase, 'FOR', temCampeaoPrimitivo);
   const passos = passosTamanhoAcimaParaCarga(selection, formaGrandeAtiva);
   const multiplicador = multiplicadorCarga(passos);
-  const linhas = [{ label: 'Força', valor: `${forValor}` }];
+  const linhas = [
+    { label: 'Força', valor: `${forValor}` },
+    ...(forValor !== forValorBase ? [{ label: 'Campeão Primitivo já incluído', valor: `${forValorBase} → ${forValor}` }] : []),
+  ];
   if (passos === 0) {
     linhas.push({ label: `× ${multiplicador} kg (Tamanho Pequeno/Médio, tabela oficial)`, valor: '' });
   } else {
@@ -68,7 +84,10 @@ export function explicarCapacidadeMaxima(selection: WizardSelection, formaGrande
   }
   return {
     linhas,
-    total: { label: 'Capacidade máxima de carga', valor: `${calcularCapacidadeMaxima(selection, formaGrandeAtiva)} kg` },
+    total: {
+      label: 'Capacidade máxima de carga',
+      valor: `${calcularCapacidadeMaxima(selection, formaGrandeAtiva, temCampeaoPrimitivo)} kg`,
+    },
   };
 }
 

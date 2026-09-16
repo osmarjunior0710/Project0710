@@ -77,6 +77,8 @@ import { type MagiaGratisDeInvocacao } from '../../core/invocacoesMagiaGratis';
 import { aplicarAlteracaoPv, ganharPvTemporario } from '../../core/pvTemporario';
 import { deveAplicarVigorImplacavel } from '../../core/vigorImplacavel';
 import { deveOferecerFuriaImplacavel, cdFuriaImplacavel, pvFuriaImplacavel } from '../../core/furiaImplacavel';
+import { aplicarCampeaoPrimitivo } from '../../core/campeaoPrimitivo';
+import { ajustarPvMaximoPorMudancaDeCon } from '../../core/pvRetroativo';
 import { tipoDanoSubescolha, opcoesEscolhaReutilizavel } from '../../core/especieSubescolha';
 import { dadosAtaqueDeSopro, explicarCdAtaqueDeSopro } from '../../core/ataqueDeSopro';
 import { valorBencaoDoTenebroso } from '../../core/bencaoDoTenebroso';
@@ -169,7 +171,14 @@ export default function FichaShell() {
 
 function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }) {
   const navigate = useNavigate();
-  const { registrarBonusExtra, registrarSorte, registrarInspiracaoHeroica, estado: rollEmAndamento, rolarD20 } = useRoll();
+  const {
+    registrarBonusExtra,
+    registrarSorte,
+    registrarInspiracaoHeroica,
+    registrarForcaIndomavel,
+    estado: rollEmAndamento,
+    rolarD20,
+  } = useRoll();
   const [selecao, setSelecao] = useState<WizardSelection>(personagemSalvo.selecao);
 
   // Multiclasse (Fase M2/M3, ver EmDevB.md e SDD Multiclasse) —
@@ -198,6 +207,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const classeOriginal = catalogoClasses.find((c) => c.nome === classeOriginalNome) ?? classe;
   const classesMulticlassadasNomes = classesAtual.filter((c) => c.classe !== classeOriginalNome).map((c) => c.classe);
   const conValor = selecao.atributos.CON;
+  /** Campeão Primitivo (Bárbaro nível 20) — checa TODAS as classes do
+   * personagem (não só a ativa/original), já que a característica
+   * afeta Força/Constituição do personagem inteiro, não só da classe
+   * em foco. Ver `core/campeaoPrimitivo.ts`. */
+  const temCampeaoPrimitivo = classesAtual.some((c) => {
+    const classeCatalogo = catalogoClasses.find((cc) => cc.nome === c.classe);
+    return classeCatalogo ? caracteristicaDesbloqueada(classeCatalogo, ID_CARACTERISTICA_CLASSE.campeaoPrimitivo, c.nivel) !== null : false;
+  });
 
   const [tab, setTab] = useState<TabName>('atributos');
   const [pvMax, setPvMax] = useState(personagemSalvo.pvMax ?? calcularPvMaximoNivel1(selecao) ?? personagemSalvo.pvAtual);
@@ -421,7 +438,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [pesoAtivo, setPesoAtivo] = useState(true);
 
   const desValor = valorFinalAtributo(selecao, 'DES') ?? 10;
-  const conValorFinal = valorFinalAtributo(selecao, 'CON') ?? 10;
+  const conValorFinal = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'CON') ?? 10, 'CON', temCampeaoPrimitivo);
   // Talentos que entram no cálculo (Fase 4): os escolhidos em Level
   // Up (`talentosGeraisAtuais`) MAIS o Talento de Origem, ganho fixo
   // na criação (ex: Alerta) — nunca passa pelo picker de Level Up,
@@ -446,9 +463,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const desvantagemForcaDestreza = armaduraSemTreinamentoEquipada(classeOriginal, armaduraEquipadaCatalogo, talentosEfetivos, classesMulticlassadasNomes);
   const iniciativa = calcularIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);
   const percepcaoPassiva = calcularPercepcaoPassiva(selecao, nivelTotalAtual);
-  const atributos = calcularAtributosFinais(selecao);
+  const atributos = calcularAtributosFinais(selecao, temCampeaoPrimitivo);
   const atributosFinaisAtuais = Object.fromEntries(
-    atributosOrdem.map((a) => [a, valorFinalAtributo(selecao, a) ?? 10]),
+    atributosOrdem.map((a) => [a, aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, a) ?? 10, a, temCampeaoPrimitivo)]),
   ) as Record<Atributo, number>;
   const forMod = atributos.find((a) => a.atributo === 'FOR')?.mod ?? 0;
   const desMod = atributos.find((a) => a.atributo === 'DES')?.mod ?? 0;
@@ -474,17 +491,19 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ],
     nivelTotalAtual,
     { ativa: temConhecimentoPrimordial && furiaAtiva, mod: forMod, pericias: PERICIAS_CONHECIMENTO_PRIMORDIAL },
+    temCampeaoPrimitivo,
   );
   const salvaguardas = calcularSalvaguardas(
     selecao,
     classeOriginal,
     nivelTotalAtual,
     atributosResilienteEscolhidos(talentosEfetivos, escolhaAtributoTalentoGeral),
+    temCampeaoPrimitivo,
   );
   const proficienciasFerramenta = calcularProficienciasFerramenta(selecao, nivelTotalAtual, ferramentasMulticlasseAtuais);
   const bonusProficienciaAtual = classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
-  const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva);
-  const explicacaoCapacidadeMaxima = explicarCapacidadeMaxima(selecao, formaGrandeAtiva);
+  const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva, temCampeaoPrimitivo);
+  const explicacaoCapacidadeMaxima = explicarCapacidadeMaxima(selecao, formaGrandeAtiva, temCampeaoPrimitivo);
   const explicacaoPv = explicarPvMaximo(selecao, personagem.pvMax);
   const explicacaoCa = explicarCAEquipado(itensMochila, desValor, conValorFinal, personagem.estiloDeLuta, talentosEfetivos, classeOriginal, classesMulticlassadasNomes);
   const explicacaoIniciativa = explicarIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);
@@ -696,6 +715,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * desde o último Descanso Longo — regra real não trava no instante
    * exato de rolar Iniciativa (ver `EmDevB.md`, B4.7). */
   const furiaPersistenteDisponivel = temFuriaPersistente && furiaGasto > 0 && !furiaPersistenteUsada;
+  const temForcaIndomavel = classe
+    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.forcaIndomavel, personagem.nivel) !== null
+    : false;
+  const forValorFinal = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'FOR') ?? 10, 'FOR', temCampeaoPrimitivo);
   const sorteDoTenebrosoMaximo = sorteDoTenebrosoDisponivel ? usosSorteDoTenebroso(carMod) : 0;
   const sorteDoTenebrosoRestantes = Math.max(0, sorteDoTenebrosoMaximo - sorteDoTenebrosoGasto);
   const equipadoAtual = resumoEquipado(itensMochila);
@@ -1493,6 +1516,15 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return () => registrarInspiracaoHeroica(null);
   }, [inspiracaoHeroicaAtiva, registrarInspiracaoHeroica]);
 
+  // Registra Força Indomável (Bárbaro nível 18) no modal de rolagem
+  // global — aplica sozinho em teste/salvaguarda de Força (sem botão,
+  // sem custo, ver `RollContext.tsx`). Some sozinha se a Ficha
+  // desmontar ou a classe/nível/valor de Força mudar.
+  useEffect(() => {
+    registrarForcaIndomavel(temForcaIndomavel ? forValorFinal : null);
+    return () => registrarForcaIndomavel(null);
+  }, [temForcaIndomavel, forValorFinal, registrarForcaIndomavel]);
+
   const surto = recursoContado(surtoMaximo, surtoGasto, setSurtoGasto);
   function usarSurto(): boolean {
     if (surtoUsadoTurno) return false;
@@ -1525,6 +1557,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     periciaRestritaTalentoEscolhida: string | null;
     conhecimentoPrimordialPericiaEscolhida: string | null;
   }) {
+    // Constituição ANTES de qualquer mudança deste Level Up — precisa
+    // vir antes do `aumentarAtributos`/`setSelecao` abaixo, senão perde
+    // o valor de referência pro ajuste retroativo de PV logo adiante.
+    const conAntes = valorFinalAtributo(selecao, 'CON') ?? 10;
     const novosAtributos = resultado.atributosAumentados
       ? aumentarAtributos(selecao.atributos, resultado.atributosAumentados)
       : null;
@@ -1543,9 +1579,27 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         i === idx ? { ...c, nivel: resultado.novoNivel, subclasse: resultado.subclasseEscolhida ?? c.subclasse } : c,
       );
     });
-    setPvMax((v) => v + resultado.pvGanho);
+    // Constituição DEPOIS deste Level Up — soma o Aumento no Valor de
+    // Atributo (se escolhido) E o Campeão Primitivo (Bárbaro, ao
+    // chegar no nível 20 NESTA classe — automático, sem escolha). Se
+    // o mod. de Constituição mudou, o PV Máximo precisa do ajuste
+    // retroativo (regra real: PV Máximo recalcula como se o mod. novo
+    // já valesse desde sempre) — `resultado.pvGanho` já foi calculado
+    // com o mod. ANTIGO (`LevelUpShell`/`geradorPersonagemTeste` sempre
+    // resolvem o ganho de PV do nível antes de aplicar qualquer ASI
+    // desse mesmo nível), então até o ganho DESTE nível entra no
+    // ajuste — por isso o multiplicador é `nivelTotalAtual + 1` (nível
+    // total incluindo o que acabou de ser ganho), não `nivelTotalAtual`.
+    const chegouAoCampeaoPrimitivo = classeAtivaNome === 'Bárbaro' && resultado.novoNivel === 20;
+    const conDepoisAsi = novosAtributos ? (valorFinalAtributo({ ...selecao, atributos: novosAtributos }, 'CON') ?? conAntes) : conAntes;
+    const conDepois = aplicarCampeaoPrimitivo(conDepoisAsi, 'CON', chegouAoCampeaoPrimitivo);
+    const aplicarAjustePv = (v: number) =>
+      conDepois === conAntes
+        ? v
+        : ajustarPvMaximoPorMudancaDeCon(v, modificador(conAntes), modificador(conDepois), nivelTotalAtual + 1);
+    setPvMax((v) => aplicarAjustePv(v + resultado.pvGanho));
     if (resultado.estiloDeLutaEscolhido) setEstiloDeLutaAtivo(resultado.estiloDeLutaEscolhido);
-    setPvAtual((v) => v + resultado.pvGanho);
+    setPvAtual((v) => aplicarAjustePv(v + resultado.pvGanho));
     if (resultado.truquesEscolhidos) setTruquesAtuais(resultado.truquesEscolhidos);
     if (resultado.livroDeMagiasEscolhidas) setLivroDeMagiasAtuais(resultado.livroDeMagiasEscolhidas);
     if (resultado.magiasPreparadasEscolhidas) setMagiasPreparadasAtuais(resultado.magiasPreparadasEscolhidas);

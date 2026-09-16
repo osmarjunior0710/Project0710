@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import type { ExplicacaoCalculo } from '../../core/calculoPersonagem';
+import { deveAplicarForcaIndomavel } from '../../core/forcaIndomavel';
 import { useColapsavel } from '../hooks/useColapsavel';
 import { suportaWebGL } from '../utils/suportaWebGL';
 import { lancarGrupos, rerolarGrupo, type DiceBoxResultado } from './diceBox3d';
@@ -165,6 +166,18 @@ export interface RollState {
    * (Sorte/Inspiração Heroica, ver sdd/sdd-dado-3d.md "Rerolagem") —
    * o app nunca lê os campos dele, só passa de volta pra lib. */
   resultadoBrutoD20?: DiceBoxResultado;
+  /** `true` = esta rolagem 'd20' é um teste ou Salvaguarda de Força —
+   * habilita a Força Indomável (Bárbaro nível 18, ver
+   * `core/forcaIndomavel.ts`) quando o personagem tiver a
+   * característica. Omitido/false = nunca aplica, mesmo com a
+   * característica disponível (não é uma rolagem de Força). */
+  permiteForcaIndomavel?: boolean;
+  /** `true` = o total desta rolagem foi substituído pelo valor bruto
+   * de Força (Força Indomável) — sempre recalculado do zero em toda
+   * mudança de total (Vantagem pós-rolagem, Bônus Extra, Sorte,
+   * Inspiração Heroica), nunca "gasta" um uso (a característica é
+   * sempre vantajosa, sem custo). */
+  forcaIndomavelAplicada?: boolean;
   /** Mesma ideia de `resultadoBrutoD20`, só que pra uma rolagem 'dados'
    * de 1 DADO SÓ (sem `dadosIndividuais`, ver `rolarDados`) — usado
    * pelo `rerollDadoEscolhido`/`usarRerollSe1` desse caso. Rolagem com
@@ -267,6 +280,9 @@ interface RollD20Options {
    * simples (`1d20 + N`), sem ⓘ — nem toda rolagem tem a quebra pronta
    * ainda (ver B7, `EmDev.md`). */
   explicacaoMod?: ExplicacaoCalculo;
+  /** Ver `RollState.permiteForcaIndomavel` — omitido/false = rolagem
+   * comum, sem a Força Indomável em jogo. */
+  permiteForcaIndomavel?: boolean;
   onResultado?: (total: number, d20: number) => void;
 }
 
@@ -356,6 +372,11 @@ interface RollContextValue {
    * nesta rolagem) — substitui o resultado e gasta a Inspiração
    * Heroica do personagem (`InspiracaoHeroicaProvider.usar`). */
   usarInspiracaoHeroica: () => void;
+  /** Registra o valor bruto de Força do personagem da tela atual
+   * (Bárbaro nível 18+) — `null` = não tem a característica. Aplicado
+   * sozinho (sem botão) em toda rolagem 'd20' com
+   * `permiteForcaIndomavel`, recalculado a cada mudança de total. */
+  registrarForcaIndomavel: (valor: number | null) => void;
   /** Modo de Teste (ver `AvatarMenu`) — `true` faz todo d20 sair da
    * sequência fixa 1/10/15/20 em vez de rolar de verdade (dano e
    * outros dados continuam aleatórios). Não persiste entre sessões —
@@ -425,6 +446,22 @@ function rolarD20Dado(modoTeste: MutableRefObject<boolean>, indice: MutableRefOb
   return 1 + Math.floor(Math.random() * 20);
 }
 
+/** Recalcula o total de uma rolagem 'd20' aplicando a Força Indomável
+ * (Bárbaro nível 18) se for o caso — chamado em TODO ponto que
+ * (re)computa o total de uma rolagem com `permiteForcaIndomavel`
+ * (conclusão inicial, Vantagem pós-rolagem, Bônus Extra, Sorte,
+ * Inspiração Heroica), mesmo padrão de sempre re-somar `bonusExtra.valor`
+ * nesses mesmos pontos. Sempre vantajoso pro jogador — sem "gastar" nada,
+ * por isso aplica sozinho em vez de esperar confirmação. */
+function totalComForcaIndomavel(
+  totalBase: number,
+  permiteForcaIndomavel: boolean | undefined,
+  forcaValor: number | null,
+): { total: number; aplicada: boolean } {
+  const aplicada = !!permiteForcaIndomavel && forcaValor !== null && deveAplicarForcaIndomavel(totalBase, forcaValor);
+  return { total: aplicada ? (forcaValor as number) : totalBase, aplicada };
+}
+
 function criticoDe(d20: number): CritTipo {
   return d20 === 1 ? 'falha' : d20 === 20 ? 'sucesso' : null;
 }
@@ -461,6 +498,14 @@ async function rerolarFisico(
 export function RollProvider({ children }: { children: ReactNode }) {
   const [estado, setEstado] = useState<RollState | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Força Indomável — ref (não state) de propósito: lida dentro de
+  // callbacks memoizados (`rolarD20`, `escolherVantagemPosRolagem`,
+  // etc.) sem precisar recriá-los a cada mudança, mesmo raciocínio de
+  // `modoTesteRef` acima.
+  const forcaIndomavelRef = useRef<number | null>(null);
+  const registrarForcaIndomavel = useCallback((valor: number | null) => {
+    forcaIndomavelRef.current = valor;
+  }, []);
   const [modoTeste, setModoTesteState] = useState(false);
   const modoTesteRef = useRef(false);
   const indiceModoTesteRef = useRef(0);
@@ -482,7 +527,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
   const dado3DAtivo = preferenciaDado3D && dado3DDisponivel && !modoTeste;
 
   const rolarD20 = useCallback(
-    ({ label, formula, mod, vantagem, categoria, explicacaoMod, onResultado }: RollD20Options) => {
+    ({ label, formula, mod, vantagem, categoria, explicacaoMod, permiteForcaIndomavel, onResultado }: RollD20Options) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       const usar3D = dado3DAtivo;
       setEstado({
@@ -501,6 +546,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         explicacaoMod,
         bonusExtra: null,
         motor3D: usar3D,
+        permiteForcaIndomavel,
       });
 
       // d20 simples concluído (sem Vantagem/Desvantagem pré-definida) —
@@ -508,7 +554,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
       // o motor 3D falha (sem WebGL de repente, erro de rede no
       // `import()` dinâmico) ou nunca completa.
       function concluirPlano(rolagem1: number, viaMotor3D: boolean, resultadoBruto?: DiceBoxResultado) {
-        const total = rolagem1 + mod;
+        const { total, aplicada } = totalComForcaIndomavel(rolagem1 + mod, permiteForcaIndomavel, forcaIndomavelRef.current);
         setEstado({
           label,
           formula,
@@ -528,6 +574,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
           inspiracaoHeroicaUsada: false,
           motor3D: viaMotor3D,
           resultadoBrutoD20: resultadoBruto,
+          permiteForcaIndomavel,
+          forcaIndomavelAplicada: aplicada,
         });
         onResultado?.(total, rolagem1);
       }
@@ -536,7 +584,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
       // `vantagem` só chega aqui truthy, TypeScript não sabe disso.
       function concluirVantagem(rolagem1: number, rolagem2: number, viaMotor3D: boolean) {
         const usado = vantagem === 'vantagem' ? Math.max(rolagem1, rolagem2) : Math.min(rolagem1, rolagem2);
-        const total = usado + mod;
+        const { total, aplicada } = totalComForcaIndomavel(usado + mod, permiteForcaIndomavel, forcaIndomavelRef.current);
         setEstado({
           label,
           formula,
@@ -556,6 +604,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
           inspiracaoHeroicaUsada: false,
           motor3D: viaMotor3D,
           dado2Motor3D: viaMotor3D,
+          permiteForcaIndomavel,
+          forcaIndomavelAplicada: aplicada,
         });
         onResultado?.(total, usado);
       }
@@ -856,8 +906,16 @@ export function RollProvider({ children }: { children: ReactNode }) {
           if (!prev || prev.tipo !== 'd20') return prev;
           const rolagem1 = typeof prev.valorDado === 'number' ? prev.valorDado : 0;
           const usado = prev.vantagem === 'vantagem' ? Math.max(rolagem1, rolagem2) : Math.min(rolagem1, rolagem2);
-          const total = usado + (prev.mod ?? 0);
-          return { ...prev, fase: 'concluido', dado2: rolagem2, total, critico: criticoDe(usado), dado2Motor3D: viaMotor3D };
+          const { total, aplicada } = totalComForcaIndomavel(usado + (prev.mod ?? 0), prev.permiteForcaIndomavel, forcaIndomavelRef.current);
+          return {
+            ...prev,
+            fase: 'concluido',
+            dado2: rolagem2,
+            total,
+            critico: criticoDe(usado),
+            dado2Motor3D: viaMotor3D,
+            forcaIndomavelAplicada: aplicada,
+          };
         });
       }
 
@@ -909,9 +967,11 @@ export function RollProvider({ children }: { children: ReactNode }) {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       const valor = 1 + Math.floor(Math.random() * lados);
-      setEstado((prev) =>
-        prev ? { ...prev, bonusExtra: { rotulo, lados, valor }, total: (prev.total ?? 0) + valor } : prev,
-      );
+      setEstado((prev) => {
+        if (!prev) return prev;
+        const { total, aplicada } = totalComForcaIndomavel((prev.total ?? 0) + valor, prev.permiteForcaIndomavel, forcaIndomavelRef.current);
+        return { ...prev, bonusExtra: { rotulo, lados, valor }, total, forcaIndomavelAplicada: aplicada };
+      });
     }, DURACAO_ANIMACAO_MS);
   }, [estado, bonusExtraProvider]);
 
@@ -931,8 +991,17 @@ export function RollProvider({ children }: { children: ReactNode }) {
     function concluir(novaRolagem: number, novoResultadoBruto?: DiceBoxResultado) {
       setEstado((prev) => {
         if (!prev || prev.tipo !== 'd20') return prev;
-        const total = novaRolagem + (prev.mod ?? 0) + (typeof prev.bonusExtra?.valor === 'number' ? prev.bonusExtra.valor : 0);
-        return { ...prev, fase: 'concluido', valorDado: novaRolagem, total, critico: criticoDe(novaRolagem), resultadoBrutoD20: novoResultadoBruto };
+        const totalBase = novaRolagem + (prev.mod ?? 0) + (typeof prev.bonusExtra?.valor === 'number' ? prev.bonusExtra.valor : 0);
+        const { total, aplicada } = totalComForcaIndomavel(totalBase, prev.permiteForcaIndomavel, forcaIndomavelRef.current);
+        return {
+          ...prev,
+          fase: 'concluido',
+          valorDado: novaRolagem,
+          total,
+          critico: criticoDe(novaRolagem),
+          resultadoBrutoD20: novoResultadoBruto,
+          forcaIndomavelAplicada: aplicada,
+        };
       });
     }
 
@@ -1000,8 +1069,17 @@ export function RollProvider({ children }: { children: ReactNode }) {
     function concluir(novaRolagem: number, novoResultadoBruto?: DiceBoxResultado) {
       setEstado((prev) => {
         if (!prev || prev.tipo !== 'd20') return prev;
-        const total = novaRolagem + (prev.mod ?? 0) + (typeof prev.bonusExtra?.valor === 'number' ? prev.bonusExtra.valor : 0);
-        return { ...prev, fase: 'concluido', valorDado: novaRolagem, total, critico: criticoDe(novaRolagem), resultadoBrutoD20: novoResultadoBruto };
+        const totalBase = novaRolagem + (prev.mod ?? 0) + (typeof prev.bonusExtra?.valor === 'number' ? prev.bonusExtra.valor : 0);
+        const { total, aplicada } = totalComForcaIndomavel(totalBase, prev.permiteForcaIndomavel, forcaIndomavelRef.current);
+        return {
+          ...prev,
+          fase: 'concluido',
+          valorDado: novaRolagem,
+          total,
+          critico: criticoDe(novaRolagem),
+          resultadoBrutoD20: novoResultadoBruto,
+          forcaIndomavelAplicada: aplicada,
+        };
       });
     }
 
@@ -1041,6 +1119,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         inspiracaoHeroicaDisponivel: inspiracaoHeroicaProvider?.disponivel ?? false,
         registrarInspiracaoHeroica,
         usarInspiracaoHeroica,
+        registrarForcaIndomavel,
         modoTeste,
         alternarModoTeste,
         preferenciaDado3D,

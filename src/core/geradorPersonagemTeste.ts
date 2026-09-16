@@ -33,7 +33,10 @@ import { bonusPvPorNivelDaEspecie, bonusPvPorNivelDoTalento, calcularPvMaximoNiv
 import { armasParaMaestria, quantidadeMaestriaEmArma } from './maestriaArma';
 import { valorRecursoClasse } from './recursosClasse';
 import { completarListaDeMagias, espacosDeMagiaAtivos, usaRedefinicaoPorDescanso } from './magiasPersonagem';
-import { niveisComASI, niveisComEspecialista, temEstiloDeLutaTrocavel, subclasseImplementada } from './levelUp';
+import { caracteristicaDesbloqueada, niveisComASI, niveisComEspecialista, temEstiloDeLutaTrocavel, subclasseImplementada } from './levelUp';
+import { ID_CARACTERISTICA_CLASSE } from '../data/rulesets/dnd2024/idsCaracteristicasClasse';
+import { aplicarCampeaoPrimitivo } from './campeaoPrimitivo';
+import { ajustarPvMaximoPorMudancaDeCon } from './pvRetroativo';
 import { opcoesSubescolhaNoWizard, tracoComEscolhaDePericia } from './especieSubescolha';
 import { gerarIdPersonagem, type PersonagemSalvo } from './armazenamentoPersonagens';
 import { embaralhar, sorteiaUm } from './sorteio';
@@ -222,9 +225,10 @@ function aplicarLevelUpsAleatorios(
   let periciasEspecialistaAtual: string[] = [];
   let talentosGeraisAtual: string[] = [];
 
-  const conValor = valorFinalAtributo(selecao, 'CON') ?? 10;
-  const mediaPvPorNivel =
-    dadoVidaValor[classe.dadoDeVida] + modificador(conValor) + bonusPvPorNivelDaEspecie(selecao) + bonusPvPorNivelDoTalento(selecao);
+  // Bônus fixo por nível (Tenacidade Anã/Vigoroso) não muda durante o
+  // loop — só o mod. de CON muda (ASI/Campeão Primitivo), por isso é
+  // lido de novo a cada nível abaixo em vez de congelado aqui.
+  const bonusFlatPorNivel = bonusPvPorNivelDaEspecie(selecao) + bonusPvPorNivelDoTalento(selecao);
   const subclassesDaClasse = subclasses.filter((s) => s.classeId === classe.id);
   // Mago (e futuras classes com o mesmo Padrão C, ver DECISOES-CLASSES.md
   // "Casters"): Truques/Magias Preparadas só trocam no Descanso Longo —
@@ -232,7 +236,8 @@ function aplicarLevelUpsAleatorios(
   const usaRedefPorDescanso = usaRedefinicaoPorDescanso(classe);
 
   for (let nivel = 2; nivel <= nivelAlvo; nivel++) {
-    pvMax += mediaPvPorNivel;
+    const conAntes = valorFinalAtributo(selecao, 'CON') ?? 10;
+    pvMax += dadoVidaValor[classe.dadoDeVida] + modificador(conAntes) + bonusFlatPorNivel;
 
     if (classe.nivelSubclasse === nivel && !subclasseAtual) {
       // Mesma regra de `sortearLevelUpRapido`/`LevelUpShell` (ver
@@ -305,6 +310,20 @@ function aplicarLevelUpsAleatorios(
           selecao = { ...selecao, atributos: aumentarAtributos(selecao.atributos, codigos) };
         }
       }
+    }
+
+    // Campeão Primitivo (Bárbaro nível 20) — automático, sem escolha
+    // (mesmo espírito de um ASI, só que sem decisão do jogador). Não
+    // grava o +4 em `selecao.atributos` (ficaria bagunçado com a
+    // exibição ao vivo, que já aplica isso sozinha — ver
+    // `FichaShell.tsx`/`core/campeaoPrimitivo.ts`) — só usa o valor
+    // "virtual" pra saber quanto o PV Máximo precisa ajustar agora.
+    const jaTinhaCampeaoAntes = caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.campeaoPrimitivo, nivel - 1) !== null;
+    const temCampeaoAgora = caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.campeaoPrimitivo, nivel) !== null;
+    const conDepoisAsi = valorFinalAtributo(selecao, 'CON') ?? conAntes;
+    const conDepois = aplicarCampeaoPrimitivo(conDepoisAsi, 'CON', temCampeaoAgora && !jaTinhaCampeaoAntes);
+    if (conDepois !== conAntes) {
+      pvMax = ajustarPvMaximoPorMudancaDeCon(pvMax, modificador(conAntes), modificador(conDepois), nivel);
     }
   }
 

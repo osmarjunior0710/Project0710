@@ -56,6 +56,13 @@ export const ID_CARACTERISTICA_CLASSE = {
    * entre Descansos Longos. Ver `FichaShell.tsx`
    * (`recuperarFuriaPersistente`). */
   furiaPersistente: 'Fúria Persistente',
+  /** Bárbaro nível 18 — teste/salvaguarda de Força com total menor que
+   * o valor de Força vira automaticamente esse valor. Ver
+   * `core/forcaIndomavel.ts`, `RollContext.tsx`. */
+  forcaIndomavel: 'Força Indomável',
+  /** Bárbaro nível 20 — Força e Constituição sobem +4, até no máximo
+   * 25. Ver `core/campeaoPrimitivo.ts`. */
+  campeaoPrimitivo: 'Campeão Primitivo',
 } as const;
 
 export type IdCaracteristicaClasse = keyof typeof ID_CARACTERISTICA_CLASSE;
