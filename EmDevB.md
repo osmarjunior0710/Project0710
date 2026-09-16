@@ -521,8 +521,17 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       com o mod. antigo + ajuste retroativo de 20 níveis × delta de
       mod.). Popup "ⓘ" do atributo mostra a quebra "FOR base 10 +
       Campeão Primitivo +4 = mod. FOR +2".
-- [ ] **B4.10 — ASI (4/8/12/16):** conferir se já funciona sozinho
-      (mecanismo genérico por ID, igual Ataque Extra).
+- [x] **B4.10 — ASI (4/8/12/16) — confirmado, sem código novo.**
+      `classes.ts` já tem 'Aumento no Valor de Atributo' exatamente nos
+      níveis 4/8/12/16 (19 é Dádiva Épica, separado, também correto) —
+      `niveisComASI` já lê isso genericamente por ID
+      (`ID_CARACTERISTICA_CLASSE.asi`), mesmo mecanismo já usado por
+      Guerreiro/Bardo/Bruxo/Mago, nada específico de Bárbaro pra
+      escrever. Verificado com Playwright: Bárbaro criado no nível 3
+      (pill "Talento no 4") → 13 "⚡ Inst. Level Up" seguidos (nível 3
+      até 16, cruzando os 4 níveis de ASI) sem nenhum erro de console;
+      atributos mudaram de forma consistente com ASI/talento sorteado
+      em cada oportunidade (DES 11→14, CON 14→16).
 - [ ] **B5 — Trilha do Berserker** (nível 3/6/10/14): Frenesi, Fúria
       Irracional, Retaliação, Presença Intimidante.
 - [ ] **B6 — Trilha do Coração Selvagem:** Arauto da Fauna, Fúria dos
