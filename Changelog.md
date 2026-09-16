@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0114
+
+Bárbaro — Força Indomável (nível 18) chegou. Em qualquer teste ou
+Salvaguarda de Força, se o total sair menor que o seu valor de Força,
+ele vira automaticamente esse valor — sem precisar tocar em nada,
+aparece "💪 Força Indomável" no popup de dado quando isso acontece.
+
 ## v202609_1959
 
 O painel Ação Bônus agora mostra o contador de usos de Fúria (pips

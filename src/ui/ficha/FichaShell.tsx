@@ -169,7 +169,14 @@ export default function FichaShell() {
 
 function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }) {
   const navigate = useNavigate();
-  const { registrarBonusExtra, registrarSorte, registrarInspiracaoHeroica, estado: rollEmAndamento, rolarD20 } = useRoll();
+  const {
+    registrarBonusExtra,
+    registrarSorte,
+    registrarInspiracaoHeroica,
+    registrarForcaIndomavel,
+    estado: rollEmAndamento,
+    rolarD20,
+  } = useRoll();
   const [selecao, setSelecao] = useState<WizardSelection>(personagemSalvo.selecao);
 
   // Multiclasse (Fase M2/M3, ver EmDevB.md e SDD Multiclasse) —
@@ -696,6 +703,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * desde o último Descanso Longo — regra real não trava no instante
    * exato de rolar Iniciativa (ver `EmDevB.md`, B4.7). */
   const furiaPersistenteDisponivel = temFuriaPersistente && furiaGasto > 0 && !furiaPersistenteUsada;
+  const temForcaIndomavel = classe
+    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.forcaIndomavel, personagem.nivel) !== null
+    : false;
+  const forValorFinal = valorFinalAtributo(selecao, 'FOR') ?? 10;
   const sorteDoTenebrosoMaximo = sorteDoTenebrosoDisponivel ? usosSorteDoTenebroso(carMod) : 0;
   const sorteDoTenebrosoRestantes = Math.max(0, sorteDoTenebrosoMaximo - sorteDoTenebrosoGasto);
   const equipadoAtual = resumoEquipado(itensMochila);
@@ -1492,6 +1503,15 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     });
     return () => registrarInspiracaoHeroica(null);
   }, [inspiracaoHeroicaAtiva, registrarInspiracaoHeroica]);
+
+  // Registra Força Indomável (Bárbaro nível 18) no modal de rolagem
+  // global — aplica sozinho em teste/salvaguarda de Força (sem botão,
+  // sem custo, ver `RollContext.tsx`). Some sozinha se a Ficha
+  // desmontar ou a classe/nível/valor de Força mudar.
+  useEffect(() => {
+    registrarForcaIndomavel(temForcaIndomavel ? forValorFinal : null);
+    return () => registrarForcaIndomavel(null);
+  }, [temForcaIndomavel, forValorFinal, registrarForcaIndomavel]);
 
   const surto = recursoContado(surtoMaximo, surtoGasto, setSurtoGasto);
   function usarSurto(): boolean {

@@ -453,9 +453,31 @@ do Jogador (PDF `04a_-_Cap_3_Classes_de_Personagem_Barbaro_a_Feiticeiro.pdf`).
       (572)/`npm run build` limpos + Playwright: painel Bônus mostra
       "6/6 disponíveis" com 6 pips vermelhos cheios; depois de gastar 1
       uso, "5/6 disponíveis" com o último pip cinza.
-- [ ] **B4.8 — Força Indomável (nível 18):** reroll de teste OU
-      salvaguarda de Força usando o valor cheio, se o resultado for
-      menor.
+- [x] **B4.8 — Força Indomável (nível 18).** NÃO é reroll — é
+      substituição direta do total pelo valor bruto de Força quando o
+      total sair menor (regra: "se o total for menor que seu valor de
+      Força, use esse valor no lugar do total"). Sempre vantajoso, sem
+      custo — aplica sozinho, sem botão (feedback do Osmar: "por que
+      teria opção, se o jogador nunca ia recusar?").
+      Novo `core/forcaIndomavel.ts` (`deveAplicarForcaIndomavel`) + 2
+      testes. `RollContext.tsx` ganhou `permiteForcaIndomavel` (marca
+      "isso é um teste/salvaguarda de Força" na rolagem) +
+      `registrarForcaIndomavel` (valor bruto de Força do personagem,
+      `null` = sem a característica) — a substituição roda em TODO
+      ponto que recalcula o total de um d20 (conclusão inicial,
+      Vantagem/Desvantagem escolhida depois, Bônus Extra, Sorte,
+      Inspiração Heroica), mesmo padrão de sempre re-somar
+      `bonusExtra.valor` nesses pontos — nunca "sticky", reavalia do
+      zero a cada vez. `AtributosTab.tsx`: as 3 rolagens de Força
+      (teste de atributo, Atletismo, Salvaguarda de Força) marcam
+      `permiteForcaIndomavel`. `RollOverlay.tsx` mostra "💪 Força
+      Indomável — total virou seu valor de Força" quando aplica.
+      Verificado com `tsc -b --force`/`npm test -- --run`
+      (581)/`npm run build` limpos + Playwright num Bárbaro nível 18
+      (Modo de Teste): total 1 (FOR 14) → vira 14, texto aparece;
+      escolher Vantagem depois (2º dado 10, total 10 = FOR 10 exato)
+      → NÃO aplica (regra é "menor que", não "menor ou igual") —
+      confirma que reavalia certo em vez de ficar "grudado".
 - [ ] **B4.9 — Campeão Primitivo (nível 20):** FOR/CON +4 até 25 —
       mexe no cálculo de atributos finais, ver precedente de "+X até
       Y" de nível 20 antes de desenhar.
