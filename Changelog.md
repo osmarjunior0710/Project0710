@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2045
+
+Talento Resiliente ganhou uma tela nova de escolha de atributo (+1 e
+proficiência de Salvaguarda) mostrando o valor atual e pra quanto ele
+vai, igual já acontecia nas telas normais de Aumento no Valor de
+Atributo — antes só mostrava o nome do atributo, sem essa referência.
+
 ## v202609_0946
 
 Bárbaro — Campeão Primitivo (nível 20) chegou: Força e Constituição
