@@ -316,17 +316,13 @@ no celular ficar perceptivelmente lento: parar de embutir
 aplicar code-splitting. Ninguém decidiu fazer isso ainda — só
 registrado como possibilidade.
 
-**Emblemas das outras 9 classes são placeholder (cópia do emblema do
-Guerreiro).** O Osmar já subiu os emblemas novos (formato redondo) de
-Guerreiro, Bardo e **Bruxo** (classe + os 4 Patronos, gerados por IA em
-grid 2x2, recortados e comprimidos em `webp`) — as 9 restantes
-(Bárbaro, Clérigo, Druida, Feiticeiro, Guardião, Ladino, Mago, Monge,
-Paladino) usam uma cópia do emblema do Guerreiro por enquanto (aparecem
-cinza, dentro do card "em breve"). Trocar pelo arquivo real assim que
-existir — é só substituir `src/assets/icones-classes/{id}-banner.webp`,
-o código não muda (`IconeClasse` acha pelo nome do arquivo
-automaticamente). Ver DECISOES-DESIGN.md "Ícones novos (emblema
-redondo)".
+~~**Emblemas das outras 9 classes são placeholder.**~~ **Resolvido**
+(confirmado no postmortem do Bárbaro, 2026-09) — conferindo
+`src/assets/icones-classes/*.webp` hoje, todas as 22 classes/
+subclasses/patronos têm arquivo próprio com hash distinto (nenhum é
+mais cópia do emblema do Guerreiro). O Osmar foi subindo os emblemas
+reais aos poucos sem avisar entrega por entrega — essa pendência tinha
+ficado sem ser fechada. Nada a fazer, só remover a entrada.
 
 **Contexto:** decisão do Osmar após fechar o Plano de Equipamento —
 "vamos pra sintonização" (E4) e depois "a gente vai começar uma
@@ -453,14 +449,20 @@ Multiclasse (`classesExtrasNomes`/nível total) e a quebra do popup de
 rolagem (B7/B8) continuam encaixando certo em todos eles.
 
 **Por que ainda fica aqui:** a revisão foi só de código, sem clicar na
-tela — nenhum dos 23 é testável com o Char de Teste Fixo atual (Mago/
-Bardo), que não tem talento de arma/armadura nenhum. Falta a validação
-visual de verdade.
+tela — nenhum dos 23 era testável com o Char de Teste Fixo da época
+(Mago/Bardo), que não tem talento de arma/armadura nenhum. Falta a
+validação visual de verdade.
 
-**O que falta pra resolver:** quando existir um personagem de teste
-marcial (Guerreiro/Bárbaro — ver Backlog.md se/quando o Osmar quiser
-essa 2ª ferramenta), validar cada um dos 23 na tela de verdade, um a
-um, e só então mover pra `DECISOES-CLASSES.md` como confirmado.
+**Atualizado no postmortem do Bárbaro (2026-09):** o bloqueio "não
+existe personagem de teste marcial" não existe mais — Guerreiro
+(desde sempre) e agora Bárbaro também são classes marciais jogáveis de
+verdade via "🎲 Personagem de Teste"/wizard normal, sem precisar de
+nenhuma ferramenta nova (a referência antiga a "Backlog.md" pra uma 2ª
+ferramenta não existe mais/nunca foi escrita). **O que falta pra
+resolver:** ainda não é o clique-a-clique de verdade — só a
+possibilidade já existe. Fazer a validação visual dos 23 talentos/
+Estilos de Luta um a um com um Guerreiro ou Bárbaro de teste, e só
+então mover pra `DECISOES-CLASSES.md` como confirmado.
 
 ## Estilo de Luta — Interceptação/Protetivo precisam de consciência multi-combatente
 
@@ -594,35 +596,35 @@ rodam a jogada de verdade em cima desse dado.
   existe no app; depende da Mochila ganhar suporte a "item com cargas"
   primeiro.
 
-## Faltam 10 classes (só Guerreiro e Bardo importados)
+## Faltam 7 classes (Guerreiro, Bardo, Bruxo, Mago e Bárbaro já importados)
+
+**Atualizado no postmortem do Bárbaro (2026-09) — esta entrada tinha
+ficado desatualizada** (ainda dizia "só Guerreiro e Bardo", listando
+Bruxo/Mago/Bárbaro como faltantes mesmo já implementados há tempo).
 
 **O que é:** Guerreiro foi a classe-piloto (mais simples: sem magia,
-sem subclasse até nível 3); Bardo foi a segunda (conjurador completo).
-As outras 10 (Bárbaro, Bruxo, Clérigo, Druida, Feiticeiro, Guardião,
-Ladino, Mago, Monge, Paladino) ficam "(em breve)" na lista de Classe
-do wizard.
+sem subclasse até nível 3); Bardo, Bruxo, Mago e Bárbaro vieram depois
+(ver `DECISOES-CLASSES.md` e `aprendizados/classes/barbaro.md` pros
+detalhes de cada uma). As 7 restantes (Clérigo, Druida, Feiticeiro,
+Guardião, Ladino, Monge, Paladino) ficam "(em breve)" na lista de
+Classe do wizard.
 
 **O que falta pra resolver:** pra cada classe nova, repetir o mesmo
-processo do Guerreiro — 1) importar núcleo + progressão da planilha
+processo já validado 5x — 1) importar núcleo + progressão da planilha
 (`classes.ts`), 2) importar características por nível da planilha
 (`caracteristicasClasse.ts`), 3) conferir se a planilha já tem tudo que
-a classe precisa (verificar se sub-recursos tipo "Fúrias" do Bárbaro
-seguem o mesmo formato de "Bônus de X: N" na coluna "Recursos da
-Classe"), 4) pedir/usar o PDF do Cap. 3 pra proficiências e equipamento
-inicial de classe (mesma exceção documentada usada no Guerreiro).
-Guardião e Paladino compartilham a tabela de conjuração (ver
-DECISOES-DADOS.md) — importar uma vez só quando chegar a vez delas.
+a classe precisa (recursos com formato "Bônus de X: N" na coluna
+"Recursos da Classe"), 4) pedir/usar o PDF do Cap. 3 pra proficiências
+e equipamento inicial de classe (mesma exceção documentada usada no
+Guerreiro). Guardião e Paladino compartilham a tabela de conjuração
+(ver DECISOES-DADOS.md) — importar uma vez só quando chegar a vez
+delas.
 
 **Material de apoio já pronto do Osmar (fora deste repositório, ele
-guarda em documentos próprios):** decupagem nível a nível completa de
-Bárbaro (4 Trilhas) e guia de implementação de Golias (espécie) já
-existem, com achados específicos (Fúria precisa de temporizador de
-turno com extensão automática; Ancestralidade Gigante do Golias muda
-de categoria de ação conforme a escolha do jogador; interações
-Golias+Bárbaro testadas). Também tem mapeamento de progressão de
-Maestria em Arma por nível pendente pra Bárbaro/Guardião/Ladino/
-Paladino (só Guerreiro está documentado hoje). Pedir esses documentos
-ao Osmar quando a vez de cada uma dessas entregas chegar, em vez de
+guarda em documentos próprios):** mapeamento de progressão de Maestria
+em Arma por nível pendente pra Guardião/Ladino/Paladino (Guerreiro e
+Bárbaro já documentados/implementados). Pedir esses documentos ao
+Osmar quando a vez de cada uma dessas entregas chegar, em vez de
 redescobrir do zero.
 
 ## Características de Guerreiro nos níveis 2, 5, 20 tiveram texto de tabela removido na importação
@@ -1044,13 +1046,19 @@ pra Druida (Druídico, fixo) e Ladino (Gíria dos Ladrões fixo + 1 à
 escolha). **Druida e Ladino não são classes jogáveis ainda** (aparecem
 "(em breve)" no wizard) — o código está certo e coberto por teste
 automatizado, mas só dá pra ver funcionando na tela quando uma das
-duas virar classe completa (ver pendência "Faltam 10 classes").
+duas virar classe completa (ver pendência "Faltam 7 classes").
 
-**O que falta pra resolver:** as outras 10 classes (Bárbaro, Bardo,
-Bruxo, Clérigo, Feiticeiro, Guardião, Guerreiro, Mago, Monge, Paladino)
-ainda não foram auditadas linha a linha na aba "Características de
-Classe" pra confirmar se concedem idioma extra também — auditar quando
-cada uma for implementada.
+**Guerreiro/Bardo/Bruxo/Mago/Bárbaro já auditados de graça, como
+efeito colateral de importar `caracteristicasClasse.ts` de cada uma
+(atualizado no postmortem do Bárbaro, 2026-09):** nenhuma característica
+de nível 1 dessas 5 concede idioma extra — nenhuma ação nova precisa,
+só confirmação de que a lista abaixo encolheu.
+
+**O que falta pra resolver:** as outras 5 classes ainda sem dado
+importado (Clérigo, Feiticeiro, Guardião, Monge, Paladino — Druida e
+Ladino já resolvidas, ver acima) ainda não foram auditadas linha a
+linha na aba "Características de Classe" pra confirmar se concedem
+idioma extra também — auditar quando cada uma for implementada.
 
 ## Card padronizado de descrição — só Magias hoje, falta Itens/Armas/Armaduras/Itens Mágicos
 
