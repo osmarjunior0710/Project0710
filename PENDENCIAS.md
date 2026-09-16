@@ -1394,3 +1394,30 @@ pro PV extra e "mod. Inteligência, mínimo 1" pro dano. Como o app não
 rastreia automaticamente qual espaço criou qual pet, o jogador agora
 informa o círculo manualmente (select) ao ligar o toggle em
 `PetsTab.tsx` — ver `core/necromante.ts`'s `bonusLegiaoDosMortos`.
+
+## Bárbaro — Golpe Brutal/Golpe Brutal Fortalecido: escolha de efeito depois de acertar o ataque, travado numa revisão maior do fluxo de d20
+
+**Achado do Osmar (2026-09), testando na tela:** Golpe Brutal (nível 9)
+e Golpe Brutal Fortalecido (13/17) têm um efeito que deveria ser
+escolhido DEPOIS de confirmar que o ataque acertou — e isso "não tem no
+sistema" hoje do jeito que deveria. Osmar pediu explicitamente pra
+**anotar e resolver por último**, sem detalhar mais agora — o motivo:
+vai exigir revisar o fluxo de rolagem de d20 (`RollContext.tsx`/
+`RollOverlay.tsx`/o jeito que `AcaoPanelContent.tsx`/`CombatTab.tsx`
+encadeiam ataque → dano → efeito hoje) de um jeito que afeta VÁRIAS
+características, não só Golpe Brutal — mesmo padrão do Necromante B4
+acima ("motor que afeta qualquer X, não só Y", vira foco próprio).
+
+**Estado atual pra referência (não confirmado como certo ou errado
+ainda — só o que o código faz hoje):** o jogador escolhe "🔨 Golpe
+Brutal" como o tipo de ataque ANTES de rolar (renuncia a Vantagem
+nessa jogada, `AcaoPanelContent.tsx`), rola o d20, e só DEPOIS de ver o
+resultado é que aparecem os botões de dano ("🎲 Rolar Dano" e "🔨 Rolar
+Golpe Brutal") — o jogador só toca no de Golpe Brutal se souber (por
+fora do app) que acertou, mesmo princípio de "o jogador confirma
+acerto" de qualquer outro ataque. O picker de efeito
+(Debilitador/Poderoso/Atordoante/Destruidor,
+`escolherEfeitoGolpeBrutal` em `CombatTab.tsx`) só aparece depois
+desse 2º botão. Osmar não confirmou se esse fluxo já está certo ou se
+o gap está em outro lugar — não investigar mais fundo até a revisão
+maior do d20 acontecer.
