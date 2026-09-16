@@ -12,6 +12,13 @@
 > de `DECISOES-DESIGN.md` pra saber qual arquivo cobre qual assunto,
 > e **atualize o arquivo certo** sempre que tomar ou aprender algo
 > sobre uma decisão de design (ver seção 7).
+> Histórico de construção específico de UM foco (quebras, decisões,
+> bugs achados/corrigidos, o que ficou pendente) vai num MD próprio em
+> `aprendizados/<domínio>/<foco>.md` (ex.: `aprendizados/classes/barbaro.md`)
+> — diferente da família `DECISOES-*.md`, que só guarda padrão
+> reaproveitável em MAIS DE UM foco. `aprendizados/INDICE.md` cataloga
+> o que existe em cada arquivo — leia-o antes de reabrir um foco
+> parecido (ver seção 7.2).
 > Fatos de regra de D&D já confirmados (catálogo, valores,
 > pré-requisitos) ficam em `DND-Regras.md`, organizados por tópico —
 > leia esse também antes de mexer em dado de regra (ver seção 3.1).
@@ -298,12 +305,17 @@ repete vai pro `LICOES-RAPIDAS.md` (seção 16), não vira regra
 permanente na hora.
 
 **Fechando um foco** (todos os passos relevantes do `EmDev.md` viraram
-`[x]`, ou o Osmar decide encerrar por outro motivo): (1) aprendizado
-generalizável vira entrada no `DECISOES-*.md` certo (seção 7); (2) o
-que ficou de propósito sem fazer vai pro `PENDENCIAS.md`, agrupado sob
-o tópico do foco (seção 11); (3) aproveite esse momento pra também
-limpar do `PENDENCIAS.md` qualquer coisa — mesmo de outro foco — que
-foi resolvida no caminho; (4) esvazie o `EmDev.md`; (5) pergunte qual o
+`[x]`, ou o Osmar decide encerrar por outro motivo): (1) escreva/
+atualize o arquivo de histórico do foco em `aprendizados/<domínio>/
+<foco>.md` (quebras, decisões, bugs achados/corrigidos, o que ficou
+pendente — ver seção 7.2) e garanta que `aprendizados/INDICE.md` lista
+esse arquivo; (2) aprendizado que generaliza pra MAIS DE UM foco
+(padrão reaproveitável, não histórico deste foco específico) vira
+entrada no `DECISOES-*.md` certo (seção 7); (3) o que ficou de
+propósito sem fazer vai pro `PENDENCIAS.md`, agrupado sob o tópico do
+foco (seção 11); (4) aproveite esse momento pra também limpar do
+`PENDENCIAS.md` qualquer coisa — mesmo de outro foco — que foi
+resolvida no caminho; (5) esvazie o `EmDev.md`; (6) pergunte qual o
 próximo foco.
 
 ### 6.5 Reaproveite o padrão que já existe — não invente um novo
@@ -353,6 +365,15 @@ design (não só uma correção técnica óbvia), **consulte o(s) arquivo(s)
 relevante(s) primeiro** pra não repetir uma decisão que já foi tomada e
 revertida antes.
 
+**Desde 2026-09, esta família só guarda padrão que se repete em MAIS DE
+UM foco** (ex.: "como decupar uma classe nova", "motor de Level Up
+genérico") — histórico de construção específico de UM foco só (as
+quebras/decisões/bugs de UMA classe/feature específica) vai em
+`aprendizados/` (seção 7.2), não aqui. Na dúvida entre os dois, use o
+teste: "isso muda como eu vou implementar uma coisa PARECIDA no
+futuro?" (sim → `DECISOES-*.md`) vs. "isso é só o que aconteceu
+construindo ESTE foco específico?" (sim → `aprendizados/`).
+
 ### 7.1 Esses arquivos são padrão reaproveitável, não changelog — critério de escrita
 
 Em 2026-09, depois de implementar só 2 classes (Guerreiro, Bardo) e 1
@@ -393,6 +414,55 @@ mais de ~600-800 linhas, ou mais de ~15-20 entradas. Compactar não é
 apagar informação — é reescrever o que sobrou de várias entregas
 relacionadas numa entrada só, focada no padrão, cortando a narrativa
 de como se chegou lá.
+
+## 7.2. `aprendizados/` — histórico de construção por foco (arquivo de referência, não changelog compactável)
+
+Criado em 2026-09 (ideia do Osmar, primeiro caso o foco Bárbaro) pra
+resolver o mesmo problema da seção 7.1 de outro ângulo: em vez de só
+compactar `DECISOES-*.md` com o tempo, o histórico específico de UM
+foco (uma classe, uma feature, um sistema) nunca entra lá pra começo
+de conversa — vai num arquivo próprio, que pode ser tão detalhado
+quanto for útil, sem pressão de ficar enxuto pro resto do projeto.
+
+**Estrutura:** uma subpasta por domínio, espelhando a família
+`DECISOES-*.md` (`aprendizados/classes/<nome-da-classe>.md`,
+`aprendizados/dados/<assunto>.md`, etc. — crie a subpasta que fizer
+sentido pro domínio, não precisa ser só `classes/`). Dentro de cada
+arquivo, cabeçalhos `## Título descritivo` normais (mesma convenção de
+sempre) — **sem numeração/ID como forma de organização** (número muda,
+fica frágil pra achar de novo); se quiser um jeito rápido de achar algo
+dentro do próprio arquivo, use um título descritivo que já entrega o
+assunto, não um código.
+
+**O que entra num arquivo de `aprendizados/`:** o processo de
+construção completo daquele foco — como foi quebrado em entregas,
+decisões técnicas tomadas (inclusive as corrigidas no meio do caminho,
+com o "por quê"), bugs achados e corrigidos, o que ficou pendente e
+por quê. Mais generoso que o teste de compactação da seção 7.1 (pode
+registrar coisa que só interessa a quem mexer NESSE mesmo foco de
+novo), mas ainda não é changelog linha a linha de commit — é a versão
+já organizada/legível do que aconteceu.
+
+**`aprendizados/INDICE.md`** cataloga todo arquivo da pasta (mesmo
+padrão de `livros-referencia/INDICE.md`) — 1 entrada por arquivo,
+resumindo o que ele cobre, pra qualquer sessão futura saber onde
+procurar antes de reabrir um assunto do zero. **Atualize esse índice
+sempre que criar ou renomear um arquivo em `aprendizados/`.**
+
+**Quando um aprendizado generaliza pra MAIS DE UM foco** (não só o
+atual), ele sai daqui e vira entrada em `DECISOES-*.md` (seção 7) —
+`aprendizados/` referencia de volta em vez de duplicar ("ver
+`DECISOES-CLASSES.md` 'X'"). A via inversa também existe: ao fechar um
+foco, verifique se a família `DECISOES-*.md` relevante já tem entrada
+específica desse foco que deveria migrar PRA cá (histórico específico,
+não padrão) — mova quando fizer sentido, sem obrigação de migrar tudo
+de uma vez.
+
+**Migração do que já existe é gradual, não obrigatória:** classes/
+features implementadas antes deste sistema existir (Guerreiro, Bardo,
+Bruxo, Mago, Multiclasse...) continuam só em `DECISOES-*.md` até
+alguém (Osmar ou Claude Code) decidir migrar uma sob demanda — não é
+preciso reescrever tudo agora só porque o sistema existe.
 
 ## 8. Lacunas de dados conhecidas (não travam o projeto)
 

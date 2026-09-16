@@ -1397,6 +1397,10 @@ informa o círculo manualmente (select) ao ligar o toggle em
 
 ## Bárbaro — Golpe Brutal/Golpe Brutal Fortalecido: escolha de efeito depois de acertar o ataque, travado numa revisão maior do fluxo de d20
 
+**Ver também:** `aprendizados/classes/barbaro.md` pro histórico
+completo de implementação do Bárbaro (esta pendência é referenciada de
+lá também, não duplicar detalhe técnico nos dois lugares).
+
 **Achado do Osmar (2026-09), testando na tela:** Golpe Brutal (nível 9)
 e Golpe Brutal Fortalecido (13/17) têm um efeito que deveria ser
 escolhido DEPOIS de confirmar que o ataque acertou — e isso "não tem no
@@ -1421,3 +1425,72 @@ acerto" de qualquer outro ataque. O picker de efeito
 desse 2º botão. Osmar não confirmou se esse fluxo já está certo ou se
 o gap está em outro lugar — não investigar mais fundo até a revisão
 maior do d20 acontecer.
+
+## Bárbaro — Trilhas (B5-B8) ainda não implementadas (classe base fechada, 2026-09)
+
+**O que é:** o foco "Bárbaro" fechou com a classe base nível 1-20
+completa e testada (B1-B4.10) — ver `aprendizados/classes/barbaro.md`
+pro histórico completo. As 4 Trilhas (subclasses, nível 3/6/10/14
+cada) ficaram **deliberadamente fora do escopo** desta rodada, por
+decisão do Osmar ao fechar o foco (não é esquecido, é adiado de
+propósito, mesmo padrão já usado com as subclasses de Guerreiro).
+
+**Dado já confirmado na planilha mestra** (aba "Subclasses") — não
+precisa reconferir do zero ao retomar, só reler o que já foi extraído:
+- **B5 — Trilha do Berserker:** Frenesi (nível 3, dano extra Xd6 no
+  1º acerto de Força do turno com Ataque Imprudente+Fúria ativos, X =
+  bônus de Dano da Fúria atual), Fúria Irracional (nível 6, imune a
+  Amedrontado/Enfeitiçado com Fúria ativa, encerra essas condições ao
+  entrar em Fúria), Retaliação (nível 10, Reação — ataque corpo a
+  corpo de volta ao ser dano dentro de 1,5m), Presença Intimidante
+  (nível 14, Ação Bônus, medo em área, CD 8+mod.FOR+Prof, resistida
+  por Sabedoria, 1x/Descanso Longo ou gasta 1 uso de Fúria pra
+  recarregar).
+- **B6 — Trilha do Coração Selvagem:** Arauto da Fauna, Fúria dos
+  Selvagens (escolha a cada ativação), Aspecto dos Selvagens (escolha
+  entre Descansos), Arauto da Natureza, Poder dos Selvagens (escolha a
+  cada ativação) — ainda não extraído em detalhe da planilha.
+- **B7 — Trilha da Árvore do Mundo:** Vitalidade da Árvore, Ramos da
+  Árvore (Reação), Raízes Devastadoras, Percorrer a Árvore — ainda não
+  extraído em detalhe.
+- **B8 — Trilha do Fanático:** Campeão dos Deuses (reserva de dados),
+  Fúria Divina, Concentração Fanática, Presença Zelosa, Fúria dos
+  Deuses (nível 14, forma temporária) — ainda não extraído em detalhe.
+
+**O que falta pra resolver:** quando o Osmar decidir retomar, seguir o
+ciclo normal de foco (seção 6 do `CLAUDE.md`) — B5-B8 pode reordenar a
+ordem das Trilhas na hora se uma se mostrar mais simples/pronta que a
+outra ao chegar lá (nota já deixada no plano original).
+
+## Progressão pós-nível-20 / Dádivas Épicas repetíveis (cross-classe, achado fechando o foco Bárbaro)
+
+**O que é:** o app trata nível 20 como o teto absoluto de progressão
+(a aba "Evolução do Personagem" da planilha mestra para em 355.000 XP,
+nível 20) — isso está **incorreto** pela regra real 2024. Confirmado
+lendo o Livro do Mestre (Cap. 7, seção "Dádivas Épicas", pág. 52 do
+PDF `livro-do-mestre/07b_-_Cap_7_Tesouro_Parte_2.pdf`): "as dádivas
+épicas também podem ser usadas como forma de progressão [...] para
+personagens que não tenham mais níveis para ganhar. [...] considere
+conceder uma dádiva épica para cada personagem para cada 30.000 XP que
+ele adquirir acima de 355.000 XP."
+
+**Por que importa:** isso é universal, vale pra QUALQUER classe — não
+é uma característica do Bárbaro (achado incidentalmente enquanto
+fechava esse foco, por isso registrado aqui e não em
+`aprendizados/classes/barbaro.md`). É diferente da característica de
+classe "Dádiva Épica" de nível 19 que várias classes já têm (essa
+continua existindo igual, é um evento único de nível fixo) — este é um
+sistema À PARTE, de progressão contínua sem subir de nível.
+
+**Decisão do Osmar ao encontrar isso (2026-09):** vira foco próprio
+depois, não faz parte do fechamento do Bárbaro nem é implementado
+agora ("depois voltamos nisso").
+
+**O que falta pra resolver, quando esse foco for aberto:** decidir como
+modelar "XP acima de 355.000" na Ficha (hoje `core/experiencia.ts` só
+sabe ir até o marco do nível 20), como conceder/escolher uma Dádiva
+Épica repetível a cada 30.000 XP extra (schema provavelmente
+reaproveita o mecanismo de escolha de Dádiva Épica de nível 19 que já
+existe, só o GATILHO muda de "nível fixo" pra "marco de XP repetido"),
+e se algo na UI de nível/XP precisa deixar claro que o personagem
+"continua avançando" mesmo sem outro número de nível pra mostrar.
