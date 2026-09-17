@@ -187,7 +187,18 @@ export type EfeitoMecanicoTalento =
    * também seja Leve — só a da mão PRINCIPAL precisa. A secundária só
    * não pode ser Duas Mãos (regra de base, não muda). Ver
    * `core/ataque.ts` (`ataqueBonusMaoSecundaria`). */
-  | { tipo: 'mao-secundaria-sem-exigir-leve' };
+  | { tipo: 'mao-secundaria-sem-exigir-leve' }
+  /** Mestre das Armas: +1 slot de Maestria em Arma, INDEPENDENTE dos
+   * slots nativos da classe (Guerreiro/Bárbaro) — livro (p.206):
+   * "desde que você tenha proficiência com ela", não restrito à
+   * categoria ampla que `armasParaMaestria()` assume pro Guerreiro.
+   * Escolhido no passo novo `maestriaArmaTalento` do Level Up,
+   * trocável em Descanso Longo (mesmo padrão/componente
+   * `TrocarArmaMaestria` dos slots nativos, só que com o pool mais
+   * amplo — qualquer arma que o personagem seja proficiente, não só o
+   * catálogo da classe). Ver `core/maestriaArma.ts`
+   * (`armasElegiveisParaMaestriaExtra`). */
+  | { tipo: 'slot-maestria-extra' };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -648,6 +659,7 @@ export const talentos: Talento[] = [
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'DES'], maximo: 20 },
     beneficios: "Usa propriedade de Maestria de 1 tipo de arma Simples/Marcial à escolha (mesmo sem ser nativo dela); troca em Descanso Longo.",
+    efeitoMecanico: { tipo: 'slot-maestria-extra' },
     pagina: 206,
     fonte: "PHB 2024",
   },

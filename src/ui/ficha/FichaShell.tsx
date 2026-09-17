@@ -71,7 +71,7 @@ import {
 import { ataqueAtual, ataqueBonusMaoSecundaria } from '../../core/ataque';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
-import { armasParaMaestria as listarArmasParaMaestria } from '../../core/maestriaArma';
+import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
 import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria } from '../../core/recursosClasse';
 import { type MagiaGratisDeInvocacao } from '../../core/invocacoesMagiaGratis';
 import { aplicarAlteracaoPv, ganharPvTemporario } from '../../core/pvTemporario';
@@ -294,6 +294,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Escolha de atributo do Resiliente — ver `core/talentoAtributo.ts`.
   const [escolhaAtributoTalentoGeral, setEscolhaAtributoTalentoGeral] = useState<Record<string, string>>(
     personagemSalvo.escolhaAtributoTalentoGeral ?? {},
+  );
+  // Slot EXTRA de Maestria em Arma do Mestre das Armas — independente
+  // dos slots nativos (`maestriaArma`) — ver `core/maestriaArma.ts`.
+  const [maestriaArmaExtra, setMaestriaArmaExtra] = useState<string | null>(
+    personagemSalvo.maestriaArmaTalentoGeralAtual ?? null,
   );
   const [talentosFavoritos, setTalentosFavoritos] = useState<string[]>(personagemSalvo.talentosFavoritosAtual ?? []);
   const [folegoGasto, setFolegoGasto] = useState(personagemSalvo.folegoGasto ?? 0);
@@ -837,6 +842,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     talentosGeraisAtual: talentosGeraisAtuais,
     escolhaMagiaTalentoGeral,
     escolhaAtributoTalentoGeral,
+    maestriaArmaTalentoGeralAtual: maestriaArmaExtra,
     talentosFavoritosAtual: talentosFavoritos,
     itensMochilaAtual: itensMochila,
     petsAtual: pets,
@@ -924,6 +930,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       talentosGeraisAtuais,
       escolhaMagiaTalentoGeral,
       escolhaAtributoTalentoGeral,
+      maestriaArmaExtra,
       talentosFavoritos,
       itensMochila,
       levelUpHpModo,
@@ -1349,6 +1356,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setMaestriaArma((prev) => prev.map((a) => (a === armaAntiga ? armaNova : a)));
   }
 
+  function trocarMaestriaArmaExtra(armaNova: string) {
+    setMaestriaArmaExtra(armaNova);
+  }
+
   function alterarQuantidadeItem(id: string, delta: number) {
     setItensMochila((prev) =>
       prev.map((it) => (it.id === id ? { ...it, quantidade: Math.max(0, it.quantidade + delta) } : it)),
@@ -1553,6 +1564,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
     escolhaMagiaTalentoGeral: Record<string, string[]> | null;
     escolhaAtributoTalentoGeral: Record<string, string> | null;
+    maestriaArmaTalentoEscolhida: string | null;
     periciaLivreTalentoEscolhida: string | null;
     periciaRestritaTalentoEscolhida: string | null;
     conhecimentoPrimordialPericiaEscolhida: string | null;
@@ -1634,6 +1646,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
     if (resultado.escolhaAtributoTalentoGeral) {
       setEscolhaAtributoTalentoGeral((prev) => ({ ...prev, ...resultado.escolhaAtributoTalentoGeral }));
+    }
+    if (resultado.maestriaArmaTalentoEscolhida) {
+      setMaestriaArmaExtra(resultado.maestriaArmaTalentoEscolhida);
     }
     if (resultado.periciaLivreTalentoEscolhida) {
       setPericiasTalentoGeralAtuais((prev) => [...prev, resultado.periciaLivreTalentoEscolhida!]);
@@ -2014,6 +2029,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             maestriaArma={maestriaArma}
             armasParaMaestria={classe ? listarArmasParaMaestria(classe) : []}
             onTrocarArmaMaestria={trocarArmaMaestria}
+            maestriaArmaExtra={maestriaArmaExtra}
+            armasElegiveisMaestriaExtra={classe ? armasElegiveisParaMaestriaExtra(classe, talentosEfetivos) : []}
+            onTrocarMaestriaArmaExtra={trocarMaestriaArmaExtra}
             onRolarIniciativa={aoRolarIniciativa}
             sentidos={sentidos}
             resistenciaInferaDisponivel={resistenciaInferaDisponivel}

@@ -67,6 +67,14 @@ interface AtributosTabProps {
   maestriaArma: string[];
   armasParaMaestria: Arma[];
   onTrocarArmaMaestria: (armaAntiga: string, armaNova: string) => void;
+  /** Slot EXTRA de Maestria do talento Mestre das Armas — `null` = sem
+   * o talento (ou talento sem arma escolhida ainda), seção não mostra
+   * essa linha. Pool de troca mais amplo que `armasParaMaestria`
+   * (qualquer arma que o personagem seja proficiente, não só o
+   * catálogo nativo da classe) — ver `core/maestriaArma.ts`. */
+  maestriaArmaExtra: string | null;
+  armasElegiveisMaestriaExtra: Arma[];
+  onTrocarMaestriaArmaExtra: (armaNova: string) => void;
   onRolarIniciativa?: () => void;
   /** Sentidos Especiais (Visão no Escuro/às Cegas/Verdadeira,
    * Sismiconsciência) já somados de espécie + Invocações Místicas —
@@ -120,6 +128,9 @@ export default function AtributosTab({
   maestriaArma,
   armasParaMaestria,
   onTrocarArmaMaestria,
+  maestriaArmaExtra,
+  armasElegiveisMaestriaExtra,
+  onTrocarMaestriaArmaExtra,
   onRolarIniciativa,
   sentidos,
   resistenciaInferaDisponivel,
@@ -353,7 +364,7 @@ export default function AtributosTab({
         </>
       )}
 
-      {maestriaArma.length > 0 && (
+      {(maestriaArma.length > 0 || maestriaArmaExtra) && (
         <>
           <div className="section-title">Maestria em Arma</div>
           {maestriaArma.map((nome) => {
@@ -378,6 +389,32 @@ export default function AtributosTab({
               </div>
             );
           })}
+          {maestriaArmaExtra && (
+            <div className={styles.maestriaRow}>
+              <div className={styles.maestriaTop}>
+                <span>
+                  {maestriaArmaExtra} <span className="label">(Mestre das Armas)</span>
+                </span>
+                <TrocarArmaMaestria
+                  armaAtual={maestriaArmaExtra}
+                  todasAsArmas={armasElegiveisMaestriaExtra}
+                  jaEscolhidas={[maestriaArmaExtra]}
+                  onTrocar={onTrocarMaestriaArmaExtra}
+                />
+              </div>
+              {(() => {
+                const arma = armasElegiveisMaestriaExtra.find((a) => a.nome === maestriaArmaExtra);
+                return (
+                  arma && (
+                    <div className={styles.maestriaDetalhe}>
+                      {arma.dano} ·{' '}
+                      <ItemComDescricao nome={arma.maestria} descricao={buscarDescricaoMaestria(arma.maestria)} variante="icone" />
+                    </div>
+                  )
+                );
+              })()}
+            </div>
+          )}
           <div className="label" style={{ marginTop: 2, marginBottom: 12 }}>
             você pode trocar 1 arma a cada Descanso Longo.
           </div>

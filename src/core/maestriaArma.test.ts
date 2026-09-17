@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { quantidadeMaestriaEmArma, armasParaMaestria } from './maestriaArma';
+import { quantidadeMaestriaEmArma, armasParaMaestria, armasElegiveisParaMaestriaExtra } from './maestriaArma';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { armas } from '../data/rulesets/dnd2024/armas';
 
@@ -35,5 +35,25 @@ describe('armasParaMaestria', () => {
     expect(elegiveis.length).toBeGreaterThan(0);
     expect(elegiveis.length).toBeLessThan(armas.length);
     expect(elegiveis.every((a) => a.categoria.includes('Corpo a Corpo'))).toBe(true);
+  });
+});
+
+describe('armasElegiveisParaMaestriaExtra — Mestre das Armas (slot-maestria-extra)', () => {
+  it('Bardo (só Armas Simples nativas) só pode escolher entre as Simples, mesmo sem o recurso nativo de Maestria', () => {
+    const elegiveis = armasElegiveisParaMaestriaExtra(classe('Bardo'));
+    expect(elegiveis.length).toBeGreaterThan(0);
+    expect(elegiveis.every((a) => a.categoria.includes('Simples'))).toBe(true);
+  });
+
+  it('com Treinamento com Armas Marciais, Bardo passa a poder escolher também Marciais', () => {
+    const semTalento = armasElegiveisParaMaestriaExtra(classe('Bardo'), []);
+    const comTalento = armasElegiveisParaMaestriaExtra(classe('Bardo'), ['treinamento-com-armas-marciais']);
+    expect(comTalento.length).toBeGreaterThan(semTalento.length);
+    expect(comTalento.length).toBe(armas.length);
+  });
+
+  it('borda: classe sem nenhuma proficiência de arma cadastrada devolve lista vazia', () => {
+    const semClasse = { nome: 'Classe Inexistente' } as unknown as Parameters<typeof armasElegiveisParaMaestriaExtra>[0];
+    expect(armasElegiveisParaMaestriaExtra(semClasse)).toEqual([]);
   });
 });

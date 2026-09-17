@@ -1196,11 +1196,33 @@ Os 5 viáveis, na ordem que forem entregues:
       baixo — vale confirmar no celular com Adaga na mão principal +
       uma arma corpo a corpo não-Leve (ex.: Machado de Batalha) na
       secundária.
-- [ ] **D.3 — Mestre das Armas**: escolhe 1 tipo de arma Simples/
-      Marcial pra usar a propriedade de Maestria mesmo sem ser nativo,
-      trocável em Descanso Longo — reaproveita `TrocarArmaMaestria.tsx`
-      como um slot ADICIONAL (não substitui a Maestria normal da
-      classe).
+- [x] **D.3 — Mestre das Armas**: novo `efeitoMecanico:
+      'slot-maestria-extra'`. Confirmado no livro (Cap. 5, p.206): "1
+      tipo de arma Simples ou Marcial à sua escolha, DESDE QUE VOCÊ
+      TENHA PROFICIÊNCIA COM ELA" — por isso o pool desse slot usa
+      `classeProficienteComArma` (`core/maestriaArma.ts`,
+      `armasElegiveisParaMaestriaExtra`), mais amplo que
+      `armasParaMaestria()` (que só cobre a categoria nativa ampla do
+      Guerreiro/Bárbaro): cobre proficiência restrita (Ladino/Monge) e
+      a somada por Treinamento com Armas Marciais. Slot NOVO e
+      independente dos nativos (`maestriaArmaTalentoGeralAtual` em
+      `armazenamentoPersonagens.ts`, `maestriaArmaExtra` em
+      `FichaShell.tsx`) — escolhido no passo novo `maestriaArmaTalento`
+      do Level Up (mesmo padrão 7-toques de `resilienteAtributo`),
+      trocável em Descanso Longo reaproveitando 100%
+      `TrocarArmaMaestria.tsx` (só o pool de opções muda), exibido como
+      uma 4ª linha na seção "Maestria em Arma" da aba Atributos, com o
+      rótulo "(Mestre das Armas)" pra distinguir do slot nativo.
+      Testado (`maestriaArma.test.ts` — 3 casos novos: Bardo só Simples,
+      Bardo+Treinamento com Armas Marciais libera o catálogo inteiro,
+      borda de classe sem proficiência cadastrada). Verificado: `tsc
+      -b`/`npm test` (594)/`npm run build` limpos + Playwright
+      (Guerreiro nível 3→4 real, escolhe Mestre das Armas → ASI FOR/DES
+      → passo novo "Arma (Mestre das Armas)" com o catálogo inteiro →
+      escolhe Mosquete → Resumo mostra "Arma (Mestre das Armas):
+      Mosquete" → ficha final: 4ª linha "Mosquete (MESTRE DAS ARMAS)" na
+      Maestria em Arma, com seu próprio 🔄 → troca por Adaga
+      independente das outras 3, resto intacto).
 - [ ] **D.4 — Mestre em Armas Grandes**: dano extra fixo (=Bônus de
       Proficiência) com arma Pesada + ataque bônus extra após Crítico
       (`estado.critico`, já existe) ou reduzir o alvo a 0 PV (botão de

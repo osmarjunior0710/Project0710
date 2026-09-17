@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1124
+
+Talento Mestre das Armas agora funciona de verdade: dá 1 slot EXTRA
+de Maestria em Arma, independente dos slots normais da classe,
+podendo ser qualquer arma que você já seja proficiente (não só o
+catálogo nativo da sua classe) — escolhido no Level Up e trocável em
+Descanso Longo, aparece como uma linha a mais na seção "Maestria em
+Arma" da aba Atributos.
+
 ## v202609_0016
 
 Talento Especialista Ambidestro agora funciona de verdade: com ele,

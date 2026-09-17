@@ -111,6 +111,11 @@ export interface ResultadoLevelUpRapido {
    * Se o talento sorteado for Resiliente, o personagem fica sem o +1/
    * proficiência de Salvaguarda até escolher manualmente depois. */
   escolhaAtributoTalentoGeral: Record<string, string> | null;
+  /** Level Up Rápido nunca sorteia a arma do slot extra de Mestre das
+   * Armas (mesma lógica de `escolhaMagiaTalentoGeral` acima) — sempre
+   * `null` aqui. Se o talento sorteado for Mestre das Armas, o
+   * personagem fica sem o slot extra até escolher manualmente depois. */
+  maestriaArmaTalentoEscolhida: string | null;
   /** Level Up Rápido nunca sorteia a perícia livre/restrita de
    * Especialista em Perícia/Analítico/Mente Aguçada (mesma lógica de
    * `escolhaMagiaTalentoGeral` acima) — sempre `null` aqui. */
@@ -340,6 +345,7 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     magiaIniciadaAlteracoes: null,
     escolhaMagiaTalentoGeral: null,
     escolhaAtributoTalentoGeral: null,
+    maestriaArmaTalentoEscolhida: null,
     periciaLivreTalentoEscolhida: null,
     periciaRestritaTalentoEscolhida: null,
     conhecimentoPrimordialPericiaEscolhida,

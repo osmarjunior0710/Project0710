@@ -52,6 +52,7 @@ import { talentos } from '../../../data/rulesets/dnd2024/talentos';
 import { opcoesMagiaEscolhidaPorEscola, opcoesMagiasRituais, quantidadeMagiasRituais } from '../../../core/magiaTalentoGeral';
 import { opcoesPericiaRestrita } from '../../../core/periciaTalentoGeral';
 import { opcoesAtributoResiliente } from '../../../core/talentoAtributo';
+import { armasElegiveisParaMaestriaExtra } from '../../../core/maestriaArma';
 import TelaEscolherTalento from './TelaEscolherTalento';
 import TrocarValorSimples from '../../components/TrocarValorSimples';
 import { useEscolhaMultipla } from '../hooks/useEscolhaMultipla';
@@ -122,6 +123,11 @@ interface LevelUpShellProps {
      * `{ [talentoId]: atributoEscolhido }`. `null` = nenhuma escolha
      * desse tipo nesse level-up. */
     escolhaAtributoTalentoGeral: Record<string, string> | null;
+    /** Só preenchido quando o Talento Geral ESCOLHIDO NESTE level-up
+     * for Mestre das Armas (`slot-maestria-extra`) — nome da arma
+     * escolhida pro slot extra de Maestria. `null` = talento não
+     * escolhido nesse level-up. */
+    maestriaArmaTalentoEscolhida: string | null;
     /** Só preenchido quando o Talento Geral ESCOLHIDO NESTE level-up
      * for Especialista em Perícia — 1 perícia LIVRE (qualquer uma,
      * ainda não proficiente) que vira proficiência de verdade. `null`
@@ -251,6 +257,7 @@ type LuStep =
   | 'periciaLivreTalento'
   | 'periciaRestritaTalento'
   | 'resilienteAtributo'
+  | 'maestriaArmaTalento'
   | 'dadivaEpica'
   | 'arcanaMistica'
   | 'iniciadoEmMagia'
@@ -452,6 +459,14 @@ export default function LevelUpShell({
   const precisaEscolherAtributoResiliente = tipoEfeitoTalentoEscolhido === 'atributo-e-salvaguarda-escolhidos';
   const opcoesAtributoResilienteAtual = talentoObjEscolhido ? opcoesAtributoResiliente(talentoObjEscolhido.id, classe) : [];
   const [atributoResilienteEscolhido, setAtributoResilienteEscolhido] = useState<Atributo | null>(null);
+  // Mestre das Armas (`slot-maestria-extra`) — mesmo padrão de
+  // `precisaEscolherAtributoResiliente`, só entra quando o talento
+  // ESCOLHIDO NESTE level-up for esse.
+  const precisaEscolherMaestriaArmaTalento = tipoEfeitoTalentoEscolhido === 'slot-maestria-extra';
+  const opcoesMaestriaArmaTalentoAtual = precisaEscolherMaestriaArmaTalento
+    ? armasElegiveisParaMaestriaExtra(classe, talentosGeraisAtuais)
+    : [];
+  const [maestriaArmaTalentoEscolhida, setMaestriaArmaTalentoEscolhida] = useState<string | null>(null);
   // Crescimento do Conjurador Ritualista: mesmo passo `talentoMagia`,
   // mas disparado num level-up POSTERIOR ao que concedeu o talento —
   // sempre que o Bônus de Proficiência sobe, o total de magias Rituais
@@ -577,6 +592,7 @@ export default function LevelUpShell({
     if (concedeEspecializacaoExtra) luSteps.push('periciaLivreTalento');
     if (opcoesPericiaRestritaAtual.length > 0) luSteps.push('periciaRestritaTalento');
     if (precisaEscolherAtributoResiliente && opcoesAtributoResilienteAtual.length > 0) luSteps.push('resilienteAtributo');
+    if (precisaEscolherMaestriaArmaTalento && opcoesMaestriaArmaTalentoAtual.length > 0) luSteps.push('maestriaArmaTalento');
   }
   if (especialistaDisparaAgora || concedeEspecializacaoExtra) luSteps.push('especialista');
   // Fora do bloco de ASI — o crescimento de magias Rituais acompanha o
@@ -830,6 +846,7 @@ export default function LevelUpShell({
     periciaLivreTalento: 'Perícia do Talento',
     periciaRestritaTalento: 'Perícia do Talento',
     resilienteAtributo: 'Atributo (Resiliente)',
+    maestriaArmaTalento: 'Arma (Mestre das Armas)',
     dadivaEpica: 'Dádiva Épica',
     arcanaMistica: 'Arcana Mística',
     iniciadoEmMagia: 'Iniciado em Magia',
@@ -984,6 +1001,10 @@ export default function LevelUpShell({
       setAviso('Escolha o atributo do talento antes de avançar.');
       return;
     }
+    if (step === 'maestriaArmaTalento' && maestriaArmaTalentoEscolhida === null) {
+      setAviso('Escolha a arma do talento antes de avançar.');
+      return;
+    }
     setAviso(null);
     if (step === 'resumo') {
       onConfirmar({
@@ -1021,6 +1042,7 @@ export default function LevelUpShell({
           luSteps.includes('resilienteAtributo') && talentoObjEscolhido && atributoResilienteEscolhido
             ? { [talentoObjEscolhido.id]: atributoResilienteEscolhido }
             : null,
+        maestriaArmaTalentoEscolhida: luSteps.includes('maestriaArmaTalento') ? maestriaArmaTalentoEscolhida : null,
         periciaLivreTalentoEscolhida: luSteps.includes('periciaLivreTalento') ? periciaLivreEscolhida : null,
         periciaRestritaTalentoEscolhida: luSteps.includes('periciaRestritaTalento') ? periciaRestritaEscolhida : null,
         conhecimentoPrimordialPericiaEscolhida: luSteps.includes('conhecimentoPrimordial') ? conhecimentoPrimordialEscolhida : null,
@@ -1836,6 +1858,28 @@ export default function LevelUpShell({
           </>
         )}
 
+        {step === 'maestriaArmaTalento' && talentoObjEscolhido && (
+          <>
+            <div className="section-title">{talentoObjEscolhido.nome} — escolha 1 arma</div>
+            <div className="label" style={{ marginBottom: 8 }}>
+              Usa a propriedade de Maestria dessa arma, mesmo sem ser o tipo nativo da classe — troca em Descanso
+              Longo. Só armas que você já é proficiente aparecem aqui.
+            </div>
+            {opcoesMaestriaArmaTalentoAtual.map((arma) => (
+              <div
+                key={arma.id}
+                className={`opt-card ${maestriaArmaTalentoEscolhida === arma.nome ? 'selected' : ''}`}
+                onClick={() => setMaestriaArmaTalentoEscolhida(arma.nome)}
+              >
+                <div className="opt-card-name">{arma.nome}</div>
+                <div className="opt-card-desc">
+                  {arma.dano} · {arma.maestria}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
         {step === 'dadivaEpica' && (
           <>
             <div className="section-title">Dádiva Épica</div>
@@ -2125,6 +2169,12 @@ export default function LevelUpShell({
               <div className="summary-row">
                 <span>Atributo (Resiliente)</span>
                 <span>{atributoResilienteEscolhido ?? 'nenhum escolhido'}</span>
+              </div>
+            )}
+            {luSteps.includes('maestriaArmaTalento') && (
+              <div className="summary-row">
+                <span>Arma (Mestre das Armas)</span>
+                <span>{maestriaArmaTalentoEscolhida ?? 'nenhuma escolhida'}</span>
               </div>
             )}
             {luSteps.includes('asi') && (

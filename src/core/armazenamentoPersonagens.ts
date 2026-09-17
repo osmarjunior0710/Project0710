@@ -66,6 +66,12 @@ export interface PersonagemSalvo {
   periciasMulticlasseAtual?: string[];
   ferramentasMulticlasseAtual?: string[];
   maestriaArmaAtual?: string[];
+  /** Slot EXTRA de Maestria em Arma do talento Mestre das Armas —
+   * independente de `maestriaArmaAtual` (slots nativos da classe).
+   * `null`/ausente = talento não escolhido ainda, ou escolhido mas
+   * arma ainda não selecionada. Ver `core/maestriaArma.ts`
+   * (`armasElegiveisParaMaestriaExtra`). */
+  maestriaArmaTalentoGeralAtual?: string | null;
   folegoGasto?: number;
   indomavelGasto?: number;
   surtoGasto?: number;

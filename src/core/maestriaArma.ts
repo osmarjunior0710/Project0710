@@ -8,6 +8,7 @@ import { armas, type Arma } from '../data/rulesets/dnd2024/armas';
 import { proficienciasArmaArmaduraClasse } from '../data/rulesets/dnd2024/proficienciasArmaArmaduraClasse';
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { valorRecursoClasse } from './recursosClasse';
+import { classeProficienteComArma } from './proficienciaArma';
 
 export function quantidadeMaestriaEmArma(classe: Classe, nivel: number): number {
   return valorRecursoClasse(classe, 'Maestria em Arma', nivel);
@@ -31,4 +32,16 @@ export function armasParaMaestria(classe: Classe): Arma[] {
   if (prof?.proficienciaArmas !== 'Armas Simples e Marciais') return [];
   if (classe.nome === 'Bárbaro') return armas.filter((a) => a.categoria.includes('Corpo a Corpo'));
   return armas;
+}
+
+/** Pool de armas elegíveis pro slot EXTRA de Maestria do talento
+ * Mestre das Armas — livro (p.206): "arma Simples ou Marcial à sua
+ * escolha, desde que você tenha proficiência com ela". Diferente de
+ * `armasParaMaestria()` (que só cobre a categoria ampla nativa do
+ * Guerreiro/Bárbaro): aqui qualquer arma que a PROFICIÊNCIA real do
+ * personagem cubra conta, incluindo proficiência restrita (Ladino,
+ * Monge) e a somada por talento (Treinamento com Armas Marciais) —
+ * ver `core/proficienciaArma.ts` (`classeProficienteComArma`). */
+export function armasElegiveisParaMaestriaExtra(classe: Classe, talentosAtuais?: string[]): Arma[] {
+  return armas.filter((a) => classeProficienteComArma(classe, a, talentosAtuais));
 }
