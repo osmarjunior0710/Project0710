@@ -1223,6 +1223,27 @@ Os 5 viáveis, na ordem que forem entregues:
       Mosquete" → ficha final: 4ª linha "Mosquete (MESTRE DAS ARMAS)" na
       Maestria em Arma, com seu próprio 🔄 → troca por Adaga
       independente das outras 3, resto intacto).
+- [x] **Correção achada no caminho do D.3, apontada pelo Osmar**: os
+      slots NATIVOS de Maestria em Arma (Guerreiro/Bárbaro) nunca
+      cresciam sozinhos nos níveis certos (Guerreiro: 3→4 no nível 4,
+      4→5 no nível 10, 5→6 no nível 16) — o Level Up nunca chamava
+      `quantidadeMaestriaEmArma(classe, novoNivel)`, então o total
+      ficava congelado no valor da criação pra sempre. Corrigido: novo
+      passo `maestriaArmaCrescimento` no `LevelUpShell`, só entra na
+      sequência quando `quantidadeMaestriaEmArma(classe, novoNivel) >
+      maestriaArmaAtual.length` (cresceu de verdade nesse nível, não é
+      passo vazio todo level-up) — reaproveita `useEscolhaMultipla`
+      (mesmo hook de Truques/Invocações Místicas) com as armas já
+      escolhidas travadas (`bloqueado`), forçando escolher só a(s)
+      vaga(s) NOVA(S) que abriram; trocar uma arma já escolhida
+      continua sendo só via `TrocarArmaMaestria.tsx` na aba Atributos,
+      não nesse passo. Verificado: `tsc -b`/`npm test` (594)/`npm run
+      build` limpos + Playwright (Guerreiro nível 3→4 real, 2 rodadas
+      com personagens diferentes: passo novo aparece com as 3 armas
+      nativas marcadas "(já tinha)" e travadas, escolhe a 4ª → Resumo
+      "Maestria em Arma: +1 nova(s)" → ficha final tem as 3 antigas
+      intactas + a nova, confirmando que nenhuma foi perdida/trocada
+      sem querer).
 - [ ] **D.4 — Mestre em Armas Grandes**: dano extra fixo (=Bônus de
       Proficiência) com arma Pesada + ataque bônus extra após Crítico
       (`estado.critico`, já existe) ou reduzir o alvo a 0 PV (botão de

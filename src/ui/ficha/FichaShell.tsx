@@ -1565,6 +1565,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     escolhaMagiaTalentoGeral: Record<string, string[]> | null;
     escolhaAtributoTalentoGeral: Record<string, string> | null;
     maestriaArmaTalentoEscolhida: string | null;
+    maestriaArmaEscolhida: string[] | null;
     periciaLivreTalentoEscolhida: string | null;
     periciaRestritaTalentoEscolhida: string | null;
     conhecimentoPrimordialPericiaEscolhida: string | null;
@@ -1649,6 +1650,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
     if (resultado.maestriaArmaTalentoEscolhida) {
       setMaestriaArmaExtra(resultado.maestriaArmaTalentoEscolhida);
+    }
+    if (resultado.maestriaArmaEscolhida) {
+      setMaestriaArma(resultado.maestriaArmaEscolhida);
     }
     if (resultado.periciaLivreTalentoEscolhida) {
       setPericiasTalentoGeralAtuais((prev) => [...prev, resultado.periciaLivreTalentoEscolhida!]);
@@ -1768,6 +1772,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         hpRolado={levelUpHpRolado}
         onHpRoladoChange={setLevelUpHpRolado}
         truquesAtuais={truquesAtuais}
+        maestriaArmaAtual={maestriaArma}
         truquesDaClasse={magiasDaClasse(classe.nome, 0)}
         magiasPreparadasAtuais={magiasPreparadasAtuais}
         livroDeMagiasAtuais={livroDeMagiasAtuais}

@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1912
+
+Corrigido: Maestria em Arma do Guerreiro/Bárbaro agora cresce de
+verdade nos níveis certos (4, 10 e 16 pro Guerreiro) — antes ficava
+travada no número de armas escolhidas na criação do personagem pra
+sempre. Agora, ao subir pra um desses níveis no Level Up, aparece uma
+tela pra escolher só a(s) arma(s) nova(s); as que você já tinha
+continuam intactas.
+
 ## v202609_1124
 
 Talento Mestre das Armas agora funciona de verdade: dá 1 slot EXTRA

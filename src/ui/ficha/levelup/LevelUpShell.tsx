@@ -52,7 +52,7 @@ import { talentos } from '../../../data/rulesets/dnd2024/talentos';
 import { opcoesMagiaEscolhidaPorEscola, opcoesMagiasRituais, quantidadeMagiasRituais } from '../../../core/magiaTalentoGeral';
 import { opcoesPericiaRestrita } from '../../../core/periciaTalentoGeral';
 import { opcoesAtributoResiliente } from '../../../core/talentoAtributo';
-import { armasElegiveisParaMaestriaExtra } from '../../../core/maestriaArma';
+import { armasElegiveisParaMaestriaExtra, armasParaMaestria, quantidadeMaestriaEmArma } from '../../../core/maestriaArma';
 import TelaEscolherTalento from './TelaEscolherTalento';
 import TrocarValorSimples from '../../components/TrocarValorSimples';
 import { useEscolhaMultipla } from '../hooks/useEscolhaMultipla';
@@ -128,6 +128,12 @@ interface LevelUpShellProps {
      * escolhida pro slot extra de Maestria. `null` = talento não
      * escolhido nesse level-up. */
     maestriaArmaTalentoEscolhida: string | null;
+    /** Lista COMPLETA (antigas + novas) de Maestria em Arma NATIVA da
+     * classe (Guerreiro/Bárbaro) — cresce sozinha nos níveis certos
+     * (4/10/16 pro Guerreiro), mesmo padrão de `truquesEscolhidos`.
+     * `null` = classe sem esse recurso, ou nenhuma vaga nova nesse
+     * level-up (passo não entrou na sequência). */
+    maestriaArmaEscolhida: string[] | null;
     /** Só preenchido quando o Talento Geral ESCOLHIDO NESTE level-up
      * for Especialista em Perícia — 1 perícia LIVRE (qualquer uma,
      * ainda não proficiente) que vira proficiência de verdade. `null`
@@ -156,6 +162,11 @@ interface LevelUpShellProps {
   /** Truques que o personagem já tem (pré-marcados na tela de escolha
    * — Etapa 4.1). */
   truquesAtuais: string[];
+  /** Maestria em Arma NATIVA (Guerreiro/Bárbaro) que o personagem já
+   * tem — pré-marcadas na tela que aparece só quando o total de vagas
+   * cresce (níveis 4/10/16 pro Guerreiro). Ver `core/maestriaArma.ts`
+   * (`quantidadeMaestriaEmArma`). */
+  maestriaArmaAtual: string[];
   /** Catálogo completo de Truques da classe, pra escolher de/pra. */
   truquesDaClasse: Magia[];
   /** Magias Preparadas que o personagem já tem (Etapa 4.3). */
@@ -258,6 +269,7 @@ type LuStep =
   | 'periciaRestritaTalento'
   | 'resilienteAtributo'
   | 'maestriaArmaTalento'
+  | 'maestriaArmaCrescimento'
   | 'dadivaEpica'
   | 'arcanaMistica'
   | 'iniciadoEmMagia'
@@ -278,6 +290,7 @@ export default function LevelUpShell({
   onHpRoladoChange,
   truquesAtuais,
   truquesDaClasse,
+  maestriaArmaAtual,
   magiasPreparadasAtuais,
   livroDeMagiasAtuais,
   magiasDaClasseDisponiveis,
@@ -300,6 +313,8 @@ export default function LevelUpShell({
   onToggleFavoritoTalento,
 }: LevelUpShellProps) {
   const novoNivel = personagem.nivel + 1;
+  const maxMaestriaArma = quantidadeMaestriaEmArma(classe, novoNivel);
+  const armasParaMaestriaAtual = armasParaMaestria(classe);
   const maxTruques = valorRecursoClasse(classe, 'Truques Conhecidos', novoNivel);
   const maxMagiasPreparadas = valorRecursoClasse(classe, 'Magias Preparadas', novoNivel);
   const maxLivroDeMagias = valorRecursoClasse(classe, 'Livro de Magias', novoNivel);
@@ -558,6 +573,11 @@ export default function LevelUpShell({
     luSteps.push('conhecimentoPrimordial');
   }
   if (temEstiloDeLutaTrocavel(classe, novoNivel)) luSteps.push('estiloDeLuta');
+  // Diferente de Truques/Invocações (sempre no array quando a classe
+  // tem o recurso, mesmo sem vaga nova) — Maestria em Arma só entra
+  // quando o total de vagas CRESCEU de verdade nesse nível (senão seria
+  // um passo vazio pra Guerreiro/Bárbaro na maioria dos level-ups).
+  if (maxMaestriaArma > maestriaArmaAtual.length) luSteps.push('maestriaArmaCrescimento');
   if (maxTruques > 0) luSteps.push('truques');
   if (temLivroDeMagias) luSteps.push('livroDeMagias');
   if (magiasPeritoNecromanciaBonusNesteNivel > 0) luSteps.push('peritoNecromancia');
@@ -643,6 +663,16 @@ export default function LevelUpShell({
     // a troca dele é só no Descanso Longo, não no Level Up.
     bloqueado: (nome) => usaRedefPorDescanso && truquesAtuais.includes(nome),
   });
+  // Vagas nativas de Maestria em Arma (Guerreiro/Bárbaro) que crescem
+  // sozinhas por nível (4/10/16 pro Guerreiro) — arma já escolhida
+  // fica travada aqui (trocar uma existente é só no Descanso Longo,
+  // ver `TrocarArmaMaestria.tsx` na aba Atributos), este passo só
+  // preenche as vagas NOVAS que a subida de nível abriu.
+  const { escolhidos: maestriaArmaEscolhida, toggle: toggleMaestriaArma } = useEscolhaMultipla(
+    maestriaArmaAtual,
+    maxMaestriaArma,
+    { bloqueado: (nome) => maestriaArmaAtual.includes(nome) },
+  );
   const { escolhidos: livroDeMagiasEscolhido, toggle: toggleLivroDeMagias } = useEscolhaMultipla(
     livroDeMagiasAtuais,
     maxLivroDeMagias,
@@ -847,6 +877,7 @@ export default function LevelUpShell({
     periciaRestritaTalento: 'Perícia do Talento',
     resilienteAtributo: 'Atributo (Resiliente)',
     maestriaArmaTalento: 'Arma (Mestre das Armas)',
+    maestriaArmaCrescimento: 'Maestria em Arma',
     dadivaEpica: 'Dádiva Épica',
     arcanaMistica: 'Arcana Mística',
     iniciadoEmMagia: 'Iniciado em Magia',
@@ -886,6 +917,10 @@ export default function LevelUpShell({
     }
     if (step === 'conhecimentoPrimordial' && conhecimentoPrimordialEscolhida === null) {
       setAviso('Escolha a perícia do Conhecimento Primordial antes de avançar.');
+      return;
+    }
+    if (step === 'maestriaArmaCrescimento' && maestriaArmaEscolhida.length < maxMaestriaArma) {
+      setAviso(`Escolha ${maxMaestriaArma - maestriaArmaAtual.length} arma(s) nova(s) de Maestria antes de avançar.`);
       return;
     }
     if (step === 'truques' && !truquesValido) {
@@ -1043,6 +1078,7 @@ export default function LevelUpShell({
             ? { [talentoObjEscolhido.id]: atributoResilienteEscolhido }
             : null,
         maestriaArmaTalentoEscolhida: luSteps.includes('maestriaArmaTalento') ? maestriaArmaTalentoEscolhida : null,
+        maestriaArmaEscolhida: luSteps.includes('maestriaArmaCrescimento') ? maestriaArmaEscolhida : null,
         periciaLivreTalentoEscolhida: luSteps.includes('periciaLivreTalento') ? periciaLivreEscolhida : null,
         periciaRestritaTalentoEscolhida: luSteps.includes('periciaRestritaTalento') ? periciaRestritaEscolhida : null,
         conhecimentoPrimordialPericiaEscolhida: luSteps.includes('conhecimentoPrimordial') ? conhecimentoPrimordialEscolhida : null,
@@ -1350,6 +1386,41 @@ export default function LevelUpShell({
                 <div className="opt-card-desc">{e.beneficios}</div>
               </div>
             ))}
+          </>
+        )}
+
+        {step === 'maestriaArmaCrescimento' && (
+          <>
+            <div className="section-title">
+              Maestria em Arma — escolha {maxMaestriaArma - maestriaArmaAtual.length} nova(s) (
+              {maestriaArmaEscolhida.length}/{maxMaestriaArma})
+            </div>
+            <div className="label" style={{ marginBottom: 8 }}>
+              Seu treinamento cresceu com o nível — as armas que você já tinha continuam, escolha só a(s) nova(s).
+            </div>
+            {armasParaMaestriaAtual.map((arma) => {
+              const jaTinha = maestriaArmaAtual.includes(arma.nome);
+              const marcado = maestriaArmaEscolhida.includes(arma.nome);
+              return (
+                <div
+                  key={arma.id}
+                  className={`opt-card ${marcado ? 'selected' : ''}`}
+                  style={{ cursor: jaTinha ? 'default' : 'pointer', opacity: jaTinha ? 0.6 : 1 }}
+                  onClick={() => {
+                    if (jaTinha) return;
+                    toggleMaestriaArma(arma.nome);
+                  }}
+                >
+                  <div className="opt-card-name">
+                    {arma.nome}
+                    {jaTinha ? ' (já tinha)' : ''}
+                  </div>
+                  <div className="opt-card-desc">
+                    {arma.dano} · {arma.maestria}
+                  </div>
+                </div>
+              );
+            })}
           </>
         )}
 
@@ -2040,6 +2111,12 @@ export default function LevelUpShell({
               <div className="summary-row">
                 <span>Estilo de Luta</span>
                 <span>{estiloDeLutaEscolhido ?? 'nenhum escolhido'}</span>
+              </div>
+            )}
+            {luSteps.includes('maestriaArmaCrescimento') && (
+              <div className="summary-row">
+                <span>Maestria em Arma</span>
+                <span>+{maestriaArmaEscolhida.length - maestriaArmaAtual.length} nova(s)</span>
               </div>
             )}
             {luSteps.includes('truques') && (

@@ -116,6 +116,12 @@ export interface ResultadoLevelUpRapido {
    * `null` aqui. Se o talento sorteado for Mestre das Armas, o
    * personagem fica sem o slot extra até escolher manualmente depois. */
   maestriaArmaTalentoEscolhida: string | null;
+  /** Level Up Rápido nunca sorteia as vagas NOVAS de Maestria em Arma
+   * NATIVA que abrem nos níveis 4/10/16 (mesma lógica de
+   * `escolhaMagiaTalentoGeral` acima) — sempre `null` aqui. O
+   * personagem fica com menos vagas preenchidas que o total real até
+   * escolher manualmente depois. */
+  maestriaArmaEscolhida: string[] | null;
   /** Level Up Rápido nunca sorteia a perícia livre/restrita de
    * Especialista em Perícia/Analítico/Mente Aguçada (mesma lógica de
    * `escolhaMagiaTalentoGeral` acima) — sempre `null` aqui. */
@@ -346,6 +352,7 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     escolhaMagiaTalentoGeral: null,
     escolhaAtributoTalentoGeral: null,
     maestriaArmaTalentoEscolhida: null,
+    maestriaArmaEscolhida: null,
     periciaLivreTalentoEscolhida: null,
     periciaRestritaTalentoEscolhida: null,
     conhecimentoPrimordialPericiaEscolhida,
