@@ -181,7 +181,13 @@ export type EfeitoMecanicoTalento =
    * por uma sub-tela nova no passo "Talento" do Level Up. Ver
    * `core/periciaTalentoGeral.ts` (`opcoesAtributoResiliente`) e
    * `core/calculoPersonagem.ts` (`calcularSalvaguardas`). */
-  | { tipo: 'atributo-e-salvaguarda-escolhidos' };
+  | { tipo: 'atributo-e-salvaguarda-escolhidos' }
+  /** Especialista Ambidestro: o ataque bônus da mão secundária (Cap. 6,
+   * regra base de Duas Armas) deixa de exigir que a arma secundária
+   * também seja Leve — só a da mão PRINCIPAL precisa. A secundária só
+   * não pode ser Duas Mãos (regra de base, não muda). Ver
+   * `core/ataque.ts` (`ataqueBonusMaoSecundaria`). */
+  | { tipo: 'mao-secundaria-sem-exigir-leve' };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -521,6 +527,7 @@ export const talentos: Talento[] = [
     prerequisitos: { nivelMinimo: 4, atributosMinimos: ['FOR', 'DES'], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'DES'], maximo: 20 },
     beneficios: "Ação Atacar com arma Leve: ataque adicional como Ação Bônus com outra arma corpo a corpo sem Duas Mãos (sem somar mod. de atributo no dano extra, a menos que negativo). Desembainha/embainha 2 armas sem Duas Mãos de uma vez.",
+    efeitoMecanico: { tipo: 'mao-secundaria-sem-exigir-leve' },
     pagina: 205,
     fonte: "PHB 2024",
   },

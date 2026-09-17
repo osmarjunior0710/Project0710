@@ -1176,10 +1176,26 @@ Os 5 viáveis, na ordem que forem entregues:
       escolha real, mostrando "CON 10 → 11" pré-selecionado → avança →
       Resumo mostra "Talento: Resistente" + "Atributo do talento: CON
       +1" certos).
-- [ ] **D.2 — Especialista Ambidestro**: remove a exigência de a arma
-      da mão secundária ter propriedade Leve em `ataqueBonusMaoSecundaria`
-      (só a principal precisa) + ganha ASI (mecanismo genérico já
-      existente).
+- [x] **D.2 — Especialista Ambidestro**: novo `efeitoMecanico:
+      'mao-secundaria-sem-exigir-leve'`. `ataqueBonusMaoSecundaria`
+      (`core/ataque.ts`) passou a checar Duas Mãos na mão SECUNDÁRIA
+      separado da checagem de Leve (antes só checava Leve nas duas
+      mãos) — com o talento, só a mão PRINCIPAL ainda precisa ser
+      Leve; sem o talento, comportamento idêntico a antes (as duas
+      precisam ser Leve). ASI usa o mecanismo genérico já existente
+      (`concedeAsi`), sem código novo. Testado (`ataque.test.ts` — 4
+      casos novos: sem o talento bloqueia mão secundária não-Leve, com
+      o talento libera, Duas Mãos continua bloqueando mesmo com o
+      talento, mão principal sem Leve continua bloqueando mesmo com o
+      talento). Verificado: `tsc -b`/`npm test` (591)/`npm run build`
+      limpos. **Sem validação Playwright** — call site em
+      `FichaShell.tsx` não mudou (já passava `talentosEfetivos`),
+      testar de ponta a ponta exigiria escolher o talento + equipar 2
+      armas específicas via Mochila, caro pra esta entrega; a lógica
+      nova está isolada e coberta pelos 4 casos automatizados, risco
+      baixo — vale confirmar no celular com Adaga na mão principal +
+      uma arma corpo a corpo não-Leve (ex.: Machado de Batalha) na
+      secundária.
 - [ ] **D.3 — Mestre das Armas**: escolhe 1 tipo de arma Simples/
       Marcial pra usar a propriedade de Maestria mesmo sem ser nativo,
       trocável em Descanso Longo — reaproveita `TrocarArmaMaestria.tsx`

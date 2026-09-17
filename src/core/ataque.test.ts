@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ataqueComArma, ataqueDesarmado } from './ataque';
+import { ataqueComArma, ataqueDesarmado, ataqueBonusMaoSecundaria } from './ataque';
 import { armas } from '../data/rulesets/dnd2024/armas';
 import { classes } from '../data/rulesets/dnd2024/classes';
 
@@ -116,5 +116,32 @@ describe('explicacaoAcerto (B7 — quebra do modificador no popup de rolagem)', 
     expect(usouDes.info.explicacaoAcerto.linhas[0].label).toBe('mod. DES (Acuidade)');
     const usouFor = ataqueComArma(rapieira, barbaro, 1, 4, 2, false, false, null, false);
     expect(usouFor.info.explicacaoAcerto.linhas[0].label).toBe('mod. FOR (Acuidade)');
+  });
+});
+
+describe('ataqueBonusMaoSecundaria — Especialista Ambidestro (mao-secundaria-sem-exigir-leve)', () => {
+  it('sem o talento: mão secundária SEM Leve (Machado de Batalha) não gera ataque bônus', () => {
+    const r = ataqueBonusMaoSecundaria('Adaga', 'Machado de Batalha', guerreiro, 1, 3, 1, null, []);
+    expect(r).toBeNull();
+  });
+
+  it('com o talento: mão secundária SEM Leve (Machado de Batalha) passa a gerar ataque bônus, mão principal continua exigindo Leve', () => {
+    const r = ataqueBonusMaoSecundaria('Adaga', 'Machado de Batalha', guerreiro, 1, 3, 1, null, [
+      'especialista-ambidestro',
+    ]);
+    expect(r).not.toBeNull();
+    expect(r?.nome).toContain('Machado de Batalha');
+  });
+
+  it('borda: com o talento, mão secundária Duas Mãos (Machado Grande) continua bloqueada', () => {
+    const r = ataqueBonusMaoSecundaria('Adaga', 'Machado Grande', guerreiro, 1, 3, 1, null, ['especialista-ambidestro']);
+    expect(r).toBeNull();
+  });
+
+  it('borda: com o talento, mão PRINCIPAL sem Leve (Machado de Batalha) ainda bloqueia', () => {
+    const r = ataqueBonusMaoSecundaria('Machado de Batalha', 'Adaga', guerreiro, 1, 3, 1, null, [
+      'especialista-ambidestro',
+    ]);
+    expect(r).toBeNull();
   });
 });

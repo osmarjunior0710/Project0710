@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0016
+
+Talento Especialista Ambidestro agora funciona de verdade: com ele,
+o ataque bônus da mão secundária passa a valer mesmo com uma arma
+corpo a corpo que não seja Leve na mão secundária (só a principal
+ainda precisa ser Leve) — antes as duas precisavam ser Leve pra
+liberar esse ataque extra.
+
 ## v202609_2115
 
 Level Up: qualquer talento que dá +1 num atributo (mesmo quando só há

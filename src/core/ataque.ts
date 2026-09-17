@@ -216,6 +216,10 @@ export function ataqueAtual(
  * (confirmado no Cap. 6, ver DECISOES-DESIGN.md "Sistema de
  * Equipamento"). `null` quando a condição não é satisfeita — painel
  * de Ação Bônus simplesmente não mostra a opção.
+ *
+ * Especialista Ambidestro (`mao-secundaria-sem-exigir-leve`) relaxa a
+ * exigência: só a Mão Principal precisa ser Leve — a Secundária só não
+ * pode ser Duas Mãos (regra base, continua valendo pros dois casos).
  */
 export function ataqueBonusMaoSecundaria(
   nomeMaoPrincipal: string | null,
@@ -232,7 +236,10 @@ export function ataqueBonusMaoSecundaria(
   const principal = armas.find((a) => a.nome === nomeMaoPrincipal);
   const secundaria = armas.find((a) => a.nome === nomeMaoSecundaria);
   if (!principal || !secundaria) return null;
-  if (!principal.propriedades.includes('Leve') || !secundaria.propriedades.includes('Leve')) return null;
+  if (secundaria.propriedades.includes('Duas Mãos')) return null;
+  const secundariaSemExigirLeve = efeitoMecanicoDoTalento(talentosAtuais, 'mao-secundaria-sem-exigir-leve') !== null;
+  if (!principal.propriedades.includes('Leve')) return null;
+  if (!secundariaSemExigirLeve && !secundaria.propriedades.includes('Leve')) return null;
   // `outraArmaNaMaoSecundaria: true` — este ATAQUE é o de outra arma
   // na mão secundária, então Duelismo ("nenhuma outra arma") nunca se
   // aplica aqui, só potencialmente no ataque principal.
