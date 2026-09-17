@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2115
+
+Level Up: qualquer talento que dá +1 num atributo (mesmo quando só há
+1 atributo possível, tipo Resistente/Ator/Sorrateiro) agora sempre
+mostra uma tela de confirmação com "atributo atual → atributo novo"
+antes de aplicar — antes esses talentos de atributo único aplicavam o
++1 direto, sem tela nenhuma.
+
 ## v202609_2045
 
 Talento Resiliente ganhou uma tela nova de escolha de atributo (+1 e

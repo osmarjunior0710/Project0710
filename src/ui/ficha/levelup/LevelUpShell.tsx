@@ -429,13 +429,14 @@ export default function LevelUpShell({
         ? magiaIniciadaEspecieEscolhida
         : null,
   };
-  /** Talento escolhido pede uma escolha de atributo real (não é
-   * `'nenhum'`, nem `escolha-unica` com 1 atributo só, que já aplica
-   * direto sem passo extra). */
+  /** Talento escolhido concede ASI (qualquer `concedeAsi.tipo` que não
+   * seja `'nenhum'`) — sempre passa pelo passo extra `'asiAtributo'`,
+   * mesmo quando só há 1 atributo possível (`escolha-unica` com 1 só):
+   * a opção já vem pré-selecionada por `aplicarAsiDoTalento`, mas a
+   * tela mostra o "valor atual → valor novo" antes de confirmar, em
+   * vez de aplicar em silêncio. Ver DECISOES-DESIGN.md. */
   const precisaEscolherAtributoDoTalento =
-    talentoObjEscolhido !== null &&
-    talentoObjEscolhido.concedeAsi.tipo !== 'nenhum' &&
-    (talentoObjEscolhido.concedeAsi.tipo === 'distribuir-dois' || talentoObjEscolhido.concedeAsi.atributos.length > 1);
+    talentoObjEscolhido !== null && talentoObjEscolhido.concedeAsi.tipo !== 'nenhum';
   // Talento Geral com magia(s) ESCOLHIDA(S) — por escola restrita
   // (Tocado pela Sombra/Fadas, 1 magia) ou Rituais (Conjurador
   // Ritualista, N = Bônus de Proficiência) — passo extra só entra
@@ -783,12 +784,14 @@ export default function LevelUpShell({
     setAsiEscolhas((prev) => prev.filter((_, i) => i !== idx));
   }
 
-  /** Ao escolher um talento com `concedeAsi`, decide o que fazer com o
-   * ASI que ele concede — `escolha-unica` com 1 atributo só aplica
-   * direto (sem escolha real). O resto (`distribuir-dois`, ou
-   * `escolha-unica` com 2+ atributos) fica pro passo extra
-   * 'asiAtributo' — ver `precisaEscolherAtributoDoTalento`. Ver
-   * DECISOES-DESIGN.md. */
+  /** Ao escolher um talento com `concedeAsi`, pré-seleciona o que dá
+   * pra pré-selecionar — `escolha-unica` com 1 atributo só já marca
+   * esse atributo (sem escolha real pro jogador fazer), mas ainda
+   * passa pelo passo extra 'asiAtributo' pra mostrar "valor atual →
+   * valor novo" antes de confirmar. O resto (`distribuir-dois`, ou
+   * `escolha-unica` com 2+ atributos) fica em branco pro jogador
+   * escolher nesse mesmo passo — ver `precisaEscolherAtributoDoTalento`.
+   * Ver DECISOES-DESIGN.md. */
   function aplicarAsiDoTalento(t: (typeof talentos)[number]) {
     if (t.concedeAsi.tipo === 'nenhum') {
       setAsiEscolhas([]);
@@ -1700,7 +1703,9 @@ export default function LevelUpShell({
             {talentoObjEscolhido.concedeAsi.tipo === 'escolha-unica' && (
               <>
                 <div className="label" style={{ marginBottom: 10 }}>
-                  {talentoObjEscolhido.nome} dá +1 num desses atributos, à sua escolha.
+                  {talentoObjEscolhido.concedeAsi.atributos.length > 1
+                    ? `${talentoObjEscolhido.nome} dá +1 num desses atributos, à sua escolha.`
+                    : `${talentoObjEscolhido.nome} dá +1 nesse atributo.`}
                 </div>
                 {talentoObjEscolhido.concedeAsi.atributos.map((a) => {
                   const base = atributosAtuais[a] ?? 10;

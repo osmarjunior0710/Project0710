@@ -1159,6 +1159,23 @@ Os 5 viáveis, na ordem que forem entregues:
       talento: SAB +1" → ficha final: SAB sobe de 14 pra 15, vira
       Salvaguarda de Sabedoria proficiente com popup "mod. SAB +2 /
       Bônus de Proficiência (Resiliente) +2 / +4").
+- [x] **Correção pós-D.1, apontada pelo Osmar testando no celular**: a
+      tela nova "Atributo (Resiliente)" mostrava só o nome do atributo,
+      sem referência de quanto ele ia subir — diferente do padrão já
+      usado na tela normal de ASI (`escolha-unica`, "atributo valor →
+      valor+1"). Corrigido pra usar o mesmo padrão (`atributosAtuais`
+      já disponível no componente). Generalizado além do pedido
+      original: talento com ASI de 1 atributo só (`escolha-unica` com 1
+      item) agora SEMPRE passa pela tela de confirmação com "atual →
+      novo" em vez de aplicar em silêncio (antes só entrava na tela
+      quando havia 2+ opções pra escolher de verdade) — decisão
+      registrada em `DECISOES-FICHA.md`. Verificado: `tsc -b`/`npm
+      test` (587)/`npm run build` limpos + Playwright (Bárbaro nível
+      3→4, escolhe o talento Resistente — 1 atributo só, CON — no passo
+      de talento → tela nova "Atributo do Talento" aparece mesmo sem
+      escolha real, mostrando "CON 10 → 11" pré-selecionado → avança →
+      Resumo mostra "Talento: Resistente" + "Atributo do talento: CON
+      +1" certos).
 - [ ] **D.2 — Especialista Ambidestro**: remove a exigência de a arma
       da mão secundária ter propriedade Leve em `ataqueBonusMaoSecundaria`
       (só a principal precisa) + ganha ASI (mecanismo genérico já

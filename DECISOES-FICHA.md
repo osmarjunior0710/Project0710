@@ -22,6 +22,22 @@ descanso não é uma ação de turno, é algo que acontece entre/depois de
 combates. Mantém a aba Combat focada em "o que eu faço agora, no meu
 turno".
 
+## Level Up — toda escolha de ASI passa por uma tela de confirmação com "valor atual → valor novo"
+
+**Decisão:** qualquer talento que conceda Aumento no Valor de Atributo
+(`concedeAsi.tipo !== 'nenhum'`) sempre passa pelo passo extra
+`'asiAtributo'` do Level Up, mesmo quando só existe 1 atributo possível
+(`escolha-unica` com 1 atributo só). Nesse caso a única opção já vem
+pré-selecionada (nada pro jogador escolher de verdade), mas a tela
+ainda mostra "Atributo valor-atual → valor-novo" antes de confirmar —
+nunca aplica o +1 em silêncio sem o jogador ver a mudança.
+
+**Por quê:** o jogador precisa de referência de quanto o atributo vai
+subir antes de confirmar, mesmo quando não há escolha real — aplicar
+direto sem tela (como acontecia antes) deixava sem contexto o que
+mudou. O mesmo padrão vale pra qualquer talento com ASI daqui pra
+frente, incluindo os que ainda serão implementados.
+
 ## Ficha — nada é editável livremente depois de salva
 
 **Decisão:** não existe distinção "editável sem XP" vs. "travada com
