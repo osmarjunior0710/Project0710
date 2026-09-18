@@ -198,7 +198,20 @@ export type EfeitoMecanicoTalento =
    * amplo — qualquer arma que o personagem seja proficiente, não só o
    * catálogo da classe). Ver `core/maestriaArma.ts`
    * (`armasElegiveisParaMaestriaExtra`). */
-  | { tipo: 'slot-maestria-extra' };
+  | { tipo: 'slot-maestria-extra' }
+  /** Mestre em Armas Grandes — livro (p.207), 2 efeitos independentes
+   * na mesma flag (não faz sentido ter 1 sem o outro, mesmo talento):
+   * (1) Maestria em Armas Pesadas: dano extra automático = Bônus de
+   * Proficiência sempre que acertar com arma Pesada, sem limite de
+   * "1x/turno" (ver `core/ataque.ts`, `ataqueComArma`). (2) Cortar:
+   * ataque extra como Ação Bônus, mesma arma, imediatamente após
+   * Acerto Crítico OU reduzir o alvo a 0 PV — Crítico detectado sozinho
+   * (nat 20 no ataque principal, ver `FichaShell.tsx`); "reduzir a 0
+   * PV" precisa de confirmação manual (o app não sabe o PV do
+   * inimigo). Só vale com arma Corpo a Corpo (Cortar exige isso; a
+   * Maestria em Armas Pesadas não, mas armas Pesadas hoje são todas
+   * Corpo a Corpo ou Munição — sem conflito na prática). */
+  | { tipo: 'dano-extra-e-cortar-arma-pesada' };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -705,6 +718,7 @@ export const talentos: Talento[] = [
     prerequisitos: { nivelMinimo: 4, atributosMinimos: ['FOR'], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR'], maximo: 20 },
     beneficios: "Com arma Pesada, ação Atacar: dano extra = Bônus de Proficiência. Após Crítico ou reduzir alguém a 0 PV com arma corpo a corpo: ataque extra (Ação Bônus).",
+    efeitoMecanico: { tipo: 'dano-extra-e-cortar-arma-pesada' },
     pagina: 207,
     fonte: "PHB 2024",
   },

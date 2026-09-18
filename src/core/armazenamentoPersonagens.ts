@@ -292,6 +292,10 @@ export interface PersonagemSalvo {
    * reseta junto com `turnStateAtual` (Fim do Turno). Só 1x por turno
    * (regra real: "uma jogada de ataque à sua escolha no seu turno"). */
   golpeBrutalUsadoTurno?: boolean;
+  /** Cortar (Mestre em Armas Grandes) — `true` = liberado agora (após
+   * Crítico ou confirmação manual de "reduziu a 0 PV"), reseta no Fim
+   * do Turno. Ver `FichaShell.tsx`. */
+  cortarProntoTurno?: boolean;
   /** Vigor Implacável (Orc) já disparou desde o último Descanso Longo
    * — só ele reseta. Ver `core/vigorImplacavel.ts`. */
   vigorImplacavelGasto?: boolean;

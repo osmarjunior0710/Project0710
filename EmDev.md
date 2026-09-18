@@ -1262,10 +1262,41 @@ Os 5 viáveis, na ordem que forem entregues:
       pra "já trocou..." → clique forçado no ícone travado não abre o
       popup → Descanso Longo → ícone libera de novo e o texto volta a
       "você pode trocar...").
-- [ ] **D.4 — Mestre em Armas Grandes**: dano extra fixo (=Bônus de
-      Proficiência) com arma Pesada + ataque bônus extra após Crítico
-      (`estado.critico`, já existe) ou reduzir o alvo a 0 PV (botão de
-      confirmação manual, já que o app não sabe o PV do inimigo).
+- [x] **D.4 — Mestre em Armas Grandes**: novo `efeitoMecanico:
+      'dano-extra-e-cortar-arma-pesada'`, 2 efeitos independentes na
+      mesma flag (livro, p.207).
+      **Maestria em Armas Pesadas** (dano extra): automático, sem
+      botão — `ataqueComArma` (`core/ataque.ts`) soma o Bônus de
+      Proficiência no `danoMod` sempre que a arma tiver a propriedade
+      "Pesada", sem limite de "1x/turno" (livro não restringe). Testado
+      (`ataque.test.ts` — 2 casos: com talento + arma Pesada soma o
+      bônus, sem Pesada não soma mesmo com o talento).
+      **Cortar** (ataque bônus, mesma arma): Crítico detectado sozinho
+      — novo `useEffect` em `FichaShell.tsx` observa `estado` do
+      `useRoll()` e liga `cortarPronto` quando uma rolagem rotulada
+      "Ataque — ..." (padrão já usado em `AcaoPanelContent.tsx`/
+      `CombatTab.tsx`) conclui com `critico === 'sucesso'` e inclui o
+      nome da arma principal — sem precisar de `categoria` nova no
+      `RollContext`. "Reduzir a 0 PV" fica com botão manual "☠ Reduziu
+      o alvo a 0 PV?" ao lado de Atacar (`AcaoPanelContent.tsx`), só
+      aparece com arma Corpo a Corpo equipada. Os dois caminhos liberam
+      a MESMA linha nova "🗡 Cortar" no painel de Ação Bônus
+      (`BonusPanelContent.tsx`, mesmo padrão visual/estrutural do
+      `ataqueBonus` já existente da Mão Secundária — nova prop
+      agrupada `cortar: {disponivel, ataque, onConfirmarReduziuAZero,
+      onUsar}` roteada FichaShell → CombatTab → Acao/BonusPanelContent,
+      mesmo padrão de `golpeBrutal`), reseta em `fimDoTurno()` igual
+      `golpeBrutalUsadoTurno`. Verificado: `tsc -b`/`npm test`
+      (596)/`npm run build` limpos + Playwright (Guerreiro com Machado
+      Grande equipado e o talento injetado via localStorage — sorteio
+      de talento/arma é caro de forçar via UI — confirma "☠ Reduziu a 0
+      PV?" → aparece "🗡 Cortar — Machado Grande" na Ação Bônus → usa →
+      Ação Bônus marca "USADA" → rola "Ataque — Machado Grande
+      (Cortar)" com a arma certa). **Reset no Fim do Turno não
+      confirmado via Playwright** (overlay do dado físico não fechou a
+      tempo no teste headless) — o código reaproveita literalmente o
+      mesmo `fimDoTurno()`/padrão de flag já validado por
+      `golpeBrutalUsadoTurno`/`ataqueImprudenteAtivo`, risco baixo.
 - [ ] **D.5 — Mestre em Escudos** (só o golpe de escudo — a Reação de
       anular dano fica de fora, gatilho externo que o app não modela):
       golpe ativo após acertar corpo a corpo, Salv. Força CD 8+mod.FOR+

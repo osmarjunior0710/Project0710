@@ -89,6 +89,21 @@ describe('ataqueComArma — bonusDanoSeForca (Dano da Fúria do Bárbaro)', () =
   });
 });
 
+describe('ataqueComArma — Mestre em Armas Grandes (dano-extra-e-cortar-arma-pesada)', () => {
+  it('arma Pesada (Machado Grande) + talento: soma o Bônus de Proficiência no dano', () => {
+    const semTalento = ataqueComArma(machadoGrande, guerreiro, 4, 3, 1, false, false, null, false, undefined, []);
+    const comTalento = ataqueComArma(machadoGrande, guerreiro, 4, 3, 1, false, false, null, false, undefined, [
+      'mestre-em-armas-grandes',
+    ]);
+    expect(comTalento.info.danoMod).toBe(semTalento.info.danoMod + 2); // Bônus de Proficiência nível 4 = +2
+  });
+
+  it('borda: arma sem Pesada (Rapieira) não ganha o bônus, mesmo com o talento', () => {
+    const r = ataqueComArma(rapieira, guerreiro, 4, 3, 1, false, false, null, false, undefined, ['mestre-em-armas-grandes']);
+    expect(r.info.danoMod).toBe(3); // só mod. FOR/DES normal, sem bônus extra
+  });
+});
+
 describe('explicacaoAcerto (B7 — quebra do modificador no popup de rolagem)', () => {
   it('Ataque Desarmado: sempre 2 linhas (mod. FOR + Bônus de Proficiência)', () => {
     const r = ataqueDesarmado(guerreiro, 1, 3);

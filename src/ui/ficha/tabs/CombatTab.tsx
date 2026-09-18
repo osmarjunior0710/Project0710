@@ -155,6 +155,19 @@ interface CombatTabProps {
     usadoTurno: boolean;
     onUsar: () => void;
   };
+  /** Cortar (Mestre em Armas Grandes) — `disponivel` = talento presente
+   * + arma Corpo a Corpo equipada (gate pro botão manual "Reduziu a 0
+   * PV?"). `ataque` = MESMA arma do ataque principal, só não-`null`
+   * quando o Crítico foi detectado sozinho OU o jogador confirmou
+   * manualmente — vira a linha de Ação Bônus (mesmo padrão de
+   * `ataqueBonus`). `onUsar` consome o uso (reseta pro próximo
+   * Crítico/confirmação). Reseta sozinho no Fim do Turno. */
+  cortar: {
+    disponivel: boolean;
+    ataque: AtaqueResolvido | null;
+    onConfirmarReduziuAZero: () => void;
+    onUsar: () => void;
+  };
   /** Mãos Curativas (Aasimar) — `disponivel` `false` = espécie não é
    * Aasimar. */
   maosCurativas: { disponivel: boolean; gasto: boolean; dados: number; onUsar: () => boolean };
@@ -401,6 +414,12 @@ export default function CombatTab({
     escolhas: golpeBrutalEscolhas,
     usadoTurno: golpeBrutalUsadoTurno,
     onUsar: onUsarGolpeBrutal,
+  },
+  cortar: {
+    disponivel: cortarDisponivel,
+    ataque: cortarAtaque,
+    onConfirmarReduziuAZero: onConfirmarCortarReduzirAZero,
+    onUsar: onUsarCortar,
   },
   maosCurativas: {
     disponivel: maosCurativasDisponivel,
@@ -721,6 +740,28 @@ export default function CombatTab({
       lados: ataqueBonus.info.danoLados,
       mod: ataqueBonus.info.danoMod,
       tipoDano: ataqueBonus.info.danoTipo,
+    });
+  }
+
+  function usarCortarAtaque() {
+    if (!cortarAtaque) return;
+    rolarD20({
+      label: `Ataque — ${cortarAtaque.nome} (Cortar)`,
+      formula: `1d20 + ${cortarAtaque.info.modAcerto}`,
+      mod: cortarAtaque.info.modAcerto,
+      explicacaoMod: cortarAtaque.info.explicacaoAcerto,
+      vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
+    });
+    onUsarCortar();
+    onMarcarUsado('bonus');
+    setPainelAberto(null);
+    setFeedback(`🗡 ${cortarAtaque.nome} (Cortar) — ${cortarAtaque.descricao} Toque "Rolar Dano" pra ver o dano.`);
+    setDanoPendente({
+      label: `Dano — ${cortarAtaque.nome} (Cortar)`,
+      quantidade: cortarAtaque.info.danoQuantidade,
+      lados: cortarAtaque.info.danoLados,
+      mod: cortarAtaque.info.danoMod,
+      tipoDano: cortarAtaque.info.danoTipo,
     });
   }
 
@@ -1309,6 +1350,8 @@ export default function CombatTab({
             golpeBrutalDados={golpeBrutalDados}
             golpeBrutalUsadoTurno={golpeBrutalUsadoTurno}
             onUsarGolpeBrutal={onUsarGolpeBrutal}
+            podeOferecerCortar={cortarDisponivel}
+            onConfirmarCortarReduzirAZero={onConfirmarCortarReduzirAZero}
             detalhesAtivo={detalhesAtivo}
             maosCurativasDisponivel={maosCurativasDisponivel}
             maosCurativasGasto={maosCurativasGasto}
@@ -1382,6 +1425,8 @@ export default function CombatTab({
             onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
             ataqueBonus={ataqueBonus}
             onUsarAtaqueBonus={usarAtaqueMaoSecundaria}
+            cortarAtaque={cortarAtaque}
+            onUsarCortar={usarCortarAtaque}
             usosInspiracaoMaximo={usosInspiracaoMaximo}
             usosInspiracaoRestantes={usosInspiracaoRestantes}
             tamanhoDadoInspiracao={tamanhoDadoInspiracao}

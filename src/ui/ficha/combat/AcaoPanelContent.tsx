@@ -100,6 +100,12 @@ interface AcaoPanelContentProps {
    * fecha logo em seguida (mesmo `onEscolher`), então quem mostra o
    * banner de verdade é o `CombatTab` (que sobrevive ao fechamento). */
   onColheitaMacabraDisponivel: (cura: number) => void;
+  /** Cortar (Mestre em Armas Grandes) — `podeOferecerCortar` = talento
+   * + arma Corpo a Corpo equipada, mostra o botão manual "Reduziu a 0
+   * PV?" ao lado de Atacar (Crítico já é detectado sozinho pelo
+   * `FichaShell.tsx`, sem precisar de UI aqui). */
+  podeOferecerCortar: boolean;
+  onConfirmarCortarReduzirAZero: () => void;
 }
 
 export default function AcaoPanelContent({
@@ -146,6 +152,8 @@ export default function AcaoPanelContent({
   onUsarFalarComAnimaisGnomo,
   colheitaMacabraDisponivel,
   onColheitaMacabraDisponivel,
+  podeOferecerCortar,
+  onConfirmarCortarReduzirAZero,
 }: AcaoPanelContentProps) {
   const { rolarD20, rolarDados } = useRoll();
   const { picker, abrirLista } = useUsarMagiaPainel({
@@ -310,6 +318,18 @@ export default function AcaoPanelContent({
             <div className={styles.rowDesc}>
               Renuncia à Vantagem do Ataque Imprudente NESSE ataque. Se acertar, +{golpeBrutalDados}d10 de dano e você
               escolhe o efeito depois de rolar. 1x por turno.
+            </div>
+          )}
+        </div>
+      )}
+
+      {ataqueAtual && podeOferecerCortar && (
+        <div className={styles.row} onClick={onConfirmarCortarReduzirAZero}>
+          <div className={styles.rowName}>☠ Reduziu o alvo a 0 PV?</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Confirma manualmente (o app não sabe o PV do inimigo) — libera "Cortar" na Ação Bônus: 1 ataque extra
+              com a mesma arma. Acerto Crítico já libera sozinho.
             </div>
           )}
         </div>

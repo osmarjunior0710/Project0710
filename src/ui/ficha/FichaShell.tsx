@@ -69,6 +69,7 @@ import {
   type SlotEquipamento,
 } from '../../core/equipamento';
 import { ataqueAtual, ataqueBonusMaoSecundaria } from '../../core/ataque';
+import { armas } from '../../data/rulesets/dnd2024/armas';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
@@ -356,6 +357,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [maestriaArmaTalentoTrocaDisponivel, setMaestriaArmaTalentoTrocaDisponivel] = useState(
     personagemSalvo.maestriaArmaTalentoTrocaDisponivel ?? true,
   );
+  // Cortar (Mestre em Armas Grandes) — libera 1 ataque bônus com a
+  // MESMA arma após Crítico (detectado sozinho, ver useEffect abaixo)
+  // ou reduzir o alvo a 0 PV (confirmação manual). Reseta em
+  // `fimDoTurno`, mesmo padrão de `golpeBrutalUsadoTurno`.
+  const [cortarPronto, setCortarPronto] = useState(personagemSalvo.cortarProntoTurno ?? false);
   const [lancarNoInfernoGasto, setLancarNoInfernoGasto] = useState(personagemSalvo.lancarNoInfernoGasto ?? false);
   const [surtoGasto, setSurtoGasto] = useState(personagemSalvo.surtoGasto ?? 0);
   const [inspiracaoGasto, setInspiracaoGasto] = useState(personagemSalvo.inspiracaoGasto ?? 0);
@@ -742,6 +748,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const sorteDoTenebrosoRestantes = Math.max(0, sorteDoTenebrosoMaximo - sorteDoTenebrosoGasto);
   const equipadoAtual = resumoEquipado(itensMochila);
   const armaEquipada = equipadoAtual.maoPrincipal;
+  const armaEquipadaCatalogo = armaEquipada ? armas.find((a) => a.nome === armaEquipada.nome) : undefined;
+  const armaEquipadaEhCorpoACorpo = armaEquipadaCatalogo ? !armaEquipadaCatalogo.categoria.includes('à Distância') : false;
+  const temMestreArmasGrandes = efeitoMecanicoDoTalento(talentosEfetivos, 'dano-extra-e-cortar-arma-pesada') !== null;
+  // Cortar só pode ser oferecido com arma Corpo a Corpo (regra real) —
+  // gate usado tanto pro botão manual "Reduziu a 0 PV?" quanto pro
+  // useEffect de detecção automática de Crítico, mais abaixo.
+  const podeOferecerCortar = temMestreArmasGrandes && armaEquipadaEhCorpoACorpo;
   const ataque = classe
     ? ataqueAtual(
         armaEquipada?.nome ?? null,
@@ -775,6 +788,37 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       )
     : null;
 
+  // Cortar (Mestre em Armas Grandes) — detecta Crítico sozinho no
+  // ataque PRINCIPAL: toda rolagem de ataque usa o label "Ataque —
+  // ..." (ver `AcaoPanelContent.tsx`/`CombatTab.tsx`), e a do ataque
+  // principal sempre inclui o nome da arma equipada — suficiente pra
+  // distinguir do ataque da Mão Secundária (arma diferente na imensa
+  // maioria dos casos). "Reduzir a 0 PV" não dá pra detectar (o app
+  // não sabe o PV do inimigo) — fica pro botão manual em
+  // `AcaoPanelContent.tsx` (`confirmarCortarPorReduzirAZero`).
+  useEffect(() => {
+    if (
+      podeOferecerCortar &&
+      ataque &&
+      rollEmAndamento?.fase === 'concluido' &&
+      rollEmAndamento.critico === 'sucesso' &&
+      rollEmAndamento.label.startsWith('Ataque —') &&
+      rollEmAndamento.label.includes(ataque.nome)
+    ) {
+      setCortarPronto(true);
+    }
+  }, [rollEmAndamento]);
+  /** Ataque de Cortar em si — MESMA arma do ataque principal (`ataque`,
+   * já calculado acima), só liberado quando `cortarPronto`. `null` =
+   * some da UI (painel de Ação Bônus simplesmente não mostra). */
+  const cortarAtaque = cortarPronto ? ataque : null;
+  function confirmarCortarPorReduzirAZero() {
+    if (podeOferecerCortar) setCortarPronto(true);
+  }
+  function usarCortar() {
+    setCortarPronto(false);
+  }
+
   // Salva progresso automaticamente a cada mudança relevante — Level
   // Up, Descanso, troca de arma de Maestria, uso de Recuperar
   // Fôlego/Indomável/Surto de Ação. Sem isso, um F5 na Ficha depois de
@@ -803,6 +847,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     surtoUsadoTurnoAtual: surtoUsadoTurno,
     ataqueImprudenteAtivoTurno: ataqueImprudenteAtivo,
     golpeBrutalUsadoTurno,
+    cortarProntoTurno: cortarPronto,
     conhecimentoPrimordialPericiaEscolhida,
     pvMax: personagem.pvMax,
     pvTemporarioAtual: pvTemporario,
@@ -896,6 +941,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       surtoUsadoTurno,
       ataqueImprudenteAtivo,
       golpeBrutalUsadoTurno,
+      cortarPronto,
       conhecimentoPrimordialPericiaEscolhida,
       pvTemporario,
       maestriaArma,
@@ -1116,6 +1162,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setSurtoUsadoTurno(false);
     setAtaqueImprudenteAtivo(false);
     setGolpeBrutalUsadoTurno(false);
+    setCortarPronto(false);
   }
 
   /** `classeNome` — omitido = gasta do pool "principal" em foco agora
@@ -2248,6 +2295,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               escolhas: golpeBrutalEscolhas,
               usadoTurno: golpeBrutalUsadoTurno,
               onUsar: () => setGolpeBrutalUsadoTurno(true),
+            }}
+            cortar={{
+              disponivel: podeOferecerCortar,
+              ataque: cortarAtaque,
+              onConfirmarReduziuAZero: confirmarCortarPorReduzirAZero,
+              onUsar: usarCortar,
             }}
             maosCurativas={{
               disponivel: maosCurativasDisponivel,

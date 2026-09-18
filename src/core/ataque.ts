@@ -143,6 +143,15 @@ export function ataqueComArma(
   const bonusArquearia = distancia && efeitoEstilo?.tipo === 'bonus-ataque-distancia' ? efeitoEstilo.bonus : 0;
   const podeDuelismo = !distancia && !duasMaosAtivo && !outraArmaNaMaoSecundaria;
   const bonusDuelismo = podeDuelismo && efeitoEstilo?.tipo === 'bonus-dano-uma-mao-sem-outra-arma' ? efeitoEstilo.bonus : 0;
+  // Mestre em Armas Grandes — Maestria em Armas Pesadas: dano extra
+  // (=Bônus de Proficiência) sempre que acertar com arma Pesada, sem
+  // limite de "1x/turno" (livro não restringe). Usa o Bônus de
+  // Proficiência do PERSONAGEM, não o `prof` condicional de cima (esse
+  // só soma quando proficiente com a arma — o talento não exige isso).
+  const bonusArmaPesada =
+    arma.propriedades.includes('Pesada') && efeitoMecanicoDoTalento(talentosAtuais, 'dano-extra-e-cortar-arma-pesada') !== null
+      ? bonusProficiencia(classe, nivel)
+      : 0;
 
   // Rótulo do atributo usado no acerto, pro popup de rolagem (B7) —
   // mesma lógica de `atribMod` acima, só nomeando a fonte. `atribForcada`
@@ -166,7 +175,7 @@ export function ataqueComArma(
       },
       danoQuantidade: quantidade,
       danoLados: lados,
-      danoMod: danoMod + bonusDuelismo + (usouForca ? bonusDanoSeForca : 0),
+      danoMod: danoMod + bonusDuelismo + bonusArmaPesada + (usouForca ? bonusDanoSeForca : 0),
       danoTipo: tipo,
       usouForca,
     },

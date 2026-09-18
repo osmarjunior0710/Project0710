@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1231
+
+Talento Mestre em Armas Grandes agora funciona de verdade: com arma
+Pesada, todo acerto já soma o Bônus de Proficiência no dano
+automaticamente. E depois de um Acerto Crítico (detectado sozinho)
+ou de você confirmar manualmente que reduziu o alvo a 0 PV (botão "☠
+Reduziu o alvo a 0 PV?" perto de Atacar), libera "Cortar" — 1 ataque
+extra com a mesma arma na Ação Bônus.
+
 ## v202609_1125
 
 Corrigido: trocar arma de Maestria (🔄, seja a do Guerreiro/Bárbaro ou

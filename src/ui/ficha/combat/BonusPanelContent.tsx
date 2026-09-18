@@ -17,6 +17,11 @@ interface BonusPanelContentProps {
   onUsarRecuperarFolego: () => void;
   ataqueBonus: AtaqueResolvido | null;
   onUsarAtaqueBonus: () => void;
+  /** Cortar (Mestre em Armas Grandes) — `null` = ainda não liberado
+   * (esperando Crítico ou confirmação manual de "reduziu a 0 PV", ver
+   * `CombatTab.tsx`). Mesma arma do ataque principal. */
+  cortarAtaque: AtaqueResolvido | null;
+  onUsarCortar: () => void;
   usosInspiracaoMaximo: number;
   usosInspiracaoRestantes: number;
   tamanhoDadoInspiracao: number;
@@ -139,6 +144,8 @@ export default function BonusPanelContent({
   onUsarRecuperarFolego,
   ataqueBonus,
   onUsarAtaqueBonus,
+  cortarAtaque,
+  onUsarCortar,
   usosInspiracaoMaximo,
   usosInspiracaoRestantes,
   tamanhoDadoInspiracao,
@@ -253,6 +260,7 @@ export default function BonusPanelContent({
     !formaGrandeDisponivel &&
     !revelacaoCelestialDisponivel &&
     !ataqueBonus &&
+    !cortarAtaque &&
     !mestreDaMorteDisponivel &&
     !temMagiaBonus &&
     acoesGenericasBonus.length === 0
@@ -414,6 +422,14 @@ export default function BonusPanelContent({
           <div className={styles.rowDesc}>
             {ataqueBonus.descricao}
             {detalhesAtivo && ' Propriedade Leve nas duas mãos: sem bônus de atributo no dano (a menos que seja negativo).'}
+          </div>
+        </div>
+      )}
+      {cortarAtaque && (
+        <div className={styles.row} onClick={onUsarCortar}>
+          <div className={styles.rowName}>🗡 Cortar — {cortarAtaque.nome}</div>
+          <div className={styles.rowDesc}>
+            Acerto Crítico ou reduziu o alvo a 0 PV — ataque extra com a mesma arma. {cortarAtaque.descricao}
           </div>
         </div>
       )}
