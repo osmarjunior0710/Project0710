@@ -116,6 +116,33 @@ codar (CLAUDE.md seção 6.4) — inclusive achados no meio do caminho
 lendo o PDF, não assumindo). Nenhuma entrega deste foco pulou o
 checklist `tsc -b`/`npm test`/`npm run build` antes de publicar.
 
+## Correções pós-fechamento, achadas pelo Osmar testando no celular
+
+- **Treinamento de Armadura/Escudo virou pré-requisito bloqueante de
+  verdade** — 5 talentos (Especialista/Mestre em Armaduras Médias/
+  Pesadas, Mestre em Escudos) tinham o pré-requisito só como texto
+  livre não-bloqueante (`outro`, mesmo padrão de "Característica
+  Conjuração ou Magia de Pacto"). Como o app já tem o dado de
+  treinamento de cada classe (`core/proficienciaArmadura.ts`, usado em
+  CA/Desvantagem sem treino), virou campo estruturado
+  (`prerequisitoArmadura`) que bloqueia a escolha de verdade, em vez
+  de só avisar — ver `DECISOES-CLASSES.md` ("Pré-requisito 'outro' vira
+  campo estruturado...").
+- **Golpe de Escudo ganhou o popup padrão de "salvaguarda do alvo"** —
+  antes era uma linha solta que marcava "usado" na hora do toque, sem
+  mostrar CD/Sucesso/Falha num popup (diferente de Ataque de Sopro/
+  Lançar no Inferno/Salvaguarda de Magia, que já tinham esse fluxo).
+  Os 3 modais quase idênticos foram unificados num componente só
+  (`SalvaguardaDoAlvoModal.tsx`) e Golpe de Escudo virou o 4º
+  consumidor — ver `DECISOES-COMBATE.md` ("Salvaguarda do alvo —
+  modal único").
+- **Bug não relacionado, achado no caminho: Fúria do Bárbaro sumida do
+  painel de Ação Bônus** — a condição de "nenhuma ação bônus
+  disponível" nunca incluía `furiaDisponivel`, então um Bárbaro nível 1
+  (só Fúria disponível) sempre via a mensagem de vazio. Bug antigo,
+  existia desde a implementação de Fúria, não relacionado a nenhuma
+  entrega deste foco — 1 linha corrigida.
+
 ## O que ficou de fora (ver `PENDENCIAS.md`)
 
 Os 23 talentos/Estilos de Luta implementados ANTES desta fase (antes
