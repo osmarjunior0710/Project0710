@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1406
+
+Ambiente de "🧪 Protótipos" ganhou a cena "Acerto/Erro — Ataque com
+efeito", com 3 variantes trocáveis do mesmo cenário de mentirinha
+(ataque num Goblin) — serve pra a gente decidir junto como o fluxo de
+ataque→dano→efeito deveria funcionar de verdade, ainda não muda nada
+no jogo real.
+
 ## v202609_1402
 
 Talento Mestre em Escudos agora funciona de verdade: com arma Corpo a
