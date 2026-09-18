@@ -178,6 +178,13 @@ export interface RollState {
    * Inspiração Heroica), nunca "gasta" um uso (a característica é
    * sempre vantajosa, sem custo). */
   forcaIndomavelAplicada?: boolean;
+  /** [Protótipo, ver `RollD20Options.confirmarAcerto`.] */
+  confirmarAcerto?: { onAcertou: () => void; onErrou: () => void } | null;
+  /** [Protótipo, ver `RollDadosOptions.efeitosExtras`.] */
+  efeitosExtras?: { titulo: string; opcoes: string[]; onFecharComEfeito: (escolhido: string | null) => void } | null;
+  /** [Protótipo] Opção marcada agora (toggle — tocar de novo
+   * desmarca), lida por `onFecharComEfeito` quando o "OK" fecha. */
+  efeitoExtraEscolhido?: string | null;
   /** Mesma ideia de `resultadoBrutoD20`, só que pra uma rolagem 'dados'
    * de 1 DADO SÓ (sem `dadosIndividuais`, ver `rolarDados`) — usado
    * pelo `rerollDadoEscolhido`/`usarRerollSe1` desse caso. Rolagem com
@@ -284,6 +291,12 @@ interface RollD20Options {
    * comum, sem a Força Indomável em jogo. */
   permiteForcaIndomavel?: boolean;
   onResultado?: (total: number, d20: number) => void;
+  /** [Protótipo, ver sdd/sdd-fluxo-rolagem.md] Quando presente, troca
+   * o ✕ de fechar por 2 botões "Errei"/"Acertei" assim que a rolagem
+   * concluir — o popup só fecha por um dos dois (nem tap fora, nem
+   * ✕). Opt-in por chamada; `undefined` em qualquer rolagem que não
+   * passe isso mantém o comportamento de sempre. */
+  confirmarAcerto?: { onAcertou: () => void; onErrou: () => void };
 }
 
 interface RollDadosOptions {
@@ -312,6 +325,13 @@ interface RollDadosOptions {
    * rolagem só mostra a fórmula simples, sem ⓘ. */
   explicacaoMod?: ExplicacaoCalculo;
   onResultado?: (total: number) => void;
+  /** [Protótipo, ver sdd/sdd-fluxo-rolagem.md] Lista de opções de
+   * efeito (texto livre) pra escolher DEPOIS da rolagem concluir —
+   * substitui o fechamento por tap-fora/✕ por um botão "OK" (some só
+   * quando presente). Não aplica nada sozinho — quem chama lê a
+   * escolha via `RollState.efeitoExtraEscolhido` no momento do
+   * `onFecharComEfeito`. */
+  efeitosExtras?: { titulo: string; opcoes: string[]; onFecharComEfeito: (escolhido: string | null) => void };
 }
 
 interface RollContextValue {
@@ -324,6 +344,10 @@ interface RollContextValue {
    * total e crítico a partir do dado escolhido. */
   escolherVantagemPosRolagem: (tipo: Vantagem) => void;
   fechar: () => void;
+  /** [Protótipo, ver `RollDadosOptions.efeitosExtras`.] Marca/desmarca
+   * uma opção na rolagem 'dados' concluída em exibição — só tem
+   * efeito quando `estado.efeitosExtras` está presente. */
+  escolherEfeitoExtra: (opcao: string) => void;
   /** Bônus extra registrado agora (ver `BonusExtraProvider`) — `null`
    * quando nenhuma característica desse tipo está disponível pro
    * personagem da tela atual. */
@@ -527,7 +551,17 @@ export function RollProvider({ children }: { children: ReactNode }) {
   const dado3DAtivo = preferenciaDado3D && dado3DDisponivel && !modoTeste;
 
   const rolarD20 = useCallback(
-    ({ label, formula, mod, vantagem, categoria, explicacaoMod, permiteForcaIndomavel, onResultado }: RollD20Options) => {
+    ({
+      label,
+      formula,
+      mod,
+      vantagem,
+      categoria,
+      explicacaoMod,
+      permiteForcaIndomavel,
+      onResultado,
+      confirmarAcerto,
+    }: RollD20Options) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       const usar3D = dado3DAtivo;
       setEstado({
@@ -547,6 +581,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         bonusExtra: null,
         motor3D: usar3D,
         permiteForcaIndomavel,
+        confirmarAcerto,
       });
 
       // d20 simples concluído (sem Vantagem/Desvantagem pré-definida) —
@@ -576,6 +611,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           resultadoBrutoD20: resultadoBruto,
           permiteForcaIndomavel,
           forcaIndomavelAplicada: aplicada,
+          confirmarAcerto,
         });
         onResultado?.(total, rolagem1);
       }
@@ -606,6 +642,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           dado2Motor3D: viaMotor3D,
           permiteForcaIndomavel,
           forcaIndomavelAplicada: aplicada,
+          confirmarAcerto,
         });
         onResultado?.(total, usado);
       }
@@ -655,7 +692,19 @@ export function RollProvider({ children }: { children: ReactNode }) {
   );
 
   const rolarDados = useCallback(
-    ({ label, formula, quantidade, lados, mod, gruposExtras, rerollSe1, rerollEscolhido, explicacaoMod, onResultado }: RollDadosOptions) => {
+    ({
+      label,
+      formula,
+      quantidade,
+      lados,
+      mod,
+      gruposExtras,
+      rerollSe1,
+      rerollEscolhido,
+      explicacaoMod,
+      onResultado,
+      efeitosExtras,
+    }: RollDadosOptions) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       const usar3D = dado3DAtivo;
       // "reroll se 1"/reroll de 1 dado só fazem sentido sabendo o
@@ -687,6 +736,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           : especificacaoDados.map((d, i) => ({ id: `d${i}`, lados: d.lados, valor: '🎲' })),
         explicacaoMod,
         motor3D: usar3D,
+        efeitosExtras,
       });
 
       // Dado único concluído (Perfurador com arma de 1 dado só) —
@@ -716,6 +766,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
           explicacaoMod,
           motor3D: viaMotor3D,
           resultadoBrutoDados: resultadoBruto,
+          efeitosExtras,
+          efeitoExtraEscolhido: null,
         });
         onResultado?.(total);
       }
@@ -747,6 +799,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
           rerollEscolhidoUsado: false,
           explicacaoMod,
           motor3D: viaMotor3D,
+          efeitosExtras,
+          efeitoExtraEscolhido: null,
         });
         onResultado?.(total);
       }
@@ -954,6 +1008,15 @@ export function RollProvider({ children }: { children: ReactNode }) {
     });
   }, [adicionarLog]);
 
+  // [Protótipo] Toggle simples — tocar na mesma opção desmarca; tocar
+  // em outra troca a escolha. Só decide o log/callback no fechar (via
+  // `onFecharComEfeito`), nunca aplica nada sozinho.
+  const escolherEfeitoExtra = useCallback((opcao: string) => {
+    setEstado((prev) =>
+      prev ? { ...prev, efeitoExtraEscolhido: prev.efeitoExtraEscolhido === opcao ? null : opcao } : prev,
+    );
+  }, []);
+
   const [bonusExtraProvider, setBonusExtraProvider] = useState<BonusExtraProvider | null>(null);
   const registrarBonusExtra = useCallback((provider: BonusExtraProvider | null) => setBonusExtraProvider(provider), []);
 
@@ -1108,6 +1171,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         rolarDados,
         escolherVantagemPosRolagem,
         fechar,
+        escolherEfeitoExtra,
         bonusExtraDisponivel: bonusExtraProvider,
         registrarBonusExtra,
         aplicarBonusExtra,

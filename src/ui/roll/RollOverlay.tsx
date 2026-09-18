@@ -50,6 +50,7 @@ export default function RollOverlay() {
     rerollDadoEscolhido,
     inspiracaoHeroicaDisponivel,
     usarInspiracaoHeroica,
+    escolherEfeitoExtra,
   } = useRoll();
 
   if (!estado) return null;
@@ -75,7 +76,11 @@ export default function RollOverlay() {
   // quando a rolagem terminava (achado testando no celular: o motor,
   // físico ou não, continua em andamento por trás mesmo com o popup
   // fechado, e o `setEstado` do resultado reabria do zero).
-  const podeFechar = estado.fase === 'concluido';
+  // [Protótipo, ver sdd/sdd-fluxo-rolagem.md] Rolagem com
+  // confirmarAcerto/efeitosExtras só fecha pelos botões novos — nem
+  // tap fora, nem ✕ (o jogador precisa decidir antes de seguir).
+  const aguardandoDecisaoNova = !!estado.confirmarAcerto || !!estado.efeitosExtras;
+  const podeFechar = estado.fase === 'concluido' && !aguardandoDecisaoNova;
 
   return (
     <div
@@ -83,12 +88,14 @@ export default function RollOverlay() {
       onClick={podeFechar ? fechar : undefined}
     >
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-        <div
-          className={`${styles.close} ${podeFechar ? '' : styles.closeDesabilitado}`}
-          onClick={podeFechar ? fechar : undefined}
-        >
-          <span className={styles.closeIcon}>✕</span>
-        </div>
+        {!aguardandoDecisaoNova && (
+          <div
+            className={`${styles.close} ${podeFechar ? '' : styles.closeDesabilitado}`}
+            onClick={podeFechar ? fechar : undefined}
+          >
+            <span className={styles.closeIcon}>✕</span>
+          </div>
+        )}
         <div className={styles.label}>{estado.label}</div>
         {estado.dadosIndividuais ? (
           <div className={styles.diceGridWrap}>
@@ -182,6 +189,57 @@ export default function RollOverlay() {
               onClick={() => escolherVantagemPosRolagem('vantagem')}
             >
               Vantagem
+            </div>
+          </div>
+        )}
+        {estado.fase === 'concluido' && estado.confirmarAcerto && (
+          <div className={`${styles.vantagemButtons} ${styles.confirmarAcertoWrap}`}>
+            <div
+              className={`${styles.vantagemBtn} ${styles.desvantagemBtn}`}
+              onClick={() => {
+                const { onErrou } = estado.confirmarAcerto!;
+                fechar();
+                onErrou();
+              }}
+            >
+              Errei
+            </div>
+            <div
+              className={`${styles.vantagemBtn} ${styles.vantagemBtnPositivo}`}
+              onClick={() => {
+                const { onAcertou } = estado.confirmarAcerto!;
+                fechar();
+                onAcertou();
+              }}
+            >
+              Acertei
+            </div>
+          </div>
+        )}
+        {estado.fase === 'concluido' && estado.efeitosExtras && (
+          <div className={styles.efeitosExtrasWrap}>
+            <div className={styles.efeitosExtrasTitulo}>{estado.efeitosExtras.titulo}</div>
+            <div className={styles.efeitosExtrasOpcoes}>
+              {estado.efeitosExtras.opcoes.map((opcao) => (
+                <div
+                  key={opcao}
+                  className={`${styles.efeitoOpcaoBtn} ${opcao === estado.efeitoExtraEscolhido ? styles.efeitoOpcaoBtnAtiva : ''}`}
+                  onClick={() => escolherEfeitoExtra(opcao)}
+                >
+                  {opcao}
+                </div>
+              ))}
+            </div>
+            <div
+              className={styles.okBtn}
+              onClick={() => {
+                const escolhido = estado.efeitoExtraEscolhido ?? null;
+                const { onFecharComEfeito } = estado.efeitosExtras!;
+                fechar();
+                onFecharComEfeito(escolhido);
+              }}
+            >
+              OK
             </div>
           </div>
         )}

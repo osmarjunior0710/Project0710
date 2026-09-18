@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1439
+
+A cena "Acerto/Erro" do ambiente de Protótipos agora usa o popup de
+rolagem de verdade (não uma tela separada) — ele ganhou a capacidade
+opcional de perguntar "Errei/Acertei" e encadear direto num popup de
+dano com escolha de efeito, só quando quem chama pedir isso (nenhuma
+rolagem real do jogo mudou de comportamento). Ainda é só protótipo,
+não afeta nenhum personagem.
+
 ## v202609_1406
 
 Ambiente de "🧪 Protótipos" ganhou a cena "Acerto/Erro — Ataque com

@@ -62,19 +62,43 @@ de decidir a versão final — primeiro uso real vai ser aqui.
       tela ("Último resultado: 7").
 - [ ] **Entrega B — Prototipar os 4 formatos de rolagem** em baixa
       fidelidade, decidindo ao vivo.
-  - [x] **Acerto/Erro** — cena `AcertoErroCena.tsx`
-        (`/prototipo/acerto-erro`), cenário de mentirinha ("ataca um
-        Goblin de 10 PV") com 3 variantes trocáveis no topo, mesmo
-        estado reiniciado a cada troca: **A** (réplica do "atira e
-        esquece" atual — dano/efeito liberados na mesma chamada, sem
-        esperar `onResultado`), **B** (espera o resultado real da
-        rolagem via `onResultado`, só libera dano/efeito depois de
-        confirmar "Acertou?"), **C** (igual à B, mas o efeito escolhido
-        muda o PV/status do Goblin fictício de verdade, em vez de só
-        escrever um lembrete). Verificado com `tsc -b --force`/`npm
-        test -- --run` (598)/`npm run build` limpos + Playwright em
-        390px, as 3 variantes de ponta a ponta. Falta o Osmar decidir
-        qual variante vira o padrão real (não decidido ainda).
+  - [x] **Acerto/Erro (Variantes A/B/C, DESCARTADAS pelo Osmar).**
+        1ª tentativa: 3 variantes trocáveis numa TELA própria da cena
+        (fora do popup real). Feedback: "você simplificou e acabou que
+        a gente perde o flow" — usar uma tela custom em vez do popup de
+        rolagem de verdade quebra a sensação do fluxo real, mesmo
+        testando a mesma decisão de fundo.
+  - [x] **Acerto/Erro (Variante D, aprovada como direção).** Osmar
+        especificou o layout final do PRÓPRIO popup de rolagem (não
+        mais uma tela separada): título = ação (Teste/Salvaguarda/
+        Ataque/etc) → rolagem → Vantagem/Desvantagem → **novo:** botões
+        "Errei" (esquerda)/"Acertei" (direita) no lugar do ✕ — Errei
+        fecha e volta; Acertei fecha e abre um 2º popup (Dano) com
+        título → rolagem de dano → área de efeitos extras (escolhe N
+        de uma lista, só ajuda o log, não aplica nada) → botão "OK"
+        azul que fecha.
+        **Implementado estendendo o popup de verdade** (não um clone
+        visual) — `RollContext.tsx`/`RollOverlay.tsx` ganharam 2 campos
+        opcionais, aditivos, sem efeito em nenhuma chamada existente:
+        `RollD20Options.confirmarAcerto` (troca ✕/tap-fora por Errei/
+        Acertei) e `RollDadosOptions.efeitosExtras` (lista de opções +
+        botão OK antes de fechar, novo `escolherEfeitoExtra` no
+        contexto). `AcertoErroCena.tsx` reescrita: sem variantes, só o
+        cenário ("ataca um Goblin de 10 PV") usando o popup real de
+        ponta a ponta — dano E efeito escolhido já aplicam de verdade
+        no Goblin fictício. Verificado com `tsc -b --force`/`npm test
+        -- --run` (598)/`npm run build` limpos + Playwright em 390px:
+        popup sem ✕, Errei/Acertei aparecem, tap-fora NÃO fecha
+        (trava até escolher), Errei fecha e volta, Acertei encadeia no
+        popup de dano com o picker de efeito + OK, Goblin atualiza.
+        **Regressão checada:** uma rolagem REAL (Salvaguarda de Força,
+        char de teste) continua com ✕ normal e fecha por tap-fora,
+        sem Errei/Acertei — os 2 campos novos são zero-efeito em
+        qualquer chamada que não os passe explicitamente.
+        **Ainda em aberto:** Osmar ainda não confirmou que a Variante D
+        vira o padrão definitivo (só disse "precisamos de uma versão
+        D" e deu a especificação) — falta o "ok" final antes de mover
+        pra Entrega C.
   - [ ] **Salvaguarda** — SDD já concluiu que não tem o problema
         (resultado é sempre só informativo); decidir se ainda vale
         prototipar ou se pula direto pra Entrega C nesse formato.
