@@ -78,7 +78,7 @@ export default function RollOverlay() {
   // [Protótipo, ver sdd/sdd-fluxo-rolagem.md] Rolagem com
   // confirmarAcerto/confirmarFechamento só fecha pelos botões novos —
   // nem tap fora, nem ✕ (o jogador precisa decidir antes de seguir).
-  const aguardandoDecisaoNova = !!estado.confirmarAcerto || !!estado.confirmarFechamento;
+  const aguardandoDecisaoNova = !!estado.confirmarAcerto || !!estado.confirmarFechamento || !!estado.confirmarAlvoCura;
   const podeFechar = estado.fase === 'concluido' && !aguardandoDecisaoNova;
 
   return (
@@ -225,6 +225,31 @@ export default function RollOverlay() {
             }}
           >
             {estado.confirmarFechamento.rotulo ?? 'OK'}
+          </div>
+        )}
+        {estado.fase === 'concluido' && estado.confirmarAlvoCura && (
+          <div className={`${styles.vantagemButtons} ${styles.confirmarAcertoWrap}`}>
+            <div
+              className={`${styles.vantagemBtn} ${styles.desvantagemBtn}`}
+              onClick={() => {
+                const { onCurarOutro } = estado.confirmarAlvoCura!;
+                fechar();
+                onCurarOutro?.();
+              }}
+            >
+              Curar outro
+            </div>
+            <div
+              className={`${styles.vantagemBtn} ${styles.vantagemBtnPositivo}`}
+              onClick={() => {
+                const { onMeCurar } = estado.confirmarAlvoCura!;
+                const total = estado.total ?? 0;
+                fechar();
+                onMeCurar(total);
+              }}
+            >
+              Me curar
+            </div>
           </div>
         )}
         {sorteDisponivel &&

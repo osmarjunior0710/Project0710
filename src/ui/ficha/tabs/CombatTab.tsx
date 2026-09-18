@@ -1303,6 +1303,7 @@ export default function CombatTab({
             onAtacar={registrarAtaque}
             onAbrirSalvaguarda={abrirSalvaguarda}
             gastarSlotCirculo={onGastarSlotCirculo}
+            onAlterarPv={onAlterarPv}
             nivel={nivel}
             espacos={espacos}
             espacosGastosPorCirculo={espacosGastosPorCirculo}
@@ -1399,6 +1400,7 @@ export default function CombatTab({
             espacos={espacos}
             espacosGastosPorCirculo={espacosGastosPorCirculo}
             onGastarSlotCirculo={onGastarSlotCirculo}
+            onAlterarPv={onAlterarPv}
             classeAtivaNome={classeAtivaNome}
             ponte={ponte}
             nivel={nivel}
@@ -1430,6 +1432,7 @@ export default function CombatTab({
             onEscolher={(nome, desc, dano) => escolherNoPainel('reacao', nome, desc, dano)}
             onAbrirSalvaguarda={abrirSalvaguarda}
             gastarSlotCirculo={onGastarSlotCirculo}
+            onAlterarPv={onAlterarPv}
             nivel={nivel}
             conjura={conjura}
             magiasReacao={magiasPreparadasReacao}

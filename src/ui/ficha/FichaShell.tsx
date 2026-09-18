@@ -2171,6 +2171,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             espacosGastosPorCirculo={espacosGastosParaConjurar}
             classeAtivaNome={chaveDoPoolDeMagia}
             ponte={ponte}
+            onAlterarPv={alterarPv}
             espacosParaConjurar={espacosParaConjurar}
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}

@@ -68,6 +68,21 @@ o comportamento de quem não passa o campo novo):**
    usava pro picker antigo de Golpe Brutal) pra cada opção — título +
    parágrafo, nunca só um nome solto. Botão "OK" sempre visível mas
    `btn-disabled` até pelo menos 1 opção escolhida.
+4. **`RollDadosOptions.confirmarAlvoCura: { onMeCurar, onCurarOutro? }`**
+   — extensão do mesmo padrão pra Cura (2026-09, pedido direto do
+   Osmar, sem rodada de protótipo: "cura como o acerto/erro"). Numa
+   rolagem de CURA que pode ter como alvo o próprio personagem OU
+   outra criatura, troca o fechamento normal por 2 botões (mesmo
+   estilo Errei/Acertei): "Curar outro" (esquerda/vermelho) só fecha —
+   não existe seletor genérico de "qual outra criatura" ainda, quem
+   precisa disso (Colheita Macabra) continua com o próprio modal
+   dedicado, sem passar por aqui; "Me curar" (direita/verde) fecha E
+   aplica o total rolado no PV do personagem (`onMeCurar`). Usado por
+   magia de cura genérica (3 painéis: Ação/Bônus, Reação, aba Magias —
+   cada um com sua própria cópia de `decidirConjuracao`/`rollCura`) e
+   Mãos Curativas (Aasimar). Cura que É SEMPRE "eu mesmo" (Recuperar
+   Fôlego, Fúria Implacável) continua com `onResultado` direto, sem
+   esse gate — não tem escolha de alvo pra perguntar.
 
 **Continua fora de escopo (decisão antiga, ainda vale):** o efeito
 escolhido nunca aplica nada de verdade no alvo (o app não modela

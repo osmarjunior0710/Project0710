@@ -89,13 +89,19 @@ perguntas originais:
    precisa DECIDIR algo antes de prosseguir", não "o app precisa
    REAGIR a um número".
 
-## 6. Formatos ainda sem prototipar (Salvaguarda/Teste/Cura)
+## 6. Formatos ainda sem prototipar (Salvaguarda/Teste)
 
 Salvaguarda e Teste seguem confirmados como "sem o problema" (seção 2)
-— não vale a pena gastar rodada de protótipo neles. **Cura em outro
-alvo** (seletor de Pet vs. outro PJ) continua uma pergunta genuína em
-aberto, não resolvida nesta rodada — registrada em `PENDENCIAS.md` pra
-retomar quando/se fizer sentido.
+— não vale a pena gastar rodada de protótipo neles.
+
+**Cura — resolvido sem protótipo (2026-09, pedido direto do Osmar):**
+"Curar outro"/"Me curar" (`RollDadosOptions.confirmarAlvoCura`, ver
+`DECISOES-COMBATE.md` "Fluxo Acerto/Erro" item 4) aplicado direto às
+curas que hoje eram "atira e esquece" (magia de cura genérica, Mãos
+Curativas). Continua em aberto só a pergunta mais estreita de "seletor
+de QUAL outra criatura" (Pet vs. outro PJ) — "Curar outro" nesse
+padrão não pergunta quem, só fecha; quem precisa saber quem (Colheita
+Macabra) continua com o próprio modal dedicado. Ver `PENDENCIAS.md`.
 
 ## 4. Onde isso encosta em sistema existente (risco de colisão)
 

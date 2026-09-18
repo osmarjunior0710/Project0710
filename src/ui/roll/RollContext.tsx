@@ -182,6 +182,8 @@ export interface RollState {
   confirmarAcerto?: { onAcertou: () => void; onErrou: () => void } | null;
   /** [Protótipo, ver `RollDadosOptions.confirmarFechamento`.] */
   confirmarFechamento?: { rotulo?: string; aoTocar?: () => void } | null;
+  /** Ver `RollDadosOptions.confirmarAlvoCura`. */
+  confirmarAlvoCura?: { onMeCurar: (total: number) => void; onCurarOutro?: () => void } | null;
   /** Mesma ideia de `resultadoBrutoD20`, só que pra uma rolagem 'dados'
    * de 1 DADO SÓ (sem `dadosIndividuais`, ver `rolarDados`) — usado
    * pelo `rerollDadoEscolhido`/`usarRerollSe1` desse caso. Rolagem com
@@ -331,6 +333,17 @@ interface RollDadosOptions {
    * chama, não por aqui). Ausente = comportamento normal (tap-fora/✕
    * fecham, sem botão extra). */
   confirmarFechamento?: { rotulo?: string; aoTocar?: () => void };
+  /** Cura que pode ter como alvo o próprio personagem ou outra
+   * criatura (Pet/PJ) — fluxo Acerto/Erro aplicado à Cura (ver
+   * `sdd/sdd-fluxo-rolagem.md`). Substitui o fechamento normal por 2
+   * botões "Curar outro"/"Me curar" assim que a rolagem concluir.
+   * "Curar outro" só fecha (não existe seletor de alvo genérico
+   * ainda — quem precisa de um alvo específico, tipo Colheita
+   * Macabra, continua com o próprio modal dedicado, sem usar essa
+   * opção aqui); "Me curar" fecha E aplica o total rolado no PV do
+   * personagem (`onMeCurar`). Mutuamente exclusivo com
+   * `confirmarFechamento` — nunca as duas juntas na mesma chamada. */
+  confirmarAlvoCura?: { onMeCurar: (total: number) => void; onCurarOutro?: () => void };
 }
 
 interface RollContextValue {
@@ -712,6 +725,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
       explicacaoMod,
       onResultado,
       confirmarFechamento,
+      confirmarAlvoCura,
     }: RollDadosOptions) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       const usar3D = dado3DAtivo;
@@ -745,6 +759,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         explicacaoMod,
         motor3D: usar3D,
         confirmarFechamento,
+        confirmarAlvoCura,
       });
 
       // Dado único concluído (Perfurador com arma de 1 dado só) —
@@ -775,6 +790,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           motor3D: viaMotor3D,
           resultadoBrutoDados: resultadoBruto,
           confirmarFechamento,
+          confirmarAlvoCura,
         });
         onResultado?.(total);
       }
@@ -807,6 +823,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           explicacaoMod,
           motor3D: viaMotor3D,
           confirmarFechamento,
+          confirmarAlvoCura,
         });
         onResultado?.(total);
       }

@@ -33,6 +33,10 @@ interface AcaoPanelContentProps {
    * pro upcast (igual `conjurarMagia` já calcula). */
   onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
   gastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
+  /** Aplica cura direto no PV do personagem ("Me curar", ver
+   * `RollDadosOptions.confirmarAlvoCura`) — usado por magia de cura E
+   * Mãos Curativas (Aasimar). */
+  onAlterarPv: (delta: number) => void;
   /** Nível do personagem — pro Aprimoramento de Truque (dano escala
    * nos níveis 5/11/17, ver `calcularDanoMagia`). */
   nivel: number;
@@ -137,6 +141,7 @@ export default function AcaoPanelContent({
   onAtacar,
   onAbrirSalvaguarda,
   gastarSlotCirculo,
+  onAlterarPv,
   nivel,
   espacos,
   espacosGastosPorCirculo,
@@ -191,6 +196,7 @@ export default function AcaoPanelContent({
     onEscolher,
     onAbrirSalvaguarda,
     gastarSlotCirculo,
+    onAlterarPv,
     nivel,
     espacos,
     espacosGastosPorCirculo,
@@ -208,7 +214,14 @@ export default function AcaoPanelContent({
 
   function usarMaosCurativas() {
     if (!onUsarMaosCurativas()) return;
-    rolarDados({ label: 'Mãos Curativas — Cura', formula: `${dadosMaosCurativas}d4`, quantidade: dadosMaosCurativas, lados: 4, mod: 0 });
+    rolarDados({
+      label: 'Mãos Curativas — Cura',
+      formula: `${dadosMaosCurativas}d4`,
+      quantidade: dadosMaosCurativas,
+      lados: 4,
+      mod: 0,
+      confirmarAlvoCura: { onMeCurar: (total) => onAlterarPv(total) },
+    });
     onEscolher('🙌 Mãos Curativas', 'Toque uma criatura — ela recupera o total mostrado em Pontos de Vida.');
   }
 

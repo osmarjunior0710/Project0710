@@ -1479,17 +1479,20 @@ são os 2 pontos que ainda disparam a rolagem sem esperar `onResultado`.
 "acertei" manualmente) — talvez só precise do `confirmarAcerto`, sem
 `confirmarFechamento`.
 
-## Cura em outro alvo — seletor de alvo ainda sem padrão definido
+## Cura em outro alvo — seletor de QUAL criatura ainda sem padrão definido
 
-**O que é:** levantado no `sdd/sdd-fluxo-rolagem.md` (seção 2, taxonomia
-dos 4 formatos de rolagem) e nunca resolvido nesta rodada — hoje cada
-"Cura em outro alvo" resolve a escolha de um jeito diferente:
-Recuperar Fôlego é sempre "eu mesmo" (sem seletor); Colheita Macabra
-(Necromante) pede um `<select>` de Pet dentro do próprio modal
-(`ColheitaMacabraModal.tsx`). Não existe hoje um padrão único de
-"escolher o alvo da cura" que sirva tanto pra Pet quanto pra outro
-Personagem Jogador (multiclasse/grupo de mesa) — essa 2ª situação nem
-existe no app ainda (não há conceito de "outros PJs da mesa" na Ficha).
+**O que é:** a pergunta "eu mesmo ou outra criatura" já está resolvida
+(`RollDadosOptions.confirmarAlvoCura`, "Curar outro"/"Me curar", ver
+`DECISOES-COMBATE.md` "Fluxo Acerto/Erro" item 4) pra cura genérica de
+magia e Mãos Curativas. O que continua sem padrão único é a pergunta
+mais estreita "QUAL outra criatura" — "Curar outro" nesse fluxo só
+fecha, não pergunta quem; Colheita Macabra (Necromante) continua com o
+próprio `<select>` de Pet dentro do modal dedicado
+(`ColheitaMacabraModal.tsx`), sem usar o `confirmarAlvoCura`. Não
+existe hoje um seletor genérico que sirva tanto pra Pet quanto pra
+outro Personagem Jogador (multiclasse/grupo de mesa) — essa 2ª
+situação nem existe no app ainda (não há conceito de "outros PJs da
+mesa" na Ficha).
 
 **O que falta pra resolver:** só faz sentido revisitar quando existir
 alguma necessidade real de cura em outro PJ (não só Pet) — até lá, o

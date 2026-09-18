@@ -158,7 +158,7 @@ export function decidirConjuracao(
           mod: cura.mod,
           explicacaoMod: cura.explicacao,
         },
-        textoFeedback: 'Cura rolada — aplique o total no alvo.',
+        textoFeedback: 'Cura rolada — escolha o alvo no popup ("Me curar" ou "Curar outro").',
         curaColheitaMacabra: curaMacabra,
       };
     }

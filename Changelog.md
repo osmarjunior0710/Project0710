@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1805
+
+**Cura ganha "Curar outro"/"Me curar", igual ao Acerto/Erro.** Ao
+rolar cura de magia (qualquer classe) ou Mãos Curativas (Aasimar), o
+popup agora pergunta o alvo em vez de só mostrar o total: "Curar
+outro" fecha (aplica na mesa como sempre); "Me curar" fecha e já soma
+o total ao seu PV sozinho. Recuperar Fôlego e Fúria Implacável
+continuam iguais (já eram sempre "eu mesmo").
+
 ## v202609_1742
 
 **Tentativa de corrigir a sombra do dado 3D, que sumiu depois da
