@@ -1767,6 +1767,7 @@ export default function LevelUpShell({
             <TelaEscolherTalento
               nivelAtual={novoNivel}
               atributosFinais={atributosFinaisAtuais}
+              classe={classe}
               talentosGeraisAtuais={talentosGeraisAtuais}
               favoritos={talentosFavoritosAtuais}
               onToggleFavorito={onToggleFavoritoTalento}
@@ -1959,6 +1960,7 @@ export default function LevelUpShell({
               categoria="Dádiva Épica"
               nivelAtual={novoNivel}
               atributosFinais={atributosFinaisAtuais}
+              classe={classe}
               talentosGeraisAtuais={talentosGeraisAtuais}
               favoritos={talentosFavoritosAtuais}
               onToggleFavorito={onToggleFavoritoTalento}

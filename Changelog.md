@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1816
+
+Talentos que exigem treinamento com Armadura Média/Pesada ou Escudo
+(Especialista/Mestre em Armaduras Médias/Pesadas, Mestre em Escudos)
+agora ficam bloqueados de verdade na lista de Talentos quando o
+personagem não tem esse treinamento, em vez de só mostrar um aviso.
+
 ## v202609_1402
 
 Talento Mestre em Escudos agora funciona de verdade: com arma Corpo a

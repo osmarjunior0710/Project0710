@@ -42,6 +42,12 @@ export interface PrerequisitosTalento {
    * "Característica Conjuração ou Magia de Pacto") — mostrar como
    * aviso não-bloqueante, nunca travar a escolha por causa dele. */
   outro: string | null;
+  /** Treinamento com Armadura/Escudo — DIFERENTE de `outro`: esse aqui
+   * É validável de verdade (mesmo dado de `core/proficienciaArmadura.ts`
+   * usado pra CA/Desvantagem sem treino), então trava a escolha igual
+   * `nivelMinimo`/`atributosMinimos` fazem, em vez de só avisar. Ver
+   * `TelaEscolherTalento.tsx` (`motivoIndisponivel`). */
+  prerequisitoArmadura?: 'Leve' | 'Média' | 'Pesada' | 'Escudos';
 }
 
 /** Schema de ASI por talento — 2 formatos reais encontrados na
@@ -581,7 +587,7 @@ export const talentos: Talento[] = [
     nome: "Especialista em Armaduras Médias",
     categoria: "Geral",
     repetivel: false,
-    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Armadura Leve" },
+    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null, prerequisitoArmadura: 'Leve' },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'DES'], maximo: 20 },
     efeitoMecanico: { tipo: 'proficiencia-armadura', categorias: ['Média'] },
     beneficios: "Treinamento com Armadura Média.",
@@ -593,7 +599,7 @@ export const talentos: Talento[] = [
     nome: "Especialista em Armaduras Pesadas",
     categoria: "Geral",
     repetivel: false,
-    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Armadura Média" },
+    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null, prerequisitoArmadura: 'Média' },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'CON'], maximo: 20 },
     efeitoMecanico: { tipo: 'proficiencia-armadura', categorias: ['Pesada'] },
     beneficios: "Treinamento com Armadura Pesada.",
@@ -690,7 +696,7 @@ export const talentos: Talento[] = [
     nome: "Mestre em Armaduras Médias",
     categoria: "Geral",
     repetivel: false,
-    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Armadura Média" },
+    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null, prerequisitoArmadura: 'Média' },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'DES'], maximo: 20 },
     beneficios: "Com Armadura Média e Destreza 16+: soma +3 (em vez de +2) na CA.",
     efeitoMecanico: { tipo: 'teto-des-armadura-media', desMinima: 16, tetoDes: 3 },
@@ -702,7 +708,7 @@ export const talentos: Talento[] = [
     nome: "Mestre em Armaduras Pesadas",
     categoria: "Geral",
     repetivel: false,
-    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Armadura Pesada" },
+    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null, prerequisitoArmadura: 'Pesada' },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'CON'], maximo: 20 },
     beneficios: "Com Armadura Pesada, reduz dano Contundente/Cortante/Perfurante sofrido em valor = seu Bônus de Proficiência.",
     pagina: 207,
@@ -736,7 +742,7 @@ export const talentos: Talento[] = [
     nome: "Mestre em Escudos",
     categoria: "Geral",
     repetivel: false,
-    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Escudo" },
+    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null, prerequisitoArmadura: 'Escudos' },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR'], maximo: 20 },
     beneficios: "Acertar corpo a corpo a 1,5m: pode golpear com Escudo também (Salv. Força CD 8+mod.Força+Bônus Prof.) — empurra 1,5m ou Caído, 1x/turno. Reação: com Escudo e sucesso em salv. Destreza que daria metade do dano, evita todo o dano.",
     efeitoMecanico: { tipo: 'golpe-de-escudo' },

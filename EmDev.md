@@ -1327,3 +1327,49 @@ troca travada por Descanso Longo). Nenhum talento viável restante na
 lista — os 11 movidos pro Backlog (Atleta, Ator, Combatente Montado,
 etc.) continuam lá até o app ganhar o motor que falta (Deslocamento/
 estado de inimigo/posição).
+
+### Correção pós-Grupo D: pré-requisito de Armadura/Escudo passa a bloquear de verdade
+
+Achado pelo Osmar testando "Mestre em Escudos" no celular: o card só
+mostrava um aviso não-bloqueante ("⚠️ Requer: Treinamento com Escudo —
+confirme que seu personagem atende"), mesmo o app já tendo o dado de
+treinamento de cada classe pra checar de verdade. Proposto restringir a
+validação aos 5 talentos cujo pré-requisito de texto livre é
+exatamente uma categoria de Treinamento com Armadura/Escudo (mapeável
+pra `core/proficienciaArmadura.ts`, já usado em CA/Desvantagem sem
+treino) — outros pré-requisitos de texto livre (ex.: "Característica
+Conjuração ou Magia de Pacto") continuam só aviso, fora de escopo.
+Aprovado pelo Osmar ("Correto").
+
+- [x] `PrerequisitosTalento` ganhou `prerequisitoArmadura?: 'Leve' |
+      'Média' | 'Pesada' | 'Escudos'` — campo estruturado e validável,
+      diferente de `outro` (texto livre, nunca bloqueia). Aplicado nos
+      5 talentos que tinham esse pré-requisito em texto
+      (`especialista-em-armaduras-medias`/`-pesadas`,
+      `mestre-em-armaduras-medias`/`-pesadas`, `mestre-em-escudos`),
+      trocando `outro: "Treinamento com Armadura X"` por `outro: null,
+      prerequisitoArmadura: 'X'`.
+- [x] `TelaEscolherTalento.tsx`: `motivoIndisponivel()` ganhou uma 3ª
+      checagem (depois de nível e atributos), reaproveitando a mesma
+      `classeProficienteComArmadura()` já usada pra CA/Desvantagem sem
+      treino — sem duplicar lógica de proficiência. Precisou de uma
+      nova prop opcional `classe?: Classe` (só os 2 call sites do Level
+      Up passam, já tinham `classe` em mãos; o call site do Wizard/
+      Origem não passa — nenhum talento de Origem usa
+      `prerequisitoArmadura`, então pular a checagem ali é seguro).
+      Documentado como padrão reaproveitável em `DECISOES-CLASSES.md`
+      ("Talentos — arquitetura final"): pré-requisito de texto livre
+      vira campo estruturado sempre que o dado pra validar já existe
+      em outro lugar do app.
+      Verificado: `tsc -b`/`npm test` (598)/`npm run build` limpos +
+      Playwright (Guerreiro, com Escudo — treino de verdade — "Mestre
+      em Escudos" aparece disponível, sem aviso nenhum). Bloqueio de
+      verdade pra classe SEM treino de Escudo (Bardo/Bruxo/Mago, todos
+      sem essa proficiência conforme
+      `proficienciasArmaArmaduraClasse.ts`) não confirmado via
+      Playwright — o helper de avanço automático do teste não lida bem
+      com as telas de Truques/Livro de Magias dessas classes (trava
+      tentando selecionar as quantidades exatas); a função reutilizada
+      (`classeProficienteComArmadura`) já é testada e usada em produção
+      pra CA/Desvantagem, risco baixo — vale confirmar no celular com
+      um Bardo/Bruxo/Mago sem Escudo.
