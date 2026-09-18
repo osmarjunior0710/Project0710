@@ -89,7 +89,7 @@
 // distintas no mesmo lançamento).
 //
 // `salvaguardaFalha`/`salvaguardaSucesso` são o texto curto e
-// padronizado (estilo `AtaqueDeSoproModal`) do que acontece em cada
+// padronizado (estilo `SalvaguardaDoAlvoModal`) do que acontece em cada
 // resultado da salvaguarda — só preenchido nas magias que têm
 // `ataqueOuSalvaguarda` do tipo Salvaguarda E `danoBaseDado` (85 das
 // 390; as outras ficam `null`, incluindo magias de salvaguarda sem

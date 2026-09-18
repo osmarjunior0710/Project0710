@@ -998,3 +998,32 @@ qualquer valor) nova, checar se ela já é a MESMA fórmula de algo que já
 existe no app — reaproveitar 1 valor calculado 1x (`explicarCdConjuracao`,
 calculado em `FichaShell.tsx`) pra alimentar todos os popups que mostram
 essa CD, em vez de recalcular por feature.
+
+## Salvaguarda do alvo — modal único pra "CD do jogador, o ALVO que salva"
+
+Toda característica onde o personagem impõe uma CD e é o ALVO (inimigo/
+NPC) quem faz a salvaguarda — Ataque de Sopro (Draconato), Lançar no
+Inferno (Bruxo), Salvaguarda de Magia e Golpe de Escudo (Mestre em
+Escudos) — é o MESMO caso mecânico: o app não modela PV/atributo de
+monstro, então nunca rola a salvaguarda do alvo sozinho, só mostra a CD
+(+ quebra ⓘ) e o texto de Sucesso/Falha; o jogador resolve na mesa e
+toca a ação disponível (rolar dano, ou só fechar quando não há dano —
+Golpe de Escudo só empurra/derruba).
+
+Até 2026-09 essas 4 features tinham 3 modais quase idênticos copiados à
+mão (`AtaqueDeSoproModal`/`LancarNoInfernoModal`/`MagiaSalvaguardaModal`)
+e Golpe de Escudo nem passava por um modal — era uma linha solta que
+marcava "usado" na hora, sem mostrar CD/Sucesso/Falha num popup. Achado
+pelo Osmar testando: Golpe de Escudo não seguia o mesmo padrão de
+"mostrar CD → resolver na mesa → confirmar" que os outros 3 já tinham.
+Unificados num componente só, `SalvaguardaDoAlvoModal.tsx` (título,
+atributo, CD+ⓘ, Sucesso/Falha, até 2 botões de ação opcionais, texto
+alternativo quando não há ação de dano) — os 4 casos passaram a
+consumir o mesmo componente, Golpe de Escudo virou o 4º consumidor em
+vez de uma linha solta (mesmo padrão de "abrir modal + marcar uso na
+mesma ação" que Ataque de Sopro/Lançar no Inferno já usavam).
+
+**Padrão pra lembrar:** qualquer talento/magia/característica NOVA que
+seja "CD do personagem, o alvo que salva" (sem o app rolar o dado do
+alvo) usa `SalvaguardaDoAlvoModal` — nunca cria um modal próprio pra
+esse formato.

@@ -9,7 +9,6 @@ import { useRoll } from '../../roll/RollContext';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import type { DanoPendente } from './DanoPendente';
 import TickPips from '../../components/TickPips';
-import InfoValor from '../../components/InfoValor';
 import styles from './PanelRows.module.css';
 
 export type { DanoPendente };
@@ -124,12 +123,11 @@ interface AcaoPanelContentProps {
   podeOferecerCortar: boolean;
   onConfirmarCortarReduzirAZero: () => void;
   /** Golpe de Escudo (Mestre em Escudos) — `temGolpeDeEscudo` = talento
-   * + arma Corpo a Corpo + Escudo equipado. Sem rolagem de dano — o
-   * app só mostra a CD (Salv. Força), o jogador resolve empurrar/
-   * derrubar na mesa e confirma o uso (1x/turno). */
+   * + arma Corpo a Corpo + Escudo equipado. Toque abre o popup padrão
+   * de "salvaguarda do alvo" (CD, Sucesso/Falha) — mesmo padrão de
+   * Ataque de Sopro/Lançar no Inferno, ver `SalvaguardaDoAlvoModal` em
+   * `CombatTab.tsx` — e já marca o uso (1x/turno). */
   temGolpeDeEscudo: boolean;
-  cdGolpeDeEscudo: number | null;
-  explicacaoCdGolpeDeEscudo: ExplicacaoCalculo | null;
   golpeDeEscudoUsadoTurno: boolean;
   onUsarGolpeDeEscudo: () => void;
 }
@@ -184,8 +182,6 @@ export default function AcaoPanelContent({
   podeOferecerCortar,
   onConfirmarCortarReduzirAZero,
   temGolpeDeEscudo,
-  cdGolpeDeEscudo,
-  explicacaoCdGolpeDeEscudo,
   golpeDeEscudoUsadoTurno,
   onUsarGolpeDeEscudo,
 }: AcaoPanelContentProps) {
@@ -402,10 +398,7 @@ export default function AcaoPanelContent({
 
       {ataqueAtual && temGolpeDeEscudo && !golpeDeEscudoUsadoTurno && (
         <div className={styles.row} onClick={onUsarGolpeDeEscudo}>
-          <div className={styles.rowName}>
-            🛡 Golpe de Escudo — CD {cdGolpeDeEscudo ?? '—'}{' '}
-            {explicacaoCdGolpeDeEscudo && <InfoValor titulo="Golpe de Escudo" explicacao={explicacaoCdGolpeDeEscudo} />}
-          </div>
+          <div className={styles.rowName}>🛡 Golpe de Escudo</div>
           {detalhesAtivo && (
             <div className={styles.rowDesc}>
               Ao acertar com essa arma: Salv. Força do alvo — falha empurra 1,5m ou derruba (Caído), à sua escolha.

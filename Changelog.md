@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1937
+
+Golpe de Escudo (talento Mestre em Escudos) agora abre um popup próprio
+ao usar — mostra a CD da salvaguarda, o que acontece no sucesso e na
+falha ("empurra 1,5m ou derruba, à sua escolha") — em vez de só marcar
+usado direto ao tocar. Mesmo padrão visual que Ataque de Sopro e
+Lançar no Inferno já tinham.
+
 ## v202609_1816
 
 Talentos que exigem treinamento com Armadura Média/Pesada ou Escudo

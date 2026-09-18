@@ -1373,3 +1373,51 @@ Aprovado pelo Osmar ("Correto").
       (`classeProficienteComArmadura`) já é testada e usada em produção
       pra CA/Desvantagem, risco baixo — vale confirmar no celular com
       um Bardo/Bruxo/Mago sem Escudo.
+
+### Correção pós-Grupo D: Golpe de Escudo ganha o popup padrão de "salvaguarda do alvo"
+
+Achado pelo Osmar testando "Mestre em Escudos" no celular: Golpe de
+Escudo mostrava a CD numa linha solta e marcava "usado" na hora do
+toque — sem popup, sem mostrar Sucesso/Falha — diferente de Ataque de
+Sopro/Lançar no Inferno/Salvaguarda de Magia, que já tinham esse fluxo
+de 2 passos (CD + Sucesso/Falha → jogador resolve na mesa → confirma).
+Perguntado se o app trata ataque/salvaguarda como função (sim, `core/`
+é 100% função — ver `DECISOES-COMBATE.md`), e proposto: como os 3
+modais existentes eram quase idênticos (copiados à mão), extrair 1
+componente genérico e fazer Golpe de Escudo virar o 4º consumidor em
+vez de criar um 4º modal quase igual. Aprovado pelo Osmar ("sim").
+
+- [x] Novo `SalvaguardaDoAlvoModal.tsx` (título, atributo, CD+ⓘ,
+      Sucesso/Falha, até 2 botões de ação opcionais — "Rolar Dano"
+      principal/condicional —, texto alternativo quando não há dano) —
+      substitui `AtaqueDeSoproModal`/`LancarNoInfernoModal`/
+      `MagiaSalvaguardaModal` (removidos), que agora chamam o
+      componente único com os textos/CDs próprios de cada caso.
+      `core/magiaDano.ts` ganhou `rotuloBotaoDanoMagia()` (formata o
+      texto do botão "🎲 Rolar Dano (NdM tipo)") pra não duplicar essa
+      formatação entre `MagiasTab.tsx`/`CombatTab.tsx` (os 2 lugares
+      que abrem o popup de Salvaguarda de Magia).
+- [x] Golpe de Escudo (`AcaoPanelContent.tsx`/`CombatTab.tsx`): a linha
+      no painel de Ação simplificou (só o nome, CD saiu da linha —
+      agora só aparece dentro do popup) e passou a abrir
+      `SalvaguardaDoAlvoModal` ao tocar, marcando o uso (1x/turno) na
+      MESMA ação de abrir — mesmo padrão de `abrirAtaqueDeSopro`/
+      `abrirLancarNoInferno` (`abrirGolpeDeEscudo()` novo em
+      `CombatTab.tsx`). Documentado como padrão reaproveitável em
+      `DECISOES-COMBATE.md` ("Salvaguarda do alvo — modal único"): toda
+      característica nova desse formato ("CD do jogador, alvo salva")
+      usa esse componente, nunca cria um modal próprio.
+      Verificado: `tsc -b`/`npm test` (598)/`npm run build` limpos +
+      Playwright (Guerreiro com Espada Longa + Escudo equipados e o
+      talento injetado via localStorage — sorteio de talento/
+      equipamento é caro de forçar via UI — linha "🛡 Golpe de Escudo"
+      aparece, sem CD na linha → toca → popup "Golpe de Escudo" mostra
+      "Alvo faz salvaguarda de Força", CD 12 com ⓘ, "✅ Sucesso: nada
+      acontece" / "❌ Falha: empurra 1,5m ou é derrubado..." → fecha →
+      linha some da lista, confirmando o uso marcado). Ataque de
+      Sopro/Lançar no Inferno/Salvaguarda de Magia não re-testados via
+      Playwright nesta entrega — são só troca de "casca" (mesmos
+      textos/CDs/callbacks de antes, só via o componente genérico em
+      vez do modal próprio), risco baixo; vale o Osmar confirmar visual
+      dos 3 no celular (título, CD, Sucesso/Falha, botão de dano)
+      continuam iguais a antes.

@@ -10,7 +10,7 @@ import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPerson
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
-import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda } from '../../../core/magiaDano';
+import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import InfoChip from '../../components/InfoChip';
 import LinearProgressBar from '../../components/LinearProgressBar';
@@ -20,9 +20,7 @@ import AcaoPanelContent, { type DanoPendente } from '../combat/AcaoPanelContent'
 import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
 import BonusPanelContent from '../combat/BonusPanelContent';
 import ReacaoPanelContent from '../combat/ReacaoPanelContent';
-import LancarNoInfernoModal from '../combat/LancarNoInfernoModal';
-import AtaqueDeSoproModal from '../combat/AtaqueDeSoproModal';
-import MagiaSalvaguardaModal from '../combat/MagiaSalvaguardaModal';
+import SalvaguardaDoAlvoModal from '../combat/SalvaguardaDoAlvoModal';
 import styles from './CombatTab.module.css';
 
 /** Duração total da "piscada" de Fim do Turno (ver `fimDoTurno`) — os
@@ -540,6 +538,7 @@ export default function CombatTab({
   const [periciaInigualavelPendente, setPericiaInigualavelPendente] = useState(false);
   const [lancarNoInfernoAberto, setLancarNoInfernoAberto] = useState(false);
   const [ataqueDeSoproAberto, setAtaqueDeSoproAberto] = useState(false);
+  const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
   const cdLancarNoInferno = modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null;
   const temEspacoDePactoDisponivel = espacos.some((e) => (espacosGastosPorCirculo[e.circulo] ?? 0) < e.maximo);
   const { rolarD20, rolarDados } = useRoll();
@@ -806,6 +805,15 @@ export default function CombatTab({
     rolarDados({ label: 'Lançar no Inferno — Dano', formula: '8d10', quantidade: 8, lados: 10, mod: 0 });
   }
 
+  /** Golpe de Escudo (Mestre em Escudos) — mesmo padrão de
+   * `abrirAtaqueDeSopro`/`abrirLancarNoInferno`: marca o uso (1x/turno)
+   * e abre o popup padrão de "salvaguarda do alvo" junto, na mesma
+   * ação de tocar a linha no painel de Ação. */
+  function abrirGolpeDeEscudo() {
+    onUsarGolpeDeEscudo();
+    setGolpeDeEscudoAberto(true);
+  }
+
   function usarPericiaInigualavel() {
     if (!onUsarInspiracao()) return;
     rolarDados({
@@ -897,6 +905,17 @@ export default function CombatTab({
     if (categoria === 'bonus') return 'right';
     return 'bottom';
   }
+
+  const danoSalvaguarda = telaSalvaguarda
+    ? calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)
+    : null;
+  const danoCondicionalSalvaguarda = telaSalvaguarda
+    ? calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)
+    : null;
+  const avisoUpcastSalvaguarda =
+    danoSalvaguarda?.upcastNaoAutomatico && telaSalvaguarda?.magia.upcastTexto
+      ? `Círculo usado é maior que o base — dano abaixo NÃO inclui o upcast. Efeito real: ${telaSalvaguarda.magia.upcastTexto}`
+      : null;
 
   return (
     <>
@@ -1335,10 +1354,8 @@ export default function CombatTab({
             podeOferecerCortar={cortarDisponivel}
             onConfirmarCortarReduzirAZero={onConfirmarCortarReduzirAZero}
             temGolpeDeEscudo={golpeDeEscudoDisponivel}
-            cdGolpeDeEscudo={cdGolpeDeEscudo}
-            explicacaoCdGolpeDeEscudo={explicacaoCdGolpeDeEscudo}
             golpeDeEscudoUsadoTurno={golpeDeEscudoUsadoTurno}
-            onUsarGolpeDeEscudo={onUsarGolpeDeEscudo}
+            onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
             detalhesAtivo={detalhesAtivo}
             maosCurativasDisponivel={maosCurativasDisponivel}
             maosCurativasGasto={maosCurativasGasto}
@@ -1466,38 +1483,63 @@ export default function CombatTab({
         )}
       </SidePanel>
       {lancarNoInfernoAberto && (
-        <LancarNoInfernoModal
+        <SalvaguardaDoAlvoModal
+          titulo="Lançar no Inferno"
+          atributo="Carisma"
           cd={cdLancarNoInferno}
           explicacaoCd={explicacaoCdConjuracao}
-          onRolarDano={rolarDanoLancarNoInferno}
+          textoSucesso="evita a magia"
+          textoFalha="8d10 de dano Psíquico (Ínferos não sofrem) + Incapacitado até o final do seu próximo turno"
+          acaoPrincipal={{ label: '🎲 Rolar Dano (8d10 Psíquico)', onClick: rolarDanoLancarNoInferno }}
           onFechar={() => setLancarNoInfernoAberto(false)}
         />
       )}
       {ataqueDeSoproAberto && (
-        <AtaqueDeSoproModal
+        <SalvaguardaDoAlvoModal
+          titulo="Ataque de Sopro"
+          atributo="Destreza"
           cd={cdAtaqueDeSopro}
           explicacaoCd={explicacaoCdAtaqueDeSopro}
-          tipoDano={tipoDanoAtaqueDeSopro}
-          numDados={numDadosAtaqueDeSopro}
-          onRolarDano={rolarDanoAtaqueDeSopro}
+          textoSucesso="metade do dano"
+          textoFalha={`${numDadosAtaqueDeSopro}d10 de dano ${tipoDanoAtaqueDeSopro ?? '—'} (Cone de 4,5m ou Linha de 9m×1,5m, à sua escolha)`}
+          acaoPrincipal={{
+            label: `🎲 Rolar Dano (${numDadosAtaqueDeSopro}d10 ${tipoDanoAtaqueDeSopro ?? ''})`,
+            onClick: rolarDanoAtaqueDeSopro,
+          }}
           onFechar={() => setAtaqueDeSoproAberto(false)}
         />
       )}
       {telaSalvaguarda && (
-        <MagiaSalvaguardaModal
-          nomeMagia={telaSalvaguarda.magia.nome}
+        <SalvaguardaDoAlvoModal
+          titulo={telaSalvaguarda.magia.nome}
           atributo={atributoSalvaguarda(telaSalvaguarda.magia)}
           cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
           explicacaoCd={explicacaoCdConjuracao}
           textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
           textoFalha={telaSalvaguarda.magia.salvaguardaFalha}
-          dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}
-          upcastTexto={telaSalvaguarda.magia.upcastTexto}
-          onRolarDano={rolarDanoSalvaguarda}
-          danoCondicional={calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}
-          danoCondicionalTexto={telaSalvaguarda.magia.danoCondicionalTexto}
-          onRolarDanoCondicional={rolarDanoCondicionalSalvaguarda}
+          aviso={avisoUpcastSalvaguarda}
+          acaoPrincipal={danoSalvaguarda ? { label: rotuloBotaoDanoMagia(danoSalvaguarda), onClick: rolarDanoSalvaguarda } : null}
+          acaoSecundaria={
+            danoCondicionalSalvaguarda
+              ? {
+                  label: rotuloBotaoDanoMagia(danoCondicionalSalvaguarda, `🎲 Rolar Dano — ${telaSalvaguarda.magia.danoCondicionalTexto}`),
+                  onClick: rolarDanoCondicionalSalvaguarda,
+                }
+              : null
+          }
+          semAcaoTexto="Veja a descrição da magia (ⓘ) pro efeito."
           onFechar={() => setTelaSalvaguarda(null)}
+        />
+      )}
+      {golpeDeEscudoAberto && (
+        <SalvaguardaDoAlvoModal
+          titulo="Golpe de Escudo"
+          atributo="Força"
+          cd={cdGolpeDeEscudo}
+          explicacaoCd={explicacaoCdGolpeDeEscudo}
+          textoSucesso="nada acontece"
+          textoFalha="empurra 1,5m ou é derrubado (Caído), à sua escolha"
+          onFechar={() => setGolpeDeEscudoAberto(false)}
         />
       )}
     </>
