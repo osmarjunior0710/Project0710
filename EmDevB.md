@@ -45,7 +45,21 @@ de decidir a versão final — primeiro uso real vai ser aqui.
       é.** Em andamento: proposta de rota (`/prototipo`), ponto de
       entrada (Lista de Personagens, discreto) e estrutura de "cenas"
       soltas — aguardando aprovação do Osmar antes de codar.
-- [ ] **Entrega A — Ambiente de Protótipo** (infraestrutura mínima).
+- [x] **Entrega A — Ambiente de Protótipo** (infraestrutura mínima).
+      Rota `/prototipo` (lista de "cenas") e `/prototipo/:cenaId`
+      (`PrototipoShell.tsx`/`PrototipoCenaShell.tsx`), catálogo de
+      cenas em `src/ui/prototipo/cenas/index.ts` (adicionar cena nova =
+      1 entrada ali). Ponto de entrada discreto no rodapé da Lista de
+      Personagens ("🧪 protótipos", `.label`, não um `.btn` grande —
+      ferramenta nossa, não do jogador). 1ª cena
+      (`ExemploRolagemSimples.tsx`) prova que dá pra reaproveitar
+      `RollContext`/`RollOverlay` de verdade fora do fluxo de
+      personagem, sem `armazenamentoPersonagens`. Verificado com
+      `tsc -b --force`/`npm test -- --run` (596)/`npm run build`
+      limpos + Playwright em 390px: link aparece na Lista, abre a
+      lista de cenas, abre a cena, "🎲 Rolar" dispara o RollOverlay de
+      verdade (mesmo popup/animação do jogo), resultado aparece na
+      tela ("Último resultado: 7").
 - [ ] **Entrega B — Prototipar os 4 formatos de rolagem** em baixa
       fidelidade, decidindo ao vivo.
 - [ ] **Entrega C — Formaliza o padrão** (DECISOES-COMBATE.md).

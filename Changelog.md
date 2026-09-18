@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1355
+
+Novo ambiente de "🧪 Protótipos" — ferramenta interna (link discreto
+no rodapé da Lista de Personagens) pra testar ideias de fluxo/UX antes
+de virarem de verdade. Ainda não afeta nenhuma tela do jogo, mas já
+serve pra você bisbilhotar se quiser: `Lista > 🧪 protótipos`.
+
 ## v202609_1231
 
 Talento Mestre em Armas Grandes agora funciona de verdade: com arma

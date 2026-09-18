@@ -138,6 +138,17 @@ export default function CharacterList() {
           onCriado={(id) => navigate(`/ficha/${id}`)}
         />
       )}
+
+      {/* Ferramenta interna (Osmar + Claude Code), não feature do
+       * jogo — por isso discreta, não um "btn" grande como as duas
+       * acima. Ver sdd/sdd-fluxo-rolagem.md. */}
+      <div
+        className="label"
+        style={{ textAlign: 'center', marginTop: 'auto', paddingTop: 16, cursor: 'pointer' }}
+        onClick={() => navigate('/prototipo')}
+      >
+        🧪 protótipos
+      </div>
     </div>
   );
 }
