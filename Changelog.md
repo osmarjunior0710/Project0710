@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1654
+
+**Corrige o dado 3D "morrendo" pro resto da sessão.** Bug introduzido
+pelo ambiente de Protótipos: visitar `/prototipo` (ou até só a Lista)
+e depois voltar pra uma Ficha fazia o dado físico parar de aparecer
+de vez (o número ainda saía certo, só sem a animação/dado físico) —
+só um F5 resolvia. Corrigido de raiz: o "espaço" onde o dado 3D vive
+agora é permanente, independente de qual tela você está.
+
 ## v202609_1644
 
 Ajuste pequeno nos títulos dos popups de Golpe Brutal — agora mostram

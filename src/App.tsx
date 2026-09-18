@@ -10,6 +10,7 @@ import PrototipoShell from './ui/prototipo/PrototipoShell';
 import PrototipoCenaShell from './ui/prototipo/PrototipoCenaShell';
 import { RollProvider } from './ui/roll/RollContext';
 import RollOverlay from './ui/roll/RollOverlay';
+import Dice3dCanvasHost from './ui/roll/Dice3dCanvasHost';
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <VersionBadge />
+      <Dice3dCanvasHost />
       <RollOverlay />
     </RollProvider>
   );

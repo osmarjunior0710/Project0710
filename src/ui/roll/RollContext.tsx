@@ -418,6 +418,17 @@ interface RollContextValue {
   /** Valor DERIVADO pronto pra decidir o motor de rolagem (Fase B):
    * `preferenciaDado3D && dado3DDisponivel && !modoTeste`. */
   dado3DAtivo: boolean;
+  /** `true` = o FAB avulso de dado 3D (`Dice3dFab.tsx`) está aberto —
+   * junto com `estado?.motor3D`, decide se `Dice3dCanvasHost.tsx`
+   * (host global do `<canvas>`, montado 1x em `App.tsx`) fica visível.
+   * Só o `Dice3dFab` chama isso; existe aqui (não como estado local
+   * dele) porque o host do canvas precisa saber SEM depender do FAB
+   * estar montado — ver `Dice3dCanvasHost.tsx` pro motivo completo
+   * (bug corrigido: o host antes vivia dentro do FAB, só existia com a
+   * Ficha aberta — qualquer rolagem fora dela, ex. `/prototipo`, achava
+   * o container ausente e "matava" o motor 3D pro resto da sessão). */
+  dado3DFabAberto: boolean;
+  registrarDado3DFabAberto: (aberto: boolean) => void;
   /** Histórico compartilhado de rolagens (últimas `MAX_LOG`, mais
    * recente primeiro) — alimentado automaticamente por toda rolagem
    * real (`rolarD20`/`rolarDados`, via `fechar()`) E pelo dado 3D
@@ -544,6 +555,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preferenciaDado3D]);
   const dado3DAtivo = preferenciaDado3D && dado3DDisponivel && !modoTeste;
+  const [dado3DFabAberto, setDado3DFabAberto] = useState(false);
+  const registrarDado3DFabAberto = useCallback((aberto: boolean) => setDado3DFabAberto(aberto), []);
 
   const rolarD20 = useCallback(
     ({
@@ -1173,6 +1186,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
         alternarPreferenciaDado3D,
         dado3DDisponivel,
         dado3DAtivo,
+        dado3DFabAberto,
+        registrarDado3DFabAberto,
         log,
         adicionarLog,
       }}

@@ -71,6 +71,38 @@ montar sua própria cópia do overlay. Padrão geral: "uma coisa só que
 qualquer tela aciona" em React é Context + Provider no topo da árvore,
 nunca duplicar o componente de overlay tela por tela.
 
+**Bug real corrigido (2026-09) — a mesma regra vale pra qualquer
+recurso NÃO-React que um Context global gerencia, não só o overlay
+em si:** o motor de dado 3D (`@3d-dice/dice-box`) guarda 1 instância
+singleton (`diceBoxRef`, módulo `diceBox3d.ts`) presa a um `<canvas>`
+que ela cria dentro de 1 `<div id="dice3d-canvas-host">` específico —
+mas esse `<div>` vivia dentro de `Dice3dFab.tsx`, montado só quando a
+Ficha estava aberta. Ir pra qualquer tela SEM a Ficha (a Lista, o
+Wizard, e principalmente o `/prototipo` novo, que reaproveita
+`RollContext`/`RollOverlay` de propósito) desmontava esse `<div>` — a
+lib nunca detecta isso e `carregarDiceBox3D()` sempre devolve a MESMA
+instância já criada, presa a um container que não existe mais no DOM.
+Resultado: o dado físico "morria" pro resto da sessão (o total ainda
+calculava certo, só o dado nunca mais aparecia visualmente), até um
+refresh de página completo.
+
+**Correção — o host do `<canvas>` virou tão global quanto o próprio
+`RollOverlay`:** `Dice3dCanvasHost.tsx`, montado 1x em `App.tsx` ao
+lado do `RollOverlay`, nunca desmonta. `Dice3dFab.tsx` (o FAB avulso,
+que continua Ficha-específico) só avisa o `RollContext`
+(`dado3DFabAberto`/`registrarDado3DFabAberto`, mesmo padrão de
+`registrarBonusExtra`/`registrarForcaIndomavel`) se está aberto ou
+não — não é mais dono do `<div>` do canvas.
+
+**Regra geral pra qualquer recurso futuro parecido (engine/singleton
+não-React que precisa de 1 elemento DOM fixo):** se um Context global
+(`RollContext`, ou outro que vier a existir) depende de um recurso
+assim, o elemento DOM que ele precisa TAMBÉM precisa ser montado no
+nível global (`App.tsx`), nunca dentro de uma tela/feature específica
+— mesmo que hoje só aquela tela use o recurso. "Só a Ficha usa dado
+3D hoje" foi exatamente a suposição que quebrou ao abrir uma 2ª porta
+de entrada (`/prototipo`) pro mesmo Context.
+
 ## Tema visual do app de verdade (React): light, não dark
 
 **Decisão:** o app em React usa paleta **clara** (fundo claro, texto
