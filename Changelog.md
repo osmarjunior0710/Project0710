@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1640
+
+Golpe Brutal (Bárbaro, nível 9+) de verdade agora segue o fluxo novo:
+ao atacar, o popup pergunta "Errei"/"Acertei" antes de liberar o dano;
+se acertou, o dano da arma e o dado extra do Golpe Brutal já rolam
+juntos num popup só, com um botão "🔨 Golpe Brutal" que abre a lista
+de efeitos (cartões com título + descrição) pra escolher — a escolha
+não muda nada mecanicamente ainda (o app não rastreia inimigo), mas
+agora tem um caminho claro até ela.
+
 ## v202609_1546
 
 Refinamento na cena "Acerto/Erro" dos Protótipos: o popup de dano

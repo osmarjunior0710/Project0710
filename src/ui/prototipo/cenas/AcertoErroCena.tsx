@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRoll } from '../../roll/RollContext';
-import EscolherEfeitoModal from './EscolherEfeitoModal';
+import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
 
 /** Cena "Acerto/Erro" (Variante D, ver sdd/sdd-fluxo-rolagem.md) — o
  * popup de rolagem de verdade (`RollOverlay`) ganhou "Errei"/"Acertei"
@@ -124,7 +124,7 @@ export default function AcertoErroCena() {
         <EscolherEfeitoModal
           titulo="🔨 Golpe Brutal — escolha 1 efeito"
           opcoes={EFEITOS}
-          onEscolher={(nome) => {
+          onEscolher={([nome]) => {
             setStatusGoblin(TAG_DO_EFEITO[nome]);
             empilhar(`Efeito escolhido: ${nome}.`);
             setModalEfeitoAberto(false);

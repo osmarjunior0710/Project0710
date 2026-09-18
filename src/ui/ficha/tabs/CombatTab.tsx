@@ -17,6 +17,7 @@ import LinearProgressBar from '../../components/LinearProgressBar';
 import ContadorUsos from '../../components/ContadorUsos';
 import SidePanel from '../combat/SidePanel';
 import AcaoPanelContent, { type DanoPendente } from '../combat/AcaoPanelContent';
+import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
 import BonusPanelContent from '../combat/BonusPanelContent';
 import ReacaoPanelContent from '../combat/ReacaoPanelContent';
 import LancarNoInfernoModal from '../combat/LancarNoInfernoModal';
@@ -526,15 +527,12 @@ export default function CombatTab({
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [danoPendente, setDanoPendente] = useState<DanoPendente | null>(null);
-  /** Golpe Brutal (Bárbaro nível 9+) — `true` depois de rolar o dado
-   * extra, enquanto falta escolher o(s) efeito(s). Só textual (o app
-   * não rastreia alvo/status de inimigo) — escolher só atualiza o
-   * feedback com o lembrete da regra. */
+  /** Golpe Brutal (Bárbaro nível 9+) — `true` depois de confirmar o
+   * popup de dano (botão "🔨 Golpe Brutal", `confirmarFechamento`),
+   * abre o modal de escolha de efeito (`EscolherEfeitoModal`). Só
+   * textual (o app não rastreia alvo/status de inimigo) — escolher só
+   * atualiza o feedback com o lembrete da regra. */
   const [golpeBrutalEfeitoPendente, setGolpeBrutalEfeitoPendente] = useState(false);
-  /** Efeitos já marcados nesse ciclo — só usado quando `escolhas` (nível
-   * 17) é 2 (precisa marcar as 2 antes de confirmar); com 1 escolha,
-   * tocar já finaliza na hora, sem passar por aqui. */
-  const [golpeBrutalEfeitosEscolhidos, setGolpeBrutalEfeitosEscolhidos] = useState<string[]>([]);
   const [telaSalvaguarda, setTelaSalvaguarda] = useState<{ magia: Magia; circuloUsado: number } | null>(null);
   const [ataquesFeitos, setAtaquesFeitos] = useState(0);
   const [piscando, setPiscando] = useState(false);
@@ -577,7 +575,6 @@ export default function CombatTab({
       setDanoPendente(null);
       setAtaquesFeitos(0);
       setGolpeBrutalEfeitoPendente(false);
-      setGolpeBrutalEfeitosEscolhidos([]);
     }, DURACAO_PISCADA_MS / 2);
     setTimeout(() => setPiscando(false), DURACAO_PISCADA_MS);
   }
@@ -587,7 +584,6 @@ export default function CombatTab({
     setFeedback(null);
     setDanoPendente(null);
     setGolpeBrutalEfeitoPendente(false);
-    setGolpeBrutalEfeitosEscolhidos([]);
     setPainelAberto(categoria);
     setUltimoPainel(categoria);
   }
@@ -844,6 +840,19 @@ export default function CombatTab({
     }
   }
 
+  /** Mesmo bookkeeping de `registrarAtaque`, sem `setDanoPendente` —
+   * Golpe Brutal (Fluxo Acerto/Erro) não usa mais os botões antigos de
+   * dano, o popup já resolve tudo sozinho (ver `AcaoPanelContent.tsx`). */
+  function registrarGolpeBrutalAtaque(nome: string, desc: string) {
+    const proximo = ataquesFeitos + 1;
+    setAtaquesFeitos(proximo);
+    setFeedback(`${nome} — ${desc}`);
+    if (proximo >= numAtaques) {
+      onMarcarUsado('acao');
+      setPainelAberto(null);
+    }
+  }
+
   function usarSurtoDeAcao() {
     if (!onUsarSurto()) return;
     setFeedback('💥 Surto de Ação — você ganhou uma ação extra nesse turno (a Ação normal continua disponível).');
@@ -864,41 +873,17 @@ export default function CombatTab({
     });
   }
 
-  /** Golpe Brutal — rola o dado extra (2º botão, ao lado de "Rolar
-   * Dano") e abre o picker de efeito. Some da lista de dano pendente
-   * depois de rolado (nunca 2x na mesma jogada). */
-  function rolarGolpeBrutalPendente() {
-    if (!danoPendente?.golpeBrutal) return;
-    const { quantidade, lados } = danoPendente.golpeBrutal;
-    rolarDados({ label: 'Golpe Brutal — Dano Extra', formula: `${quantidade}d${lados}`, quantidade, lados, mod: 0 });
-    setDanoPendente((atual) => (atual ? { ...atual, golpeBrutal: null } : atual));
-    setGolpeBrutalEfeitoPendente(true);
-  }
-
   const efeitosGolpeBrutalDisponiveis = EFEITOS_GOLPE_BRUTAL.filter(
     (e) => e.nivelMinimo === 9 || golpeBrutalEfeitosNivel13,
   );
 
+  /** Chamado pelo `EscolherEfeitoModal` (ver `DECISOES-COMBATE.md`
+   * "Fluxo Acerto/Erro") — só texto de lembrete, o app não rastreia
+   * alvo/status de inimigo (decisão antiga, ver Backlog.md). */
   function finalizarEfeitosGolpeBrutal(nomes: string[]) {
     const textos = nomes.map((nome) => efeitosGolpeBrutalDisponiveis.find((e) => e.nome === nome)?.texto ?? '');
     setFeedback(`🔨 ${nomes.join(' + ')} — ${textos.join(' ')}`);
     setGolpeBrutalEfeitoPendente(false);
-    setGolpeBrutalEfeitosEscolhidos([]);
-  }
-
-  /** Nível 9-16: 1 escolha, toca e já finaliza. Nível 17+
-   * (`golpeBrutalEscolhas === 2`): marca/desmarca até ter exatamente 2,
-   * "Confirmar" finaliza as 2 juntas. */
-  function escolherEfeitoGolpeBrutal(nome: string) {
-    if (golpeBrutalEscolhas <= 1) {
-      finalizarEfeitosGolpeBrutal([nome]);
-      return;
-    }
-    setGolpeBrutalEfeitosEscolhidos((atual) => {
-      if (atual.includes(nome)) return atual.filter((n) => n !== nome);
-      if (atual.length >= golpeBrutalEscolhas) return atual;
-      return [...atual, nome];
-    });
   }
 
   const temEspacoDisponivel = espacos.some((e) => (espacosGastosPorCirculo[e.circulo] ?? 0) < e.maximo);
@@ -1288,41 +1273,17 @@ export default function CombatTab({
               🎲 Rolar Dano
             </div>
           )}
-          {danoPendente?.golpeBrutal && (
-            <div className="btn btn-primary" style={{ marginTop: 10, padding: '10px 14px', display: 'inline-block' }} onClick={rolarGolpeBrutalPendente}>
-              🔨 Rolar Golpe Brutal
-            </div>
-          )}
         </div>
       )}
 
       {golpeBrutalEfeitoPendente && (
-        <div className={styles.feedback}>
-          <div>
-            {golpeBrutalEscolhas > 1
-              ? `Escolha ${golpeBrutalEscolhas} efeitos de Golpe Brutal:`
-              : 'Escolha 1 efeito de Golpe Brutal:'}
-          </div>
-          {efeitosGolpeBrutalDisponiveis.map((efeito) => (
-            <div
-              key={efeito.nome}
-              className={`opt-card ${golpeBrutalEfeitosEscolhidos.includes(efeito.nome) ? 'selected' : ''}`}
-              onClick={() => escolherEfeitoGolpeBrutal(efeito.nome)}
-            >
-              <div className="opt-card-name">{efeito.nome}</div>
-              <div className="opt-card-desc">{efeito.texto}</div>
-            </div>
-          ))}
-          {golpeBrutalEscolhas > 1 && (
-            <div
-              className={`btn btn-primary${golpeBrutalEfeitosEscolhidos.length !== golpeBrutalEscolhas ? ' btn-disabled' : ''}`}
-              style={{ marginTop: 10 }}
-              onClick={() => golpeBrutalEfeitosEscolhidos.length === golpeBrutalEscolhas && finalizarEfeitosGolpeBrutal(golpeBrutalEfeitosEscolhidos)}
-            >
-              Confirmar
-            </div>
-          )}
-        </div>
+        <EscolherEfeitoModal
+          titulo={golpeBrutalEscolhas > 1 ? `🔨 Golpe Brutal — escolha ${golpeBrutalEscolhas} efeitos` : '🔨 Golpe Brutal — escolha 1 efeito'}
+          opcoes={efeitosGolpeBrutalDisponiveis}
+          maxEscolhas={golpeBrutalEscolhas}
+          onEscolher={finalizarEfeitosGolpeBrutal}
+          onFechar={() => setGolpeBrutalEfeitoPendente(false)}
+        />
       )}
 
 
@@ -1368,6 +1329,8 @@ export default function CombatTab({
             golpeBrutalDados={golpeBrutalDados}
             golpeBrutalUsadoTurno={golpeBrutalUsadoTurno}
             onUsarGolpeBrutal={onUsarGolpeBrutal}
+            onGolpeBrutalAtacou={registrarGolpeBrutalAtaque}
+            onGolpeBrutalDanoConfirmado={() => setGolpeBrutalEfeitoPendente(true)}
             podeOferecerCortar={cortarDisponivel}
             onConfirmarCortarReduzirAZero={onConfirmarCortarReduzirAZero}
             temGolpeDeEscudo={golpeDeEscudoDisponivel}

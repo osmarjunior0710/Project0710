@@ -1387,37 +1387,6 @@ rastreia automaticamente qual espaço criou qual pet, o jogador agora
 informa o círculo manualmente (select) ao ligar o toggle em
 `PetsTab.tsx` — ver `core/necromante.ts`'s `bonusLegiaoDosMortos`.
 
-## Bárbaro — Golpe Brutal/Golpe Brutal Fortalecido: escolha de efeito depois de acertar o ataque, travado numa revisão maior do fluxo de d20
-
-**Ver também:** `aprendizados/classes/barbaro.md` pro histórico
-completo de implementação do Bárbaro (esta pendência é referenciada de
-lá também, não duplicar detalhe técnico nos dois lugares).
-
-**Achado do Osmar (2026-09), testando na tela:** Golpe Brutal (nível 9)
-e Golpe Brutal Fortalecido (13/17) têm um efeito que deveria ser
-escolhido DEPOIS de confirmar que o ataque acertou — e isso "não tem no
-sistema" hoje do jeito que deveria. Osmar pediu explicitamente pra
-**anotar e resolver por último**, sem detalhar mais agora — o motivo:
-vai exigir revisar o fluxo de rolagem de d20 (`RollContext.tsx`/
-`RollOverlay.tsx`/o jeito que `AcaoPanelContent.tsx`/`CombatTab.tsx`
-encadeiam ataque → dano → efeito hoje) de um jeito que afeta VÁRIAS
-características, não só Golpe Brutal — mesmo padrão do Necromante B4
-acima ("motor que afeta qualquer X, não só Y", vira foco próprio).
-
-**Estado atual pra referência (não confirmado como certo ou errado
-ainda — só o que o código faz hoje):** o jogador escolhe "🔨 Golpe
-Brutal" como o tipo de ataque ANTES de rolar (renuncia a Vantagem
-nessa jogada, `AcaoPanelContent.tsx`), rola o d20, e só DEPOIS de ver o
-resultado é que aparecem os botões de dano ("🎲 Rolar Dano" e "🔨 Rolar
-Golpe Brutal") — o jogador só toca no de Golpe Brutal se souber (por
-fora do app) que acertou, mesmo princípio de "o jogador confirma
-acerto" de qualquer outro ataque. O picker de efeito
-(Debilitador/Poderoso/Atordoante/Destruidor,
-`escolherEfeitoGolpeBrutal` em `CombatTab.tsx`) só aparece depois
-desse 2º botão. Osmar não confirmou se esse fluxo já está certo ou se
-o gap está em outro lugar — não investigar mais fundo até a revisão
-maior do d20 acontecer.
-
 ## Bárbaro — Trilhas (B5-B8) ainda não implementadas (classe base fechada, 2026-09)
 
 **O que é:** o foco "Bárbaro" fechou com a classe base nível 1-20
@@ -1486,3 +1455,43 @@ reaproveita o mecanismo de escolha de Dádiva Épica de nível 19 que já
 existe, só o GATILHO muda de "nível fixo" pra "marco de XP repetido"),
 e se algo na UI de nível/XP precisa deixar claro que o personagem
 "continua avançando" mesmo sem outro número de nível pra mostrar.
+
+## Retrofit do Fluxo Acerto/Erro nas outras características (Ataque normal, magia, Ancestralidade Gigante)
+
+**O que é:** o foco "Revisão do fluxo de rolagem" fechou (2026-09)
+aplicando o padrão novo (ver `DECISOES-COMBATE.md` "Fluxo Acerto/Erro")
+só no Golpe Brutal do Bárbaro — a pendência original que motivou o
+foco inteiro. Ataque normal (fora de Golpe Brutal), ataque de magia e
+Ancestralidade Gigante (Golias) continuam no padrão antigo "atira e
+esquece" — nenhum deles está visivelmente quebrado pro jogador hoje
+(só Golpe Brutal empacava de verdade, porque a escolha de efeito
+morava atrás de 2 botões separados sem ordem clara), por isso ficaram
+de fora dessa rodada por decisão consciente (ver `sdd/sdd-fluxo-rolagem.md`
+seção 5).
+
+**O que falta pra resolver:** retrofitar cada um pro padrão novo
+(`confirmarAcerto`/`confirmarFechamento`) quando fizer sentido —
+`AcaoPanelContent.tsx`'s `rolarAtaque` (caminho normal, sem Golpe
+Brutal) e `useUsarMagiaPainel.tsx`'s `conjurarMagia` (ataque de magia)
+são os 2 pontos que ainda disparam a rolagem sem esperar `onResultado`.
+`usarAncestralidadeGiganteAoAcertar` (`CombatTab.tsx`) é mais simples
+(sem escolha de N opções, já é clicado só depois do jogador decidir
+"acertei" manualmente) — talvez só precise do `confirmarAcerto`, sem
+`confirmarFechamento`.
+
+## Cura em outro alvo — seletor de alvo ainda sem padrão definido
+
+**O que é:** levantado no `sdd/sdd-fluxo-rolagem.md` (seção 2, taxonomia
+dos 4 formatos de rolagem) e nunca resolvido nesta rodada — hoje cada
+"Cura em outro alvo" resolve a escolha de um jeito diferente:
+Recuperar Fôlego é sempre "eu mesmo" (sem seletor); Colheita Macabra
+(Necromante) pede um `<select>` de Pet dentro do próprio modal
+(`ColheitaMacabraModal.tsx`). Não existe hoje um padrão único de
+"escolher o alvo da cura" que sirva tanto pra Pet quanto pra outro
+Personagem Jogador (multiclasse/grupo de mesa) — essa 2ª situação nem
+existe no app ainda (não há conceito de "outros PJs da mesa" na Ficha).
+
+**O que falta pra resolver:** só faz sentido revisitar quando existir
+alguma necessidade real de cura em outro PJ (não só Pet) — até lá, o
+padrão de `ColheitaMacabraModal.tsx` (select inline) continua servindo
+sozinho pra Pet, sem problema visível.

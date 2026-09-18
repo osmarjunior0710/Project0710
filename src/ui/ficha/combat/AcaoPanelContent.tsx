@@ -73,13 +73,25 @@ interface AcaoPanelContentProps {
   /** Golpe Brutal (Bárbaro nível 9+) — só aparece como linha própria
    * (ao lado de "🗡 Atacar") quando o Ataque Imprudente já está ativo
    * nesse turno e ainda não foi usado. `golpeBrutalDados` = 1 (nível
-   * 9-16) ou 2 (17+, "2d10"). Escolha do EFEITO (Debilitador/Poderoso/
-   * etc.) acontece depois, no `CombatTab` (junto com o botão de rolar
-   * o dado extra) — aqui só decide/rola o ataque em si. */
+   * 9-16) ou 2 (17+, "2d10"). Fluxo Acerto/Erro (ver
+   * `DECISOES-COMBATE.md`): o ataque pergunta "Acertou?" de verdade
+   * (`confirmarAcerto`); se sim, rola dano + dado extra JUNTOS
+   * (`gruposExtras`) e o popup de dano já oferece o botão "🔨 Golpe
+   * Brutal" (`confirmarFechamento`) — tocar nele avisa o `CombatTab`
+   * (`onGolpeBrutalDanoConfirmado`) pra abrir o modal de escolha do
+   * efeito, que segue morando lá (tem a lista/nível). */
   temGolpeBrutal: boolean;
   golpeBrutalDados: number;
   golpeBrutalUsadoTurno: boolean;
   onUsarGolpeBrutal: () => void;
+  /** Bookkeeping do turno (ataquesFeitos/marcar Ação usada) pro
+   * ataque de Golpe Brutal — separado de `onAtacar` porque esse
+   * fluxo NÃO usa mais `DanoPendente`/os botões antigos de dano. */
+  onGolpeBrutalAtacou: (nome: string, desc: string) => void;
+  /** Chamado quando o jogador toca "🔨 Golpe Brutal" no popup de dano
+   * (depois de acertar e rolar) — abre o modal de efeito no
+   * `CombatTab`. */
+  onGolpeBrutalDanoConfirmado: () => void;
   detalhesAtivo: boolean;
   /** Mãos Curativas (Aasimar) — `false` = espécie não é Aasimar. */
   maosCurativasDisponivel: boolean;
@@ -151,6 +163,8 @@ export default function AcaoPanelContent({
   golpeBrutalDados,
   golpeBrutalUsadoTurno,
   onUsarGolpeBrutal,
+  onGolpeBrutalAtacou,
+  onGolpeBrutalDanoConfirmado,
   detalhesAtivo,
   maosCurativasDisponivel,
   maosCurativasGasto,
@@ -206,43 +220,66 @@ export default function AcaoPanelContent({
     );
   }
 
+  /** Golpe Brutal (Bárbaro nível 9+) segue o Fluxo Acerto/Erro
+   * (`DECISOES-COMBATE.md`): renuncia à Vantagem NESSA jogada, popup
+   * de ataque pergunta "Acertou?" de verdade — só rola dano (arma +
+   * dado extra JUNTOS, `gruposExtras`) se "Acertei"; o popup de dano
+   * já embute o botão "🔨 Golpe Brutal" pra abrir o modal de efeito
+   * (`onGolpeBrutalDanoConfirmado`, o `CombatTab` decide o resto —
+   * lista/nível). Bookkeeping do turno via `onGolpeBrutalAtacou`
+   * (não usa mais `DanoPendente`). */
+  function rolarAtaqueGolpeBrutal(nome: string, ataque: AtaqueInfo) {
+    rolarD20({
+      label: `Ataque — ${nome} (Golpe Brutal)`,
+      formula: `1d20 + ${ataque.modAcerto}`,
+      mod: ataque.modAcerto,
+      explicacaoMod: ataque.explicacaoAcerto,
+      confirmarAcerto: {
+        onAcertou: () => {
+          rolarDados({
+            label: `Dano — ${nome} (+ Golpe Brutal)`,
+            formula: `${ataque.danoQuantidade}d${ataque.danoLados}${ataque.danoMod ? ` + ${ataque.danoMod}` : ''} + ${golpeBrutalDados}d10`,
+            quantidade: ataque.danoQuantidade,
+            lados: ataque.danoLados,
+            mod: ataque.danoMod,
+            gruposExtras: [{ quantidade: golpeBrutalDados, lados: 10 }],
+            confirmarFechamento: { rotulo: '🔨 Golpe Brutal', aoTocar: onGolpeBrutalDanoConfirmado },
+          });
+        },
+        onErrou: () => {},
+      },
+    });
+    onGolpeBrutalAtacou(
+      `🗡 ${nome}`,
+      'Rolagem de acerto feita — renunciou à Vantagem do Ataque Imprudente pro Golpe Brutal.',
+    );
+  }
+
   /** `imprudente` — Ataque Imprudente (Bárbaro) já decidido pra esse
    * ataque (e o turno inteiro, ver `escolherAtaque`); só vira Vantagem
    * de verdade quando o ataque específico usa Força
    * (`ataque.usouForca`). Se coincidir com a Desvantagem de Armadura
-   * sem treino, as duas se cancelam (`resolverVantagem`).
-   * `golpeBrutal` (Bárbaro nível 9+, ver `usarGolpeBrutal`) — renuncia
-   * à Vantagem NESSA jogada especificamente (ignora `imprudente`) e
-   * anexa o dado extra no `DanoPendente`, pro `CombatTab` mostrar o 2º
-   * botão de dano. */
+   * sem treino, as duas se cancelam (`resolverVantagem`). */
   function rolarAtaque(
     nome: string,
     ataque: AtaqueInfo,
     finalizar: (nome: string, desc: string, dano: DanoPendente) => void,
     imprudente: boolean,
-    golpeBrutal = false,
   ) {
     rolarD20({
-      label: `Ataque — ${nome}${golpeBrutal ? ' (Golpe Brutal)' : ''}`,
+      label: `Ataque — ${nome}`,
       formula: `1d20 + ${ataque.modAcerto}`,
       mod: ataque.modAcerto,
       explicacaoMod: ataque.explicacaoAcerto,
-      vantagem: resolverVantagem(!golpeBrutal && imprudente && ataque.usouForca, desvantagemForcaDestreza),
+      vantagem: resolverVantagem(imprudente && ataque.usouForca, desvantagemForcaDestreza),
     });
-    finalizar(
-      `🗡 ${nome}`,
-      golpeBrutal
-        ? `Rolagem de acerto feita — renunciou à Vantagem do Ataque Imprudente pro Golpe Brutal. Toque "Rolar Dano" pro dano normal e "Rolar Golpe Brutal" pro dado extra se acertou.`
-        : `Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano ${ataque.danoTipo}.`,
-      {
-        label: `Dano — ${nome}`,
-        quantidade: ataque.danoQuantidade,
-        lados: ataque.danoLados,
-        mod: ataque.danoMod,
-        tipoDano: ataque.danoTipo,
-        golpeBrutal: golpeBrutal ? { quantidade: golpeBrutalDados, lados: 10 } : null,
-      },
-    );
+    finalizar(`🗡 ${nome}`, `Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano ${ataque.danoTipo}.`, {
+      label: `Dano — ${nome}`,
+      quantidade: ataque.danoQuantidade,
+      lados: ataque.danoLados,
+      mod: ataque.danoMod,
+      tipoDano: ataque.danoTipo,
+    });
   }
 
   const surtoDesabilitado = surtoRestantes <= 0 || surtoUsadoTurno;
@@ -279,7 +316,7 @@ export default function AcaoPanelContent({
   function usarGolpeBrutal() {
     if (!ataqueAtual) return;
     onUsarGolpeBrutal();
-    rolarAtaque(`🗡 ${ataqueAtual.nome}`, ataqueAtual.info, onAtacar, false, true);
+    rolarAtaqueGolpeBrutal(`🗡 ${ataqueAtual.nome}`, ataqueAtual.info);
   }
 
   if (picker) return picker;
