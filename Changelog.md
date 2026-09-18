@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1546
+
+Refinamento na cena "Acerto/Erro" dos Protótipos: o popup de dano
+agora é condicional — mostra "OK" simples pra quem não tem
+característica com escolha de efeito, ou um botão com o nome da
+característica (ex. "🔨 Golpe Brutal") que abre um 3º popup com a
+lista de efeitos (título + descrição, igual à aba Combate) e um "OK"
+que só habilita depois de escolher. Ainda protótipo, não muda o jogo.
+
 ## v202609_1439
 
 A cena "Acerto/Erro" do ambiente de Protótipos agora usa o popup de

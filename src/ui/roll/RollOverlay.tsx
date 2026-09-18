@@ -50,7 +50,6 @@ export default function RollOverlay() {
     rerollDadoEscolhido,
     inspiracaoHeroicaDisponivel,
     usarInspiracaoHeroica,
-    escolherEfeitoExtra,
   } = useRoll();
 
   if (!estado) return null;
@@ -77,9 +76,9 @@ export default function RollOverlay() {
   // físico ou não, continua em andamento por trás mesmo com o popup
   // fechado, e o `setEstado` do resultado reabria do zero).
   // [Protótipo, ver sdd/sdd-fluxo-rolagem.md] Rolagem com
-  // confirmarAcerto/efeitosExtras só fecha pelos botões novos — nem
-  // tap fora, nem ✕ (o jogador precisa decidir antes de seguir).
-  const aguardandoDecisaoNova = !!estado.confirmarAcerto || !!estado.efeitosExtras;
+  // confirmarAcerto/confirmarFechamento só fecha pelos botões novos —
+  // nem tap fora, nem ✕ (o jogador precisa decidir antes de seguir).
+  const aguardandoDecisaoNova = !!estado.confirmarAcerto || !!estado.confirmarFechamento;
   const podeFechar = estado.fase === 'concluido' && !aguardandoDecisaoNova;
 
   return (
@@ -216,31 +215,16 @@ export default function RollOverlay() {
             </div>
           </div>
         )}
-        {estado.fase === 'concluido' && estado.efeitosExtras && (
-          <div className={styles.efeitosExtrasWrap}>
-            <div className={styles.efeitosExtrasTitulo}>{estado.efeitosExtras.titulo}</div>
-            <div className={styles.efeitosExtrasOpcoes}>
-              {estado.efeitosExtras.opcoes.map((opcao) => (
-                <div
-                  key={opcao}
-                  className={`${styles.efeitoOpcaoBtn} ${opcao === estado.efeitoExtraEscolhido ? styles.efeitoOpcaoBtnAtiva : ''}`}
-                  onClick={() => escolherEfeitoExtra(opcao)}
-                >
-                  {opcao}
-                </div>
-              ))}
-            </div>
-            <div
-              className={styles.okBtn}
-              onClick={() => {
-                const escolhido = estado.efeitoExtraEscolhido ?? null;
-                const { onFecharComEfeito } = estado.efeitosExtras!;
-                fechar();
-                onFecharComEfeito(escolhido);
-              }}
-            >
-              OK
-            </div>
+        {estado.fase === 'concluido' && estado.confirmarFechamento && (
+          <div
+            className={styles.okBtn}
+            onClick={() => {
+              const { aoTocar } = estado.confirmarFechamento!;
+              fechar();
+              aoTocar?.();
+            }}
+          >
+            {estado.confirmarFechamento.rotulo ?? 'OK'}
           </div>
         )}
         {sorteDisponivel &&
