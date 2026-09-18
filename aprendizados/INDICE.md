@@ -29,3 +29,13 @@ Um arquivo por classe de D&D implementada no app.
 implementadas antes do Bárbaro, Guerreiro/Bardo/Bruxo/Mago, continuam
 só em `DECISOES-CLASSES.md`; migração pra cá é gradual, sob demanda,
 não obrigatória de uma vez.)*
+
+## `talentos/`
+
+- **`talentos/fase-4.md`** — Talentos Fase 4 (efeito mecânico de
+  verdade): arquitetura `EfeitoMecanicoTalento`, os grupos A (Origem)/
+  B (Geral já existente)/C (penalidades de proficiência)/D (reaudit
+  2026-09 + os 5 talentos viáveis: Resiliente, Especialista
+  Ambidestro, Mestre das Armas, Mestre em Armas Grandes, Mestre em
+  Escudos), e os 2 bugs de Maestria em Arma achados no caminho
+  (crescimento por nível, troca sem limite de Descanso Longo).

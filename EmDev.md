@@ -761,7 +761,7 @@ Foco fechado — as 3 entregas do Char de Teste Fixo (nível 1 → nível 20
 multiclasse → Mochila completa) estão prontas. Aprendizados registrados
 em `DECISOES-WIZARD.md`. Volta o foco de Talentos — Fase 4 (abaixo).
 
-## Foco ATIVO: Talentos — Fase 4 completa (efeito mecânico de verdade)
+## Foco: Talentos — Fase 4 (efeito mecânico de verdade) — COMPLETO
 
 77 talentos ainda sem efeito mecânico, em 5 categorias (Geral 42,
 Talento Selvagem 10, Dádiva Épica 12, Estilo de Luta 7, Origem 6).
@@ -1297,8 +1297,33 @@ Os 5 viáveis, na ordem que forem entregues:
       tempo no teste headless) — o código reaproveita literalmente o
       mesmo `fimDoTurno()`/padrão de flag já validado por
       `golpeBrutalUsadoTurno`/`ataqueImprudenteAtivo`, risco baixo.
-- [ ] **D.5 — Mestre em Escudos** (só o golpe de escudo — a Reação de
-      anular dano fica de fora, gatilho externo que o app não modela):
-      golpe ativo após acertar corpo a corpo, Salv. Força CD 8+mod.FOR+
-      Bônus Prof. (mesmo padrão de CD do B8), empurra 1,5m ou derruba,
-      1x/turno.
+- [x] **D.5 — Mestre em Escudos** (só o Golpe de Escudo — "Interpor
+      Escudo", a Reação que anula dano, ficou de fora: depende de um
+      efeito EXTERNO com salvaguarda de Destreza que o app não modela).
+      Novo `efeitoMecanico: 'golpe-de-escudo'`. CD fixa "8 + mod.FOR +
+      Bônus de Proficiência" (livro, p.207) em `core/golpeDeEscudo.ts`
+      (`explicarCdGolpeDeEscudo`, mesmo formato de
+      `explicarCdAtaqueDeSopro`), testado (`golpeDeEscudo.test.ts` — 2
+      casos: normal + borda mod.FOR negativo). Sem rolagem de dano —
+      o efeito é só empurrar/derrubar, então o app apenas MOSTRA a CD
+      (com ⓘ de quebra) numa linha nova "🛡 Golpe de Escudo" ao lado de
+      Atacar (`AcaoPanelContent.tsx`), só aparece com arma Corpo a
+      Corpo + Escudo equipados; ao tocar, marca usado (1x/turno,
+      mesmo padrão `golpeBrutalUsadoTurno`/`fimDoTurno()`) e a linha
+      some — resolver empurrar/Caído fica na mesa, igual toda
+      salvaguarda-do-alvo já existente (Ataque de Sopro/Lançar no
+      Inferno). Verificado: `tsc -b`/`npm test` (598)/`npm run build`
+      limpos + Playwright (Guerreiro com Espada Longa + Escudo
+      equipados e o talento injetado via localStorage — sorteio de
+      talento/equipamento é caro de forçar via UI — linha "🛡 Golpe de
+      Escudo — CD 10" aparece certa → usa → linha some, confirmando o
+      "usado".
+
+**Grupo D fechado** — os 5 talentos viáveis da reaudit de 2026-09
+implementados (Resiliente, Especialista Ambidestro, Mestre das Armas,
+Mestre em Armas Grandes, Mestre em Escudos), mais as 2 correções de
+Maestria em Arma achadas no caminho (crescimento nativo por nível,
+troca travada por Descanso Longo). Nenhum talento viável restante na
+lista — os 11 movidos pro Backlog (Atleta, Ator, Combatente Montado,
+etc.) continuam lá até o app ganhar o motor que falta (Deslocamento/
+estado de inimigo/posição).

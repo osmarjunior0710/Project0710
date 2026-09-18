@@ -211,7 +211,16 @@ export type EfeitoMecanicoTalento =
    * inimigo). Só vale com arma Corpo a Corpo (Cortar exige isso; a
    * Maestria em Armas Pesadas não, mas armas Pesadas hoje são todas
    * Corpo a Corpo ou Munição — sem conflito na prática). */
-  | { tipo: 'dano-extra-e-cortar-arma-pesada' };
+  | { tipo: 'dano-extra-e-cortar-arma-pesada' }
+  /** Mestre em Escudos — só "Golpe de Escudo" (livro p.207): ao
+   * acertar com arma Corpo a Corpo como parte da ação Atacar, com
+   * Escudo equipado, força Salv. Força (CD 8+mod.FOR+Bônus
+   * Proficiência) — falha empurra 1,5m OU derruba (Caído), à escolha,
+   * 1x/turno. "Interpor Escudo" (Reação, anula dano de um efeito com
+   * salvaguarda de Destreza) fica de fora — depende de um efeito
+   * EXTERNO que o app não modela (dano recebido por área/magia
+   * inimiga). Ver `core/golpeDeEscudo.ts`. */
+  | { tipo: 'golpe-de-escudo' };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -730,6 +739,7 @@ export const talentos: Talento[] = [
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Escudo" },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR'], maximo: 20 },
     beneficios: "Acertar corpo a corpo a 1,5m: pode golpear com Escudo também (Salv. Força CD 8+mod.Força+Bônus Prof.) — empurra 1,5m ou Caído, 1x/turno. Reação: com Escudo e sucesso em salv. Destreza que daria metade do dano, evita todo o dano.",
+    efeitoMecanico: { tipo: 'golpe-de-escudo' },
     pagina: 207,
     fonte: "PHB 2024",
   },

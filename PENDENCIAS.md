@@ -723,42 +723,29 @@ motivou o pedido.
   ainda, exceto Guerreiro nível 1, que já está limpo). Aplicar o mesmo
   tratamento de Espécies quando fizer sentido pra tela em questão.
 
-## Talentos — Fase 4 em andamento (Fases 1, 2 e 3 completas; lote 1 de Fase 4 feito)
+## Talentos — Fase 4 FECHADA (2026-09) — o que ficou de fora de propósito
 
-**O que é:** Fases 1 (dado), 2 (classificação de texto) e 3 completa
-(seleção de Talento Geral no Level Up com validação de Nível/Atributo
-Mínimo + ASI embutido do próprio talento aplicado de verdade) estão
-feitas — ver DECISOES-CLASSES.md pros detalhes. Fase 4 (efeito mecânico
-de verdade) começou — ver "Talentos Fase 4 — lote 1" em
-DECISOES-CLASSES.md pro esquema de dado (`efeitoMecanico`) e os 5
-primeiros talentos implementados (Alerta, Defensivo, Arquearia,
-Duelismo, Mestre em Armaduras Médias). O resto dos ~80 talentos
-continua `[PH]` (salvo/mostrado, sem efeito na ficha) até chegar a vez
-de cada um.
+Fases 1-4 completas — ver `aprendizados/talentos/fase-4.md` pro
+histórico completo do foco (arquitetura `EfeitoMecanicoTalento`, os
+grupos A/B/C/D, os 5 talentos viáveis do Grupo D e os 2 bugs de
+Maestria em Arma corrigidos no caminho). O que ficou de fora:
 
-**O que falta:**
-
-1. **Fase 4 — continuar em lotes pequenos** (5-10 por vez), mesmo
-   esquema do lote 1 (campo `efeitoMecanico` em `talentos.ts`/
-   `estilosDeLuta.ts`, lido por `core/calculoPersonagem.ts`/
-   `core/ataque.ts` via `efeitoMecanicoDoTalento()`). Ordem sugerida:
-   próximos números isolados fáceis de conectar num cálculo que já
-   existe, por último múltiplos efeitos/Reação (ex: Conjurador
-   Bélico, que provavelmente precisa de UI nova no painel de Reação
-   do Combat, não só um número). A classificação da Fase 2
-   (`classificarTalento.ts`) ajuda a decidir em qual painel de Combat
-   (Ação/Bônus/Reação) cada efeito deve aparecer quando chegar a vez
-   dele, mas ainda precisa de tag manual "afeta cálculo" por talento —
-   o classificador é heurístico (regex), erra ocasionalmente, não é
-   fonte de verdade sozinho.
-2. **Descoberta do lote 1, ainda sem ação:** a planilha tem os mesmos
-   10 Estilos de Luta catalogados 2x — uma vez em `talentos.ts`
-   (categoria "Estilo de Luta") e de novo em `estilosDeLuta.ts` (aba
-   filtrada). Hoje isso não causa bug de UI (a lista de Talentos do
-   Level Up só mostra categoria "Geral", então a cópia em
-   `talentos.ts` nunca aparece pro jogador) — só uma duplicação de
-   dado. Não decidido se vale a pena unificar num arquivo só algum dia;
-   registrado aqui pra não redescobrir do zero.
+1. **11 Talentos Gerais travados estruturalmente** (Atleta, Ator,
+   Combatente Montado, Conjurador Bélico, Duelista Defensivo,
+   Especialista em Besta, Exterminador de Conjuradores, Imobilizador,
+   Mestre em Armas de Haste, Mestre em Armaduras Pesadas,
+   Mestre-Atirador) — dependem de Deslocamento/estado de inimigo/
+   monta/posição, que o app não modela hoje. Registrados em
+   `Backlog.md` com o motivo técnico específico de cada um. Não é
+   "sem prioridade" — é "sem motor pra isso ainda".
+2. **Descoberta ainda sem ação:** a planilha tem os mesmos 10 Estilos
+   de Luta catalogados 2x — uma vez em `talentos.ts` (categoria
+   "Estilo de Luta") e de novo em `estilosDeLuta.ts` (aba filtrada).
+   Hoje isso não causa bug de UI (a lista de Talentos do Level Up só
+   mostra categoria "Geral", então a cópia em `talentos.ts` nunca
+   aparece pro jogador) — só uma duplicação de dado. Não decidido se
+   vale a pena unificar num arquivo só algum dia; registrado aqui pra
+   não redescobrir do zero.
 
 Ideia extra do Osmar (registrada, sem decisão ainda — é decisão de
 produto, não de dado/regra): uma aba de anotações de talento; se for

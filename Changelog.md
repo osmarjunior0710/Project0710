@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1402
+
+Talento Mestre em Escudos agora funciona de verdade: com arma Corpo a
+Corpo e Escudo equipados, aparece "Golpe de Escudo" ao lado de Atacar
+mostrando a CD da salvaguarda do alvo (empurra 1,5m ou derruba, à
+escolha) — 1x por turno. Com isso, fecha o grupo de 5 talentos gerais
+implementados nesta rodada (Resiliente, Especialista Ambidestro,
+Mestre das Armas, Mestre em Armas Grandes, Mestre em Escudos).
+
 ## v202609_1231
 
 Talento Mestre em Armas Grandes agora funciona de verdade: com arma

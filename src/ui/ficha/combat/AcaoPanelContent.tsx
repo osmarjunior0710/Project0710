@@ -9,6 +9,7 @@ import { useRoll } from '../../roll/RollContext';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import type { DanoPendente } from './DanoPendente';
 import TickPips from '../../components/TickPips';
+import InfoValor from '../../components/InfoValor';
 import styles from './PanelRows.module.css';
 
 export type { DanoPendente };
@@ -106,6 +107,15 @@ interface AcaoPanelContentProps {
    * `FichaShell.tsx`, sem precisar de UI aqui). */
   podeOferecerCortar: boolean;
   onConfirmarCortarReduzirAZero: () => void;
+  /** Golpe de Escudo (Mestre em Escudos) — `temGolpeDeEscudo` = talento
+   * + arma Corpo a Corpo + Escudo equipado. Sem rolagem de dano — o
+   * app só mostra a CD (Salv. Força), o jogador resolve empurrar/
+   * derrubar na mesa e confirma o uso (1x/turno). */
+  temGolpeDeEscudo: boolean;
+  cdGolpeDeEscudo: number | null;
+  explicacaoCdGolpeDeEscudo: ExplicacaoCalculo | null;
+  golpeDeEscudoUsadoTurno: boolean;
+  onUsarGolpeDeEscudo: () => void;
 }
 
 export default function AcaoPanelContent({
@@ -154,6 +164,11 @@ export default function AcaoPanelContent({
   onColheitaMacabraDisponivel,
   podeOferecerCortar,
   onConfirmarCortarReduzirAZero,
+  temGolpeDeEscudo,
+  cdGolpeDeEscudo,
+  explicacaoCdGolpeDeEscudo,
+  golpeDeEscudoUsadoTurno,
+  onUsarGolpeDeEscudo,
 }: AcaoPanelContentProps) {
   const { rolarD20, rolarDados } = useRoll();
   const { picker, abrirLista } = useUsarMagiaPainel({
@@ -330,6 +345,21 @@ export default function AcaoPanelContent({
             <div className={styles.rowDesc}>
               Confirma manualmente (o app não sabe o PV do inimigo) — libera "Cortar" na Ação Bônus: 1 ataque extra
               com a mesma arma. Acerto Crítico já libera sozinho.
+            </div>
+          )}
+        </div>
+      )}
+
+      {ataqueAtual && temGolpeDeEscudo && !golpeDeEscudoUsadoTurno && (
+        <div className={styles.row} onClick={onUsarGolpeDeEscudo}>
+          <div className={styles.rowName}>
+            🛡 Golpe de Escudo — CD {cdGolpeDeEscudo ?? '—'}{' '}
+            {explicacaoCdGolpeDeEscudo && <InfoValor titulo="Golpe de Escudo" explicacao={explicacaoCdGolpeDeEscudo} />}
+          </div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Ao acertar com essa arma: Salv. Força do alvo — falha empurra 1,5m ou derruba (Caído), à sua escolha.
+              1x por turno.
             </div>
           )}
         </div>

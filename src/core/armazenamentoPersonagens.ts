@@ -292,6 +292,9 @@ export interface PersonagemSalvo {
    * reseta junto com `turnStateAtual` (Fim do Turno). Só 1x por turno
    * (regra real: "uma jogada de ataque à sua escolha no seu turno"). */
   golpeBrutalUsadoTurno?: boolean;
+  /** Golpe de Escudo (Mestre em Escudos) — 1x por turno, reseta no Fim
+   * do Turno. */
+  golpeDeEscudoUsadoTurno?: boolean;
   /** Cortar (Mestre em Armas Grandes) — `true` = liberado agora (após
    * Crítico ou confirmação manual de "reduziu a 0 PV"), reseta no Fim
    * do Turno. Ver `FichaShell.tsx`. */

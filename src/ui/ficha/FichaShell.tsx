@@ -70,6 +70,7 @@ import {
 } from '../../core/equipamento';
 import { ataqueAtual, ataqueBonusMaoSecundaria } from '../../core/ataque';
 import { armas } from '../../data/rulesets/dnd2024/armas';
+import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
@@ -324,6 +325,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [furiaAtiva, setFuriaAtiva] = useState(personagemSalvo.furiaAtiva ?? false);
   const [ataqueImprudenteAtivo, setAtaqueImprudenteAtivo] = useState(personagemSalvo.ataqueImprudenteAtivoTurno ?? false);
   const [golpeBrutalUsadoTurno, setGolpeBrutalUsadoTurno] = useState(personagemSalvo.golpeBrutalUsadoTurno ?? false);
+  // Golpe de Escudo (Mestre em Escudos) — 1x por turno, mesmo padrão
+  // de `golpeBrutalUsadoTurno`.
+  const [golpeDeEscudoUsadoTurno, setGolpeDeEscudoUsadoTurno] = useState(personagemSalvo.golpeDeEscudoUsadoTurno ?? false);
   const [conhecimentoPrimordialPericiaEscolhida, setConhecimentoPrimordialPericiaEscolhida] = useState(
     personagemSalvo.conhecimentoPrimordialPericiaEscolhida ?? null,
   );
@@ -755,6 +759,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // gate usado tanto pro botão manual "Reduziu a 0 PV?" quanto pro
   // useEffect de detecção automática de Crítico, mais abaixo.
   const podeOferecerCortar = temMestreArmasGrandes && armaEquipadaEhCorpoACorpo;
+  // Golpe de Escudo (Mestre em Escudos) — precisa de arma Corpo a
+  // Corpo (mesma checagem de Cortar) + Escudo equipado.
+  const temMestreEmEscudos = efeitoMecanicoDoTalento(talentosEfetivos, 'golpe-de-escudo') !== null;
+  const podeOferecerGolpeDeEscudo = temMestreEmEscudos && armaEquipadaEhCorpoACorpo && equipadoAtual.escudo !== null;
+  const explicacaoCdGolpeDeEscudo = podeOferecerGolpeDeEscudo
+    ? explicarCdGolpeDeEscudo(forMod, bonusProficienciaAtual)
+    : null;
   const ataque = classe
     ? ataqueAtual(
         armaEquipada?.nome ?? null,
@@ -848,6 +859,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ataqueImprudenteAtivoTurno: ataqueImprudenteAtivo,
     golpeBrutalUsadoTurno,
     cortarProntoTurno: cortarPronto,
+    golpeDeEscudoUsadoTurno,
     conhecimentoPrimordialPericiaEscolhida,
     pvMax: personagem.pvMax,
     pvTemporarioAtual: pvTemporario,
@@ -942,6 +954,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       ataqueImprudenteAtivo,
       golpeBrutalUsadoTurno,
       cortarPronto,
+      golpeDeEscudoUsadoTurno,
       conhecimentoPrimordialPericiaEscolhida,
       pvTemporario,
       maestriaArma,
@@ -1163,6 +1176,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setAtaqueImprudenteAtivo(false);
     setGolpeBrutalUsadoTurno(false);
     setCortarPronto(false);
+    setGolpeDeEscudoUsadoTurno(false);
   }
 
   /** `classeNome` — omitido = gasta do pool "principal" em foco agora
@@ -2301,6 +2315,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               ataque: cortarAtaque,
               onConfirmarReduziuAZero: confirmarCortarPorReduzirAZero,
               onUsar: usarCortar,
+            }}
+            golpeDeEscudo={{
+              disponivel: podeOferecerGolpeDeEscudo,
+              cd: explicacaoCdGolpeDeEscudo ? Number(explicacaoCdGolpeDeEscudo.total.valor) : null,
+              explicacaoCd: explicacaoCdGolpeDeEscudo,
+              usadoTurno: golpeDeEscudoUsadoTurno,
+              onUsar: () => setGolpeDeEscudoUsadoTurno(true),
             }}
             maosCurativas={{
               disponivel: maosCurativasDisponivel,

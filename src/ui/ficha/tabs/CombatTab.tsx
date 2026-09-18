@@ -168,6 +168,17 @@ interface CombatTabProps {
     onConfirmarReduziuAZero: () => void;
     onUsar: () => void;
   };
+  /** Golpe de Escudo (Mestre em Escudos) — `disponivel` = talento +
+   * arma Corpo a Corpo + Escudo equipado. Sem rolagem de dano (só
+   * empurra/derruba) — o app mostra a CD, jogador resolve na mesa e
+   * marca `onUsar` (1x por turno, reseta no Fim do Turno). */
+  golpeDeEscudo: {
+    disponivel: boolean;
+    cd: number | null;
+    explicacaoCd: ExplicacaoCalculo | null;
+    usadoTurno: boolean;
+    onUsar: () => void;
+  };
   /** Mãos Curativas (Aasimar) — `disponivel` `false` = espécie não é
    * Aasimar. */
   maosCurativas: { disponivel: boolean; gasto: boolean; dados: number; onUsar: () => boolean };
@@ -420,6 +431,13 @@ export default function CombatTab({
     ataque: cortarAtaque,
     onConfirmarReduziuAZero: onConfirmarCortarReduzirAZero,
     onUsar: onUsarCortar,
+  },
+  golpeDeEscudo: {
+    disponivel: golpeDeEscudoDisponivel,
+    cd: cdGolpeDeEscudo,
+    explicacaoCd: explicacaoCdGolpeDeEscudo,
+    usadoTurno: golpeDeEscudoUsadoTurno,
+    onUsar: onUsarGolpeDeEscudo,
   },
   maosCurativas: {
     disponivel: maosCurativasDisponivel,
@@ -1352,6 +1370,11 @@ export default function CombatTab({
             onUsarGolpeBrutal={onUsarGolpeBrutal}
             podeOferecerCortar={cortarDisponivel}
             onConfirmarCortarReduzirAZero={onConfirmarCortarReduzirAZero}
+            temGolpeDeEscudo={golpeDeEscudoDisponivel}
+            cdGolpeDeEscudo={cdGolpeDeEscudo}
+            explicacaoCdGolpeDeEscudo={explicacaoCdGolpeDeEscudo}
+            golpeDeEscudoUsadoTurno={golpeDeEscudoUsadoTurno}
+            onUsarGolpeDeEscudo={onUsarGolpeDeEscudo}
             detalhesAtivo={detalhesAtivo}
             maosCurativasDisponivel={maosCurativasDisponivel}
             maosCurativasGasto={maosCurativasGasto}
