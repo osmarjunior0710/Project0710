@@ -103,6 +103,16 @@ nível global (`App.tsx`), nunca dentro de uma tela/feature específica
 3D hoje" foi exatamente a suposição que quebrou ao abrir uma 2ª porta
 de entrada (`/prototipo`) pro mesmo Context.
 
+**Regra pra config de biblioteca externa envolta por um módulo nosso
+(`diceBox3d.ts`):** sempre passar explícito qualquer opção que
+controle um efeito visual perceptível (ex.: `enableShadows`), mesmo
+quando o valor padrão da lib já é o que a gente quer — depender do
+default interno de uma dependência externa custa zero hoje e vira
+mistério amanhã se essa opção nunca aparecer escrita em lugar nenhum
+do nosso código (achado depois de investigar a sombra do dado 3D
+"sumindo" sem nenhuma mudança nossa relacionada — o valor já resolvia
+certo por trás dos panos, só não estava explícito).
+
 ## Tema visual do app de verdade (React): light, não dark
 
 **Decisão:** o app em React usa paleta **clara** (fundo claro, texto
