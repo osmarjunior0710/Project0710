@@ -65,27 +65,37 @@ personagem — como escolher/confirmar o alvo antes/depois da rolagem
 ainda varia: Recuperar Fôlego é sempre "eu mesmo", Colheita Macabra
 pede escolha de Pet, sem padrão comum entre os dois).
 
-## 3. Perguntas em aberto — a resolver prototipando (Entrega B), não aqui
+## 3. Decisão final — Acerto/Erro (validada no protótipo, ver DECISOES-COMBATE.md)
 
-Este SDD propositalmente NÃO decide as respostas — a ideia do Osmar é
-prototipar em baixa fidelidade primeiro e decidir ao vivo, clicando.
-Perguntas que o protótipo precisa responder:
+Prototipado em `/prototipo/acerto-erro` (4 rodadas — as telas
+separadas das 3 primeiras variantes quebravam a sensação de "popup de
+verdade"; a versão final estende o `RollOverlay` real em vez de
+cloná-lo). **Padrão definitivo, registrado por completo em
+`DECISOES-COMBATE.md` "Fluxo Acerto/Erro"** — resumo das respostas às
+perguntas originais:
 
-1. Pra "Acerto/Erro": o app deveria perguntar "acertou?" explicitamente
-   depois da rolagem (1 toque a mais, mas o app passa a saber) ou
-   continuar deixando o jogador decidir por fora e só oferecer os
-   botões de dano/efeito como estão hoje (sem gating)?
-2. Quando existe escolha de efeito pós-acerto (Golpe Brutal e
-   parecidos futuros), ela deveria sempre aplicar algo real no app
-   (nem que seja só um texto salvo no histórico/Perfil), ou tem
-   espaço legítimo pra "só lembrete" quando o app genuinamente não
-   modela o alvo (inimigo, sem ficha própria no app)?
-3. Pra Cura em outro alvo: existe um padrão de "seletor de alvo" único
-   que sirva pra Pet E outro PJ (quando isso existir), ou continuam
-   sendo fluxos diferentes por natureza?
-4. O mecanismo `onResultado` já existente é suficiente pra tudo isso,
-   ou falta algo nele (ex: ele não decide POR SI SÓ "acertou" — só
-   entrega o total).
+1. **O app pergunta "Acertou?" de verdade** — `RollD20Options.confirmarAcerto`
+   troca ✕/tap-fora por botões "Errei"/"Acertei" no popup de ataque.
+2. **Escolha de efeito continua só lembrete de texto** (decisão antiga
+   confirmada, não mudou) — o que mudou foi o CAMINHO até a escolha:
+   `RollDadosOptions.confirmarFechamento` (OK simples ou botão com nome
+   da característica) encadeia num modal próprio
+   (`EscolherEfeitoModal.tsx`) com as opções em `opt-card`.
+3. **Cura em outro alvo — ainda não resolvido**, ver seção 6 abaixo
+   (fora do escopo desta rodada).
+4. **`onResultado` continua o mecanismo certo** pra "reagir ao valor
+   rolado" (cura, Iniciativa) — `confirmarAcerto`/`confirmarFechamento`
+   são complementares a ele, não substitutos: resolvem "o jogador
+   precisa DECIDIR algo antes de prosseguir", não "o app precisa
+   REAGIR a um número".
+
+## 6. Formatos ainda sem prototipar (Salvaguarda/Teste/Cura)
+
+Salvaguarda e Teste seguem confirmados como "sem o problema" (seção 2)
+— não vale a pena gastar rodada de protótipo neles. **Cura em outro
+alvo** (seletor de Pet vs. outro PJ) continua uma pergunta genuína em
+aberto, não resolvida nesta rodada — registrada em `PENDENCIAS.md` pra
+retomar quando/se fizer sentido.
 
 ## 4. Onde isso encosta em sistema existente (risco de colisão)
 

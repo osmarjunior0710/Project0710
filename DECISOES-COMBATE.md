@@ -24,6 +24,63 @@ do navegador — o wireframe original simulava um celular dentro de uma div
 `#frame`; o app de verdade não tem esse frame, a tela real já é o
 contêiner. Vale pra qualquer overlay novo daqui pra frente.
 
+## Fluxo Acerto/Erro — o popup de rolagem pergunta, nunca "atira e esquece"
+
+**Problema resolvido:** até 2026-09, toda rolagem de ataque (e a
+escolha de efeito que algumas características concedem depois de
+acertar, ex. Golpe Brutal) usava um padrão "atira e esquece" — o app
+liberava dano/efeito na MESMA chamada que iniciava a rolagem, sem
+saber se o jogador realmente acertou, e "escolher um efeito" só
+escrevia um texto de lembrete, nunca mudava nada de verdade. Ver
+`sdd/sdd-fluxo-rolagem.md` pro levantamento completo e
+`aprendizados/classes/barbaro.md` pra origem do achado (pendência de
+Golpe Brutal). Protótipo iterado com o Osmar em `/prototipo/acerto-erro`
+antes de formalizar — 4 rodadas até fechar (telas separadas quebravam
+a sensação de "popup de verdade"; a versão final estende o PRÓPRIO
+popup em vez de substituí-lo).
+
+**Padrão definitivo, 3 peças, cada uma opcional/aditiva (nenhuma muda
+o comportamento de quem não passa o campo novo):**
+
+1. **`RollD20Options.confirmarAcerto: { onAcertou, onErrou }`** — numa
+   rolagem de ATAQUE (ou qualquer d20 onde "acertar" decide o próximo
+   passo), troca o ✕/tap-fora por 2 botões no rodapé do popup de
+   rolagem ("Errei" à esquerda/vermelho, "Acertei" à direita/verde,
+   MESMO estilo de Vantagem/Desvantagem). Errei fecha e volta pro
+   estado anterior; Acertei fecha e roda `onAcertou` (normalmente
+   dispara a rolagem de dano).
+2. **`RollDadosOptions.confirmarFechamento: { rotulo?, aoTocar? }`**
+   — numa rolagem de DANO que pode ter uma escolha de efeito depois
+   (ex. Golpe Brutal), troca o fechamento normal por 1 botão no
+   rodapé: sem `rotulo` mostra "OK" azul simples (personagem sem
+   nenhuma característica com escolha — só fecha); com `rotulo`, mostra
+   esse texto (nome da característica, ex. "🔨 Golpe Brutal") — tocar
+   fecha o popup de dano e roda `aoTocar` (normalmente abre o popup de
+   efeito). Quem decide qual dos dois passar é sempre o CALLER (o
+   painel/aba que sabe se o personagem tem a característica), nunca o
+   `RollOverlay`.
+3. **Popup de efeito é um MODAL PRÓPRIO, fora do `RollOverlay`** —
+   não é rolagem de dado, é escolha pura. `src/ui/components/
+   EscolherEfeitoModal.tsx`, mesmo padrão visual dos modais já
+   existentes (`ColheitaMacabraModal`/`FuriaImplacavelModal`,
+   `TrocarArmaMaestria.module.css`) + `opt-card`/`opt-card-name`/
+   `opt-card-desc` (globais, mesmo componente que a aba Combate já
+   usava pro picker antigo de Golpe Brutal) pra cada opção — título +
+   parágrafo, nunca só um nome solto. Botão "OK" sempre visível mas
+   `btn-disabled` até pelo menos 1 opção escolhida.
+
+**Continua fora de escopo (decisão antiga, ainda vale):** o efeito
+escolhido nunca aplica nada de verdade no alvo (o app não modela
+inimigo/status de terceiro) — só populates o feedback/log pro jogador
+aplicar na mesa. Isso não mudou com o Fluxo Acerto/Erro, só o
+CAMINHO até a escolha.
+
+**Retrofit de características que ainda usam o padrão antigo (Ataque
+normal fora de Golpe Brutal, magia, Ancestralidade Gigante) não é
+obrigatório de uma vez** — ver `PENDENCIAS.md`. Toda característica
+NOVA que precise de "confirma acerto"/"escolhe efeito" já nasce usando
+esse padrão.
+
 ## Combate — economia de ação: 3 botões fixos, cada um abre painel do seu lado
 
 **Decisão:** Ação/Ação Bônus/Reação são 3 botões fixos; cada um abre um
