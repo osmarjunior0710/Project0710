@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1742
+
+**Tentativa de corrigir a sombra do dado 3D, que sumiu depois da
+correção do dado 3D "morrendo".** Configuramos explicitamente a
+sombra do motor de dado físico (em vez de depender do padrão da
+biblioteca) — não deu pra confirmar sozinho se isso já resolve, já
+que a sombra não aparece no ambiente de teste automatizado nem antes
+nem depois dessa mudança. Testa aí e avisa se a sombra voltou.
+
 ## v202609_1654
 
 **Corrige o dado 3D "morrendo" pro resto da sessão.** Bug introduzido

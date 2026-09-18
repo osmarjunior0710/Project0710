@@ -1495,3 +1495,36 @@ existe no app ainda (não há conceito de "outros PJs da mesa" na Ficha).
 alguma necessidade real de cura em outro PJ (não só Pet) — até lá, o
 padrão de `ColheitaMacabraModal.tsx` (select inline) continua servindo
 sozinho pra Pet, sem problema visível.
+
+## Dado 3D — sombra sumiu (investigação em aberto)
+
+**O que é:** depois da correção do dado 3D "morrendo" (`Dice3dCanvasHost.tsx`
+global, ver `DECISOES-DESIGN.md` "Rolagem de dados — contexto global"),
+o Osmar reportou que a sombra do dado físico no chão sumiu — o dado
+continua caindo e mostrando o resultado certo, mas sem sombra embaixo
+ele parece "colado num chromakey" em vez de caindo em cima da ficha.
+
+**O que já foi checado e NÃO é a causa:** `enableShadows` do
+`@3d-dice/dice-box` (a flag que, internamente, deixa o material do
+"chão" que recebe a sombra com alpha 0/invisível se estiver
+desligada) já resolvia `true` mesmo sem configurar nada — confirmado
+lendo o merge de defaults da lib E imprimindo o config resolvido de
+verdade no console, tanto antes quanto depois da correção do dado
+morrendo. Passamos a configurar `enableShadows: true` explícito mesmo
+assim (`diceBox3d.ts`) — mais correto/defensivo, mas não é a causa
+raiz, então não é garantia de ter corrigido a sombra.
+
+**Por que ficou em aberto:** não deu pra reproduzir a sombra sumindo
+em nenhum ambiente de teste automatizado (o navegador headless usado
+pra testar não renderiza a sombra do motor 3D nem antes nem depois da
+mudança, então não dá pra comparar visualmente por esse caminho) —
+só o Osmar consegue ver isso, testando na tela de verdade. Falta
+descobrir: acontece já na 1ª rolagem depois de abrir a ficha, ou só
+depois de rolar algumas vezes? Acontece em toda rolagem 3D ou só às
+vezes?
+
+**O que falta pra resolver:** esperar o Osmar confirmar (depois de
+testar com o carimbo de versão mais novo) se a sombra já voltou com o
+`enableShadows` explícito, ou se continua faltando — nesse caso,
+precisa de mais uma pista (ex.: acontece sempre ou intermitente) pra
+investigar de novo.
