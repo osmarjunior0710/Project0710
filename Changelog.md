@@ -5,6 +5,11 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1644
+
+Ajuste pequeno nos títulos dos popups de Golpe Brutal — agora mostram
+"Ataque + Golpe Brutal" e "Dano + Golpe Brutal", mais claro que antes.
+
 ## v202609_1640
 
 Golpe Brutal (Bárbaro, nível 9+) de verdade agora segue o fluxo novo:

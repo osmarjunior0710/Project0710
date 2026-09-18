@@ -230,14 +230,14 @@ export default function AcaoPanelContent({
    * (não usa mais `DanoPendente`). */
   function rolarAtaqueGolpeBrutal(nome: string, ataque: AtaqueInfo) {
     rolarD20({
-      label: `Ataque — ${nome} (Golpe Brutal)`,
+      label: `${nome} — Ataque + Golpe Brutal`,
       formula: `1d20 + ${ataque.modAcerto}`,
       mod: ataque.modAcerto,
       explicacaoMod: ataque.explicacaoAcerto,
       confirmarAcerto: {
         onAcertou: () => {
           rolarDados({
-            label: `Dano — ${nome} (+ Golpe Brutal)`,
+            label: `${nome} — Dano + Golpe Brutal`,
             formula: `${ataque.danoQuantidade}d${ataque.danoLados}${ataque.danoMod ? ` + ${ataque.danoMod}` : ''} + ${golpeBrutalDados}d10`,
             quantidade: ataque.danoQuantidade,
             lados: ataque.danoLados,
