@@ -264,6 +264,7 @@ export default function BonusPanelContent({
     !saltoDaNuvemDisponivel &&
     !formaGrandeDisponivel &&
     !revelacaoCelestialDisponivel &&
+    !furiaDisponivel &&
     !ataqueBonus &&
     !cortarAtaque &&
     !mestreDaMorteDisponivel &&

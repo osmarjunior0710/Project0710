@@ -1421,3 +1421,20 @@ vez de criar um 4º modal quase igual. Aprovado pelo Osmar ("sim").
       vez do modal próprio), risco baixo; vale o Osmar confirmar visual
       dos 3 no celular (título, CD, Sucesso/Falha, botão de dano)
       continuam iguais a antes.
+
+### Bug achado pelo Osmar: Fúria do Bárbaro sumiu do painel de Ação Bônus
+
+Não relacionado à entrega de Golpe de Escudo — bug antigo em
+`BonusPanelContent.tsx`: a condição que decide "Nenhuma ação bônus
+disponível pra este personagem no nível atual" checava várias flags
+(`vooDraconicoDisponivel`/`saltoDaNuvemDisponivel`/etc.) mas nunca
+incluiu `furiaDisponivel` — ficou faltando desde que Fúria foi
+implementada (commit "Bárbaro B3: motor de Fúria"). Resultado: um
+Bárbaro nível 1 (só Fúria disponível na Ação Bônus, nada mais) sempre
+via a mensagem de vazio em vez do toggle de Fúria.
+
+- [x] Adicionado `!furiaDisponivel` na condição de vazio. Verificado:
+      `tsc -b`/`npm test` (598)/`npm run build` limpos + Playwright
+      (Bárbaro nível 1 → painel de Ação Bônus mostra "Fúria: 2/2
+      disponíveis" + toggle → ativa → pips caem pra 1/2, toggle liga,
+      "já ativa — encerre pelo card fixo" aparece).

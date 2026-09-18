@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1955
+
+Corrigido: a ação de Fúria do Bárbaro tinha sumido do painel de Ação
+Bônus (mostrava "Nenhuma ação bônus disponível" mesmo o personagem
+tendo Fúria) — bug antigo, não relacionado à entrega anterior, achado
+enquanto o Osmar testava. Fúria volta a aparecer normal, com os pips
+de uso e o toggle pra ativar.
+
 ## v202609_1937
 
 Golpe de Escudo (talento Mestre em Escudos) agora abre um popup próprio
