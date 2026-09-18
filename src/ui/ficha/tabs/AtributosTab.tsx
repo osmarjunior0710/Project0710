@@ -67,6 +67,9 @@ interface AtributosTabProps {
   maestriaArma: string[];
   armasParaMaestria: Arma[];
   onTrocarArmaMaestria: (armaAntiga: string, armaNova: string) => void;
+  /** `false` = já trocou desde o último Descanso Longo — ícone 🔄
+   * travado até o próximo (regra real: 1 troca por Descanso Longo). */
+  maestriaArmaTrocaDisponivel: boolean;
   /** Slot EXTRA de Maestria do talento Mestre das Armas — `null` = sem
    * o talento (ou talento sem arma escolhida ainda), seção não mostra
    * essa linha. Pool de troca mais amplo que `armasParaMaestria`
@@ -75,6 +78,9 @@ interface AtributosTabProps {
   maestriaArmaExtra: string | null;
   armasElegiveisMaestriaExtra: Arma[];
   onTrocarMaestriaArmaExtra: (armaNova: string) => void;
+  /** Mesma trava de `maestriaArmaTrocaDisponivel`, mas independente —
+   * o talento concede a troca separadamente do slot nativo. */
+  maestriaArmaTalentoTrocaDisponivel: boolean;
   onRolarIniciativa?: () => void;
   /** Sentidos Especiais (Visão no Escuro/às Cegas/Verdadeira,
    * Sismiconsciência) já somados de espécie + Invocações Místicas —
@@ -128,9 +134,11 @@ export default function AtributosTab({
   maestriaArma,
   armasParaMaestria,
   onTrocarArmaMaestria,
+  maestriaArmaTrocaDisponivel,
   maestriaArmaExtra,
   armasElegiveisMaestriaExtra,
   onTrocarMaestriaArmaExtra,
+  maestriaArmaTalentoTrocaDisponivel,
   onRolarIniciativa,
   sentidos,
   resistenciaInferaDisponivel,
@@ -378,6 +386,7 @@ export default function AtributosTab({
                     todasAsArmas={armasParaMaestria}
                     jaEscolhidas={maestriaArma}
                     onTrocar={(nova) => onTrocarArmaMaestria(nome, nova)}
+                    desabilitado={!maestriaArmaTrocaDisponivel}
                   />
                 </div>
                 {arma && (
@@ -400,6 +409,7 @@ export default function AtributosTab({
                   todasAsArmas={armasElegiveisMaestriaExtra}
                   jaEscolhidas={[maestriaArmaExtra]}
                   onTrocar={onTrocarMaestriaArmaExtra}
+                  desabilitado={!maestriaArmaTalentoTrocaDisponivel}
                 />
               </div>
               {(() => {
@@ -416,7 +426,14 @@ export default function AtributosTab({
             </div>
           )}
           <div className="label" style={{ marginTop: 2, marginBottom: 12 }}>
-            você pode trocar 1 arma a cada Descanso Longo.
+            {maestriaArma.length > 0 &&
+              (maestriaArmaTrocaDisponivel
+                ? 'você pode trocar 1 arma a cada Descanso Longo. '
+                : 'já trocou desde o último Descanso Longo — disponível de novo depois de descansar. ')}
+            {maestriaArmaExtra &&
+              (maestriaArmaTalentoTrocaDisponivel
+                ? 'a arma do Mestre das Armas também troca 1x por Descanso Longo, à parte.'
+                : 'a arma do Mestre das Armas já foi trocada — disponível de novo depois de descansar.')}
           </div>
         </>
       )}

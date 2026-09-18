@@ -8,15 +8,19 @@ interface TrocarArmaMaestriaProps {
   todasAsArmas: Arma[];
   jaEscolhidas: string[];
   onTrocar: (novaArma: string) => void;
+  /** `true` = ícone fica opaco e não abre o popup — já trocou a arma
+   * permitida desde o último Descanso Longo, trava até o próximo (ver
+   * `DECISOES-CLASSES.md` "Maestria em Arma — a troca é 1x por
+   * Descanso Longo de verdade"). */
+  desabilitado?: boolean;
 }
 
 /** Ícone "🔄" ao lado de uma arma de Maestria já escolhida — abre um
  * popup com a lista de armas elegíveis (excluindo as que já ocupam
- * outro slot de Maestria) pra trocar por essa. Regra: Guerreiro troca 1
- * arma de Maestria a cada Descanso Longo (ver DECISOES-DESIGN.md
- * "Guerreiro — 2 exceções reais"), por isso o gatilho fica dentro da
- * seção de Descanso Longo da aba Perfil, não no Level Up. */
-export default function TrocarArmaMaestria({ armaAtual, todasAsArmas, jaEscolhidas, onTrocar }: TrocarArmaMaestriaProps) {
+ * outro slot de Maestria) pra trocar por essa. Regra: Guerreiro/
+ * Bárbaro (e o talento Mestre das Armas) trocam 1 arma de Maestria a
+ * cada Descanso Longo — ver `desabilitado`. */
+export default function TrocarArmaMaestria({ armaAtual, todasAsArmas, jaEscolhidas, onTrocar, desabilitado }: TrocarArmaMaestriaProps) {
   const [aberto, setAberto] = useState(false);
   useLockBodyScroll(aberto);
 
@@ -26,9 +30,10 @@ export default function TrocarArmaMaestria({ armaAtual, todasAsArmas, jaEscolhid
     <>
       <span
         className={styles.icon}
+        style={desabilitado ? { opacity: 0.35, pointerEvents: 'none' } : undefined}
         onClick={(e) => {
           e.stopPropagation();
-          setAberto(true);
+          if (!desabilitado) setAberto(true);
         }}
       >
         🔄

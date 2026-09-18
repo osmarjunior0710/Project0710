@@ -1244,6 +1244,24 @@ Os 5 viáveis, na ordem que forem entregues:
       "Maestria em Arma: +1 nova(s)" → ficha final tem as 3 antigas
       intactas + a nova, confirmando que nenhuma foi perdida/trocada
       sem querer).
+- [x] **Correção apontada pelo Osmar, achada revisando Mestre das
+      Armas**: o 🔄 de Maestria em Arma (nativa Guerreiro/Bárbaro E o
+      slot extra do talento) ficava sempre clicável, sem gate nenhum —
+      livro confirma "sempre que completar um Descanso Longo, pode
+      alterar 1 dessas escolhas". Já era uma simplificação assumida,
+      documentada em `PENDENCIAS.md`/`DECISOES-CLASSES.md`. Corrigido:
+      2 flags novas (`maestriaArmaTrocaDisponivel`/
+      `maestriaArmaTalentoTrocaDisponivel`, independentes entre si —
+      cada fonte concede sua própria troca), default `true` (não trava
+      personagens já salvos), viram `false` ao usar a troca, voltam a
+      `true` no Descanso Longo. `TrocarArmaMaestria.tsx` ganhou prop
+      `desabilitado` (mesmo padrão visual/interação já usado em
+      Resistência Ínfera — ícone opaco, `pointer-events: none`).
+      Verificado: `tsc -b`/`npm test` (594)/`npm run build` limpos +
+      Playwright (Guerreiro: troca 1 arma → ícone trava e o texto muda
+      pra "já trocou..." → clique forçado no ícone travado não abre o
+      popup → Descanso Longo → ícone libera de novo e o texto volta a
+      "você pode trocar...").
 - [ ] **D.4 — Mestre em Armas Grandes**: dano extra fixo (=Bônus de
       Proficiência) com arma Pesada + ataque bônus extra após Crítico
       (`estado.critico`, já existe) ou reduzir o alvo a 0 PV (botão de

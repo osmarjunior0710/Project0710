@@ -849,12 +849,9 @@ entregas pequenas (B1-B5) pro "Guerreiro base", antes de partir pras
   classes com proficiência restrita entram quando ganharem esse
   recurso de verdade).
 
-**Simplificação assumida (não é a regra 100% literal):** o ícone de
-troca fica sempre visível na aba Perfil, não é gated a "só aparece
-depois de apertar Descanso Longo de verdade". Fica documentado como
-decisão consciente em `DECISOES-CLASSES.md` — se o Osmar preferir a
-versão mais fiel (só habilita a troca logo depois de descansar), essa
-pendência entra aqui.
+~~Simplificação assumida: ícone de troca sempre clicável, sem gate de
+Descanso Longo~~ — resolvido 2026-09 (Osmar apontou), ver
+`DECISOES-CLASSES.md`.
 
 **Já feito:**
 - **B3 — Recuperar Fôlego + Mente Tática na aba Combat.** Painel de

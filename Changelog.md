@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1125
+
+Corrigido: trocar arma de Maestria (🔄, seja a do Guerreiro/Bárbaro ou
+a do talento Mestre das Armas) agora só é permitido 1 vez a cada
+Descanso Longo — antes dava pra trocar quantas vezes quisesse, a
+qualquer momento.
+
 ## v202609_1912
 
 Corrigido: Maestria em Arma do Guerreiro/Bárbaro agora cresce de

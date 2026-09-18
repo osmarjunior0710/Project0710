@@ -177,6 +177,11 @@ export interface PersonagemSalvo {
    * tipos de descanso, diferente da maioria dos outros "Gasto" do
    * Bruxo (que só resetam no Longo). */
   resistenciaInferaGasto?: boolean;
+  /** Maestria em Arma — troca 1x por Descanso Longo (nativa da classe
+   * e do talento Mestre das Armas são travas INDEPENDENTES). Ausente =
+   * `true` (disponível) — ver `FichaShell.tsx`. */
+  maestriaArmaTrocaDisponivel?: boolean;
+  maestriaArmaTalentoTrocaDisponivel?: boolean;
   /** `true` = Lançar no Inferno (Bruxo, Patrono Ínfero, nível 14) já
    * usado desde o último Descanso Longo — só ele reseta (ou gastar 1
    * Espaço de Pacto pra recuperar antes disso). */

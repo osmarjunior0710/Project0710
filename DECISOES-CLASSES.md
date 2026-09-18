@@ -111,8 +111,20 @@ por turno) usa flag separado do contador, resetado no fim do turno.
 **Maestria em Arma troca por Descanso Longo, não por Level Up** —
 mecanismo de troca à parte do Estilo de Luta, aparece no fluxo de
 Descanso. Nº de armas lido de `core/maestriaArma.ts`, nunca hardcoded.
+A troca é 1x por Descanso Longo DE VERDADE (livro: "sempre que
+completar um Descanso Longo, pode alterar 1 dessas escolhas") — flag
+`(talento)?maestriaArmaTrocaDisponivel` liga no Descanso Longo, desliga
+no uso, trava o ícone 🔄 (`desabilitado`, mesmo padrão de
+`resistenciaInferaGasto`) até o próximo descanso. Nativa (Guerreiro/
+Bárbaro) e a do talento Mestre das Armas são flags INDEPENDENTES —
+cada fonte concede sua própria troca separadamente. **Padrão pra
+qualquer futura "troca 1x por Descanso":** flag boolean default
+`true` (não trava personagens já salvos antes da regra existir),
+liga em `descansoLongo()`, desliga na própria função de troca.
 
-**Data/origem:** 2026-08, plano "Guerreiro 1-20".
+**Data/origem:** 2026-08, plano "Guerreiro 1-20"; trava por Descanso
+Longo corrigida 2026-09 (Osmar apontou que a simplificação assumida
+originalmente — troca sempre livre — contradizia a regra real).
 
 ## Casters — 3 padrões reais de troca de magia (não é "known vs prepared")
 

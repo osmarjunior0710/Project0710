@@ -342,6 +342,20 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagemSalvo.resistenciaInferaAtual ?? null,
   );
   const [resistenciaInferaGasto, setResistenciaInferaGasto] = useState(personagemSalvo.resistenciaInferaGasto ?? false);
+  // Maestria em Arma — regra real (livro): troca 1x a cada Descanso
+  // Longo, não a qualquer momento (ver DECISOES-CLASSES.md). Default
+  // `true` (disponível) pra não travar personagens já salvos antes
+  // desta correção existir — passa a `false` só depois do 1º uso,
+  // volta a `true` no próximo Descanso Longo. Slot nativo (Guerreiro/
+  // Bárbaro) e o slot extra do talento Mestre das Armas são fontes
+  // INDEPENDENTES (o livro concede a troca separadamente em cada),
+  // cada um com sua própria trava.
+  const [maestriaArmaTrocaDisponivel, setMaestriaArmaTrocaDisponivel] = useState(
+    personagemSalvo.maestriaArmaTrocaDisponivel ?? true,
+  );
+  const [maestriaArmaTalentoTrocaDisponivel, setMaestriaArmaTalentoTrocaDisponivel] = useState(
+    personagemSalvo.maestriaArmaTalentoTrocaDisponivel ?? true,
+  );
   const [lancarNoInfernoGasto, setLancarNoInfernoGasto] = useState(personagemSalvo.lancarNoInfernoGasto ?? false);
   const [surtoGasto, setSurtoGasto] = useState(personagemSalvo.surtoGasto ?? 0);
   const [inspiracaoGasto, setInspiracaoGasto] = useState(personagemSalvo.inspiracaoGasto ?? 0);
@@ -818,6 +832,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     sorteDoTenebrosoGasto,
     resistenciaInferaAtual,
     resistenciaInferaGasto,
+    maestriaArmaTrocaDisponivel,
+    maestriaArmaTalentoTrocaDisponivel,
     lancarNoInfernoGasto,
     surtoGasto,
     espacosGastosPorClasseECirculo,
@@ -906,6 +922,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       sorteDoTenebrosoGasto,
       resistenciaInferaAtual,
       resistenciaInferaGasto,
+      maestriaArmaTrocaDisponivel,
+      maestriaArmaTalentoTrocaDisponivel,
       lancarNoInfernoGasto,
       surtoGasto,
       espacosGastosPorClasseECirculo,
@@ -1209,6 +1227,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setAstuciaMagicaGasta(false);
     setContatarPatronoGasto(false);
     setResistenciaInferaGasto(false);
+    setMaestriaArmaTrocaDisponivel(true);
+    setMaestriaArmaTalentoTrocaDisponivel(true);
     setLancarNoInfernoGasto(false);
     setArcanaMisticaGastos([]);
     setMagiasGratisGastas([]);
@@ -1354,10 +1374,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   function trocarArmaMaestria(armaAntiga: string, armaNova: string) {
     setMaestriaArma((prev) => prev.map((a) => (a === armaAntiga ? armaNova : a)));
+    setMaestriaArmaTrocaDisponivel(false);
   }
 
   function trocarMaestriaArmaExtra(armaNova: string) {
     setMaestriaArmaExtra(armaNova);
+    setMaestriaArmaTalentoTrocaDisponivel(false);
   }
 
   function alterarQuantidadeItem(id: string, delta: number) {
@@ -2034,9 +2056,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             maestriaArma={maestriaArma}
             armasParaMaestria={classe ? listarArmasParaMaestria(classe) : []}
             onTrocarArmaMaestria={trocarArmaMaestria}
+            maestriaArmaTrocaDisponivel={maestriaArmaTrocaDisponivel}
             maestriaArmaExtra={maestriaArmaExtra}
             armasElegiveisMaestriaExtra={classe ? armasElegiveisParaMaestriaExtra(classe, talentosEfetivos) : []}
             onTrocarMaestriaArmaExtra={trocarMaestriaArmaExtra}
+            maestriaArmaTalentoTrocaDisponivel={maestriaArmaTalentoTrocaDisponivel}
             onRolarIniciativa={aoRolarIniciativa}
             sentidos={sentidos}
             resistenciaInferaDisponivel={resistenciaInferaDisponivel}
