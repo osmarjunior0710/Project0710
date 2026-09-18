@@ -42,6 +42,9 @@ interface UsarMagiaPainelParams {
   modCarisma: number;
   colheitaMacabraDisponivel: boolean;
   onColheitaMacabraDisponivel: (cura: number) => void;
+  /** Aplica a cura rolada (`rollCura`) direto no PV do personagem —
+   * ver `RollDadosOptions.confirmarAlvoCura` ("Me curar"). */
+  onAlterarPv: (delta: number) => void;
 }
 
 /** Fluxo completo de "Usar Magia" dentro de um painel do Combate
@@ -105,7 +108,10 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
       return;
     }
     if (resultado.rollCura) {
-      rolarDados(resultado.rollCura);
+      rolarDados({
+        ...resultado.rollCura,
+        confirmarAlvoCura: { onMeCurar: (total) => p.onAlterarPv(total) },
+      });
     }
     p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
   }

@@ -178,6 +178,12 @@ export interface RollState {
    * Inspiração Heroica), nunca "gasta" um uso (a característica é
    * sempre vantajosa, sem custo). */
   forcaIndomavelAplicada?: boolean;
+  /** [Protótipo, ver `RollD20Options.confirmarAcerto`.] */
+  confirmarAcerto?: { onAcertou: () => void; onErrou: () => void } | null;
+  /** [Protótipo, ver `RollDadosOptions.confirmarFechamento`.] */
+  confirmarFechamento?: { rotulo?: string; aoTocar?: () => void } | null;
+  /** Ver `RollDadosOptions.confirmarAlvoCura`. */
+  confirmarAlvoCura?: { onMeCurar: (total: number) => void; onCurarOutro?: () => void } | null;
   /** Mesma ideia de `resultadoBrutoD20`, só que pra uma rolagem 'dados'
    * de 1 DADO SÓ (sem `dadosIndividuais`, ver `rolarDados`) — usado
    * pelo `rerollDadoEscolhido`/`usarRerollSe1` desse caso. Rolagem com
@@ -284,6 +290,12 @@ interface RollD20Options {
    * comum, sem a Força Indomável em jogo. */
   permiteForcaIndomavel?: boolean;
   onResultado?: (total: number, d20: number) => void;
+  /** [Protótipo, ver sdd/sdd-fluxo-rolagem.md] Quando presente, troca
+   * o ✕ de fechar por 2 botões "Errei"/"Acertei" assim que a rolagem
+   * concluir — o popup só fecha por um dos dois (nem tap fora, nem
+   * ✕). Opt-in por chamada; `undefined` em qualquer rolagem que não
+   * passe isso mantém o comportamento de sempre. */
+  confirmarAcerto?: { onAcertou: () => void; onErrou: () => void };
 }
 
 interface RollDadosOptions {
@@ -312,6 +324,26 @@ interface RollDadosOptions {
    * rolagem só mostra a fórmula simples, sem ⓘ. */
   explicacaoMod?: ExplicacaoCalculo;
   onResultado?: (total: number) => void;
+  /** [Protótipo, ver sdd/sdd-fluxo-rolagem.md] Substitui o fechamento
+   * por tap-fora/✕ por 1 botão no rodapé, assim que a rolagem
+   * concluir — `rotulo` ausente mostra "OK" simples (só fecha);
+   * presente troca o texto (ex.: nome de uma característica com
+   * escolha própria, tipo "Golpe Brutal") — tocar fecha e chama
+   * `aoTocar` (normalmente abre outro popup/modal, decidido por quem
+   * chama, não por aqui). Ausente = comportamento normal (tap-fora/✕
+   * fecham, sem botão extra). */
+  confirmarFechamento?: { rotulo?: string; aoTocar?: () => void };
+  /** Cura que pode ter como alvo o próprio personagem ou outra
+   * criatura (Pet/PJ) — fluxo Acerto/Erro aplicado à Cura (ver
+   * `sdd/sdd-fluxo-rolagem.md`). Substitui o fechamento normal por 2
+   * botões "Curar outro"/"Me curar" assim que a rolagem concluir.
+   * "Curar outro" só fecha (não existe seletor de alvo genérico
+   * ainda — quem precisa de um alvo específico, tipo Colheita
+   * Macabra, continua com o próprio modal dedicado, sem usar essa
+   * opção aqui); "Me curar" fecha E aplica o total rolado no PV do
+   * personagem (`onMeCurar`). Mutuamente exclusivo com
+   * `confirmarFechamento` — nunca as duas juntas na mesma chamada. */
+  confirmarAlvoCura?: { onMeCurar: (total: number) => void; onCurarOutro?: () => void };
 }
 
 interface RollContextValue {
@@ -399,6 +431,17 @@ interface RollContextValue {
   /** Valor DERIVADO pronto pra decidir o motor de rolagem (Fase B):
    * `preferenciaDado3D && dado3DDisponivel && !modoTeste`. */
   dado3DAtivo: boolean;
+  /** `true` = o FAB avulso de dado 3D (`Dice3dFab.tsx`) está aberto —
+   * junto com `estado?.motor3D`, decide se `Dice3dCanvasHost.tsx`
+   * (host global do `<canvas>`, montado 1x em `App.tsx`) fica visível.
+   * Só o `Dice3dFab` chama isso; existe aqui (não como estado local
+   * dele) porque o host do canvas precisa saber SEM depender do FAB
+   * estar montado — ver `Dice3dCanvasHost.tsx` pro motivo completo
+   * (bug corrigido: o host antes vivia dentro do FAB, só existia com a
+   * Ficha aberta — qualquer rolagem fora dela, ex. `/prototipo`, achava
+   * o container ausente e "matava" o motor 3D pro resto da sessão). */
+  dado3DFabAberto: boolean;
+  registrarDado3DFabAberto: (aberto: boolean) => void;
   /** Histórico compartilhado de rolagens (últimas `MAX_LOG`, mais
    * recente primeiro) — alimentado automaticamente por toda rolagem
    * real (`rolarD20`/`rolarDados`, via `fechar()`) E pelo dado 3D
@@ -525,9 +568,21 @@ export function RollProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preferenciaDado3D]);
   const dado3DAtivo = preferenciaDado3D && dado3DDisponivel && !modoTeste;
+  const [dado3DFabAberto, setDado3DFabAberto] = useState(false);
+  const registrarDado3DFabAberto = useCallback((aberto: boolean) => setDado3DFabAberto(aberto), []);
 
   const rolarD20 = useCallback(
-    ({ label, formula, mod, vantagem, categoria, explicacaoMod, permiteForcaIndomavel, onResultado }: RollD20Options) => {
+    ({
+      label,
+      formula,
+      mod,
+      vantagem,
+      categoria,
+      explicacaoMod,
+      permiteForcaIndomavel,
+      onResultado,
+      confirmarAcerto,
+    }: RollD20Options) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       const usar3D = dado3DAtivo;
       setEstado({
@@ -547,6 +602,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         bonusExtra: null,
         motor3D: usar3D,
         permiteForcaIndomavel,
+        confirmarAcerto,
       });
 
       // d20 simples concluído (sem Vantagem/Desvantagem pré-definida) —
@@ -576,6 +632,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           resultadoBrutoD20: resultadoBruto,
           permiteForcaIndomavel,
           forcaIndomavelAplicada: aplicada,
+          confirmarAcerto,
         });
         onResultado?.(total, rolagem1);
       }
@@ -606,6 +663,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           dado2Motor3D: viaMotor3D,
           permiteForcaIndomavel,
           forcaIndomavelAplicada: aplicada,
+          confirmarAcerto,
         });
         onResultado?.(total, usado);
       }
@@ -655,7 +713,20 @@ export function RollProvider({ children }: { children: ReactNode }) {
   );
 
   const rolarDados = useCallback(
-    ({ label, formula, quantidade, lados, mod, gruposExtras, rerollSe1, rerollEscolhido, explicacaoMod, onResultado }: RollDadosOptions) => {
+    ({
+      label,
+      formula,
+      quantidade,
+      lados,
+      mod,
+      gruposExtras,
+      rerollSe1,
+      rerollEscolhido,
+      explicacaoMod,
+      onResultado,
+      confirmarFechamento,
+      confirmarAlvoCura,
+    }: RollDadosOptions) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       const usar3D = dado3DAtivo;
       // "reroll se 1"/reroll de 1 dado só fazem sentido sabendo o
@@ -687,6 +758,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
           : especificacaoDados.map((d, i) => ({ id: `d${i}`, lados: d.lados, valor: '🎲' })),
         explicacaoMod,
         motor3D: usar3D,
+        confirmarFechamento,
+        confirmarAlvoCura,
       });
 
       // Dado único concluído (Perfurador com arma de 1 dado só) —
@@ -716,6 +789,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
           explicacaoMod,
           motor3D: viaMotor3D,
           resultadoBrutoDados: resultadoBruto,
+          confirmarFechamento,
+          confirmarAlvoCura,
         });
         onResultado?.(total);
       }
@@ -747,6 +822,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
           rerollEscolhidoUsado: false,
           explicacaoMod,
           motor3D: viaMotor3D,
+          confirmarFechamento,
+          confirmarAlvoCura,
         });
         onResultado?.(total);
       }
@@ -1126,6 +1203,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
         alternarPreferenciaDado3D,
         dado3DDisponivel,
         dado3DAtivo,
+        dado3DFabAberto,
+        registrarDado3DFabAberto,
         log,
         adicionarLog,
       }}

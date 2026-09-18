@@ -45,6 +45,11 @@ export function carregarDiceBox3D(): Promise<DiceBox> {
       // da lib é 5; achado testando no celular (pedido do Osmar: "uns
       // 20% menor que o tamanho original", não do tamanho que ficou).
       scale: 6.75,
+      // Explícito de propósito (ver DECISOES-DESIGN.md "Sombra do dado
+      // 3D sumiu") — a lib já traz isso como padrão, mas depender só do
+      // default interno dela não é confiável o suficiente pra uma coisa
+      // que já sumiu 1x sem nenhuma mudança nossa nesse valor.
+      enableShadows: true,
     });
     await box.init();
     diceBoxRef = box;

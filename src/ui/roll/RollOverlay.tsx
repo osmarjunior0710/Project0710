@@ -75,7 +75,11 @@ export default function RollOverlay() {
   // quando a rolagem terminava (achado testando no celular: o motor,
   // físico ou não, continua em andamento por trás mesmo com o popup
   // fechado, e o `setEstado` do resultado reabria do zero).
-  const podeFechar = estado.fase === 'concluido';
+  // [Protótipo, ver sdd/sdd-fluxo-rolagem.md] Rolagem com
+  // confirmarAcerto/confirmarFechamento só fecha pelos botões novos —
+  // nem tap fora, nem ✕ (o jogador precisa decidir antes de seguir).
+  const aguardandoDecisaoNova = !!estado.confirmarAcerto || !!estado.confirmarFechamento || !!estado.confirmarAlvoCura;
+  const podeFechar = estado.fase === 'concluido' && !aguardandoDecisaoNova;
 
   return (
     <div
@@ -83,12 +87,14 @@ export default function RollOverlay() {
       onClick={podeFechar ? fechar : undefined}
     >
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-        <div
-          className={`${styles.close} ${podeFechar ? '' : styles.closeDesabilitado}`}
-          onClick={podeFechar ? fechar : undefined}
-        >
-          <span className={styles.closeIcon}>✕</span>
-        </div>
+        {!aguardandoDecisaoNova && (
+          <div
+            className={`${styles.close} ${podeFechar ? '' : styles.closeDesabilitado}`}
+            onClick={podeFechar ? fechar : undefined}
+          >
+            <span className={styles.closeIcon}>✕</span>
+          </div>
+        )}
         <div className={styles.label}>{estado.label}</div>
         {estado.dadosIndividuais ? (
           <div className={styles.diceGridWrap}>
@@ -182,6 +188,67 @@ export default function RollOverlay() {
               onClick={() => escolherVantagemPosRolagem('vantagem')}
             >
               Vantagem
+            </div>
+          </div>
+        )}
+        {estado.fase === 'concluido' && estado.confirmarAcerto && (
+          <div className={`${styles.vantagemButtons} ${styles.confirmarAcertoWrap}`}>
+            <div
+              className={`${styles.vantagemBtn} ${styles.desvantagemBtn}`}
+              onClick={() => {
+                const { onErrou } = estado.confirmarAcerto!;
+                fechar();
+                onErrou();
+              }}
+            >
+              Errei
+            </div>
+            <div
+              className={`${styles.vantagemBtn} ${styles.vantagemBtnPositivo}`}
+              onClick={() => {
+                const { onAcertou } = estado.confirmarAcerto!;
+                fechar();
+                onAcertou();
+              }}
+            >
+              Acertei
+            </div>
+          </div>
+        )}
+        {estado.fase === 'concluido' && estado.confirmarFechamento && (
+          <div
+            className={styles.okBtn}
+            onClick={() => {
+              const { aoTocar } = estado.confirmarFechamento!;
+              fechar();
+              aoTocar?.();
+            }}
+          >
+            {estado.confirmarFechamento.rotulo ?? 'OK'}
+          </div>
+        )}
+        {estado.fase === 'concluido' && estado.confirmarAlvoCura && (
+          <div className={`${styles.vantagemButtons} ${styles.confirmarAcertoWrap}`}>
+            <div
+              className={`${styles.vantagemBtn} ${styles.desvantagemBtn}`}
+              onClick={() => {
+                const { onCurarOutro } = estado.confirmarAlvoCura!;
+                fechar();
+                onCurarOutro?.();
+              }}
+            >
+              Curar outro
+            </div>
+            <div
+              className={`${styles.vantagemBtn} ${styles.vantagemBtnPositivo}`}
+              onClick={() => {
+                const { onMeCurar } = estado.confirmarAlvoCura!;
+                const total = estado.total ?? 0;
+                fechar();
+                onMeCurar(total);
+              }}
+            >
+              Me curar
             </div>
           </div>
         )}

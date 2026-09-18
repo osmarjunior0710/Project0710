@@ -35,7 +35,7 @@ describe('decidirConjuracao', () => {
     const resultado = decidirConjuracao(magia('palavracurativa'), 1, 1, null, false, false, undefined, 0);
     expect(resultado.mecanica).toBe('cura');
     expect(resultado.rollCura).toBeDefined();
-    expect(resultado.textoFeedback).toBe('Cura rolada — aplique o total no alvo.');
+    expect(resultado.textoFeedback).toBe('Cura rolada — escolha o alvo no popup ("Me curar" ou "Curar outro").');
   });
 
   it('nenhuma mecânica reconhecida (Luz) — texto de feedback vira a descrição curta da magia', () => {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRoll } from '../../roll/RollContext';
-import { carregarDiceBox3D, DICE3D_CANVAS_HOST_ID, lancarGrupos } from '../../roll/diceBox3d';
+import { carregarDiceBox3D, lancarGrupos } from '../../roll/diceBox3d';
 import styles from './Dice3dFab.module.css';
 
 const TIPOS = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'] as const;
@@ -46,7 +46,7 @@ const LOG_ALTURA_ITEM_PX = 52;
  * fora da coluna expandida colapsa de volta pro FAB.
  */
 export default function Dice3dFab() {
-  const { log, adicionarLog, estado } = useRoll();
+  const { log, adicionarLog, registrarDado3DFabAberto } = useRoll();
   const [aberto, setAberto] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -56,20 +56,20 @@ export default function Dice3dFab() {
   const [logAberto, setLogAberto] = useState(false);
   const raizRef = useRef<HTMLDivElement>(null);
 
-  // `true` = uma rolagem OFICIAL (perícia/ataque/etc, RollOverlay) está
-  // usando o motor 3D agora — o host do canvas (compartilhado, ver
-  // diceBox3d.ts) precisa ficar visível mesmo com este FAB fechado,
-  // senão o RollOverlay não tem onde mostrar o dado físico.
-  const rollOficialUsando3D = estado?.motor3D === true;
-  const mostrarCanvas = aberto || rollOficialUsando3D;
-
   const totalSelecionado = Object.values(selecoes).reduce((acc, n) => acc + (n ?? 0), 0);
 
+  // Avisa o `RollContext` se o FAB está aberto — o host do canvas 3D
+  // agora é global (`Dice3dCanvasHost.tsx`, montado em `App.tsx`), não
+  // mais um `<div>` deste componente, então quem decide "mostrar ou
+  // não" precisa saber isso de fora. Desmontar com o FAB aberto (não
+  // deveria acontecer, mas por segurança) avisa `false` no cleanup.
+  useEffect(() => {
+    registrarDado3DFabAberto(aberto);
+    return () => registrarDado3DFabAberto(false);
+  }, [aberto, registrarDado3DFabAberto]);
+
   // Pré-carrega assim que a Ficha abre, pra já estar pronto quando o
-  // jogador tocar o FAB (ou quando a 1ª rolagem oficial 3D acontecer)
-  // — o host do canvas fica sempre montado (nunca desmonta ao fechar o
-  // menu), só escondido via CSS, senão a lib perde a referência do
-  // <canvas> e a próxima rolagem não aparece mais.
+  // jogador tocar o FAB (ou quando a 1ª rolagem oficial 3D acontecer).
   useEffect(() => {
     setCarregando(true);
     carregarDiceBox3D()
@@ -172,16 +172,6 @@ export default function Dice3dFab() {
 
   return (
     <div ref={raizRef}>
-      {/* Sempre montado (nunca condicional) — a lib do dado 3D fica
-          dona desse nó de verdade; escondido via CSS quando fechado.
-          Também fica visível (sem os controles do FAB) quando uma
-          rolagem OFICIAL está usando o motor 3D (`rollOficialUsando3D`)
-          — é o mesmo canvas físico compartilhado, ver diceBox3d.ts.
-          Sem fundo escuro: o dado cai por cima da tela normal. */}
-      <div className={mostrarCanvas ? styles.canvasWrapper : styles.canvasWrapperEscondido}>
-        <div id={DICE3D_CANVAS_HOST_ID} className={styles.canvasHost} />
-      </div>
-
       {aberto && (carregando || erro || resultado !== null) && (
         <div className={styles.statusFlutuante}>
           {carregando && 'Carregando dado 3D…'}

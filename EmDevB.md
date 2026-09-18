@@ -16,51 +16,10 @@
 
 ---
 
-## Foco: Revisão do fluxo de rolagem Acerto/Erro (fecha a pendência de Golpe Brutal do Bárbaro)
-
-Motivado pela pendência "Bárbaro — Golpe Brutal/Golpe Brutal
-Fortalecido: escolha de efeito depois de acertar o ataque" em
-`PENDENCIAS.md`. Investigação (levantamento factual) mostrou que o
-problema é maior que só Golpe Brutal — ver `sdd/sdd-fluxo-rolagem.md`.
-
-Ideia de processo nova pro projeto, sugerida pelo Osmar: existir um
-ambiente de protótipo (baixa fidelidade, fora do fluxo real de
-personagem) pra validar decisões de fluxo/UX clicando na tela ANTES
-de decidir a versão final — primeiro uso real vai ser aqui.
-
-- [x] **Chapéu 1 (PM) — quebra em entregas.** Aprovado pelo Osmar
-      ("Bora"): Entrega A (ambiente de protótipo) → B (prototipar os 4
-      formatos de rolagem: Salvaguarda/Teste/Acerto-Erro/Cura) → C
-      (formaliza o padrão em DECISOES-COMBATE.md) → D (aplica no Golpe
-      Brutal de verdade). Retrofit das outras características com o
-      mesmo problema (Ataque normal, magia, Ancestralidade Gigante)
-      fica fora desta rodada, vai pro `PENDENCIAS.md`.
-- [x] **Chapéu 2 (Game Designer) — SDD.** `sdd/sdd-fluxo-rolagem.md`
-      escrito: levanta o estado atual (padrão "atira e esquece", 2
-      comportamentos inconsistentes de "escolher efeito"), a taxonomia
-      dos 4 formatos, e as perguntas em aberto que o protótipo (Entrega
-      B) precisa responder — decisões propositalmente NÃO tomadas no
-      documento.
-- [ ] **Chapéu 3 (Product/UI Design) — onde o protótipo mora e como
-      é.** Em andamento: proposta de rota (`/prototipo`), ponto de
-      entrada (Lista de Personagens, discreto) e estrutura de "cenas"
-      soltas — aguardando aprovação do Osmar antes de codar.
-- [x] **Entrega A — Ambiente de Protótipo** (infraestrutura mínima).
-      Rota `/prototipo` (lista de "cenas") e `/prototipo/:cenaId`
-      (`PrototipoShell.tsx`/`PrototipoCenaShell.tsx`), catálogo de
-      cenas em `src/ui/prototipo/cenas/index.ts` (adicionar cena nova =
-      1 entrada ali). Ponto de entrada discreto no rodapé da Lista de
-      Personagens ("🧪 protótipos", `.label`, não um `.btn` grande —
-      ferramenta nossa, não do jogador). 1ª cena
-      (`ExemploRolagemSimples.tsx`) prova que dá pra reaproveitar
-      `RollContext`/`RollOverlay` de verdade fora do fluxo de
-      personagem, sem `armazenamentoPersonagens`. Verificado com
-      `tsc -b --force`/`npm test -- --run` (596)/`npm run build`
-      limpos + Playwright em 390px: link aparece na Lista, abre a
-      lista de cenas, abre a cena, "🎲 Rolar" dispara o RollOverlay de
-      verdade (mesmo popup/animação do jogo), resultado aparece na
-      tela ("Último resultado: 7").
-- [ ] **Entrega B — Prototipar os 4 formatos de rolagem** em baixa
-      fidelidade, decidindo ao vivo.
-- [ ] **Entrega C — Formaliza o padrão** (DECISOES-COMBATE.md).
-- [ ] **Entrega D — Aplica no Golpe Brutal**, fecha a pendência.
+*(vazio — sem foco em andamento no momento. Foco "Revisão do fluxo de
+rolagem Acerto/Erro" fechado em 2026-09: ambiente de Protótipo criado
+(`/prototipo`), padrão Errei/Acertei + escolha de efeito formalizado
+em `DECISOES-COMBATE.md` "Fluxo Acerto/Erro", aplicado de verdade no
+Golpe Brutal do Bárbaro — fecha a pendência original. Retrofit das
+outras características e "Cura em outro alvo" registrados em
+`PENDENCIAS.md`, deliberadamente fora desta rodada.)*

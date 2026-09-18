@@ -24,6 +24,12 @@ declare module '@3d-dice/dice-box' {
     assetPath: string;
     theme?: string;
     scale?: number;
+    /** Sombra do dado físico no "chão" — a lib já vem com isso `true`
+     * por padrão, mas o material que desenha a sombra fica com alpha 0
+     * (invisível) se essa flag não chegar como `true` de verdade no
+     * config interno dela (ver `diceBox3d.ts` pra contexto). Passar
+     * explícito aqui remove qualquer dependência do default interno. */
+    enableShadows?: boolean;
   }
 
   export interface DiceBoxRollOpcoes {

@@ -385,3 +385,31 @@
 .closeDesabilitado:active .closeIcon {
   background: var(--panel2);
 }
+
+/* [Protótipo, ver sdd/sdd-fluxo-rolagem.md] Errei/Acertei reaproveita
+   o MESMO layout/cor de Vantagem-Desvantagem (.vantagemButtons/
+   .vantagemBtn/.desvantagemBtn/.vantagemBtnPositivo acima) — só
+   textos e gatilho diferentes, por isso não precisou de classe nova
+   pros botões em si. */
+.confirmarAcertoWrap {
+  margin-top: var(--space-5);
+}
+
+/* [Protótipo] Botão único de "OK"/ação especial no rodapé, ver
+   RollD20Options.confirmarFechamento — azul, distinto do dourado de
+   .bonusExtraBtn e do verde/vermelho de Vantagem-Errei/Acertei, pra
+   sinalizar "ação neutra de prosseguir". */
+.okBtn {
+  margin-top: var(--space-4);
+  min-height: 44px;
+  border-radius: var(--shape-full);
+  border: 1.5px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}

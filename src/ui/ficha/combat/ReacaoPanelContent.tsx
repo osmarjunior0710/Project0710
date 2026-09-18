@@ -26,6 +26,9 @@ interface ReacaoPanelContentProps {
    * ponte de Magia de Pacto ainda, ver PENDENCIAS.md "Painel de Reação
    * ainda usa a lista plana antiga"), então quem chama pode omitir. */
   gastarSlotCirculo: (circulo: number, classeNome?: string) => boolean;
+  /** Aplica cura de magia direto no PV do personagem ("Me curar", ver
+   * `RollDadosOptions.confirmarAlvoCura`). */
+  onAlterarPv: (delta: number) => void;
   /** Nível do personagem — pro Aprimoramento de Truque (dano escala
    * nos níveis 5/11/17, ver `calcularDanoMagia`). */
   nivel: number;
@@ -91,6 +94,7 @@ export default function ReacaoPanelContent({
   onEscolher,
   onAbrirSalvaguarda,
   gastarSlotCirculo,
+  onAlterarPv,
   nivel,
   conjura,
   magiasReacao,
@@ -166,7 +170,10 @@ export default function ReacaoPanelContent({
       return;
     }
     if (resultado.rollCura) {
-      rolarDados(resultado.rollCura);
+      rolarDados({
+        ...resultado.rollCura,
+        confirmarAlvoCura: { onMeCurar: (total) => onAlterarPv(total) },
+      });
     }
     onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
   }

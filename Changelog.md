@@ -12,6 +12,74 @@ Talentos que exigem treinamento com Armadura Média/Pesada ou Escudo
 agora ficam bloqueados de verdade na lista de Talentos quando o
 personagem não tem esse treinamento, em vez de só mostrar um aviso.
 
+## v202609_1805
+
+**Cura ganha "Curar outro"/"Me curar", igual ao Acerto/Erro.** Ao
+rolar cura de magia (qualquer classe) ou Mãos Curativas (Aasimar), o
+popup agora pergunta o alvo em vez de só mostrar o total: "Curar
+outro" fecha (aplica na mesa como sempre); "Me curar" fecha e já soma
+o total ao seu PV sozinho. Recuperar Fôlego e Fúria Implacável
+continuam iguais (já eram sempre "eu mesmo").
+
+## v202609_1742
+
+**Tentativa de corrigir a sombra do dado 3D, que sumiu depois da
+correção do dado 3D "morrendo".** Configuramos explicitamente a
+sombra do motor de dado físico (em vez de depender do padrão da
+biblioteca) — não deu pra confirmar sozinho se isso já resolve, já
+que a sombra não aparece no ambiente de teste automatizado nem antes
+nem depois dessa mudança. Testa aí e avisa se a sombra voltou.
+
+## v202609_1654
+
+**Corrige o dado 3D "morrendo" pro resto da sessão.** Bug introduzido
+pelo ambiente de Protótipos: visitar `/prototipo` (ou até só a Lista)
+e depois voltar pra uma Ficha fazia o dado físico parar de aparecer
+de vez (o número ainda saía certo, só sem a animação/dado físico) —
+só um F5 resolvia. Corrigido de raiz: o "espaço" onde o dado 3D vive
+agora é permanente, independente de qual tela você está.
+
+## v202609_1644
+
+Ajuste pequeno nos títulos dos popups de Golpe Brutal — agora mostram
+"Ataque + Golpe Brutal" e "Dano + Golpe Brutal", mais claro que antes.
+
+## v202609_1640
+
+Golpe Brutal (Bárbaro, nível 9+) de verdade agora segue o fluxo novo:
+ao atacar, o popup pergunta "Errei"/"Acertei" antes de liberar o dano;
+se acertou, o dano da arma e o dado extra do Golpe Brutal já rolam
+juntos num popup só, com um botão "🔨 Golpe Brutal" que abre a lista
+de efeitos (cartões com título + descrição) pra escolher — a escolha
+não muda nada mecanicamente ainda (o app não rastreia inimigo), mas
+agora tem um caminho claro até ela.
+
+## v202609_1546
+
+Refinamento na cena "Acerto/Erro" dos Protótipos: o popup de dano
+agora é condicional — mostra "OK" simples pra quem não tem
+característica com escolha de efeito, ou um botão com o nome da
+característica (ex. "🔨 Golpe Brutal") que abre um 3º popup com a
+lista de efeitos (título + descrição, igual à aba Combate) e um "OK"
+que só habilita depois de escolher. Ainda protótipo, não muda o jogo.
+
+## v202609_1439
+
+A cena "Acerto/Erro" do ambiente de Protótipos agora usa o popup de
+rolagem de verdade (não uma tela separada) — ele ganhou a capacidade
+opcional de perguntar "Errei/Acertei" e encadear direto num popup de
+dano com escolha de efeito, só quando quem chama pedir isso (nenhuma
+rolagem real do jogo mudou de comportamento). Ainda é só protótipo,
+não afeta nenhum personagem.
+
+## v202609_1406
+
+Ambiente de "🧪 Protótipos" ganhou a cena "Acerto/Erro — Ataque com
+efeito", com 3 variantes trocáveis do mesmo cenário de mentirinha
+(ataque num Goblin) — serve pra a gente decidir junto como o fluxo de
+ataque→dano→efeito deveria funcionar de verdade, ainda não muda nada
+no jogo real.
+
 ## v202609_1402
 
 Talento Mestre em Escudos agora funciona de verdade: com arma Corpo a
