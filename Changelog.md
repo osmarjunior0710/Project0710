@@ -14,6 +14,13 @@ escolha) — 1x por turno. Com isso, fecha o grupo de 5 talentos gerais
 implementados nesta rodada (Resiliente, Especialista Ambidestro,
 Mestre das Armas, Mestre em Armas Grandes, Mestre em Escudos).
 
+## v202609_1355
+
+Novo ambiente de "🧪 Protótipos" — ferramenta interna (link discreto
+no rodapé da Lista de Personagens) pra testar ideias de fluxo/UX antes
+de virarem de verdade. Ainda não afeta nenhuma tela do jogo, mas já
+serve pra você bisbilhotar se quiser: `Lista > 🧪 protótipos`.
+
 ## v202609_1231
 
 Talento Mestre em Armas Grandes agora funciona de verdade: com arma
