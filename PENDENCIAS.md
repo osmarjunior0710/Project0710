@@ -14,6 +14,15 @@
 
 ---
 
+## Golpe Brutal (Bárbaro) — confirmar se tem limite de usos por descanso
+
+Pedido do Osmar (2026-09), enquanto discutíamos Esmagador/Talhador:
+checar se Golpe Brutal deveria ter algum limite de usos por Descanso
+Curto/Longo (hoje só é 1x/TURNO, `golpeBrutalUsadoTurno`, resetado no
+Fim do Turno — sem limite adicional por descanso). Confirmar contra a
+planilha/livro se essa é a regra real ou se falta um limite maior.
+
+
 ## Planilha mestra não tem os IDs que o app usa internamente (Magias, Opções de Classe)
 
 **O que é:** a planilha mestra já tem coluna `ID` própria em várias
