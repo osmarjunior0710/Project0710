@@ -295,6 +295,10 @@ export interface PersonagemSalvo {
   /** Golpe de Escudo (Mestre em Escudos) — 1x por turno, reseta no Fim
    * do Turno. */
   golpeDeEscudoUsadoTurno?: boolean;
+  /** Esmagador/Talhador — mesmo padrão 1x por turno, reseta no Fim do
+   * Turno. Flags independentes (o personagem pode ter os 2). */
+  esmagadorUsadoTurno?: boolean;
+  talhadorUsadoTurno?: boolean;
   /** Cortar (Mestre em Armas Grandes) — `true` = liberado agora (após
    * Crítico ou confirmação manual de "reduziu a 0 PV"), reseta no Fim
    * do Turno. Ver `FichaShell.tsx`. */

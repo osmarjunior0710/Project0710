@@ -193,31 +193,27 @@ anunciar na mesa, em vez do app calcular.
   Guloseimas Revigorantes (PV Temporário = Bônus de Proficiência,
   Ação Bônus pra comer) — mesma trava de "vários aliados" acima.
 
-## Talentos Gerais — Agressor/Esmagador/Sentinela/Talhador decidido não implementar (2026-09)
+## Talentos Gerais — Agressor/Sentinela decidido não implementar (2026-09)
 
-Osmar decidiu deixar esses 4 só como texto (`[PH]`) — mesmo espírito
+Osmar decidiu deixar esses 2 só como texto (`[PH]`) — mesmo espírito
 do B.3 acima, nenhum vai ganhar mecânica de verdade; o jogador lembra
-sozinho na mesa quando o gatilho acontecer. Diferente de Perfurador
-(mesma "família" das 5 magias de dano por tipo — Cortante/Contundente/
-Perfurante — mas esse SIM vai ser implementado, ver EmDev.md B.6).
+sozinho na mesa quando o gatilho acontecer. Esmagador/Talhador saíram
+dessa lista (2026-09) — o app já sabe o tipo de dano do ataque
+(`AtaqueInfo.danoTipo`), então o gatilho "ao causar dano Contundente/
+Cortante" virou implementável de verdade (ver `DECISOES-COMBATE.md`
+"Fluxo Acerto/Erro sem 'renunciar' nada antes"); só o bônus de Crítico
+desses 2 (Vantagem/Desvantagem contra o alvo) ficou fora, decisão à
+parte do Osmar (o app não modela turno/alvo nesse nível).
 
 - **Agressor** (p.203) — trava dupla: a ação Correr no Combat só dá o
   Deslocamento padrão, sem lugar pra somar bônus condicional de
   talento; e precisa saber que o personagem "se moveu 3m+ em linha
   reta antes de acertar" — o app não rastreia movimento/distância
   percorrida no turno.
-- **Esmagador** (p.205) — dispara "ao causar dano Contundente": a
-  ficha ainda não sabe qual é o TIPO de dano do ataque que acabou de
-  acontecer (dano é só um número calculado, sem essa tag). Além disso,
-  o efeito em si (empurrar o alvo 1,5m) depende de posição/grade, que
-  o app não modela.
 - **Sentinela** (p.207) — depende de saber quando OUTRA criatura
   (não o próprio personagem) é atacada ou Desengaja a 1,5m dele — isso
   é posição relativa entre vários combatentes; a ficha é individual,
   sem noção de "mapa" de quem está perto de quem.
-- **Talhador** (p.208) — mesma trava de tipo de dano do Esmagador (dano
-  Cortante), mais o efeito em si (reduzir o Deslocamento do alvo) exigir
-  uma ficha de status do INIMIGO, que também não existe no app.
 
 ## Talentos Gerais — B.4 escopo corrigido (2026-09)
 
@@ -266,7 +262,9 @@ Grupo D (Talentos — Fase 4).
   ALVO está concentrando, estado de inimigo que o app não rastreia.
 - **Imobilizador** (p.206) — Ataque Desarmado aplica a condição
   Imobilizado no alvo — condição de INIMIGO, que o app não rastreia
-  (mesma trava do Esmagador/Talhador).
+  (efeito precisa "grudar" no alvo entre turnos, diferente de
+  Esmagador/Talhador, que só empurram/reduzem Deslocamento na hora,
+  sem precisar lembrar disso depois).
 - **Mestre em Armas de Haste** (p.207) — ataque bônus com a outra
   ponta da arma + Reação quando alguém entra no alcance — a 2ª parte
   depende de posição/movimento de inimigo, que o app não modela.

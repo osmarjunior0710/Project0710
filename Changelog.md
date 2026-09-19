@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1304
+
+Talentos Esmagador e Talhador funcionam de verdade: ao acertar um
+ataque com arma que causa dano Contundente (Esmagador) ou Cortante
+(Talhador), 1x por turno, o popup de dano ganha um botão do talento —
+tocar mostra o efeito (empurrar o alvo 1,5m / reduzir Deslocamento em
+3m) com as opções "Ativar" ou "Não usar" (essa última guarda o talento
+pro próximo ataque do mesmo turno).
+
 ## v202609_0956
 
 Novo protótipo em "🧪 Protótipos" (Lista de personagens): cena

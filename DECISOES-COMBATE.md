@@ -1027,3 +1027,42 @@ mesma ação" que Ataque de Sopro/Lançar no Inferno já usavam).
 seja "CD do personagem, o alvo que salva" (sem o app rolar o dado do
 alvo) usa `SalvaguardaDoAlvoModal` — nunca cria um modal próprio pra
 esse formato.
+
+## Fluxo Acerto/Erro sem "renunciar" nada antes — Esmagador/Talhador
+
+Diferente do Golpe Brutal (o único caso do Fluxo Acerto/Erro até
+2026-09), Esmagador/Talhador não têm NADA pra renunciar antes de
+atacar — o gatilho ("ao causar o tipo de dano certo") é automático.
+Por isso o "Atacar" normal (`rolarAtaque` em `AcaoPanelContent.tsx`,
+até então sempre no padrão antigo "atira e esquece" — só Golpe Brutal
+tinha uma função própria com Acerto/Erro) ganhou um DESVIO condicional:
+quando a arma do ataque bate o tipo de dano do talento (`Contundente`/
+`Cortante`) E o personagem tem o talento E ele ainda não foi usado
+neste turno, o próprio "Atacar" usa `confirmarAcerto`/
+`confirmarFechamento` igual Golpe Brutal; sem essas 3 condições,
+continua 100% no fluxo antigo (não incomoda quem não tem os talentos).
+
+**Peça nova: `AtivarEfeitoModal.tsx`** — pro popup final de talento com
+1 efeito só (não é escolha entre vários, por isso não reaproveita
+`EscolherEfeitoModal`) e 2 botões: "✅ Ativar" (aplica e marca o uso) e
+"🚫 Não usar" (fecha sem marcar nada — o talento continua livre pro
+PRÓXIMO ataque do MESMO turno, útil quando o alvo já morreu ou o
+jogador quer guardar pra um ataque melhor). Suporta um texto de
+restrição opcional (ex.: "Este efeito só pode ser usado uma vez por
+turno."), mostrado após uma linha em branco dentro do próprio card.
+
+**Escopo decidido com o Osmar (2026-09):** só a arma da Mão Principal
+(mesmo corte do Golpe de Escudo); e o bônus de Crítico desses 2
+talentos (Vantagem/Desvantagem CONTRA o alvo) ficou de fora — o app
+não modela turno/alvo nesse nível pra automatizar isso, então fica só
+no texto do talento (`beneficios`) pro jogador aplicar sozinho na
+mesa, sem nenhum aviso automático. Validado antes em low-fidelity no
+ambiente de Protótipos (`EsmagadorTalhadorCena.tsx`) — ver
+`aprendizados/talentos/fase-4.md`.
+
+**Padrão pra lembrar:** talento futuro que dispare automaticamente ao
+ACERTAR (sem nada pra renunciar antes) segue este molde — desvio
+condicional dentro da função de ataque já existente + `AtivarEfeitoModal`
+pro popup final — nunca um toggle "antes de atacar" (isso é só pra
+características que EXIGEM uma escolha prévia, tipo Golpe Brutal
+renunciando Vantagem).

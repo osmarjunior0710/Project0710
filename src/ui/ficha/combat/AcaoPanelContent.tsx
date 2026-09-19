@@ -87,14 +87,22 @@ interface AcaoPanelContentProps {
   golpeBrutalDados: number;
   golpeBrutalUsadoTurno: boolean;
   onUsarGolpeBrutal: () => void;
-  /** Bookkeeping do turno (ataquesFeitos/marcar Ação usada) pro
-   * ataque de Golpe Brutal — separado de `onAtacar` porque esse
-   * fluxo NÃO usa mais `DanoPendente`/os botões antigos de dano. */
-  onGolpeBrutalAtacou: (nome: string, desc: string) => void;
+  /** Bookkeeping do turno (ataquesFeitos/marcar Ação usada) pra
+   * qualquer ataque que siga o Fluxo Acerto/Erro (Golpe Brutal,
+   * Esmagador/Talhador) — separado de `onAtacar` porque esse fluxo NÃO
+   * usa mais `DanoPendente`/os botões antigos de dano. */
+  onAtacouSemDanoPendente: (nome: string, desc: string) => void;
   /** Chamado quando o jogador toca "🔨 Golpe Brutal" no popup de dano
    * (depois de acertar e rolar) — abre o modal de efeito no
    * `CombatTab`. */
   onGolpeBrutalDanoConfirmado: () => void;
+  /** Esmagador/Talhador — ver `CombatTab.tsx` (`golpeCondicional`).
+   * `onAbrirGolpeCondicional` chamado quando o jogador toca o botão do
+   * talento no popup de dano (mesmo padrão do Golpe Brutal), o
+   * `CombatTab` decide qual popup (`AtivarEfeitoModal`) mostrar. */
+  esmagadorDisponivel: boolean;
+  talhadorDisponivel: boolean;
+  onAbrirGolpeCondicional: (talento: 'esmagador' | 'talhador') => void;
   detalhesAtivo: boolean;
   /** Mãos Curativas (Aasimar) — `false` = espécie não é Aasimar. */
   maosCurativasDisponivel: boolean;
@@ -166,8 +174,11 @@ export default function AcaoPanelContent({
   golpeBrutalDados,
   golpeBrutalUsadoTurno,
   onUsarGolpeBrutal,
-  onGolpeBrutalAtacou,
+  onAtacouSemDanoPendente,
   onGolpeBrutalDanoConfirmado,
+  esmagadorDisponivel,
+  talhadorDisponivel,
+  onAbrirGolpeCondicional,
   detalhesAtivo,
   maosCurativasDisponivel,
   maosCurativasGasto,
@@ -235,7 +246,7 @@ export default function AcaoPanelContent({
    * dado extra JUNTOS, `gruposExtras`) se "Acertei"; o popup de dano
    * já embute o botão "🔨 Golpe Brutal" pra abrir o modal de efeito
    * (`onGolpeBrutalDanoConfirmado`, o `CombatTab` decide o resto —
-   * lista/nível). Bookkeeping do turno via `onGolpeBrutalAtacou`
+   * lista/nível). Bookkeeping do turno via `onAtacouSemDanoPendente`
    * (não usa mais `DanoPendente`). */
   function rolarAtaqueGolpeBrutal(nome: string, ataque: AtaqueInfo) {
     rolarD20({
@@ -258,29 +269,83 @@ export default function AcaoPanelContent({
         onErrou: () => {},
       },
     });
-    onGolpeBrutalAtacou(
+    onAtacouSemDanoPendente(
       `🗡 ${nome}`,
       'Rolagem de acerto feita — renunciou à Vantagem do Ataque Imprudente pro Golpe Brutal.',
     );
   }
 
+  /** Esmagador/Talhador — qual dos 2 (se algum) entra em jogo NESSE
+   * ataque específico, olhando o tipo de dano REAL da arma usada
+   * agora (`ataque.danoTipo`) — `esmagadorDisponivel`/
+   * `talhadorDisponivel` (vindo do `FichaShell.tsx`) já garantem talento
+   * + ainda não usado no turno; só falta bater o tipo de dano. Nunca os
+   * 2 ao mesmo tempo (Contundente e Cortante são mutuamente exclusivos
+   * pra uma mesma arma). */
+  function talentoGolpeCondicionalAtivavel(ataque: AtaqueInfo): 'esmagador' | 'talhador' | null {
+    if (esmagadorDisponivel && ataque.danoTipo === 'Contundente') return 'esmagador';
+    if (talhadorDisponivel && ataque.danoTipo === 'Cortante') return 'talhador';
+    return null;
+  }
+
+  const ROTULO_GOLPE_CONDICIONAL: Record<'esmagador' | 'talhador', string> = {
+    esmagador: '🔨 Esmagador',
+    talhador: '🗡️ Talhador',
+  };
+
   /** `imprudente` — Ataque Imprudente (Bárbaro) já decidido pra esse
    * ataque (e o turno inteiro, ver `escolherAtaque`); só vira Vantagem
    * de verdade quando o ataque específico usa Força
    * (`ataque.usouForca`). Se coincidir com a Desvantagem de Armadura
-   * sem treino, as duas se cancelam (`resolverVantagem`). */
+   * sem treino, as duas se cancelam (`resolverVantagem`).
+   *
+   * Esmagador/Talhador entram aqui: diferente de Golpe Brutal, não têm
+   * nada pra "renunciar" antes de atacar — o gatilho é automático, só
+   * muda o CAMINHO depois do "Acertei" quando
+   * `talentoGolpeCondicionalAtivavel` bate; sem isso, ataque continua
+   * 100% no fluxo antigo (sem perguntar nada), pra não incomodar quem
+   * não tem esses talentos. */
   function rolarAtaque(
     nome: string,
     ataque: AtaqueInfo,
     finalizar: (nome: string, desc: string, dano: DanoPendente) => void,
     imprudente: boolean,
   ) {
+    const vantagem = resolverVantagem(imprudente && ataque.usouForca, desvantagemForcaDestreza);
+    const talento = talentoGolpeCondicionalAtivavel(ataque);
+    if (talento) {
+      rolarD20({
+        label: `Ataque — ${nome}`,
+        formula: `1d20 + ${ataque.modAcerto}`,
+        mod: ataque.modAcerto,
+        explicacaoMod: ataque.explicacaoAcerto,
+        vantagem,
+        confirmarAcerto: {
+          onAcertou: () => {
+            rolarDados({
+              label: `Dano — ${nome}`,
+              formula: `${ataque.danoQuantidade}d${ataque.danoLados}${ataque.danoMod ? ` + ${ataque.danoMod}` : ''}`,
+              quantidade: ataque.danoQuantidade,
+              lados: ataque.danoLados,
+              mod: ataque.danoMod,
+              confirmarFechamento: {
+                rotulo: ROTULO_GOLPE_CONDICIONAL[talento],
+                aoTocar: () => onAbrirGolpeCondicional(talento),
+              },
+            });
+          },
+          onErrou: () => {},
+        },
+      });
+      onAtacouSemDanoPendente(`🗡 ${nome}`, 'Rolagem de acerto feita.');
+      return;
+    }
     rolarD20({
       label: `Ataque — ${nome}`,
       formula: `1d20 + ${ataque.modAcerto}`,
       mod: ataque.modAcerto,
       explicacaoMod: ataque.explicacaoAcerto,
-      vantagem: resolverVantagem(imprudente && ataque.usouForca, desvantagemForcaDestreza),
+      vantagem,
     });
     finalizar(`🗡 ${nome}`, `Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano ${ataque.danoTipo}.`, {
       label: `Dano — ${nome}`,

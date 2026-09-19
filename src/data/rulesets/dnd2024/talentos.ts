@@ -226,7 +226,21 @@ export type EfeitoMecanicoTalento =
    * salvaguarda de Destreza) fica de fora — depende de um efeito
    * EXTERNO que o app não modela (dano recebido por área/magia
    * inimiga). Ver `core/golpeDeEscudo.ts`. */
-  | { tipo: 'golpe-de-escudo' };
+  | { tipo: 'golpe-de-escudo' }
+  /** Esmagador/Talhador — livro p.205/208: ao ACERTAR com arma/
+   * Desarmado que causa o tipo de dano certo (Contundente/Cortante),
+   * 1x/turno, oferece um efeito simples (empurrar 1,5m / reduzir
+   * Deslocamento 3m) — texto só, o app não modela posição/Deslocamento
+   * de verdade, resolve na mesa. Segue o Fluxo Acerto/Erro
+   * (`DECISOES-COMBATE.md`) igual Golpe Brutal: popup de dano ganha o
+   * botão do talento, que abre um popup com "Ativar"/"Não usar" — "Não
+   * usar" deixa o talento livre pro PRÓXIMO ataque do mesmo turno (o
+   * jogador pode guardar pra um alvo melhor). Bônus de Crítico (Vantagem/
+   * Desvantagem contra o alvo) fica FORA de escopo — decisão do Osmar,
+   * 2026-09: o app não modela turno/alvo nesse nível, fica só no texto
+   * do talento pro jogador aplicar sozinho. */
+  | { tipo: 'esmagador' }
+  | { tipo: 'talhador' };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -557,6 +571,7 @@ export const talentos: Talento[] = [
     beneficios: "1x/turno, ao causar dano Contundente, empurra alvo 1,5m pra espaço livre (se não maior que você). Crítico com dano Contundente: ataques contra esse alvo têm Vantagem até seu próximo turno.",
     pagina: 205,
     fonte: "PHB 2024",
+    efeitoMecanico: { tipo: 'esmagador' },
   },
   {
     id: "especialista-ambidestro",
@@ -827,6 +842,7 @@ export const talentos: Talento[] = [
     beneficios: "1x/turno, ao causar dano Cortante, reduz Deslocamento do alvo em 3m até seu próximo turno. Crítico com dano Cortante: alvo tem Desvantagem em ataques até seu próximo turno.",
     pagina: 208,
     fonte: "PHB 2024",
+    efeitoMecanico: { tipo: 'talhador' },
   },
   {
     id: "telecinetico",
