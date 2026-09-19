@@ -116,6 +116,63 @@ codar (CLAUDE.md seção 6.4) — inclusive achados no meio do caminho
 lendo o PDF, não assumindo). Nenhuma entrega deste foco pulou o
 checklist `tsc -b`/`npm test`/`npm run build` antes de publicar.
 
+## Correções pós-fechamento, achadas pelo Osmar testando no celular
+
+- **Treinamento de Armadura/Escudo virou pré-requisito bloqueante de
+  verdade** — 5 talentos (Especialista/Mestre em Armaduras Médias/
+  Pesadas, Mestre em Escudos) tinham o pré-requisito só como texto
+  livre não-bloqueante (`outro`, mesmo padrão de "Característica
+  Conjuração ou Magia de Pacto"). Como o app já tem o dado de
+  treinamento de cada classe (`core/proficienciaArmadura.ts`, usado em
+  CA/Desvantagem sem treino), virou campo estruturado
+  (`prerequisitoArmadura`) que bloqueia a escolha de verdade, em vez
+  de só avisar — ver `DECISOES-CLASSES.md` ("Pré-requisito 'outro' vira
+  campo estruturado...").
+- **Golpe de Escudo ganhou o popup padrão de "salvaguarda do alvo"** —
+  antes era uma linha solta que marcava "usado" na hora do toque, sem
+  mostrar CD/Sucesso/Falha num popup (diferente de Ataque de Sopro/
+  Lançar no Inferno/Salvaguarda de Magia, que já tinham esse fluxo).
+  Os 3 modais quase idênticos foram unificados num componente só
+  (`SalvaguardaDoAlvoModal.tsx`) e Golpe de Escudo virou o 4º
+  consumidor — ver `DECISOES-COMBATE.md` ("Salvaguarda do alvo —
+  modal único").
+- **Bug não relacionado, achado no caminho: Fúria do Bárbaro sumida do
+  painel de Ação Bônus** — a condição de "nenhuma ação bônus
+  disponível" nunca incluía `furiaDisponivel`, então um Bárbaro nível 1
+  (só Fúria disponível) sempre via a mensagem de vazio. Bug antigo,
+  existia desde a implementação de Fúria, não relacionado a nenhuma
+  entrega deste foco — 1 linha corrigida.
+
+## Esmagador/Talhador — reabertos e implementados (2026-09, pós-fechamento)
+
+Estavam no Backlog como "não implementável" (reaudit do Grupo D
+concluiu que a ficha não sabia o tipo de dano do ataque) — reaberto
+quando o Osmar apontou que a arma JÁ carrega o tipo de dano
+(`AtaqueInfo.danoTipo`, de `core/ataque.ts`), então o gatilho "ao
+causar dano Contundente/Cortante" é sim detectável. Validado antes em
+low-fidelity no ambiente de Protótipos (`EsmagadorTalhadorCena.tsx`)
+antes de mexer no código de verdade — o Osmar aprovou o fluxo ali
+primeiro.
+
+- **Mecânica:** 1x/turno, ao ACERTAR com a arma da Mão Principal
+  causando o tipo de dano certo, o "Atacar" normal passa a usar o
+  Fluxo Acerto/Erro (igual Golpe Brutal, mas sem nada pra renunciar
+  antes — o gatilho é automático). Depois do dano, popup
+  `AtivarEfeitoModal` novo oferece "✅ Ativar" (marca o uso, mostra o
+  texto do efeito) ou "🚫 Não usar" (deixa o talento livre pro PRÓXIMO
+  ataque do MESMO turno — útil se o alvo morreu ou o jogador quer
+  guardar pra um alvo melhor). Ver `DECISOES-COMBATE.md` "Fluxo
+  Acerto/Erro sem 'renunciar' nada antes".
+- **Fora de escopo, decisão do Osmar:** o bônus de Crítico dos 2
+  talentos (Vantagem/Desvantagem CONTRA o alvo) não ganhou detecção
+  automática — o app não modela turno/alvo nesse nível, fica só no
+  texto do talento pro jogador aplicar sozinho.
+- Testado via Playwright (Guerreiro nível 5 com Ataque Extra, arma
+  Contundente + Esmagador injetados via localStorage): 1º ataque
+  pergunta Acerto/Erro → acerta → ativa o efeito → feedback mostra o
+  texto certo; 2º ataque do MESMO turno (Ataque Extra) NÃO pergunta
+  mais, confirmando que a flag "usado" volta ao fluxo antigo.
+
 ## O que ficou de fora (ver `PENDENCIAS.md`)
 
 Os 23 talentos/Estilos de Luta implementados ANTES desta fase (antes

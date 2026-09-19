@@ -42,6 +42,12 @@ export interface PrerequisitosTalento {
    * "Característica Conjuração ou Magia de Pacto") — mostrar como
    * aviso não-bloqueante, nunca travar a escolha por causa dele. */
   outro: string | null;
+  /** Treinamento com Armadura/Escudo — DIFERENTE de `outro`: esse aqui
+   * É validável de verdade (mesmo dado de `core/proficienciaArmadura.ts`
+   * usado pra CA/Desvantagem sem treino), então trava a escolha igual
+   * `nivelMinimo`/`atributosMinimos` fazem, em vez de só avisar. Ver
+   * `TelaEscolherTalento.tsx` (`motivoIndisponivel`). */
+  prerequisitoArmadura?: 'Leve' | 'Média' | 'Pesada' | 'Escudos';
 }
 
 /** Schema de ASI por talento — 2 formatos reais encontrados na
@@ -220,7 +226,21 @@ export type EfeitoMecanicoTalento =
    * salvaguarda de Destreza) fica de fora — depende de um efeito
    * EXTERNO que o app não modela (dano recebido por área/magia
    * inimiga). Ver `core/golpeDeEscudo.ts`. */
-  | { tipo: 'golpe-de-escudo' };
+  | { tipo: 'golpe-de-escudo' }
+  /** Esmagador/Talhador — livro p.205/208: ao ACERTAR com arma/
+   * Desarmado que causa o tipo de dano certo (Contundente/Cortante),
+   * 1x/turno, oferece um efeito simples (empurrar 1,5m / reduzir
+   * Deslocamento 3m) — texto só, o app não modela posição/Deslocamento
+   * de verdade, resolve na mesa. Segue o Fluxo Acerto/Erro
+   * (`DECISOES-COMBATE.md`) igual Golpe Brutal: popup de dano ganha o
+   * botão do talento, que abre um popup com "Ativar"/"Não usar" — "Não
+   * usar" deixa o talento livre pro PRÓXIMO ataque do mesmo turno (o
+   * jogador pode guardar pra um alvo melhor). Bônus de Crítico (Vantagem/
+   * Desvantagem contra o alvo) fica FORA de escopo — decisão do Osmar,
+   * 2026-09: o app não modela turno/alvo nesse nível, fica só no texto
+   * do talento pro jogador aplicar sozinho. */
+  | { tipo: 'esmagador' }
+  | { tipo: 'talhador' };
 
 /** Escolha de proficiência concedida pelo próprio talento (diferente de
  * `ConcedeAsiTalento`, que é ajuste de atributo) — hoje só Habilidoso
@@ -551,6 +571,7 @@ export const talentos: Talento[] = [
     beneficios: "1x/turno, ao causar dano Contundente, empurra alvo 1,5m pra espaço livre (se não maior que você). Crítico com dano Contundente: ataques contra esse alvo têm Vantagem até seu próximo turno.",
     pagina: 205,
     fonte: "PHB 2024",
+    efeitoMecanico: { tipo: 'esmagador' },
   },
   {
     id: "especialista-ambidestro",
@@ -581,7 +602,7 @@ export const talentos: Talento[] = [
     nome: "Especialista em Armaduras Médias",
     categoria: "Geral",
     repetivel: false,
-    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Armadura Leve" },
+    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null, prerequisitoArmadura: 'Leve' },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'DES'], maximo: 20 },
     efeitoMecanico: { tipo: 'proficiencia-armadura', categorias: ['Média'] },
     beneficios: "Treinamento com Armadura Média.",
@@ -593,7 +614,7 @@ export const talentos: Talento[] = [
     nome: "Especialista em Armaduras Pesadas",
     categoria: "Geral",
     repetivel: false,
-    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Armadura Média" },
+    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null, prerequisitoArmadura: 'Média' },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'CON'], maximo: 20 },
     efeitoMecanico: { tipo: 'proficiencia-armadura', categorias: ['Pesada'] },
     beneficios: "Treinamento com Armadura Pesada.",
@@ -690,7 +711,7 @@ export const talentos: Talento[] = [
     nome: "Mestre em Armaduras Médias",
     categoria: "Geral",
     repetivel: false,
-    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Armadura Média" },
+    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null, prerequisitoArmadura: 'Média' },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'DES'], maximo: 20 },
     beneficios: "Com Armadura Média e Destreza 16+: soma +3 (em vez de +2) na CA.",
     efeitoMecanico: { tipo: 'teto-des-armadura-media', desMinima: 16, tetoDes: 3 },
@@ -702,7 +723,7 @@ export const talentos: Talento[] = [
     nome: "Mestre em Armaduras Pesadas",
     categoria: "Geral",
     repetivel: false,
-    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Armadura Pesada" },
+    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null, prerequisitoArmadura: 'Pesada' },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'CON'], maximo: 20 },
     beneficios: "Com Armadura Pesada, reduz dano Contundente/Cortante/Perfurante sofrido em valor = seu Bônus de Proficiência.",
     pagina: 207,
@@ -736,7 +757,7 @@ export const talentos: Talento[] = [
     nome: "Mestre em Escudos",
     categoria: "Geral",
     repetivel: false,
-    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: "Treinamento com Escudo" },
+    prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null, prerequisitoArmadura: 'Escudos' },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR'], maximo: 20 },
     beneficios: "Acertar corpo a corpo a 1,5m: pode golpear com Escudo também (Salv. Força CD 8+mod.Força+Bônus Prof.) — empurra 1,5m ou Caído, 1x/turno. Reação: com Escudo e sucesso em salv. Destreza que daria metade do dano, evita todo o dano.",
     efeitoMecanico: { tipo: 'golpe-de-escudo' },
@@ -821,6 +842,7 @@ export const talentos: Talento[] = [
     beneficios: "1x/turno, ao causar dano Cortante, reduz Deslocamento do alvo em 3m até seu próximo turno. Crítico com dano Cortante: alvo tem Desvantagem em ataques até seu próximo turno.",
     pagina: 208,
     fonte: "PHB 2024",
+    efeitoMecanico: { tipo: 'talhador' },
   },
   {
     id: "telecinetico",

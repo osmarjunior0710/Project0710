@@ -13,7 +13,7 @@ interface ColheitaMacabraModalProps {
 
 /** Modal pós-conjuração de magia de Necromancia com espaço (Colheita
  * Macabra, Necromante nível 3 — ver `core/necromante.ts`) — mesmo
- * padrão visual de popup centralizado de `MagiaSalvaguardaModal`/
+ * padrão visual de popup centralizado de `SalvaguardaDoAlvoModal`/
  * `TrocarValorSimples` (reaproveita `TrocarArmaMaestria.module.css`).
  * Vive em `FichaShell.tsx` (não dentro da aba Magias/Combate) — assim
  * sobrevive à troca de aba e aparece igual não importa de onde a magia

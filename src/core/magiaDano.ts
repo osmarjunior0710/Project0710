@@ -65,6 +65,15 @@ export function fmtDado(quantidade: number, lados: number, mod: number, comSinal
   return `${sinal}${quantidade}d${lados}${parteMod}`;
 }
 
+/** Texto do botão "Rolar Dano" do popup de Salvaguarda de Magia (ex.:
+ * "🎲 Rolar Dano (2d6 + 3 Fogo)") — reaproveitado pelos 2 lugares que
+ * abrem esse popup (`MagiasTab.tsx`/`CombatTab.tsx`), evita duplicar a
+ * formatação nos dois. */
+export function rotuloBotaoDanoMagia(dano: CalculoDanoMagia, prefixo = '🎲 Rolar Dano'): string {
+  const notacao = fmtDado(dano.quantidade, dano.lados, dano.mod);
+  return `${prefixo} (${notacao}${dano.tipo ? ` ${dano.tipo}` : ''})`;
+}
+
 /** Motor genérico de "dado base + Upcast + Aprimoramento de Truque" —
  * usado tanto por dano (`danoBaseDado`) quanto por cura
  * (`curaBaseDado`), já que os dois seguem exatamente a mesma regra de

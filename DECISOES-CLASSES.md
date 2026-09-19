@@ -332,7 +332,24 @@ personagem, um com aquele tipo de efeito — reaproveitado também pra
 Estilo de Luta. Talento de categoria "Origem" (concedido fixo, nunca
 passa pelo picker de Level Up) também entra no cálculo.
 
-**Data/origem:** 2026-08, Talentos Fases 1-4 lote 1.
+**Pré-requisito "outro" vira campo estruturado quando já existe dado
+pra validar de verdade:** `PrerequisitosTalento.outro` (texto livre) é
+o padrão pra pré-requisito que o app não consegue checar sozinho (ex.:
+"Característica Conjuração ou Magia de Pacto") — mostra só como aviso
+não-bloqueante, o jogador confirma na mesa. Mas quando o pré-requisito
+mapeia pra um dado que o app JÁ tem estruturado em outro lugar, ele
+ganha campo próprio, tipado, e passa a bloquear a escolha de verdade —
+igual `nivelMinimo`/`atributosMinimos` já faziam. Primeiro caso:
+`prerequisitoArmadura` (Leve/Média/Pesada/Escudos), validado com a
+mesma `classeProficienteComArmadura` de `core/proficienciaArmadura.ts`
+já usada pra CA/Desvantagem sem treino — reaproveitada, não duplicada.
+Regra pra qualquer talento futuro: se o texto de `outro` corresponder
+a um dado que já existe estruturado no app, criar campo próprio (não
+deixar como texto livre); se não existir esse dado ainda, `outro`
+continua sendo o jeito certo.
+
+**Data/origem:** 2026-08, Talentos Fases 1-4 lote 1; pré-requisito de
+Armadura/Escudo estruturado em 2026-09.
 
 ## Bruxo — Espaço de Magia de Pacto e catálogo de Invocações Místicas (schema base)
 

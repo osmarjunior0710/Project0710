@@ -13,7 +13,7 @@ import {
   type EspacoDeMagiaAtivo,
 } from '../../../core/magiasPersonagem';
 import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
-import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda } from '../../../core/magiaDano';
+import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
@@ -23,7 +23,7 @@ import TickPips from '../../components/TickPips';
 import { useColapsavel } from '../../hooks/useColapsavel';
 import { useRoll } from '../../roll/RollContext';
 import EscolherCirculoShell from '../combat/EscolherCirculoShell';
-import MagiaSalvaguardaModal from '../combat/MagiaSalvaguardaModal';
+import SalvaguardaDoAlvoModal from '../combat/SalvaguardaDoAlvoModal';
 import styles from './MagiasTab.module.css';
 
 const armasSimples = armas.filter((a) => a.categoria.includes('Simples'));
@@ -418,6 +418,17 @@ export default function MagiasTab({
   const temCurto = espacos.some((e) => e.recuperaNoDescansoCurto);
   const avisoRecuperacao = temCurto ? 'Recupera no Descanso Curto ou Longo.' : 'Recupera no Descanso Longo.';
 
+  const danoSalvaguarda = telaSalvaguarda
+    ? calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)
+    : null;
+  const danoCondicionalSalvaguarda = telaSalvaguarda
+    ? calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)
+    : null;
+  const avisoUpcastSalvaguarda =
+    danoSalvaguarda?.upcastNaoAutomatico && telaSalvaguarda?.magia.upcastTexto
+      ? `Círculo usado é maior que o base — dano abaixo NÃO inclui o upcast. Efeito real: ${telaSalvaguarda.magia.upcastTexto}`
+      : null;
+
   return (
     <>
       {desvantagemForcaDestreza && (
@@ -427,19 +438,24 @@ export default function MagiasTab({
       )}
 
       {telaSalvaguarda && (
-        <MagiaSalvaguardaModal
-          nomeMagia={telaSalvaguarda.magia.nome}
+        <SalvaguardaDoAlvoModal
+          titulo={telaSalvaguarda.magia.nome}
           atributo={atributoSalvaguarda(telaSalvaguarda.magia)}
           cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
           explicacaoCd={explicacaoCdConjuracao}
           textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
           textoFalha={telaSalvaguarda.magia.salvaguardaFalha}
-          dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}
-          upcastTexto={telaSalvaguarda.magia.upcastTexto}
-          onRolarDano={rolarDanoSalvaguarda}
-          danoCondicional={calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}
-          danoCondicionalTexto={telaSalvaguarda.magia.danoCondicionalTexto}
-          onRolarDanoCondicional={rolarDanoCondicionalSalvaguarda}
+          aviso={avisoUpcastSalvaguarda}
+          acaoPrincipal={danoSalvaguarda ? { label: rotuloBotaoDanoMagia(danoSalvaguarda), onClick: rolarDanoSalvaguarda } : null}
+          acaoSecundaria={
+            danoCondicionalSalvaguarda
+              ? {
+                  label: rotuloBotaoDanoMagia(danoCondicionalSalvaguarda, `🎲 Rolar Dano — ${telaSalvaguarda.magia.danoCondicionalTexto}`),
+                  onClick: rolarDanoCondicionalSalvaguarda,
+                }
+              : null
+          }
+          semAcaoTexto="Veja a descrição da magia (ⓘ) pro efeito."
           onFechar={() => setTelaSalvaguarda(null)}
         />
       )}

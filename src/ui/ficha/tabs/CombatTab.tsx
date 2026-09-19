@@ -10,7 +10,7 @@ import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPerson
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
-import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda } from '../../../core/magiaDano';
+import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import InfoChip from '../../components/InfoChip';
 import LinearProgressBar from '../../components/LinearProgressBar';
@@ -18,11 +18,10 @@ import ContadorUsos from '../../components/ContadorUsos';
 import SidePanel from '../combat/SidePanel';
 import AcaoPanelContent, { type DanoPendente } from '../combat/AcaoPanelContent';
 import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
+import AtivarEfeitoModal from '../../components/AtivarEfeitoModal';
 import BonusPanelContent from '../combat/BonusPanelContent';
 import ReacaoPanelContent from '../combat/ReacaoPanelContent';
-import LancarNoInfernoModal from '../combat/LancarNoInfernoModal';
-import AtaqueDeSoproModal from '../combat/AtaqueDeSoproModal';
-import MagiaSalvaguardaModal from '../combat/MagiaSalvaguardaModal';
+import SalvaguardaDoAlvoModal from '../combat/SalvaguardaDoAlvoModal';
 import styles from './CombatTab.module.css';
 
 /** Duração total da "piscada" de Fim do Turno (ver `fimDoTurno`) — os
@@ -184,6 +183,21 @@ interface CombatTabProps {
     explicacaoCd: ExplicacaoCalculo | null;
     usadoTurno: boolean;
     onUsar: () => void;
+  };
+  /** Esmagador/Talhador — `esmagadorDisponivel`/`talhadorDisponivel` =
+   * talento + ataque PRINCIPAL causa o tipo de dano certo + ainda não
+   * usado neste turno (checado em `FichaShell.tsx`). Segue o Fluxo
+   * Acerto/Erro: ao ACERTAR o ataque normal, o popup de dano ganha um
+   * botão do talento que abre `AtivarEfeitoModal` — "Ativar" chama
+   * `onAtivarX` (marca o uso); "Não usar" só fecha (flag continua
+   * livre pro próximo ataque do turno). Sem controle de Crítico
+   * (Vantagem/Desvantagem contra o alvo) — decisão do Osmar, 2026-09,
+   * fora de escopo (app não modela turno/alvo nesse nível). */
+  golpeCondicional: {
+    esmagadorDisponivel: boolean;
+    talhadorDisponivel: boolean;
+    onAtivarEsmagador: () => void;
+    onAtivarTalhador: () => void;
   };
   /** Mãos Curativas (Aasimar) — `disponivel` `false` = espécie não é
    * Aasimar. */
@@ -446,6 +460,12 @@ export default function CombatTab({
     usadoTurno: golpeDeEscudoUsadoTurno,
     onUsar: onUsarGolpeDeEscudo,
   },
+  golpeCondicional: {
+    esmagadorDisponivel,
+    talhadorDisponivel,
+    onAtivarEsmagador,
+    onAtivarTalhador,
+  },
   maosCurativas: {
     disponivel: maosCurativasDisponivel,
     gasto: maosCurativasGasto,
@@ -546,6 +566,11 @@ export default function CombatTab({
   const [periciaInigualavelPendente, setPericiaInigualavelPendente] = useState(false);
   const [lancarNoInfernoAberto, setLancarNoInfernoAberto] = useState(false);
   const [ataqueDeSoproAberto, setAtaqueDeSoproAberto] = useState(false);
+  const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
+  // Esmagador/Talhador — qual popup de "Ativar efeito" está aberto
+  // agora (`null` = nenhum), disparado pelo botão do talento no popup
+  // de dano (mesmo padrão de `golpeBrutalEfeitoPendente`).
+  const [golpeCondicionalPendente, setGolpeCondicionalPendente] = useState<'esmagador' | 'talhador' | null>(null);
   const cdLancarNoInferno = modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null;
   const temEspacoDePactoDisponivel = espacos.some((e) => (espacosGastosPorCirculo[e.circulo] ?? 0) < e.maximo);
   const { rolarD20, rolarDados } = useRoll();
@@ -812,6 +837,15 @@ export default function CombatTab({
     rolarDados({ label: 'Lançar no Inferno — Dano', formula: '8d10', quantidade: 8, lados: 10, mod: 0 });
   }
 
+  /** Golpe de Escudo (Mestre em Escudos) — mesmo padrão de
+   * `abrirAtaqueDeSopro`/`abrirLancarNoInferno`: marca o uso (1x/turno)
+   * e abre o popup padrão de "salvaguarda do alvo" junto, na mesma
+   * ação de tocar a linha no painel de Ação. */
+  function abrirGolpeDeEscudo() {
+    onUsarGolpeDeEscudo();
+    setGolpeDeEscudoAberto(true);
+  }
+
   function usarPericiaInigualavel() {
     if (!onUsarInspiracao()) return;
     rolarDados({
@@ -847,9 +881,10 @@ export default function CombatTab({
   }
 
   /** Mesmo bookkeeping de `registrarAtaque`, sem `setDanoPendente` —
-   * Golpe Brutal (Fluxo Acerto/Erro) não usa mais os botões antigos de
-   * dano, o popup já resolve tudo sozinho (ver `AcaoPanelContent.tsx`). */
-  function registrarGolpeBrutalAtaque(nome: string, desc: string) {
+   * qualquer ataque que siga o Fluxo Acerto/Erro (Golpe Brutal,
+   * Esmagador/Talhador) não usa mais os botões antigos de dano, o
+   * popup já resolve tudo sozinho (ver `AcaoPanelContent.tsx`). */
+  function registrarAtaqueSemDanoPendente(nome: string, desc: string) {
     const proximo = ataquesFeitos + 1;
     setAtaquesFeitos(proximo);
     setFeedback(`${nome} — ${desc}`);
@@ -892,6 +927,26 @@ export default function CombatTab({
     setGolpeBrutalEfeitoPendente(false);
   }
 
+  const TEXTOS_GOLPE_CONDICIONAL: Record<'esmagador' | 'talhador', { titulo: string; textoEfeito: string }> = {
+    esmagador: {
+      titulo: '🔨 Esmagador',
+      textoEfeito: 'Empurra o alvo 1,5m pra um espaço livre (se ele não for maior que você).',
+    },
+    talhador: {
+      titulo: '🗡️ Talhador',
+      textoEfeito: 'Reduz o Deslocamento do alvo em 3m até o início do seu próximo turno.',
+    },
+  };
+
+  function ativarGolpeCondicional() {
+    if (!golpeCondicionalPendente) return;
+    const { titulo, textoEfeito } = TEXTOS_GOLPE_CONDICIONAL[golpeCondicionalPendente];
+    if (golpeCondicionalPendente === 'esmagador') onAtivarEsmagador();
+    else onAtivarTalhador();
+    setFeedback(`${titulo} — ${textoEfeito}`);
+    setGolpeCondicionalPendente(null);
+  }
+
   const temEspacoDisponivel = espacos.some((e) => (espacosGastosPorCirculo[e.circulo] ?? 0) < e.maximo);
   // `espacos` já vem ordenado por círculo crescente (espacosDeMagiaAtivos,
   // core/magiasPersonagem.ts) — o primeiro com sobra é exatamente o que
@@ -903,6 +958,17 @@ export default function CombatTab({
     if (categoria === 'bonus') return 'right';
     return 'bottom';
   }
+
+  const danoSalvaguarda = telaSalvaguarda
+    ? calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)
+    : null;
+  const danoCondicionalSalvaguarda = telaSalvaguarda
+    ? calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)
+    : null;
+  const avisoUpcastSalvaguarda =
+    danoSalvaguarda?.upcastNaoAutomatico && telaSalvaguarda?.magia.upcastTexto
+      ? `Círculo usado é maior que o base — dano abaixo NÃO inclui o upcast. Efeito real: ${telaSalvaguarda.magia.upcastTexto}`
+      : null;
 
   return (
     <>
@@ -1337,15 +1403,16 @@ export default function CombatTab({
             golpeBrutalDados={golpeBrutalDados}
             golpeBrutalUsadoTurno={golpeBrutalUsadoTurno}
             onUsarGolpeBrutal={onUsarGolpeBrutal}
-            onGolpeBrutalAtacou={registrarGolpeBrutalAtaque}
+            onAtacouSemDanoPendente={registrarAtaqueSemDanoPendente}
             onGolpeBrutalDanoConfirmado={() => setGolpeBrutalEfeitoPendente(true)}
             podeOferecerCortar={cortarDisponivel}
             onConfirmarCortarReduzirAZero={onConfirmarCortarReduzirAZero}
             temGolpeDeEscudo={golpeDeEscudoDisponivel}
-            cdGolpeDeEscudo={cdGolpeDeEscudo}
-            explicacaoCdGolpeDeEscudo={explicacaoCdGolpeDeEscudo}
             golpeDeEscudoUsadoTurno={golpeDeEscudoUsadoTurno}
-            onUsarGolpeDeEscudo={onUsarGolpeDeEscudo}
+            onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
+            esmagadorDisponivel={esmagadorDisponivel}
+            talhadorDisponivel={talhadorDisponivel}
+            onAbrirGolpeCondicional={setGolpeCondicionalPendente}
             detalhesAtivo={detalhesAtivo}
             maosCurativasDisponivel={maosCurativasDisponivel}
             maosCurativasGasto={maosCurativasGasto}
@@ -1473,38 +1540,72 @@ export default function CombatTab({
         )}
       </SidePanel>
       {lancarNoInfernoAberto && (
-        <LancarNoInfernoModal
+        <SalvaguardaDoAlvoModal
+          titulo="Lançar no Inferno"
+          atributo="Carisma"
           cd={cdLancarNoInferno}
           explicacaoCd={explicacaoCdConjuracao}
-          onRolarDano={rolarDanoLancarNoInferno}
+          textoSucesso="evita a magia"
+          textoFalha="8d10 de dano Psíquico (Ínferos não sofrem) + Incapacitado até o final do seu próximo turno"
+          acaoPrincipal={{ label: '🎲 Rolar Dano (8d10 Psíquico)', onClick: rolarDanoLancarNoInferno }}
           onFechar={() => setLancarNoInfernoAberto(false)}
         />
       )}
       {ataqueDeSoproAberto && (
-        <AtaqueDeSoproModal
+        <SalvaguardaDoAlvoModal
+          titulo="Ataque de Sopro"
+          atributo="Destreza"
           cd={cdAtaqueDeSopro}
           explicacaoCd={explicacaoCdAtaqueDeSopro}
-          tipoDano={tipoDanoAtaqueDeSopro}
-          numDados={numDadosAtaqueDeSopro}
-          onRolarDano={rolarDanoAtaqueDeSopro}
+          textoSucesso="metade do dano"
+          textoFalha={`${numDadosAtaqueDeSopro}d10 de dano ${tipoDanoAtaqueDeSopro ?? '—'} (Cone de 4,5m ou Linha de 9m×1,5m, à sua escolha)`}
+          acaoPrincipal={{
+            label: `🎲 Rolar Dano (${numDadosAtaqueDeSopro}d10 ${tipoDanoAtaqueDeSopro ?? ''})`,
+            onClick: rolarDanoAtaqueDeSopro,
+          }}
           onFechar={() => setAtaqueDeSoproAberto(false)}
         />
       )}
       {telaSalvaguarda && (
-        <MagiaSalvaguardaModal
-          nomeMagia={telaSalvaguarda.magia.nome}
+        <SalvaguardaDoAlvoModal
+          titulo={telaSalvaguarda.magia.nome}
           atributo={atributoSalvaguarda(telaSalvaguarda.magia)}
           cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
           explicacaoCd={explicacaoCdConjuracao}
           textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
           textoFalha={telaSalvaguarda.magia.salvaguardaFalha}
-          dano={calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}
-          upcastTexto={telaSalvaguarda.magia.upcastTexto}
-          onRolarDano={rolarDanoSalvaguarda}
-          danoCondicional={calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)}
-          danoCondicionalTexto={telaSalvaguarda.magia.danoCondicionalTexto}
-          onRolarDanoCondicional={rolarDanoCondicionalSalvaguarda}
+          aviso={avisoUpcastSalvaguarda}
+          acaoPrincipal={danoSalvaguarda ? { label: rotuloBotaoDanoMagia(danoSalvaguarda), onClick: rolarDanoSalvaguarda } : null}
+          acaoSecundaria={
+            danoCondicionalSalvaguarda
+              ? {
+                  label: rotuloBotaoDanoMagia(danoCondicionalSalvaguarda, `🎲 Rolar Dano — ${telaSalvaguarda.magia.danoCondicionalTexto}`),
+                  onClick: rolarDanoCondicionalSalvaguarda,
+                }
+              : null
+          }
+          semAcaoTexto="Veja a descrição da magia (ⓘ) pro efeito."
           onFechar={() => setTelaSalvaguarda(null)}
+        />
+      )}
+      {golpeDeEscudoAberto && (
+        <SalvaguardaDoAlvoModal
+          titulo="Golpe de Escudo"
+          atributo="Força"
+          cd={cdGolpeDeEscudo}
+          explicacaoCd={explicacaoCdGolpeDeEscudo}
+          textoSucesso="nada acontece"
+          textoFalha="empurra 1,5m ou é derrubado (Caído), à sua escolha"
+          onFechar={() => setGolpeDeEscudoAberto(false)}
+        />
+      )}
+      {golpeCondicionalPendente && (
+        <AtivarEfeitoModal
+          titulo={TEXTOS_GOLPE_CONDICIONAL[golpeCondicionalPendente].titulo}
+          textoEfeito={TEXTOS_GOLPE_CONDICIONAL[golpeCondicionalPendente].textoEfeito}
+          restricaoTexto="Este efeito só pode ser usado uma vez por turno."
+          onAtivar={ativarGolpeCondicional}
+          onNaoUsar={() => setGolpeCondicionalPendente(null)}
         />
       )}
     </>

@@ -1,10 +1,20 @@
 import type { Atributo } from '../../../data/wizardFixtures';
+import type { Classe } from '../../../data/rulesets/dnd2024/classes';
 import { talentos, type CategoriaTalento, type Talento } from '../../../data/rulesets/dnd2024/talentos';
 import { talentoTemPlaceholder } from '../../../core/classificarTalento';
+import { classeProficienteComArmadura } from '../../../core/proficienciaArmadura';
 
 interface TelaEscolherTalentoProps {
   nivelAtual: number;
   atributosFinais: Record<Atributo, number>;
+  /** Pra validar `prerequisitos.prerequisitoArmadura` de verdade
+   * (mesmo dado de `core/proficienciaArmadura.ts` usado pra CA/
+   * Desvantagem sem treino) — sem isso o pré-requisito de Armadura/
+   * Escudo viraria aviso não-bloqueante como o resto de `outro`.
+   * `undefined` = pula essa checagem (hoje só o Wizard, categoria
+   * "Origem" — nenhum talento de Origem usa `prerequisitoArmadura`,
+   * só os "Geral" do Level Up, que sempre passam `classe`). */
+  classe?: Classe;
   /** Categoria filtrada — `'Geral'` (padrão) pro passo ASI/Talento do
    * Level Up, `'Dádiva Épica'` pro passo próprio dela. Mesma tela,
    * só troca o catálogo (CLAUDE.md 6.1: reaproveitar em vez de
@@ -19,13 +29,26 @@ interface TelaEscolherTalentoProps {
   onSelecionar: (id: string) => void;
 }
 
-function motivoIndisponivel(t: Talento, nivelAtual: number, atributosFinais: Record<Atributo, number>): string | null {
+function motivoIndisponivel(
+  t: Talento,
+  nivelAtual: number,
+  atributosFinais: Record<Atributo, number>,
+  classe: Classe | undefined,
+  talentosGeraisAtuais: string[],
+): string | null {
   if (t.prerequisitos.nivelMinimo !== null && nivelAtual < t.prerequisitos.nivelMinimo) {
     return `Requer nível ${t.prerequisitos.nivelMinimo}+`;
   }
   const faltando = t.prerequisitos.atributosMinimos.filter((a) => (atributosFinais[a] ?? 10) < 13);
   if (faltando.length > 0) {
     return `Requer ${faltando.join('/')} 13+`;
+  }
+  if (
+    classe &&
+    t.prerequisitos.prerequisitoArmadura &&
+    !classeProficienteComArmadura(classe, t.prerequisitos.prerequisitoArmadura, talentosGeraisAtuais)
+  ) {
+    return `Requer Treinamento com ${t.prerequisitos.prerequisitoArmadura === 'Escudos' ? 'Escudo' : `Armadura ${t.prerequisitos.prerequisitoArmadura}`}`;
   }
   return null;
 }
@@ -124,6 +147,7 @@ function CardTalento({
 export default function TelaEscolherTalento({
   nivelAtual,
   atributosFinais,
+  classe,
   categoria = 'Geral',
   talentosGeraisAtuais,
   favoritos,
@@ -139,7 +163,7 @@ export default function TelaEscolherTalento({
   const resto = opcoes.filter((t) => !idsFavoritados.has(t.id));
 
   function renderCard(t: Talento) {
-    const motivo = motivoIndisponivel(t, nivelAtual, atributosFinais);
+    const motivo = motivoIndisponivel(t, nivelAtual, atributosFinais, classe, talentosGeraisAtuais);
     return (
       <CardTalento
         key={t.id}

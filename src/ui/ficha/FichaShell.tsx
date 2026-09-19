@@ -353,6 +353,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Golpe de Escudo (Mestre em Escudos) — 1x por turno, mesmo padrão
   // de `golpeBrutalUsadoTurno`.
   const [golpeDeEscudoUsadoTurno, setGolpeDeEscudoUsadoTurno] = useState(personagemSalvo.golpeDeEscudoUsadoTurno ?? false);
+  // Esmagador/Talhador — mesmo padrão 1x/turno, flags independentes
+  // (o personagem pode ter os 2 talentos ao mesmo tempo).
+  const [esmagadorUsadoTurno, setEsmagadorUsadoTurno] = useState(personagemSalvo.esmagadorUsadoTurno ?? false);
+  const [talhadorUsadoTurno, setTalhadorUsadoTurno] = useState(personagemSalvo.talhadorUsadoTurno ?? false);
   const [conhecimentoPrimordialPericiaEscolhida, setConhecimentoPrimordialPericiaEscolhida] = useState(
     personagemSalvo.conhecimentoPrimordialPericiaEscolhida ?? null,
   );
@@ -824,6 +828,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       )
     : null;
 
+  // Esmagador/Talhador — só oferece quando o ataque PRINCIPAL causa o
+  // tipo de dano certo (Mão Secundária fica de fora, mesmo escopo do
+  // Golpe de Escudo), tem o talento, e ainda não usou neste turno.
+  const temEsmagador = efeitoMecanicoDoTalento(talentosEfetivos, 'esmagador') !== null;
+  const temTalhador = efeitoMecanicoDoTalento(talentosEfetivos, 'talhador') !== null;
+  const podeOferecerEsmagador = temEsmagador && !esmagadorUsadoTurno && ataque?.info.danoTipo === 'Contundente';
+  const podeOferecerTalhador = temTalhador && !talhadorUsadoTurno && ataque?.info.danoTipo === 'Cortante';
+
   // Cortar (Mestre em Armas Grandes) — detecta Crítico sozinho no
   // ataque PRINCIPAL: toda rolagem de ataque usa o label "Ataque —
   // ..." (ver `AcaoPanelContent.tsx`/`CombatTab.tsx`), e a do ataque
@@ -885,6 +897,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     golpeBrutalUsadoTurno,
     cortarProntoTurno: cortarPronto,
     golpeDeEscudoUsadoTurno,
+    esmagadorUsadoTurno,
+    talhadorUsadoTurno,
     conhecimentoPrimordialPericiaEscolhida,
     pvMax: personagem.pvMax,
     pvTemporarioAtual: pvTemporario,
@@ -980,6 +994,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       golpeBrutalUsadoTurno,
       cortarPronto,
       golpeDeEscudoUsadoTurno,
+      esmagadorUsadoTurno,
+      talhadorUsadoTurno,
       conhecimentoPrimordialPericiaEscolhida,
       pvTemporario,
       maestriaArma,
@@ -1219,6 +1235,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setGolpeBrutalUsadoTurno(false);
     setCortarPronto(false);
     setGolpeDeEscudoUsadoTurno(false);
+    setEsmagadorUsadoTurno(false);
+    setTalhadorUsadoTurno(false);
   }
 
   /** `classeNome` — omitido = gasta do pool "principal" em foco agora
@@ -2388,6 +2406,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               explicacaoCd: explicacaoCdGolpeDeEscudo,
               usadoTurno: golpeDeEscudoUsadoTurno,
               onUsar: () => setGolpeDeEscudoUsadoTurno(true),
+            }}
+            golpeCondicional={{
+              esmagadorDisponivel: podeOferecerEsmagador,
+              talhadorDisponivel: podeOferecerTalhador,
+              onAtivarEsmagador: () => setEsmagadorUsadoTurno(true),
+              onAtivarTalhador: () => setTalhadorUsadoTurno(true),
             }}
             maosCurativas={{
               disponivel: maosCurativasDisponivel,

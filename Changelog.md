@@ -5,7 +5,7 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
-## v202609_1530
+## v202609_1531
 
 **Magia de cura ganha efeito visual — vinheta verde + partículas "+".**
 Quando você escolhe "Me curar" no popup de uma magia de cura, sobe um
@@ -13,6 +13,45 @@ brilho verde da base da tela com "+" flutuando pra cima, 2 segundos,
 depois some sozinho (mesmo estilo da aura vermelha da Fúria do
 Bárbaro). Só em magia de cura — Mãos Curativas, Recuperar Fôlego e os
 botões manuais de PV continuam sem esse efeito.
+
+## v202609_1304
+
+Talentos Esmagador e Talhador funcionam de verdade: ao acertar um
+ataque com arma que causa dano Contundente (Esmagador) ou Cortante
+(Talhador), 1x por turno, o popup de dano ganha um botão do talento —
+tocar mostra o efeito (empurrar o alvo 1,5m / reduzir Deslocamento em
+3m) com as opções "Ativar" ou "Não usar" (essa última guarda o talento
+pro próximo ataque do mesmo turno).
+
+## v202609_0956
+
+Novo protótipo em "🧪 Protótipos" (Lista de personagens): cena
+"Esmagador/Talhador" pra validar o fluxo proposto pra esses 2 talentos
+(ataque → acerto → dano → popup "Ativar"/"Não usar"). Ainda não afeta
+nenhum personagem real.
+
+## v202609_1955
+
+Corrigido: a ação de Fúria do Bárbaro tinha sumido do painel de Ação
+Bônus (mostrava "Nenhuma ação bônus disponível" mesmo o personagem
+tendo Fúria) — bug antigo, não relacionado à entrega anterior, achado
+enquanto o Osmar testava. Fúria volta a aparecer normal, com os pips
+de uso e o toggle pra ativar.
+
+## v202609_1937
+
+Golpe de Escudo (talento Mestre em Escudos) agora abre um popup próprio
+ao usar — mostra a CD da salvaguarda, o que acontece no sucesso e na
+falha ("empurra 1,5m ou derruba, à sua escolha") — em vez de só marcar
+usado direto ao tocar. Mesmo padrão visual que Ataque de Sopro e
+Lançar no Inferno já tinham.
+
+## v202609_1816
+
+Talentos que exigem treinamento com Armadura Média/Pesada ou Escudo
+(Especialista/Mestre em Armaduras Médias/Pesadas, Mestre em Escudos)
+agora ficam bloqueados de verdade na lista de Talentos quando o
+personagem não tem esse treinamento, em vez de só mostrar um aviso.
 
 ## v202609_1805
 

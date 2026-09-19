@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 import ExemploRolagemSimples from './ExemploRolagemSimples';
 import AcertoErroCena from './AcertoErroCena';
+import EsmagadorTalhadorCena from './EsmagadorTalhadorCena';
 
 export interface CenaPrototipo {
   id: string;
@@ -27,5 +28,12 @@ export const cenasPrototipo: CenaPrototipo[] = [
     titulo: 'Acerto/Erro — Ataque com efeito',
     descricao: '3 variantes trocáveis pra decidir o fluxo de ataque→dano→efeito (ver sdd-fluxo-rolagem.md).',
     Componente: AcertoErroCena,
+  },
+  {
+    id: 'esmagador-talhador',
+    titulo: 'Esmagador/Talhador — gatilho automático por tipo de dano',
+    descricao:
+      'Ataque sem "renunciar" nada antes — só pergunta Acerto/Erro quando a arma bate o tipo de dano, tem o talento e ele ainda não foi usado no turno. Popup final com "Ativar"/"Não usar".',
+    Componente: EsmagadorTalhadorCena,
   },
 ];
