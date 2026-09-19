@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0956
+
+Novo protótipo em "🧪 Protótipos" (Lista de personagens): cena
+"Esmagador/Talhador" pra validar o fluxo proposto pra esses 2 talentos
+(ataque → acerto → dano → popup "Ativar"/"Não usar"). Ainda não afeta
+nenhum personagem real.
+
 ## v202609_1955
 
 Corrigido: a ação de Fúria do Bárbaro tinha sumido do painel de Ação
