@@ -7,11 +7,8 @@ import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPerson
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { useRoll } from '../../roll/RollContext';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
-import type { DanoPendente } from './DanoPendente';
 import TickPips from '../../components/TickPips';
 import styles from './PanelRows.module.css';
-
-export type { DanoPendente };
 
 interface AcaoPanelContentProps {
   /** `SidePanel.open` do drawer — ver comentário em
@@ -24,8 +21,7 @@ interface AcaoPanelContentProps {
    * magia (`modAcertoConjuracao`) não é afetado — usa o atributo de
    * conjuração, não Força/Destreza. */
   desvantagemForcaDestreza: boolean;
-  onEscolher: (nome: string, desc: string, dano?: DanoPendente) => void;
-  onAtacar: (nome: string, desc: string, dano: DanoPendente) => void;
+  onEscolher: (nome: string, desc: string) => void;
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda (CD + atributo + sucesso/falha), que vive em
    * CombatTab (persiste depois do painel fechar). `circuloUsado` é
@@ -68,6 +64,12 @@ interface AcaoPanelContentProps {
   surtoUsadoTurno: boolean;
   onUsarSurto: () => void;
   ataqueAtual: AtaqueResolvido | null;
+  /** Valentão de Taverna (Dano Garantido) — `true` = pode rerolar 1 no
+   * dano do Ataque Desarmado. */
+  danoDesarmadoRerollDisponivel: boolean;
+  /** Perfurador — `true` = pode rerolar 1 dado à escolha quando o dano
+   * causado for Perfurante (ver `core/rerollDanoTalento.ts`). */
+  perfuradorDisponivel: boolean;
   /** Ataque Imprudente (Bárbaro, nível 2+) — `false` = não tem essa
    * característica. Só na 1ª jogada de ataque do turno
    * (`ataquesFeitos === 0`), tocar "Atacar" abre um mini-picker
@@ -92,9 +94,9 @@ interface AcaoPanelContentProps {
   golpeBrutalUsadoTurno: boolean;
   onUsarGolpeBrutal: () => void;
   /** Bookkeeping do turno (ataquesFeitos/marcar Ação usada) pra
-   * qualquer ataque que siga o Fluxo Acerto/Erro (Golpe Brutal,
-   * Esmagador/Talhador) — separado de `onAtacar` porque esse fluxo NÃO
-   * usa mais `DanoPendente`/os botões antigos de dano. */
+   * qualquer ataque — Fluxo Acerto/Erro sempre (retrofit 2026-09, ver
+   * `DECISOES-COMBATE.md`), nunca mais usa `DanoPendente`/os botões
+   * antigos de dano. */
   onAtacouSemDanoPendente: (nome: string, desc: string) => void;
   /** Chamado quando o jogador toca "🔨 Golpe Brutal" no popup de dano
    * (depois de acertar e rolar) — abre o modal de efeito no
@@ -107,6 +109,18 @@ interface AcaoPanelContentProps {
   esmagadorDisponivel: boolean;
   talhadorDisponivel: boolean;
   onAbrirGolpeCondicional: (talento: 'esmagador' | 'talhador') => void;
+  /** Ancestralidade Gigante (Golias) — as 3 opções "ao acertar"
+   * (Arrepio do Gelo/Queimadura de Fogo/Tombo da Colina), retrofit
+   * 2026-09 pro Fluxo Acerto/Erro (antes era um card avulso solto na
+   * tela, "toque ao acertar", ver `DECISOES-COMBATE.md`) — mesmo
+   * padrão de Esmagador/Talhador: o popup de dano do ataque principal
+   * já oferece o botão, `null`/0 usos = nenhuma disponível agora.
+   * `onAtivarAncestralidadeGigante` já faz tudo (gasta o uso, rola o
+   * dano certo, mostra o feedback) — mora no `CombatTab.tsx` porque é
+   * quem tem o resto do estado (Salto da Nuvem usa o MESMO contador). */
+  ancestralidadeGiganteEscolhida: string | null;
+  usosAncestralidadeGiganteRestantes: number;
+  onAtivarAncestralidadeGigante: () => void;
   detalhesAtivo: boolean;
   /** Mãos Curativas (Aasimar) — `false` = espécie não é Aasimar. */
   maosCurativasDisponivel: boolean;
@@ -123,7 +137,7 @@ interface AcaoPanelContentProps {
   /** Colheita Macabra (Necromante, nível 3+) — `true` = personagem tem
    * a característica. Ver `core/necromante.ts`. */
   colheitaMacabraDisponivel: boolean;
-  /** Chamado (além do fluxo normal de `onEscolher`/`onAtacar`) sempre
+  /** Chamado (além do fluxo normal de `onEscolher`) sempre
    * que uma magia de Necromancia é conjurada com espaço — o painel
    * fecha logo em seguida (mesmo `onEscolher`), então quem mostra o
    * banner de verdade é o `CombatTab` (que sobrevive ao fechamento). */
@@ -148,7 +162,6 @@ export default function AcaoPanelContent({
   aberto,
   desvantagemForcaDestreza,
   onEscolher,
-  onAtacar,
   onAbrirSalvaguarda,
   gastarSlotCirculo,
   onAlterarPv,
@@ -172,6 +185,8 @@ export default function AcaoPanelContent({
   surtoUsadoTurno,
   onUsarSurto,
   ataqueAtual,
+  danoDesarmadoRerollDisponivel,
+  perfuradorDisponivel,
   temAtaqueImprudente,
   ataqueImprudenteAtivo,
   onAtivarAtaqueImprudente,
@@ -184,6 +199,9 @@ export default function AcaoPanelContent({
   esmagadorDisponivel,
   talhadorDisponivel,
   onAbrirGolpeCondicional,
+  ancestralidadeGiganteEscolhida,
+  usosAncestralidadeGiganteRestantes,
+  onAtivarAncestralidadeGigante,
   detalhesAtivo,
   maosCurativasDisponivel,
   maosCurativasGasto,
@@ -298,67 +316,81 @@ export default function AcaoPanelContent({
     talhador: '🗡️ Talhador',
   };
 
+  const ROTULO_ANCESTRALIDADE_GIGANTE: Record<string, string> = {
+    'Arrepio do Gelo (Gigante do Gelo)': '🧊 Arrepio do Gelo',
+    'Queimadura de Fogo (Gigante de Fogo)': '🔥 Queimadura de Fogo',
+    'Tombo da Colina (Gigante da Colina)': '⛰️ Tombo da Colina',
+  };
+
+  /** `confirmarFechamento` do popup de dano do ataque principal —
+   * Esmagador/Talhador (por tipo de dano da arma) tem prioridade;
+   * sem nenhum dos 2, oferece Ancestralidade Gigante se disponível
+   * (`ancestralidadeGiganteEscolhida` é uma das 3 opções "ao acertar"
+   * E ainda sobra uso); sem nada aplicável, fica só o "OK". Os 2
+   * "talentos" nunca coexistem numa mesma arma (Contundente vs.
+   * Cortante são mutuamente exclusivos) — Ancestralidade Gigante
+   * TEORICAMENTE poderia coincidir com um dos 2 (espécie Golias +
+   * Talento Geral), mas o popup só tem espaço pra 1 botão extra; nesse
+   * caso raro, o talento (ligado à arma) ganha prioridade. */
+  function confirmarFechamentoDoAtaque(talento: 'esmagador' | 'talhador' | null): {
+    rotulo?: string;
+    aoTocar?: () => void;
+  } {
+    if (talento) {
+      return { rotulo: ROTULO_GOLPE_CONDICIONAL[talento], aoTocar: () => onAbrirGolpeCondicional(talento) };
+    }
+    const rotuloAncestralidade = ancestralidadeGiganteEscolhida
+      ? ROTULO_ANCESTRALIDADE_GIGANTE[ancestralidadeGiganteEscolhida]
+      : undefined;
+    if (rotuloAncestralidade && usosAncestralidadeGiganteRestantes > 0) {
+      return { rotulo: rotuloAncestralidade, aoTocar: onAtivarAncestralidadeGigante };
+    }
+    return {};
+  }
+
   /** `imprudente` — Ataque Imprudente (Bárbaro) já decidido pra esse
    * ataque (e o turno inteiro, ver `escolherAtaque`); só vira Vantagem
    * de verdade quando o ataque específico usa Força
    * (`ataque.usouForca`). Se coincidir com a Desvantagem de Armadura
    * sem treino, as duas se cancelam (`resolverVantagem`).
    *
-   * Esmagador/Talhador entram aqui: diferente de Golpe Brutal, não têm
-   * nada pra "renunciar" antes de atacar — o gatilho é automático, só
-   * muda o CAMINHO depois do "Acertei" quando
-   * `talentoGolpeCondicionalAtivavel` bate; sem isso, ataque continua
-   * 100% no fluxo antigo (sem perguntar nada), pra não incomodar quem
-   * não tem esses talentos. */
-  function rolarAtaque(
-    nome: string,
-    ataque: AtaqueInfo,
-    finalizar: (nome: string, desc: string, dano: DanoPendente) => void,
-    imprudente: boolean,
-  ) {
+   * Fluxo Acerto/Erro SEMPRE (retrofit 2026-09, pedido do Osmar — ver
+   * `DECISOES-COMBATE.md`) — antes só ativava com Esmagador/Talhador
+   * disponíveis, senão caía no "atira e esquece" antigo
+   * (`DanoPendente`/botão "Rolar Dano" manual). Sem talento aplicável,
+   * `confirmarFechamento` fica sem `rotulo`/`aoTocar` — popup de dano
+   * mostra só "OK". */
+  function rolarAtaque(nome: string, ataque: AtaqueInfo, imprudente: boolean) {
     const vantagem = resolverVantagem(imprudente && ataque.usouForca, desvantagemForcaDestreza);
     const talento = talentoGolpeCondicionalAtivavel(ataque);
-    if (talento) {
-      rolarD20({
-        label: `Ataque — ${nome}`,
-        formula: `1d20 + ${ataque.modAcerto}`,
-        mod: ataque.modAcerto,
-        explicacaoMod: ataque.explicacaoAcerto,
-        vantagem,
-        confirmarAcerto: {
-          onAcertou: () => {
-            rolarDados({
-              label: `Dano — ${nome}`,
-              formula: `${ataque.danoQuantidade}d${ataque.danoLados}${ataque.danoMod ? ` + ${ataque.danoMod}` : ''}`,
-              quantidade: ataque.danoQuantidade,
-              lados: ataque.danoLados,
-              mod: ataque.danoMod,
-              confirmarFechamento: {
-                rotulo: ROTULO_GOLPE_CONDICIONAL[talento],
-                aoTocar: () => onAbrirGolpeCondicional(talento),
-              },
-            });
-          },
-          onErrou: () => {},
-        },
-      });
-      onAtacouSemDanoPendente(`🗡 ${nome}`, 'Rolagem de acerto feita.');
-      return;
-    }
+    // Ver `AcaoPanelContentProps.danoDesarmadoRerollDisponivel`/
+    // `perfuradorDisponivel` — os 2 rerolls de dano do ataque comum
+    // (checados aqui, não em `rerollDanoTalento.ts`, porque dependem
+    // do `nome`/`danoTipo` DESSE ataque específico).
+    const ehDanoDesarmado = nome.endsWith('Ataque Desarmado');
     rolarD20({
       label: `Ataque — ${nome}`,
       formula: `1d20 + ${ataque.modAcerto}`,
       mod: ataque.modAcerto,
       explicacaoMod: ataque.explicacaoAcerto,
       vantagem,
+      confirmarAcerto: {
+        onAcertou: () => {
+          rolarDados({
+            label: `Dano — ${nome}`,
+            formula: `${ataque.danoQuantidade}d${ataque.danoLados}${ataque.danoMod ? ` + ${ataque.danoMod}` : ''}`,
+            quantidade: ataque.danoQuantidade,
+            lados: ataque.danoLados,
+            mod: ataque.danoMod,
+            rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
+            rerollEscolhido: perfuradorDisponivel && ataque.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
+            confirmarFechamento: confirmarFechamentoDoAtaque(talento),
+          });
+        },
+        onErrou: () => {},
+      },
     });
-    finalizar(`🗡 ${nome}`, `Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano ${ataque.danoTipo}.`, {
-      label: `Dano — ${nome}`,
-      quantidade: ataque.danoQuantidade,
-      lados: ataque.danoLados,
-      mod: ataque.danoMod,
-      tipoDano: ataque.danoTipo,
-    });
+    onAtacouSemDanoPendente(`🗡 ${nome}`, 'Rolagem de acerto feita.');
   }
 
   const surtoDesabilitado = surtoRestantes <= 0 || surtoUsadoTurno;
@@ -377,14 +409,14 @@ export default function AcaoPanelContent({
       setEscolhendoAtaque(true);
       return;
     }
-    rolarAtaque(`🗡 ${ataqueAtual.nome}`, ataqueAtual.info, onAtacar, ataqueImprudenteAtivo);
+    rolarAtaque(`🗡 ${ataqueAtual.nome}`, ataqueAtual.info, ataqueImprudenteAtivo);
   }
 
   function escolherAtaque(imprudente: boolean) {
     if (!ataqueAtual) return;
     setEscolhendoAtaque(false);
     if (imprudente) onAtivarAtaqueImprudente();
-    rolarAtaque(`🗡 ${ataqueAtual.nome}`, ataqueAtual.info, onAtacar, imprudente);
+    rolarAtaque(`🗡 ${ataqueAtual.nome}`, ataqueAtual.info, imprudente);
   }
 
   /** Golpe Brutal (Bárbaro nível 9+) — linha própria, separada de

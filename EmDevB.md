@@ -16,10 +16,15 @@
 
 ---
 
-*(vazio — sem foco em andamento no momento. Foco "Revisão do fluxo de
-rolagem Acerto/Erro" fechado em 2026-09: ambiente de Protótipo criado
-(`/prototipo`), padrão Errei/Acertei + escolha de efeito formalizado
-em `DECISOES-COMBATE.md` "Fluxo Acerto/Erro", aplicado de verdade no
-Golpe Brutal do Bárbaro — fecha a pendência original. Retrofit das
-outras características e "Cura em outro alvo" registrados em
-`PENDENCIAS.md`, deliberadamente fora desta rodada.)*
+*(vazio — sem foco em andamento no momento. Foco "Retrofit do Fluxo
+Acerto/Erro pra TODO ataque" fechado em 2026-09: Ataque normal, Ataque
+Bônus (mão secundária), Cortar, ataque de magia (3 painéis) e
+Ancestralidade Gigante (só no ataque principal, decisão registrada em
+`Backlog.md`) agora sempre usam Acerto/Erro — nunca mais "atira e
+esquece". `DanoPendente`/botão "Rolar Dano" removidos por inteiro
+(ficaram sem nenhum uso). No meio do caminho, achado e corrigido um
+descuido real: os rerolls de Talento (Dano Garantido/Perfurador)
+moravam só na função do botão antigo, replicados agora em cada
+produtor de dano (Ataque normal/Bônus/Cortar). Documentado em
+`DECISOES-COMBATE.md` "Fluxo Acerto/Erro"/"Esmagador/Talhador/
+Ancestralidade Gigante" e `sdd/sdd-fluxo-rolagem.md` seção 5.)*

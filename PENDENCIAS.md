@@ -1465,29 +1465,6 @@ existe, só o GATILHO muda de "nível fixo" pra "marco de XP repetido"),
 e se algo na UI de nível/XP precisa deixar claro que o personagem
 "continua avançando" mesmo sem outro número de nível pra mostrar.
 
-## Retrofit do Fluxo Acerto/Erro nas outras características (Ataque normal, magia, Ancestralidade Gigante)
-
-**O que é:** o foco "Revisão do fluxo de rolagem" fechou (2026-09)
-aplicando o padrão novo (ver `DECISOES-COMBATE.md` "Fluxo Acerto/Erro")
-só no Golpe Brutal do Bárbaro — a pendência original que motivou o
-foco inteiro. Ataque normal (fora de Golpe Brutal), ataque de magia e
-Ancestralidade Gigante (Golias) continuam no padrão antigo "atira e
-esquece" — nenhum deles está visivelmente quebrado pro jogador hoje
-(só Golpe Brutal empacava de verdade, porque a escolha de efeito
-morava atrás de 2 botões separados sem ordem clara), por isso ficaram
-de fora dessa rodada por decisão consciente (ver `sdd/sdd-fluxo-rolagem.md`
-seção 5).
-
-**O que falta pra resolver:** retrofitar cada um pro padrão novo
-(`confirmarAcerto`/`confirmarFechamento`) quando fizer sentido —
-`AcaoPanelContent.tsx`'s `rolarAtaque` (caminho normal, sem Golpe
-Brutal) e `useUsarMagiaPainel.tsx`'s `conjurarMagia` (ataque de magia)
-são os 2 pontos que ainda disparam a rolagem sem esperar `onResultado`.
-`usarAncestralidadeGiganteAoAcertar` (`CombatTab.tsx`) é mais simples
-(sem escolha de N opções, já é clicado só depois do jogador decidir
-"acertei" manualmente) — talvez só precise do `confirmarAcerto`, sem
-`confirmarFechamento`.
-
 ## Cura em outro alvo — seletor de QUAL criatura ainda sem padrão definido
 
 **O que é:** a pergunta "eu mesmo ou outra criatura" já está resolvida

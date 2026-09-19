@@ -6,7 +6,6 @@ import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { useRoll } from '../../roll/RollContext';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
-import type { DanoPendente } from './DanoPendente';
 
 interface UsarMagiaPainelParams {
   /** `SidePanel.open` do drawer que hospeda este painel — o painel de
@@ -19,7 +18,7 @@ interface UsarMagiaPainelParams {
    * do "← Voltar" do próprio picker. */
   aberto: boolean;
   desvantagemForcaDestreza: boolean;
-  onEscolher: (nome: string, desc: string, dano?: DanoPendente) => void;
+  onEscolher: (nome: string, desc: string) => void;
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda (CD + atributo + sucesso/falha), que vive em
    * CombatTab (persiste depois do painel fechar). */
@@ -99,8 +98,26 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
       p.onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
     }
     if (resultado.rollAcerto) {
-      rolarD20(resultado.rollAcerto);
-      p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback, resultado.danoPendente);
+      const dano = resultado.danoPendente;
+      rolarD20({
+        ...resultado.rollAcerto,
+        confirmarAcerto: {
+          onAcertou: () => {
+            if (!dano) return;
+            rolarDados({
+              label: dano.label,
+              formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+              quantidade: dano.quantidade,
+              lados: dano.lados,
+              mod: dano.mod,
+              explicacaoMod: dano.explicacaoMod,
+              confirmarFechamento: {},
+            });
+          },
+          onErrou: () => {},
+        },
+      });
+      p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
       return;
     }
     if (resultado.mecanica === 'salvaguarda') {

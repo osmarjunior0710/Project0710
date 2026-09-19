@@ -6,7 +6,6 @@ import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
-import type { DanoPendente } from './DanoPendente';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
 import styles from './PanelRows.module.css';
@@ -100,7 +99,7 @@ interface BonusPanelContentProps {
    * `bonusPvTempMestreDaMorte` em `core/necromante.ts`). */
   pvTempMestreDaMorte: number;
   onUsarMestreDaMorte: (petIds: string[]) => void;
-  onEscolher: (nome: string, desc: string, dano?: DanoPendente) => void;
+  onEscolher: (nome: string, desc: string) => void;
   /** `SidePanel.open` do drawer — ver comentário em
    * `useUsarMagiaPainel.tsx` (reseta o picker de "Usar Magia" ao
    * fechar pela borda/backdrop, não só pelo "← Voltar" dele mesmo). */

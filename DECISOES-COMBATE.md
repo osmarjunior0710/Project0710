@@ -115,11 +115,27 @@ inimigo/status de terceiro) — só populates o feedback/log pro jogador
 aplicar na mesa. Isso não mudou com o Fluxo Acerto/Erro, só o
 CAMINHO até a escolha.
 
-**Retrofit de características que ainda usam o padrão antigo (Ataque
-normal fora de Golpe Brutal, magia, Ancestralidade Gigante) não é
-obrigatório de uma vez** — ver `PENDENCIAS.md`. Toda característica
-NOVA que precise de "confirma acerto"/"escolhe efeito" já nasce usando
-esse padrão.
+**Retrofit completo (2026-09, pedido do Osmar: "o fluxo do protótipo de
+ataque vira o fluxo pra tudo"):** todo ataque no app usa Acerto/Erro
+sempre, sem exceção — não existe mais "atira e esquece" pra ataque.
+Cobertura final: Ataque normal, Ataque Bônus (mão secundária), Cortar
+(Mestre em Armas Grandes), ataque de magia (3 painéis: Ação/Bônus,
+Reação, aba Magias, via `core/conjurarMagia.ts` `decidirConjuracao`) e
+Ancestralidade Gigante (ver entrada "Esmagador/Talhador" abaixo, que
+generalizou pra cobrir os 3). Sem talento/característica aplicável, o
+popup de dano mostra só "OK" — nunca mais o botão manual "Rolar Dano".
+`DanoPendente`/`danoPendente`/`onEscolher(...,dano)` (o mecanismo
+inteiro do padrão antigo) foram removidos por completo — nada mais
+produz isso. Toda característica NOVA que precise de "confirma
+acerto"/"escolhe efeito" já nasce usando esse padrão.
+
+**Cuidado ao portar dano pendente pra `confirmarAcerto`:** o dano de
+ataque com arma pode ter rerolls de Talento amarrados
+(`rerollSe1`/`rerollEscolhido` — Dano Garantido do Valentão de
+Taverna, Perfurador), fáceis de esquecer já que moravam só na FUNÇÃO
+COMPARTILHADA do botão antigo "Rolar Dano" (não em cada produtor de
+dano pendente) — ao migrar CADA produtor pro popup próprio, replique
+essas condições em CADA UM, não só no ataque principal.
 
 ## Combate — economia de ação: 3 botões fixos, cada um abre painel do seu lado
 
@@ -1053,19 +1069,33 @@ seja "CD do personagem, o alvo que salva" (sem o app rolar o dado do
 alvo) usa `SalvaguardaDoAlvoModal` — nunca cria um modal próprio pra
 esse formato.
 
-## Fluxo Acerto/Erro sem "renunciar" nada antes — Esmagador/Talhador
+## Fluxo Acerto/Erro sem "renunciar" nada antes — Esmagador/Talhador/Ancestralidade Gigante
 
-Diferente do Golpe Brutal (o único caso do Fluxo Acerto/Erro até
-2026-09), Esmagador/Talhador não têm NADA pra renunciar antes de
-atacar — o gatilho ("ao causar o tipo de dano certo") é automático.
-Por isso o "Atacar" normal (`rolarAtaque` em `AcaoPanelContent.tsx`,
-até então sempre no padrão antigo "atira e esquece" — só Golpe Brutal
-tinha uma função própria com Acerto/Erro) ganhou um DESVIO condicional:
-quando a arma do ataque bate o tipo de dano do talento (`Contundente`/
-`Cortante`) E o personagem tem o talento E ele ainda não foi usado
-neste turno, o próprio "Atacar" usa `confirmarAcerto`/
-`confirmarFechamento` igual Golpe Brutal; sem essas 3 condições,
-continua 100% no fluxo antigo (não incomoda quem não tem os talentos).
+Diferente do Golpe Brutal (o 1º caso do Fluxo Acerto/Erro), Esmagador/
+Talhador/Ancestralidade Gigante (Golias) não têm NADA pra renunciar
+antes de atacar — o gatilho ("ao acertar", às vezes só "com o tipo de
+dano certo") é automático. O "Atacar" normal (`rolarAtaque` em
+`AcaoPanelContent.tsx`) decide o botão extra do popup de dano nesta
+ordem de prioridade: Esmagador/Talhador (se a arma bater o tipo de
+dano do talento E o personagem tiver E ainda não usado no turno) →
+senão Ancestralidade Gigante (se a espécie/escolha bater E sobrar uso)
+→ senão só "OK". Os 2 primeiros nunca coexistem por dano
+(Contundente/Cortante são mutuamente exclusivos numa arma), mas
+Ancestralidade Gigante TEORICAMENTE poderia coincidir com um deles
+(Golias + Talento Geral) — como o popup só tem espaço pra 1 botão
+extra, o talento (ligado à arma) ganha prioridade nesse caso raro.
+
+**Ancestralidade Gigante só no ataque principal, decisão explícita do
+Osmar:** antes, era um card avulso "toque ao acertar", usável depois
+de QUALQUER ataque (Ataque Bônus, Cortar, magia, Reação). Migrar pra
+dentro do popup de dano do ataque principal (pedido do Osmar: "junto
+no popup de dano, igual Esmagador/Talhador") faz o mesmo talento SÓ
+disparar por esse caminho agora — não tem botão equivalente pra Ataque
+Bônus/Cortar/magia/Reação. Coerente com Esmagador/Talhador (que também
+só existiram no ataque principal desde sempre), mas é uma restrição
+REAL pra quem usa Ancestralidade Gigante depois de outro tipo de
+ataque — ver `Backlog.md` "Ancestralidade Gigante só no ataque
+principal".
 
 **Peça nova: `AtivarEfeitoModal.tsx`** — pro popup final de talento com
 1 efeito só (não é escolha entre vários, por isso não reaproveita

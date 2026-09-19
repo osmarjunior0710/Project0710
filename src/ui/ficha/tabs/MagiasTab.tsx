@@ -257,13 +257,6 @@ export default function MagiasTab({
   const { rolarD20, rolarDados } = useRoll();
   const [telaCirculo, setTelaCirculo] = useState<Magia | null>(null);
   const [armaDePactoEscolhida, setArmaDePactoEscolhida] = useState('');
-  const [danoPendenteMagia, setDanoPendenteMagia] = useState<{
-    label: string;
-    quantidade: number;
-    lados: number;
-    mod: number;
-    explicacaoMod?: ExplicacaoCalculo;
-  } | null>(null);
   const [telaSalvaguarda, setTelaSalvaguarda] = useState<{ magia: Magia; circuloUsado: number } | null>(null);
 
   if (!conjura) {
@@ -309,11 +302,27 @@ export default function MagiasTab({
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
     }
     if (resultado.rollAcerto) {
-      rolarD20(resultado.rollAcerto);
-      setDanoPendenteMagia(resultado.danoPendente ?? null);
+      const dano = resultado.danoPendente;
+      rolarD20({
+        ...resultado.rollAcerto,
+        confirmarAcerto: {
+          onAcertou: () => {
+            if (!dano) return;
+            rolarDados({
+              label: dano.label,
+              formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+              quantidade: dano.quantidade,
+              lados: dano.lados,
+              mod: dano.mod,
+              explicacaoMod: dano.explicacaoMod,
+              confirmarFechamento: {},
+            });
+          },
+          onErrou: () => {},
+        },
+      });
       return;
     }
-    setDanoPendenteMagia(null);
     if (resultado.mecanica === 'salvaguarda') {
       setTelaSalvaguarda({ magia: m, circuloUsado });
       return;
@@ -324,19 +333,6 @@ export default function MagiasTab({
         confirmarAlvoCura: { onMeCurar: (total) => onCuraDeMagiaAplicada(total) },
       });
     }
-  }
-
-  function rolarDanoPendenteMagia() {
-    if (!danoPendenteMagia) return;
-    rolarDados({
-      label: danoPendenteMagia.label,
-      formula: `${danoPendenteMagia.quantidade}d${danoPendenteMagia.lados}${danoPendenteMagia.mod ? ` + ${danoPendenteMagia.mod}` : ''}`,
-      quantidade: danoPendenteMagia.quantidade,
-      lados: danoPendenteMagia.lados,
-      mod: danoPendenteMagia.mod,
-      explicacaoMod: danoPendenteMagia.explicacaoMod,
-    });
-    setDanoPendenteMagia(null);
   }
 
   function rolarDanoSalvaguarda() {
@@ -458,19 +454,6 @@ export default function MagiasTab({
           semAcaoTexto="Veja a descrição da magia (ⓘ) pro efeito."
           onFechar={() => setTelaSalvaguarda(null)}
         />
-      )}
-
-      {danoPendenteMagia && (
-        <div className="label" style={{ marginBottom: 12, padding: 10, background: 'var(--panel)', borderRadius: 'var(--shape-md)' }}>
-          Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano.
-          <div
-            className="btn btn-primary"
-            style={{ marginTop: 10, padding: '10px 14px', display: 'inline-block' }}
-            onClick={rolarDanoPendenteMagia}
-          >
-            🎲 Rolar Dano
-          </div>
-        </div>
       )}
 
       {espacos.length > 0 && (

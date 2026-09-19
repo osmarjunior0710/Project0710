@@ -131,7 +131,7 @@ export function decidirConjuracao(
           }
         : undefined,
       textoFeedback: danoFinal
-        ? 'Rolagem de acerto feita. Toque "Rolar Dano" pra ver o dano.'
+        ? 'Rolagem de acerto feita.'
         : 'Rolagem de acerto feita. Veja a descrição da magia (ⓘ) pro dano.',
       curaColheitaMacabra: curaMacabra,
     };

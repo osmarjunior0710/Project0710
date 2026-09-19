@@ -5,6 +5,17 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1821
+
+**Todo ataque agora pergunta "Acertou?" — sem exceção.** Ataque
+normal, Ataque Bônus (mão secundária), Cortar e ataque de magia
+(qualquer classe) ganharam o mesmo popup "Errei/Acertei" que já
+existia em Golpe Brutal/Esmagador/Talhador — errou, fecha e pronto;
+acertou, o dano já rola sozinho (sem mais o botão manual "Rolar
+Dano"). Ancestralidade Gigante (Golias) também virou parte desse
+mesmo popup, junto do dano do ataque principal, em vez de um botão
+solto na tela.
+
 ## v202609_1531
 
 **Magia de cura ganha efeito visual — vinheta verde + partículas "+".**

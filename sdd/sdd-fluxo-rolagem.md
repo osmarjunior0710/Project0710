@@ -123,11 +123,15 @@ Macabra) continua com o próprio modal dedicado. Ver `PENDENCIAS.md`.
   vale checar no protótipo se um padrão genérico substituiria os 2 sem
   perder nada.
 
-## 5. Escopo desta rodada
+## 5. Escopo desta rodada — retrofit completo (2026-09)
 
-Só **Golpe Brutal** recebe o retrofit de verdade (Entrega D). O
-padrão validado aqui (Entregas B/C) fica documentado e disponível,
-mas retrofitar Ataque normal/magia/Ancestralidade Gigante pro novo
-padrão é trabalho separado, registrado em `PENDENCIAS.md` — nenhum
-deles está visivelmente quebrado pro jogador hoje, só Golpe Brutal
-empaca de verdade.
+Golpe Brutal recebeu o retrofit primeiro (Entrega D, foco original).
+Depois, com Esmagador/Talhador (branch principal) generalizando o
+padrão pro "Atacar" normal, o Osmar pediu o retrofit completo: "o
+fluxo do protótipo de ataque vira o fluxo pra tudo". Cobertura final —
+ver `DECISOES-COMBATE.md` "Fluxo Acerto/Erro" e "Esmagador/Talhador/
+Ancestralidade Gigante": Ataque normal, Ataque Bônus (mão secundária),
+Cortar, ataque de magia (3 painéis) e Ancestralidade Gigante (só no
+ataque principal, ver `Backlog.md`) — todos sempre Acerto/Erro, nunca
+mais "atira e esquece". `DanoPendente`/botão "Rolar Dano" removidos
+por completo, sem uso restante.

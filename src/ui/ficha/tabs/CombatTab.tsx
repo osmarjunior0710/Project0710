@@ -16,7 +16,7 @@ import InfoChip from '../../components/InfoChip';
 import LinearProgressBar from '../../components/LinearProgressBar';
 import ContadorUsos from '../../components/ContadorUsos';
 import SidePanel from '../combat/SidePanel';
-import AcaoPanelContent, { type DanoPendente } from '../combat/AcaoPanelContent';
+import AcaoPanelContent from '../combat/AcaoPanelContent';
 import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
 import AtivarEfeitoModal from '../../components/AtivarEfeitoModal';
 import BonusPanelContent from '../combat/BonusPanelContent';
@@ -552,7 +552,6 @@ export default function CombatTab({
   const [ultimoPainel, setUltimoPainel] = useState<RecursoTurno>('acao');
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [danoPendente, setDanoPendente] = useState<DanoPendente | null>(null);
   /** Golpe Brutal (Bárbaro nível 9+) — `true` depois de confirmar o
    * popup de dano (botão "🔨 Golpe Brutal", `confirmarFechamento`),
    * abre o modal de escolha de efeito (`EscolherEfeitoModal`). Só
@@ -603,7 +602,6 @@ export default function CombatTab({
     setTimeout(() => {
       onFimDoTurno();
       setFeedback(null);
-      setDanoPendente(null);
       setAtaquesFeitos(0);
       setGolpeBrutalEfeitoPendente(false);
     }, DURACAO_PISCADA_MS / 2);
@@ -613,7 +611,6 @@ export default function CombatTab({
   function abrirPainel(categoria: RecursoTurno) {
     if (turnState[categoria] === 'usada') return;
     setFeedback(null);
-    setDanoPendente(null);
     setGolpeBrutalEfeitoPendente(false);
     setPainelAberto(categoria);
     setUltimoPainel(categoria);
@@ -623,11 +620,10 @@ export default function CombatTab({
     setPainelAberto(null);
   }
 
-  function escolherNoPainel(categoria: RecursoTurno, nome: string, desc: string, dano?: DanoPendente) {
+  function escolherNoPainel(categoria: RecursoTurno, nome: string, desc: string) {
     onMarcarUsado(categoria);
     setPainelAberto(null);
     setFeedback(`${nome} — ${desc}`);
-    setDanoPendente(dano ?? null);
   }
 
   function abrirSalvaguarda(magia: Magia, circuloUsado: number) {
@@ -684,6 +680,13 @@ export default function CombatTab({
     onMarcarUsado('bonus');
   }
 
+  /** Ancestralidade Gigante "ao acertar" (Arrepio do Gelo/Queimadura de
+   * Fogo/Tombo da Colina) — retrofit 2026-09 (ver `DECISOES-COMBATE.md`):
+   * chamado pelo `confirmarFechamento` do popup de dano do ataque
+   * principal (`AcaoPanelContent.tsx`), não mais um card avulso solto
+   * na tela. Continua morando aqui (não em `AcaoPanelContent.tsx`)
+   * porque só o `CombatTab` tem o resto do estado (Salto da Nuvem usa
+   * o MESMO contador de usos). */
   function usarAncestralidadeGiganteAoAcertar() {
     if (!onUsarAncestralidadeGigante()) return;
     if (ancestralidadeGiganteEscolhida === 'Arrepio do Gelo (Gigante do Gelo)') {
@@ -767,6 +770,11 @@ export default function CombatTab({
     setFeedback('🎵 Inspiração de Bardo — 1 uso recuperado gastando 1 Espaço de Magia (sem ação necessária).');
   }
 
+  /** Fluxo Acerto/Erro sempre (retrofit 2026-09, ver
+   * `DECISOES-COMBATE.md`) — igual ao ataque principal
+   * (`AcaoPanelContent.tsx` `rolarAtaque`), sem botão de talento (essa
+   * dupla nunca teve Esmagador/Talhador ligado, fora de escopo desta
+   * rodada). */
   function usarAtaqueMaoSecundaria() {
     if (!ataqueBonus) return;
     rolarD20({
@@ -775,17 +783,29 @@ export default function CombatTab({
       mod: ataqueBonus.info.modAcerto,
       explicacaoMod: ataqueBonus.info.explicacaoAcerto,
       vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
+      confirmarAcerto: {
+        onAcertou: () => {
+          rolarDados({
+            label: `Dano — ${ataqueBonus.nome} (Mão Secundária)`,
+            formula: `${ataqueBonus.info.danoQuantidade}d${ataqueBonus.info.danoLados}${ataqueBonus.info.danoMod ? ` + ${ataqueBonus.info.danoMod}` : ''}`,
+            quantidade: ataqueBonus.info.danoQuantidade,
+            lados: ataqueBonus.info.danoLados,
+            mod: ataqueBonus.info.danoMod,
+            rerollSe1:
+              ataqueBonus.nome.endsWith('Ataque Desarmado') && danoDesarmadoRerollDisponivel
+                ? { rotulo: 'Dano Garantido' }
+                : undefined,
+            rerollEscolhido:
+              perfuradorDisponivel && ataqueBonus.info.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
+            confirmarFechamento: {},
+          });
+        },
+        onErrou: () => {},
+      },
     });
     onMarcarUsado('bonus');
     setPainelAberto(null);
-    setFeedback(`🗡 ${ataqueBonus.nome} (Mão Secundária) — ${ataqueBonus.descricao} Toque "Rolar Dano" pra ver o dano.`);
-    setDanoPendente({
-      label: `Dano — ${ataqueBonus.nome} (Mão Secundária)`,
-      quantidade: ataqueBonus.info.danoQuantidade,
-      lados: ataqueBonus.info.danoLados,
-      mod: ataqueBonus.info.danoMod,
-      tipoDano: ataqueBonus.info.danoTipo,
-    });
+    setFeedback(`🗡 ${ataqueBonus.nome} (Mão Secundária) — ${ataqueBonus.descricao}`);
   }
 
   function usarCortarAtaque() {
@@ -796,18 +816,30 @@ export default function CombatTab({
       mod: cortarAtaque.info.modAcerto,
       explicacaoMod: cortarAtaque.info.explicacaoAcerto,
       vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
+      confirmarAcerto: {
+        onAcertou: () => {
+          rolarDados({
+            label: `Dano — ${cortarAtaque.nome} (Cortar)`,
+            formula: `${cortarAtaque.info.danoQuantidade}d${cortarAtaque.info.danoLados}${cortarAtaque.info.danoMod ? ` + ${cortarAtaque.info.danoMod}` : ''}`,
+            quantidade: cortarAtaque.info.danoQuantidade,
+            lados: cortarAtaque.info.danoLados,
+            mod: cortarAtaque.info.danoMod,
+            rerollSe1:
+              cortarAtaque.nome.endsWith('Ataque Desarmado') && danoDesarmadoRerollDisponivel
+                ? { rotulo: 'Dano Garantido' }
+                : undefined,
+            rerollEscolhido:
+              perfuradorDisponivel && cortarAtaque.info.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
+            confirmarFechamento: {},
+          });
+        },
+        onErrou: () => {},
+      },
     });
     onUsarCortar();
     onMarcarUsado('bonus');
     setPainelAberto(null);
-    setFeedback(`🗡 ${cortarAtaque.nome} (Cortar) — ${cortarAtaque.descricao} Toque "Rolar Dano" pra ver o dano.`);
-    setDanoPendente({
-      label: `Dano — ${cortarAtaque.nome} (Cortar)`,
-      quantidade: cortarAtaque.info.danoQuantidade,
-      lados: cortarAtaque.info.danoLados,
-      mod: cortarAtaque.info.danoMod,
-      tipoDano: cortarAtaque.info.danoTipo,
-    });
+    setFeedback(`🗡 ${cortarAtaque.nome} (Cortar) — ${cortarAtaque.descricao}`);
   }
 
   function usarMenteTatica() {
@@ -869,21 +901,10 @@ export default function CombatTab({
     setPericiaInigualavelPendente(false);
   }
 
-  function registrarAtaque(nome: string, desc: string, dano: DanoPendente) {
-    const proximo = ataquesFeitos + 1;
-    setAtaquesFeitos(proximo);
-    setFeedback(`${nome} — ${desc}`);
-    setDanoPendente(dano);
-    if (proximo >= numAtaques) {
-      onMarcarUsado('acao');
-      setPainelAberto(null);
-    }
-  }
-
-  /** Mesmo bookkeeping de `registrarAtaque`, sem `setDanoPendente` —
-   * qualquer ataque que siga o Fluxo Acerto/Erro (Golpe Brutal,
-   * Esmagador/Talhador) não usa mais os botões antigos de dano, o
-   * popup já resolve tudo sozinho (ver `AcaoPanelContent.tsx`). */
+  /** Bookkeeping do turno pro ataque principal — Fluxo Acerto/Erro
+   * sempre (retrofit 2026-09, ver `DECISOES-COMBATE.md`), o popup de
+   * dano já resolve tudo sozinho, sem os botões antigos de dano (ver
+   * `AcaoPanelContent.tsx`). */
   function registrarAtaqueSemDanoPendente(nome: string, desc: string) {
     const proximo = ataquesFeitos + 1;
     setAtaquesFeitos(proximo);
@@ -897,21 +918,6 @@ export default function CombatTab({
   function usarSurtoDeAcao() {
     if (!onUsarSurto()) return;
     setFeedback('💥 Surto de Ação — você ganhou uma ação extra nesse turno (a Ação normal continua disponível).');
-  }
-
-  function rolarDanoPendente() {
-    if (!danoPendente) return;
-    const ehDanoDesarmado = danoPendente.label.endsWith('Ataque Desarmado');
-    rolarDados({
-      label: danoPendente.label,
-      formula: `${danoPendente.quantidade}d${danoPendente.lados}${danoPendente.mod ? ` + ${danoPendente.mod}` : ''}`,
-      quantidade: danoPendente.quantidade,
-      lados: danoPendente.lados,
-      mod: danoPendente.mod,
-      rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
-      rerollEscolhido: perfuradorDisponivel && danoPendente.tipoDano === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
-      explicacaoMod: danoPendente.explicacaoMod,
-    });
   }
 
   const efeitosGolpeBrutalDisponiveis = EFEITOS_GOLPE_BRUTAL.filter(
@@ -1156,29 +1162,6 @@ export default function CombatTab({
         </div>
       )}
 
-      {(ancestralidadeGiganteEscolhida === 'Arrepio do Gelo (Gigante do Gelo)' ||
-        ancestralidadeGiganteEscolhida === 'Queimadura de Fogo (Gigante de Fogo)' ||
-        ancestralidadeGiganteEscolhida === 'Tombo da Colina (Gigante da Colina)') && (
-        <div
-          className="opt-card"
-          style={{
-            marginBottom: 12,
-            cursor: usosAncestralidadeGiganteRestantes > 0 ? 'pointer' : 'default',
-            opacity: usosAncestralidadeGiganteRestantes > 0 ? 1 : 0.5,
-          }}
-          onClick={usosAncestralidadeGiganteRestantes > 0 ? usarAncestralidadeGiganteAoAcertar : undefined}
-        >
-          <div className="opt-card-name" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            🏔 {ancestralidadeGiganteEscolhida.split(' (')[0]}
-            <ContadorUsos
-              total={usosAncestralidadeGiganteMaximo}
-              usados={usosAncestralidadeGiganteMaximo - usosAncestralidadeGiganteRestantes}
-            />
-          </div>
-          <div className="opt-card-desc">toque ao acertar um ataque (recarrega no Descanso Longo)</div>
-        </div>
-      )}
-
       {(estiloDeLuta || mestreTatico || ataquesEstudados || ajusteTatico) && (
         <>
           <div className="section-title">Características</div>
@@ -1337,16 +1320,7 @@ export default function CombatTab({
         "Fim do Turno".
       </div>
 
-      {feedback && (
-        <div className={styles.feedback}>
-          {feedback}
-          {danoPendente && (
-            <div className="btn btn-primary" style={{ marginTop: 10, marginRight: 8, padding: '10px 14px', display: 'inline-block' }} onClick={rolarDanoPendente}>
-              🎲 Rolar Dano
-            </div>
-          )}
-        </div>
-      )}
+      {feedback && <div className={styles.feedback}>{feedback}</div>}
 
       {golpeBrutalEfeitoPendente && (
         <EscolherEfeitoModal
@@ -1371,8 +1345,7 @@ export default function CombatTab({
           <AcaoPanelContent
             aberto={painelAberto !== null}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
-            onEscolher={(nome, desc, dano) => escolherNoPainel('acao', nome, desc, dano)}
-            onAtacar={registrarAtaque}
+            onEscolher={(nome, desc) => escolherNoPainel('acao', nome, desc)}
             onAbrirSalvaguarda={abrirSalvaguarda}
             gastarSlotCirculo={onGastarSlotCirculo}
             onAlterarPv={onAlterarPv}
@@ -1396,6 +1369,8 @@ export default function CombatTab({
             surtoUsadoTurno={surtoUsadoTurno}
             onUsarSurto={usarSurtoDeAcao}
             ataqueAtual={ataqueAtual}
+            danoDesarmadoRerollDisponivel={danoDesarmadoRerollDisponivel}
+            perfuradorDisponivel={perfuradorDisponivel}
             temAtaqueImprudente={ataqueImprudenteDisponivel}
             ataqueImprudenteAtivo={ataqueImprudenteAtivo}
             onAtivarAtaqueImprudente={onAtivarAtaqueImprudente}
@@ -1413,6 +1388,9 @@ export default function CombatTab({
             esmagadorDisponivel={esmagadorDisponivel}
             talhadorDisponivel={talhadorDisponivel}
             onAbrirGolpeCondicional={setGolpeCondicionalPendente}
+            ancestralidadeGiganteEscolhida={ancestralidadeGiganteEscolhida}
+            usosAncestralidadeGiganteRestantes={usosAncestralidadeGiganteRestantes}
+            onAtivarAncestralidadeGigante={usarAncestralidadeGiganteAoAcertar}
             detalhesAtivo={detalhesAtivo}
             maosCurativasDisponivel={maosCurativasDisponivel}
             maosCurativasGasto={maosCurativasGasto}
@@ -1466,7 +1444,7 @@ export default function CombatTab({
             petsMortoVivo={petsMortoVivo}
             pvTempMestreDaMorte={pvTempMestreDaMorte}
             onUsarMestreDaMorte={onUsarMestreDaMorte}
-            onEscolher={(nome, desc, dano) => escolherNoPainel('bonus', nome, desc, dano)}
+            onEscolher={(nome, desc) => escolherNoPainel('bonus', nome, desc)}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             conjura={conjura}
             truques={truquesBonus}
@@ -1503,7 +1481,7 @@ export default function CombatTab({
         {ultimoPainel === 'reacao' && (
           <ReacaoPanelContent
             desvantagemForcaDestreza={desvantagemForcaDestreza}
-            onEscolher={(nome, desc, dano) => escolherNoPainel('reacao', nome, desc, dano)}
+            onEscolher={(nome, desc) => escolherNoPainel('reacao', nome, desc)}
             onAbrirSalvaguarda={abrirSalvaguarda}
             gastarSlotCirculo={onGastarSlotCirculo}
             onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}

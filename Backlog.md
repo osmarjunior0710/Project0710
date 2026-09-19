@@ -7,6 +7,21 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
+## Ancestralidade Gigante só no ataque principal (2026-09)
+
+Ao migrar Ancestralidade Gigante (Golias) do card avulso "toque ao
+acertar" pra dentro do popup de dano do ataque principal (Fluxo
+Acerto/Erro, retrofit completo — ver `DECISOES-COMBATE.md`), o talento
+deixou de estar disponível depois de Ataque Bônus, Cortar, ataque de
+magia ou ataques de Reação — só funciona mais depois do "Atacar"
+principal (`AcaoPanelContent.tsx`). Antes (card avulso manual) valia
+pra qualquer acerto, mesmo os que o app nem rastreava rolagem própria.
+Dá pra estender pros outros pontos de ataque se algum jogador Golias
+sentir falta — cada um precisaria receber os mesmos props
+(`ancestralidadeGiganteEscolhida`/`usosAncestralidadeGiganteRestantes`/
+`onAtivarAncestralidadeGigante`) e a mesma lógica de prioridade que
+`AcaoPanelContent.tsx` já tem.
+
 ## Ferramenta genérica de tracking de status/efeitos ativos (2026-09)
 
 Sugestão do Osmar ao planejar Ataque Imprudente (Bárbaro, B4.1): em vez
