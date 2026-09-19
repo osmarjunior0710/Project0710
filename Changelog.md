@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1530
+
+**Magia de cura ganha efeito visual — vinheta verde + partículas "+".**
+Quando você escolhe "Me curar" no popup de uma magia de cura, sobe um
+brilho verde da base da tela com "+" flutuando pra cima, 2 segundos,
+depois some sozinho (mesmo estilo da aura vermelha da Fúria do
+Bárbaro). Só em magia de cura — Mãos Curativas, Recuperar Fôlego e os
+botões manuais de PV continuam sem esse efeito.
+
 ## v202609_1805
 
 **Cura ganha "Curar outro"/"Me curar", igual ao Acerto/Erro.** Ao

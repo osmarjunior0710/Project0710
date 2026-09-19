@@ -15,9 +15,10 @@ interface BonusPanelContentProps {
   usosFolegoMaximo: number;
   usosFolegoRestantes: number;
   onUsarRecuperarFolego: () => void;
-  /** Aplica cura de magia direto no PV do personagem ("Me curar", ver
-   * `RollDadosOptions.confirmarAlvoCura`). */
-  onAlterarPv: (delta: number) => void;
+  /** Aplica a cura de magia no PV E dispara o efeito visual de Cura
+   * ("Me curar", ver `RollDadosOptions.confirmarAlvoCura` e
+   * `FichaShell.tsx` `onCuraDeMagiaAplicada`). */
+  onCuraDeMagiaAplicada: (total: number) => void;
   ataqueBonus: AtaqueResolvido | null;
   onUsarAtaqueBonus: () => void;
   /** Cortar (Mestre em Armas Grandes) — `null` = ainda não liberado
@@ -209,7 +210,7 @@ export default function BonusPanelContent({
   truqueVinculadoAgonizante,
   modCarisma,
   onAbrirSalvaguarda,
-  onAlterarPv,
+  onCuraDeMagiaAplicada,
   colheitaMacabraDisponivel,
   onColheitaMacabraDisponivel,
 }: BonusPanelContentProps) {
@@ -222,7 +223,7 @@ export default function BonusPanelContent({
     onEscolher,
     onAbrirSalvaguarda,
     gastarSlotCirculo: onGastarSlotCirculo,
-    onAlterarPv,
+    onCuraDeMagiaAplicada,
     nivel,
     espacos,
     espacosGastosPorCirculo,

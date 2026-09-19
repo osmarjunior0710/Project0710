@@ -84,6 +84,31 @@ o comportamento de quem não passa o campo novo):**
    Fôlego, Fúria Implacável) continua com `onResultado` direto, sem
    esse gate — não tem escolha de alvo pra perguntar.
 
+**Efeito visual de Cura — só em magia, decisão explícita do Osmar:**
+"Me curar" numa magia de cura (não Mãos Curativas, não Recuperar
+Fôlego — "tenho outros planos pra vida subindo") dispara uma vinheta
+verde na base da tela + partículas "+" subindo, 2s, mesma técnica da
+vinheta de Fúria (`CombatTab.module.css` `.furiaVinheta`) mas
+ONE-SHOT (`useState` + `setTimeout`, padrão da "piscada" de Fim de
+Turno) em vez de toggle contínuo. Vive em `FichaShell.tsx`
+(`onCuraDeMagiaAplicada` = `alterarPv` + `dispararEfeitoCura`), não em
+`CombatTab.tsx`, porque o gatilho pode vir da aba Magias (fora da
+árvore do CombatTab) — precisa ficar montado num ancestral comum das
+duas abas pra aparecer independente de qual está ativa.
+
+**Achado importante pra qualquer vinheta full-tela futura — `z-index`
+depende de QUAL borda:** a vinheta de Fúria usa `z-index: -1` porque
+fica nas bordas ESQUERDA/DIREITA, onde os cards sempre têm margem
+lateral (o vão deixa a vinheta "espiar" por trás). A vinheta de Cura,
+na BASE da tela, não tem esse vão — cards vão até quase a tabbar fixa
+(`z-index: 30`), escondendo `z-index: -1` por completo (testado:
+100% invisível). Solução: `z-index: 20` — acima do conteúdo normal
+(cards, sem z-index próprio), abaixo da tabbar (30), fazendo o verde
+"nascer" de baixo dela. Regra geral: `z-index: -1` só funciona pra
+vinheta de borda ONDE EXISTE margem/vão de verdade; vinheta que
+precisa aparecer sobre conteúdo denso (like a base da tela) precisa
+de um `z-index` positivo escolhido em relação à UI fixa mais próxima.
+
 **Continua fora de escopo (decisão antiga, ainda vale):** o efeito
 escolhido nunca aplica nada de verdade no alvo (o app não modela
 inimigo/status de terceiro) — só populates o feedback/log pro jogador

@@ -43,9 +43,10 @@ interface MagiasTabProps {
    * Quando presente, a tela de "em qual círculo" mostra as opções das
    * 2 classes juntas. */
   ponte: PoolDePonte | null;
-  /** Aplica cura de magia direto no PV do personagem ("Me curar", ver
-   * `RollDadosOptions.confirmarAlvoCura`). */
-  onAlterarPv: (delta: number) => void;
+  /** Aplica a cura de magia no PV do personagem E dispara o efeito
+   * visual de Cura ("Me curar", ver `RollDadosOptions.confirmarAlvoCura`
+   * e `FichaShell.tsx` `onCuraDeMagiaAplicada`). */
+  onCuraDeMagiaAplicada: (total: number) => void;
   /** Override do pool de Espaços de Magia — presente (M4c) quando a
    * classe ativa é uma de 2+ classes conjuradoras normais combinadas
    * (SDD Multiclasse seção 8.2): mostra o pool COMBINADO em vez do da
@@ -198,7 +199,7 @@ export default function MagiasTab({
   espacosGastosPorCirculo,
   classeAtivaNome,
   ponte,
-  onAlterarPv,
+  onCuraDeMagiaAplicada,
   espacosParaConjurar,
   onGastarSlotCirculo,
   modAcertoConjuracao,
@@ -320,7 +321,7 @@ export default function MagiasTab({
     if (resultado.rollCura) {
       rolarDados({
         ...resultado.rollCura,
-        confirmarAlvoCura: { onMeCurar: (total) => onAlterarPv(total) },
+        confirmarAlvoCura: { onMeCurar: (total) => onCuraDeMagiaAplicada(total) },
       });
     }
   }

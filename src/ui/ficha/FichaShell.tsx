@@ -146,6 +146,27 @@ const turnoInicial: Record<RecursoTurno, EstadoRecurso> = {
   reacao: 'disponivel',
 };
 
+/** Duração do efeito de Cura (ver `dispararEfeitoCura`) — mesma
+ * constante escrita no CSS via `style` inline (`--duracao-cura`),
+ * nunca duplicada separadamente (padrão de duração sincronizada, ver
+ * DECISOES-COMBATE.md). */
+const DURACAO_CURA_MS = 2000;
+
+/** Partículas "+" do efeito de Cura — mesma técnica de
+ * `PARTICULAS_FURIA` (`CombatTab.tsx`), mas só nascendo da BASE da
+ * tela e subindo (`dy` sempre negativo), não vindo das 4 bordas.
+ * Lista fixa (decoração, não precisa variar entre renders); soma de
+ * `delay` + `duration` de cada uma fica dentro de `DURACAO_CURA_MS`,
+ * pra nenhuma ficar cortada no meio quando o efeito some. */
+const PARTICULAS_CURA: { left: string; dy: string; delay: string; duration: string }[] = [
+  { left: '10%', dy: '-160px', delay: '0s', duration: '1.6s' },
+  { left: '25%', dy: '-190px', delay: '0.15s', duration: '1.4s' },
+  { left: '40%', dy: '-150px', delay: '0.3s', duration: '1.7s' },
+  { left: '55%', dy: '-200px', delay: '0.05s', duration: '1.5s' },
+  { left: '70%', dy: '-170px', delay: '0.25s', duration: '1.6s' },
+  { left: '85%', dy: '-185px', delay: '0.1s', duration: '1.5s' },
+];
+
 export default function FichaShell() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -245,6 +266,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   };
   const [pvAtual, setPvAtual] = useState(personagemSalvo.pvAtual);
   const [pvTemporario, setPvTemporario] = useState(personagemSalvo.pvTemporarioAtual ?? 0);
+  /** Efeito de Cura (ver `dispararEfeitoCura`/`onCuraDeMagiaAplicada`)
+   * — `useState(false)` + `setTimeout`, mesmo padrão da "piscada" de
+   * Fim de Turno (`CombatTab.tsx`), não um toggle contínuo. */
+  const [curaEfeitoAtivo, setCuraEfeitoAtivo] = useState(false);
   const [maestriaArma, setMaestriaArma] = useState<string[]>(personagemSalvo.maestriaArmaAtual ?? selecao.maestriaArmaEscolhida);
   const [truquesAtuais, setTruquesAtuais] = useState<string[]>(personagemSalvo.truquesAtual ?? selecao.truquesEscolhidos);
   const [magiasPreparadasAtuais, setMagiasPreparadasAtuais] = useState<string[]>(
@@ -1034,6 +1059,23 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (temFuriaImplacavel && deveOferecerFuriaImplacavel(pvAtual, resultado.pvAtual, furiaAtiva)) {
       setFuriaImplacavelPendente(true);
     }
+  }
+
+  /** Aplica a cura de uma MAGIA (mecânica `cura`, ver
+   * `core/conjurarMagia.ts`) escolhendo "Me curar" no popup de
+   * rolagem — além de somar o PV (`alterarPv`), dispara o efeito
+   * visual de Cura (pedido do Osmar: "só em magias de cura, tenho
+   * outros planos pra vida subindo" — por isso NÃO usa essa função
+   * pra Mãos Curativas/Recuperar Fôlego/os botões manuais de PV, que
+   * continuam só com `alterarPv` puro). */
+  function onCuraDeMagiaAplicada(total: number) {
+    alterarPv(total);
+    dispararEfeitoCura();
+  }
+
+  function dispararEfeitoCura() {
+    setCuraEfeitoAtivo(true);
+    setTimeout(() => setCuraEfeitoAtivo(false), DURACAO_CURA_MS);
   }
 
   /** Fúria Implacável (Bárbaro nível 11+) — rola a própria Salvaguarda
@@ -1985,6 +2027,28 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   return (
     <div className={styles.screen}>
+      {curaEfeitoAtivo && (
+        <div
+          className={styles.curaVinheta}
+          aria-hidden="true"
+          style={{ ['--duracao-cura' as string]: `${DURACAO_CURA_MS}ms` }}
+        >
+          {PARTICULAS_CURA.map((p, i) => (
+            <span
+              key={i}
+              className={styles.curaParticula}
+              style={{
+                left: p.left,
+                animationDelay: p.delay,
+                animationDuration: p.duration,
+                ['--cp-dy' as string]: p.dy,
+              }}
+            >
+              +
+            </span>
+          ))}
+        </div>
+      )}
       {descansoEmAndamento && (
         <DescansoOverlay
           tipo={descansoEmAndamento.tipo}
@@ -2171,7 +2235,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             espacosGastosPorCirculo={espacosGastosParaConjurar}
             classeAtivaNome={chaveDoPoolDeMagia}
             ponte={ponte}
-            onAlterarPv={alterarPv}
+            onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
             espacosParaConjurar={espacosParaConjurar}
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}
@@ -2243,6 +2307,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               onRecuperarComEspacoDePacto: recuperarLancarNoInfernoComEspacoDePacto,
             }}
             onAlterarPv={alterarPv}
+            onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
             turnState={turnState}
             onMarcarUsado={marcarUsado}
             onFimDoTurno={fimDoTurno}

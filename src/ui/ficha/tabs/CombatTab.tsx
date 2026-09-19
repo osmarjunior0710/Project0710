@@ -59,6 +59,11 @@ interface CombatTabProps {
    * dano antes do PV normal. 0 = nenhum, linha some. */
   pvTemporario: number;
   onAlterarPv: (delta: number) => void;
+  /** Aplica a cura de magia no PV E dispara o efeito visual de Cura
+   * (ver `FichaShell.tsx` `onCuraDeMagiaAplicada`) — diferente de
+   * `onAlterarPv` puro (usado por Recuperar Fôlego e os botões
+   * manuais de PV, que não disparam esse efeito). */
+  onCuraDeMagiaAplicada: (total: number) => void;
   /** Bênção do Tenebroso (Bruxo, Patrono Ínfero, nível 3+). */
   bencaoDoTenebroso: { disponivel: boolean; onAplicar: () => void };
   /** Lançar no Inferno (Bruxo, Patrono Ínfero, nível 14) — 1x por
@@ -352,6 +357,7 @@ export default function CombatTab({
   pvMax,
   pvTemporario,
   onAlterarPv,
+  onCuraDeMagiaAplicada,
   bencaoDoTenebroso: { disponivel: bencaoDoTenebrosoDisponivel, onAplicar: onAplicarBencaoDoTenebroso },
   lancarNoInferno: {
     disponivel: lancarNoInfernoDisponivel,
@@ -1304,6 +1310,7 @@ export default function CombatTab({
             onAbrirSalvaguarda={abrirSalvaguarda}
             gastarSlotCirculo={onGastarSlotCirculo}
             onAlterarPv={onAlterarPv}
+            onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
             nivel={nivel}
             espacos={espacos}
             espacosGastosPorCirculo={espacosGastosPorCirculo}
@@ -1400,7 +1407,7 @@ export default function CombatTab({
             espacos={espacos}
             espacosGastosPorCirculo={espacosGastosPorCirculo}
             onGastarSlotCirculo={onGastarSlotCirculo}
-            onAlterarPv={onAlterarPv}
+            onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
             classeAtivaNome={classeAtivaNome}
             ponte={ponte}
             nivel={nivel}
@@ -1432,7 +1439,7 @@ export default function CombatTab({
             onEscolher={(nome, desc, dano) => escolherNoPainel('reacao', nome, desc, dano)}
             onAbrirSalvaguarda={abrirSalvaguarda}
             gastarSlotCirculo={onGastarSlotCirculo}
-            onAlterarPv={onAlterarPv}
+            onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
             nivel={nivel}
             conjura={conjura}
             magiasReacao={magiasPreparadasReacao}

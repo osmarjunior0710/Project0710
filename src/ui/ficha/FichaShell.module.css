@@ -119,3 +119,72 @@
   font-size: 17px;
   display: block;
 }
+
+/* Efeito de Cura (pedido do Osmar, 2026-09) — só quando uma magia de
+   cura é aplicada em você mesmo ("Me curar", ver
+   `RollDadosOptions.confirmarAlvoCura`): vinheta verde subindo da
+   base da tela + partículas "+" subindo, some sozinho. DIFERENTE da
+   vinheta de Fúria (`CombatTab.module.css` .furiaVinheta) — aquela é
+   um toggle contínuo enquanto a característica está ativa; esta é um
+   efeito de UMA vez só, mesmo padrão da "piscada" de Fim de Turno
+   (`useState` + `setTimeout`, ver `FichaShell.tsx`
+   `dispararEfeitoCura`). `--duracao-cura` escrito via `style` inline
+   a partir da MESMA constante JS que agenda o `setTimeout`
+   (`DURACAO_CURA_MS`) — padrão de duração sincronizada (ver
+   `DECISOES-COMBATE.md`).
+   `z-index: 20` (NÃO -1 como a vinheta de Fúria) — achado testando: a
+   Fúria fica nas bordas ESQUERDA/DIREITA, onde os cards sempre têm
+   margem lateral (por isso `z-index: -1` já basta pra "espiar" nos
+   vãos); um efeito na BASE da tela não tem esse vão — os cards vão até
+   quase a tabbar, ficando 100% escondidos atrás com `z-index: -1`.
+   `20` fica ACIMA dos cards (conteúdo normal, sem z-index próprio) mas
+   ABAIXO da tabbar fixa (`.tabbarLayer`, z-index 30, ver
+   `FichaShell.module.css`) — o verde nasce meio que "de baixo da
+   tabbar", que é exatamente o efeito pedido. `pointer-events: none`
+   (mesmo raciocínio da Fúria) garante que nunca atrapalha toque. */
+.curaVinheta {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(46, 160, 67, 0.55) 0%, transparent 35%);
+  animation: curaPulso var(--duracao-cura) ease-out forwards;
+}
+
+@keyframes curaPulso {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.curaParticula {
+  position: absolute;
+  bottom: 0;
+  font-size: 20px;
+  font-weight: bold;
+  color: #3f9a52;
+  text-shadow: 0 0 6px rgba(63, 154, 82, 0.8);
+  animation-name: curaParticulaAnim;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+@keyframes curaParticulaAnim {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(var(--cp-dy)) scale(1);
+  }
+}

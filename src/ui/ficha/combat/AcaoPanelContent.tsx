@@ -34,9 +34,13 @@ interface AcaoPanelContentProps {
   onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
   gastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
   /** Aplica cura direto no PV do personagem ("Me curar", ver
-   * `RollDadosOptions.confirmarAlvoCura`) — usado por magia de cura E
-   * Mãos Curativas (Aasimar). */
+   * `RollDadosOptions.confirmarAlvoCura`) — usado só por Mãos
+   * Curativas (Aasimar), sem o efeito visual de Cura (esse é só pra
+   * magia, ver `onCuraDeMagiaAplicada` abaixo — pedido do Osmar). */
   onAlterarPv: (delta: number) => void;
+  /** Aplica a cura de MAGIA no PV E dispara o efeito visual de Cura
+   * (ver `FichaShell.tsx` `onCuraDeMagiaAplicada`). */
+  onCuraDeMagiaAplicada: (total: number) => void;
   /** Nível do personagem — pro Aprimoramento de Truque (dano escala
    * nos níveis 5/11/17, ver `calcularDanoMagia`). */
   nivel: number;
@@ -142,6 +146,7 @@ export default function AcaoPanelContent({
   onAbrirSalvaguarda,
   gastarSlotCirculo,
   onAlterarPv,
+  onCuraDeMagiaAplicada,
   nivel,
   espacos,
   espacosGastosPorCirculo,
@@ -196,7 +201,7 @@ export default function AcaoPanelContent({
     onEscolher,
     onAbrirSalvaguarda,
     gastarSlotCirculo,
-    onAlterarPv,
+    onCuraDeMagiaAplicada,
     nivel,
     espacos,
     espacosGastosPorCirculo,
