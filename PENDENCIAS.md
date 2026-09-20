@@ -1484,3 +1484,34 @@ mesa" na Ficha).
 alguma necessidade real de cura em outro PJ (não só Pet) — até lá, o
 padrão de `ColheitaMacabraModal.tsx` (select inline) continua servindo
 sozinho pra Pet, sem problema visível.
+
+## Salvaguarda do Alvo — precisa de coluna/ID estável na planilha antes do retrofit
+
+**O que é:** "Salvaguarda do Alvo" (Ataque de Sopro, Lançar no Inferno,
+magia com `mecanica === 'salvaguarda'`, Golpe de Escudo — todos via
+`SalvaguardaDoAlvoModal.tsx`) continua 100% "atira e esquece": mostra
+CD + texto de Sucesso/Falha, mas o botão de dano sempre rola o valor
+CHEIO — o jogador precisa dividir por 2 na mesa quando o alvo passa
+("Metade do dano"). Pedido do Osmar (2026-09): trazer o mesmo Fluxo
+Acerto/Erro pra cá (perguntar "Passou?"/"Falhou?" de verdade, igual
+"Errei"/"Acertei"), mas isso travou em 2 pontos:
+
+1. **Reconhecer o tipo de sucesso da magia genérica precisa de dado
+   novo.** Hoje `salvaguardaSucesso` (`magias.ts`/planilha aba Magias,
+   coluna `Salvaguarda_Sucesso`) é texto livre — só tem 3 valores
+   fixos hoje ("Metade do dano"/"Nenhum efeito"/1 caso raro "Dano
+   completo, sem penalidade extra"), mas comparar por TEXTO quebra se
+   o texto for reescrito depois (contra a regra de ID estável, seção
+   13 do `CLAUDE.md`). Osmar pediu uma coluna/ID estável na planilha
+   antes de programar isso pra valer — travado até essa coluna existir
+   (ex.: algo tipo `Salvaguarda_TipoSucesso` com valores fixos
+   "metade"/"nenhum"/"cheio").
+2. Ataque de Sopro/Lançar no Inferno/Golpe de Escudo (texto hardcoded
+   em `CombatTab.tsx`, não vem da planilha) NÃO têm esse problema — a
+   semântica de cada um já é conhecida direto no código.
+
+**O que falta pra resolver:** pedir a coluna nova pro Osmar na
+planilha; enquanto isso, o cálculo de "metade do dano" em si (arredon-
+damento, como mostrar no popup) vai primeiro pro ambiente de Protótipo
+(`/prototipo`) pra validar a UX antes de formalizar — ver
+`sdd/sdd-fluxo-rolagem.md` seção 6.

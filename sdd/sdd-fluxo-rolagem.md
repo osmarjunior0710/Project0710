@@ -89,10 +89,12 @@ perguntas originais:
    precisa DECIDIR algo antes de prosseguir", não "o app precisa
    REAGIR a um número".
 
-## 6. Formatos ainda sem prototipar (Salvaguarda/Teste)
+## 6. Formatos ainda sem prototipar (Teste)
 
-Salvaguarda e Teste seguem confirmados como "sem o problema" (seção 2)
-— não vale a pena gastar rodada de protótipo neles.
+Teste segue confirmado como "sem o problema" (seção 2) — não vale a
+pena gastar rodada de protótipo nele. **Salvaguarda da seção 2
+("Sentido de Perigo, qualquer save vs. efeito de terceiro" — o
+PRÓPRIO personagem rolando) também segue sem o problema.**
 
 **Cura — resolvido sem protótipo (2026-09, pedido direto do Osmar):**
 "Curar outro"/"Me curar" (`RollDadosOptions.confirmarAlvoCura`, ver
@@ -102,6 +104,19 @@ Curativas). Continua em aberto só a pergunta mais estreita de "seletor
 de QUAL outra criatura" (Pet vs. outro PJ) — "Curar outro" nesse
 padrão não pergunta quem, só fecha; quem precisa saber quem (Colheita
 Macabra) continua com o próprio modal dedicado. Ver `PENDENCIAS.md`.
+
+**Salvaguarda do Alvo — formato NOVO, achado em 2026-09, diferente do
+"Salvaguarda" da seção 2:** é o alvo (inimigo/NPC) que salva contra
+uma magia/característica SUA (Ataque de Sopro, Lançar no Inferno,
+magia com `mecanica === 'salvaguarda'`, Golpe de Escudo), não o
+próprio personagem — esse SIM tem o problema "atira e esquece" (o
+botão de dano sempre rola cheio, mesmo quando o texto diz "Metade do
+dano" no sucesso). Travado por 2 motivos, ver `PENDENCIAS.md`
+"Salvaguarda do Alvo": (1) reconhecer "sucesso = metade/nenhum/cheio"
+pras magias genéricas precisa de coluna/ID estável na planilha, ainda
+não existe; (2) o cálculo de "metade do dano" em si (arredondamento,
+como mostrar) vai primeiro pro `/prototipo` — Osmar pediu validar a
+UX antes de formalizar, mesmo processo do Acerto/Erro original.
 
 ## 4. Onde isso encosta em sistema existente (risco de colisão)
 

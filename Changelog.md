@@ -5,6 +5,17 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2349
+
+**Novo protótipo: "Salvaguarda do Alvo — Passou/Falhou + meio dano"**
+em "🧪 Protótipos" (Lista de personagens). Testa perguntar "Passou?"/
+"Falhou?" de verdade (em vez de só mostrar CD e rolar sempre o dano
+cheio) e como mostrar o cálculo de "metade do dano" depois de rolar.
+Ainda não afeta nenhuma magia/ataque real — dois pontos travados
+esperando decisão: uma coluna nova na planilha (pra saber se o
+sucesso da magia é "metade"/"nenhum"/"cheio" sem depender do texto) e
+validar essa apresentação do cálculo antes de formalizar.
+
 ## v202609_1821
 
 **Todo ataque agora pergunta "Acertou?" — sem exceção.** Ataque

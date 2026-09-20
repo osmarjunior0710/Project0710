@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import ExemploRolagemSimples from './ExemploRolagemSimples';
 import AcertoErroCena from './AcertoErroCena';
 import EsmagadorTalhadorCena from './EsmagadorTalhadorCena';
+import SalvaguardaDoAlvoCena from './SalvaguardaDoAlvoCena';
 
 export interface CenaPrototipo {
   id: string;
@@ -35,5 +36,12 @@ export const cenasPrototipo: CenaPrototipo[] = [
     descricao:
       'Ataque sem "renunciar" nada antes — só pergunta Acerto/Erro quando a arma bate o tipo de dano, tem o talento e ele ainda não foi usado no turno. Popup final com "Ativar"/"Não usar".',
     Componente: EsmagadorTalhadorCena,
+  },
+  {
+    id: 'salvaguarda-do-alvo',
+    titulo: 'Salvaguarda do Alvo — Passou/Falhou + meio dano',
+    descricao:
+      'Hoje o popup só mostra CD e sempre rola dano cheio. Testa perguntar Passou/Falhou de verdade e como mostrar o cálculo de "metade do dano" depois de rolar.',
+    Componente: SalvaguardaDoAlvoCena,
   },
 ];
