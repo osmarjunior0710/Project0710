@@ -5,6 +5,22 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1151
+
+**Protótipo de Salvaguarda do Alvo evoluiu pra um "popup único"
+configurável**, em "🧪 Protótipos" (Lista de personagens): agora tem 2
+modos lado a lado — "Ataque (Acerto/Erro)", que é o fluxo real de
+hoje, e "Salvaguarda do Alvo", que já rola o dano sozinho (mostra
+"Rolando…" e monta o popup final com CD, Falha e Sucesso já calculados
+— sem precisar tocar num botão separado de dano) e deixa ligar/
+desligar cada bloco de informação (CD, dano da falha, tipo de sucesso,
+aviso, dano condicional extra) por toggle, além de travar o fechamento
+só no botão "Ok" (toque fora não fecha mais sem querer). Os protótipos
+antigos já decididos ("Acerto/Erro", "Esmagador/Talhador", exemplo
+simples) foram removidos da lista. Ainda não afeta nenhuma magia/
+ataque real — continua esperando a coluna nova na planilha (seção
+"Salvaguarda do Alvo" do `PENDENCIAS.md`) e a aprovação do layout final.
+
 ## v202609_2349
 
 **Novo protótipo: "Salvaguarda do Alvo — Passou/Falhou + meio dano"**

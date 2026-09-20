@@ -1,8 +1,5 @@
 import type { ComponentType } from 'react';
-import ExemploRolagemSimples from './ExemploRolagemSimples';
-import AcertoErroCena from './AcertoErroCena';
-import EsmagadorTalhadorCena from './EsmagadorTalhadorCena';
-import SalvaguardaDoAlvoCena from './SalvaguardaDoAlvoCena';
+import PopupAtaqueSalvaguardaCena from './PopupAtaqueSalvaguardaCena';
 
 export interface CenaPrototipo {
   id: string;
@@ -16,32 +13,21 @@ export interface CenaPrototipo {
  * entrada aqui, sem mexer em rota nem no shell. Cada cena tem estado
  * 100% local, sem `armazenamentoPersonagens`/`core/calculoPersonagem`
  * — só pode reaproveitar UI genérica de verdade (RollContext, botões/
- * cards padrão do app). */
+ * cards padrão do app).
+ *
+ * Cenas fechadas (decisão já tomada e registrada em
+ * `DECISOES-COMBATE.md`, ou virou feature real) são apagadas daqui —
+ * o histórico de como se chegou lá fica no Git, não precisa ocupar
+ * espaço na lista. Removidas em 2026-09: "Exemplo — Rolagem simples"
+ * (só prova de conceito da infra), "Acerto/Erro — Ataque com efeito"
+ * e "Esmagador/Talhador" (as 2 decisões já viraram o fluxo real de
+ * produção). */
 export const cenasPrototipo: CenaPrototipo[] = [
   {
-    id: 'exemplo-rolagem',
-    titulo: 'Exemplo — Rolagem simples',
-    descricao: 'Prova que o ambiente consegue rolar dado de verdade fora do fluxo de personagem.',
-    Componente: ExemploRolagemSimples,
-  },
-  {
-    id: 'acerto-erro',
-    titulo: 'Acerto/Erro — Ataque com efeito',
-    descricao: '3 variantes trocáveis pra decidir o fluxo de ataque→dano→efeito (ver sdd-fluxo-rolagem.md).',
-    Componente: AcertoErroCena,
-  },
-  {
-    id: 'esmagador-talhador',
-    titulo: 'Esmagador/Talhador — gatilho automático por tipo de dano',
+    id: 'popup-ataque-salvaguarda',
+    titulo: 'Popup de Ataque/Salvaguarda — explorar layout único',
     descricao:
-      'Ataque sem "renunciar" nada antes — só pergunta Acerto/Erro quando a arma bate o tipo de dano, tem o talento e ele ainda não foi usado no turno. Popup final com "Ativar"/"Não usar".',
-    Componente: EsmagadorTalhadorCena,
-  },
-  {
-    id: 'salvaguarda-do-alvo',
-    titulo: 'Salvaguarda do Alvo — Passou/Falhou + meio dano',
-    descricao:
-      'Hoje o popup só mostra CD e sempre rola dano cheio. Testa perguntar Passou/Falhou de verdade e como mostrar o cálculo de "metade do dano" depois de rolar.',
-    Componente: SalvaguardaDoAlvoCena,
+      'Ataque (Acerto/Erro, fluxo real de hoje) lado a lado com um mockup de Salvaguarda do Alvo onde cada bloco de informação (CD, dano da falha, dano do sucesso, aviso, dano condicional) liga/desliga por toggle.',
+    Componente: PopupAtaqueSalvaguardaCena,
   },
 ];
