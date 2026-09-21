@@ -6,7 +6,7 @@
   position: fixed;
   top: 72px;
   right: 5px;
-  bottom: calc(92px + 52px + 5px);
+  bottom: calc(54px + env(safe-area-inset-bottom, 0px) + var(--space-3) + 56px + 5px);
   left: 5px;
   z-index: 90;
   pointer-events: none;
@@ -25,7 +25,7 @@
   position: fixed;
   top: 72px;
   right: 5px;
-  bottom: calc(92px + 52px + 5px);
+  bottom: calc(54px + env(safe-area-inset-bottom, 0px) + var(--space-3) + 56px + 5px);
   left: 5px;
   z-index: 90;
   visibility: hidden;

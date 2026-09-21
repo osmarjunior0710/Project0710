@@ -190,12 +190,12 @@
 }
 
 /* Aviso temporário do resultado do Descanso (toque fecha, some sozinho em
-   9s) — acima dos FABs (que ficam a 92px do rodapé, 52px de altura). */
+   9s) — acima dos FABs (56px de altura, 12px acima da barra de abas). */
 .avisoDescanso {
   position: fixed;
   left: var(--space-4);
   right: var(--space-4);
-  bottom: calc(92px + 52px + var(--space-3));
+  bottom: calc(54px + env(safe-area-inset-bottom, 0px) + var(--space-3) + 56px + var(--space-3));
   z-index: 102;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--shape-md);

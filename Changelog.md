@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2034
+
+O FAB de dados (🎲) ganhou o mesmo formato do FAB de Descanso, espelhado: 56 px, cantos bem redondos e o inferior-direito quase reto, só o ícone, no canto direito logo acima da barra de abas — os dois ficam na mesma linha. O menu de dados e a área de queda do dado 3D acompanharam a nova posição.
+
 ## v202609_2032
 
 O FAB de Descanso ficou só com o ícone 😴 (sem o texto "Descanso"), no formato do FAB de referência: 56 px, cantos bem redondos e o inferior-esquerdo quase reto, logo acima da barra de abas.
