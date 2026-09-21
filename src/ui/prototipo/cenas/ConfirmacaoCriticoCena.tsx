@@ -152,9 +152,6 @@ export default function ConfirmacaoCriticoCena() {
                 <div style={{ fontSize: 13 }}>
                   <ContaDoDado lados={20} valor={etapa.confirmacao} mod={MOD_ATAQUE} />
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 4 }}>
-                  Só informativo — o Mestre compara com a CA (um 1 aqui é só o número).
-                </div>
               </div>
             )}
 

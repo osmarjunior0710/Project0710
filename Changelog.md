@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1536
+
+Protótipo da confirmação de crítico: removido o texto explicativo embaixo do dado de confirmação.
+
 ## v202609_1534
 
 **Protótipo da confirmação de crítico:** a conta do dado (ex.: 9 + 5 = 14) agora vem com o ícone do dado ao lado (d20 aqui; outro dado mostraria a arte dele), no ataque e no dado de confirmação.
