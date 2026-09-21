@@ -1530,6 +1530,8 @@ export default function CombatTab({
           onEscolher={(nome, desc) => escolherNoPainel('reacao', nome, desc)}
           onAbrirSalvaguarda={abrirSalvaguarda}
           gastarSlotCirculo={onGastarSlotCirculo}
+          espacos={espacos}
+          espacosGastosPorCirculo={espacosGastosPorCirculo}
           onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
           nivel={nivel}
           conjura={conjura}

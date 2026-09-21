@@ -3,7 +3,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { Pet } from '../../../core/pets';
 import { iconesMagia } from '../../../core/classificarMagia';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
-import { cdConjuracao } from '../../../core/magiasPersonagem';
+import { cdConjuracao, circulosDisponiveisParaConjurar, type EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
@@ -26,6 +26,12 @@ interface ReacaoPanelContentProps {
    * ponte de Magia de Pacto ainda, ver PENDENCIAS.md "Painel de Reação
    * ainda usa a lista plana antiga"), então quem chama pode omitir. */
   gastarSlotCirculo: (circulo: number, classeNome?: string) => boolean;
+  /** Espaços de Magia do pool que está conjurando agora e quantos já foram
+   * gastos por círculo — decidem quais magias de Reação aparecem como
+   * disponíveis (mesma regra do picker de "Usar Magia": precisa sobrar
+   * espaço de um círculo >= o da magia). */
+  espacos: EspacoDeMagiaAtivo[];
+  espacosGastosPorCirculo: Record<number, number>;
   /** Aplica a cura de magia no PV E dispara o efeito visual de Cura
    * ("Me curar", ver `RollDadosOptions.confirmarAlvoCura` e
    * `FichaShell.tsx` `onCuraDeMagiaAplicada`). */
@@ -95,6 +101,8 @@ export default function ReacaoPanelContent({
   onEscolher,
   onAbrirSalvaguarda,
   gastarSlotCirculo,
+  espacos,
+  espacosGastosPorCirculo,
   onCuraDeMagiaAplicada,
   nivel,
   conjura,
@@ -138,17 +146,22 @@ export default function ReacaoPanelContent({
 
   function conjurarMagia(m: Magia) {
     if (desvantagemForcaDestreza) return;
-    if (m.circulo > 0) {
-      const ok = gastarSlotCirculo(m.circulo);
-      if (!ok) {
-        setAviso(`Sem Espaço de Magia de ${m.circulo}º círculo disponível. Veja a aba Magias pra saber quando recupera.`);
-        return;
-      }
+    // Reação não tem tela de escolha de círculo: gasta o MENOR espaço que
+    // ainda sirva (>= círculo da magia) — regra normal de conjurar com
+    // espaço maior quando o do círculo já acabou.
+    const circuloUsado = m.circulo === 0 ? 0 : (circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo)[0] ?? null);
+    if (circuloUsado === null) {
+      setAviso(`Sem Espaço de Magia disponível pra ${m.nome} (${m.circulo}º círculo ou maior). Veja a aba Magias pra saber quando recupera.`);
+      return;
+    }
+    if (m.circulo > 0 && !gastarSlotCirculo(circuloUsado)) {
+      setAviso(`Sem Espaço de Magia de ${circuloUsado}º círculo disponível. Veja a aba Magias pra saber quando recupera.`);
+      return;
     }
     setAviso(null);
     const resultado = decidirConjuracao(
       m,
-      m.circulo,
+      m.circulo === 0 ? 0 : circuloUsado,
       nivel,
       modAcertoConjuracao,
       colheitaMacabraDisponivel,
@@ -186,7 +199,7 @@ export default function ReacaoPanelContent({
     }
     if (resultado.mecanica === 'salvaguarda') {
       onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
-      onAbrirSalvaguarda(m, m.circulo);
+      onAbrirSalvaguarda(m, m.circulo === 0 ? m.circulo : circuloUsado);
       return;
     }
     if (resultado.rollCura) {
@@ -393,19 +406,25 @@ export default function ReacaoPanelContent({
               Bloqueado — Armadura equipada sem treinamento impede conjurar magias.
             </div>
           )}
-          {magiasReacao.map((m) => (
-            <div
-              key={m.id}
-              className={styles.spellMiniRow}
-              style={desvantagemForcaDestreza ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-              onClick={() => conjurarMagia(m)}
-            >
-              <span>
-                <MagiaComDescricao magia={m} /> {iconesMagia(m)}
-              </span>
-              <span className="tag">{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
-            </div>
-          ))}
+          {magiasReacao.map((m) => {
+            const semEspaco =
+              m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+            const bloqueada = desvantagemForcaDestreza || semEspaco;
+            return (
+              <div
+                key={m.id}
+                className={styles.spellMiniRow}
+                style={bloqueada ? { opacity: semEspaco ? 0.45 : 0.5, pointerEvents: 'none' } : undefined}
+                onClick={() => conjurarMagia(m)}
+              >
+                <span>
+                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  {semEspaco && <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · sem espaço disponível</span>}
+                </span>
+                <span className="tag">{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
+              </div>
+            );
+          })}
           {aviso && (
             <div className="label" style={{ color: 'var(--danger)', marginBottom: 8, marginTop: 8 }}>
               {aviso}

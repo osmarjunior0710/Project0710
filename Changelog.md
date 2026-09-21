@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2018
+
+**Correção no painel de Reação:** magia sem espaço de magia disponível agora aparece esmaecida, sem clique e com "· sem espaço disponível" (igual ao picker de Usar Magia), em vez de parecer ativa. Também passa a valer a regra de conjurar com espaço de círculo maior: se o do círculo da magia acabou mas sobra um maior, ela continua disponível e a Reação gasta o menor espaço que sirva.
+
 ## v202609_2007
 
 Os emojis provisórios da Bolsa de Moedas foram trocados pelos ícones de verdade: triângulo de cobre (PC), quadrado de prata (PP), pentágono de electro (PE), círculo de ouro (PO) e hexágono de platina (PL) — na linha da Mochila e no título do painel de cada moeda.

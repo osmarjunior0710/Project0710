@@ -1071,7 +1071,9 @@ vez de Tempo/Alcance/Componentes/Duração).
 ## Painel de Reação ainda usa a lista plana antiga de magias (não ganhou o picker novo)
 
 `ReacaoPanelContent.tsx` continua com a lista simples de magias de
-Reação (sem upcast, sem Tela 2/3) — o picker novo (`SelecionarMagiaShell`/
+Reação (sem Tela 2/3; desde 2026-09 desabilita magia sem espaço e gasta
+automaticamente o MENOR espaço de círculo >= o da magia, mas ainda sem
+escolha manual do círculo) — o picker novo (`SelecionarMagiaShell`/
 `EscolherCirculoShell`) só foi ligado no painel de Ação por ora. Como
 Reação normalmente tem poucas magias qualificadas (a maioria dos
 personagens tem 0-2), o problema de "lista infinita" que motivou o
