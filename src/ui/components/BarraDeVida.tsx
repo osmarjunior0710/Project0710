@@ -10,8 +10,7 @@
 // geometria SVG — mesma razão da `LinearProgressBar` (não anima de forma
 // confiável entre navegadores).
 
-import { useEffect, useRef, useState } from 'react';
-import { PAUSA_ANTES_ANIMAR_MS, duracaoAnimacaoPvMs, valorNoTempo } from '../../core/animacaoPv';
+import { useMarcadorAnimado } from '../hooks/useMarcadorAnimado';
 import { corPorPercentual } from './LinearProgressBar';
 
 const VIEW_W = 300;
@@ -30,62 +29,7 @@ interface BarraDeVidaProps {
 
 export default function BarraDeVida({ valor, maximo, temporario = 0, altura = 20 }: BarraDeVidaProps) {
   // `marcador` = onde o trecho vermelho está agora, alcançando `valor`.
-  const [marcador, setMarcador] = useState(valor);
-  const marcadorRef = useRef(valor);
-  const alvoRef = useRef(valor);
-  const frameRef = useRef<number | null>(null);
-  const pausaRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const animandoRef = useRef(false);
-
-  function iniciar() {
-    if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
-    const de = marcadorRef.current;
-    const para = alvoRef.current;
-    if (de === para) {
-      animandoRef.current = false;
-      return;
-    }
-    const duracao = duracaoAnimacaoPvMs(para - de);
-    const inicio = performance.now();
-    animandoRef.current = true;
-    const passo = (agora: number) => {
-      const decorrido = agora - inicio;
-      const v = valorNoTempo(de, para, decorrido, duracao);
-      marcadorRef.current = v;
-      setMarcador(v);
-      if (decorrido < duracao) {
-        frameRef.current = requestAnimationFrame(passo);
-      } else {
-        animandoRef.current = false;
-        frameRef.current = null;
-      }
-    };
-    frameRef.current = requestAnimationFrame(passo);
-  }
-
-  useEffect(() => {
-    alvoRef.current = valor;
-    if (marcadorRef.current === valor && !animandoRef.current) return;
-    if (animandoRef.current) {
-      // já rolando: continua de onde está, sem nova pausa
-      iniciar();
-      return;
-    }
-    if (pausaRef.current !== null) return; // pausa em curso já lê o alvo mais novo
-    pausaRef.current = setTimeout(() => {
-      pausaRef.current = null;
-      iniciar();
-    }, PAUSA_ANTES_ANIMAR_MS);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [valor]);
-
-  useEffect(
-    () => () => {
-      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
-      if (pausaRef.current !== null) clearTimeout(pausaRef.current);
-    },
-    [],
-  );
+  const marcador = useMarcadorAnimado(valor);
 
   const escala = maximo + temporario;
   const px = (v: number) => (escala > 0 ? (Math.max(0, Math.min(v, maximo)) / escala) * VIEW_W : 0);

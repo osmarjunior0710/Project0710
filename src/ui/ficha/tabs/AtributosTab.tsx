@@ -174,13 +174,14 @@ export default function AtributosTab({
                   onAbrirLevelUp();
                 }}
               >
-                <AnelDeProgresso progresso={1} ariaLabel="Level Up disponível">
+                <AnelDeProgresso valor={1} maximo={1} ariaLabel="Level Up disponível">
                   <span style={{ fontSize: 18 }}>⬆️</span>
                 </AnelDeProgresso>
               </div>
             ) : (
               <AnelDeProgresso
-                progresso={proximoMarcoXp ? xpAtual / proximoMarcoXp.xpNecessario : 1}
+                valor={proximoMarcoXp ? xpAtual : 1}
+                maximo={proximoMarcoXp ? proximoMarcoXp.xpNecessario : 1}
                 ariaLabel={proximoMarcoXp ? `${xpAtual} de ${proximoMarcoXp.xpNecessario} XP` : `${xpAtual} XP (máximo)`}
               >
                 <span style={{ fontSize: 12 }}>{xpCompacto(xpAtual)}</span>

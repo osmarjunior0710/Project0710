@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1847
+
+**Anel de XP com a mesma animação da barra de vida:** ao adicionar (ou remover) XP, o trecho novo aparece na hora num azul mais claro e, depois de uma pausa curta, o azul cheio vai preenchendo (ou esvaziando) até alcançá-lo. Toques seguidos continuam de onde estava.
+
 ## v202609_1841
 
 **Caixa de nível/XP (aba Atributos):** a caixa inteira agora abre o popup de XP. Por dentro são duas metades: à esquerda "Level" com o número embaixo; à direita um anel de progresso com o XP no centro (abreviado, ex.: 1,5k). Quando o Level Up está liberado, o anel vira uma seta ⬆️ — tocar nela abre o Level Up.
