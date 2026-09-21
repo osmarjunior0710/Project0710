@@ -1,10 +1,12 @@
 // Gerado a partir de dnd-master-referencia.xlsx, aba "Subclasses". Não
 // editar valores à mão.
 //
-// Bardo / Colégio do Conhecimento + Bruxo / Patrono Ínfero importados
-// — as outras 3 de Bardo (Bravura, Dança, Glamour) e as outras 3 de
-// Bruxo (Arquifada, Celestial, Grande Antigo) entram sob demanda,
-// mesmo padrão de `caracteristicasClasse.ts`.
+// Bardo / Colégio do Conhecimento + Bruxo / Patrono Ínfero + Bárbaro /
+// Trilha da Árvore do Mundo importados — as outras 3 de Bardo
+// (Bravura, Dança, Glamour), as outras 3 de Bruxo (Arquifada,
+// Celestial, Grande Antigo) e as outras 3 de Bárbaro (Berserker,
+// Coração Selvagem, Fanático) entram sob demanda, mesmo padrão de
+// `caracteristicasClasse.ts`.
 //
 // "Tipo de Ação (auto, revisar)" da planilha marcou "Palavras de
 // Interrupção" como "Passiva / Estática" — errado, o texto da própria
@@ -17,6 +19,16 @@
 // problema de extração já documentado no CLAUDE.md seção 8) — cortado
 // na importação, mantendo só o parágrafo de regra real. Também tinha
 // um espaço quebrando a palavra "tem" ("e t em a condição") — corrigido.
+//
+// Bárbaro / Trilha da Árvore do Mundo — "Raízes Devastadoras" (nível
+// 10) tinha a legenda de margem lateral da página impressa
+// ("Subclasse Trilha da" / "Árvore do Mundo") colada no meio do
+// parágrafo (mesmo problema de extração da seção 8 do CLAUDE.md) —
+// cortada, confirmado contra o Livro do Jogador (Cap. 3). "Ramos da
+// Árvore" (nível 6) tinha "Tipo de Ação" marcado como "Passiva /
+// Estática" na planilha, mas o texto diz "você pode executar uma
+// Reação" — corrigido pra "Reação" (mesmo ajuste já feito em Palavras
+// de Interrupção do Bardo).
 
 export interface CaracteristicaSubclasse {
   classe: string;
@@ -118,5 +130,41 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Uma vez por turno, ao atingir uma criatura com uma jogada de ataque, você pode tentar transportar instantaneamente o alvo para os Planos Inferiores. O alvo deve ser bem-sucedido em uma salvaguarda de Carisma contra a CD para evitar sua magia, ou ele desaparece e atravessa uma paisagem de pesadelo. O alvo sofre 8d10 pontos de dano Psíquico se não for um Ínfero e tem a condição Incapacitado até o final do seu próximo turno, quando retorna ao espaço que ocupava anteriormente ou ao espaço desocupado mais próximo. Você pode usar esta característica novamente após completar um Descanso Longo, a menos que gaste um espaço de Magia de Pacto (nenhuma ação é necessária) para restaurar seu uso.',
     tipoAcao: 'Grátis',
+  },
+  {
+    classe: 'Bárbaro',
+    subclasse: 'Trilha da Árvore do Mundo',
+    nivel: 3,
+    nome: 'Vitalidade da Árvore',
+    descricao:
+      'Sua Fúria se conecta à força vital da Árvore do Mundo. Você adquire os seguintes benefícios. Força Revigorante. No início de cada um dos seus turnos enquanto sua Fúria estiver ativa, você pode escolher outra criatura a até 3 metros de você para receber Pontos de Vida Temporários. Para determinar a quantidade de Pontos de Vida Temporários, jogue um número de d6s igual ao seu bônus de Dano da Fúria e some os valores. Se qualquer um desses Pontos de Vida Temporários ainda estiverem ativos quando sua Fúria terminar, eles desaparecem. Surto de Vitalidade. Ao ativar sua Fúria, você recebe um número de Pontos de Vida Temporários igual ao seu nível de Bárbaro.',
+    tipoAcao: 'Passiva / Estática',
+  },
+  {
+    classe: 'Bárbaro',
+    subclasse: 'Trilha da Árvore do Mundo',
+    nivel: 6,
+    nome: 'Ramos da Árvore',
+    descricao:
+      'Sempre que uma criatura que você pode ver começar o turno a até 9 metros de você enquanto sua Fúria estiver ativa, você pode executar uma Reação para convocar ramos espectrais da Árvore do Mundo ao redor dela. O alvo deve ser bem-sucedido em uma salvaguarda de Força (CD 8 mais seu modificador de Força e seu Bônus de Proficiência) ou é teleportado para um espaço desocupado à sua vista a até 1,5 metro de você ou no espaço desocupado mais próximo à sua vista. Depois que o alvo se teleportar, você pode reduzir o Deslocamento dele a 0 até o final do turno atual.',
+    tipoAcao: 'Reação',
+  },
+  {
+    classe: 'Bárbaro',
+    subclasse: 'Trilha da Árvore do Mundo',
+    nivel: 10,
+    nome: 'Raízes Devastadoras',
+    descricao:
+      'Durante o seu turno, seu alcance é 3 metros maior com qualquer arma corpo a corpo que tenha a propriedade Pesada ou Versátil, à medida que as raízes da Árvore do Mundo se estendem a partir de você. Quando você atinge com tal arma no seu turno, pode ativar a propriedade de maestria Derrubar ou Empurrar, além de outra propriedade de maestria que você estiver utilizando com a arma.',
+    tipoAcao: 'Passiva / Estática',
+  },
+  {
+    classe: 'Bárbaro',
+    subclasse: 'Trilha da Árvore do Mundo',
+    nivel: 14,
+    nome: 'Percorrer a Árvore',
+    descricao:
+      'Ao ativar sua Fúria e, como uma Ação Bônus enquanto ela estiver ativa, você pode se teleportar a até 18 metros para um espaço desocupado à sua vista. Além disso, uma vez por Fúria, você pode aumentar o alcance desse teleporte para 45 metros. Ao fazer isso, você também pode levar até seis criaturas voluntárias que estejam a até 3 metros de você. Cada criatura se teleporta para um espaço desocupado à sua escolha a até 3 metros do seu destino.',
+    tipoAcao: 'Ação Bônus',
   },
 ];

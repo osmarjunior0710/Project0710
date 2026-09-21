@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1950
+
+**1ª Trilha do Bárbaro: Trilha da Árvore do Mundo já pode ser
+escolhida** (a partir do nível 3, na criação ou no Level Up) — mostra
+as 4 características reais (Vitalidade da Árvore, Ramos da Árvore,
+Raízes Devastadoras, Percorrer a Árvore) no Perfil. Ainda é só o texto
+da regra (a parte interativa — Fúria dando Pontos de Vida Temporário,
+o popup de Reação — vem nas próximas entregas). As outras 3 Trilhas
+continuam "(em breve)".
+
 ## v202609_2232
 
 **Criação de personagem — o 🔀 "Sortear tudo desta etapa" agora existe também no Livro das Sombras, no Talento da Origem e no Talento do Versátil, e todos os 🔀 evitam o que o personagem já possui:** a ferramenta da Origem não repete a que veio da Classe, a perícia da Espécie não repete Classe/Origem/Talento, e os talentos (ex.: Músico, 3 instrumentos; Iniciado em Magia) sorteiam só o que ainda não se tem.
