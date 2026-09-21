@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1759
+
+Na aba Atributos, o título "Dados de Vida" ganhou um ⓘ que abre uma explicação: pra que servem (curar no Descanso Curto, dado + Constituição, mínimo 1), como funcionam na multiclasse, que não existe limite de dados por descanso (só os que você ainda tem) e que o Descanso Longo devolve todos.
+
 ## v202609_1755
 
 **Dados de Vida no Descanso Curto.** A reserva (1 dado por nível, do tipo de cada classe — multiclasse soma tudo e separa por tipo, ex.: 18d6 + 3d8) aparece na aba Atributos. Ao fazer um Descanso Curto com PV faltando, abre um painel pra gastar dados: cada toque rola o dado + Constituição (mínimo 1) e cura, com a barra animando. Com PV cheio o passo é pulado. O Descanso Longo devolve todos os dados gastos.

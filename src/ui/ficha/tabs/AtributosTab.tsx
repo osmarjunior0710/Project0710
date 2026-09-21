@@ -1,4 +1,5 @@
 import type { ReservaDadoVida } from '../../../core/dadosDeVida';
+import InfoTexto from '../../components/InfoTexto';
 import {
   resolverVantagem,
   type AtributoFinal,
@@ -284,7 +285,18 @@ export default function AtributosTab({
 
       {reservaDadosDeVida.length > 0 && (
         <>
-          <div className="section-title">Dados de Vida</div>
+          <div className="section-title">
+            Dados de Vida{' '}
+            <InfoTexto
+              titulo="Dados de Vida"
+              paragrafos={[
+                'Você ganha 1 Dado de Vida por nível, do tipo da sua classe (d6, d8, d10 ou d12). Com mais de uma classe, os dados somam: os do mesmo tipo se combinam e os de tipos diferentes ficam separados.',
+                'Servem pra se curar num Descanso Curto: cada dado gasto rola o dado + seu modificador de Constituição e recupera esse total em Pontos de Vida (mínimo 1).',
+                'Não há limite de dados por descanso — só a quantidade que você ainda tem. Você pode gastar todos os que restarem, um de cada vez, e para quando quiser.',
+                'O Descanso Longo devolve todos os Dados de Vida gastos (e todos os seus PV).',
+              ]}
+            />
+          </div>
           <div className="box" style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', padding: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
             {reservaDadosDeVida.map((r) => (
               <div key={r.tipo} style={{ fontSize: 14 }}>
