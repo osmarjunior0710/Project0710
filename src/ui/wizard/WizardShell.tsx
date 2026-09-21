@@ -1,5 +1,6 @@
+import { destacarPendencia } from './destacarPendencia';
 import { moedasIniciais } from '../../core/loja';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { alinhamentos, arrayPadrao, atributosOrdem, type Atributo } from '../../data/wizardFixtures';
 import { origens } from '../../data/rulesets/dnd2024/origens';
@@ -99,6 +100,7 @@ export default function WizardShell() {
   const [selection, setSelection] = useState<WizardSelection>(criarSelecaoInicial());
   const [valorSelecionado, setValorSelecionado] = useState<number | null>(null);
   const [aviso, setAviso] = useAvisoTemporario();
+  const corpoRef = useRef<HTMLDivElement>(null);
 
   function update(patch: Partial<WizardSelection>) {
     setAviso(null);
@@ -422,6 +424,7 @@ export default function WizardShell() {
   function wizNext() {
     if (!step.isValid(selection)) {
       setAviso(step.mensagemInvalida ?? 'Selecione o que falta antes de avançar.');
+      destacarPendencia(corpoRef.current);
       return;
     }
     setAviso(null);
@@ -469,7 +472,9 @@ export default function WizardShell() {
           ))}
         </div>
       </div>
-      <div className={styles.body}>{step.render({ selection, update })}</div>
+      <div className={styles.body} ref={corpoRef}>
+        {step.render({ selection, update })}
+      </div>
 
       {step.randomize && (
         <div className={styles.randomFab} onClick={step.randomize} title="Sortear tudo desta etapa">

@@ -402,3 +402,25 @@ button {
   padding: 1px 8px;
   display: inline-block;
 }
+
+/* Título de seção incompleta do wizard (ver ui/wizard/destacarPendencia.ts):
+   caixa vermelha piscando por alguns segundos depois do "Avançar". */
+.section-title[data-pendente='true'],
+.label[data-pendente='true'] {
+  animation: pendenciaPisca 0.7s ease-in-out 4;
+  outline: 2px solid var(--danger);
+  outline-offset: 3px;
+  border-radius: var(--shape-sm);
+}
+
+@keyframes pendenciaPisca {
+  0%,
+  100% {
+    background: transparent;
+    outline-color: var(--danger);
+  }
+  50% {
+    background: var(--danger-dim);
+    outline-color: transparent;
+  }
+}

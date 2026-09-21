@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2229
+
+**Criação de personagem — mostra o que falta:** ao apertar Avançar com alguma escolha pendente, a tela rola até a primeira seção incompleta e o título dela pisca com uma caixa vermelha por alguns segundos (além do aviso de sempre).
+
 ## v202609_2226
 
 **Criação de personagem — botão 🎲 Aleatório** nas listas de "Escolha N" do Talento da Origem (ex.: Músico, 3 instrumentos), do Talento da Espécie (Versátil) e do Iniciado em Magia (truques e magia): preenche só as vagas que faltam, mantém o que você já marcou e nunca sorteia o que o personagem já possui ("já possui"). Com a lista cheia vira "Sortear de novo". **Cor dos pips por classe:** Fúria vermelho, Inspiração de Bardo mostarda, Magia de Pacto roxo — na área de recursos do Combate e nos painéis onde esses recursos aparecem.
