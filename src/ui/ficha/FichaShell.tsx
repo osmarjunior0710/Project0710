@@ -408,9 +408,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [arcanaMisticaGastos, setArcanaMisticaGastos] = useState<number[]>(personagemSalvo.arcanaMisticaGastos ?? []);
   const [surtoUsadoTurno, setSurtoUsadoTurno] = useState(personagemSalvo.surtoUsadoTurnoAtual ?? false);
   const [restStatus, setRestStatus] = useState<string | null>(null);
-  // Resultado do Descanso (e avisos como Vigor Implacável) vira um aviso
-  // temporário na tela — antes morava na aba Atributos, que não é mais
-  // onde se descansa (FAB de Descanso, qualquer aba).
+  // Aviso temporário na tela (hoje só Vigor Implacável). O texto de
+  // "o que o Descanso recuperou" foi removido a pedido do Osmar.
   useEffect(() => {
     if (!restStatus) return;
     const t = setTimeout(() => setRestStatus(null), 9000);
@@ -1365,7 +1364,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setArcanaMisticaGastos([]);
     setMagiasGratisGastas([]);
     fimDoTurno();
-    setRestStatus(`Descanso Longo: PV restaurado para ${personagem.pvMax}/${personagem.pvMax}, Espaços de Magia, Recuperar Fôlego, Indomável, Surto de Ação, Inspiração de Bardo, Pontos de Sorte, Fúria e traços de espécie recuperados.`);
   }
 
   function descansoCurto() {
@@ -1404,9 +1402,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setPicoDeAdrenalinaGasto(0);
     setFuriaGasto((v) => Math.max(0, v - 1));
     setFuriaImplacavelUsos(0);
-    setRestStatus(
-      `Descanso Curto: ${algumCirculoRecuperou ? 'Espaços de Magia recuperados, ' : ''}${fonteDeInspiracao ? 'Inspiração de Bardo recuperada, ' : ''}1 uso de Recuperar Fôlego devolvido, Pico de Adrenalina recuperado, 1 uso de Fúria devolvido. PV não recupera automaticamente por descanso curto.`,
-    );
   }
 
   /** Toca em "Descanso Curto"/"Descanso Longo" (aba Atributos) — só
