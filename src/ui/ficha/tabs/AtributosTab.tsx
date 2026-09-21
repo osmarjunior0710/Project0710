@@ -50,9 +50,6 @@ interface AtributosTabProps {
    * rolagem, as duas se cancelam (`resolverVantagem`). */
   temSentidoDePerigo: boolean;
   proficienciasFerramenta: FerramentaFinal[];
-  onDescansoLongo: () => void;
-  onDescansoCurto: () => void;
-  restStatus: string | null;
   onAbrirLevelUp: () => void;
   /** XP acumulado (ver `core/experiencia.ts`) — a "barra de xp" (toda
    * a área é clicável, abre popup de lançar XP em `XpShell.tsx`) e a
@@ -123,9 +120,6 @@ export default function AtributosTab({
   desvantagemForcaDestreza,
   temSentidoDePerigo,
   proficienciasFerramenta,
-  onDescansoLongo,
-  onDescansoCurto,
-  restStatus,
   onAbrirLevelUp,
   xpAtual,
   proximoMarcoXp,
@@ -489,18 +483,6 @@ export default function AtributosTab({
         </>
       )}
 
-      <div className="section-title">Descanso</div>
-      <div className={styles.actionGrid}>
-        <div className={`box ${styles.actionBtn}`} onClick={onDescansoCurto}>
-          <div className={styles.aName}>Descanso Curto</div>
-          <div className={styles.aType}>1 hora</div>
-        </div>
-        <div className={`box ${styles.actionBtn}`} onClick={onDescansoLongo}>
-          <div className={styles.aName}>Descanso Longo</div>
-          <div className={styles.aType}>8 horas</div>
-        </div>
-      </div>
-      {restStatus && <div className={styles.restStatus}>{restStatus}</div>}
     </>
   );
 }

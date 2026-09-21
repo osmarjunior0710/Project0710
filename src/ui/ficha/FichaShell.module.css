@@ -188,3 +188,21 @@
     transform: translateY(var(--cp-dy)) scale(1);
   }
 }
+
+/* Aviso temporário do resultado do Descanso (toque fecha, some sozinho em
+   9s) — acima dos FABs (que ficam a 92px do rodapé, 52px de altura). */
+.avisoDescanso {
+  position: fixed;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: calc(92px + 52px + var(--space-3));
+  z-index: 102;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--shape-md);
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  box-shadow: var(--elevation-3);
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+}

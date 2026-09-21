@@ -1,0 +1,69 @@
+/* Mesmo visual do FAB de dados (`dice3d/Dice3dFab.module.css`), um
+   passo à esquerda dele — o FAB de dados fica em `right: --space-4`
+   (52px de largura), este vem logo depois com 1 gap (--space-3). */
+.fab {
+  position: fixed;
+  right: calc(var(--space-4) + 52px + var(--space-3));
+  bottom: 92px;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--shape-full);
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: var(--elevation-3);
+  cursor: pointer;
+  z-index: 101;
+}
+
+.fab:active {
+  opacity: 0.85;
+}
+
+.fabAberto {
+  background: #1e2a6e;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+/* Coluna que expande pra cima do FAB, alinhada à direita dele. */
+.coluna {
+  position: fixed;
+  right: calc(var(--space-4) + 52px + var(--space-3));
+  bottom: calc(92px + 52px + var(--space-3));
+  z-index: 100;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.menuBtn {
+  color: #fff;
+  font-size: 15px;
+  font-weight: bold;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--shape-full);
+  background: var(--accent);
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-shadow: var(--elevation-2);
+  white-space: nowrap;
+}
+
+.menuBtn:active {
+  background: #1e2a6e;
+}
+
+.duracao {
+  font-size: 11px;
+  font-weight: normal;
+  opacity: 0.85;
+}

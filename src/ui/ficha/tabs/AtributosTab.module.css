@@ -104,38 +104,6 @@
   background: var(--panel2);
 }
 
-.actionGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
-}
-
-.actionBtn {
-  padding: var(--space-4) var(--space-2);
-  text-align: center;
-  cursor: pointer;
-  min-height: var(--touch-target-min);
-  transition:
-    background var(--motion-standard) var(--ease-standard),
-    border-color var(--motion-standard) var(--ease-standard);
-}
-
-.actionBtn:active {
-  background: var(--accent-dim);
-  border-color: var(--accent);
-}
-
-.aName {
-  font-size: 13px;
-}
-
-.aType {
-  font-size: 10px;
-  color: var(--text-faint);
-  margin-top: 3px;
-}
-
 .maestriaRow {
   padding: var(--space-2) var(--space-1);
   border-bottom: 1px dashed var(--line-soft);
@@ -156,8 +124,3 @@
   padding-bottom: 4px;
 }
 
-.restStatus {
-  font-size: 11px;
-  color: var(--accent);
-  margin-bottom: var(--space-3);
-}

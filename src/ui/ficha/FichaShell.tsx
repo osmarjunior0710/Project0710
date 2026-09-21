@@ -123,6 +123,7 @@ import AjustarPetShell from './pets/AjustarPetShell';
 import ColheitaMacabraModal from '../components/ColheitaMacabraModal';
 import FuriaImplacavelModal from '../components/FuriaImplacavelModal';
 import Dice3dFab from './dice3d/Dice3dFab';
+import DescansoFab from './DescansoFab';
 import LevelUpShell, { type PersonagemNivel } from './levelup/LevelUpShell';
 import CompletarMagiasShell from './levelup/CompletarMagiasShell';
 import LivroDasSombrasShell from './levelup/LivroDasSombrasShell';
@@ -407,6 +408,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [arcanaMisticaGastos, setArcanaMisticaGastos] = useState<number[]>(personagemSalvo.arcanaMisticaGastos ?? []);
   const [surtoUsadoTurno, setSurtoUsadoTurno] = useState(personagemSalvo.surtoUsadoTurnoAtual ?? false);
   const [restStatus, setRestStatus] = useState<string | null>(null);
+  // Resultado do Descanso (e avisos como Vigor Implacável) vira um aviso
+  // temporário na tela — antes morava na aba Atributos, que não é mais
+  // onde se descansa (FAB de Descanso, qualquer aba).
+  useEffect(() => {
+    if (!restStatus) return;
+    const t = setTimeout(() => setRestStatus(null), 9000);
+    return () => clearTimeout(t);
+  }, [restStatus]);
   const [turnState, setTurnState] = useState<Record<RecursoTurno, EstadoRecurso>>(
     personagemSalvo.turnStateAtual ?? turnoInicial,
   );
@@ -2183,9 +2192,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             temSentidoDePerigo={temSentidoDePerigo}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             proficienciasFerramenta={proficienciasFerramenta}
-            onDescansoLongo={() => iniciarDescanso('longo')}
-            onDescansoCurto={() => iniciarDescanso('curto')}
-            restStatus={restStatus}
             onAbrirLevelUp={() => {
               const opcoes = opcoesLevelUp(classesAtual, atributosFinaisAtuais, catalogoClasses);
               if (deveEscolherClasseNoLevelUp(opcoes)) {
@@ -2525,7 +2531,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         </div>
       </div>
 
+      <DescansoFab onDescansoCurto={() => iniciarDescanso('curto')} onDescansoLongo={() => iniciarDescanso('longo')} />
       <Dice3dFab />
+      {restStatus && (
+        <div className={styles.avisoDescanso} onClick={() => setRestStatus(null)}>
+          {restStatus}
+        </div>
+      )}
     </div>
   );
 }

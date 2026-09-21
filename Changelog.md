@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1615
+
+**FAB de Descanso:** os botões Descanso Curto/Longo saíram da aba Atributos e viraram um botão flutuante 😴 (ao lado do de dados), disponível em qualquer aba — toque e escolha Curto (1 hora) ou Longo (8 horas). O texto do que foi recuperado agora aparece como um aviso na tela (toque fecha, some sozinho em 9s).
+
 ## v202609_1547
 
 **Crítico nos ataques de magia + house rule "Confirmação de crítico".** Ataques de magia agora dobram os dados de dano no 20 natural (igual aos de arma). Em 📜 House Rules (menu do avatar) tem o novo switcher **Confirmação de crítico** (desligado por padrão): ligado, um 1 ou 20 natural em ataque pede antes um segundo d20 de confirmação (com o ícone do dado, só informativo). No 1: Errei / Rolar Dano. No 20: Rolar Dano / Rolar Dano Dobrado.
