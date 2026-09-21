@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useMarcadorAnimado } from '../hooks/useMarcadorAnimado';
 
 interface AnelDeProgressoProps {
@@ -11,11 +11,15 @@ interface AnelDeProgressoProps {
   /** Conteúdo no centro do anel (texto curto). */
   children?: ReactNode;
   ariaLabel?: string;
+  /** Chamado quando o anel já está cheio E a animação terminou (o marcador
+   * alcançou o valor) — também no 1º render se já nascer cheio. Serve pra
+   * esperar a animação antes de trocar o anel por outra coisa. */
+  onCheio?: () => void;
 }
 
 /** Indicador de progresso circular (M3, variante reta, arco com ponta
  * arredondada) — gira a partir do topo, sentido horário. */
-export default function AnelDeProgresso({ valor, maximo, tamanho = 52, children, ariaLabel }: AnelDeProgressoProps) {
+export default function AnelDeProgresso({ valor, maximo, tamanho = 52, children, ariaLabel, onCheio }: AnelDeProgressoProps) {
   const espessura = 4;
   const raio = (tamanho - espessura) / 2;
   const circunferencia = 2 * Math.PI * raio;
@@ -25,6 +29,12 @@ export default function AnelDeProgresso({ valor, maximo, tamanho = 52, children,
   // Perda: cheio já no valor novo, claro do valor até o marcador (o que sumiu).
   const pCheio = fracao(Math.min(marcador, valor));
   const pClaro = fracao(Math.max(marcador, valor));
+  const cheioDeVerdade = maximo > 0 && valor >= maximo && marcador === valor;
+
+  useEffect(() => {
+    if (cheioDeVerdade) onCheio?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cheioDeVerdade]);
 
   return (
     <div style={{ position: 'relative', width: tamanho, height: tamanho }} role="img" aria-label={ariaLabel}>

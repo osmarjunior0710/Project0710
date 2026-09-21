@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1933
+
+Ao ganhar XP suficiente pra subir de nível, o anel agora termina de encher primeiro e só depois o selo de Level Up aparece (com uma entrada suave), em vez de cortar a animação. Se a ficha já abrir com Level Up pendente, o selo aparece direto.
+
 ## v202609_1930
 
 **Anel de XP mostra o progresso real do nível:** em vez de XP total contra o marco absoluto (ex.: 301 de 900), conta só dentro do nível atual (ex.: nível 2 com 301 XP = 1 de 600). O número no centro continua sendo o XP total.

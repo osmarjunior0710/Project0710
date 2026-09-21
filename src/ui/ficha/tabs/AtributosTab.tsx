@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import iconeLevelUp from '../../../assets/icones-ui/level-up.png';
 import AnelDeProgresso from '../../components/AnelDeProgresso';
 import { progressoNoNivelXp, xpCompacto } from '../../../core/experiencia';
@@ -156,6 +157,14 @@ export default function AtributosTab({
   const { rolarD20 } = useRoll();
   const sentidosParaExibir = sentidosAtivos(sentidos);
 
+  // O selo de Level Up só entra DEPOIS do anel terminar de encher (senão
+  // o selo cortava a animação do XP). Já nascendo liberado (ficha abriu
+  // com Level Up pendente), mostra direto, sem animação.
+  const [seloPronto, setSeloPronto] = useState(podeLevelUpPelaXp);
+  useEffect(() => {
+    if (!podeLevelUpPelaXp) setSeloPronto(false);
+  }, [podeLevelUpPelaXp]);
+
   // Nível atual (total) = marco do próximo - 1 — o anel mostra o progresso
   // DENTRO do nível, não o XP acumulado contra o marco absoluto.
   const progressoNivel = proximoMarcoXp ? progressoNoNivelXp(proximoMarcoXp.nivel - 1, xpAtual) : null;
@@ -171,7 +180,7 @@ export default function AtributosTab({
             <div className={styles.levelNumero}>{nivel}</div>
           </div>
           <div className={styles.levelDir}>
-            {podeLevelUpPelaXp ? (
+            {podeLevelUpPelaXp && seloPronto ? (
               <div
                 className={styles.levelUpAnel}
                 onClick={(e) => {
@@ -185,6 +194,7 @@ export default function AtributosTab({
             ) : (
               <AnelDeProgresso
                 key={proximoMarcoXp?.nivel}
+                onCheio={podeLevelUpPelaXp ? () => setSeloPronto(true) : undefined}
                 valor={progressoNivel ? progressoNivel.atual : 1}
                 maximo={progressoNivel ? progressoNivel.total : 1}
                 ariaLabel={
