@@ -39,3 +39,20 @@ não obrigatória de uma vez.)*
   Ambidestro, Mestre das Armas, Mestre em Armas Grandes, Mestre em
   Escudos), e os 2 bugs de Maestria em Arma achados no caminho
   (crescimento por nível, troca sem limite de Descanso Longo).
+
+## `sistemas/`
+
+Um arquivo por sistema/infraestrutura transversal (não amarrado a 1
+classe/talento específico).
+
+- **`sistemas/dado-3d.md`** — Dado 3D com física (`@3d-dice/dice-box`):
+  escolha da lib e gotchas de integração, Fase A (FAB avulso
+  formalizado) e Fase B1-B6 (motor virou padrão pra toda rolagem
+  oficial do jogo), + todos os bugs achados testando no celular no
+  caminho (d100 só rolava a dezena, reroll não achava o dado certo,
+  corrida de `groupId` embaralhando 2 dados simultâneos, canvas
+  encolhendo o dado, promise de init grudando, 2º dado não
+  reconhecido). Extraído de `DECISOES-COMBATE.md` na compactação de
+  2026-09 — os poucos padrões que generalizaram pra além do dado
+  (cache de promise, FAB de coluna expansível, botão circular de
+  canto) continuam lá.
