@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1732
+
+**Barra de vida estilo jogo de luta (aba Combate):** ao tomar dano, a barra cai na hora e o trecho perdido fica em vermelho, que depois vai esvaziando; na cura, o trecho a preencher aparece em vermelho e o verde vai enchendo. Toques seguidos não reiniciam: continua de onde estava (0,2 s por ponto, entre 1 e 2 s). O botão **Manual** agora funciona: abre um campo pra digitar o valor, com botões Tomar dano (vermelho), Curar (verde) e fechar.
+
 ## v202609_1702
 
 O FAB de Descanso (😴) agora fica no canto inferior esquerdo da tela; as opções Curto/Longo abrem pra cima, alinhadas à esquerda.

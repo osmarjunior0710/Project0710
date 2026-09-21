@@ -14,9 +14,10 @@ import { cdConjuracao } from '../../../core/magiasPersonagem';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import InfoChip from '../../components/InfoChip';
-import LinearProgressBar from '../../components/LinearProgressBar';
+import BarraDeVida from '../../components/BarraDeVida';
 import ContadorUsos from '../../components/ContadorUsos';
 import SidePanel from '../combat/SidePanel';
+import PvManualModal from '../combat/PvManualModal';
 import AcaoPanelContent from '../combat/AcaoPanelContent';
 import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
 import AtivarEfeitoModal from '../../components/AtivarEfeitoModal';
@@ -542,6 +543,7 @@ export default function CombatTab({
   },
   modIntAtual,
 }: CombatTabProps) {
+  const [pvManualAberto, setPvManualAberto] = useState(false);
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -1076,7 +1078,7 @@ export default function CombatTab({
             {pvAtual} / {pvMax}
           </div>
         </div>
-        <LinearProgressBar valor={pvAtual} maximo={pvMax} temporario={pvTemporario} />
+        <BarraDeVida valor={pvAtual} maximo={pvMax} temporario={pvTemporario} />
       </div>
       <div className={styles.hpBtnRow}>
         <div className={styles.hpBtnSmall} onClick={() => onAlterarPv(-5)}>
@@ -1085,8 +1087,8 @@ export default function CombatTab({
         <div className={styles.hpBtnSmall} onClick={() => onAlterarPv(-1)}>
           −1
         </div>
-        <div className={`${styles.hpBtnSmall} ${styles.hpBtnManual}`}>
-          Manual <span className="tag">[PH]</span>
+        <div className={styles.hpBtnSmall} onClick={() => setPvManualAberto(true)}>
+          Manual
         </div>
         <div className={styles.hpBtnSmall} onClick={() => onAlterarPv(1)}>
           +1
@@ -1361,6 +1363,8 @@ export default function CombatTab({
         />
       )}
 
+
+      {pvManualAberto && <PvManualModal onAplicar={onAlterarPv} onFechar={() => setPvManualAberto(false)} />}
 
       <SidePanel
         open={painelAberto === 'acao'}

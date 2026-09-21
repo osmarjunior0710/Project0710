@@ -27,7 +27,7 @@ código).
 - [ ] Recurso principal da classe visível na tela de combate
 - [x] FAB para descanso curto/longo
 - [ ] Dado de cura no descanso curto (não foi trazido da ficha do jogo)
-- [ ] Animação de dano/cura na barra de vida
+- [x] Animação de dano/cura na barra de vida (+ botão Manual de PV)
 - [ ] Revisão do botão de XP para mostrar progresso circular
 - [ ] Informações de CD, bônus de ataque de magia e afins na tela de Magias
 - [ ] Coin bag manager (mostrar, usar e adicionar moedas) + house rule de contar ou não o peso da moeda
