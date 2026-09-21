@@ -98,6 +98,7 @@ import { podeLevelUpPorXp, proximoMarcoXp } from '../../core/experiencia';
 import {
   espacosDeMagiaAtivos,
   modAcertoConjuracao as calcularModAcertoConjuracao,
+  resumoConjuracao as calcularResumoConjuracao,
   explicarModAcertoConjuracao,
   explicarCdConjuracao,
   magiasDisponiveisParaPreparar,
@@ -737,6 +738,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasPactoDoInferoDisponivel,
   });
   const modAcertoConjuracao = calcularModAcertoConjuracao(selecao, classe, nivelTotalAtual);
+  const resumoConjuracao = calcularResumoConjuracao(selecao, classe, nivelTotalAtual);
   const explicacaoAcertoConjuracao = explicarModAcertoConjuracao(selecao, classe, nivelTotalAtual);
   const explicacaoCdConjuracao = explicarCdConjuracao(selecao, classe, nivelTotalAtual);
   const usosInspiracaoMax = usosInspiracaoMaximo(selecao, classe, personagem.nivel);
@@ -2292,6 +2294,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             espacosParaConjurar={espacosParaConjurar}
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}
+            resumo={resumoConjuracao}
             explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             explicacaoCdConjuracao={explicacaoCdConjuracao}
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}

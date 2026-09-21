@@ -5,6 +5,7 @@ import {
   poolDescobertasMagicas,
   cdConjuracao,
   modAcertoConjuracao,
+  resumoConjuracao,
   explicarModAcertoConjuracao,
   explicarCdConjuracao,
   usaRedefinicaoPorDescanso,
@@ -83,6 +84,23 @@ describe('poolDescobertasMagicas', () => {
     expect(pool.every((m) => m.circulo <= 3)).toBe(true);
     const ids = pool.map((m) => m.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('resumoConjuracao', () => {
+  it('Mago INT 16: mod +3, ataque +5 (com prof +2), CD 13', () => {
+    const selecao = { ...criarSelecaoInicial(), atributos: { ...criarSelecaoInicial().atributos, INT: 16 } };
+    expect(resumoConjuracao(selecao, mago, 1)).toEqual({
+      atributoNome: 'Inteligência',
+      atributo: 'INT',
+      modAtributo: 3,
+      cd: 13,
+      modAtaque: 5,
+    });
+  });
+
+  it('borda: classe null ou sem atributo de conjuração mapeado devolve null', () => {
+    expect(resumoConjuracao(criarSelecaoInicial(), null, 1)).toBeNull();
   });
 });
 

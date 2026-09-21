@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1809
+
+**Topo da aba Magias:** 3 caixas na mesma linha com os números de conjuração da ficha de papel — **Mod. Conjuração** (com o atributo), **CD da Magia** e **Ataque Mágico**. São consulta (borda tracejada, não rolam) e cada uma tem um ⓘ explicando o que é e como o valor é formado (com a conta do seu personagem).
+
 ## v202609_1759
 
 Na aba Atributos, o título "Dados de Vida" ganhou um ⓘ que abre uma explicação: pra que servem (curar no Descanso Curto, dado + Constituição, mínimo 1), como funcionam na multiclasse, que não existe limite de dados por descanso (só os que você ainda tem) e que o Descanso Longo devolve todos.

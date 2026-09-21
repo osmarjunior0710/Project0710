@@ -384,6 +384,30 @@ export function explicarCdConjuracao(selecao: WizardSelection, classe: Classe | 
   };
 }
 
+/** Os 3 números de conjuração da ficha de papel (topo da aba Magias):
+ * modificador do atributo de conjuração, CD pra evitar a magia
+ * (8 + mod + Bônus de Proficiência) e modificador de ataque mágico
+ * (mod + Bônus de Proficiência). `null` nos mesmos casos que
+ * `modAcertoConjuracao` (classe sem atributo de conjuração mapeado). */
+export interface ResumoConjuracao {
+  /** Nome do atributo de conjuração (ex.: "Inteligência"). */
+  atributoNome: string;
+  atributo: Atributo;
+  modAtributo: number;
+  cd: number;
+  modAtaque: number;
+}
+
+export function resumoConjuracao(selecao: WizardSelection, classe: Classe | null, nivel: number): ResumoConjuracao | null {
+  if (!classe) return null;
+  const atributo = ATRIBUTO_POR_NOME[classe.atributoPrimario];
+  const modAtaque = modAcertoConjuracao(selecao, classe, nivel);
+  if (!atributo || modAtaque === null) return null;
+  const valor = valorFinalAtributo(selecao, atributo);
+  if (valor === null) return null;
+  return { atributoNome: classe.atributoPrimario, atributo, modAtributo: modificador(valor), cd: 8 + modAtaque, modAtaque };
+}
+
 /** CD pra evitar a magia/característica de conjuração (salvaguarda do
  * alvo) — regra fixa: 8 + bônus de acerto de conjuração
  * (`modAcertoConjuracao`, já soma mod. de atributo + Bônus de

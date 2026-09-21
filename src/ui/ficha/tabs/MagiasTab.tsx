@@ -15,7 +15,8 @@ import {
 import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
-import { cdConjuracao } from '../../../core/magiasPersonagem';
+import { cdConjuracao, type ResumoConjuracao } from '../../../core/magiasPersonagem';
+import InfoTexto from '../../components/InfoTexto';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
 import { danoComCritico } from '../../../core/danoCritico';
@@ -56,6 +57,9 @@ interface MagiasTabProps {
   espacosParaConjurar?: EspacoDeMagiaAtivo[];
   onGastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
   modAcertoConjuracao: number | null;
+  /** Os 3 números de conjuração mostrados no topo da aba (ver
+   * `resumoConjuracao`) — `null` = classe sem atributo de conjuração mapeado. */
+  resumo: ResumoConjuracao | null;
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
@@ -204,6 +208,7 @@ export default function MagiasTab({
   espacosParaConjurar,
   onGastarSlotCirculo,
   modAcertoConjuracao,
+  resumo,
   explicacaoAcertoConjuracao,
   explicacaoCdConjuracao,
   truqueVinculadoAgonizante,
@@ -446,8 +451,60 @@ export default function MagiasTab({
       : telaSalvaguarda.magia.salvaguardaFalha
     : null;
 
+  const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
+  // dentro de uma conta escrita: "8 + 5 + 2" (negativo vira "(-1)")
+  const num = (n: number) => (n >= 0 ? `${n}` : `(${n})`);
+  const prof = resumo ? resumo.modAtaque - resumo.modAtributo : 0;
+
   return (
     <>
+      {resumo && (
+        <div className="stat-grid">
+          <div className="box stat-box" style={{ cursor: 'default' }}>
+            <div className="stat-name">
+              MOD. CONJURAÇÃO{' '}
+              <InfoTexto
+                titulo="Modificador de conjuração"
+                paragrafos={[
+                  `É o modificador do seu atributo de conjuração (${resumo.atributoNome}) — o atributo que sua classe usa pra conjurar magias.`,
+                  `Vem direto do valor de ${resumo.atributo}: hoje ${fmt(resumo.modAtributo)}. Serve de base pra CD e pro ataque mágico. Não é pra rolar.`,
+                ]}
+              />
+            </div>
+            <div className="stat-mod">{fmt(resumo.modAtributo)}</div>
+            <div className="stat-val">{resumo.atributo}</div>
+          </div>
+          <div className="box stat-box" style={{ cursor: 'default' }}>
+            <div className="stat-name">
+              CD DA MAGIA{' '}
+              <InfoTexto
+                titulo="CD da magia"
+                paragrafos={[
+                  'É a dificuldade que o alvo precisa igualar ou superar na salvaguarda pra evitar (ou reduzir) o efeito das suas magias que exigem salvaguarda.',
+                  `Fórmula: 8 + modificador de conjuração + Bônus de Proficiência. Hoje: 8 + ${num(resumo.modAtributo)} + ${num(prof)} = ${resumo.cd}. Não é pra rolar.`,
+                ]}
+              />
+            </div>
+            <div className="stat-mod">{resumo.cd}</div>
+            <div className="stat-val">salvaguarda</div>
+          </div>
+          <div className="box stat-box" style={{ cursor: 'default' }}>
+            <div className="stat-name">
+              ATAQUE MÁGICO{' '}
+              <InfoTexto
+                titulo="Modificador de ataque mágico"
+                paragrafos={[
+                  'É o bônus que você soma ao d20 quando faz uma jogada de ataque com uma magia (ex.: Raio de Fogo). O total tem que igualar ou superar a CA do alvo.',
+                  `Fórmula: modificador de conjuração + Bônus de Proficiência. Hoje: ${num(resumo.modAtributo)} + ${num(prof)} = ${num(resumo.modAtaque)}. O app já soma isso sozinho quando você conjura — aqui é só consulta.`,
+                ]}
+              />
+            </div>
+            <div className="stat-mod">{fmt(resumo.modAtaque)}</div>
+            <div className="stat-val">acerto</div>
+          </div>
+        </div>
+      )}
+
       {desvantagemForcaDestreza && (
         <div className="label" style={{ color: 'var(--danger)', marginBottom: 10 }}>
           🚫 Armadura equipada sem treinamento — conjuração bloqueada até trocar ou tirar a armadura.
