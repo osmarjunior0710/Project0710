@@ -467,7 +467,7 @@ export default function MagiasTab({
                 titulo="Modificador de conjuração"
                 paragrafos={[
                   `É o modificador do seu atributo de conjuração (${resumo.atributoNome}) — o atributo que sua classe usa pra conjurar magias.`,
-                  `Vem direto do valor de ${resumo.atributo}: hoje ${fmt(resumo.modAtributo)}. Serve de base pra CD e pro ataque mágico. Não é pra rolar.`,
+                  `Vem direto do valor de ${resumo.atributo}: hoje ${fmt(resumo.modAtributo)}. Serve de base pra CD e pro ataque mágico.`,
                 ]}
               />
             </div>
@@ -481,7 +481,7 @@ export default function MagiasTab({
                 titulo="CD da magia"
                 paragrafos={[
                   'É a dificuldade que o alvo precisa igualar ou superar na salvaguarda pra evitar (ou reduzir) o efeito das suas magias que exigem salvaguarda.',
-                  `Fórmula: 8 + modificador de conjuração + Bônus de Proficiência. Hoje: 8 + ${num(resumo.modAtributo)} + ${num(prof)} = ${resumo.cd}. Não é pra rolar.`,
+                  `Fórmula: 8 + modificador de conjuração + Bônus de Proficiência. Hoje: 8 + ${num(resumo.modAtributo)} + ${num(prof)} = ${resumo.cd}.`,
                 ]}
               />
             </div>
@@ -495,7 +495,7 @@ export default function MagiasTab({
                 titulo="Modificador de ataque mágico"
                 paragrafos={[
                   'É o bônus que você soma ao d20 quando faz uma jogada de ataque com uma magia (ex.: Raio de Fogo). O total tem que igualar ou superar a CA do alvo.',
-                  `Fórmula: modificador de conjuração + Bônus de Proficiência. Hoje: ${num(resumo.modAtributo)} + ${num(prof)} = ${num(resumo.modAtaque)}. O app já soma isso sozinho quando você conjura — aqui é só consulta.`,
+                  `Fórmula: modificador de conjuração + Bônus de Proficiência. Hoje: ${num(resumo.modAtributo)} + ${num(prof)} = ${num(resumo.modAtaque)}.`,
                 ]}
               />
             </div>

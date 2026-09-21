@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1813
+
+Aba Magias: removidas das explicações dos ⓘ (Mod. Conjuração, CD e Ataque Mágico) as frases "não é pra rolar" e "só consulta".
+
 ## v202609_1809
 
 **Topo da aba Magias:** 3 caixas na mesma linha com os números de conjuração da ficha de papel — **Mod. Conjuração** (com o atributo), **CD da Magia** e **Ataque Mágico**. São consulta (borda tracejada, não rolam) e cada uma tem um ⓘ explicando o que é e como o valor é formado (com a conta do seu personagem).
