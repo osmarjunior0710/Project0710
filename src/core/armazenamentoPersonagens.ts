@@ -311,6 +311,10 @@ export interface PersonagemSalvo {
    * resetam pra 0) — decide a CD (10 + 5×isso). Ver
    * `core/furiaImplacavel.ts`. */
   furiaImplacavelUsosDesdeDescanso?: number;
+  /** Dados de Vida já gastos por tipo ("d8": 2) desde o último Descanso
+   * Longo (que devolve todos) — ver `core/dadosDeVida.ts`. Ausente =
+   * reserva cheia. */
+  dadosDeVidaGastos?: Record<string, number>;
   /** Fúria Persistente (Bárbaro nível 15+) — `true` = já recuperou os
    * usos gastos de Fúria desde o último Descanso Longo (só 1x, regra
    * real) — só o Descanso Longo reseta pra `false`. */

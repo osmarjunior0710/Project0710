@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1755
+
+**Dados de Vida no Descanso Curto.** A reserva (1 dado por nível, do tipo de cada classe — multiclasse soma tudo e separa por tipo, ex.: 18d6 + 3d8) aparece na aba Atributos. Ao fazer um Descanso Curto com PV faltando, abre um painel pra gastar dados: cada toque rola o dado + Constituição (mínimo 1) e cura, com a barra animando. Com PV cheio o passo é pulado. O Descanso Longo devolve todos os dados gastos.
+
 ## v202609_1736
 
 Removido o texto de resumo que aparecia na tela depois de um Descanso Curto/Longo.

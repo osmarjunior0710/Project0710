@@ -124,6 +124,8 @@ import ColheitaMacabraModal from '../components/ColheitaMacabraModal';
 import FuriaImplacavelModal from '../components/FuriaImplacavelModal';
 import Dice3dFab from './dice3d/Dice3dFab';
 import DescansoFab from './DescansoFab';
+import DadosDeVidaModal from './DadosDeVidaModal';
+import { reservaDeDadosDeVida, totalDeDadosRestantes } from '../../core/dadosDeVida';
 import LevelUpShell, { type PersonagemNivel } from './levelup/LevelUpShell';
 import CompletarMagiasShell from './levelup/CompletarMagiasShell';
 import LivroDasSombrasShell from './levelup/LivroDasSombrasShell';
@@ -332,6 +334,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [talentosFavoritos, setTalentosFavoritos] = useState<string[]>(personagemSalvo.talentosFavoritosAtual ?? []);
   const [folegoGasto, setFolegoGasto] = useState(personagemSalvo.folegoGasto ?? 0);
   const [vigorImplacavelGasto, setVigorImplacavelGasto] = useState(personagemSalvo.vigorImplacavelGasto ?? false);
+  // Dados de Vida gastos por tipo (ver `core/dadosDeVida.ts`) — a reserva
+  // sempre soma TODAS as classes, nunca só a classe em foco.
+  const [dadosDeVidaGastos, setDadosDeVidaGastos] = useState<Record<string, number>>(
+    personagemSalvo.dadosDeVidaGastos ?? {},
+  );
+  const [dadosDeVidaAberto, setDadosDeVidaAberto] = useState(false);
   const [furiaImplacavelUsos, setFuriaImplacavelUsos] = useState(personagemSalvo.furiaImplacavelUsosDesdeDescanso ?? 0);
   const [furiaPersistenteUsada, setFuriaPersistenteUsada] = useState(personagemSalvo.furiaPersistenteUsada ?? false);
   const [furiaImplacavelPendente, setFuriaImplacavelPendente] = useState(false);
@@ -607,6 +615,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const usosAncestralidadeGiganteRestantes = Math.max(0, usosAncestralidadeGiganteMaximo - ancestralidadeGiganteGasto);
   const formaGrandeDisponivel = selecao.especie === 'Golias' && nivelTotalAtual >= 5;
   const modConstituicaoAtual = modificador(conValorFinal);
+  const reservaDadosDeVida = reservaDeDadosDeVida(
+    classesAtual,
+    (nome) => catalogoClasses.find((c) => c.nome === nome)?.dadoDeVida,
+    dadosDeVidaGastos,
+  );
   const maosCurativasDisponivel = selecao.especie === 'Aasimar';
   const dadosMaosCurativas = bonusProficienciaAtual;
   const revelacaoCelestialDisponivel = selecao.especie === 'Aasimar' && nivelTotalAtual >= 3;
@@ -918,6 +931,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     folegoGasto,
     vigorImplacavelGasto,
     furiaImplacavelUsosDesdeDescanso: furiaImplacavelUsos,
+    dadosDeVidaGastos,
     furiaPersistenteUsada,
     conhecimentoDePedrasGasto,
     picoDeAdrenalinaGasto,
@@ -1325,6 +1339,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   function descansoLongo() {
     setPvAtual(personagem.pvMax);
+    setDadosDeVidaGastos({});
     // Eficiente (Humano) — "começa cada dia com Inspiração Heroica";
     // como o app não segue tempo real, a aproximação (ver SDD) é
     // conceder de novo a cada Descanso Longo. Nunca desliga sozinho
@@ -1440,7 +1455,23 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }
 
   function aoFimDaTransicaoDescanso() {
+    // Descanso Curto: só abre o passo de Dados de Vida se dá pra usar de
+    // verdade (tem dado sobrando, está vivo e com PV faltando) — com PV
+    // cheio, pula o passo todo (pedido do Osmar).
+    if (
+      descansoEmAndamento?.tipo === 'curto' &&
+      totalDeDadosRestantes(reservaDadosDeVida) > 0 &&
+      pvAtual > 0 &&
+      pvAtual < personagem.pvMax
+    ) {
+      setDadosDeVidaAberto(true);
+    }
     setDescansoEmAndamento(null);
+  }
+
+  function gastarDadoDeVida(tipo: string, cura: number) {
+    setDadosDeVidaGastos((prev) => ({ ...prev, [tipo]: (prev[tipo] ?? 0) + 1 }));
+    alterarPv(cura);
   }
 
   function usarAstuciaMagica() {
@@ -2187,6 +2218,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             temSentidoDePerigo={temSentidoDePerigo}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             proficienciasFerramenta={proficienciasFerramenta}
+            reservaDadosDeVida={reservaDadosDeVida}
             onAbrirLevelUp={() => {
               const opcoes = opcoesLevelUp(classesAtual, atributosFinaisAtuais, catalogoClasses);
               if (deveEscolherClasseNoLevelUp(opcoes)) {
@@ -2526,6 +2558,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         </div>
       </div>
 
+      {dadosDeVidaAberto && (
+        <DadosDeVidaModal
+          reserva={reservaDadosDeVida}
+          pvAtual={pvAtual}
+          pvMax={personagem.pvMax}
+          pvTemporario={pvTemporario}
+          modConstituicao={modConstituicaoAtual}
+          onGastar={gastarDadoDeVida}
+          onTerminar={() => setDadosDeVidaAberto(false)}
+        />
+      )}
       <DescansoFab onDescansoCurto={() => iniciarDescanso('curto')} onDescansoLongo={() => iniciarDescanso('longo')} />
       <Dice3dFab />
       {restStatus && (

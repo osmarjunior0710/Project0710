@@ -135,3 +135,14 @@ Fonte: `dnd-master-referencia.xlsx`, aba "Opções de Classe", linha
 - **Dano do Acerto Crítico:** jogar os DADOS de dano do ataque duas vezes, somar e adicionar os modificadores UMA vez só (Adaga: 2d4 + mod, não 2×(1d4 + mod)). Outros dados de dano do mesmo ataque (ex.: Ataque Furtivo) também são jogados duas vezes.
 
 Fonte: `livros-referencia/livro-do-jogador/02_-_Cap_1_Jogando_o_Jogo.pdf` ("Tirando 20 ou 1" e "Acertos Críticos").
+
+---
+
+## Dados de Vida (Livro do Jogador 2024, Ap. C "Descanso Curto"/"Descanso Longo" e Cap. 2 "Multiclasse")
+
+- **Reserva:** 1 Dado de Vida por nível, do tipo da classe (d6/d8/d10/d12).
+- **Multiclasse:** soma os dados de todas as classes; dados do mesmo tipo se combinam, tipos diferentes ficam separados (Clérigo 5 / Paladino 5 = 5d8 + 5d10).
+- **Descanso Curto:** gasta 1 ou mais; cada um = rolar o dado + modificador de Constituição, recupera esse total (mínimo 1 PV); pode gastar mais um depois de cada rolagem. Só inicia com pelo menos 1 PV. Interrompido por Iniciativa, magia que não seja truque ou dano (o app não simula).
+- **Descanso Longo:** recupera todos os PV **e todos os Dados de Vida gastos** (não é mais metade).
+
+Fonte: `livros-referencia/livro-do-jogador/11_-_Ap_C_Glossario_de_Regras.pdf` e `03_-_Cap_2_Criacao_de_Personagens.pdf`.

@@ -1,3 +1,4 @@
+import type { ReservaDadoVida } from '../../../core/dadosDeVida';
 import {
   resolverVantagem,
   type AtributoFinal,
@@ -50,6 +51,9 @@ interface AtributosTabProps {
    * rolagem, as duas se cancelam (`resolverVantagem`). */
   temSentidoDePerigo: boolean;
   proficienciasFerramenta: FerramentaFinal[];
+  /** Dados de Vida por tipo (soma de todas as classes) — só leitura aqui;
+   * gasta-se no Descanso Curto (`DadosDeVidaModal`). */
+  reservaDadosDeVida: ReservaDadoVida[];
   onAbrirLevelUp: () => void;
   /** XP acumulado (ver `core/experiencia.ts`) — a "barra de xp" (toda
    * a área é clicável, abre popup de lançar XP em `XpShell.tsx`) e a
@@ -120,6 +124,7 @@ export default function AtributosTab({
   desvantagemForcaDestreza,
   temSentidoDePerigo,
   proficienciasFerramenta,
+  reservaDadosDeVida,
   onAbrirLevelUp,
   xpAtual,
   proximoMarcoXp,
@@ -277,6 +282,21 @@ export default function AtributosTab({
         ))}
       </div>
 
+      {reservaDadosDeVida.length > 0 && (
+        <>
+          <div className="section-title">Dados de Vida</div>
+          <div className="box" style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', padding: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
+            {reservaDadosDeVida.map((r) => (
+              <div key={r.tipo} style={{ fontSize: 14 }}>
+                {r.tipo}{' '}
+                <span style={{ color: 'var(--text-faint)', fontSize: 12 }}>
+                  {r.restantes}/{r.total}
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
       <div className="section-title">Perícias</div>
       {salvaguardas.map((sv) => (
         <div
