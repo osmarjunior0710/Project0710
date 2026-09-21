@@ -5,6 +5,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
+import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
@@ -278,14 +279,23 @@ export default function AcaoPanelContent({
       mod: ataque.modAcerto,
       explicacaoMod: ataque.explicacaoAcerto,
       confirmarAcerto: {
-        onAcertou: () => {
+        onAcertou: ({ critico }) => {
+          const dano = danoComCritico(
+            {
+              quantidade: ataque.danoQuantidade,
+              lados: ataque.danoLados,
+              mod: ataque.danoMod,
+              gruposExtras: [{ quantidade: golpeBrutalDados, lados: 10 }],
+            },
+            critico,
+          );
           rolarDados({
-            label: `${nome} — Dano + Golpe Brutal`,
-            formula: `${ataque.danoQuantidade}d${ataque.danoLados}${ataque.danoMod ? ` + ${ataque.danoMod}` : ''} + ${golpeBrutalDados}d10`,
-            quantidade: ataque.danoQuantidade,
+            label: `${nome} — Dano + Golpe Brutal${critico ? ' (Crítico)' : ''}`,
+            formula: dano.formula,
+            quantidade: dano.quantidade,
             lados: ataque.danoLados,
             mod: ataque.danoMod,
-            gruposExtras: [{ quantidade: golpeBrutalDados, lados: 10 }],
+            gruposExtras: dano.gruposExtras,
             confirmarFechamento: { rotulo: '🔨 Golpe Brutal', aoTocar: onGolpeBrutalDanoConfirmado },
           });
         },
@@ -375,11 +385,15 @@ export default function AcaoPanelContent({
       explicacaoMod: ataque.explicacaoAcerto,
       vantagem,
       confirmarAcerto: {
-        onAcertou: () => {
+        onAcertou: ({ critico }) => {
+          const dano = danoComCritico(
+            { quantidade: ataque.danoQuantidade, lados: ataque.danoLados, mod: ataque.danoMod },
+            critico,
+          );
           rolarDados({
-            label: `Dano — ${nome}`,
-            formula: `${ataque.danoQuantidade}d${ataque.danoLados}${ataque.danoMod ? ` + ${ataque.danoMod}` : ''}`,
-            quantidade: ataque.danoQuantidade,
+            label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}`,
+            formula: dano.formula,
+            quantidade: dano.quantidade,
             lados: ataque.danoLados,
             mod: ataque.danoMod,
             rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,

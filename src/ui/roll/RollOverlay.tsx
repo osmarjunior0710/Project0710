@@ -193,25 +193,30 @@ export default function RollOverlay() {
         )}
         {estado.fase === 'concluido' && estado.confirmarAcerto && (
           <div className={`${styles.vantagemButtons} ${styles.confirmarAcertoWrap}`}>
-            <div
-              className={`${styles.vantagemBtn} ${styles.desvantagemBtn}`}
-              onClick={() => {
-                const { onErrou } = estado.confirmarAcerto!;
-                fechar();
-                onErrou();
-              }}
-            >
-              Errei
-            </div>
+            {/* 20 natural = acerto automático (sem "Errei"); 1 natural = erro
+                automático, mas o Mestre pode dar consequência (ex.: acertar
+                algo/alguém) — daí "Rolar Dano" em vez de "Acertei", sem dobra. */}
+            {estado.critico !== 'sucesso' && (
+              <div
+                className={`${styles.vantagemBtn} ${styles.desvantagemBtn}`}
+                onClick={() => {
+                  const { onErrou } = estado.confirmarAcerto!;
+                  fechar();
+                  onErrou();
+                }}
+              >
+                Errei
+              </div>
+            )}
             <div
               className={`${styles.vantagemBtn} ${styles.vantagemBtnPositivo}`}
               onClick={() => {
                 const { onAcertou } = estado.confirmarAcerto!;
                 fechar();
-                onAcertou();
+                onAcertou({ critico: estado.critico === 'sucesso' });
               }}
             >
-              Acertei
+              {estado.critico === 'sucesso' ? 'Rolar Dobro do Dano' : estado.critico === 'falha' ? 'Rolar Dano' : 'Acertei'}
             </div>
           </div>
         )}

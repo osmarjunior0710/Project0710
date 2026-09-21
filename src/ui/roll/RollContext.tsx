@@ -70,6 +70,15 @@ export interface BonusExtraProvider {
   usar: () => boolean;
 }
 
+/** Decisão de acerto depois de um ataque. `critico: true` = 20 natural
+ * (Acerto Crítico — dobra os dados de dano, ver `core/danoCritico.ts`).
+ * Quem não se importa com crítico pode declarar `onAcertou: () => void`
+ * mesmo — o argumento é opcional de ler. */
+export interface ConfirmarAcerto {
+  onAcertou: (info: { critico: boolean }) => void;
+  onErrou: () => void;
+}
+
 export interface RollState {
   label: string;
   formula: string;
@@ -185,7 +194,7 @@ export interface RollState {
    * sempre vantajosa, sem custo). */
   forcaIndomavelAplicada?: boolean;
   /** [Protótipo, ver `RollD20Options.confirmarAcerto`.] */
-  confirmarAcerto?: { onAcertou: () => void; onErrou: () => void } | null;
+  confirmarAcerto?: ConfirmarAcerto | null;
   /** [Protótipo, ver `RollDadosOptions.confirmarFechamento`.] */
   confirmarFechamento?: { rotulo?: string; aoTocar?: () => void } | null;
   /** Ver `RollDadosOptions.confirmarAlvoCura`. */
@@ -301,7 +310,7 @@ interface RollD20Options {
    * concluir — o popup só fecha por um dos dois (nem tap fora, nem
    * ✕). Opt-in por chamada; `undefined` em qualquer rolagem que não
    * passe isso mantém o comportamento de sempre. */
-  confirmarAcerto?: { onAcertou: () => void; onErrou: () => void };
+  confirmarAcerto?: ConfirmarAcerto;
 }
 
 interface RollDadosOptions {

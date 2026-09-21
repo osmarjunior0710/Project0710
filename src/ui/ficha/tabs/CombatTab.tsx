@@ -6,6 +6,7 @@ import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
+import { danoComCritico } from '../../../core/danoCritico';
 import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
@@ -797,11 +798,15 @@ export default function CombatTab({
       explicacaoMod: ataqueBonus.info.explicacaoAcerto,
       vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
       confirmarAcerto: {
-        onAcertou: () => {
+        onAcertou: ({ critico }) => {
+          const dano = danoComCritico(
+            { quantidade: ataqueBonus.info.danoQuantidade, lados: ataqueBonus.info.danoLados, mod: ataqueBonus.info.danoMod },
+            critico,
+          );
           rolarDados({
-            label: `Dano — ${ataqueBonus.nome} (Mão Secundária)`,
-            formula: `${ataqueBonus.info.danoQuantidade}d${ataqueBonus.info.danoLados}${ataqueBonus.info.danoMod ? ` + ${ataqueBonus.info.danoMod}` : ''}`,
-            quantidade: ataqueBonus.info.danoQuantidade,
+            label: `Dano — ${ataqueBonus.nome} (Mão Secundária)${critico ? ' (Crítico)' : ''}`,
+            formula: dano.formula,
+            quantidade: dano.quantidade,
             lados: ataqueBonus.info.danoLados,
             mod: ataqueBonus.info.danoMod,
             rerollSe1:
@@ -830,11 +835,15 @@ export default function CombatTab({
       explicacaoMod: cortarAtaque.info.explicacaoAcerto,
       vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
       confirmarAcerto: {
-        onAcertou: () => {
+        onAcertou: ({ critico }) => {
+          const dano = danoComCritico(
+            { quantidade: cortarAtaque.info.danoQuantidade, lados: cortarAtaque.info.danoLados, mod: cortarAtaque.info.danoMod },
+            critico,
+          );
           rolarDados({
-            label: `Dano — ${cortarAtaque.nome} (Cortar)`,
-            formula: `${cortarAtaque.info.danoQuantidade}d${cortarAtaque.info.danoLados}${cortarAtaque.info.danoMod ? ` + ${cortarAtaque.info.danoMod}` : ''}`,
-            quantidade: cortarAtaque.info.danoQuantidade,
+            label: `Dano — ${cortarAtaque.nome} (Cortar)${critico ? ' (Crítico)' : ''}`,
+            formula: dano.formula,
+            quantidade: dano.quantidade,
             lados: cortarAtaque.info.danoLados,
             mod: cortarAtaque.info.danoMod,
             rerollSe1:

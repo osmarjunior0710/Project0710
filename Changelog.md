@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1541
+
+**Acerto Crítico de verdade nos ataques de arma** (ataque normal, Golpe Brutal, Ataque Bônus/mão secundária e Cortar): 20 natural agora só oferece **Rolar Dobro do Dano** (dobra os dados, o modificador conta uma vez só, inclusive os dados do Golpe Brutal); 1 natural oferece **Errei / Rolar Dano** (dano normal, sem dobra); de 2 a 19 continua Errei / Acertei. Ataques de magia ainda não dobram (próxima entrega).
+
 ## v202609_1536
 
 Protótipo da confirmação de crítico: removido o texto explicativo embaixo do dado de confirmação.

@@ -102,11 +102,9 @@ Decisão do Osmar: implementar só o reroll de 1 dado do Perfurador por
 enquanto (já funciona, ver DECISOES-COMBATE.md "Grid de dados
 individuais"), deixando de fora:
 
-- **Dano dobra em crítico (regra geral)** — qualquer ataque com arma
-  deveria rolar o dobro de dados de dano num acerto crítico. Precisa
-  de um jeito de "Rolar Dano" saber que o "Rolar Ataque" anterior
-  daquele mesmo ataque foi crítico (hoje são 2 rolagens separadas, sem
-  vínculo entre elas).
+- **Dano dobra em crítico** — FEITO pros ataques de arma (2026-09, foco
+  Melhorias e correções: `onAcertou({ critico })` + `core/danoCritico.ts`).
+  Falta os ataques de MAGIA (próxima entrega do mesmo foco).
 - **Perfurador — "+1 dado extra no crítico"** — depende do item acima
   pra fazer sentido (some ENCIMA do dobro já esperado, não sozinho).
 
