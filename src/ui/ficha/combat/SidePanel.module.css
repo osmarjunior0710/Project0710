@@ -77,6 +77,10 @@
   background: var(--panel-reacao);
 }
 
+.temaCasa {
+  background: var(--panel-casa);
+}
+
 .panelOpen {
   /* marcador — a combinação com panelLeft/Right/Bottom acima define o transform real */
 }

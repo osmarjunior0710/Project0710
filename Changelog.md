@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1455
+
+Novo item **📜 House Rules** no menu do avatar (Preferências): abre um painel lateral com as regras da mesa. Por enquanto só tem **Peso da Mochila** (que saiu do menu de Preferências), e a escolha agora fica salva e vale pra todos os seus personagens, mesmo depois de recarregar.
+
 ## v202609_1433
 
 Os painéis de Ação, Ação Bônus e Reação do Combate agora são três painéis separados, cada um com a sua animação: acabou o deslize duplo ao trocar de um pro outro. Cada painel tem um fundo bem claro próprio (azul, amarelo e verde).

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { armazenamentoPersonagens, type PersonagemSalvo } from '../../core/armazenamentoPersonagens';
 import { garantirPersonagemDemo, ID_PERSONAGEM_DEMO } from '../../core/personagemDemo';
 import { useColapsavel } from '../hooks/useColapsavel';
+import { useHouseRules } from './hooks/useHouseRules';
 import { useAutosavePersonagem } from './hooks/useAutosavePersonagem';
 import { recursoContado, recursoFlagUnica } from './hooks/recursoGasto';
 import { caracteristicasSubclasseAtivas } from './hooks/caracteristicasSubclasseAtivas';
@@ -493,7 +494,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagemSalvo.snapshotsNivel ?? {},
   );
   const [itensDetalhados, setItensDetalhados] = useColapsavel('itens-detalhados', false);
-  const [pesoAtivo, setPesoAtivo] = useState(true);
+  const { regras: houseRules, alternar: alternarHouseRule } = useHouseRules();
+  const pesoAtivo = houseRules.pesoMochila;
 
   const desValor = valorFinalAtributo(selecao, 'DES') ?? 10;
   const conValorFinal = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'CON') ?? 10, 'CON', temCampeaoPrimitivo);
@@ -2150,8 +2152,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         <AvatarMenu
           itensDetalhados={itensDetalhados}
           onToggleItensDetalhados={() => setItensDetalhados(!itensDetalhados)}
-          pesoAtivo={pesoAtivo}
-          onTogglePeso={() => setPesoAtivo((v) => !v)}
+          houseRules={houseRules}
+          onAlternarHouseRule={alternarHouseRule}
           onLevelUpRapido={classe ? levelUpRapido : undefined}
           niveisComSnapshot={Object.keys(snapshotsNivel)
             .map(Number)

@@ -9,8 +9,11 @@ interface SidePanelProps {
   title: string;
   onClose: () => void;
   children: ReactNode;
-  detalhesAtivo: boolean;
-  onToggleDetalhes: () => void;
+  /** Sem os dois, a linha "Detalhes" some (ex.: painel de House Rules). */
+  detalhesAtivo?: boolean;
+  onToggleDetalhes?: () => void;
+  /** Fundo próprio; se omitido, segue o lado (Ação/Bônus/Reação). */
+  tema?: 'casa';
 }
 
 const temaClass: Record<Side, string> = {
@@ -25,18 +28,20 @@ const sideClass: Record<Side, string> = {
   bottom: styles.panelBottom,
 };
 
-export default function SidePanel({ open, side, title, onClose, children, detalhesAtivo, onToggleDetalhes }: SidePanelProps) {
+export default function SidePanel({ open, side, title, onClose, children, detalhesAtivo, onToggleDetalhes, tema }: SidePanelProps) {
   return (
     <>
       <div className={`${styles.backdrop} ${open ? styles.backdropOpen : ''}`} onClick={onClose} />
-      <div className={`${styles.panel} ${sideClass[side]} ${temaClass[side]} ${open ? styles.panelOpen : ''}`}>
+      <div className={`${styles.panel} ${sideClass[side]} ${tema === 'casa' ? styles.temaCasa : temaClass[side]} ${open ? styles.panelOpen : ''}`}>
         <div className={styles.title}>{title}</div>
-        <div className={styles.detalhesRow} onClick={onToggleDetalhes}>
-          <span>Detalhes</span>
-          <div className={`${styles.switchTrack} ${detalhesAtivo ? styles.switchOn : ''}`}>
-            <div className={styles.switchThumb} />
+        {onToggleDetalhes && (
+          <div className={styles.detalhesRow} onClick={onToggleDetalhes}>
+            <span>Detalhes</span>
+            <div className={`${styles.switchTrack} ${detalhesAtivo ? styles.switchOn : ''}`}>
+              <div className={styles.switchThumb} />
+            </div>
           </div>
-        </div>
+        )}
         {children}
         <div className={styles.closeLabel} onClick={onClose}>
           fechar

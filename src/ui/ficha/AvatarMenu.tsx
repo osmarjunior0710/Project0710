@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useRoll } from '../roll/RollContext';
+import type { HouseRules } from '../../core/houseRules';
+import SidePanel from './combat/SidePanel';
 import styles from './AvatarMenu.module.css';
 
 interface AvatarMenuProps {
   itensDetalhados: boolean;
   onToggleItensDetalhados: () => void;
-  pesoAtivo: boolean;
-  onTogglePeso: () => void;
+  houseRules: HouseRules;
+  onAlternarHouseRule: (chave: keyof HouseRules) => void;
   /** "⚡ Inst. Level Up" — ferramenta de teste, sobe 1 nível sorteando
    * tudo (mesmo espírito do "🎲 Personagem de Teste"), sem passar por
    * nenhuma tela e sem depender de XP acumulado (ver `XpShell.tsx` e
@@ -32,14 +34,15 @@ interface AvatarMenuProps {
 export default function AvatarMenu({
   itensDetalhados,
   onToggleItensDetalhados,
-  pesoAtivo,
-  onTogglePeso,
+  houseRules,
+  onAlternarHouseRule,
   onLevelUpRapido,
   niveisComSnapshot,
   nivelAtualSnapshot,
   onRestaurarNivel,
 }: AvatarMenuProps) {
   const [aberto, setAberto] = useState(false);
+  const [houseRulesAberto, setHouseRulesAberto] = useState(false);
   const { modoTeste, alternarModoTeste, preferenciaDado3D, alternarPreferenciaDado3D, dado3DDisponivel } = useRoll();
 
   const descDado3D = !dado3DDisponivel
@@ -59,13 +62,6 @@ export default function AvatarMenu({
       desabilitado: false,
     },
     {
-      label: 'Peso da Mochila',
-      desc: 'Mostra o peso de cada item e a barra de carga',
-      valor: pesoAtivo,
-      onToggle: onTogglePeso,
-      desabilitado: false,
-    },
-    {
       label: '🎲 Dado 3D',
       desc: descDado3D,
       valor: preferenciaDado3D && dado3DDisponivel && !modoTeste,
@@ -78,6 +74,15 @@ export default function AvatarMenu({
       valor: modoTeste,
       onToggle: alternarModoTeste,
       desabilitado: false,
+    },
+  ];
+
+  // Regras de jogo da mesa — salvas por conta (ver `core/houseRules.ts`).
+  const regrasDaCasa = [
+    {
+      chave: 'pesoMochila' as const,
+      label: 'Peso da Mochila',
+      desc: 'Mostra o peso de cada item e a barra de carga',
     },
   ];
 
@@ -107,6 +112,19 @@ export default function AvatarMenu({
                 </div>
               </div>
             ))}
+            <div
+              className={styles.menuRow}
+              onClick={() => {
+                setHouseRulesAberto(true);
+                setAberto(false);
+              }}
+            >
+              <div className={styles.menuRowText}>
+                <div className={styles.menuRowLabel}>📜 House Rules</div>
+                <div className={styles.menuRowDesc}>Regras da mesa — valem pra todos os seus personagens.</div>
+              </div>
+              <span className={styles.menuRowChevron}>›</span>
+            </div>
             {onLevelUpRapido && (
               <div
                 className={styles.menuRow}
@@ -153,6 +171,25 @@ export default function AvatarMenu({
           </div>
         </>
       )}
+      <SidePanel
+        open={houseRulesAberto}
+        side="right"
+        tema="casa"
+        title="📜 House Rules"
+        onClose={() => setHouseRulesAberto(false)}
+      >
+        {regrasDaCasa.map((r) => (
+          <div key={r.chave} className={styles.menuRow} onClick={() => onAlternarHouseRule(r.chave)}>
+            <div className={styles.menuRowText}>
+              <div className={styles.menuRowLabel}>{r.label}</div>
+              <div className={styles.menuRowDesc}>{r.desc}</div>
+            </div>
+            <div className={`${styles.switchTrack} ${houseRules[r.chave] ? styles.switchOn : ''}`}>
+              <div className={styles.switchThumb} />
+            </div>
+          </div>
+        ))}
+      </SidePanel>
     </div>
   );
 }
