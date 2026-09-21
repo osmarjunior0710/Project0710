@@ -5,6 +5,7 @@ import { iconesMagia } from '../../../core/classificarMagia';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
+import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TickPips from '../../components/TickPips';
@@ -164,12 +165,13 @@ export default function ReacaoPanelContent({
       rolarD20({
         ...resultado.rollAcerto,
         confirmarAcerto: {
-          onAcertou: () => {
+          onAcertou: ({ critico }) => {
             if (!dano) return;
+            const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
             rolarDados({
-              label: dano.label,
-              formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
-              quantidade: dano.quantidade,
+              label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
+              formula: montado.formula,
+              quantidade: montado.quantidade,
               lados: dano.lados,
               mod: dano.mod,
               explicacaoMod: dano.explicacaoMod,

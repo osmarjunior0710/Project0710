@@ -14,6 +14,11 @@ describe('normalizarHouseRules', () => {
     expect(normalizarHouseRules({ pesoMochila: 'nao' }).pesoMochila).toBe(HOUSE_RULES_PADRAO.pesoMochila);
   });
 
+  it('confirmação de crítico nasce desligada e respeita o valor salvo', () => {
+    expect(HOUSE_RULES_PADRAO.confirmacaoCritico).toBe(false);
+    expect(normalizarHouseRules({ confirmacaoCritico: true }).confirmacaoCritico).toBe(true);
+  });
+
   it('ignora lixo que não é objeto', () => {
     expect(normalizarHouseRules('quebrado')).toEqual(HOUSE_RULES_PADRAO);
   });

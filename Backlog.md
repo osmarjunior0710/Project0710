@@ -104,7 +104,7 @@ individuais"), deixando de fora:
 
 - **Dano dobra em crítico** — FEITO pros ataques de arma (2026-09, foco
   Melhorias e correções: `onAcertou({ critico })` + `core/danoCritico.ts`).
-  Falta os ataques de MAGIA (próxima entrega do mesmo foco).
+  Ataques de MAGIA também feitos. Só falta o Perfurador (+1 dado).
 - **Perfurador — "+1 dado extra no crítico"** — depende do item acima
   pra fazer sentido (some ENCIMA do dobro já esperado, não sozinho).
 

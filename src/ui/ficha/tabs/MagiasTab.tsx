@@ -18,6 +18,7 @@ import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
+import { danoComCritico } from '../../../core/danoCritico';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TickPips from '../../components/TickPips';
 import { useColapsavel } from '../../hooks/useColapsavel';
@@ -314,12 +315,13 @@ export default function MagiasTab({
       rolarD20({
         ...resultado.rollAcerto,
         confirmarAcerto: {
-          onAcertou: () => {
+          onAcertou: ({ critico }) => {
             if (!dano) return;
+            const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
             rolarDados({
-              label: dano.label,
-              formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
-              quantidade: dano.quantidade,
+              label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
+              formula: montado.formula,
+              quantidade: montado.quantidade,
               lados: dano.lados,
               mod: dano.mod,
               explicacaoMod: dano.explicacaoMod,

@@ -6,10 +6,14 @@
 export interface HouseRules {
   /** Mostra o peso de cada item e a barra de carga na Mochila. */
   pesoMochila: boolean;
+  /** Ataque com 1 ou 20 natural rola um 2º d20 de confirmação (só
+   * informativo — o Mestre compara com a CA). Ver `RollOverlay.tsx`. */
+  confirmacaoCritico: boolean;
 }
 
 export const HOUSE_RULES_PADRAO: HouseRules = {
   pesoMochila: true,
+  confirmacaoCritico: false,
 };
 
 export interface ArmazenamentoHouseRules {

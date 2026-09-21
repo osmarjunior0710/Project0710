@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1547
+
+**Crítico nos ataques de magia + house rule "Confirmação de crítico".** Ataques de magia agora dobram os dados de dano no 20 natural (igual aos de arma). Em 📜 House Rules (menu do avatar) tem o novo switcher **Confirmação de crítico** (desligado por padrão): ligado, um 1 ou 20 natural em ataque pede antes um segundo d20 de confirmação (com o ícone do dado, só informativo). No 1: Errei / Rolar Dano. No 20: Rolar Dano / Rolar Dano Dobrado.
+
 ## v202609_1541
 
 **Acerto Crítico de verdade nos ataques de arma** (ataque normal, Golpe Brutal, Ataque Bônus/mão secundária e Cortar): 20 natural agora só oferece **Rolar Dobro do Dano** (dobra os dados, o modificador conta uma vez só, inclusive os dados do Golpe Brutal); 1 natural oferece **Errei / Rolar Dano** (dano normal, sem dobra); de 2 a 19 continua Errei / Acertei. Ataques de magia ainda não dobram (próxima entrega).

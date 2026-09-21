@@ -3,6 +3,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte } from '../../../core/magiasPersonagem';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
+import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
@@ -102,12 +103,13 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
       rolarD20({
         ...resultado.rollAcerto,
         confirmarAcerto: {
-          onAcertou: () => {
+          onAcertou: ({ critico }) => {
             if (!dano) return;
+            const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
             rolarDados({
-              label: dano.label,
-              formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
-              quantidade: dano.quantidade,
+              label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
+              formula: montado.formula,
+              quantidade: montado.quantidade,
               lados: dano.lados,
               mod: dano.mod,
               explicacaoMod: dano.explicacaoMod,

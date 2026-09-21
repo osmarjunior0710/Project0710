@@ -175,6 +175,10 @@ export interface RollState {
    * cima do físico. Correção de 2026-09 (pedido do Osmar: padronizar
    * "Rolando..." pra toda rolagem que usa o motor 3D de verdade). */
   dado2Motor3D?: boolean;
+  /** House rule "Confirmação de crítico" (ver `core/houseRules.ts`): 2º d20
+   * de um ataque com 1/20 natural. Só informativo — nunca muda `total`
+   * nem `critico` da rolagem original. */
+  confirmacaoCritico?: { fase: 'rolando' | 'concluido'; valor?: number };
   /** Objeto BRUTO devolvido pelo motor 3D pro d20 simples atual
    * (`concluirPlano` em `rolarD20`) — só existe quando `motor3D` é
    * `true`. Guardado pra poder repassar pra `box.reroll()` depois
@@ -394,6 +398,9 @@ interface RollContextValue {
    * Vantagem/Desvantagem e do Bônus Extra). Sempre usa a nova jogada,
    * mesmo se também sair 1 (regra real). */
   usarSorte: () => void;
+  /** House rule "Confirmação de crítico": rola o 2º d20 informativo de um
+   * ataque (`confirmarAcerto`) com 1/20 natural, 1 vez por rolagem. */
+  rolarConfirmacaoCritico: () => void;
   /** Joga de novo o dado de uma rolagem 'dados' de 1 dado só (ver
    * `RollState.rerollSe1`) que mostrou 1 e ainda não usou o reroll —
    * substitui o resultado, sempre usa a nova jogada mesmo se também
@@ -1045,6 +1052,31 @@ export function RollProvider({ children }: { children: ReactNode }) {
     [estado, dado3DAtivo],
   );
 
+  const rolarConfirmacaoCritico = useCallback(() => {
+    if (!estado || estado.fase !== 'concluido' || !estado.confirmarAcerto || estado.confirmacaoCritico) return;
+    const usar3D = !!estado.motor3D && dado3DAtivo;
+    setEstado((prev) => (prev ? { ...prev, confirmacaoCritico: { fase: 'rolando' } } : prev));
+
+    function concluir(valor: number) {
+      setEstado((prev) => (prev ? { ...prev, confirmacaoCritico: { fase: 'concluido', valor } } : prev));
+    }
+
+    if (usar3D) {
+      (async () => {
+        try {
+          // 'add' — não limpa o d20 do ataque que ainda tá na cena
+          const [grupo] = await lancarGrupos({ qty: 1, sides: 20 }, { modo: 'add' });
+          concluir(grupo.value);
+        } catch {
+          timeoutRef.current = setTimeout(() => concluir(rolarD20Dado(modoTesteRef, indiceModoTesteRef)), DURACAO_ANIMACAO_MS);
+        }
+      })();
+      return;
+    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => concluir(rolarD20Dado(modoTesteRef, indiceModoTesteRef)), DURACAO_ANIMACAO_MS);
+  }, [estado, dado3DAtivo]);
+
   const [log, setLog] = useState<RegistroLog[]>([]);
   const adicionarLog = useCallback((registro: Omit<RegistroLog, 'id'>) => {
     const id = `log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -1218,6 +1250,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         sorteDisponivel,
         registrarSorte,
         usarSorte,
+        rolarConfirmacaoCritico,
         usarRerollSe1,
         rerollDadoEscolhido,
         inspiracaoHeroicaDisponivel: inspiracaoHeroicaProvider?.disponivel ?? false,

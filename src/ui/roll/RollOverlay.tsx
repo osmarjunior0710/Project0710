@@ -2,6 +2,7 @@ import InfoValor from '../components/InfoValor';
 import { useRoll } from './RollContext';
 import styles from './RollOverlay.module.css';
 import { artePorLados } from './dadosArte';
+import { armazenamentoHouseRules } from '../../core/houseRules';
 
 interface DadoVisualProps {
   valor: number | string;
@@ -46,6 +47,7 @@ export default function RollOverlay() {
     aplicarBonusExtra,
     sorteDisponivel,
     usarSorte,
+    rolarConfirmacaoCritico,
     usarRerollSe1,
     rerollDadoEscolhido,
     inspiracaoHeroicaDisponivel,
@@ -53,6 +55,13 @@ export default function RollOverlay() {
   } = useRoll();
 
   if (!estado) return null;
+
+  const exigeConfirmacao =
+    estado.fase === 'concluido' &&
+    !!estado.confirmarAcerto &&
+    estado.critico !== null &&
+    !estado.confirmacaoCritico &&
+    armazenamentoHouseRules.carregar().confirmacaoCritico;
 
   const critClass =
     estado.critico === 'falha' ? styles.dieCritFail : estado.critico === 'sucesso' ? styles.dieCritSuccess : '';
@@ -191,7 +200,30 @@ export default function RollOverlay() {
             </div>
           </div>
         )}
-        {estado.fase === 'concluido' && estado.confirmarAcerto && (
+        {/* House rule "Confirmação de crítico": 1/20 natural em ataque pede um
+            2º d20 (só informativo) ANTES de mostrar os botões de decisão. */}
+        {estado.fase === 'concluido' && estado.confirmarAcerto && exigeConfirmacao && (
+          <div className={`${styles.vantagemButtons} ${styles.confirmarAcertoWrap}`}>
+            <div className={`${styles.vantagemBtn} ${styles.vantagemBtnPositivo}`} onClick={rolarConfirmacaoCritico}>
+              🎲 Rolar dado de confirmação
+            </div>
+          </div>
+        )}
+        {estado.fase === 'concluido' && estado.confirmarAcerto && estado.confirmacaoCritico && (
+          <div className={styles.feedback} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            {estado.confirmacaoCritico.fase === 'rolando' ? (
+              <span>Rolando dado de confirmação...</span>
+            ) : (
+              <>
+                {artePorLados(20) && <img src={artePorLados(20)} alt="d20" style={{ width: 20, height: 20, objectFit: 'contain' }} />}
+                <span>
+                  {estado.confirmacaoCritico.valor} + {estado.mod ?? 0} = {(estado.confirmacaoCritico.valor ?? 0) + (estado.mod ?? 0)}
+                </span>
+              </>
+            )}
+          </div>
+        )}
+        {estado.fase === 'concluido' && estado.confirmarAcerto && !exigeConfirmacao && estado.confirmacaoCritico?.fase !== 'rolando' && (
           <div className={`${styles.vantagemButtons} ${styles.confirmarAcertoWrap}`}>
             {/* 20 natural = acerto automático (sem "Errei"); 1 natural = erro
                 automático, mas o Mestre pode dar consequência (ex.: acertar
@@ -208,6 +240,20 @@ export default function RollOverlay() {
                 Errei
               </div>
             )}
+            {/* 20 natural COM a house rule já confirmado: o jogador escolhe entre
+                dano normal e dobrado (o 2º dado é só informativo). */}
+            {estado.critico === 'sucesso' && estado.confirmacaoCritico && (
+              <div
+                className={`${styles.vantagemBtn} ${styles.vantagemBtnPositivo}`}
+                onClick={() => {
+                  const { onAcertou } = estado.confirmarAcerto!;
+                  fechar();
+                  onAcertou({ critico: false });
+                }}
+              >
+                Rolar Dano
+              </div>
+            )}
             <div
               className={`${styles.vantagemBtn} ${styles.vantagemBtnPositivo}`}
               onClick={() => {
@@ -216,7 +262,13 @@ export default function RollOverlay() {
                 onAcertou({ critico: estado.critico === 'sucesso' });
               }}
             >
-              {estado.critico === 'sucesso' ? 'Rolar Dobro do Dano' : estado.critico === 'falha' ? 'Rolar Dano' : 'Acertei'}
+              {estado.critico === 'sucesso'
+                ? estado.confirmacaoCritico
+                  ? 'Rolar Dano Dobrado'
+                  : 'Rolar Dobro do Dano'
+                : estado.critico === 'falha'
+                  ? 'Rolar Dano'
+                  : 'Acertei'}
             </div>
           </div>
         )}

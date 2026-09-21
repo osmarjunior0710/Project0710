@@ -84,6 +84,11 @@ export default function AvatarMenu({
       label: 'Peso da Mochila',
       desc: 'Mostra o peso de cada item e a barra de carga',
     },
+    {
+      chave: 'confirmacaoCritico' as const,
+      label: 'Confirmação de crítico',
+      desc: 'Ao tirar 1 ou 20 natural em um ataque, rola um 2º d20 de confirmação (só informativo — o Mestre decide) antes do dano.',
+    },
   ];
 
   return (
