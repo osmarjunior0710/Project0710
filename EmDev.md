@@ -31,6 +31,7 @@ código).
 - [ ] Revisão do botão de XP para mostrar progresso circular
 - [ ] Informações de CD, bônus de ataque de magia e afins na tela de Magias
 - [ ] Coin bag manager (mostrar, usar e adicionar moedas) + house rule de contar ou não o peso da moeda
+- [ ] **Bug:** no painel de Reação, magias (ex.: Escudo Arcano 1º círculo, Contramagia 3º círculo) aparecem como ativas mesmo sem espaço de magia disponível do círculo — o aviso vermelho "Sem espaço de magia de 1º círculo disponível" aparece, mas as opções não ficam desabilitadas/cinza (ver `ReacaoPanelContent.tsx`)
 
 Nota: itens 1 e 2 e o último dependem do mesmo mecanismo de house
 rules — conferir a ordem de construção ao abrir o item 1.
