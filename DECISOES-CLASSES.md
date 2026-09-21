@@ -69,6 +69,17 @@ continua funcionando nos painéis de Ação/Bônus/Reação, mas some da visão
 geral — o Char Multiclasse (`personagemTesteMulticlasse.ts`) serve pra
 conferir.
 
+**Cor dos pips por classe (`core/corRecursoClasse.ts`, pedido do Osmar
+2026-09):** cada classe tem UMA cor de pip, igual em toda tela onde o
+recurso dela aparece — Bárbaro/Fúria vermelho, Bardo/Inspiração
+mostarda, Bruxo/Magia de Pacto roxo. **Classe nova ganha cor na mesma
+entrega em que ganha o 1º recurso com contador; se o Osmar não disser
+qual, PERGUNTAR** (não escolher sozinho). Sem cor definida, o pip fica no
+azul padrão (`null`) — hoje é o caso do Guerreiro/Recuperar Fôlego. Os
+pickers de "Usar Magia" (`SelecionarMagiaShell`/`EscolherCirculoShell`)
+ainda não sabem a classe do pool, então mostram o azul padrão mesmo pro
+Bruxo.
+
 **Data/origem:** 2026-08/09, Guerreiro/Bardo/Bruxo.
 
 ## Motor de Level Up genérico (`core/levelUp.ts`)
