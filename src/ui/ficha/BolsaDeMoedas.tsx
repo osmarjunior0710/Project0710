@@ -7,10 +7,20 @@ import {
   type Moedas,
   type TipoMoeda,
 } from '../../core/moedas';
+import iconePC from '../../assets/icones-moedas/moeda-pc.webp';
+import iconePP from '../../assets/icones-moedas/moeda-pp.webp';
+import iconePE from '../../assets/icones-moedas/moeda-pe.webp';
+import iconePO from '../../assets/icones-moedas/moeda-po.webp';
+import iconePL from '../../assets/icones-moedas/moeda-pl.webp';
 import styles from '../components/TrocarArmaMaestria.module.css';
 
-/** Emojis provisórios por moeda — o Osmar vai fazer os ícones de verdade. */
-const EMOJI: Record<TipoMoeda, string> = { pc: '🟤', pp: '⚪', pe: '🟢', po: '🟡', pl: '🟣' };
+/** Ícone de cada moeda (cada uma com formato próprio: triângulo, quadrado,
+ * pentágono, círculo, hexágono — dá pra distinguir sem ler a sigla). */
+const ICONE: Record<TipoMoeda, string> = { pc: iconePC, pp: iconePP, pe: iconePE, po: iconePO, pl: iconePL };
+
+function IconeMoeda({ tipo, tamanho }: { tipo: TipoMoeda; tamanho: number }) {
+  return <img src={ICONE[tipo]} alt={SIGLA[tipo]} style={{ width: tamanho, height: tamanho, objectFit: 'contain', display: 'block' }} />;
+}
 const SIGLA: Record<TipoMoeda, string> = { pc: 'PC', pp: 'PP', pe: 'PE', po: 'PO', pl: 'PL' };
 const NOME: Record<TipoMoeda, string> = {
   pc: 'Peça de Cobre',
@@ -53,7 +63,9 @@ export default function BolsaDeMoedas({ moedas, onMudar }: BolsaDeMoedasProps) {
             style={{ borderStyle: 'solid', borderColor: 'var(--accent)', padding: 'var(--space-2) var(--space-1)' }}
             onClick={() => setAberta(t)}
           >
-            <div style={{ fontSize: 18 }}>{EMOJI[t]}</div>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <IconeMoeda tipo={t} tamanho={34} />
+            </div>
             <div className="stat-mod" style={{ fontSize: 16, margin: '2px 0' }}>
               {moedas[t]}
             </div>
@@ -131,8 +143,11 @@ function MoedaPainel({ tipo, moedas, onMudar, onFechar }: MoedaPainelProps) {
   return (
     <div className={styles.overlay} onClick={onFechar}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.title}>
-          {EMOJI[tipo]} {NOME[tipo]} — {moedas[tipo]} {SIGLA[tipo]}
+        <div className={styles.title} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <IconeMoeda tipo={tipo} tamanho={28} />
+          <span>
+            {NOME[tipo]} — {moedas[tipo]} {SIGLA[tipo]}
+          </span>
         </div>
         <input
           type="number"
