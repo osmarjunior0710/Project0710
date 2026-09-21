@@ -32,6 +32,7 @@ código).
 - [ ] Informações de CD, bônus de ataque de magia e afins na tela de Magias
 - [ ] Coin bag manager (mostrar, usar e adicionar moedas) + house rule de contar ou não o peso da moeda
 - [ ] **Bug:** no painel de Reação, magias (ex.: Escudo Arcano 1º círculo, Contramagia 3º círculo) aparecem como ativas mesmo sem espaço de magia disponível do círculo — o aviso vermelho "Sem espaço de magia de 1º círculo disponível" aparece, mas as opções não ficam desabilitadas/cinza (ver `ReacaoPanelContent.tsx`)
+- [ ] **Rever toda a integração de Multiclasse com a Ficha/Combate** — tudo foi montado pensando em UMA classe por vez ("classe ativa" via pill `classeAtivaNome`, ~70 pontos que leem nível/subclasse da classe em foco, ver `DECISOES-CLASSES.md` "Multiclasse — nível na classe ativa"). Em combate o personagem É as duas classes ao mesmo tempo: com o pill em Mago, recursos/magias do Bardo somem da tela de Combate/Magias e é preciso trocar o pill pra usar. Direção discutida (ainda sem decisão): mostrar as duas classes juntas (blocos por classe em Combate e Magias), pill vira atalho ou some, cabeçalho mantém o texto "Mago 18 / Bardo 3". É um foco à parte (grande), a abrir com os chapéus de PM/Game Designer/UI (seção 6 do CLAUDE.md), não um retoque.
 
 Nota: itens 1 e 2 e o último dependem do mesmo mecanismo de house
 rules — conferir a ordem de construção ao abrir o item 1.
