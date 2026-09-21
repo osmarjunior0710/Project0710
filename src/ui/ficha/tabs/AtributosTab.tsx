@@ -1,6 +1,6 @@
 import iconeLevelUp from '../../../assets/icones-ui/level-up.png';
 import AnelDeProgresso from '../../components/AnelDeProgresso';
-import { xpCompacto } from '../../../core/experiencia';
+import { progressoNoNivelXp, xpCompacto } from '../../../core/experiencia';
 import type { ReservaDadoVida } from '../../../core/dadosDeVida';
 import InfoTexto from '../../components/InfoTexto';
 import {
@@ -156,6 +156,10 @@ export default function AtributosTab({
   const { rolarD20 } = useRoll();
   const sentidosParaExibir = sentidosAtivos(sentidos);
 
+  // Nível atual (total) = marco do próximo - 1 — o anel mostra o progresso
+  // DENTRO do nível, não o XP acumulado contra o marco absoluto.
+  const progressoNivel = proximoMarcoXp ? progressoNoNivelXp(proximoMarcoXp.nivel - 1, xpAtual) : null;
+
   return (
     <>
       <div className={styles.topRow}>
@@ -180,9 +184,14 @@ export default function AtributosTab({
               </div>
             ) : (
               <AnelDeProgresso
-                valor={proximoMarcoXp ? xpAtual : 1}
-                maximo={proximoMarcoXp ? proximoMarcoXp.xpNecessario : 1}
-                ariaLabel={proximoMarcoXp ? `${xpAtual} de ${proximoMarcoXp.xpNecessario} XP` : `${xpAtual} XP (máximo)`}
+                key={proximoMarcoXp?.nivel}
+                valor={progressoNivel ? progressoNivel.atual : 1}
+                maximo={progressoNivel ? progressoNivel.total : 1}
+                ariaLabel={
+                  progressoNivel
+                    ? `${progressoNivel.atual} de ${progressoNivel.total} XP neste nível (${xpAtual} no total)`
+                    : `${xpAtual} XP (máximo)`
+                }
               >
                 <span style={{ fontSize: 12 }}>{xpCompacto(xpAtual)}</span>
                 <span style={{ fontSize: 8, color: 'var(--text-faint)' }}>XP</span>

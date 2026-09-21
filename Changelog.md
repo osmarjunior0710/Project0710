@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1930
+
+**Anel de XP mostra o progresso real do nível:** em vez de XP total contra o marco absoluto (ex.: 301 de 900), conta só dentro do nível atual (ex.: nível 2 com 301 XP = 1 de 600). O número no centro continua sendo o XP total.
+
 ## v202609_1925
 
 **Selo de Level Up:** quando o XP passa do marco, o selo dourado do livro com a seta aparece no lugar do anel de XP (na caixa de nível). Tocar nele abre o Level Up; o resto da caixa continua abrindo o XP.

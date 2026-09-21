@@ -9,6 +9,18 @@ export function proximoMarcoXp(nivelAtual: number): { nivel: number; xpNecessari
   return { nivel: proximoNivel, xpNecessario };
 }
 
+/** Progresso REAL dentro do nível atual: quanto do XP deste nível já foi
+ * ganho (`atual`) e quanto o nível inteiro pede (`total`) — ex.: nível 2
+ * (marco 300) indo pro 3 (marco 900) com 301 XP acumulados = 1 de 600,
+ * não 301 de 900. `null` no nível máximo (sem próximo marco). */
+export function progressoNoNivelXp(nivelAtual: number, xpAtual: number): { atual: number; total: number } | null {
+  const proximo = proximoMarcoXp(nivelAtual);
+  if (proximo === null) return null;
+  const base = xpPorNivel[nivelAtual] ?? 0;
+  const total = proximo.xpNecessario - base;
+  return { atual: Math.min(total, Math.max(0, xpAtual - base)), total };
+}
+
 /** `true` quando o XP acumulado já basta pro próximo nível (>=, nunca
  * <) — nível 20 sempre retorna `false` (não tem pra onde subir). */
 export function podeLevelUpPorXp(nivelAtual: number, xpAtual: number): boolean {
