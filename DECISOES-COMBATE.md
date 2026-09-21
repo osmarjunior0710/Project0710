@@ -1069,6 +1069,52 @@ seja "CD do personagem, o alvo que salva" (sem o app rolar o dado do
 alvo) usa `SalvaguardaDoAlvoModal` — nunca cria um modal próprio pra
 esse formato.
 
+## Salvaguarda do Alvo — popup único (Fluxo Acerto/Erro estendido, 2026-09)
+
+Extensão do padrão acima: até aqui `SalvaguardaDoAlvoModal` mostrava CD
++ Sucesso/Falha em texto e um botão manual de "Rolar Dano" — "atira e
+esquece" (jogador dividia "metade do dano" por 2 na mesa sozinho).
+Pedido do Osmar: aplicar o mesmo espírito do Fluxo Acerto/Erro (ver
+"Fluxo Acerto/Erro sem 'renunciar' nada antes" abaixo) — rolar sozinho
+e já mostrar o valor certo, sem 2ª interação manual.
+
+**Layout final** (aprovado direto pelo Osmar depois de uma cena de
+exploração em `/prototipo`, sem precisar de rodada formal de
+protótipo): título → CD + atributo → divisor → **Falha** (texto, com o
+valor rolado quando há dano) → divisor → **Sucesso** (idem) → aviso de
+upcast (se houver) → botão de dano condicional extra (se houver, ex.
+Badalar Fúnebre — continua manual, é um dano à PARTE sem relação com
+Sucesso/Falha) → 1 único botão **Ok**. Fecha só pelo Ok — tirou o toque
+fora e o "✕", pra não perder a leitura por engano (mesma ideia do
+`confirmarAcerto`/`confirmarFechamento` do Fluxo Acerto/Erro: uma
+decisão que precisa ser vista não fecha sozinha).
+
+**Como o dado entra no texto:** quando a ação tem fórmula de dano, o
+app já rola (`rolarDados` com `confirmarFechamento`, igual qualquer
+outro encadeamento do Fluxo Acerto/Erro) ANTES do popup final abrir —
+o botão "OK" do resultado do dado já leva direto pro popup preenchido,
+nunca aparecem os 2 juntos. O texto de Falha/Sucesso nunca é
+reescrito/parseado — o valor rolado é só PREFIXADO
+(`"${total} — ${texto original}"`) pras 2 magias com texto vindo da
+planilha (Falha sempre "Dano completo", nunca precisa saber o tipo);
+pros 3 casos hardcoded (Ataque de Sopro, Lançar no Inferno, Golpe de
+Escudo) o texto já é escrito pelo código, então é só reescrito limpo
+com o número dentro, sem prefixo.
+
+**Por que o Sucesso da magia genérica continua sem número:** só a
+magia lida da planilha (`mecanica === 'salvaguarda'`) não sabe se
+`salvaguardaSucesso` quer dizer metade/nenhum/cheio sem comparar por
+TEXTO livre — trava contra a regra de ID estável (seção 13 do
+`CLAUDE.md`), então esse bloco específico continua só com o texto da
+planilha, sem valor calculado, até existir uma coluna/ID pra isso (ver
+`PENDENCIAS.md` "Salvaguarda do Alvo"). Os 3 casos hardcoded não têm
+esse problema — a semântica de cada um já mora no código.
+
+**Padrão pra lembrar:** toda ação nova nesse formato (CD do jogador,
+alvo que salva) que tenha fórmula de dano própria já rola sozinha ao
+abrir e mostra Falha/Sucesso com o número certo — nunca mais um botão
+manual de "Rolar Dano" dentro de `SalvaguardaDoAlvoModal`.
+
 ## Fluxo Acerto/Erro sem "renunciar" nada antes — Esmagador/Talhador/Ancestralidade Gigante
 
 Diferente do Golpe Brutal (o 1º caso do Fluxo Acerto/Erro), Esmagador/

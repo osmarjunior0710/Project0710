@@ -257,7 +257,15 @@ export default function MagiasTab({
   const { rolarD20, rolarDados } = useRoll();
   const [telaCirculo, setTelaCirculo] = useState<Magia | null>(null);
   const [armaDePactoEscolhida, setArmaDePactoEscolhida] = useState('');
-  const [telaSalvaguarda, setTelaSalvaguarda] = useState<{ magia: Magia; circuloUsado: number } | null>(null);
+  // `danoRolado`/`upcastNaoAutomatico` — ver o mesmo padrão em
+  // `CombatTab.tsx` `abrirSalvaguarda` (Fluxo Acerto/Erro estendido pra
+  // Salvaguarda do Alvo, 2026-09, DECISOES-COMBATE.md).
+  const [telaSalvaguarda, setTelaSalvaguarda] = useState<{
+    magia: Magia;
+    circuloUsado: number;
+    danoRolado: number | null;
+    upcastNaoAutomatico: boolean;
+  } | null>(null);
 
   if (!conjura) {
     return (
@@ -324,7 +332,27 @@ export default function MagiasTab({
       return;
     }
     if (resultado.mecanica === 'salvaguarda') {
-      setTelaSalvaguarda({ magia: m, circuloUsado });
+      const dano = calcularDanoMagia(m, circuloUsado, nivel);
+      if (!dano) {
+        setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: null, upcastNaoAutomatico: false });
+        return;
+      }
+      let totalRolado = 0;
+      rolarDados({
+        label: `Dano — ✨ ${m.nome}`,
+        formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+        quantidade: dano.quantidade,
+        lados: dano.lados,
+        mod: dano.mod,
+        explicacaoMod: dano.explicacao,
+        onResultado: (total) => {
+          totalRolado = total;
+        },
+        confirmarFechamento: {
+          aoTocar: () =>
+            setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: totalRolado, upcastNaoAutomatico: dano.upcastNaoAutomatico }),
+        },
+      });
       return;
     }
     if (resultado.rollCura) {
@@ -335,25 +363,11 @@ export default function MagiasTab({
     }
   }
 
-  function rolarDanoSalvaguarda() {
-    if (!telaSalvaguarda) return;
-    const dano = calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel);
-    setTelaSalvaguarda(null);
-    if (!dano) return;
-    rolarDados({
-      label: `Dano — ✨ ${telaSalvaguarda.magia.nome}`,
-      formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
-      quantidade: dano.quantidade,
-      lados: dano.lados,
-      mod: dano.mod,
-      explicacaoMod: dano.explicacao,
-    });
-  }
-
   // Ver `danoCondicionalDado` em magias.ts — só Badalar Fúnebre hoje
   // (dano diferente se o alvo já estiver ferido, algo que o app não
-  // rastreia). Mesmo padrão de `rolarDanoSalvaguarda`, só lendo o dado
-  // alternativo.
+  // rastreia). Diferente do dano principal (dentro de
+  // `processarMagiaAoUsar`), esse continua manual/à parte — fecha o
+  // popup e rola direto, sem juntar no Falha/Sucesso.
   function rolarDanoCondicionalSalvaguarda() {
     if (!telaSalvaguarda) return;
     const dano = calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel);
@@ -414,16 +428,21 @@ export default function MagiasTab({
   const temCurto = espacos.some((e) => e.recuperaNoDescansoCurto);
   const avisoRecuperacao = temCurto ? 'Recupera no Descanso Curto ou Longo.' : 'Recupera no Descanso Longo.';
 
-  const danoSalvaguarda = telaSalvaguarda
-    ? calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)
-    : null;
   const danoCondicionalSalvaguarda = telaSalvaguarda
     ? calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)
     : null;
   const avisoUpcastSalvaguarda =
-    danoSalvaguarda?.upcastNaoAutomatico && telaSalvaguarda?.magia.upcastTexto
-      ? `Círculo usado é maior que o base — dano abaixo NÃO inclui o upcast. Efeito real: ${telaSalvaguarda.magia.upcastTexto}`
+    telaSalvaguarda?.upcastNaoAutomatico && telaSalvaguarda?.magia.upcastTexto
+      ? `Círculo usado é maior que o base — dano acima NÃO inclui o upcast. Efeito real: ${telaSalvaguarda.magia.upcastTexto}`
       : null;
+  // Ver o mesmo padrão em `CombatTab.tsx` (`textoFalhaSalvaguarda`) —
+  // nunca reescreve/assume a estrutura do texto da planilha, só
+  // prefixa o valor já rolado quando ele existe.
+  const textoFalhaSalvaguarda = telaSalvaguarda
+    ? telaSalvaguarda.danoRolado !== null
+      ? `${telaSalvaguarda.danoRolado} — ${telaSalvaguarda.magia.salvaguardaFalha}`
+      : telaSalvaguarda.magia.salvaguardaFalha
+    : null;
 
   return (
     <>
@@ -440,9 +459,8 @@ export default function MagiasTab({
           cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
           explicacaoCd={explicacaoCdConjuracao}
           textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
-          textoFalha={telaSalvaguarda.magia.salvaguardaFalha}
+          textoFalha={textoFalhaSalvaguarda}
           aviso={avisoUpcastSalvaguarda}
-          acaoPrincipal={danoSalvaguarda ? { label: rotuloBotaoDanoMagia(danoSalvaguarda), onClick: rolarDanoSalvaguarda } : null}
           acaoSecundaria={
             danoCondicionalSalvaguarda
               ? {
@@ -451,7 +469,7 @@ export default function MagiasTab({
                 }
               : null
           }
-          semAcaoTexto="Veja a descrição da magia (ⓘ) pro efeito."
+          semAcaoTexto={telaSalvaguarda.danoRolado === null ? 'Veja a descrição da magia (ⓘ) pro efeito.' : null}
           onFechar={() => setTelaSalvaguarda(null)}
         />
       )}

@@ -105,18 +105,20 @@ de QUAL outra criatura" (Pet vs. outro PJ) — "Curar outro" nesse
 padrão não pergunta quem, só fecha; quem precisa saber quem (Colheita
 Macabra) continua com o próprio modal dedicado. Ver `PENDENCIAS.md`.
 
-**Salvaguarda do Alvo — formato NOVO, achado em 2026-09, diferente do
-"Salvaguarda" da seção 2:** é o alvo (inimigo/NPC) que salva contra
-uma magia/característica SUA (Ataque de Sopro, Lançar no Inferno,
-magia com `mecanica === 'salvaguarda'`, Golpe de Escudo), não o
-próprio personagem — esse SIM tem o problema "atira e esquece" (o
-botão de dano sempre rola cheio, mesmo quando o texto diz "Metade do
-dano" no sucesso). Travado por 2 motivos, ver `PENDENCIAS.md`
-"Salvaguarda do Alvo": (1) reconhecer "sucesso = metade/nenhum/cheio"
-pras magias genéricas precisa de coluna/ID estável na planilha, ainda
-não existe; (2) o cálculo de "metade do dano" em si (arredondamento,
-como mostrar) vai primeiro pro `/prototipo` — Osmar pediu validar a
-UX antes de formalizar, mesmo processo do Acerto/Erro original.
+**Salvaguarda do Alvo — resolvido (2026-09), formato achado depois do
+Acerto/Erro original, diferente do "Salvaguarda" da seção 2:** é o
+alvo (inimigo/NPC) que salva contra uma magia/característica SUA
+(Ataque de Sopro, Lançar no Inferno, magia com `mecanica ===
+'salvaguarda'`, Golpe de Escudo), não o próprio personagem — deixou de
+ser "atira e esquece": quando a ação tem dano, o app já rola sozinho
+ao abrir (sem botão manual de "Rolar Dano") e monta o popup com CD,
+Falha e Sucesso já calculados. Dessa vez o layout foi direto aprovado
+pelo Osmar sem rodada de `/prototipo` — só a cena de exploração
+(toggle por bloco) que existiu antes de formalizar, ver
+`DECISOES-COMBATE.md` "Salvaguarda do Alvo — popup único". Continua em
+aberto só o **Sucesso da magia genérica**: sem coluna/ID estável na
+planilha pro tipo (metade/nenhum/cheio), esse bloco específico mostra
+só o texto da planilha, sem número — ver `PENDENCIAS.md`.
 
 ## 4. Onde isso encosta em sistema existente (risco de colisão)
 

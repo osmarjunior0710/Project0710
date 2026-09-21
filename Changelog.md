@@ -5,6 +5,20 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0019
+
+**Salvaguarda do Alvo virou de verdade — não é mais "atira e esquece"**
+(Ataque de Sopro, Lançar no Inferno, Golpe de Escudo e magia com
+salvaguarda genérica): quando a ação causa dano, o app já rola sozinho
+ao tocar (sem precisar de um botão separado de "Rolar Dano") e o popup
+final já mostra Falha e Sucesso com o número certo — inclusive a
+metade do dano do Ataque de Sopro, já calculada. Layout novo: título,
+CD, Falha, Sucesso, e um único botão "Ok" pra fechar (tirei o "fechar
+tocando fora", pra não fechar sem querer no meio da leitura). Continua
+faltando só o número no Sucesso das magias genéricas mais raras (as
+que vêm direto da planilha) — isso ainda espera uma coluna nova que o
+Osmar vai adicionar.
+
 ## v202609_1151
 
 **Protótipo de Salvaguarda do Alvo evoluiu pra um "popup único"

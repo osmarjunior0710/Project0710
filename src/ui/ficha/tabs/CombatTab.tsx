@@ -558,13 +558,24 @@ export default function CombatTab({
    * textual (o app não rastreia alvo/status de inimigo) — escolher só
    * atualiza o feedback com o lembrete da regra. */
   const [golpeBrutalEfeitoPendente, setGolpeBrutalEfeitoPendente] = useState(false);
-  const [telaSalvaguarda, setTelaSalvaguarda] = useState<{ magia: Magia; circuloUsado: number } | null>(null);
+  // `danoRolado: null` = magia sem fórmula de dano própria (não tem o
+  // que rolar); `number` = já rolou sozinho ao abrir (ver
+  // `abrirSalvaguarda` — Fluxo Acerto/Erro estendido pra Salvaguarda do
+  // Alvo, 2026-09, ver DECISOES-COMBATE.md).
+  const [telaSalvaguarda, setTelaSalvaguarda] = useState<{
+    magia: Magia;
+    circuloUsado: number;
+    danoRolado: number | null;
+    upcastNaoAutomatico: boolean;
+  } | null>(null);
   const [ataquesFeitos, setAtaquesFeitos] = useState(0);
   const [piscando, setPiscando] = useState(false);
   const [iniciativaValor, setIniciativaValor] = useState<number | null>(null);
   const [periciaInigualavelPendente, setPericiaInigualavelPendente] = useState(false);
-  const [lancarNoInfernoAberto, setLancarNoInfernoAberto] = useState(false);
-  const [ataqueDeSoproAberto, setAtaqueDeSoproAberto] = useState(false);
+  // `null` = popup fechado; `number` = aberto com esse total já rolado
+  // (mesmo padrão de `telaSalvaguarda.danoRolado`).
+  const [lancarNoInfernoDano, setLancarNoInfernoDano] = useState<number | null>(null);
+  const [ataqueDeSoproDano, setAtaqueDeSoproDano] = useState<number | null>(null);
   const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
   // Esmagador/Talhador — qual popup de "Ativar efeito" está aberto
   // agora (`null` = nenhum), disparado pelo botão do talento no popup
@@ -626,29 +637,40 @@ export default function CombatTab({
     setFeedback(`${nome} — ${desc}`);
   }
 
+  // Fluxo Acerto/Erro estendido pra Salvaguarda do Alvo (2026-09, ver
+  // DECISOES-COMBATE.md "Salvaguarda do Alvo — popup único"): quando a
+  // magia tem fórmula de dano própria, já rola sozinho ao abrir (sem
+  // botão manual de "Rolar Dano") — o popup final só abre depois que o
+  // dado resolve, com Falha/Sucesso já calculados.
   function abrirSalvaguarda(magia: Magia, circuloUsado: number) {
-    setTelaSalvaguarda({ magia, circuloUsado });
-  }
-
-  function rolarDanoSalvaguarda() {
-    if (!telaSalvaguarda) return;
-    const dano = calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel);
-    setTelaSalvaguarda(null);
-    if (!dano) return;
+    const dano = calcularDanoMagia(magia, circuloUsado, nivel);
+    if (!dano) {
+      setTelaSalvaguarda({ magia, circuloUsado, danoRolado: null, upcastNaoAutomatico: false });
+      return;
+    }
+    let totalRolado = 0;
     rolarDados({
-      label: `Dano — ✨ ${telaSalvaguarda.magia.nome}`,
+      label: `Dano — ✨ ${magia.nome}`,
       formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
       quantidade: dano.quantidade,
       lados: dano.lados,
       mod: dano.mod,
       explicacaoMod: dano.explicacao,
+      onResultado: (total) => {
+        totalRolado = total;
+      },
+      confirmarFechamento: {
+        aoTocar: () =>
+          setTelaSalvaguarda({ magia, circuloUsado, danoRolado: totalRolado, upcastNaoAutomatico: dano.upcastNaoAutomatico }),
+      },
     });
   }
 
   // Ver `danoCondicionalDado` em magias.ts — só Badalar Fúnebre hoje
   // (dano diferente se o alvo já estiver ferido, algo que o app não
-  // rastreia). Mesmo padrão de `rolarDanoSalvaguarda`, só lendo o dado
-  // alternativo.
+  // rastreia). Diferente do dano principal (`abrirSalvaguarda`), esse
+  // continua manual/à parte — fecha o popup e rola direto, sem juntar
+  // no Falha/Sucesso.
   function rolarDanoCondicionalSalvaguarda() {
     if (!telaSalvaguarda) return;
     const dano = calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel);
@@ -727,17 +749,17 @@ export default function CombatTab({
 
   function abrirAtaqueDeSopro() {
     if (!onUsarAtaqueDeSopro()) return;
-    setAtaqueDeSoproAberto(true);
-  }
-
-  function rolarDanoAtaqueDeSopro() {
-    setAtaqueDeSoproAberto(false);
+    let totalRolado = 0;
     rolarDados({
       label: 'Ataque de Sopro — Dano',
       formula: `${numDadosAtaqueDeSopro}d10`,
       quantidade: numDadosAtaqueDeSopro,
       lados: 10,
       mod: 0,
+      onResultado: (total) => {
+        totalRolado = total;
+      },
+      confirmarFechamento: { aoTocar: () => setAtaqueDeSoproDano(totalRolado) },
     });
   }
 
@@ -861,12 +883,18 @@ export default function CombatTab({
 
   function abrirLancarNoInferno() {
     if (!onUsarLancarNoInferno()) return;
-    setLancarNoInfernoAberto(true);
-  }
-
-  function rolarDanoLancarNoInferno() {
-    setLancarNoInfernoAberto(false);
-    rolarDados({ label: 'Lançar no Inferno — Dano', formula: '8d10', quantidade: 8, lados: 10, mod: 0 });
+    let totalRolado = 0;
+    rolarDados({
+      label: 'Lançar no Inferno — Dano',
+      formula: '8d10',
+      quantidade: 8,
+      lados: 10,
+      mod: 0,
+      onResultado: (total) => {
+        totalRolado = total;
+      },
+      confirmarFechamento: { aoTocar: () => setLancarNoInfernoDano(totalRolado) },
+    });
   }
 
   /** Golpe de Escudo (Mestre em Escudos) — mesmo padrão de
@@ -965,16 +993,23 @@ export default function CombatTab({
     return 'bottom';
   }
 
-  const danoSalvaguarda = telaSalvaguarda
-    ? calcularDanoMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)
-    : null;
   const danoCondicionalSalvaguarda = telaSalvaguarda
     ? calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)
     : null;
   const avisoUpcastSalvaguarda =
-    danoSalvaguarda?.upcastNaoAutomatico && telaSalvaguarda?.magia.upcastTexto
-      ? `Círculo usado é maior que o base — dano abaixo NÃO inclui o upcast. Efeito real: ${telaSalvaguarda.magia.upcastTexto}`
+    telaSalvaguarda?.upcastNaoAutomatico && telaSalvaguarda?.magia.upcastTexto
+      ? `Círculo usado é maior que o base — dano acima NÃO inclui o upcast. Efeito real: ${telaSalvaguarda.magia.upcastTexto}`
       : null;
+  // `${total} — ${texto original}` (nunca reescreve/assume a estrutura
+  // do texto da planilha — ver PENDENCIAS.md "Salvaguarda do Alvo":
+  // reconhecer TIPO de sucesso (metade/nenhum/cheio) precisa de coluna
+  // nova, mas mostrar o valor JÁ rolado ao lado do texto de Falha não
+  // depende disso, porque Falha é sempre "dano completo").
+  const textoFalhaSalvaguarda = telaSalvaguarda
+    ? telaSalvaguarda.danoRolado !== null
+      ? `${telaSalvaguarda.danoRolado} — ${telaSalvaguarda.magia.salvaguardaFalha}`
+      : telaSalvaguarda.magia.salvaguardaFalha
+    : null;
 
   return (
     <>
@@ -1517,31 +1552,26 @@ export default function CombatTab({
           />
         )}
       </SidePanel>
-      {lancarNoInfernoAberto && (
+      {lancarNoInfernoDano !== null && (
         <SalvaguardaDoAlvoModal
           titulo="Lançar no Inferno"
           atributo="Carisma"
           cd={cdLancarNoInferno}
           explicacaoCd={explicacaoCdConjuracao}
           textoSucesso="evita a magia"
-          textoFalha="8d10 de dano Psíquico (Ínferos não sofrem) + Incapacitado até o final do seu próximo turno"
-          acaoPrincipal={{ label: '🎲 Rolar Dano (8d10 Psíquico)', onClick: rolarDanoLancarNoInferno }}
-          onFechar={() => setLancarNoInfernoAberto(false)}
+          textoFalha={`${lancarNoInfernoDano} de dano Psíquico (Ínferos não sofrem) + Incapacitado até o final do seu próximo turno`}
+          onFechar={() => setLancarNoInfernoDano(null)}
         />
       )}
-      {ataqueDeSoproAberto && (
+      {ataqueDeSoproDano !== null && (
         <SalvaguardaDoAlvoModal
           titulo="Ataque de Sopro"
           atributo="Destreza"
           cd={cdAtaqueDeSopro}
           explicacaoCd={explicacaoCdAtaqueDeSopro}
-          textoSucesso="metade do dano"
-          textoFalha={`${numDadosAtaqueDeSopro}d10 de dano ${tipoDanoAtaqueDeSopro ?? '—'} (Cone de 4,5m ou Linha de 9m×1,5m, à sua escolha)`}
-          acaoPrincipal={{
-            label: `🎲 Rolar Dano (${numDadosAtaqueDeSopro}d10 ${tipoDanoAtaqueDeSopro ?? ''})`,
-            onClick: rolarDanoAtaqueDeSopro,
-          }}
-          onFechar={() => setAtaqueDeSoproAberto(false)}
+          textoSucesso={`${Math.floor(ataqueDeSoproDano / 2)} de dano ${tipoDanoAtaqueDeSopro ?? '—'} (metade)`}
+          textoFalha={`${ataqueDeSoproDano} de dano ${tipoDanoAtaqueDeSopro ?? '—'} (Cone de 4,5m ou Linha de 9m×1,5m, à sua escolha)`}
+          onFechar={() => setAtaqueDeSoproDano(null)}
         />
       )}
       {telaSalvaguarda && (
@@ -1551,9 +1581,8 @@ export default function CombatTab({
           cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
           explicacaoCd={explicacaoCdConjuracao}
           textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
-          textoFalha={telaSalvaguarda.magia.salvaguardaFalha}
+          textoFalha={textoFalhaSalvaguarda}
           aviso={avisoUpcastSalvaguarda}
-          acaoPrincipal={danoSalvaguarda ? { label: rotuloBotaoDanoMagia(danoSalvaguarda), onClick: rolarDanoSalvaguarda } : null}
           acaoSecundaria={
             danoCondicionalSalvaguarda
               ? {
@@ -1562,7 +1591,7 @@ export default function CombatTab({
                 }
               : null
           }
-          semAcaoTexto="Veja a descrição da magia (ⓘ) pro efeito."
+          semAcaoTexto={telaSalvaguarda.danoRolado === null ? 'Veja a descrição da magia (ⓘ) pro efeito.' : null}
           onFechar={() => setTelaSalvaguarda(null)}
         />
       )}
