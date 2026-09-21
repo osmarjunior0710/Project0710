@@ -65,6 +65,18 @@
   transform: translateY(0);
 }
 
+.temaAcao {
+  background: var(--panel-acao);
+}
+
+.temaBonus {
+  background: var(--panel-bonus);
+}
+
+.temaReacao {
+  background: var(--panel-reacao);
+}
+
 .panelOpen {
   /* marcador — a combinação com panelLeft/Right/Bottom acima define o transform real */
 }

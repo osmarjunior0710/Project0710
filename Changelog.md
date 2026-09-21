@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1433
+
+Os painéis de Ação, Ação Bônus e Reação do Combate agora são três painéis separados, cada um com a sua animação: acabou o deslize duplo ao trocar de um pro outro. Cada painel tem um fundo bem claro próprio (azul, amarelo e verde).
+
 ## v202609_0019
 
 **Salvaguarda do Alvo virou de verdade — não é mais "atira e esquece"**

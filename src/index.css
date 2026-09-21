@@ -2,6 +2,10 @@
   --bg: #f5f5f2;
   --panel: #ffffff;
   --panel2: #ececea;
+  /* Fundo dos 3 painéis de turno (Ação/Bônus/Reação) — SidePanel.tsx */
+  --panel-acao: #f3f6fe;
+  --panel-bonus: #fefaea;
+  --panel-reacao: #f1faf4;
   --line: #c7c7c2;
   --line-soft: #dcdcd8;
   --text: #1c1c1e;

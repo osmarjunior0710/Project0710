@@ -542,14 +542,6 @@ export default function CombatTab({
   modIntAtual,
 }: CombatTabProps) {
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
-  /** Qual painel foi o ÚLTIMO aberto — ao contrário de `painelAberto`,
-   * NUNCA volta a `null`. Existe só pra alimentar side/title/conteúdo
-   * do `SidePanel` mesmo DEPOIS de fechar: sem isso, fechar zera
-   * `painelAberto` na hora, o `side` cai no fallback `'left'` e o
-   * painel troca de lado NO MEIO da própria animação de saída (Bônus/
-   * Reação saem deslizando pra esquerda em vez de voltar pro lado de
-   * onde vieram) — bug visual reportado pelo Osmar. */
-  const [ultimoPainel, setUltimoPainel] = useState<RecursoTurno>('acao');
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
   /** Golpe Brutal (Bárbaro nível 9+) — `true` depois de confirmar o
@@ -624,7 +616,6 @@ export default function CombatTab({
     setFeedback(null);
     setGolpeBrutalEfeitoPendente(false);
     setPainelAberto(categoria);
-    setUltimoPainel(categoria);
   }
 
   function fecharPainel() {
@@ -986,12 +977,6 @@ export default function CombatTab({
   // core/magiasPersonagem.ts) — o primeiro com sobra é exatamente o que
   // `gastarQualquerSlot` (FichaShell.tsx) vai gastar de verdade.
   const proximoCirculoParaGastar = espacos.find((e) => (espacosGastosPorCirculo[e.circulo] ?? 0) < e.maximo)?.circulo ?? null;
-
-  function ladoDoPainel(categoria: RecursoTurno): 'left' | 'right' | 'bottom' {
-    if (categoria === 'acao') return 'left';
-    if (categoria === 'bonus') return 'right';
-    return 'bottom';
-  }
 
   const danoCondicionalSalvaguarda = telaSalvaguarda
     ? calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)
@@ -1369,188 +1354,200 @@ export default function CombatTab({
 
 
       <SidePanel
-        open={painelAberto !== null}
-        side={ladoDoPainel(ultimoPainel)}
-        title={`${LABELS[ultimoPainel].icone} ${LABELS[ultimoPainel].nome}`}
+        open={painelAberto === 'acao'}
+        side="left"
+        title={`${LABELS.acao.icone} ${LABELS.acao.nome}`}
         onClose={fecharPainel}
         detalhesAtivo={detalhesAtivo}
         onToggleDetalhes={() => setDetalhesAtivo((v) => !v)}
       >
-        {ultimoPainel === 'acao' && (
-          <AcaoPanelContent
-            aberto={painelAberto !== null}
-            desvantagemForcaDestreza={desvantagemForcaDestreza}
-            onEscolher={(nome, desc) => escolherNoPainel('acao', nome, desc)}
-            onAbrirSalvaguarda={abrirSalvaguarda}
-            gastarSlotCirculo={onGastarSlotCirculo}
-            onAlterarPv={onAlterarPv}
-            onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
-            nivel={nivel}
-            espacos={espacos}
-            espacosGastosPorCirculo={espacosGastosPorCirculo}
-            classeAtivaNome={classeAtivaNome}
-            ponte={ponte}
-            conjura={conjura}
-            truques={truquesAcao}
-            magiasPreparadas={magiasPreparadasAcao}
-            modAcertoConjuracao={modAcertoConjuracao}
-            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
-            truqueVinculadoAgonizante={truqueVinculadoAgonizante}
-            modCarisma={modCarisma}
-            numAtaques={numAtaques}
-            ataquesFeitos={ataquesFeitos}
-            surtoMax={surtoMaximo}
-            surtoRestantes={surtoRestantes}
-            surtoUsadoTurno={surtoUsadoTurno}
-            onUsarSurto={usarSurtoDeAcao}
-            ataqueAtual={ataqueAtual}
-            danoDesarmadoRerollDisponivel={danoDesarmadoRerollDisponivel}
-            perfuradorDisponivel={perfuradorDisponivel}
-            temAtaqueImprudente={ataqueImprudenteDisponivel}
-            ataqueImprudenteAtivo={ataqueImprudenteAtivo}
-            onAtivarAtaqueImprudente={onAtivarAtaqueImprudente}
-            temGolpeBrutal={golpeBrutalDisponivel}
-            golpeBrutalDados={golpeBrutalDados}
-            golpeBrutalUsadoTurno={golpeBrutalUsadoTurno}
-            onUsarGolpeBrutal={onUsarGolpeBrutal}
-            onAtacouSemDanoPendente={registrarAtaqueSemDanoPendente}
-            onGolpeBrutalDanoConfirmado={() => setGolpeBrutalEfeitoPendente(true)}
-            podeOferecerCortar={cortarDisponivel}
-            onConfirmarCortarReduzirAZero={onConfirmarCortarReduzirAZero}
-            temGolpeDeEscudo={golpeDeEscudoDisponivel}
-            golpeDeEscudoUsadoTurno={golpeDeEscudoUsadoTurno}
-            onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
-            esmagadorDisponivel={esmagadorDisponivel}
-            talhadorDisponivel={talhadorDisponivel}
-            onAbrirGolpeCondicional={setGolpeCondicionalPendente}
-            ancestralidadeGiganteEscolhida={ancestralidadeGiganteEscolhida}
-            usosAncestralidadeGiganteRestantes={usosAncestralidadeGiganteRestantes}
-            onAtivarAncestralidadeGigante={usarAncestralidadeGiganteAoAcertar}
-            detalhesAtivo={detalhesAtivo}
-            maosCurativasDisponivel={maosCurativasDisponivel}
-            maosCurativasGasto={maosCurativasGasto}
-            dadosMaosCurativas={dadosMaosCurativas}
-            onUsarMaosCurativas={onUsarMaosCurativas}
-            falarComAnimaisGnomoDisponivel={falarComAnimaisGnomoDisponivel}
-            usosFalarComAnimaisGnomoMaximo={usosFalarComAnimaisGnomoMaximo}
-            usosFalarComAnimaisGnomoRestantes={usosFalarComAnimaisGnomoRestantes}
-            onUsarFalarComAnimaisGnomo={onUsarFalarComAnimaisGnomo}
-            colheitaMacabraDisponivel={colheitaMacabraDisponivel}
-            onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
-          />
-        )}
-        {ultimoPainel === 'bonus' && (
-          <BonusPanelContent
-            aberto={painelAberto !== null}
-            usosFolegoMaximo={usosFolegoMaximo}
-            usosFolegoRestantes={usosFolegoRestantes}
-            onUsarRecuperarFolego={usarRecuperarFolego}
-            usosConhecimentoDePedrasMaximo={usosConhecimentoDePedrasMaximo}
-            usosConhecimentoDePedrasRestantes={usosConhecimentoDePedrasRestantes}
-            onUsarConhecimentoDePedras={usarConhecimentoDePedras}
-            usosPicoDeAdrenalinaMaximo={usosPicoDeAdrenalinaMaximo}
-            usosPicoDeAdrenalinaRestantes={usosPicoDeAdrenalinaRestantes}
-            onUsarPicoDeAdrenalina={usarPicoDeAdrenalina}
-            vooDraconicoDisponivel={vooDraconicoDisponivel}
-            vooDraconicoGasto={vooDraconicoGasto}
-            onUsarVooDraconico={usarVooDraconico}
-            saltoDaNuvemDisponivel={ancestralidadeGiganteEscolhida === 'Salto da Nuvem (Gigante das Nuvens)'}
-            usosSaltoDaNuvemMaximo={usosAncestralidadeGiganteMaximo}
-            usosSaltoDaNuvemRestantes={usosAncestralidadeGiganteRestantes}
-            onUsarSaltoDaNuvem={usarSaltoDaNuvem}
-            formaGrandeDisponivel={formaGrandeDisponivel}
-            formaGrandeGasto={formaGrandeGasto}
-            formaGrandeAtiva={formaGrandeAtiva}
-            onUsarFormaGrande={usarFormaGrande}
-            furiaDisponivel={furiaDisponivel}
-            furiaMaximo={furiaMaximo}
-            furiaRestantes={furiaRestantes}
-            furiaAtiva={furiaAtiva}
-            onUsarFuria={usarFuria}
-            revelacaoCelestialDisponivel={revelacaoCelestialDisponivel}
-            revelacaoCelestialGasto={revelacaoCelestialGasto}
-            revelacaoCelestialFormaAtiva={revelacaoCelestialFormaAtiva}
-            opcoesRevelacaoCelestial={opcoesRevelacaoCelestial}
-            danoBonusRevelacaoCelestial={danoBonusRevelacaoCelestial}
-            cdMantoNecrotico={cdMantoNecrotico}
-            onUsarRevelacaoCelestial={usarRevelacaoCelestial}
-            acoesGenericasBonus={acoesGenericasBonus}
-            mestreDaMorteDisponivel={mestreDaMorteDisponivel}
-            petsMortoVivo={petsMortoVivo}
-            pvTempMestreDaMorte={pvTempMestreDaMorte}
-            onUsarMestreDaMorte={onUsarMestreDaMorte}
-            onEscolher={(nome, desc) => escolherNoPainel('bonus', nome, desc)}
-            desvantagemForcaDestreza={desvantagemForcaDestreza}
-            conjura={conjura}
-            truques={truquesBonus}
-            magiasPreparadas={magiasPreparadasBonus}
-            espacos={espacos}
-            espacosGastosPorCirculo={espacosGastosPorCirculo}
-            onGastarSlotCirculo={onGastarSlotCirculo}
-            onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
-            classeAtivaNome={classeAtivaNome}
-            ponte={ponte}
-            nivel={nivel}
-            modAcertoConjuracao={modAcertoConjuracao}
-            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
-            truqueVinculadoAgonizante={truqueVinculadoAgonizante}
-            modCarisma={modCarisma}
-            onAbrirSalvaguarda={abrirSalvaguarda}
-            colheitaMacabraDisponivel={colheitaMacabraDisponivel}
-            onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
-            ataqueBonus={ataqueBonus}
-            onUsarAtaqueBonus={usarAtaqueMaoSecundaria}
-            cortarAtaque={cortarAtaque}
-            onUsarCortar={usarCortarAtaque}
-            usosInspiracaoMaximo={usosInspiracaoMaximo}
-            usosInspiracaoRestantes={usosInspiracaoRestantes}
-            tamanhoDadoInspiracao={tamanhoDadoInspiracao}
-            fonteDeInspiracao={fonteDeInspiracao}
-            temEspacoDisponivel={temEspacoDisponivel}
-            proximoCirculoParaGastar={proximoCirculoParaGastar}
-            onUsarInspiracao={usarInspiracaoBardo}
-            onRecuperarInspiracaoComEspaco={recuperarInspiracaoComEspaco}
-            detalhesAtivo={detalhesAtivo}
-          />
-        )}
-        {ultimoPainel === 'reacao' && (
-          <ReacaoPanelContent
-            desvantagemForcaDestreza={desvantagemForcaDestreza}
-            onEscolher={(nome, desc) => escolherNoPainel('reacao', nome, desc)}
-            onAbrirSalvaguarda={abrirSalvaguarda}
-            gastarSlotCirculo={onGastarSlotCirculo}
-            onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
-            nivel={nivel}
-            conjura={conjura}
-            magiasReacao={magiasPreparadasReacao}
-            modAcertoConjuracao={modAcertoConjuracao}
-            explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
-            truqueVinculadoAgonizante={truqueVinculadoAgonizante}
-            modCarisma={modCarisma}
-            colheitaMacabraDisponivel={colheitaMacabraDisponivel}
-            onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
-            detalhesAtivo={detalhesAtivo}
-            contraEncantamentoDisponivel={contraEncantamentoDisponivel}
-            palavrasDeInterrupcaoDisponivel={palavrasDeInterrupcaoDisponivel}
-            usosInspiracaoMaximo={usosInspiracaoMaximo}
-            usosInspiracaoRestantes={usosInspiracaoRestantes}
-            tamanhoDadoInspiracao={tamanhoDadoInspiracao}
-            onUsarInspiracao={onUsarInspiracao}
-            resistenciaDaPedraDisponivel={ancestralidadeGiganteEscolhida === 'Resistência da Pedra (Gigante da Pedra)'}
-            trovaoDaTempestadeDisponivel={ancestralidadeGiganteEscolhida === 'Trovão da Tempestade (Gigante da Tempestade)'}
-            usosAncestralidadeGiganteMaximo={usosAncestralidadeGiganteMaximo}
-            usosAncestralidadeGiganteRestantes={usosAncestralidadeGiganteRestantes}
-            onUsarAncestralidadeGigante={onUsarAncestralidadeGigante}
-            modConstituicaoAtual={modConstituicaoAtual}
-            colheitaDosMortosDisponivel={colheitaDosMortosDisponivel}
-            personagemEnsanguentado={personagemEnsanguentado}
-            opcoesColheitaDosMortos={opcoesColheitaDosMortos}
-            onColheitaDosMortos={onColheitaDosMortos}
-            mestreDaMorteExplosaoDisponivel={mestreDaMorteDisponivel}
-            mestreDaMorteExplosaoLiberada={mestreDaMorteExplosaoLiberada}
-            modIntAtual={modIntAtual}
-          />
-        )}
+        <AcaoPanelContent
+          aberto={painelAberto === 'acao'}
+          desvantagemForcaDestreza={desvantagemForcaDestreza}
+          onEscolher={(nome, desc) => escolherNoPainel('acao', nome, desc)}
+          onAbrirSalvaguarda={abrirSalvaguarda}
+          gastarSlotCirculo={onGastarSlotCirculo}
+          onAlterarPv={onAlterarPv}
+          onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
+          nivel={nivel}
+          espacos={espacos}
+          espacosGastosPorCirculo={espacosGastosPorCirculo}
+          classeAtivaNome={classeAtivaNome}
+          ponte={ponte}
+          conjura={conjura}
+          truques={truquesAcao}
+          magiasPreparadas={magiasPreparadasAcao}
+          modAcertoConjuracao={modAcertoConjuracao}
+          explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
+          truqueVinculadoAgonizante={truqueVinculadoAgonizante}
+          modCarisma={modCarisma}
+          numAtaques={numAtaques}
+          ataquesFeitos={ataquesFeitos}
+          surtoMax={surtoMaximo}
+          surtoRestantes={surtoRestantes}
+          surtoUsadoTurno={surtoUsadoTurno}
+          onUsarSurto={usarSurtoDeAcao}
+          ataqueAtual={ataqueAtual}
+          danoDesarmadoRerollDisponivel={danoDesarmadoRerollDisponivel}
+          perfuradorDisponivel={perfuradorDisponivel}
+          temAtaqueImprudente={ataqueImprudenteDisponivel}
+          ataqueImprudenteAtivo={ataqueImprudenteAtivo}
+          onAtivarAtaqueImprudente={onAtivarAtaqueImprudente}
+          temGolpeBrutal={golpeBrutalDisponivel}
+          golpeBrutalDados={golpeBrutalDados}
+          golpeBrutalUsadoTurno={golpeBrutalUsadoTurno}
+          onUsarGolpeBrutal={onUsarGolpeBrutal}
+          onAtacouSemDanoPendente={registrarAtaqueSemDanoPendente}
+          onGolpeBrutalDanoConfirmado={() => setGolpeBrutalEfeitoPendente(true)}
+          podeOferecerCortar={cortarDisponivel}
+          onConfirmarCortarReduzirAZero={onConfirmarCortarReduzirAZero}
+          temGolpeDeEscudo={golpeDeEscudoDisponivel}
+          golpeDeEscudoUsadoTurno={golpeDeEscudoUsadoTurno}
+          onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
+          esmagadorDisponivel={esmagadorDisponivel}
+          talhadorDisponivel={talhadorDisponivel}
+          onAbrirGolpeCondicional={setGolpeCondicionalPendente}
+          ancestralidadeGiganteEscolhida={ancestralidadeGiganteEscolhida}
+          usosAncestralidadeGiganteRestantes={usosAncestralidadeGiganteRestantes}
+          onAtivarAncestralidadeGigante={usarAncestralidadeGiganteAoAcertar}
+          detalhesAtivo={detalhesAtivo}
+          maosCurativasDisponivel={maosCurativasDisponivel}
+          maosCurativasGasto={maosCurativasGasto}
+          dadosMaosCurativas={dadosMaosCurativas}
+          onUsarMaosCurativas={onUsarMaosCurativas}
+          falarComAnimaisGnomoDisponivel={falarComAnimaisGnomoDisponivel}
+          usosFalarComAnimaisGnomoMaximo={usosFalarComAnimaisGnomoMaximo}
+          usosFalarComAnimaisGnomoRestantes={usosFalarComAnimaisGnomoRestantes}
+          onUsarFalarComAnimaisGnomo={onUsarFalarComAnimaisGnomo}
+          colheitaMacabraDisponivel={colheitaMacabraDisponivel}
+          onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
+        />
+      </SidePanel>
+      <SidePanel
+        open={painelAberto === 'bonus'}
+        side="right"
+        title={`${LABELS.bonus.icone} ${LABELS.bonus.nome}`}
+        onClose={fecharPainel}
+        detalhesAtivo={detalhesAtivo}
+        onToggleDetalhes={() => setDetalhesAtivo((v) => !v)}
+      >
+        <BonusPanelContent
+          aberto={painelAberto === 'bonus'}
+          usosFolegoMaximo={usosFolegoMaximo}
+          usosFolegoRestantes={usosFolegoRestantes}
+          onUsarRecuperarFolego={usarRecuperarFolego}
+          usosConhecimentoDePedrasMaximo={usosConhecimentoDePedrasMaximo}
+          usosConhecimentoDePedrasRestantes={usosConhecimentoDePedrasRestantes}
+          onUsarConhecimentoDePedras={usarConhecimentoDePedras}
+          usosPicoDeAdrenalinaMaximo={usosPicoDeAdrenalinaMaximo}
+          usosPicoDeAdrenalinaRestantes={usosPicoDeAdrenalinaRestantes}
+          onUsarPicoDeAdrenalina={usarPicoDeAdrenalina}
+          vooDraconicoDisponivel={vooDraconicoDisponivel}
+          vooDraconicoGasto={vooDraconicoGasto}
+          onUsarVooDraconico={usarVooDraconico}
+          saltoDaNuvemDisponivel={ancestralidadeGiganteEscolhida === 'Salto da Nuvem (Gigante das Nuvens)'}
+          usosSaltoDaNuvemMaximo={usosAncestralidadeGiganteMaximo}
+          usosSaltoDaNuvemRestantes={usosAncestralidadeGiganteRestantes}
+          onUsarSaltoDaNuvem={usarSaltoDaNuvem}
+          formaGrandeDisponivel={formaGrandeDisponivel}
+          formaGrandeGasto={formaGrandeGasto}
+          formaGrandeAtiva={formaGrandeAtiva}
+          onUsarFormaGrande={usarFormaGrande}
+          furiaDisponivel={furiaDisponivel}
+          furiaMaximo={furiaMaximo}
+          furiaRestantes={furiaRestantes}
+          furiaAtiva={furiaAtiva}
+          onUsarFuria={usarFuria}
+          revelacaoCelestialDisponivel={revelacaoCelestialDisponivel}
+          revelacaoCelestialGasto={revelacaoCelestialGasto}
+          revelacaoCelestialFormaAtiva={revelacaoCelestialFormaAtiva}
+          opcoesRevelacaoCelestial={opcoesRevelacaoCelestial}
+          danoBonusRevelacaoCelestial={danoBonusRevelacaoCelestial}
+          cdMantoNecrotico={cdMantoNecrotico}
+          onUsarRevelacaoCelestial={usarRevelacaoCelestial}
+          acoesGenericasBonus={acoesGenericasBonus}
+          mestreDaMorteDisponivel={mestreDaMorteDisponivel}
+          petsMortoVivo={petsMortoVivo}
+          pvTempMestreDaMorte={pvTempMestreDaMorte}
+          onUsarMestreDaMorte={onUsarMestreDaMorte}
+          onEscolher={(nome, desc) => escolherNoPainel('bonus', nome, desc)}
+          desvantagemForcaDestreza={desvantagemForcaDestreza}
+          conjura={conjura}
+          truques={truquesBonus}
+          magiasPreparadas={magiasPreparadasBonus}
+          espacos={espacos}
+          espacosGastosPorCirculo={espacosGastosPorCirculo}
+          onGastarSlotCirculo={onGastarSlotCirculo}
+          onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
+          classeAtivaNome={classeAtivaNome}
+          ponte={ponte}
+          nivel={nivel}
+          modAcertoConjuracao={modAcertoConjuracao}
+          explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
+          truqueVinculadoAgonizante={truqueVinculadoAgonizante}
+          modCarisma={modCarisma}
+          onAbrirSalvaguarda={abrirSalvaguarda}
+          colheitaMacabraDisponivel={colheitaMacabraDisponivel}
+          onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
+          ataqueBonus={ataqueBonus}
+          onUsarAtaqueBonus={usarAtaqueMaoSecundaria}
+          cortarAtaque={cortarAtaque}
+          onUsarCortar={usarCortarAtaque}
+          usosInspiracaoMaximo={usosInspiracaoMaximo}
+          usosInspiracaoRestantes={usosInspiracaoRestantes}
+          tamanhoDadoInspiracao={tamanhoDadoInspiracao}
+          fonteDeInspiracao={fonteDeInspiracao}
+          temEspacoDisponivel={temEspacoDisponivel}
+          proximoCirculoParaGastar={proximoCirculoParaGastar}
+          onUsarInspiracao={usarInspiracaoBardo}
+          onRecuperarInspiracaoComEspaco={recuperarInspiracaoComEspaco}
+          detalhesAtivo={detalhesAtivo}
+        />
+      </SidePanel>
+      <SidePanel
+        open={painelAberto === 'reacao'}
+        side="bottom"
+        title={`${LABELS.reacao.icone} ${LABELS.reacao.nome}`}
+        onClose={fecharPainel}
+        detalhesAtivo={detalhesAtivo}
+        onToggleDetalhes={() => setDetalhesAtivo((v) => !v)}
+      >
+        <ReacaoPanelContent
+          desvantagemForcaDestreza={desvantagemForcaDestreza}
+          onEscolher={(nome, desc) => escolherNoPainel('reacao', nome, desc)}
+          onAbrirSalvaguarda={abrirSalvaguarda}
+          gastarSlotCirculo={onGastarSlotCirculo}
+          onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
+          nivel={nivel}
+          conjura={conjura}
+          magiasReacao={magiasPreparadasReacao}
+          modAcertoConjuracao={modAcertoConjuracao}
+          explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
+          truqueVinculadoAgonizante={truqueVinculadoAgonizante}
+          modCarisma={modCarisma}
+          colheitaMacabraDisponivel={colheitaMacabraDisponivel}
+          onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
+          detalhesAtivo={detalhesAtivo}
+          contraEncantamentoDisponivel={contraEncantamentoDisponivel}
+          palavrasDeInterrupcaoDisponivel={palavrasDeInterrupcaoDisponivel}
+          usosInspiracaoMaximo={usosInspiracaoMaximo}
+          usosInspiracaoRestantes={usosInspiracaoRestantes}
+          tamanhoDadoInspiracao={tamanhoDadoInspiracao}
+          onUsarInspiracao={onUsarInspiracao}
+          resistenciaDaPedraDisponivel={ancestralidadeGiganteEscolhida === 'Resistência da Pedra (Gigante da Pedra)'}
+          trovaoDaTempestadeDisponivel={ancestralidadeGiganteEscolhida === 'Trovão da Tempestade (Gigante da Tempestade)'}
+          usosAncestralidadeGiganteMaximo={usosAncestralidadeGiganteMaximo}
+          usosAncestralidadeGiganteRestantes={usosAncestralidadeGiganteRestantes}
+          onUsarAncestralidadeGigante={onUsarAncestralidadeGigante}
+          modConstituicaoAtual={modConstituicaoAtual}
+          colheitaDosMortosDisponivel={colheitaDosMortosDisponivel}
+          personagemEnsanguentado={personagemEnsanguentado}
+          opcoesColheitaDosMortos={opcoesColheitaDosMortos}
+          onColheitaDosMortos={onColheitaDosMortos}
+          mestreDaMorteExplosaoDisponivel={mestreDaMorteDisponivel}
+          mestreDaMorteExplosaoLiberada={mestreDaMorteExplosaoLiberada}
+          modIntAtual={modIntAtual}
+        />
       </SidePanel>
       {lancarNoInfernoDano !== null && (
         <SalvaguardaDoAlvoModal

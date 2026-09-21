@@ -13,6 +13,12 @@ interface SidePanelProps {
   onToggleDetalhes: () => void;
 }
 
+const temaClass: Record<Side, string> = {
+  left: styles.temaAcao,
+  right: styles.temaBonus,
+  bottom: styles.temaReacao,
+};
+
 const sideClass: Record<Side, string> = {
   left: styles.panelLeft,
   right: styles.panelRight,
@@ -23,7 +29,7 @@ export default function SidePanel({ open, side, title, onClose, children, detalh
   return (
     <>
       <div className={`${styles.backdrop} ${open ? styles.backdropOpen : ''}`} onClick={onClose} />
-      <div className={`${styles.panel} ${sideClass[side]} ${open ? styles.panelOpen : ''}`}>
+      <div className={`${styles.panel} ${sideClass[side]} ${temaClass[side]} ${open ? styles.panelOpen : ''}`}>
         <div className={styles.title}>{title}</div>
         <div className={styles.detalhesRow} onClick={onToggleDetalhes}>
           <span>Detalhes</span>
