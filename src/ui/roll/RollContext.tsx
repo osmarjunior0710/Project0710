@@ -3,7 +3,13 @@ import type { ExplicacaoCalculo } from '../../core/calculoPersonagem';
 import { deveAplicarForcaIndomavel } from '../../core/forcaIndomavel';
 import { useColapsavel } from '../hooks/useColapsavel';
 import { suportaWebGL } from '../utils/suportaWebGL';
-import { lancarGrupos, rerolarGrupo, type DiceBoxResultado } from './diceBox3d';
+import {
+  agruparDadosPorLados,
+  distribuirPorLados,
+  lancarGrupos,
+  rerolarGrupo,
+  type DiceBoxResultado,
+} from './diceBox3d';
 
 type CritTipo = 'sucesso' | 'falha' | null;
 
@@ -846,12 +852,24 @@ export function RollProvider({ children }: { children: ReactNode }) {
               const [grupo] = await lancarGrupos({ qty: 1, sides: lados });
               concluirUmDado(grupo.value, true, dadoBruto(grupo));
             } else {
-              const grupos = especificacaoDados.map((d) => ({ qty: 1, sides: d.lados }));
-              const resultados = await lancarGrupos(grupos);
+              // 1 grupo por TIPO de dado (não 1 notação por dado): N
+              // notações "1dX" concorrentes disparam a mesma corrida
+              // interna da lib vista na Vantagem — o 2º dado voltava sem
+              // valor e contava 0 no total (achado do Osmar: "2d8+3"
+              // somando só 1 dado). Tipos diferentes (ex.: arma + Ataque
+              // Furtivo) entram um de cada vez ('add' depois do 1º) pra
+              // nunca haver 2 notações em voo ao mesmo tempo.
+              const ladosDosDados = especificacaoDados.map((d) => d.lados);
+              const pools = new Map<number, DiceBoxResultado[]>();
+              for (const [i, g] of agruparDadosPorLados(ladosDosDados).entries()) {
+                const [grupo] = await lancarGrupos({ qty: g.qty, sides: g.sides }, { modo: i === 0 ? 'roll' : 'add' });
+                pools.set(g.sides, grupo.rolls ?? [grupo]);
+              }
+              const dados = distribuirPorLados(ladosDosDados, pools);
               concluirGrid(
-                resultados.map((r) => r.value),
+                dados.map((d) => d?.value ?? 0),
                 true,
-                resultados.map(dadoBruto),
+                dados.map((d) => (d ? dadoBruto(d) : undefined)) as DiceBoxResultado[],
               );
             }
           } catch {

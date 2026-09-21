@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1531
+
+**Correção:** com o Dado 3D ligado, às vezes um dos dados de uma rolagem de 2+ dados (ex.: dano dobrado 2d8) aparecia vazio e não entrava na soma. Agora todos os dados contam, inclusive quando o dano mistura dados diferentes (arma + Ataque Furtivo).
+
 ## v202609_1526
 
 **Protótipo** (ainda não está no combate real): nova cena "House rule — Confirmação de crítico" no ambiente de Protótipo. Dá pra forçar 1 e 20 e ver o fluxo com e sem a house rule (2º dado de confirmação, botões Errei / Rolar Dano / Rolar Dano Dobrado). Teste de Perícia não ganha 2º dado.

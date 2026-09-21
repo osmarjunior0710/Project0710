@@ -199,3 +199,30 @@ export async function lancarGrupos(
     else box.roll(notacao);
   });
 }
+
+/** Agrupa a lista de dados (só o nº de lados de cada um, na ordem do
+ * grid) em 1 notação por tipo de dado, na ordem da primeira aparição —
+ * ex.: [8, 8, 6] vira `[{sides: 8, qty: 2}, {sides: 6, qty: 1}]`. Existe
+ * porque mandar N notações "1dX" concorrentes pra lib 3D dispara uma
+ * corrida interna (mesmo achado da Vantagem, ver `rolarD20` em
+ * `RollContext.tsx`): o 2º dado volta sem valor e conta como 0 no
+ * total. Com 1 grupo por tipo (`qty` = quantos), nada disputa nada. */
+export function agruparDadosPorLados(lados: number[]): { sides: number; qty: number }[] {
+  const contagem = new Map<number, number>();
+  for (const l of lados) contagem.set(l, (contagem.get(l) ?? 0) + 1);
+  return [...contagem.entries()].map(([sides, qty]) => ({ sides, qty }));
+}
+
+/** Devolve, na ordem original de `lados`, um item de cada "pool" por
+ * número de lados — inverso de `agruparDadosPorLados`: `pools` guarda os
+ * resultados de cada grupo (`grupo.rolls`), e cada dado da lista pega o
+ * próximo do pool do seu tipo. Pool acabou antes da hora (lib devolveu
+ * menos dados que o pedido) = `undefined` naquela posição. */
+export function distribuirPorLados<T>(lados: number[], pools: Map<number, T[]>): (T | undefined)[] {
+  const cursor = new Map<number, number>();
+  return lados.map((l) => {
+    const i = cursor.get(l) ?? 0;
+    cursor.set(l, i + 1);
+    return pools.get(l)?.[i];
+  });
+}
