@@ -46,7 +46,8 @@ export default function DescansoFab({ onDescansoCurto, onDescansoLongo }: Descan
         onClick={() => setAberto((v) => !v)}
         aria-label="Descanso"
       >
-        😴
+        <span className={styles.fabIcone}>😴</span>
+        <span className={styles.fabRotulo}>Descanso</span>
       </div>
     </div>
   );

@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2031
+
+O botão flutuante de Descanso virou um FAB estendido: pílula com o ícone 😴 e o texto "Descanso", com o canto inferior esquerdo quase reto, colado ao canto esquerdo logo acima da barra de abas (12 px de folga). As opções Curto/Longo continuam abrindo pra cima.
+
 ## v202609_2027
 
 **Personagem multiclasse sem espaços de magia:** o "Inst. Level Up" (ferramenta de teste) deixava o personagem passar do nível 20 (o Char de Teste Fixo foi pra Mago 18 + Bardo 3 = nível 21) e a tabela de espaços de multiclasse só vai até 20, então ele ficava sem nenhum espaço. Agora o Inst. Level Up some no nível 20 e a consulta da tabela trava em 20.
