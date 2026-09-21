@@ -4,6 +4,7 @@
 
 import type { WizardSelection } from './personagem';
 import type { ItemMochila } from './mochila';
+import type { Moedas } from './moedas';
 import type { Pet } from './pets';
 import type { PersonagemClasse } from './multiclasse';
 import { ID_PERSONAGEM_DEMO } from '../data/personagemDemo';
@@ -315,6 +316,8 @@ export interface PersonagemSalvo {
    * Longo (que devolve todos) — ver `core/dadosDeVida.ts`. Ausente =
    * reserva cheia. */
   dadosDeVidaGastos?: Record<string, number>;
+  /** Bolsa de Moedas (ver `core/moedas.ts`) — ausente = zero moedas. */
+  moedas?: Moedas;
   /** Fúria Persistente (Bárbaro nível 15+) — `true` = já recuperou os
    * usos gastos de Fúria desde o último Descanso Longo (só 1x, regra
    * real) — só o Descanso Longo reseta pra `false`. */

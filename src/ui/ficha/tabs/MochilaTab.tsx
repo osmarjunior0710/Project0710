@@ -13,6 +13,8 @@ import {
   type CategoriaMochila,
 } from '../../../core/equipamento';
 import ItemComDescricao from '../../components/ItemComDescricao';
+import BolsaDeMoedas from '../BolsaDeMoedas';
+import { pesoDasMoedasKg, type Moedas } from '../../../core/moedas';
 import InfoValor from '../../components/InfoValor';
 import { corDaCarga } from '../../utils/corCarga';
 import { itemExigeSintonizacao, contarSintonizados, LIMITE_SINTONIZACAO } from '../../../core/sintonizacao';
@@ -22,6 +24,10 @@ interface MochilaTabProps {
   itens: ItemMochila[];
   itensDetalhados: boolean;
   pesoAtivo: boolean;
+  moedas: Moedas;
+  onMudarMoedas: (novas: Moedas) => void;
+  /** House rule "Peso das moedas" — só conta com `pesoAtivo` também ligado. */
+  pesoMoedasAtivo: boolean;
   capacidadeMaxima: number | null;
   explicacaoCapacidadeMaxima: ExplicacaoCalculo;
   onAlterarQuantidade: (id: string, delta: number) => void;
@@ -297,6 +303,9 @@ export default function MochilaTab({
   itens,
   itensDetalhados,
   pesoAtivo,
+  moedas,
+  onMudarMoedas,
+  pesoMoedasAtivo,
   capacidadeMaxima,
   explicacaoCapacidadeMaxima,
   onAlterarQuantidade,
@@ -307,7 +316,10 @@ export default function MochilaTab({
   onAlternarDuasMaos,
   onAlternarSintonizacao,
 }: MochilaTabProps) {
-  const carga = calcularCargaTotal(itens);
+  const cargaItens = calcularCargaTotal(itens);
+  // Moedas entram na carga (100 = 1 kg) quando a house rule está ligada.
+  const kgMoedas = pesoAtivo && pesoMoedasAtivo ? pesoDasMoedasKg(moedas) : 0;
+  const carga = { ...cargaItens, kg: Math.round((cargaItens.kg + kgMoedas) * 10) / 10 };
   const percentual = capacidadeMaxima ? Math.round((carga.kg / capacidadeMaxima) * 100) : 0;
   const sobrecarregado = capacidadeMaxima !== null && carga.kg > capacidadeMaxima;
   const equipado = resumoEquipado(itens);
@@ -328,12 +340,17 @@ export default function MochilaTab({
 
   return (
     <>
+      <BolsaDeMoedas moedas={moedas} onMudar={onMudarMoedas} />
+
       {pesoAtivo && (
         <>
           <div className="section-title">Carga</div>
           <div className={`box ${styles.cargaBox}`}>
             <div className={styles.cargaRow}>
-              <span>{carga.kg.toString().replace('.', ',')} kg carregados</span>
+              <span>
+                {carga.kg.toString().replace('.', ',')} kg carregados
+                {kgMoedas > 0 && ` (${kgMoedas.toString().replace('.', ',')} kg de moedas)`}
+              </span>
               <span>
                 máx. {capacidadeMaxima ?? '—'} kg
                 <InfoValor titulo="Capacidade máxima de carga" explicacao={explicacaoCapacidadeMaxima} />

@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2002
+
+**Bolsa de Moedas na Mochila.** A primeira linha da Mochila agora tem as 5 moedas (PC, PP, PE, PO, PL — emojis provisórios) com o total em PO. Tocar numa moeda abre um painel pra **Adicionar** ou **Remover**; remover gasta com conversão automática entre moedas (usa a do tipo, depois as menores, depois quebra uma maior e devolve o troco) e mostra o que foi pago e o troco. Personagens novos começam com o ouro que sobrou da Loja. Nova regra em 📜 House Rules: **Peso das moedas** (100 moedas = 1 kg na carga; vem ligada). Também corrigido: os Dados de Vida gastos agora são salvos de verdade ao recarregar a ficha.
+
 ## v202609_1933
 
 Ao ganhar XP suficiente pra subir de nível, o anel agora termina de encher primeiro e só depois o selo de Level Up aparece (com uma entrada suave), em vez de cortar a animação. Se a ficha já abrir com Level Up pendente, o selo aparece direto.

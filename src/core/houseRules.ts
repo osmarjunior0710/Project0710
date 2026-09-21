@@ -6,6 +6,9 @@
 export interface HouseRules {
   /** Mostra o peso de cada item e a barra de carga na Mochila. */
   pesoMochila: boolean;
+  /** Conta o peso das moedas (100 moedas = 1 kg) na carga da Mochila.
+   * Só faz efeito se `pesoMochila` também estiver ligada. */
+  pesoMoedas: boolean;
   /** Ataque com 1 ou 20 natural rola um 2º d20 de confirmação (só
    * informativo — o Mestre compara com a CA). Ver `RollOverlay.tsx`. */
   confirmacaoCritico: boolean;
@@ -13,6 +16,7 @@ export interface HouseRules {
 
 export const HOUSE_RULES_PADRAO: HouseRules = {
   pesoMochila: true,
+  pesoMoedas: true,
   confirmacaoCritico: false,
 };
 

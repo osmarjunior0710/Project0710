@@ -125,6 +125,7 @@ import ColheitaMacabraModal from '../components/ColheitaMacabraModal';
 import FuriaImplacavelModal from '../components/FuriaImplacavelModal';
 import Dice3dFab from './dice3d/Dice3dFab';
 import DescansoFab from './DescansoFab';
+import { normalizarMoedas, type Moedas } from '../../core/moedas';
 import DadosDeVidaModal from './DadosDeVidaModal';
 import { reservaDeDadosDeVida, totalDeDadosRestantes } from '../../core/dadosDeVida';
 import LevelUpShell, { type PersonagemNivel } from './levelup/LevelUpShell';
@@ -341,6 +342,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagemSalvo.dadosDeVidaGastos ?? {},
   );
   const [dadosDeVidaAberto, setDadosDeVidaAberto] = useState(false);
+  const [moedas, setMoedas] = useState<Moedas>(() => normalizarMoedas(personagemSalvo.moedas));
   const [furiaImplacavelUsos, setFuriaImplacavelUsos] = useState(personagemSalvo.furiaImplacavelUsosDesdeDescanso ?? 0);
   const [furiaPersistenteUsada, setFuriaPersistenteUsada] = useState(personagemSalvo.furiaPersistenteUsada ?? false);
   const [furiaImplacavelPendente, setFuriaImplacavelPendente] = useState(false);
@@ -934,6 +936,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     vigorImplacavelGasto,
     furiaImplacavelUsosDesdeDescanso: furiaImplacavelUsos,
     dadosDeVidaGastos,
+    moedas,
     furiaPersistenteUsada,
     conhecimentoDePedrasGasto,
     picoDeAdrenalinaGasto,
@@ -1028,6 +1031,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       folegoGasto,
       vigorImplacavelGasto,
       furiaImplacavelUsos,
+      dadosDeVidaGastos,
+      moedas,
       furiaPersistenteUsada,
       conhecimentoDePedrasGasto,
       picoDeAdrenalinaGasto,
@@ -2272,6 +2277,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             itens={itensMochila}
             itensDetalhados={itensDetalhados}
             pesoAtivo={pesoAtivo}
+            moedas={moedas}
+            onMudarMoedas={setMoedas}
+            pesoMoedasAtivo={houseRules.pesoMoedas}
             capacidadeMaxima={capacidadeMaxima}
             explicacaoCapacidadeMaxima={explicacaoCapacidadeMaxima}
             onAlterarQuantidade={alterarQuantidadeItem}

@@ -1,3 +1,4 @@
+import { moedasIniciais } from '../../core/loja';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { alinhamentos, arrayPadrao, atributosOrdem, type Atributo } from '../../data/wizardFixtures';
@@ -433,6 +434,7 @@ export default function WizardShell() {
         xp: selection.xp,
         pvAtual: pvMax,
         selecao: selection,
+        moedas: moedasIniciais(selection),
       });
       // A Ficha (Perfil/Mochila/Magias/Combat) ainda não lê o personagem
       // salvo — isso é a próxima entrega (A3). Por ora volta pra Lista,

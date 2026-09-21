@@ -85,6 +85,11 @@ export default function AvatarMenu({
       desc: 'Mostra o peso de cada item e a barra de carga',
     },
     {
+      chave: 'pesoMoedas' as const,
+      label: 'Peso das moedas',
+      desc: 'Conta o peso das moedas na carga da Mochila (100 moedas = 1 kg). Só vale com o Peso da Mochila ligado.',
+    },
+    {
       chave: 'confirmacaoCritico' as const,
       label: 'Confirmação de crítico',
       desc: 'Ao tirar 1 ou 20 natural em um ataque, rola um 2º d20 de confirmação (só informativo — o Mestre decide) antes do dano.',

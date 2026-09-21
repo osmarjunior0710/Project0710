@@ -11,7 +11,8 @@ import { armaduras } from '../data/rulesets/dnd2024/armaduras';
 import { equipamentoAventura } from '../data/rulesets/dnd2024/equipamentoAventura';
 import { gruposFerramenta } from '../data/rulesets/dnd2024/ferramentas';
 import { proficienciasArmaArmaduraClasse } from '../data/rulesets/dnd2024/proficienciasArmaArmaduraClasse';
-import { classeDaSelecao } from './calculoPersonagem';
+import { calcularOuroInicial, classeDaSelecao } from './calculoPersonagem';
+import { moedasDeOuro, type Moedas } from './moedas';
 import { DESAGREGACAO_KITS } from './mochila';
 import { modificador, valorFinalAtributo, type WizardSelection } from './personagem';
 
@@ -298,4 +299,12 @@ export function calcularCustoCarrinho(carrinho: ItemCarrinho[], catalogo: GrupoL
     if (preco !== undefined) total += preco * it.quantidade;
   }
   return total;
+}
+
+/** Moedas iniciais do personagem novo: o ouro que sobrou depois da Loja
+ * (ouro inicial de Origem + Classe menos o carrinho), parte inteira em PO
+ * e o resto em PP/PC. Nunca negativo. */
+export function moedasIniciais(selection: WizardSelection): Moedas {
+  const restante = calcularOuroInicial(selection) - calcularCustoCarrinho(selection.itens, construirCatalogoLoja());
+  return moedasDeOuro(Math.max(0, restante));
 }

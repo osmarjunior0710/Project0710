@@ -146,3 +146,12 @@ Fonte: `livros-referencia/livro-do-jogador/02_-_Cap_1_Jogando_o_Jogo.pdf` ("Tira
 - **Descanso Longo:** recupera todos os PV **e todos os Dados de Vida gastos** (não é mais metade).
 
 Fonte: `livros-referencia/livro-do-jogador/11_-_Ap_C_Glossario_de_Regras.pdf` e `03_-_Cap_2_Criacao_de_Personagens.pdf`.
+
+---
+
+## Moedas (Livro do Jogador 2024, Cap. 6)
+
+- 5 moedas: Cobre (PC) = 1/100 PO; Prata (PP) = 1/10 PO; Electro (PE) = 1/2 PO; Ouro (PO) = 1; Platina (PL) = 10 PO.
+- Peso: uma moeda pesa cerca de 10 g — 100 moedas = 1 kg.
+
+Fonte: `livros-referencia/livro-do-jogador/07_-_Cap_6_Equipamento.pdf`, seção "Moedas" (tabela Valores das Moedas).

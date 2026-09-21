@@ -19,6 +19,11 @@ describe('normalizarHouseRules', () => {
     expect(normalizarHouseRules({ confirmacaoCritico: true }).confirmacaoCritico).toBe(true);
   });
 
+  it('peso das moedas nasce ligado e respeita o valor salvo', () => {
+    expect(HOUSE_RULES_PADRAO.pesoMoedas).toBe(true);
+    expect(normalizarHouseRules({ pesoMoedas: false }).pesoMoedas).toBe(false);
+  });
+
   it('ignora lixo que não é objeto', () => {
     expect(normalizarHouseRules('quebrado')).toEqual(HOUSE_RULES_PADRAO);
   });

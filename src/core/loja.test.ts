@@ -7,6 +7,7 @@ import {
   classeEhProficiente,
   construirCatalogoLoja,
   itensAdquiridosPorKits,
+  moedasIniciais,
   type GrupoLoja,
   type LojaItem,
 } from './loja';
@@ -161,5 +162,16 @@ describe('classeEhProficiente', () => {
 
   it('borda: sem classe escolhida ainda, assume true (não bloqueia filtro antes da hora)', () => {
     expect(classeEhProficiente(criarSelecaoInicial(), espadaLonga)).toBe(true);
+  });
+});
+
+describe('moedasIniciais', () => {
+  it('sem Origem/Classe escolhidas não há ouro, então zero moedas', () => {
+    expect(moedasIniciais(selecao())).toEqual({ pc: 0, pp: 0, pe: 0, po: 0, pl: 0 });
+  });
+
+  it('o ouro da Origem (opção B = 50 PO) vira PO inicial quando nada foi comprado', () => {
+    const m = moedasIniciais(selecao({ origem: 'Acólito', equipamentoOrigemEscolhido: 'B' }));
+    expect(m.po).toBe(50);
   });
 });
