@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2032
+
+O FAB de Descanso ficou só com o ícone 😴 (sem o texto "Descanso"), no formato do FAB de referência: 56 px, cantos bem redondos e o inferior-esquerdo quase reto, logo acima da barra de abas.
+
 ## v202609_2031
 
 O botão flutuante de Descanso virou um FAB estendido: pílula com o ícone 😴 e o texto "Descanso", com o canto inferior esquerdo quase reto, colado ao canto esquerdo logo acima da barra de abas (12 px de folga). As opções Curto/Longo continuam abrindo pra cima.
