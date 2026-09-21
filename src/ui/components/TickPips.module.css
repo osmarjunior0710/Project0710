@@ -31,3 +31,7 @@
 .pipVermelho {
   background: var(--danger);
 }
+
+.pipMostarda {
+  background: var(--pip-mostarda);
+}

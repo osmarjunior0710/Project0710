@@ -20,6 +20,8 @@
      Ver TickPips.tsx (`variante="especial"`). */
   --accent-especial: #8a5fd9;
   --accent-especial-dim: #e8e1fb;
+  /* Pip de recurso do Bardo (Inspiração) — ver core/corRecursoClasse.ts */
+  --pip-mostarda: #c9971a;
   --good: #2f8f52;
   --warn: #a3690f;
   --danger: #b3261e;

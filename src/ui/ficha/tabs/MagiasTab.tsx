@@ -549,7 +549,7 @@ export default function MagiasTab({
                 return (
                   <div key={espaco.circulo} className={styles.espacoRow} style={i === 0 ? { borderTop: 'none' } : undefined}>
                     <span>{espaco.circulo}º círculo</span>
-                    <TickPips total={espaco.maximo} usados={gasto} tamanho="lg" />
+                    <TickPips total={espaco.maximo} usados={gasto} tamanho="lg" variante={classeAtivaNome === 'Bruxo' ? 'roxo' : 'padrao'} />
                   </div>
                 );
               })}

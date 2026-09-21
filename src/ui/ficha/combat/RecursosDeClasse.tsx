@@ -30,7 +30,7 @@ export default function RecursosDeClasse({ recursos }: RecursosDeClasseProps) {
           <span style={{ fontSize: 13 }}>
             {r.nome} <InfoTexto titulo={r.nome} paragrafos={r.descricao} />
           </span>
-          <ContadorUsos total={r.maximo} usados={r.maximo - r.restantes} />
+          <ContadorUsos total={r.maximo} usados={r.maximo - r.restantes} variante={r.cor ?? 'padrao'} />
         </div>
       ))}
     </div>

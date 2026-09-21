@@ -1289,7 +1289,7 @@ export default function CombatTab({
         <>
           <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span>Perícia Inigualável</span>
-            <ContadorUsos total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} />
+            <ContadorUsos total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} variante="mostarda" />
           </div>
           {periciaInigualavelPendente ? (
             <div className="box" style={{ padding: 12, marginBottom: 12 }}>

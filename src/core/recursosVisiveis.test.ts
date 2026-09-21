@@ -56,6 +56,18 @@ describe('montarRecursosVisiveis', () => {
     expect(r[0]).toMatchObject({ id: 'recuperar-folego', maximo: 2, restantes: 1 });
   });
 
+  it('cada recurso vem com a cor da classe (Bárbaro vermelho, Bardo mostarda, Bruxo roxo; Guerreiro sem cor)', () => {
+    const r = montarRecursosVisiveis(
+      entrada([
+        { classe: 'Bárbaro', nivel: 1, subclasse: null },
+        { classe: 'Bardo', nivel: 1, subclasse: null },
+        { classe: 'Bruxo', nivel: 1, subclasse: null },
+        { classe: 'Guerreiro', nivel: 1, subclasse: null },
+      ]),
+    );
+    expect(r.map((x) => x.cor)).toEqual(['vermelho', 'mostarda', 'roxo', null]);
+  });
+
   it('classe sem recurso desse tipo (Mago) e classe fora do catálogo não geram linha', () => {
     expect(montarRecursosVisiveis(entrada([{ classe: 'Mago', nivel: 5, subclasse: null }]))).toEqual([]);
     expect(montarRecursosVisiveis(entrada([{ classe: 'Inventada', nivel: 3, subclasse: null }]))).toEqual([]);

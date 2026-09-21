@@ -14,6 +14,8 @@ import { iconesMagia } from '../../../core/classificarMagia';
 import { pericias } from '../../../data/rulesets/dnd2024/pericias';
 import type { ConcessoesJaConcedidas, FonteConcessao } from '../../../core/concessoesJaConcedidas';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
+import { sortearEscolhas } from '../../../core/sortearEscolhas';
+import { BotaoAleatorio, TituloComAleatorio } from '../BotaoAleatorio';
 
 export const todasFerramentas = Array.from(new Set(Object.values(gruposFerramenta).flat().map((f) => f.nome))).sort();
 
@@ -28,11 +30,14 @@ export function ProficienciaOuFerramentaEscolhas({
   jaConcedidas,
   escolhidas,
   onToggle,
+  onDefinir,
 }: {
   talento: Talento;
   jaConcedidas: ConcessoesJaConcedidas;
   escolhidas: string[];
   onToggle: (nome: string) => void;
+  /** Troca a lista inteira de uma vez (botão "🎲 Aleatório"). */
+  onDefinir: (lista: string[]) => void;
 }) {
   const concede = talento.concedeProficiencias;
   const concedeFerramentaGrupo = talento.concedeFerramentaGrupo;
@@ -58,6 +63,17 @@ export function ProficienciaOuFerramentaEscolhas({
     );
   }
 
+  // Sorteio: só o que o personagem ainda NÃO possui por outra fonte.
+  function sortear() {
+    const opcoes = [
+      ...(mostrarPericias ? pericias.map((p) => p.nome) : []),
+      ...(mostrarFerramentas ? opcoesFerramenta : []),
+    ];
+    const evitar = new Set<string>([...jaConcedidas.pericias.keys(), ...jaConcedidas.ferramentas.keys()]);
+    const cheia = escolhidas.length >= max;
+    onDefinir(sortearEscolhas(opcoes, cheia ? [] : escolhidas, max, evitar));
+  }
+
   return (
     <>
       <div className="section-title">{talento.nome}</div>
@@ -65,9 +81,9 @@ export function ProficienciaOuFerramentaEscolhas({
         {talento.beneficios}
       </div>
 
-      <div className="section-title">
+      <TituloComAleatorio botao={<BotaoAleatorio cheia={escolhidas.length >= max} onClick={sortear} />}>
         Escolha {max} ({escolhidas.length}/{max})
-      </div>
+      </TituloComAleatorio>
       <div className="label" style={{ marginBottom: 4 }}>
         Pode escolher algo que você já tem — só não ganha nada a mais por isso.
       </div>
@@ -99,8 +115,10 @@ export function IniciadoEmMagiaEscolhas({
   jaConcedidas,
   truquesEscolhidos,
   onToggleTruque,
+  onDefinirTruques,
   magiaEscolhida,
   onToggleMagia,
+  onDefinirMagia,
   atributoEscolhido,
   onEscolherAtributo,
   seletorLista,
@@ -113,8 +131,12 @@ export function IniciadoEmMagiaEscolhas({
   jaConcedidas: ConcessoesJaConcedidas;
   truquesEscolhidos: string[];
   onToggleTruque: (nome: string) => void;
+  /** Troca os 2 truques de uma vez (botão "🎲 Aleatório"). */
+  onDefinirTruques: (lista: string[]) => void;
   magiaEscolhida: string | null;
   onToggleMagia: (nome: string) => void;
+  /** Define a magia de 1º círculo de uma vez (botão "🎲 Aleatório"). */
+  onDefinirMagia: (nome: string | null) => void;
   atributoEscolhido: Atributo | null;
   onEscolherAtributo: (atributo: Atributo) => void;
   /** UI extra pra escolher a lista de classe — só o caminho do
@@ -123,6 +145,26 @@ export function IniciadoEmMagiaEscolhas({
 }) {
   const truquesDaLista = lista ? magiasDaClasse(lista, 0) : [];
   const magiasNivel1DaLista = lista ? magiasDaClasse(lista, 1) : [];
+  // "já possui" por OUTRA fonte que não o próprio talento (mesmo critério das tags abaixo).
+  const truquesDeOutraFonte = new Set(
+    [...jaConcedidas.truques].filter(([, fonte]) => fonte !== 'Talento').map(([nome]) => nome),
+  );
+  const magiasDeOutraFonte = new Set(
+    [...jaConcedidas.magias].filter(([, fonte]) => fonte !== 'Talento').map(([nome]) => nome),
+  );
+  function sortearTruques() {
+    const cheia = truquesEscolhidos.length >= 2;
+    onDefinirTruques(sortearEscolhas(truquesDaLista.map((m) => m.nome), cheia ? [] : truquesEscolhidos, 2, truquesDeOutraFonte));
+  }
+  function sortearMagia() {
+    const [nova] = sortearEscolhas(
+      magiasNivel1DaLista.map((m) => m.nome),
+      [],
+      1,
+      new Set([...magiasDeOutraFonte, ...(magiaEscolhida ? [magiaEscolhida] : [])]),
+    );
+    onDefinirMagia(nova ?? magiaEscolhida);
+  }
 
   return (
     <>
@@ -137,7 +179,9 @@ export function IniciadoEmMagiaEscolhas({
 
       {lista && (
         <>
-          <div className="section-title">Truques — escolha 2 ({truquesEscolhidos.length}/2)</div>
+          <TituloComAleatorio botao={<BotaoAleatorio cheia={truquesEscolhidos.length >= 2} onClick={sortearTruques} />}>
+            Truques — escolha 2 ({truquesEscolhidos.length}/2)
+          </TituloComAleatorio>
           {truquesDaLista.map((m) => {
             const fonte = jaConcedidas.truques.get(m.nome);
             const outraFonte = fonte && fonte !== 'Talento' ? fonte : null;
@@ -156,9 +200,9 @@ export function IniciadoEmMagiaEscolhas({
             );
           })}
 
-          <div className="section-title">
+          <TituloComAleatorio botao={<BotaoAleatorio cheia={magiaEscolhida !== null} onClick={sortearMagia} />}>
             Magia de 1º círculo — escolha 1 ({magiaEscolhida ? 1 : 0}/1)
-          </div>
+          </TituloComAleatorio>
           <div className="label" style={{ marginBottom: 4 }}>
             Sempre preparada — conjura de graça 1x por Descanso Longo, senão gasta Espaço de Magia.
           </div>

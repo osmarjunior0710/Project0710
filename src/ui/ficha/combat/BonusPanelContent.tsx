@@ -374,7 +374,7 @@ export default function BonusPanelContent({
         <>
           <div className={styles.slotCounter}>
             <span>Inspiração de Bardo (d{tamanhoDadoInspiracao}):</span>
-            <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} />
+            <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} variante="mostarda" />
             <span style={{ color: 'var(--text-faint)' }}>
               {usosInspiracaoRestantes}/{usosInspiracaoMaximo} disponíveis
             </span>

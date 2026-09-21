@@ -9,6 +9,7 @@
 // que NÃO seja Espaço de Magia comum, entra aqui. Ver DECISOES-CLASSES.md.
 
 import type { Classe } from '../data/rulesets/dnd2024/classes';
+import { corDoRecursoDaClasse, type CorRecurso } from './corRecursoClasse';
 import { dadoInspiracao, usosInspiracaoMaximo } from './inspiracaoBardo';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
 import type { PersonagemClasse } from './multiclasse';
@@ -23,6 +24,8 @@ export interface RecursoVisivel {
   restantes: number;
   /** Um parágrafo por item — vira o texto do ⓘ. */
   descricao: string[];
+  /** Cor dos pips (por classe, ver `corRecursoClasse.ts`); `null` = azul padrão. */
+  cor: CorRecurso | null;
 }
 
 export interface EntradaRecursosVisiveis {
@@ -57,6 +60,7 @@ export function montarRecursosVisiveis(e: EntradaRecursosVisiveis): RecursoVisiv
           nome: 'Fúria',
           maximo,
           restantes: Math.max(0, maximo - e.gastos.furia),
+          cor: corDoRecursoDaClasse(classe.nome),
           descricao: [
             'Estado de combate do Bárbaro: ativada como Ação Bônus (painel de Ação Bônus), dá resistência a dano Contundente, Cortante e Perfurante e bônus de dano em ataques baseados em Força.',
             `Recarrega: ${recuperaEm(classe, 'Fúrias')}.`,
@@ -73,6 +77,7 @@ export function montarRecursosVisiveis(e: EntradaRecursosVisiveis): RecursoVisiv
           nome: 'Inspiração de Bardo',
           maximo,
           restantes: Math.max(0, maximo - e.gastos.inspiracao),
+          cor: corDoRecursoDaClasse(classe.nome),
           descricao: [
             `Ação Bônus: concede a uma criatura um d${dadoInspiracao(classe, c.nivel)} pra somar a um teste, jogada de ataque ou salvaguarda. Os usos são iguais ao seu modificador de Carisma (mínimo 1).`,
             `Recarrega: ${recuperaEm(classe, 'Dados de Inspiração de Bardo (tipo do dado)')}.`,
@@ -90,6 +95,7 @@ export function montarRecursosVisiveis(e: EntradaRecursosVisiveis): RecursoVisiv
           nome: 'Magia de Pacto',
           maximo: pacto.maximo,
           restantes: Math.max(0, pacto.maximo - gastos),
+          cor: corDoRecursoDaClasse(classe.nome),
           descricao: [
             `Seus espaços de magia de Bruxo são todos do mesmo círculo (${pacto.circulo}º) e sempre valem pro círculo máximo.`,
             `Recarrega: ${recuperaEm(classe, 'Espaço de Magia de Pacto (quantidade)')}.`,
@@ -106,6 +112,7 @@ export function montarRecursosVisiveis(e: EntradaRecursosVisiveis): RecursoVisiv
           nome: 'Recuperar Fôlego',
           maximo,
           restantes: Math.max(0, maximo - e.gastos.folego),
+          cor: corDoRecursoDaClasse(classe.nome),
           descricao: [
             `Ação Bônus: você recupera Pontos de Vida iguais a 1d10 + seu nível de Guerreiro (${c.nivel}).`,
             `Recarrega: ${recuperaEm(classe, 'Recuperar Fôlego (usos)')}.`,
@@ -116,3 +123,4 @@ export function montarRecursosVisiveis(e: EntradaRecursosVisiveis): RecursoVisiv
   }
   return lista;
 }
+

@@ -41,12 +41,14 @@ export default function TalentoEspecieEscolhasStep({ selection, update }: StepPr
           if (i > -1) update({ truquesMagiaIniciadaEspecieEscolhidos: atual.filter((x) => x !== nome) });
           else if (atual.length < 2) update({ truquesMagiaIniciadaEspecieEscolhidos: [...atual, nome] });
         }}
+        onDefinirTruques={(lista) => update({ truquesMagiaIniciadaEspecieEscolhidos: lista })}
         magiaEscolhida={selection.magiaMagiaIniciadaEspecieEscolhida}
         onToggleMagia={(nome) =>
           update({
             magiaMagiaIniciadaEspecieEscolhida: selection.magiaMagiaIniciadaEspecieEscolhida === nome ? null : nome,
           })
         }
+        onDefinirMagia={(nome) => update({ magiaMagiaIniciadaEspecieEscolhida: nome })}
         atributoEscolhido={selection.atributoMagiaIniciadaEspecieEscolhido}
         onEscolherAtributo={(atributo) => update({ atributoMagiaIniciadaEspecieEscolhido: atributo })}
         seletorLista={
@@ -96,6 +98,7 @@ export default function TalentoEspecieEscolhasStep({ selection, update }: StepPr
         if (escolhidas.includes(nome)) update({ proficienciasTalentoEspecieEscolhidas: escolhidas.filter((x) => x !== nome) });
         else if (escolhidas.length < max) update({ proficienciasTalentoEspecieEscolhidas: [...escolhidas, nome] });
       }}
+      onDefinir={(lista) => update({ proficienciasTalentoEspecieEscolhidas: lista })}
     />
   );
 }

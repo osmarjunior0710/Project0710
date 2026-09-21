@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2226
+
+**Criação de personagem — botão 🎲 Aleatório** nas listas de "Escolha N" do Talento da Origem (ex.: Músico, 3 instrumentos), do Talento da Espécie (Versátil) e do Iniciado em Magia (truques e magia): preenche só as vagas que faltam, mantém o que você já marcou e nunca sorteia o que o personagem já possui ("já possui"). Com a lista cheia vira "Sortear de novo". **Cor dos pips por classe:** Fúria vermelho, Inspiração de Bardo mostarda, Magia de Pacto roxo — na área de recursos do Combate e nos painéis onde esses recursos aparecem.
+
 ## v202609_2101
 
 **Recursos de classe na aba Combate:** nova área logo abaixo do HP e dos botões −5/+5, só de leitura, com uma linha por recurso (nome ⓘ pips restantes/total): **Fúria** (Bárbaro), **Inspiração de Bardo**, **Magia de Pacto** (Bruxo) e **Recuperar Fôlego** (Guerreiro). Mostra os recursos de TODAS as classes do personagem de uma vez (não só a do pill) e o ⓘ explica o que é e quando recarrega. Também corrigido: a Fúria de personagem multiclasse agora usa o nível da classe (não o nível total). Novo botão na Lista: 🧪 Char Multiclasse (Bárbaro 1 / Bardo 1 / Bruxo 1, atributos 20) pra conferir.

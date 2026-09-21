@@ -28,10 +28,12 @@ export default function TalentoOrigemEscolhasStep({ selection, update }: StepPro
           if (i > -1) update({ truquesMagiaIniciadaEscolhidos: atual.filter((x) => x !== nome) });
           else if (atual.length < 2) update({ truquesMagiaIniciadaEscolhidos: [...atual, nome] });
         }}
+        onDefinirTruques={(lista) => update({ truquesMagiaIniciadaEscolhidos: lista })}
         magiaEscolhida={selection.magiaMagiaIniciadaEscolhida}
         onToggleMagia={(nome) =>
           update({ magiaMagiaIniciadaEscolhida: selection.magiaMagiaIniciadaEscolhida === nome ? null : nome })
         }
+        onDefinirMagia={(nome) => update({ magiaMagiaIniciadaEscolhida: nome })}
         atributoEscolhido={selection.atributoMagiaIniciadaEscolhido}
         onEscolherAtributo={(atributo) => update({ atributoMagiaIniciadaEscolhido: atributo })}
       />
@@ -54,6 +56,7 @@ export default function TalentoOrigemEscolhasStep({ selection, update }: StepPro
         if (escolhidas.includes(nome)) update({ proficienciasTalentoOrigemEscolhidas: escolhidas.filter((x) => x !== nome) });
         else if (escolhidas.length < max) update({ proficienciasTalentoOrigemEscolhidas: [...escolhidas, nome] });
       }}
+      onDefinir={(lista) => update({ proficienciasTalentoOrigemEscolhidas: lista })}
     />
   );
 }
