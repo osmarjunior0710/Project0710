@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRoll } from '../../roll/RollContext';
+import { artePorLados } from '../../roll/dadosArte';
 import styles from '../../components/TrocarArmaMaestria.module.css';
 
 /** Protótipo da house rule "confirmação de crítico" (ver `EmDev.md`,
@@ -15,6 +16,19 @@ import styles from '../../components/TrocarArmaMaestria.module.css';
 type Etapa = { tipo: 'primeiro'; d20: number } | { tipo: 'confirmado'; d20: number; confirmacao: number };
 
 const MOD_ATAQUE = 5;
+
+/** Ícone do dado (arte do tipo, ex.: d20) pequeno + a conta ao lado. */
+function ContaDoDado({ lados, valor, mod }: { lados: number; valor: number; mod: number }) {
+  const arte = artePorLados(lados);
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+      {arte && <img src={arte} alt={`d${lados}`} style={{ width: 20, height: 20, objectFit: 'contain' }} />}
+      <span>
+        {valor} + {mod} = {valor + mod}
+      </span>
+    </span>
+  );
+}
 
 function sortearD20(): number {
   return 1 + Math.floor(Math.random() * 20);
@@ -126,7 +140,7 @@ export default function ConfirmacaoCriticoCena() {
             <div className={styles.title}>Ataque de Espada</div>
             <div style={{ fontSize: 34, fontWeight: 'bold' }}>{d20}</div>
             <div style={{ fontSize: 13, marginBottom: 8 }}>
-              {d20} + {MOD_ATAQUE} = {d20 + MOD_ATAQUE}
+              <ContaDoDado lados={20} valor={d20} mod={MOD_ATAQUE} />
             </div>
             {nat1 && <div style={{ color: 'var(--danger)', fontWeight: 'bold', marginBottom: 8 }}>😢 FALHA CRÍTICA</div>}
             {nat20 && <div style={{ color: 'var(--good)', fontWeight: 'bold', marginBottom: 8 }}>🎉 ACERTO CRÍTICO!</div>}
@@ -135,9 +149,11 @@ export default function ConfirmacaoCriticoCena() {
               <div style={{ margin: '8px 0', padding: 8, border: '1px dashed var(--line)' }}>
                 <div className="label">Dado de confirmação</div>
                 <div style={{ fontSize: 22, fontWeight: 'bold' }}>{etapa.confirmacao}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-faint)' }}>
-                  {etapa.confirmacao} + {MOD_ATAQUE} = {etapa.confirmacao + MOD_ATAQUE} — só informativo (o Mestre compara
-                  com a CA; um 1 aqui é só o número).
+                <div style={{ fontSize: 13 }}>
+                  <ContaDoDado lados={20} valor={etapa.confirmacao} mod={MOD_ATAQUE} />
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 4 }}>
+                  Só informativo — o Mestre compara com a CA (um 1 aqui é só o número).
                 </div>
               </div>
             )}

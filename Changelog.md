@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1534
+
+**Protótipo da confirmação de crítico:** a conta do dado (ex.: 9 + 5 = 14) agora vem com o ícone do dado ao lado (d20 aqui; outro dado mostraria a arte dele), no ataque e no dado de confirmação.
+
 ## v202609_1531
 
 **Correção:** com o Dado 3D ligado, às vezes um dos dados de uma rolagem de 2+ dados (ex.: dano dobrado 2d8) aparecia vazio e não entrava na soma. Agora todos os dados contam, inclusive quando o dano mistura dados diferentes (arma + Ataque Furtivo).
