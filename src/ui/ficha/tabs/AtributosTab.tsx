@@ -1,3 +1,5 @@
+import AnelDeProgresso from '../../components/AnelDeProgresso';
+import { xpCompacto } from '../../../core/experiencia';
 import type { ReservaDadoVida } from '../../../core/dadosDeVida';
 import InfoTexto from '../../components/InfoTexto';
 import {
@@ -156,36 +158,35 @@ export default function AtributosTab({
   return (
     <>
       <div className={styles.topRow}>
-        <div className={`box-solid ${styles.levelBox}`}>
-          <div>
-            <div className="label">
-              nível
-              <br />
-              atual
-            </div>
-            <div style={{ fontSize: 17 }}>{nivel}</div>
+        {/* Caixa inteira abre o popup de XP; 2 metades: Level (esq.) e anel de
+            progresso de XP (dir.). Level Up (quando liberado) fica no anel. */}
+        <div className={`box-solid ${styles.levelBox}`} onClick={onAbrirXpPopup}>
+          <div className={styles.levelEsq}>
+            <div className="label">Level</div>
+            <div className={styles.levelNumero}>{nivel}</div>
           </div>
-          <div className={styles.xpArea}>
-            {podeLevelUpPelaXp && (
-              <div className="btn btn-primary" style={{ padding: '6px 10px' }} onClick={onAbrirLevelUp}>
-                ⬆️ Level Up
+          <div className={styles.levelDir}>
+            {podeLevelUpPelaXp ? (
+              <div
+                className={styles.levelUpAnel}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAbrirLevelUp();
+                }}
+              >
+                <AnelDeProgresso progresso={1} ariaLabel="Level Up disponível">
+                  <span style={{ fontSize: 18 }}>⬆️</span>
+                </AnelDeProgresso>
               </div>
+            ) : (
+              <AnelDeProgresso
+                progresso={proximoMarcoXp ? xpAtual / proximoMarcoXp.xpNecessario : 1}
+                ariaLabel={proximoMarcoXp ? `${xpAtual} de ${proximoMarcoXp.xpNecessario} XP` : `${xpAtual} XP (máximo)`}
+              >
+                <span style={{ fontSize: 12 }}>{xpCompacto(xpAtual)}</span>
+                <span style={{ fontSize: 8, color: 'var(--text-faint)' }}>XP</span>
+              </AnelDeProgresso>
             )}
-            <div className={styles.xpChip} onClick={onAbrirXpPopup}>
-              <div className={styles.xpBarTrack}>
-                <div
-                  className={styles.xpBarFill}
-                  style={{
-                    width: proximoMarcoXp
-                      ? `${Math.min(100, (xpAtual / proximoMarcoXp.xpNecessario) * 100)}%`
-                      : '100%',
-                  }}
-                />
-              </div>
-              <div className={styles.xpChipLabel}>
-                {proximoMarcoXp ? `${xpAtual}/${proximoMarcoXp.xpNecessario} XP` : `${xpAtual} XP (máx.)`}
-              </div>
-            </div>
           </div>
         </div>
         <div className={`box ${styles.hpBox}`}>

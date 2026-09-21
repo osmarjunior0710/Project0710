@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1841
+
+**Caixa de nível/XP (aba Atributos):** a caixa inteira agora abre o popup de XP. Por dentro são duas metades: à esquerda "Level" com o número embaixo; à direita um anel de progresso com o XP no centro (abreviado, ex.: 1,5k). Quando o Level Up está liberado, o anel vira uma seta ⬆️ — tocar nela abre o Level Up.
+
 ## v202609_1814
 
 Aba Magias: o rótulo "Mod. Conjuração" virou "Mod. de Conj.".
