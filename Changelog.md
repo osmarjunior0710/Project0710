@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1925
+
+**Selo de Level Up:** quando o XP passa do marco, o selo dourado do livro com a seta aparece no lugar do anel de XP (na caixa de nível). Tocar nele abre o Level Up; o resto da caixa continua abrindo o XP.
+
 ## v202609_1847
 
 **Anel de XP com a mesma animação da barra de vida:** ao adicionar (ou remover) XP, o trecho novo aparece na hora num azul mais claro e, depois de uma pausa curta, o azul cheio vai preenchendo (ou esvaziando) até alcançá-lo. Toques seguidos continuam de onde estava.

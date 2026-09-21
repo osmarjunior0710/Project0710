@@ -1,3 +1,4 @@
+import iconeLevelUp from '../../../assets/icones-ui/level-up.png';
 import AnelDeProgresso from '../../components/AnelDeProgresso';
 import { xpCompacto } from '../../../core/experiencia';
 import type { ReservaDadoVida } from '../../../core/dadosDeVida';
@@ -174,9 +175,8 @@ export default function AtributosTab({
                   onAbrirLevelUp();
                 }}
               >
-                <AnelDeProgresso valor={1} maximo={1} ariaLabel="Level Up disponível">
-                  <span style={{ fontSize: 18 }}>⬆️</span>
-                </AnelDeProgresso>
+                {/* Passou do marco de XP: o selo de Level Up ocupa o lugar do anel. */}
+                <img src={iconeLevelUp} alt="Level Up disponível" className={styles.levelUpSelo} />
               </div>
             ) : (
               <AnelDeProgresso

@@ -33,6 +33,14 @@
 
 .levelUpAnel {
   cursor: pointer;
+  display: flex;
+}
+
+.levelUpSelo {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 6px rgba(255, 210, 90, 0.75));
 }
 
 .hpRow {
