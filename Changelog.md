@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1702
+
+O FAB de Descanso (😴) agora fica no canto inferior esquerdo da tela; as opções Curto/Longo abrem pra cima, alinhadas à esquerda.
+
 ## v202609_1615
 
 **FAB de Descanso:** os botões Descanso Curto/Longo saíram da aba Atributos e viraram um botão flutuante 😴 (ao lado do de dados), disponível em qualquer aba — toque e escolha Curto (1 hora) ou Longo (8 horas). O texto do que foi recuperado agora aparece como um aviso na tela (toque fecha, some sozinho em 9s).
