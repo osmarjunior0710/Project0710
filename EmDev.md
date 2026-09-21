@@ -24,7 +24,7 @@ código).
 
 - [x] Botão no perfil de "House Rules", que contém todos os switchers de opção de regra do tipo house rule
 - [x] House rule: confirmação de crítico — **FEITO (A, B e C)**; histórico: protótipo publicado (`/prototipo/confirmacao-critico`), protótipo APROVADO. Plano em 3 entregas: **A** crítico padrão nos ataques de arma (`onAcertou({critico})`, `core/danoCritico.ts`) — [x] feita; **B** mesmo crítico nos ataques de magia (`useUsarMagiaPainel`, `MagiasTab`, `ReacaoPanelContent`, `CombatTab` magia) — [ ]; **C** switcher da house rule no painel House Rules + 2º d20 real no overlay (lê `armazenamentoHouseRules`) — [ ]. Perfurador (+1 dado no crítico) fica de fora (Backlog). Regras já decididas: só ataque (perícia nunca tem 2º d20); 1 natural = "Errei" (nada acontece) ou "Rolar Dano" (dano normal, sem dobra); 20 natural sem house rule = só "Rolar Dobro do Dano" (dobro de DADOS, mod 1x); 20 com house rule = 2º d20 só informativo, depois "Rolar Dano" / "Rolar Dano Dobrado"
-- [ ] Recurso principal da classe visível na tela de combate
+- [x] Recurso principal da classe visível na tela de combate (Fúria, Inspiração de Bardo, Magia de Pacto, Recuperar Fôlego; outros no Backlog)
 - [x] FAB para descanso curto/longo
 - [x] Dado de cura no descanso curto (não foi trazido da ficha do jogo)
 - [x] Animação de dano/cura na barra de vida (+ botão Manual de PV)

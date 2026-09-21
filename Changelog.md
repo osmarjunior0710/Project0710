@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2101
+
+**Recursos de classe na aba Combate:** nova área logo abaixo do HP e dos botões −5/+5, só de leitura, com uma linha por recurso (nome ⓘ pips restantes/total): **Fúria** (Bárbaro), **Inspiração de Bardo**, **Magia de Pacto** (Bruxo) e **Recuperar Fôlego** (Guerreiro). Mostra os recursos de TODAS as classes do personagem de uma vez (não só a do pill) e o ⓘ explica o que é e quando recarrega. Também corrigido: a Fúria de personagem multiclasse agora usa o nível da classe (não o nível total). Novo botão na Lista: 🧪 Char Multiclasse (Bárbaro 1 / Bardo 1 / Bruxo 1, atributos 20) pra conferir.
+
 ## v202609_2034
 
 O FAB de dados (🎲) ganhou o mesmo formato do FAB de Descanso, espelhado: 56 px, cantos bem redondos e o inferior-direito quase reto, só o ícone, no canto direito logo acima da barra de abas — os dois ficam na mesma linha. O menu de dados e a área de queda do dado 3D acompanharam a nova posição.

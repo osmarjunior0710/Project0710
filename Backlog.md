@@ -7,6 +7,16 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
+## Recursos visíveis (área abaixo do HP) — o que ficou de fora de propósito (2026-09)
+
+Pedido do Osmar: a 1ª versão mostra só Fúria, Inspiração de Bardo, Magia de
+Pacto e Recuperar Fôlego. Já existem no app, com contador, e podem entrar
+depois em `core/recursosVisiveis.ts` se ele quiser: **Surto de Ação** e
+**Indomável** (Guerreiro); **Astúcia Mágica**, **Contatar Patrono** e
+**Arcana Mística** (Bruxo); e os de espécie/talento — Conhecimento de
+Pedras, Pico de Adrenalina, Ataque de Sopro, Ancestralidade Gigante, Falar
+com Animais e Pontos de Sorte. Mago não tem recurso com contador hoje.
+
 ## Ancestralidade Gigante só no ataque principal (2026-09)
 
 Ao migrar Ancestralidade Gigante (Golias) do card avulso "toque ao

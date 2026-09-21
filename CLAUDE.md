@@ -336,6 +336,10 @@ coisa. Isso vale tanto pra dado (`data/`) quanto pra UI (`ui/`):
 - Se o pedido parecer exigir 2 coisas novas mas 1 delas já é coberta
   por um mecanismo existente, implemente só a parte genuinamente nova.
 
+- Toda classe/característica nova com recurso de "N usos" (fora Espaço de
+  Magia comum) entra em `core/recursosVisiveis.ts` na mesma entrega — ver
+  `DECISOES-CLASSES.md` "Recurso de classe com contador".
+
 **Por quê:** o app já tem vários casos parecidos-mas-não-iguais
 acumulados (ex.: diferentes formas de "escolher 1 de um grupo", de
 "escolher N itens", de exibir "concedido por X") — cada padrão novo

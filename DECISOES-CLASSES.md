@@ -54,6 +54,21 @@ nem toda classe tem. Caso ainda aberto (ver `PENDENCIAS.md`):
 checar proficiência real — invisível em classes com acesso amplo a
 arma, vai expor em classe restrita (ex: só Simples).
 
+**Recurso de classe com contador entra em `core/recursosVisiveis.ts`
+(diretriz permanente, pedido do Osmar 2026-09).** Toda classe nova (ou
+característica nova) que tenha um recurso do tipo "N usos, recarrega em X"
+— Fúria, Inspiração de Bardo, Espaço de Magia de Pacto, Recuperar Fôlego —
+precisa ganhar uma entrada em `montarRecursosVisiveis` na MESMA entrega em
+que o recurso é implementado: é a área passiva abaixo do HP na aba Combate
+(1 linha: nome ⓘ pips), calculada por classe com o nível DAQUELA classe e
+sempre listando TODAS as classes do personagem (nunca só a do pill). Espaço
+de Magia comum de conjurador (sem ser Pacto) NÃO entra — já tem a aba
+Magias. O texto do ⓘ é o "o que é + recarrega quando" (`recuperaEm` da
+planilha), nunca um parágrafo solto na tela. Sem essa entrada o recurso
+continua funcionando nos painéis de Ação/Bônus/Reação, mas some da visão
+geral — o Char Multiclasse (`personagemTesteMulticlasse.ts`) serve pra
+conferir.
+
 **Data/origem:** 2026-08/09, Guerreiro/Bardo/Bruxo.
 
 ## Motor de Level Up genérico (`core/levelUp.ts`)

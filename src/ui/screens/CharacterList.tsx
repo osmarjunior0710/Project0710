@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { armazenamentoPersonagens } from '../../core/armazenamentoPersonagens';
 import { ID_PERSONAGEM_DEMO } from '../../core/personagemDemo';
 import { recriarPersonagemTesteFixo, ID_PERSONAGEM_TESTE_FIXO } from '../../core/personagemTesteFixo';
+import { recriarPersonagemTesteMulticlasse, ID_PERSONAGEM_TESTE_MULTICLASSE } from '../../core/personagemTesteMulticlasse';
 import { calcularPvMaximoNivel1 } from '../../core/calculoPersonagem';
 import { classesDoPersonagem } from '../../core/multiclasse';
 import { classes } from '../../data/rulesets/dnd2024/classes';
@@ -93,6 +94,17 @@ export default function CharacterList() {
         }}
       >
         🧪 Char de Teste Fixo — sempre o mesmo personagem, pra testar sem depender de sorteio
+      </div>
+
+      <div
+        className="btn"
+        style={{ marginBottom: 10 }}
+        onClick={() => {
+          recriarPersonagemTesteMulticlasse();
+          navigate(`/ficha/${ID_PERSONAGEM_TESTE_MULTICLASSE}`);
+        }}
+      >
+        🧪 Char Multiclasse — Bárbaro 1 / Bardo 1 / Bruxo 1, atributos 20 (recursos de classe juntos)
       </div>
 
       {personagens.length === 0 && (

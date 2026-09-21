@@ -18,6 +18,8 @@ import BarraDeVida from '../../components/BarraDeVida';
 import ContadorUsos from '../../components/ContadorUsos';
 import SidePanel from '../combat/SidePanel';
 import PvManualModal from '../combat/PvManualModal';
+import RecursosDeClasse from '../combat/RecursosDeClasse';
+import type { RecursoVisivel } from '../../../core/recursosVisiveis';
 import AcaoPanelContent from '../combat/AcaoPanelContent';
 import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
 import AtivarEfeitoModal from '../../components/AtivarEfeitoModal';
@@ -59,6 +61,8 @@ interface CombatTabProps {
   /** PV Temporário atual (ex: Vigor Ínfero/Vitalidade Vazia) — absorve
    * dano antes do PV normal. 0 = nenhum, linha some. */
   pvTemporario: number;
+  /** Recursos de classe com contador de todas as classes (passivo, abaixo do HP). */
+  recursosDeClasse: RecursoVisivel[];
   onAlterarPv: (delta: number) => void;
   /** Aplica a cura de magia no PV E dispara o efeito visual de Cura
    * (ver `FichaShell.tsx` `onCuraDeMagiaAplicada`) — diferente de
@@ -372,6 +376,7 @@ export default function CombatTab({
   pvAtual,
   pvMax,
   pvTemporario,
+  recursosDeClasse,
   onAlterarPv,
   onCuraDeMagiaAplicada,
   bencaoDoTenebroso: { disponivel: bencaoDoTenebrosoDisponivel, onAplicar: onAplicarBencaoDoTenebroso },
@@ -1097,6 +1102,8 @@ export default function CombatTab({
           +5
         </div>
       </div>
+
+      <RecursosDeClasse recursos={recursosDeClasse} />
 
       {furiaDisponivel && (
         <div className="opt-card" style={{ marginBottom: 12, borderColor: furiaAtiva ? '#b23b3b' : undefined }}>

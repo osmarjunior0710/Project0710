@@ -125,6 +125,7 @@ import ColheitaMacabraModal from '../components/ColheitaMacabraModal';
 import FuriaImplacavelModal from '../components/FuriaImplacavelModal';
 import Dice3dFab from './dice3d/Dice3dFab';
 import DescansoFab from './DescansoFab';
+import { montarRecursosVisiveis } from '../../core/recursosVisiveis';
 import { normalizarMoedas, type Moedas } from '../../core/moedas';
 import DadosDeVidaModal from './DadosDeVidaModal';
 import { reservaDeDadosDeVida, totalDeDadosRestantes } from '../../core/dadosDeVida';
@@ -593,10 +594,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Fúria (Bárbaro) — ver sdd/sdd-barbaro-furia.md. `armaduraPesadaEquipada`
   // também trava a ATIVAÇÃO (regra real) e força o encerramento
   // automático ao equipar (ver `equiparItem`).
-  const furiaMaximo = classe ? quantidadeFuria(classe, nivelTotalAtual) : 0;
+  const furiaMaximo = classe ? quantidadeFuria(classe, personagem.nivel) : 0;
   const furiaDisponivel = furiaMaximo > 0;
   const furiaRestantes = Math.max(0, furiaMaximo - furiaGasto);
-  const furiaBonusDano = classe ? bonusDanoFuria(classe, nivelTotalAtual) : 0;
+  const furiaBonusDano = classe ? bonusDanoFuria(classe, personagem.nivel) : 0;
   const armaduraPesadaEquipada = armaduraEquipadaCatalogo?.categoria.startsWith('Armadura Pesada') ?? false;
   const temVigorImplacavel = selecao.especie === 'Orc';
   const usosConhecimentoDePedrasMaximo = selecao.especie === 'Anão' && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
@@ -745,6 +746,19 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const explicacaoCdConjuracao = explicarCdConjuracao(selecao, classe, nivelTotalAtual);
   const usosInspiracaoMax = usosInspiracaoMaximo(selecao, classe, personagem.nivel);
   const usosInspiracaoRestantes = Math.max(0, usosInspiracaoMax - inspiracaoGasto);
+  // Recursos de classe com contador, de TODAS as classes (não só a em foco) —
+  // área passiva da aba Combate. Ver `core/recursosVisiveis.ts`.
+  const recursosDeClasse = montarRecursosVisiveis({
+    classes: classesAtual,
+    catalogo: catalogoClasses,
+    selecao,
+    gastos: {
+      furia: furiaGasto,
+      folego: folegoGasto,
+      inspiracao: inspiracaoGasto,
+      espacosPorClasseECirculo: espacosGastosPorClasseECirculo,
+    },
+  });
   const tamanhoDadoInspiracao = dadoInspiracao(classe, personagem.nivel);
   const fonteDeInspiracao = fonteDeInspiracaoDesbloqueada(classe, personagem.nivel);
   const numAtaquesBase = classe ? numeroDeAtaques(classe, personagem.nivel) : 1;
@@ -2366,6 +2380,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             pvAtual={pvAtual}
             pvMax={personagem.pvMax}
             pvTemporario={pvTemporario}
+            recursosDeClasse={recursosDeClasse}
             bencaoDoTenebroso={{ disponivel: bencaoDoTenebrosoDisponivel, onAplicar: aplicarBencaoDoTenebroso }}
             lancarNoInferno={{
               disponivel: lancarNoInfernoDisponivel,
