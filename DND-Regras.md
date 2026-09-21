@@ -124,3 +124,14 @@ Preparadas normais, que só trocam 1 por level-up.
 
 Fonte: `dnd-master-referencia.xlsx`, aba "Opções de Classe", linha
 `Classe_Bruxo_InvMist_PacTomo` (conferida contra o livro).
+
+---
+
+## Acerto Crítico / 20 e 1 naturais (Livro do Jogador 2024, Cap. 1)
+
+- **20 natural em jogada de ATAQUE:** acerta sempre, independente de modificadores ou CA — é um Acerto Crítico.
+- **1 natural em jogada de ATAQUE:** erra sempre, independente de modificadores ou CA.
+- **Teste de perícia/atributo e salvaguarda:** 20 e 1 não têm efeito automático — valem só pelo número.
+- **Dano do Acerto Crítico:** jogar os DADOS de dano do ataque duas vezes, somar e adicionar os modificadores UMA vez só (Adaga: 2d4 + mod, não 2×(1d4 + mod)). Outros dados de dano do mesmo ataque (ex.: Ataque Furtivo) também são jogados duas vezes.
+
+Fonte: `livros-referencia/livro-do-jogador/02_-_Cap_1_Jogando_o_Jogo.pdf` ("Tirando 20 ou 1" e "Acertos Críticos").

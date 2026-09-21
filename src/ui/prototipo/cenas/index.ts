@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import PopupAtaqueSalvaguardaCena from './PopupAtaqueSalvaguardaCena';
+import ConfirmacaoCriticoCena from './ConfirmacaoCriticoCena';
 
 export interface CenaPrototipo {
   id: string;
@@ -29,5 +30,12 @@ export const cenasPrototipo: CenaPrototipo[] = [
     descricao:
       'Ataque (Acerto/Erro, fluxo real de hoje) lado a lado com um mockup de Salvaguarda do Alvo onde cada bloco de informação (CD, dano da falha, dano do sucesso, aviso, dano condicional) liga/desliga por toggle.',
     Componente: PopupAtaqueSalvaguardaCena,
+  },
+  {
+    id: 'confirmacao-critico',
+    titulo: 'House rule — Confirmação de crítico',
+    descricao:
+      'Fluxo de 1 natural e 20 natural em ataque, com e sem a house rule (2º d20 de confirmação). Teste de Perícia nunca ganha o 2º dado.',
+    Componente: ConfirmacaoCriticoCena,
   },
 ];

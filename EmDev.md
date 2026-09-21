@@ -23,7 +23,7 @@ onde fica na tela), depois seguir o ciclo normal (proposta → ok →
 código).
 
 - [x] Botão no perfil de "House Rules", que contém todos os switchers de opção de regra do tipo house rule
-- [ ] House rule: confirmação de crítico
+- [ ] House rule: confirmação de crítico — **protótipo publicado** (`/prototipo/confirmacao-critico`), aguardando aprovação do Osmar antes de ligar no combate real. Regras já decididas: só ataque (perícia nunca tem 2º d20); 1 natural = "Errei" (nada acontece) ou "Rolar Dano" (dano normal, sem dobra); 20 natural sem house rule = só "Rolar Dobro do Dano" (dobro de DADOS, mod 1x); 20 com house rule = 2º d20 só informativo, depois "Rolar Dano" / "Rolar Dano Dobrado"
 - [ ] Recurso principal da classe visível na tela de combate
 - [ ] FAB para descanso curto/longo
 - [ ] Dado de cura no descanso curto (não foi trazido da ficha do jogo)
