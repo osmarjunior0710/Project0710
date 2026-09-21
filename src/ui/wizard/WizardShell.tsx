@@ -1,3 +1,7 @@
+import { concessoesJaConcedidas } from '../../core/concessoesJaConcedidas';
+import { sortearEscolhas } from '../../core/sortearEscolhas';
+import { sortearMagiaIniciada, sortearProficienciasDoTalento } from '../../core/sortearEscolhasTalento';
+import { truquesElegiveisLivroDasSombras, magiasRituaisElegiveisLivroDasSombras } from '../../core/livroDasSombras';
 import { destacarPendencia } from './destacarPendencia';
 import { moedasIniciais } from '../../core/loja';
 import { useState, useRef } from 'react';
@@ -181,7 +185,11 @@ export default function WizardShell() {
     if (origemSelecionada.ferramenta.categoria === 'escolha') {
       const opcoes = gruposFerramenta[origemSelecionada.ferramenta.grupo] ?? [];
       if (opcoes.length > 0) {
-        patch.ferramentaOrigemEscolhida = opcoes[Math.floor(Math.random() * opcoes.length)].nome;
+        // Evita o que o personagem já possui (ex.: ferramenta escolhida na Classe).
+        const ja = concessoesJaConcedidas(selection, origemSelecionada);
+        const nomes = opcoes.map((f) => f.nome);
+        const [livre] = sortearEscolhas(nomes, [], 1, new Set(ja.ferramentas.keys()));
+        patch.ferramentaOrigemEscolhida = livre ?? nomes[Math.floor(Math.random() * nomes.length)];
       }
     }
     update(patch);
@@ -208,7 +216,10 @@ export default function WizardShell() {
     const tracoPericia = tracoComEscolhaDePericia(especieSelecionada);
     if (tracoPericia) {
       const opcoes = tracoPericia.opcoesPericia ?? pericias.map((p) => p.nome);
-      patch.periciaEspecieEscolhida = opcoes[Math.floor(Math.random() * opcoes.length)];
+      // Evita o que o personagem já possui (Classe/Origem/Talento).
+      const ja = concessoesJaConcedidas(selection, origens.find((o) => o.nome === selection.origem), especieSelecionada);
+      const [livre] = sortearEscolhas(opcoes, [], 1, new Set(ja.pericias.keys()));
+      patch.periciaEspecieEscolhida = livre ?? opcoes[Math.floor(Math.random() * opcoes.length)];
     }
     if (especieSelecionada.traços.some((t) => t.id === 'versatil')) {
       patch.talentoEspecieEscolhido = talentosOrigem[Math.floor(Math.random() * talentosOrigem.length)].id;
@@ -218,6 +229,49 @@ export default function WizardShell() {
       patch.subescolhaEspecieEscolhida = opcoesSubescolha[Math.floor(Math.random() * opcoesSubescolha.length)].nome;
     }
     update(patch);
+  }
+  function randomizarLivroDasSombras() {
+    const jaConhecidos = [...selection.truquesEscolhidos, ...selection.magiasPreparadasEscolhidas];
+    update({
+      livroDasSombrasTruques: sortearEscolhas(truquesElegiveisLivroDasSombras(jaConhecidos).map((m) => m.nome), [], 3),
+      livroDasSombrasMagias: sortearEscolhas(magiasRituaisElegiveisLivroDasSombras(jaConhecidos).map((m) => m.nome), [], 2),
+    });
+  }
+  function randomizarTalentoOrigem() {
+    const origem = origens.find((o) => o.nome === selection.origem);
+    const talento = origem ? talentosOrigem.find((t) => t.id === origem.talentoOrigemId) : undefined;
+    if (!origem || !talento) return;
+    const ja = concessoesJaConcedidas(selection, origem);
+    if (talento.concedeMagiaIniciada) {
+      const r = sortearMagiaIniciada(origem.talentoOrigemVariante ?? '', ja);
+      update({
+        truquesMagiaIniciadaEscolhidos: r.truques,
+        magiaMagiaIniciadaEscolhida: r.magia,
+        atributoMagiaIniciadaEscolhido: r.atributo,
+      });
+      return;
+    }
+    update({ proficienciasTalentoOrigemEscolhidas: sortearProficienciasDoTalento(talento, ja) });
+  }
+  function randomizarTalentoEspecie() {
+    const talento = talentoDoVersatil(selection);
+    if (!talento) return;
+    const origem = origens.find((o) => o.nome === selection.origem);
+    const especie = especies.find((e) => e.nome === selection.especie);
+    const ja = concessoesJaConcedidas(selection, origem, especie);
+    if (talento.concedeMagiaIniciada) {
+      const listas = ['Clérigo', 'Druida', 'Mago'];
+      const lista = selection.listaMagiaIniciadaEspecieEscolhida ?? listas[Math.floor(Math.random() * listas.length)];
+      const r = sortearMagiaIniciada(lista, ja);
+      update({
+        listaMagiaIniciadaEspecieEscolhida: lista,
+        truquesMagiaIniciadaEspecieEscolhidos: r.truques,
+        magiaMagiaIniciadaEspecieEscolhida: r.magia,
+        atributoMagiaIniciadaEspecieEscolhido: r.atributo,
+      });
+      return;
+    }
+    update({ proficienciasTalentoEspecieEscolhidas: sortearProficienciasDoTalento(talento, ja) });
   }
   function randomizarAtributos() {
     const valores = embaralhar(arrayPadrao);
@@ -283,6 +337,7 @@ export default function WizardShell() {
     },
     {
       name: '1c. Livro das Sombras',
+      randomize: randomizarLivroDasSombras,
       render: (p) => <LivroDasSombrasStep {...p} />,
       condicao: (s) => s.invocacoesMisticasEscolhidas.includes('pacto-do-tomo'),
       isValid: (s) => s.livroDasSombrasTruques.length === 3 && s.livroDasSombrasMagias.length === 2,
@@ -309,6 +364,7 @@ export default function WizardShell() {
     },
     {
       name: '2c. Talento da Origem',
+      randomize: randomizarTalentoOrigem,
       render: (p) => <TalentoOrigemEscolhasStep {...p} />,
       condicao: (s) =>
         concedeProficienciasDaOrigem(s) !== undefined ||
@@ -354,6 +410,7 @@ export default function WizardShell() {
     },
     {
       name: '3c. Talento do Versátil',
+      randomize: randomizarTalentoEspecie,
       render: (p) => <TalentoEspecieEscolhasStep {...p} />,
       condicao: (s) => {
         const talento = talentoDoVersatil(s);

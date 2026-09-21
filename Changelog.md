@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2232
+
+**Criação de personagem — o 🔀 "Sortear tudo desta etapa" agora existe também no Livro das Sombras, no Talento da Origem e no Talento do Versátil, e todos os 🔀 evitam o que o personagem já possui:** a ferramenta da Origem não repete a que veio da Classe, a perícia da Espécie não repete Classe/Origem/Talento, e os talentos (ex.: Músico, 3 instrumentos; Iniciado em Magia) sorteiam só o que ainda não se tem.
+
 ## v202609_2229
 
 **Criação de personagem — mostra o que falta:** ao apertar Avançar com alguma escolha pendente, a tela rola até a primeira seção incompleta e o título dela pisca com uma caixa vermelha por alguns segundos (além do aviso de sempre).

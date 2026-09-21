@@ -15,6 +15,7 @@ import { pericias } from '../../../data/rulesets/dnd2024/pericias';
 import type { ConcessoesJaConcedidas, FonteConcessao } from '../../../core/concessoesJaConcedidas';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import { sortearEscolhas } from '../../../core/sortearEscolhas';
+import { sortearProficienciasDoTalento } from '../../../core/sortearEscolhasTalento';
 import { BotaoAleatorio, TituloComAleatorio } from '../BotaoAleatorio';
 
 export const todasFerramentas = Array.from(new Set(Object.values(gruposFerramenta).flat().map((f) => f.nome))).sort();
@@ -63,15 +64,11 @@ export function ProficienciaOuFerramentaEscolhas({
     );
   }
 
-  // Sorteio: só o que o personagem ainda NÃO possui por outra fonte.
+  // Sorteio: só o que o personagem ainda NÃO possui por outra fonte
+  // (`core/sortearEscolhasTalento.ts`, o mesmo do 🔀 da etapa).
   function sortear() {
-    const opcoes = [
-      ...(mostrarPericias ? pericias.map((p) => p.nome) : []),
-      ...(mostrarFerramentas ? opcoesFerramenta : []),
-    ];
-    const evitar = new Set<string>([...jaConcedidas.pericias.keys(), ...jaConcedidas.ferramentas.keys()]);
     const cheia = escolhidas.length >= max;
-    onDefinir(sortearEscolhas(opcoes, cheia ? [] : escolhidas, max, evitar));
+    onDefinir(sortearProficienciasDoTalento(talento, jaConcedidas, cheia ? [] : escolhidas));
   }
 
   return (
