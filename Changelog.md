@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1814
+
+Aba Magias: o rótulo "Mod. Conjuração" virou "Mod. de Conj.".
+
 ## v202609_1813
 
 Aba Magias: removidas das explicações dos ⓘ (Mod. Conjuração, CD e Ataque Mágico) as frases "não é pra rolar" e "só consulta".

@@ -462,7 +462,7 @@ export default function MagiasTab({
         <div className="stat-grid">
           <div className="box stat-box" style={{ cursor: 'default' }}>
             <div className="stat-name">
-              MOD. CONJURAÇÃO{' '}
+              MOD. DE CONJ.{' '}
               <InfoTexto
                 titulo="Modificador de conjuração"
                 paragrafos={[
