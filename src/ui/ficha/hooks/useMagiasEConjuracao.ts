@@ -148,7 +148,10 @@ export function useMagiasEConjuracao(input: {
   const emConjuracaoCombinada = temConjuracaoMulticlasse(classesAtual) && (classeAtivaEntry ? contaNaConjuracaoMulticlasse(classeAtivaEntry) : false);
   const chaveDoPoolDeMagia = emConjuracaoCombinada ? 'combinado' : classeAtivaNome;
   const espacosParaConjurar = emConjuracaoCombinada
-    ? espacosCombinadosComoAtivos(espacosMagiaParaNivelCombinado(nivelEquivalenteConjuracaoMulticlasse(classesAtual)) ?? [])
+    ? espacosCombinadosComoAtivos(
+        // A tabela Conjurador Multiclasse só vai até 20 — trava aí pra nunca voltar vazio.
+        espacosMagiaParaNivelCombinado(Math.min(20, nivelEquivalenteConjuracaoMulticlasse(classesAtual))) ?? [],
+      )
     : espacos;
   const espacosGastosParaConjurar = emConjuracaoCombinada ? (espacosGastosPorClasseECirculo['combinado'] ?? {}) : espacosGastosPorCirculo;
   const truques = truquesDoPersonagem(truquesAtuais);

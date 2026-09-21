@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2027
+
+**Personagem multiclasse sem espaços de magia:** o "Inst. Level Up" (ferramenta de teste) deixava o personagem passar do nível 20 (o Char de Teste Fixo foi pra Mago 18 + Bardo 3 = nível 21) e a tabela de espaços de multiclasse só vai até 20, então ele ficava sem nenhum espaço. Agora o Inst. Level Up some no nível 20 e a consulta da tabela trava em 20.
+
 ## v202609_2018
 
 **Correção no painel de Reação:** magia sem espaço de magia disponível agora aparece esmaecida, sem clique e com "· sem espaço disponível" (igual ao picker de Usar Magia), em vez de parecer ativa. Também passa a valer a regra de conjurar com espaço de círculo maior: se o do círculo da magia acabou mas sobra um maior, ela continua disponível e a Reação gasta o menor espaço que sirva.

@@ -2196,7 +2196,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           onToggleItensDetalhados={() => setItensDetalhados(!itensDetalhados)}
           houseRules={houseRules}
           onAlternarHouseRule={alternarHouseRule}
-          onLevelUpRapido={classe ? levelUpRapido : undefined}
+          // Nível de personagem máximo é 20 (soma de todas as classes) — a
+          // ferramenta de teste não sobe além disso (nível 21 deixava a
+          // tabela de espaços de multiclasse sem linha e o personagem sem espaços).
+          onLevelUpRapido={classe && nivelTotalAtual < 20 ? levelUpRapido : undefined}
           niveisComSnapshot={Object.keys(snapshotsNivel)
             .map(Number)
             .sort((a, b) => a - b)}
