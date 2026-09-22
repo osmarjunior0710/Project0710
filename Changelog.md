@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1547
+
+**Level Up — passo "Novas Características" some quando não tem nada pra mostrar:** níveis que só dão Aumento no Valor de Atributo/Talento (ex: Guerreiro 3→4) não mostram mais uma tela vazia "Nenhuma característica nova nesse nível" — o passo só aparece quando sobra pelo menos 1 característica pra listar (ex: Guerreiro 4→5, que ganha Ataque Extra).
+
 ## v202609_0842
 
 **Popups de Conjuração/CD/Ataque Mágico padronizados:** os 3 ⓘ da aba

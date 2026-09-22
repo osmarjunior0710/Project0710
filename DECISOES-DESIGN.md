@@ -756,3 +756,30 @@ tabela) pra cobrir isso sem precisar de componente novo.
   de contexto antes da tabela) — mas quando o `ⓘ` já existir e a
   descrição estiver faltando, é um bom momento pra ir no livro/regra
   confirmada e preencher, em vez de deixar em branco por preguiça.
+
+## Level Up — passo "Novas Características" só entra quando sobra algo pra mostrar
+
+Achado 2026-09 (Osmar testando: "sei que mudou algo nesse nível, mas a
+tela aparece vazia"). Duas regras permanentes pro passo `features` do
+Level Up (`LevelUpShell.tsx`):
+
+- **Não duplica característica com tela própria.** Uma característica
+  que já ganha uma tela DEDICADA mais adiante no mesmo Level Up
+  (Subclasse, Proficiências Bônus, Estilo de Luta, Especialista,
+  Aumento de Atributo, Dádiva Épica, Arcana Mística, Descobertas
+  Mágicas, Perito em Necromancia) não aparece de novo como card
+  estático aqui — só as passivas SEM tela própria (ex.: Ataque Extra).
+- **Só entra na sequência quando sobra pelo menos 1 característica**
+  depois desse filtro — mesmo padrão condicional de todo o resto do
+  array de passos (`luSteps`). Antes desse ajuste, "Novas
+  Características" era o único passo fixo (sempre aparecia, mesmo
+  vazio com "Nenhuma característica nova nesse nível") — confuso
+  justamente pros níveis (ex. Aumento de Atributo) que MUDAM algo,
+  mas cuja mudança inteira já tem tela própria, então esse passo
+  ficava sem nada pra mostrar.
+
+**Padrão pra lembrar:** qualquer passo do Level Up cujo conteúdo pode
+ficar vazio depois de aplicar um filtro (não só uma condição de
+regra simples) precisa calcular esse conteúdo ANTES de decidir se
+entra em `luSteps`, não depois — um passo nunca deveria aparecer só
+pra mostrar "nada aqui".

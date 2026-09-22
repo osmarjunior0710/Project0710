@@ -541,7 +541,7 @@ export default function LevelUpShell({
   );
   const [conhecimentoPrimordialEscolhida, setConhecimentoPrimordialEscolhida] = useState<string | null>(null);
 
-  const luSteps: LuStep[] = ['pv', 'features'];
+  const luSteps: LuStep[] = ['pv'];
   // Só entra na sequência se sobrar pelo menos 1 subclasse IMPLEMENTADA
   // pra escolher — senão o passo travaria o Level Up pra sempre (todo
   // card aparece travado, sem opção de avançar). Continua null até a
@@ -624,14 +624,13 @@ export default function LevelUpShell({
   // arcanum escolhido — regra real permite trocar a qualquer momento.
   if (novoCirculoArcanaMistica !== null || Object.keys(arcanaMisticaAtuais).length > 0) luSteps.push('arcanaMistica');
   if (magiaIniciadaOrigemAtual || magiaIniciadaEspecieAtual) luSteps.push('iniciadoEmMagia');
-  luSteps.push('resumo');
 
   // Características que já ganham uma tela própria mais adiante nesse
   // mesmo Level Up não aparecem de novo como card no passo "Novas
   // Características" — evita repetir a mesma coisa 2x (ver
-  // DECISOES-DESIGN.md "Level Up — passo de Novas Características não
-  // duplica característica com tela própria"). Uma característica
-  // passiva sem tela própria (ex: "Ataque Extra") continua aparecendo
+  // DECISOES-DESIGN.md "Level Up — passo 'Novas Características' só
+  // entra quando sobra algo pra mostrar"). Uma característica passiva
+  // sem tela própria (ex: "Ataque Extra") continua aparecendo
   // normalmente — esse passo é o único lugar que mostra ela.
   const nomesComTelaPropria = new Set<string>();
   if (luSteps.includes('subclasse')) nomesComTelaPropria.add(`Subclasse de ${classe.nome}`);
@@ -645,6 +644,16 @@ export default function LevelUpShell({
   if (luSteps.includes('arcanaMistica') && novoCirculoArcanaMistica !== null) {
     nomesComTelaPropria.add(`Arcana Mística (${novoCirculoArcanaMistica}º círculo)`);
   }
+
+  // "Novas Características" só entra na sequência quando sobra pelo
+  // menos 1 característica passiva pra listar (mesmo padrão
+  // condicional de todo o resto deste array — ver DECISOES-DESIGN.md
+  // acima referenciado).
+  const features = caracteristicasDoNivelComSubclasse(classe, novoNivel, subclasseEscolhida).filter(
+    (f) => !nomesComTelaPropria.has(f.nome),
+  );
+  if (features.length > 0) luSteps.splice(1, 0, 'features');
+  luSteps.push('resumo');
 
   const [luIndex, setLuIndex] = useState(0);
   const [faseDramatica, setFaseDramatica] = useState<FaseDramatica>('idle');
@@ -1097,9 +1106,6 @@ export default function LevelUpShell({
     setLuIndex((i) => i - 1);
   }
 
-  const features = caracteristicasDoNivelComSubclasse(classe, novoNivel, subclasseEscolhida).filter(
-    (f) => !nomesComTelaPropria.has(f.nome),
-  );
   const dadivaEpica = caracteristicasDoNivel(classe, novoNivel).find((f) => f.nome === 'Dádiva Épica');
   const arcanaMisticaFeature =
     novoCirculoArcanaMistica !== null
@@ -1302,9 +1308,6 @@ export default function LevelUpShell({
         {step === 'features' && (
           <>
             <div className="section-title">Características desbloqueadas no nível {novoNivel}</div>
-            {features.length === 0 && (
-              <div className="label">Nenhuma característica nova nesse nível.</div>
-            )}
             {features.map((f) => (
               <div key={f.nome} className="opt-card" style={{ cursor: 'default' }}>
                 <div className="opt-card-name">{f.nome}</div>
