@@ -811,24 +811,26 @@ export default function CombatTab({
 
   /** Percorrer a Árvore (Trilha da Árvore do Mundo, nível 14) — versão
    * BASE (18m): Ação Bônus normal, sem custo de recurso próprio, então
-   * só a economia genérica de Ação Bônus do turno trava (mesmo padrão
-   * de qualquer outro recurso deste painel — `onMarcarUsado('bonus')`).
-   * Sem rolagem (o app não modela posição/teleporte, só o texto). */
+   * só a economia genérica de Ação Bônus do turno trava. Reaproveita
+   * `escolherNoPainel` (mesmo padrão de "selecionar e fechar o
+   * painel" das ações genéricas — não deixar aberto depois de usar,
+   * como qualquer outra escolha do painel). Sem rolagem (o app não
+   * modela posição/teleporte, só o texto). */
   function usarPercorrerArvore() {
-    onMarcarUsado('bonus');
-    setFeedback('🌳 Percorrer a Árvore — teleporte de até 18m pra um espaço desocupado à sua vista.');
+    escolherNoPainel('bonus', '🌳 Percorrer a Árvore', 'teleporte de até 18m pra um espaço desocupado à sua vista.');
   }
 
   /** Percorrer a Árvore — Longa Distância (45m + até 6 criaturas
    * voluntárias a até 3m de você): mesma Ação Bônus de cima, então
-   * também gasta o turno (`onMarcarUsado('bonus')`), mas com a
-   * restrição adicional de 1x por FÚRIA (`onUsarPercorrerArvoreEstendida`,
+   * também fecha o painel via `escolherNoPainel`, mas com a restrição
+   * adicional de 1x por FÚRIA (`onUsarPercorrerArvoreEstendida`,
    * reseta ao reativar a Fúria). */
   function usarPercorrerArvoreLongaDistancia() {
     if (!onUsarPercorrerArvoreEstendida()) return;
-    onMarcarUsado('bonus');
-    setFeedback(
-      '🌳 Percorrer a Árvore — Longa Distância — teleporte de até 45m; pode levar até 6 criaturas voluntárias a até 3m de você.',
+    escolherNoPainel(
+      'bonus',
+      '🌳 Percorrer a Árvore — Longa Distância',
+      'teleporte de até 45m; pode levar até 6 criaturas voluntárias a até 3m de você.',
     );
   }
 
