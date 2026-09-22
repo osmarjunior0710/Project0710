@@ -3,6 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import iconeMochilaTab from '../../assets/icones-tabbar/icone-mochila.webp';
 import iconeMagiasTab from '../../assets/icones-tabbar/icone-magias.webp';
 import iconeCombateTab from '../../assets/icones-tabbar/icone-combate.webp';
+import iconeAtributosTab from '../../assets/icones-tabbar/icone-atributos.webp';
+import iconePerfilTab from '../../assets/icones-tabbar/icone-perfil.webp';
+import iconePetsTab from '../../assets/icones-tabbar/icone-pets.webp';
 import { armazenamentoPersonagens, type PersonagemSalvo } from '../../core/armazenamentoPersonagens';
 import { garantirPersonagemDemo, ID_PERSONAGEM_DEMO } from '../../core/personagemDemo';
 import { useColapsavel } from '../hooks/useColapsavel';
@@ -147,12 +150,12 @@ type TabName = 'atributos' | 'perfil' | 'mochila' | 'magias' | 'combat' | 'pets'
  * já são reconhecíveis sozinhas, o texto ficava redundante). `label` continua
  * existindo pra acessibilidade (título/alt), só não é exibido na tela. */
 const TABS: { id: TabName; label: string; icon: string; img?: string }[] = [
-  { id: 'atributos', label: 'Atributos', icon: '🧬' },
-  { id: 'perfil', label: 'Perfil', icon: '👤' },
+  { id: 'atributos', label: 'Atributos', icon: '🧬', img: iconeAtributosTab },
+  { id: 'perfil', label: 'Perfil', icon: '👤', img: iconePerfilTab },
   { id: 'mochila', label: 'Mochila', icon: '🎒', img: iconeMochilaTab },
   { id: 'magias', label: 'Magias', icon: '📖', img: iconeMagiasTab },
   { id: 'combat', label: 'Combate', icon: '⚔', img: iconeCombateTab },
-  { id: 'pets', label: 'Pets', icon: '🐾' },
+  { id: 'pets', label: 'Pets', icon: '🐾', img: iconePetsTab },
 ];
 
 const turnoInicial: Record<RecursoTurno, EstadoRecurso> = {

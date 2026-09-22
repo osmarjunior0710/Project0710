@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1716
+
+Últimos 3 ícones do menu inferior (Atributos, Perfil, Pets) trocados por arte própria — agora as 6 abas mostram só o ícone, sem texto embaixo.
+
 ## v202609_1524
 
 Ícones novos de Mochila, Magias e Combate no menu inferior (artes próprias em vez de emoji) — essas 3 abas agora mostram só o ícone, sem texto embaixo.
