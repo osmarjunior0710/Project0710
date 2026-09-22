@@ -264,8 +264,8 @@ export default function LojaStep({ selection, update }: StepProps) {
         <div className={styles.ouroBoxTopo}>
           <div className={styles.ouroLabelCol}>
             <span className="label">ouro inicial</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              <IconeMoeda tipo="po" tamanho={20} />
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, lineHeight: 1 }}>
+              <IconeMoeda tipo="po" tamanho={16} />
               {ouroInicial} PO
             </span>
           </div>
@@ -274,11 +274,11 @@ export default function LojaStep({ selection, update }: StepProps) {
             {/* Restante nas 3 moedas (PO, PP, PC) — o que sobra de verdade, ex.: 82,35 PO = 82 PO 3 PP 5 PC */}
             <span
               className={`${styles.ouroValor} ${ouroRestante <= 0 ? styles.ouroValorZerado : ''}`}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, lineHeight: 1 }}
             >
               {(['po', 'pp', 'pc'] as const).map((t) => (
-                <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                  <IconeMoeda tipo={t} tamanho={20} />
+                <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, lineHeight: 1 }}>
+                  <IconeMoeda tipo={t} tamanho={16} />
                   {restanteEmMoedas[t]}
                 </span>
               ))}

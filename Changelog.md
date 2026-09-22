@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0046
+
+Loja da criação de personagem: os ícones das moedas (ouro inicial e restante) ficaram menores (16 px) e alinhados ao centro do valor.
+
 ## v202609_0043
 
 **Criação de personagem — ouro na Loja:** o cabeçalho agora mostra os ícones das moedas e o **Restante** aparece nas 3 moedas (PO, PP e PC) com o cálculo certo — ex.: 84,5 PO = 84 PO + 5 PP + 0 PC.
