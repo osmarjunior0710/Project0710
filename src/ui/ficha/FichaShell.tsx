@@ -552,6 +552,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ? armaduras.find((a) => a.nome === itemArmaduraEquipada.nome)
     : undefined;
   const desvantagemForcaDestreza = armaduraSemTreinamentoEquipada(classeOriginal, armaduraEquipadaCatalogo, talentosEfetivos, classesMulticlassadasNomes);
+  // Desvantagem em Furtividade é propriedade da PRÓPRIA armadura (campo
+  // `furtividade` da planilha), não de falta de treinamento — vale
+  // mesmo treinado, diferente de `desvantagemForcaDestreza` acima.
+  const desvantagemFurtividadeArmadura =
+    armaduraEquipadaCatalogo?.furtividade === 'Desvantagem' ? armaduraEquipadaCatalogo.nome : null;
   const iniciativa = calcularIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);
   const percepcaoPassiva = calcularPercepcaoPassiva(selecao, nivelTotalAtual);
   const atributos = calcularAtributosFinais(selecao, temCampeaoPrimitivo);
@@ -2293,6 +2298,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             salvaguardas={salvaguardas}
             temSentidoDePerigo={temSentidoDePerigo}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
+            desvantagemFurtividadeArmadura={desvantagemFurtividadeArmadura}
             proficienciasFerramenta={proficienciasFerramenta}
             reservaDadosDeVida={reservaDadosDeVida}
             onAbrirLevelUp={() => {

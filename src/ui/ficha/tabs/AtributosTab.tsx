@@ -51,6 +51,13 @@ interface AtributosTabProps {
    * Afeta o box de atributo FOR/DES, perícias de FOR/DES e Iniciativa
    * — não afeta INT/SAB/CAR nem outras perícias. */
   desvantagemForcaDestreza: boolean;
+  /** Nome da armadura equipada quando ela impõe Desvantagem em
+   * Furtividade (campo `furtividade` de `data/rulesets/dnd2024/
+   * armaduras.ts`) — `null` = sem armadura equipada ou a equipada não
+   * tem essa restrição. Diferente de `desvantagemForcaDestreza`
+   * (falta de treinamento): essa aqui vale mesmo treinado, é
+   * propriedade da própria armadura. */
+  desvantagemFurtividadeArmadura: string | null;
   /** Sentido de Perigo (Bárbaro, nível 2+) — Vantagem na Salvaguarda
    * de Destreza. Se coincidir com `desvantagemForcaDestreza` na mesma
    * rolagem, as duas se cancelam (`resolverVantagem`). */
@@ -127,6 +134,7 @@ export default function AtributosTab({
   salvaguardas,
   pericias,
   desvantagemForcaDestreza,
+  desvantagemFurtividadeArmadura,
   temSentidoDePerigo,
   proficienciasFerramenta,
   reservaDadosDeVida,
@@ -366,33 +374,45 @@ export default function AtributosTab({
           </span>
         </div>
       ))}
-      {pericias.map((p) => (
-        <div
-          key={p.nome}
-          className={styles.skillRow}
-          onClick={() =>
-            rolarD20({
-              label: p.nome,
-              formula: `1d20 ${p.mod >= 0 ? '+' : '-'} ${Math.abs(p.mod)}`,
-              mod: p.mod,
-              explicacaoMod: p.explicacao,
-              categoria: 'atributoOuSalvaguarda',
-              permiteForcaIndomavel: p.atributo === 'FOR',
-              vantagem:
-                desvantagemForcaDestreza && (p.atributo === 'FOR' || p.atributo === 'DES') ? 'desvantagem' : undefined,
-            })
-          }
-        >
-          <span>
-            {p.proficiente ? '🔵' : '⚫'} {p.especialista && '⭐ '}
-            {p.nome} ({p.atributo}) 🎲 <InfoValor titulo={p.nome} explicacao={p.explicacao} />
-          </span>
-          <span>
-            {p.mod >= 0 ? '+' : ''}
-            {p.mod}
-          </span>
-        </div>
-      ))}
+      {pericias.map((p) => {
+        const desvantagemFurtividade = p.nome === 'Furtividade' && desvantagemFurtividadeArmadura !== null;
+        const explicacaoComDesvantagem = desvantagemFurtividade
+          ? {
+              ...p.explicacao,
+              linhas: [...p.explicacao.linhas, { label: 'Desvantagem', valor: `Armadura (${desvantagemFurtividadeArmadura})` }],
+            }
+          : p.explicacao;
+        return (
+          <div
+            key={p.nome}
+            className={styles.skillRow}
+            onClick={() =>
+              rolarD20({
+                label: p.nome,
+                formula: `1d20 ${p.mod >= 0 ? '+' : '-'} ${Math.abs(p.mod)}`,
+                mod: p.mod,
+                explicacaoMod: explicacaoComDesvantagem,
+                categoria: 'atributoOuSalvaguarda',
+                permiteForcaIndomavel: p.atributo === 'FOR',
+                vantagem:
+                  (desvantagemForcaDestreza && (p.atributo === 'FOR' || p.atributo === 'DES')) || desvantagemFurtividade
+                    ? 'desvantagem'
+                    : undefined,
+              })
+            }
+          >
+            <span>
+              {p.proficiente ? '🔵' : '⚫'} {p.especialista && '⭐ '}
+              {p.nome} {desvantagemFurtividade && '🔻'} ({p.atributo}) 🎲{' '}
+              <InfoValor titulo={p.nome} explicacao={explicacaoComDesvantagem} />
+            </span>
+            <span>
+              {p.mod >= 0 ? '+' : ''}
+              {p.mod}
+            </span>
+          </div>
+        );
+      })}
       <div className="label" style={{ marginTop: 6, marginBottom: 12 }}>
         toque num atributo, perícia ou iniciativa pra rolar o dado.
       </div>
