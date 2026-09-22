@@ -72,6 +72,7 @@ import {
 import { ataqueAtual, ataqueBonusMaoSecundaria } from '../../core/ataque';
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
+import { explicarCdRamosDaArvore } from '../../core/ramosDaArvore';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
@@ -346,6 +347,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [moedas, setMoedas] = useState<Moedas>(() => normalizarMoedas(personagemSalvo.moedas));
   const [furiaImplacavelUsos, setFuriaImplacavelUsos] = useState(personagemSalvo.furiaImplacavelUsosDesdeDescanso ?? 0);
   const [furiaPersistenteUsada, setFuriaPersistenteUsada] = useState(personagemSalvo.furiaPersistenteUsada ?? false);
+  const [percorrerArvoreEstendidaUsada, setPercorrerArvoreEstendidaUsada] = useState(
+    personagemSalvo.percorrerArvoreEstendidaUsada ?? false,
+  );
   const [furiaImplacavelPendente, setFuriaImplacavelPendente] = useState(false);
   /** `null` = ainda oferecendo (fase 'oferta' do modal), esperando o
    * jogador tocar em rolar; `true`/`false` = dado já rolado, resultado
@@ -367,6 +371,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Golpe de Escudo (Mestre em Escudos) — 1x por turno, mesmo padrão
   // de `golpeBrutalUsadoTurno`.
   const [golpeDeEscudoUsadoTurno, setGolpeDeEscudoUsadoTurno] = useState(personagemSalvo.golpeDeEscudoUsadoTurno ?? false);
+  // Força Revigorante (Vitalidade da Árvore, Bárbaro nível 3+) — regra
+  // real é "no início de cada um dos seus turnos", modelada como 1x
+  // por turno (mesmo padrão de `golpeDeEscudoUsadoTurno`) em vez do
+  // botão livre sem trava da 1ª versão (Osmar pediu a troca, 2026-09).
+  const [forcaRevigoranteUsadaTurno, setForcaRevigoranteUsadaTurno] = useState(
+    personagemSalvo.forcaRevigoranteUsadaTurno ?? false,
+  );
   // Esmagador/Talhador — mesmo padrão 1x/turno, flags independentes
   // (o personagem pode ter os 2 talentos ao mesmo tempo).
   const [esmagadorUsadoTurno, setEsmagadorUsadoTurno] = useState(personagemSalvo.esmagadorUsadoTurno ?? false);
@@ -541,6 +552,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ? armaduras.find((a) => a.nome === itemArmaduraEquipada.nome)
     : undefined;
   const desvantagemForcaDestreza = armaduraSemTreinamentoEquipada(classeOriginal, armaduraEquipadaCatalogo, talentosEfetivos, classesMulticlassadasNomes);
+  // Desvantagem em Furtividade é propriedade da PRÓPRIA armadura (campo
+  // `furtividade` da planilha), não de falta de treinamento — vale
+  // mesmo treinado, diferente de `desvantagemForcaDestreza` acima.
+  const desvantagemFurtividadeArmadura =
+    armaduraEquipadaCatalogo?.furtividade === 'Desvantagem' ? armaduraEquipadaCatalogo.nome : null;
   const iniciativa = calcularIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);
   const percepcaoPassiva = calcularPercepcaoPassiva(selecao, nivelTotalAtual);
   const atributos = calcularAtributosFinais(selecao, temCampeaoPrimitivo);
@@ -653,6 +669,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     aSorteDoProprioTenebroso: sorteDoTenebrosoDisponivel,
     resistenciaInfera: resistenciaInferaDisponivel,
     lancarNoInferno: lancarNoInfernoDisponivel,
+    vitalidadeDaArvore: vitalidadeDaArvoreDisponivel,
+    ramosDaArvore: ramosDaArvoreDesbloqueada,
+    percorrerArvore: percorrerArvoreDesbloqueada,
   } = caracteristicasSubclasseAtivas(personagem.subclasse, personagem.nivel, [
     'legiaoDosMortos',
     'grimorioDeNecromancia',
@@ -665,6 +684,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'aSorteDoProprioTenebroso',
     'resistenciaInfera',
     'lancarNoInferno',
+    'vitalidadeDaArvore',
+    'ramosDaArvore',
+    'percorrerArvore',
   ]);
   // G3.3 (foco de saúde do projeto, ver EmDevB.md): todo o bloco de
   // magia/conjuração/pool combinado (antes ~150 linhas soltas aqui)
@@ -836,6 +858,18 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const explicacaoCdGolpeDeEscudo = podeOferecerGolpeDeEscudo
     ? explicarCdGolpeDeEscudo(forMod, bonusProficienciaAtual)
     : null;
+  // Ramos da Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 6) — só
+  // com a Fúria ativa (o próprio texto da característica: "enquanto sua
+  // Fúria estiver ativa").
+  const podeOferecerRamosDaArvore = ramosDaArvoreDesbloqueada && furiaAtiva;
+  const explicacaoCdRamosDaArvore = podeOferecerRamosDaArvore
+    ? explicarCdRamosDaArvore(forMod, bonusProficienciaAtual)
+    : null;
+  // Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 14) —
+  // só com a Fúria ativa, mesma condição de Ramos da Árvore. Card
+  // informativo (sem CD/rolagem — é só teleporte) + 1 toggle real pra
+  // "usei a versão estendida (45m) nesta Fúria".
+  const podeOferecerPercorrerArvore = percorrerArvoreDesbloqueada && furiaAtiva;
   const ataque = classe
     ? ataqueAtual(
         armaEquipada?.nome ?? null,
@@ -938,6 +972,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     golpeBrutalUsadoTurno,
     cortarProntoTurno: cortarPronto,
     golpeDeEscudoUsadoTurno,
+    forcaRevigoranteUsadaTurno,
     esmagadorUsadoTurno,
     talhadorUsadoTurno,
     conhecimentoPrimordialPericiaEscolhida,
@@ -952,6 +987,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     dadosDeVidaGastos,
     moedas,
     furiaPersistenteUsada,
+    percorrerArvoreEstendidaUsada,
     conhecimentoDePedrasGasto,
     picoDeAdrenalinaGasto,
     ataqueDeSoproGasto,
@@ -1037,6 +1073,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       golpeBrutalUsadoTurno,
       cortarPronto,
       golpeDeEscudoUsadoTurno,
+      forcaRevigoranteUsadaTurno,
       esmagadorUsadoTurno,
       talhadorUsadoTurno,
       conhecimentoPrimordialPericiaEscolhida,
@@ -1048,6 +1085,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       dadosDeVidaGastos,
       moedas,
       furiaPersistenteUsada,
+      percorrerArvoreEstendidaUsada,
       conhecimentoDePedrasGasto,
       picoDeAdrenalinaGasto,
       ataqueDeSoproGasto,
@@ -1204,6 +1242,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return vooDraconico.usar();
   }
 
+  // Percorrer a Árvore (versão estendida, 45m) — 1x por FÚRIA (não por
+  // Descanso, diferente dos outros `recursoFlagUnica` acima): reseta
+  // dentro de `usarFuria()` ao ATIVAR de novo, não em descansoLongo.
+  const percorrerArvoreEstendida = recursoFlagUnica(percorrerArvoreEstendidaUsada, setPercorrerArvoreEstendidaUsada);
+  function usarPercorrerArvoreEstendida(): boolean {
+    return percorrerArvoreEstendida.usar();
+  }
+
   const ancestralidadeGigante = recursoContado(usosAncestralidadeGiganteMaximo, ancestralidadeGiganteGasto, setAncestralidadeGiganteGasto);
   function usarAncestralidadeGigante(): boolean {
     return ancestralidadeGigante.usar();
@@ -1242,6 +1288,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (furiaRestantes <= 0 || armaduraPesadaEquipada) return false;
     setFuriaGasto((v) => v + 1);
     setFuriaAtiva(true);
+    // Vitalidade da Árvore (Trilha da Árvore do Mundo, nível 3) — Surto
+    // de Vitalidade: PV Temporário = nível NA CLASSE Bárbaro, sempre ao
+    // ativar, sem perguntar (mesmo espírito de Força Indomável/Campeão
+    // Primitivo — nunca teria opção, o jogador nunca ia recusar).
+    if (vitalidadeDaArvoreDisponivel) {
+      setPvTemporario((atual) => ganharPvTemporario(atual, personagem.nivel));
+    }
+    // Percorrer a Árvore (nível 14) — a versão estendida (45m) é 1x por
+    // FÚRIA: toda ativação nova libera o uso de novo.
+    if (percorrerArvoreDesbloqueada) setPercorrerArvoreEstendidaUsada(false);
     return true;
   }
 
@@ -1280,6 +1336,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setGolpeBrutalUsadoTurno(false);
     setCortarPronto(false);
     setGolpeDeEscudoUsadoTurno(false);
+    setForcaRevigoranteUsadaTurno(false);
     setEsmagadorUsadoTurno(false);
     setTalhadorUsadoTurno(false);
   }
@@ -2241,6 +2298,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             salvaguardas={salvaguardas}
             temSentidoDePerigo={temSentidoDePerigo}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
+            desvantagemFurtividadeArmadura={desvantagemFurtividadeArmadura}
             proficienciasFerramenta={proficienciasFerramenta}
             reservaDadosDeVida={reservaDadosDeVida}
             onAbrirLevelUp={() => {
@@ -2444,6 +2502,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               onUsar: usarFuria,
               persistenteDisponivel: furiaPersistenteDisponivel,
               onRecuperarPersistente: recuperarFuriaPersistente,
+              vitalidadeDaArvoreDisponivel,
+              forcaRevigoranteUsadaTurno,
+              onMarcarForcaRevigoranteUsada: () => setForcaRevigoranteUsadaTurno(true),
             }}
             ataqueImprudente={{
               disponivel: temAtaqueImprudente,
@@ -2470,6 +2531,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               explicacaoCd: explicacaoCdGolpeDeEscudo,
               usadoTurno: golpeDeEscudoUsadoTurno,
               onUsar: () => setGolpeDeEscudoUsadoTurno(true),
+            }}
+            ramosDaArvore={{
+              disponivel: podeOferecerRamosDaArvore,
+              cd: explicacaoCdRamosDaArvore ? Number(explicacaoCdRamosDaArvore.total.valor) : null,
+              explicacaoCd: explicacaoCdRamosDaArvore,
+            }}
+            percorrerArvore={{
+              disponivel: podeOferecerPercorrerArvore,
+              estendidaDisponivel: percorrerArvoreEstendida.disponivel,
+              onUsarEstendida: usarPercorrerArvoreEstendida,
             }}
             golpeCondicional={{
               esmagadorDisponivel: podeOferecerEsmagador,

@@ -5,9 +5,96 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
-## v202609_1331
+## v202609_1332
 
 Cor do Guerreiro (Recuperar Fôlego) confirmada: azul, o mesmo padrão de sempre.
+
+## v202609_0842
+
+**Popups de Conjuração/CD/Ataque Mágico padronizados:** os 3 ⓘ da aba
+Magias (Mod. de Conjuração, CD da Magia, Ataque Mágico) agora mostram
+a mesma tabela discriminada (label + valor) usada em toda perícia/
+salvaguarda, em vez do parágrafo com a fórmula escrita por extenso.
+
+## v202609_0835
+
+**Correção: o fim de cada aba da Ficha agora rola por cima dos 2 FABs**
+(😴 Descanso, 🎲 Dado 3D) — antes o final de listas longas (ex.:
+Maestria em Arma) ficava escondido atrás deles.
+
+## v202609_0827
+
+**Desvantagem em Furtividade por armadura, automática:** vestir uma
+armadura que impõe Desvantagem em Furtividade (Acolchoada, Loriga de
+Escamas, Placas Parcial, e todas as Armaduras Pesadas) agora aplica a
+Desvantagem sozinha ao rolar Furtividade — sem depender do jogador
+lembrar. A perícia ganha um 🔻 ao lado do nome, e o ⓘ explica qual
+armadura está causando isso.
+
+## v202609_0739
+
+**Melhorias na Loja (criação de personagem):** os títulos "Equipado
+(Origem)/(Classe)" viraram "Escolhido (Origem)/(Classe)" (nada está
+equipado ainda nessa etapa); a tag "Nx adquirido por Kit X" ganhou um
+tom de azul mais claro, pra não confundir com o azul mais forte de um
+item efetivamente comprado; e os itens que vieram de graça pela Origem
+ou Classe (não só de Kits) agora também ganham a mesma tag — "Nx
+adquirido no kit de origem"/"...de classe" — quando aparecem na lista
+de itens à venda.
+
+## v202609_0107
+
+**Correção: os cards de Percorrer a Árvore fecham o painel de Ação
+Bônus ao selecionar** — antes ficavam abertos depois de tocar (só o
+"Bônus" lá em cima marcava usado), agora fecham igual qualquer outra
+escolha do painel.
+
+## v202609_0047
+
+**Percorrer a Árvore virou 2 cards:** o card de Ação Bônus agora
+mostra "🌳 Percorrer a Árvore" (teleporte de 18m, pode usar todo
+turno) separado de "🌳 Percorrer a Árvore — Longa Distância" (45m +
+até 6 criaturas, 1x por Fúria) — antes era 1 card só. Usar qualquer um
+dos dois agora também gasta a Ação Bônus do turno, igual outros
+recursos do painel.
+
+## v202609_0037
+
+**Força Revigorante agora trava 1x por turno:** o botão "🌳 Força
+Revigorante" (Trilha da Árvore do Mundo) fica cinza depois de usado e
+libera sozinho no "Fim do Turno" — igual Golpe de Escudo e outras
+características de 1x/turno já tinham, em vez de ficar disponível pra
+sempre enquanto a Fúria está ativa.
+
+## v202609_2242
+
+**Trilha da Árvore do Mundo — Percorrer a Árvore (Ação Bônus):** com a
+Fúria ativa e nível 14+, um novo card aparece no painel de Ação Bônus
+explicando o teleporte de 18m (sem custo de recurso) e, quando a
+versão estendida de 45m for usada, um toque marca "já usada nesta
+Fúria" — volta a liberar sozinho na próxima vez que a Fúria for
+ativada. Com isso, a Trilha da Árvore do Mundo (1ª subclasse de
+Bárbaro) está completa.
+
+## v202609_2233
+
+**Trilha da Árvore do Mundo — Ramos da Árvore (Reação):** com a Fúria
+ativa e nível 6+, um novo card aparece no painel de Reação — toque
+nele quando uma criatura à vista começar o turno perto de você pra ver
+a CD, e o texto de Falha (ela é teleportada pra perto de você, e você
+pode travar o Deslocamento dela a 0 até o fim do turno) ou Sucesso
+(nada acontece).
+
+## v202609_2204
+
+**Trilha da Árvore do Mundo — Vitalidade da Árvore já funciona de
+verdade:** ativar Fúria (Bárbaro dessa Trilha) já soma Pontos de Vida
+Temporário sozinho, sem precisar fazer nada (igual ao seu nível na
+classe). Enquanto a Fúria está ativa, um novo botão "🌳 Força
+Revigorante" aparece no card de Fúria — rola o dado certo (mesmo
+número de d6 do bônus de Dano da Fúria) pra você aplicar como PV
+Temporário em outro personagem/aliado na mesa (o app não modela outra
+criatura, só rola e mostra o número).
 
 ## v202609_0049
 

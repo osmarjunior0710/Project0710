@@ -5,6 +5,13 @@ import styles from './InfoValor.module.css';
 
 interface InfoValorProps {
   titulo: string;
+  /** Parágrafo(s) de regra antes da tabela — mesmo texto que `InfoTexto`
+   * mostraria sozinho, só que aqui some com a tabela de conta embaixo.
+   * Padrão único pra todo popup informativo (2026-09, pedido do Osmar):
+   * Título / Descrição (quando existir) / Tabela / fechar. Omitido =
+   * só título + tabela (a maioria dos números simples não precisa de
+   * explicação de regra, só da conta). */
+  descricao?: string | string[];
   explicacao: ExplicacaoCalculo;
 }
 
@@ -21,7 +28,7 @@ interface InfoValorProps {
  * o overlay continua sendo filho dessa linha, então sem o
  * stopPropagation um toque pra fechar o popup borbulha pro onClick da
  * linha por baixo e dispara a rolagem de dado sem querer. */
-export default function InfoValor({ titulo, explicacao }: InfoValorProps) {
+export default function InfoValor({ titulo, descricao, explicacao }: InfoValorProps) {
   const [aberto, setAberto] = useState(false);
   useLockBodyScroll(aberto);
 
@@ -46,6 +53,12 @@ export default function InfoValor({ titulo, explicacao }: InfoValorProps) {
         >
           <div className={styles.card} onClick={(e) => e.stopPropagation()}>
             <div className={styles.title}>{titulo}</div>
+            {descricao &&
+              (Array.isArray(descricao) ? descricao : [descricao]).map((p, i) => (
+                <p key={i} style={{ fontSize: 13, lineHeight: 1.5, margin: '0 0 10px', textTransform: 'none' }}>
+                  {p}
+                </p>
+              ))}
             <div className={styles.tabela}>
               {explicacao.linhas.map((linha, i) => (
                 <div className={styles.linha} key={i}>

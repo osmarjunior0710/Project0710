@@ -8,8 +8,10 @@ import {
   construirCatalogoLoja,
   formatarPO,
   itensAdquiridosPorKits,
+  itensAdquiridosPorOrigemOuClasse,
   type GrupoLoja,
   type ItemAdquiridoPorKit,
+  type ItemAdquiridoPorOrigemOuClasse,
   type LojaItem,
 } from '../../../core/loja';
 import { calcularOuroInicial } from '../../../core/calculoPersonagem';
@@ -43,12 +45,14 @@ function ItemCard({
   update,
   ouroRestante,
   adquiridoPorKit,
+  adquiridoPorOrigemOuClasse,
 }: {
   item: LojaItem;
   selection: StepProps['selection'];
   update: StepProps['update'];
   ouroRestante: number;
   adquiridoPorKit?: ItemAdquiridoPorKit;
+  adquiridoPorOrigemOuClasse?: ItemAdquiridoPorOrigemOuClasse;
 }) {
   const qtd = quantidadeNoCarrinho(selection, item.nome);
   const podeComprar = item.custoPO !== null && item.custoPO <= ouroRestante;
@@ -139,9 +143,19 @@ function ItemCard({
       </div>
       {adquiridoPorKit && (
         <div className={styles.adquiridoPorKitRow}>
-          <span className="tag">
+          <span className={`tag ${styles.tagAdquirido}`}>
             {adquiridoPorKit.quantidade}x adquirido por {adquiridoPorKit.kits.join(', ')}
           </span>
+        </div>
+      )}
+      {adquiridoPorOrigemOuClasse && adquiridoPorOrigemOuClasse.quantidadeOrigem > 0 && (
+        <div className={styles.adquiridoPorKitRow}>
+          <span className={`tag ${styles.tagAdquirido}`}>{adquiridoPorOrigemOuClasse.quantidadeOrigem}x adquirido no kit de origem</span>
+        </div>
+      )}
+      {adquiridoPorOrigemOuClasse && adquiridoPorOrigemOuClasse.quantidadeClasse > 0 && (
+        <div className={styles.adquiridoPorKitRow}>
+          <span className={`tag ${styles.tagAdquirido}`}>{adquiridoPorOrigemOuClasse.quantidadeClasse}x adquirido no kit de classe</span>
         </div>
       )}
     </div>
@@ -188,6 +202,7 @@ function Grupo({
   ouroRestante,
   soProficiente,
   adquiridosPorKits,
+  adquiridosPorOrigemOuClasse,
 }: {
   grupo: GrupoLoja;
   selection: StepProps['selection'];
@@ -195,6 +210,7 @@ function Grupo({
   ouroRestante: number;
   soProficiente: boolean;
   adquiridosPorKits: Map<string, ItemAdquiridoPorKit>;
+  adquiridosPorOrigemOuClasse: Map<string, ItemAdquiridoPorOrigemOuClasse>;
 }) {
   const [aberto, setAberto] = useState(false);
   const itensVisiveis = soProficiente && GRUPOS_ARMA_ARMADURA.has(grupo.id) ? grupo.itens.filter((it) => classeEhProficiente(selection, it)) : grupo.itens;
@@ -237,6 +253,7 @@ function Grupo({
             update={update}
             ouroRestante={ouroRestante}
             adquiridoPorKit={adquiridosPorKits.get(item.nome)}
+            adquiridoPorOrigemOuClasse={adquiridosPorOrigemOuClasse.get(item.nome)}
           />
         ))}
     </div>
@@ -252,6 +269,7 @@ export default function LojaStep({ selection, update }: StepProps) {
   const adquiridosPorKits = itensAdquiridosPorKits(selection.itens, catalogo);
 
   const itensMochila = calcularItensIniciais(selection);
+  const adquiridosPorOrigemOuClasse = itensAdquiridosPorOrigemOuClasse(itensMochila, catalogo);
   const carga = calcularCargaTotal(itensMochila);
   const capacidadeMaxima = calcularCapacidadeMaxima(selection);
   const percentualCarga = capacidadeMaxima ? Math.round((carga.kg / capacidadeMaxima) * 100) : 0;
@@ -304,8 +322,8 @@ export default function LojaStep({ selection, update }: StepProps) {
       {(itensOrigem.length > 0 || itensClasse.length > 0) && (
         <>
           <div className="section-title">Você já está levando</div>
-          <EquipadoResumo titulo="Equipado (Origem)" itens={itensOrigem} />
-          <EquipadoResumo titulo="Equipado (Classe)" itens={itensClasse} />
+          <EquipadoResumo titulo="Escolhido (Origem)" itens={itensOrigem} />
+          <EquipadoResumo titulo="Escolhido (Classe)" itens={itensClasse} />
         </>
       )}
 
@@ -319,6 +337,7 @@ export default function LojaStep({ selection, update }: StepProps) {
           ouroRestante={ouroRestante}
           soProficiente={soProficiente}
           adquiridosPorKits={adquiridosPorKits}
+          adquiridosPorOrigemOuClasse={adquiridosPorOrigemOuClasse}
         />
       ))}
     </>

@@ -144,6 +144,18 @@ interface CombatTabProps {
      * outros botões condicionais de card (ex.: Bênção do Tenebroso). */
     persistenteDisponivel: boolean;
     onRecuperarPersistente: () => void;
+    /** Trilha da Árvore do Mundo (nível 3+) — Força Revigorante: no
+     * início do turno rola Xd6 (X = bônus de Dano da Fúria) de PV
+     * Temporário pra OUTRA criatura — o app não aplica sozinho (não
+     * modela "outra criatura"), só rola e mostra o total. */
+    vitalidadeDaArvoreDisponivel: boolean;
+    /** Força Revigorante — 1x por turno (reseta no Fim do Turno, mesmo
+     * padrão de Golpe de Escudo/Esmagador/Talhador — troca da versão
+     * anterior sem trava, decisão do Osmar 2026-09). `onMarcarUsada`
+     * só marca o flag — a rolagem em si continua local a este
+     * componente (`usarForcaRevigorante`, já rola o Xd6). */
+    forcaRevigoranteUsadaTurno: boolean;
+    onMarcarForcaRevigoranteUsada: () => void;
   };
   /** Ataque Imprudente (Bárbaro, nível 2+) — decidido só na 1ª jogada
    * de ataque do turno (o painel de Ação abre um mini-picker "Ataque
@@ -189,6 +201,30 @@ interface CombatTabProps {
     explicacaoCd: ExplicacaoCalculo | null;
     usadoTurno: boolean;
     onUsar: () => void;
+  };
+  /** Ramos da Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 6) —
+   * `disponivel` = Fúria ativa + nível 6+. Reação de verdade (não
+   * ligada ao SEU ataque, diferente de Golpe de Escudo) — mora no
+   * painel de Reação e consome o mesmo slot genérico de Reação do
+   * turno (`turnState.reacao`), não um `usadoTurno` próprio. */
+  ramosDaArvore: {
+    disponivel: boolean;
+    cd: number | null;
+    explicacaoCd: ExplicacaoCalculo | null;
+  };
+  /** Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 14)
+   * — `disponivel` = Fúria ativa + nível 14+. 2 cards (pedido do
+   * Osmar, 2026-09, testando): a versão base (18m) é um Ação Bônus
+   * normal, disponível todo turno (só a economia genérica de Ação
+   * Bônus do turno trava, igual qualquer outro recurso desse painel);
+   * "Longa Distância" (45m + até 6 criaturas) é 1x por FÚRIA
+   * (`estendidaDisponivel`, reseta ao reativar a Fúria — ver
+   * `usarFuria` em `FichaShell.tsx`), sem CD/rolagem em nenhuma das
+   * duas (é só teleporte, sem dano). */
+  percorrerArvore: {
+    disponivel: boolean;
+    estendidaDisponivel: boolean;
+    onUsarEstendida: () => boolean;
   };
   /** Esmagador/Talhador — `esmagadorDisponivel`/`talhadorDisponivel` =
    * talento + ataque PRINCIPAL causa o tipo de dano certo + ainda não
@@ -440,6 +476,9 @@ export default function CombatTab({
     onUsar: onUsarFuria,
     persistenteDisponivel: furiaPersistenteDisponivel,
     onRecuperarPersistente: onRecuperarFuriaPersistente,
+    vitalidadeDaArvoreDisponivel,
+    forcaRevigoranteUsadaTurno,
+    onMarcarForcaRevigoranteUsada,
   },
   ataqueImprudente: {
     disponivel: ataqueImprudenteDisponivel,
@@ -466,6 +505,16 @@ export default function CombatTab({
     explicacaoCd: explicacaoCdGolpeDeEscudo,
     usadoTurno: golpeDeEscudoUsadoTurno,
     onUsar: onUsarGolpeDeEscudo,
+  },
+  ramosDaArvore: {
+    disponivel: ramosDaArvoreDisponivel,
+    cd: cdRamosDaArvore,
+    explicacaoCd: explicacaoCdRamosDaArvore,
+  },
+  percorrerArvore: {
+    disponivel: percorrerArvoreDisponivel,
+    estendidaDisponivel: percorrerArvoreEstendidaDisponivel,
+    onUsarEstendida: onUsarPercorrerArvoreEstendida,
   },
   golpeCondicional: {
     esmagadorDisponivel,
@@ -577,6 +626,7 @@ export default function CombatTab({
   const [lancarNoInfernoDano, setLancarNoInfernoDano] = useState<number | null>(null);
   const [ataqueDeSoproDano, setAtaqueDeSoproDano] = useState<number | null>(null);
   const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
+  const [ramosDaArvoreAberto, setRamosDaArvoreAberto] = useState(false);
   // Esmagador/Talhador — qual popup de "Ativar efeito" está aberto
   // agora (`null` = nenhum), disparado pelo botão do talento no popup
   // de dano (mesmo padrão de `golpeBrutalEfeitoPendente`).
@@ -739,6 +789,49 @@ export default function CombatTab({
     const ativandoAgora = !furiaAtiva;
     if (!onUsarFuria()) return;
     if (ativandoAgora) onMarcarUsado('bonus');
+  }
+
+  /** Força Revigorante (Trilha da Árvore do Mundo, nível 3+) — sempre
+   * pra OUTRA criatura, nunca pro próprio personagem (o app não modela
+   * "outra criatura" na cena, só rola e mostra o total pro jogador
+   * aplicar na mesa). 1x por turno — reseta no Fim do Turno, mesmo
+   * padrão de Golpe de Escudo (troca da versão anterior sem trava,
+   * decisão do Osmar 2026-09). */
+  function usarForcaRevigorante() {
+    if (forcaRevigoranteUsadaTurno) return;
+    rolarDados({
+      label: '🌳 Força Revigorante (PV Temp. pra outra criatura)',
+      formula: `${furiaBonusDano}d6`,
+      quantidade: furiaBonusDano,
+      lados: 6,
+      mod: 0,
+    });
+    onMarcarForcaRevigoranteUsada();
+  }
+
+  /** Percorrer a Árvore (Trilha da Árvore do Mundo, nível 14) — versão
+   * BASE (18m): Ação Bônus normal, sem custo de recurso próprio, então
+   * só a economia genérica de Ação Bônus do turno trava. Reaproveita
+   * `escolherNoPainel` (mesmo padrão de "selecionar e fechar o
+   * painel" das ações genéricas — não deixar aberto depois de usar,
+   * como qualquer outra escolha do painel). Sem rolagem (o app não
+   * modela posição/teleporte, só o texto). */
+  function usarPercorrerArvore() {
+    escolherNoPainel('bonus', '🌳 Percorrer a Árvore', 'teleporte de até 18m pra um espaço desocupado à sua vista.');
+  }
+
+  /** Percorrer a Árvore — Longa Distância (45m + até 6 criaturas
+   * voluntárias a até 3m de você): mesma Ação Bônus de cima, então
+   * também fecha o painel via `escolherNoPainel`, mas com a restrição
+   * adicional de 1x por FÚRIA (`onUsarPercorrerArvoreEstendida`,
+   * reseta ao reativar a Fúria). */
+  function usarPercorrerArvoreLongaDistancia() {
+    if (!onUsarPercorrerArvoreEstendida()) return;
+    escolherNoPainel(
+      'bonus',
+      '🌳 Percorrer a Árvore — Longa Distância',
+      'teleporte de até 45m; pode levar até 6 criaturas voluntárias a até 3m de você.',
+    );
   }
 
   function usarRevelacaoCelestial(formaEscolhida: string) {
@@ -911,6 +1004,18 @@ export default function CombatTab({
   function abrirGolpeDeEscudo() {
     onUsarGolpeDeEscudo();
     setGolpeDeEscudoAberto(true);
+  }
+
+  /** Ramos da Árvore — Reação de verdade (gatilho: criatura à vista
+   * começa o turno perto de você), então gasta o slot genérico de
+   * Reação do turno (`onMarcarUsado('reacao')`, mesmo economato de
+   * Contra-Encantamento/Palavras de Interrupção) em vez de um
+   * `usadoTurno` próprio como Golpe de Escudo (aquele é sempre depois
+   * do SEU ataque, não compete pela Reação do turno). */
+  function abrirRamosDaArvore() {
+    onMarcarUsado('reacao');
+    setPainelAberto(null);
+    setRamosDaArvoreAberto(true);
   }
 
   function usarPericiaInigualavel() {
@@ -1119,6 +1224,20 @@ export default function CombatTab({
               <div className="label" style={{ marginTop: 4 }}>
                 Encerra sozinha ao vestir Armadura Pesada — ou toque abaixo pra encerrar manualmente.
               </div>
+              {vitalidadeDaArvoreDisponivel && (
+                <div
+                  className="btn"
+                  style={{ marginTop: 8, ...(forcaRevigoranteUsadaTurno ? { opacity: 0.5, pointerEvents: 'none' } : {}) }}
+                  onClick={usarForcaRevigorante}
+                >
+                  🌳 Força Revigorante — {furiaBonusDano}d6 PV Temp. (início do turno, pra outra criatura)
+                </div>
+              )}
+              {vitalidadeDaArvoreDisponivel && forcaRevigoranteUsadaTurno && (
+                <div className="label" style={{ marginTop: 4 }}>
+                  já usada neste turno — libera sozinha no "Fim do Turno".
+                </div>
+              )}
               <div
                 className="btn"
                 style={{ marginTop: 8, background: 'rgba(178, 59, 59, 0.16)', borderColor: '#b23b3b' }}
@@ -1478,6 +1597,10 @@ export default function CombatTab({
           furiaRestantes={furiaRestantes}
           furiaAtiva={furiaAtiva}
           onUsarFuria={usarFuria}
+          percorrerArvoreDisponivel={percorrerArvoreDisponivel}
+          percorrerArvoreEstendidaDisponivel={percorrerArvoreEstendidaDisponivel}
+          onUsarPercorrerArvore={usarPercorrerArvore}
+          onUsarPercorrerArvoreLongaDistancia={usarPercorrerArvoreLongaDistancia}
           revelacaoCelestialDisponivel={revelacaoCelestialDisponivel}
           revelacaoCelestialGasto={revelacaoCelestialGasto}
           revelacaoCelestialFormaAtiva={revelacaoCelestialFormaAtiva}
@@ -1569,6 +1692,8 @@ export default function CombatTab({
           mestreDaMorteExplosaoDisponivel={mestreDaMorteDisponivel}
           mestreDaMorteExplosaoLiberada={mestreDaMorteExplosaoLiberada}
           modIntAtual={modIntAtual}
+          ramosDaArvoreDisponivel={ramosDaArvoreDisponivel}
+          onAbrirRamosDaArvore={abrirRamosDaArvore}
         />
       </SidePanel>
       {lancarNoInfernoDano !== null && (
@@ -1623,6 +1748,17 @@ export default function CombatTab({
           textoSucesso="nada acontece"
           textoFalha="empurra 1,5m ou é derrubado (Caído), à sua escolha"
           onFechar={() => setGolpeDeEscudoAberto(false)}
+        />
+      )}
+      {ramosDaArvoreAberto && (
+        <SalvaguardaDoAlvoModal
+          titulo="Ramos da Árvore"
+          atributo="Força"
+          cd={cdRamosDaArvore}
+          explicacaoCd={explicacaoCdRamosDaArvore}
+          textoSucesso="nada acontece"
+          textoFalha="teleporta pra um espaço desocupado à sua vista a até 1,5m de você (ou o mais próximo à sua vista); você pode reduzir o Deslocamento dele a 0 até o final do turno atual"
+          onFechar={() => setRamosDaArvoreAberto(false)}
         />
       )}
       {golpeCondicionalPendente && (

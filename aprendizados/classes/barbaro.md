@@ -276,8 +276,8 @@ progressão genericamente por ID.
 - B6 — Trilha do Coração Selvagem: Arauto da Fauna, Fúria dos
   Selvagens, Aspecto dos Selvagens, Arauto da Natureza, Poder dos
   Selvagens.
-- B7 — Trilha da Árvore do Mundo: Vitalidade da Árvore, Ramos da
-  Árvore (Reação), Raízes Devastadoras, Percorrer a Árvore.
+- B7 — Trilha da Árvore do Mundo: **implementada por completo em
+  2026-09** (ver seção própria abaixo) — não é mais pendência.
 - B8 — Trilha do Fanático: Campeão dos Deuses (reserva de dados),
   Fúria Divina, Concentração Fanática, Presença Zelosa, Fúria dos
   Deuses (nível 14, forma temporária).
@@ -301,3 +301,114 @@ qualquer classe. O app hoje trata nível 20 como máximo absoluto (a aba
 característica do Bárbaro — é um sistema à parte, cross-classe — por
 isso vira foco próprio depois, não faz parte deste arquivo além desta
 nota de origem. Ver `PENDENCIAS.md`.
+
+## Trilha da Árvore do Mundo (B7) — 1ª subclasse de Bárbaro, 2026-09
+
+Retomado como o próximo foco depois da classe base fechar. O Osmar
+escolheu a ordem das 4 Trilhas (Árvore do Mundo → Berserker → Coração
+Selvagem → Fanático) e já forneceu os 4 emblemas (banners webp,
+salvos em `assets/icones-classes/`) antes de começar.
+
+**Planilha + Livro do Jogador (Cap. 3) cruzados, sem divergência** — só
+1 célula com o bug de sempre (legenda de margem lateral colada no meio
+do parágrafo, ver CLAUDE.md seção 8): "Raízes Devastadoras" tinha
+"Subclasse Trilha da" / "Árvore do Mundo" interrompendo a frase.
+Confirmado via `pdftotext -layout` no PDF que era exatamente esse
+artefato de extração — reconstruída a frase limpa. "Ramos da Árvore"
+também veio com `tipoAcao` errado na planilha ("Passiva/Estática"),
+corrigido pra "Reação" (o próprio texto diz "você pode executar uma
+Reação" — mesmo tipo de ajuste já feito em Palavras de Interrupção do
+Bardo).
+
+**Quebra em 5 entregas** (aprovada antes de codar, seção 6.4 do
+CLAUDE.md):
+1. Dado no banco (as 4 características, sem nada visível de mecânica
+   ainda) — confirma que a Trilha aparece selecionável e as 4
+   características aparecem certinho no Perfil.
+2. Vitalidade da Árvore (nível 3) — mecânica de verdade.
+3. Ramos da Árvore (nível 6) — Reação.
+4. Percorrer a Árvore (nível 14) — Ação Bônus.
+5. Fechamento (este arquivo + `PENDENCIAS.md`).
+
+(Raízes Devastadoras, nível 10, não teve entrega própria — é só texto
+passivo sem nenhum estado pra rastrear, já cobriu com a Entrega 1.)
+
+**Decisões de design aprovadas antes de codar** (2 perguntas, "Sim
+para as duas"):
+- **Força Revigorante** (dentro de Vitalidade da Árvore — Xd6 PV Temp
+  pra OUTRA criatura, 1x no início de cada turno com Fúria ativa): o
+  app não modela outra criatura na cena, então o botão só rola e
+  mostra o total pro jogador aplicar na mesa — mas a trava de "1x por
+  turno" reaproveita o mesmo mecanismo que Golpe de Escudo/Esmagador/
+  Talhador já tinham (flag `usadoTurno`, resetado no "Fim do Turno"),
+  em vez de inventar um jeito novo de rastrear turno.
+- **Percorrer a Árvore**: em vez de tentar modelar teleporte/posição
+  no mapa (fora de escopo do app), virou card informativo (texto da
+  regra) + 1 toggle real só pra parte que TEM estado pra rastrear (a
+  versão estendida de 45m é 1x por Fúria — ver abaixo).
+
+**Vitalidade da Árvore (Entrega 2):** duas partes no mesmo texto de
+característica, ambas automáticas (sem pergunta ao jogador — mesmo
+espírito de Força Indomável/Campeão Primitivo, o jogador nunca ia
+recusar PV Temp de graça):
+- Surto de Vitalidade: ao ATIVAR a Fúria, ganha PV Temp = nível na
+  classe Bárbaro, via `ganharPvTemporario` (substitui, nunca soma —
+  já era o padrão usado noutras fontes de PV Temp do app).
+- Força Revigorante: botão "🌳 Força Revigorante" dentro do card de
+  Fúria, rola Xd6 (X = bônus de Dano da Fúria) e mostra o total pro
+  jogador aplicar em outra criatura na mesa. 1x por turno
+  (`forcaRevigoranteUsadaTurno`, reseta no "Fim do Turno") — o Osmar
+  reparou, testando, que o app já tinha esse mesmo mecanismo pronto
+  pros outros 1x/turno (Golpe de Escudo etc.) e pediu pra reaproveitar
+  em vez de deixar o botão livre pra sempre (1ª versão publicada não
+  tinha trava nenhuma).
+
+**Ramos da Árvore (Entrega 3):** primeira característica de Reação do
+Bárbaro que não é ligada ao PRÓPRIO ataque (diferente de Golpe de
+Escudo, que é sempre depois do seu ataque acertar) — o gatilho é uma
+criatura A VISTA começando o turno perto de você. Por isso foi pro
+painel de Reação de verdade (`ReacaoPanelContent.tsx`), não pro painel
+de Ação (onde Golpe de Escudo mora), e consome o slot genérico de
+Reação do turno (`onMarcarUsado('reacao')`, mesmo economato de
+Contra-Encantamento/Palavras de Interrupção) em vez de um `usadoTurno`
+próprio. CD (8+FOR+Prof) igual à de Golpe de Escudo, mas em arquivo
+próprio (`core/ramosDaArvore.ts`) — mesma fórmula, características
+diferentes, sem acoplar um nome de feature ao outro.
+
+**Percorrer a Árvore (Entrega 4):** 2 cards separados no painel de
+Ação Bônus (pedido do Osmar, testando ao vivo) — o livro deixa claro
+que são 2 coisas com regra de uso diferente, então a UI reflete isso
+em vez de esconder as 2 dentro de 1 card só:
+- **"🌳 Percorrer a Árvore"** (base, 18m): Ação Bônus normal, sem
+  recurso próprio — só a economia genérica de Ação Bônus do turno
+  trava (`onMarcarUsado('bonus')`, mesmo padrão de qualquer outro
+  recurso do painel, ex. Voo Dracônico). Pode usar todo turno.
+- **"🌳 Percorrer a Árvore — Longa Distância"** (45m + até 6
+  criaturas): a mesma Ação Bônus, mas com a restrição adicional de 1x
+  por FÚRIA — não 1x por Descanso, como quase todo outro recurso do
+  app. Isso não cabia no `recursoFlagUnica` de sempre (que só reseta
+  no Descanso Longo/Curto): o flag (`percorrerArvoreEstendidaUsada`)
+  reseta dentro do próprio `usarFuria()`, no momento em que a Fúria é
+  ATIVADA de novo — padrão novo, específico desta característica
+  (nenhuma outra do app tinha "1x por ativação de outro recurso" antes
+  desta).
+
+**Correção depois de publicado:** a 1ª versão juntava as 2 num card só
+(texto explicando as 2 versões + 1 toggle) e não gastava a Ação Bônus
+do turno em nenhuma das duas — o Osmar reparou (testando) que o livro
+trata as 2 como a MESMA Ação Bônus (então gastar o turno é regra real,
+igual qualquer outro recurso desse painel) e que separar em 2 cards
+deixa mais claro qual delas tem a trava de 1x/Fúria. Logo depois, mais
+um reparo: os 2 cards marcavam `onMarcarUsado('bonus')` na mão sem
+fechar o painel (padrão de vários outros recursos desse painel, ex.
+Voo Dracônico), mas o esperado aqui era "selecionar e fechar", igual
+uma escolha genérica — trocado pra reaproveitar `escolherNoPainel`
+(mesma função das ações genéricas do Cap. 1), que já fecha o painel
+sozinho.
+
+**Padrão pra lembrar (generalizável, candidato a `DECISOES-CLASSES.md`
+se aparecer de novo):** nem todo "1x até resetar" reseta no Descanso —
+uma característica pode ter o próprio ciclo de reset atrelado à
+ativação de OUTRO recurso do personagem (aqui, a Fúria). Vale conferir
+o texto da regra com atenção em vez de assumir Descanso Curto/Longo
+por padrão.

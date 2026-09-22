@@ -16,7 +16,7 @@ import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classif
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { cdConjuracao, type ResumoConjuracao } from '../../../core/magiasPersonagem';
-import InfoTexto from '../../components/InfoTexto';
+import InfoValor from '../../components/InfoValor';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
 import { danoComCritico } from '../../../core/danoCritico';
@@ -452,9 +452,6 @@ export default function MagiasTab({
     : null;
 
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
-  // dentro de uma conta escrita: "8 + 5 + 2" (negativo vira "(-1)")
-  const num = (n: number) => (n >= 0 ? `${n}` : `(${n})`);
-  const prof = resumo ? resumo.modAtaque - resumo.modAtributo : 0;
 
   return (
     <>
@@ -463,12 +460,13 @@ export default function MagiasTab({
           <div className="box stat-box" style={{ cursor: 'default' }}>
             <div className="stat-name">
               MOD. DE CONJ.{' '}
-              <InfoTexto
+              <InfoValor
                 titulo="Modificador de conjuração"
-                paragrafos={[
-                  `É o modificador do seu atributo de conjuração (${resumo.atributoNome}) — o atributo que sua classe usa pra conjurar magias.`,
-                  `Vem direto do valor de ${resumo.atributo}: hoje ${fmt(resumo.modAtributo)}. Serve de base pra CD e pro ataque mágico.`,
-                ]}
+                descricao={`É o modificador do seu atributo de conjuração (${resumo.atributoNome}) — o atributo que sua classe usa pra conjurar magias. Serve de base pra CD e pro ataque mágico.`}
+                explicacao={{
+                  linhas: [{ label: `mod. ${resumo.atributo}`, valor: fmt(resumo.modAtributo) }],
+                  total: { label: 'Modificador de Conjuração', valor: fmt(resumo.modAtributo) },
+                }}
               />
             </div>
             <div className="stat-mod">{fmt(resumo.modAtributo)}</div>
@@ -477,13 +475,13 @@ export default function MagiasTab({
           <div className="box stat-box" style={{ cursor: 'default' }}>
             <div className="stat-name">
               CD DA MAGIA{' '}
-              <InfoTexto
-                titulo="CD da magia"
-                paragrafos={[
-                  'É a dificuldade que o alvo precisa igualar ou superar na salvaguarda pra evitar (ou reduzir) o efeito das suas magias que exigem salvaguarda.',
-                  `Fórmula: 8 + modificador de conjuração + Bônus de Proficiência. Hoje: 8 + ${num(resumo.modAtributo)} + ${num(prof)} = ${resumo.cd}.`,
-                ]}
-              />
+              {explicacaoCdConjuracao && (
+                <InfoValor
+                  titulo="CD da magia"
+                  descricao="É a dificuldade que o alvo precisa igualar ou superar na salvaguarda pra evitar (ou reduzir) o efeito das suas magias que exigem salvaguarda."
+                  explicacao={explicacaoCdConjuracao}
+                />
+              )}
             </div>
             <div className="stat-mod">{resumo.cd}</div>
             <div className="stat-val">salvaguarda</div>
@@ -491,13 +489,13 @@ export default function MagiasTab({
           <div className="box stat-box" style={{ cursor: 'default' }}>
             <div className="stat-name">
               ATAQUE MÁGICO{' '}
-              <InfoTexto
-                titulo="Modificador de ataque mágico"
-                paragrafos={[
-                  'É o bônus que você soma ao d20 quando faz uma jogada de ataque com uma magia (ex.: Raio de Fogo). O total tem que igualar ou superar a CA do alvo.',
-                  `Fórmula: modificador de conjuração + Bônus de Proficiência. Hoje: ${num(resumo.modAtributo)} + ${num(prof)} = ${num(resumo.modAtaque)}.`,
-                ]}
-              />
+              {explicacaoAcertoConjuracao && (
+                <InfoValor
+                  titulo="Modificador de ataque mágico"
+                  descricao="É o bônus que você soma ao d20 quando faz uma jogada de ataque com uma magia (ex.: Raio de Fogo). O total tem que igualar ou superar a CA do alvo."
+                  explicacao={explicacaoAcertoConjuracao}
+                />
+              )}
             </div>
             <div className="stat-mod">{fmt(resumo.modAtaque)}</div>
             <div className="stat-val">acerto</div>

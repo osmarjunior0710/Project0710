@@ -296,6 +296,10 @@ export interface PersonagemSalvo {
   /** Golpe de Escudo (Mestre em Escudos) — 1x por turno, reseta no Fim
    * do Turno. */
   golpeDeEscudoUsadoTurno?: boolean;
+  /** Força Revigorante (Vitalidade da Árvore, Bárbaro Trilha da Árvore
+   * do Mundo, nível 3+) — 1x por turno, reseta no Fim do Turno (mesmo
+   * padrão de `golpeDeEscudoUsadoTurno`). */
+  forcaRevigoranteUsadaTurno?: boolean;
   /** Esmagador/Talhador — mesmo padrão 1x por turno, reseta no Fim do
    * Turno. Flags independentes (o personagem pode ter os 2). */
   esmagadorUsadoTurno?: boolean;
@@ -359,6 +363,11 @@ export interface PersonagemSalvo {
    * até "Encerrar Fúria" ou vestir Armadura Pesada, não expira sozinha
    * por turno. */
   furiaAtiva?: boolean;
+  /** `true` = já usou a versão estendida (45m + levar até 6 criaturas)
+   * de Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível
+   * 14) NESTA Fúria — reseta ao ativar a Fúria de novo (1x por Fúria,
+   * não por Descanso), ver `usarFuria` em `FichaShell.tsx`. */
+  percorrerArvoreEstendidaUsada?: boolean;
   /** Conhecimento Primordial (Bárbaro, nível 3) — perícia extra
    * escolhida no Level Up, permanente (nunca reseta). `null`/ausente =
    * ainda não escolhida (o passo aparece de novo no próximo Level Up). */

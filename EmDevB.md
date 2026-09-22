@@ -16,53 +16,35 @@
 
 ---
 
-## Foco: Bárbaro — Trilha da Árvore do Mundo (1ª Trilha, ordem: Árvore
-do Mundo → Berserker → Coração Selvagem → Fanático, decisão do Osmar)
+## Foco: Bárbaro — Trilha do Berserker (2ª Trilha)
 
-Planilha conferida + cruzada com o Livro do Jogador (Cap. 3) — nenhuma
-divergência, só a célula de "Raízes Devastadoras" com o bug de sempre
-(legenda de margem colada no meio do parágrafo), corrigida na
-importação. Emblemas das 4 Trilhas já salvos em
-`assets/icones-classes/` (`{id}-banner.webp`).
-
-Decisões já aprovadas pelo Osmar:
-- **Força Revigorante** (rola PV Temp pra outra criatura, 1x no início
-  do turno): botão sempre disponível enquanto a Fúria está ativa, sem
-  trava de turno de verdade — confia no jogador.
-- **Percorrer a Árvore**: card informativo de Ação Bônus + 1 toggle
-  real pro "usei a versão estendida (45m) nesta Fúria" (reseta quando
-  a Fúria reativa, mesmo padrão de Fúria Persistente).
+SDD completo em `sdd/sdd-barbaro-berserker.md` (planilha + Livro do
+Jogador cruzados, sem divergência — só os 2 bugs de extração de
+sempre: legenda de margem em Presença Intimidante, `tipoAcao` errado
+em Retaliação). Leituras já confirmadas com o Osmar (não precisa
+reconfirmar): Fúria Irracional vira só texto (app não rastreia
+condições); Presença Intimidante não repete a salvaguarda por
+criatura (app não segue NPC turno a turno).
 
 Checklist:
-- [x] **Entrega 1** — Dado no banco: as 4 características em
-      `caracteristicasSubclasse.ts` (Vitalidade da Árvore/Ramos da
-      Árvore/Raízes Devastadoras/Percorrer a Árvore), com o texto de
-      Raízes Devastadoras corrigido e `tipoAcao` de Ramos da Árvore
-      ajustado pra "Reação" (planilha marcou errado, mesmo tipo de
-      ajuste já feito em Palavras de Interrupção do Bardo). Confirmado
-      via Playwright: a Trilha já aparece selecionável (Personagem de
-      Teste e o wizard normal, via `subclasseImplementada`), o
-      cabeçalho mostra "(Trilha da Árvore do Mundo)" e as 4
-      características aparecem certinho no Perfil, seção "SUBCLASSE —
-      TRILHA DA ÁRVORE DO MUNDO". 1 teste antigo corrigido
-      (`geradorPersonagemTeste.test.ts` assumia "Bárbaro nunca sorteia
-      subclasse" — agora sorteia a única implementada).
-- [ ] **Entrega 2** — Vitalidade da Árvore mecânica: Surto de
-      Vitalidade automático (PV Temp = nível na classe, ao ativar
-      Fúria, via `ganharPvTemporario`) + botão de Força Revigorante
-      (rola Xd6, X = bônus de Dano da Fúria, mostra o total pro
-      jogador aplicar em outra criatura).
-- [ ] **Entrega 3** — Ramos da Árvore: card de Reação (só com Fúria
-      ativa + nível 6+) que abre `SalvaguardaDoAlvoModal` (Força, CD
-      8+FOR+Prof, sem dano — sucesso "nada acontece", falha
-      "teleporta perto de você, Deslocamento 0 até o fim do turno").
-- [ ] **Entrega 4** — Percorrer a Árvore: card informativo de Ação
-      Bônus (nível 14+, Fúria ativa) + toggle "usei a versão
-      estendida nesta Fúria" (reseta ao reativar Fúria).
+- [ ] **Entrega 1** — Dado no banco: as 4 características em
+      `caracteristicasSubclasse.ts` (Frenesi/Fúria Irracional/
+      Retaliação/Presença Intimidante), com a legenda de margem
+      cortada de Presença Intimidante e `tipoAcao` de Retaliação
+      ajustado pra "Reação".
+- [ ] **Entrega 2** — Frenesi: dano extra automático (Xd6, X = bônus
+      de Dano da Fúria) no 1º acerto do turno com Ataque Imprudente +
+      Fúria ativos.
+- [ ] **Entrega 3** — Retaliação: card de Reação (nível 10+, sem
+      checar Fúria) com ataque de verdade (arma equipada/Desarmado),
+      reaproveitando o motor de ataque já usado em "🗡 Atacar".
+- [ ] **Entrega 4** — Presença Intimidante: card de Ação Bônus (nível
+      14+) com CD 8+FOR+Prof, salvaguarda de Sabedoria, Falha/Sucesso;
+      1x por Descanso Longo + recarga gastando 1 uso de Fúria.
 - [ ] **Entrega 5** — Fechamento: `npm test`/`tsc`/`build`,
       `aprendizados/classes/barbaro.md` atualizado com esta Trilha,
-      `PENDENCIAS.md` "Bárbaro — Trilhas" perde a Árvore do Mundo da
-      lista (as outras 3 continuam).
+      `PENDENCIAS.md` "Bárbaro — Trilhas" perde o Berserker da lista
+      (Coração Selvagem/Fanático continuam on hold).
 
-(Raízes Devastadoras não precisa de entrega própria — é só texto,
-já cobre com a Entrega 1.)
+(Fúria Irracional não precisa de entrega própria — é só texto, já
+cobre com a Entrega 1.)
