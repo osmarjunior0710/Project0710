@@ -16,15 +16,53 @@
 
 ---
 
-*(vazio — sem foco em andamento no momento. Foco "Retrofit do Fluxo
-Acerto/Erro pra TODO ataque" fechado em 2026-09: Ataque normal, Ataque
-Bônus (mão secundária), Cortar, ataque de magia (3 painéis) e
-Ancestralidade Gigante (só no ataque principal, decisão registrada em
-`Backlog.md`) agora sempre usam Acerto/Erro — nunca mais "atira e
-esquece". `DanoPendente`/botão "Rolar Dano" removidos por inteiro
-(ficaram sem nenhum uso). No meio do caminho, achado e corrigido um
-descuido real: os rerolls de Talento (Dano Garantido/Perfurador)
-moravam só na função do botão antigo, replicados agora em cada
-produtor de dano (Ataque normal/Bônus/Cortar). Documentado em
-`DECISOES-COMBATE.md` "Fluxo Acerto/Erro"/"Esmagador/Talhador/
-Ancestralidade Gigante" e `sdd/sdd-fluxo-rolagem.md` seção 5.)*
+## Foco: Bárbaro — Trilha da Árvore do Mundo (1ª Trilha, ordem: Árvore
+do Mundo → Berserker → Coração Selvagem → Fanático, decisão do Osmar)
+
+Planilha conferida + cruzada com o Livro do Jogador (Cap. 3) — nenhuma
+divergência, só a célula de "Raízes Devastadoras" com o bug de sempre
+(legenda de margem colada no meio do parágrafo), corrigida na
+importação. Emblemas das 4 Trilhas já salvos em
+`assets/icones-classes/` (`{id}-banner.webp`).
+
+Decisões já aprovadas pelo Osmar:
+- **Força Revigorante** (rola PV Temp pra outra criatura, 1x no início
+  do turno): botão sempre disponível enquanto a Fúria está ativa, sem
+  trava de turno de verdade — confia no jogador.
+- **Percorrer a Árvore**: card informativo de Ação Bônus + 1 toggle
+  real pro "usei a versão estendida (45m) nesta Fúria" (reseta quando
+  a Fúria reativa, mesmo padrão de Fúria Persistente).
+
+Checklist:
+- [x] **Entrega 1** — Dado no banco: as 4 características em
+      `caracteristicasSubclasse.ts` (Vitalidade da Árvore/Ramos da
+      Árvore/Raízes Devastadoras/Percorrer a Árvore), com o texto de
+      Raízes Devastadoras corrigido e `tipoAcao` de Ramos da Árvore
+      ajustado pra "Reação" (planilha marcou errado, mesmo tipo de
+      ajuste já feito em Palavras de Interrupção do Bardo). Confirmado
+      via Playwright: a Trilha já aparece selecionável (Personagem de
+      Teste e o wizard normal, via `subclasseImplementada`), o
+      cabeçalho mostra "(Trilha da Árvore do Mundo)" e as 4
+      características aparecem certinho no Perfil, seção "SUBCLASSE —
+      TRILHA DA ÁRVORE DO MUNDO". 1 teste antigo corrigido
+      (`geradorPersonagemTeste.test.ts` assumia "Bárbaro nunca sorteia
+      subclasse" — agora sorteia a única implementada).
+- [ ] **Entrega 2** — Vitalidade da Árvore mecânica: Surto de
+      Vitalidade automático (PV Temp = nível na classe, ao ativar
+      Fúria, via `ganharPvTemporario`) + botão de Força Revigorante
+      (rola Xd6, X = bônus de Dano da Fúria, mostra o total pro
+      jogador aplicar em outra criatura).
+- [ ] **Entrega 3** — Ramos da Árvore: card de Reação (só com Fúria
+      ativa + nível 6+) que abre `SalvaguardaDoAlvoModal` (Força, CD
+      8+FOR+Prof, sem dano — sucesso "nada acontece", falha
+      "teleporta perto de você, Deslocamento 0 até o fim do turno").
+- [ ] **Entrega 4** — Percorrer a Árvore: card informativo de Ação
+      Bônus (nível 14+, Fúria ativa) + toggle "usei a versão
+      estendida nesta Fúria" (reseta ao reativar Fúria).
+- [ ] **Entrega 5** — Fechamento: `npm test`/`tsc`/`build`,
+      `aprendizados/classes/barbaro.md` atualizado com esta Trilha,
+      `PENDENCIAS.md` "Bárbaro — Trilhas" perde a Árvore do Mundo da
+      lista (as outras 3 continuam).
+
+(Raízes Devastadoras não precisa de entrega própria — é só texto,
+já cobre com a Entrega 1.)
