@@ -17,6 +17,10 @@ Tabbar mais compacta: padding vertical dos botões reduzido de 8px pra 4px.
 
 Últimos 3 ícones do menu inferior (Atributos, Perfil, Pets) trocados por arte própria — agora as 6 abas mostram só o ícone, sem texto embaixo.
 
+## v202609_1547
+
+**Level Up — passo "Novas Características" some quando não tem nada pra mostrar:** níveis que só dão Aumento no Valor de Atributo/Talento (ex: Guerreiro 3→4) não mostram mais uma tela vazia "Nenhuma característica nova nesse nível" — o passo só aparece quando sobra pelo menos 1 característica pra listar (ex: Guerreiro 4→5, que ganha Ataque Extra).
+
 ## v202609_1524
 
 Ícones novos de Mochila, Magias e Combate no menu inferior (artes próprias em vez de emoji) — essas 3 abas agora mostram só o ícone, sem texto embaixo.
