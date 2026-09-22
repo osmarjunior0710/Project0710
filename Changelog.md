@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1731
+
+**Novo protótipo interno — Esmagador + Raízes Devastadoras:** em 🧪 Protótipos, cena nova comparando 3 jeitos de oferecer os 2 efeitos quando gatilham no mesmo golpe (cartões paralelos, fila sequencial, lista única) — ferramenta de decisão, não afeta ficha de personagem nenhuma.
+
 ## v202609_1547
 
 **Level Up — passo "Novas Características" some quando não tem nada pra mostrar:** níveis que só dão Aumento no Valor de Atributo/Talento (ex: Guerreiro 3→4) não mostram mais uma tela vazia "Nenhuma característica nova nesse nível" — o passo só aparece quando sobra pelo menos 1 característica pra listar (ex: Guerreiro 4→5, que ganha Ataque Extra).

@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 import PopupAtaqueSalvaguardaCena from './PopupAtaqueSalvaguardaCena';
 import ConfirmacaoCriticoCena from './ConfirmacaoCriticoCena';
+import EsmagadorRaizesCena from './EsmagadorRaizesCena';
 
 export interface CenaPrototipo {
   id: string;
@@ -37,5 +38,12 @@ export const cenasPrototipo: CenaPrototipo[] = [
     descricao:
       'Fluxo de 1 natural e 20 natural em ataque, com e sem a house rule (2º d20 de confirmação). Teste de Perícia nunca ganha o 2º dado.',
     Componente: ConfirmacaoCriticoCena,
+  },
+  {
+    id: 'esmagador-raizes',
+    titulo: 'Esmagador + Raízes Devastadoras — 2 efeitos no mesmo acerto',
+    descricao:
+      'Clava Grande (Pesada + Contundente) qualifica pros 2 ao mesmo tempo. 3 layouts pra decidir como oferecer: cartões paralelos, fila sequencial, ou lista única com 1 confirmação.',
+    Componente: EsmagadorRaizesCena,
   },
 ];
