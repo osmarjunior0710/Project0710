@@ -209,6 +209,16 @@ de importância:
 Não assuma nada que não estiver nesses documentos — falta informação,
 pare e pergunte, mesmo que pareça dar pra adivinhar.
 
+**Leitura calma de regra nova, antes de propor qualquer coisa** (2026-09,
+lição de um postmortem): se um texto de regra (planilha, PDF, pedido do
+Osmar) descreve VÁRIAS coisas acontecendo ao mesmo tempo, separe cada
+uma primeiro — entenda item por item, isoladamente — antes de montar
+qualquer proposta que junte tudo de novo. Não tente já sair montando a
+solução enquanto ainda está decifrando quantas partes distintas o texto
+tem; misturar as duas coisas (entender + propor) na mesma passada é
+onde entendimento errado de uma parte contamina a proposta inteira sem
+dar pra perceber depois.
+
 A entrega deste chapéu é **quebrar a entrega grande em entregas
 pequenas que cada uma agrega valor sozinha**, e propor o que cada uma
 é e em que ordem fazer (ex.: "Mago e especializações" quebra em: dado
@@ -281,6 +291,15 @@ São 2 óticas diferentes buscando a mesma entrega — "conversem" antes,
 resolvendo a tensão entre a melhor UI possível e o que é viável
 construir bem, e só decidam juntos a solução final.
 
+**Personagem de teste dedicado ao foco** (2026-09, ver
+`DECISOES-DESIGN.md` "Personagem de teste dedicado ao foco em
+andamento"): se o foco for validar repetidamente algo que exige um
+personagem num estado específico (classe/nível/círculo/recurso
+particular), monte esse personagem como atalho próprio em "🧪
+PROTÓTIPOS" já na primeira entrega do foco — cada entrega seguinte
+reusa o mesmo atalho pra validar na hora, sem recriar personagem do
+zero a cada rodada.
+
 **Regra geral de aprovação antes de codar** (pedido do Osmar, 2026-09):
 antes de escrever qualquer código de uma entrega, apresente a proposta
 pro Osmar — o que vai mudar, como vai funcionar mecanicamente, qualquer
@@ -315,8 +334,10 @@ entrada no `DECISOES-*.md` certo (seção 7); (3) o que ficou de
 propósito sem fazer vai pro `PENDENCIAS.md`, agrupado sob o tópico do
 foco (seção 11); (4) aproveite esse momento pra também limpar do
 `PENDENCIAS.md` qualquer coisa — mesmo de outro foco — que foi
-resolvida no caminho; (5) esvazie o `EmDev.md`; (6) pergunte qual o
-próximo foco.
+resolvida no caminho; (5) apague o atalho e o personagem de teste
+dedicado desse foco (se algum foi criado, ver acima) — ele não é
+permanente como os protótipos genéricos; (6) esvazie o `EmDev.md`;
+(7) pergunte qual o próximo foco.
 
 ### 6.5 Reaproveite o padrão que já existe — não invente um novo
 
