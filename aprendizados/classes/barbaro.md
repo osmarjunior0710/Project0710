@@ -375,16 +375,30 @@ próprio. CD (8+FOR+Prof) igual à de Golpe de Escudo, mas em arquivo
 próprio (`core/ramosDaArvore.ts`) — mesma fórmula, características
 diferentes, sem acoplar um nome de feature ao outro.
 
-**Percorrer a Árvore (Entrega 4):** a versão BASE (18m) não tem
-nenhum recurso pra rastrear (sempre disponível, Ação Bônus, sem
-limite) — só texto informativo. Só a versão ESTENDIDA (45m + levar
-até 6 criaturas) precisa de estado, porque é 1x por Fúria — não 1x por
-Descanso, como quase todo outro recurso do app. Isso não cabia no
-`recursoFlagUnica` de sempre (que só reseta no Descanso Longo/Curto):
-o flag (`percorrerArvoreEstendidaUsada`) reseta dentro do próprio
-`usarFuria()`, no momento em que a Fúria é ATIVADA de novo — padrão
-novo, específico desta característica (nenhuma outra do app tinha
-"1x por ativação de outro recurso" antes desta).
+**Percorrer a Árvore (Entrega 4):** 2 cards separados no painel de
+Ação Bônus (pedido do Osmar, testando ao vivo) — o livro deixa claro
+que são 2 coisas com regra de uso diferente, então a UI reflete isso
+em vez de esconder as 2 dentro de 1 card só:
+- **"🌳 Percorrer a Árvore"** (base, 18m): Ação Bônus normal, sem
+  recurso próprio — só a economia genérica de Ação Bônus do turno
+  trava (`onMarcarUsado('bonus')`, mesmo padrão de qualquer outro
+  recurso do painel, ex. Voo Dracônico). Pode usar todo turno.
+- **"🌳 Percorrer a Árvore — Longa Distância"** (45m + até 6
+  criaturas): a mesma Ação Bônus, mas com a restrição adicional de 1x
+  por FÚRIA — não 1x por Descanso, como quase todo outro recurso do
+  app. Isso não cabia no `recursoFlagUnica` de sempre (que só reseta
+  no Descanso Longo/Curto): o flag (`percorrerArvoreEstendidaUsada`)
+  reseta dentro do próprio `usarFuria()`, no momento em que a Fúria é
+  ATIVADA de novo — padrão novo, específico desta característica
+  (nenhuma outra do app tinha "1x por ativação de outro recurso" antes
+  desta).
+
+**Correção depois de publicado:** a 1ª versão juntava as 2 num card só
+(texto explicando as 2 versões + 1 toggle) e não gastava a Ação Bônus
+do turno em nenhuma das duas — o Osmar reparou (testando) que o livro
+trata as 2 como a MESMA Ação Bônus (então gastar o turno é regra real,
+igual qualquer outro recurso desse painel) e que separar em 2 cards
+deixa mais claro qual delas tem a trava de 1x/Fúria.
 
 **Padrão pra lembrar (generalizável, candidato a `DECISOES-CLASSES.md`
 se aparecer de novo):** nem todo "1x até resetar" reseta no Descanso —
