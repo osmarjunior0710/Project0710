@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0037
+
+**Força Revigorante agora trava 1x por turno:** o botão "🌳 Força
+Revigorante" (Trilha da Árvore do Mundo) fica cinza depois de usado e
+libera sozinho no "Fim do Turno" — igual Golpe de Escudo e outras
+características de 1x/turno já tinham, em vez de ficar disponível pra
+sempre enquanto a Fúria está ativa.
+
 ## v202609_2242
 
 **Trilha da Árvore do Mundo — Percorrer a Árvore (Ação Bônus):** com a

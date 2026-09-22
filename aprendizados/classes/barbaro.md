@@ -337,11 +337,11 @@ passivo sem nenhum estado pra rastrear, já cobriu com a Entrega 1.)
 para as duas"):
 - **Força Revigorante** (dentro de Vitalidade da Árvore — Xd6 PV Temp
   pra OUTRA criatura, 1x no início de cada turno com Fúria ativa): o
-  app não modela outra criatura/turno de verdade, então virou um botão
-  sempre disponível enquanto a Fúria está ativa, sem trava de "já usou
-  este turno" — confia no jogador (mesmo espírito de várias outras
-  características de ação sem alvo modelado no app, ex. Ataque de
-  Sopro).
+  app não modela outra criatura na cena, então o botão só rola e
+  mostra o total pro jogador aplicar na mesa — mas a trava de "1x por
+  turno" reaproveita o mesmo mecanismo que Golpe de Escudo/Esmagador/
+  Talhador já tinham (flag `usadoTurno`, resetado no "Fim do Turno"),
+  em vez de inventar um jeito novo de rastrear turno.
 - **Percorrer a Árvore**: em vez de tentar modelar teleporte/posição
   no mapa (fora de escopo do app), virou card informativo (texto da
   regra) + 1 toggle real só pra parte que TEM estado pra rastrear (a
@@ -356,7 +356,12 @@ recusar PV Temp de graça):
   já era o padrão usado noutras fontes de PV Temp do app).
 - Força Revigorante: botão "🌳 Força Revigorante" dentro do card de
   Fúria, rola Xd6 (X = bônus de Dano da Fúria) e mostra o total pro
-  jogador aplicar em outra criatura na mesa.
+  jogador aplicar em outra criatura na mesa. 1x por turno
+  (`forcaRevigoranteUsadaTurno`, reseta no "Fim do Turno") — o Osmar
+  reparou, testando, que o app já tinha esse mesmo mecanismo pronto
+  pros outros 1x/turno (Golpe de Escudo etc.) e pediu pra reaproveitar
+  em vez de deixar o botão livre pra sempre (1ª versão publicada não
+  tinha trava nenhuma).
 
 **Ramos da Árvore (Entrega 3):** primeira característica de Reação do
 Bárbaro que não é ligada ao PRÓPRIO ataque (diferente de Golpe de

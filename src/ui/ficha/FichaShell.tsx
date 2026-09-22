@@ -371,6 +371,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Golpe de Escudo (Mestre em Escudos) — 1x por turno, mesmo padrão
   // de `golpeBrutalUsadoTurno`.
   const [golpeDeEscudoUsadoTurno, setGolpeDeEscudoUsadoTurno] = useState(personagemSalvo.golpeDeEscudoUsadoTurno ?? false);
+  // Força Revigorante (Vitalidade da Árvore, Bárbaro nível 3+) — regra
+  // real é "no início de cada um dos seus turnos", modelada como 1x
+  // por turno (mesmo padrão de `golpeDeEscudoUsadoTurno`) em vez do
+  // botão livre sem trava da 1ª versão (Osmar pediu a troca, 2026-09).
+  const [forcaRevigoranteUsadaTurno, setForcaRevigoranteUsadaTurno] = useState(
+    personagemSalvo.forcaRevigoranteUsadaTurno ?? false,
+  );
   // Esmagador/Talhador — mesmo padrão 1x/turno, flags independentes
   // (o personagem pode ter os 2 talentos ao mesmo tempo).
   const [esmagadorUsadoTurno, setEsmagadorUsadoTurno] = useState(personagemSalvo.esmagadorUsadoTurno ?? false);
@@ -960,6 +967,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     golpeBrutalUsadoTurno,
     cortarProntoTurno: cortarPronto,
     golpeDeEscudoUsadoTurno,
+    forcaRevigoranteUsadaTurno,
     esmagadorUsadoTurno,
     talhadorUsadoTurno,
     conhecimentoPrimordialPericiaEscolhida,
@@ -1060,6 +1068,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       golpeBrutalUsadoTurno,
       cortarPronto,
       golpeDeEscudoUsadoTurno,
+      forcaRevigoranteUsadaTurno,
       esmagadorUsadoTurno,
       talhadorUsadoTurno,
       conhecimentoPrimordialPericiaEscolhida,
@@ -1322,6 +1331,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setGolpeBrutalUsadoTurno(false);
     setCortarPronto(false);
     setGolpeDeEscudoUsadoTurno(false);
+    setForcaRevigoranteUsadaTurno(false);
     setEsmagadorUsadoTurno(false);
     setTalhadorUsadoTurno(false);
   }
@@ -2487,6 +2497,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               persistenteDisponivel: furiaPersistenteDisponivel,
               onRecuperarPersistente: recuperarFuriaPersistente,
               vitalidadeDaArvoreDisponivel,
+              forcaRevigoranteUsadaTurno,
+              onMarcarForcaRevigoranteUsada: () => setForcaRevigoranteUsadaTurno(true),
             }}
             ataqueImprudente={{
               disponivel: temAtaqueImprudente,

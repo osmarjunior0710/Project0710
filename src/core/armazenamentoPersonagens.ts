@@ -296,6 +296,10 @@ export interface PersonagemSalvo {
   /** Golpe de Escudo (Mestre em Escudos) — 1x por turno, reseta no Fim
    * do Turno. */
   golpeDeEscudoUsadoTurno?: boolean;
+  /** Força Revigorante (Vitalidade da Árvore, Bárbaro Trilha da Árvore
+   * do Mundo, nível 3+) — 1x por turno, reseta no Fim do Turno (mesmo
+   * padrão de `golpeDeEscudoUsadoTurno`). */
+  forcaRevigoranteUsadaTurno?: boolean;
   /** Esmagador/Talhador — mesmo padrão 1x por turno, reseta no Fim do
    * Turno. Flags independentes (o personagem pode ter os 2). */
   esmagadorUsadoTurno?: boolean;

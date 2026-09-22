@@ -144,12 +144,18 @@ interface CombatTabProps {
      * outros botões condicionais de card (ex.: Bênção do Tenebroso). */
     persistenteDisponivel: boolean;
     onRecuperarPersistente: () => void;
-    /** Trilha da Árvore do Mundo (nível 3+) — Força Revigorante: 1x no
-     * início do turno (confiando no jogador, sem trava de verdade,
-     * decisão do Osmar 2026-09) rola Xd6 (X = bônus de Dano da Fúria)
-     * de PV Temporário pra OUTRA criatura — o app não aplica sozinho
-     * (não modela "outra criatura"), só rola e mostra o total. */
+    /** Trilha da Árvore do Mundo (nível 3+) — Força Revigorante: no
+     * início do turno rola Xd6 (X = bônus de Dano da Fúria) de PV
+     * Temporário pra OUTRA criatura — o app não aplica sozinho (não
+     * modela "outra criatura"), só rola e mostra o total. */
     vitalidadeDaArvoreDisponivel: boolean;
+    /** Força Revigorante — 1x por turno (reseta no Fim do Turno, mesmo
+     * padrão de Golpe de Escudo/Esmagador/Talhador — troca da versão
+     * anterior sem trava, decisão do Osmar 2026-09). `onMarcarUsada`
+     * só marca o flag — a rolagem em si continua local a este
+     * componente (`usarForcaRevigorante`, já rola o Xd6). */
+    forcaRevigoranteUsadaTurno: boolean;
+    onMarcarForcaRevigoranteUsada: () => void;
   };
   /** Ataque Imprudente (Bárbaro, nível 2+) — decidido só na 1ª jogada
    * de ataque do turno (o painel de Ação abre um mini-picker "Ataque
@@ -467,6 +473,8 @@ export default function CombatTab({
     persistenteDisponivel: furiaPersistenteDisponivel,
     onRecuperarPersistente: onRecuperarFuriaPersistente,
     vitalidadeDaArvoreDisponivel,
+    forcaRevigoranteUsadaTurno,
+    onMarcarForcaRevigoranteUsada,
   },
   ataqueImprudente: {
     disponivel: ataqueImprudenteDisponivel,
@@ -782,9 +790,11 @@ export default function CombatTab({
   /** Força Revigorante (Trilha da Árvore do Mundo, nível 3+) — sempre
    * pra OUTRA criatura, nunca pro próprio personagem (o app não modela
    * "outra criatura" na cena, só rola e mostra o total pro jogador
-   * aplicar na mesa). Botão livre enquanto a Fúria está ativa, sem
-   * trava de 1x/turno de verdade — decisão do Osmar (2026-09). */
+   * aplicar na mesa). 1x por turno — reseta no Fim do Turno, mesmo
+   * padrão de Golpe de Escudo (troca da versão anterior sem trava,
+   * decisão do Osmar 2026-09). */
   function usarForcaRevigorante() {
+    if (forcaRevigoranteUsadaTurno) return;
     rolarDados({
       label: '🌳 Força Revigorante (PV Temp. pra outra criatura)',
       formula: `${furiaBonusDano}d6`,
@@ -792,6 +802,7 @@ export default function CombatTab({
       lados: 6,
       mod: 0,
     });
+    onMarcarForcaRevigoranteUsada();
   }
 
   function usarRevelacaoCelestial(formaEscolhida: string) {
@@ -1185,8 +1196,17 @@ export default function CombatTab({
                 Encerra sozinha ao vestir Armadura Pesada — ou toque abaixo pra encerrar manualmente.
               </div>
               {vitalidadeDaArvoreDisponivel && (
-                <div className="btn" style={{ marginTop: 8 }} onClick={usarForcaRevigorante}>
+                <div
+                  className="btn"
+                  style={{ marginTop: 8, ...(forcaRevigoranteUsadaTurno ? { opacity: 0.5, pointerEvents: 'none' } : {}) }}
+                  onClick={usarForcaRevigorante}
+                >
                   🌳 Força Revigorante — {furiaBonusDano}d6 PV Temp. (início do turno, pra outra criatura)
+                </div>
+              )}
+              {vitalidadeDaArvoreDisponivel && forcaRevigoranteUsadaTurno && (
+                <div className="label" style={{ marginTop: 4 }}>
+                  já usada neste turno — libera sozinha no "Fim do Turno".
                 </div>
               )}
               <div
