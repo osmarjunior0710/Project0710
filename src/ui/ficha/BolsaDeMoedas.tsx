@@ -18,8 +18,38 @@ import styles from '../components/TrocarArmaMaestria.module.css';
  * pentágono, círculo, hexágono — dá pra distinguir sem ler a sigla). */
 const ICONE: Record<TipoMoeda, string> = { pc: iconePC, pp: iconePP, pe: iconePE, po: iconePO, pl: iconePL };
 
-export function IconeMoeda({ tipo, tamanho }: { tipo: TipoMoeda; tamanho: number }) {
-  return <img src={ICONE[tipo]} alt={SIGLA[tipo]} style={{ width: tamanho, height: tamanho, objectFit: 'contain', display: 'block' }} />;
+/** Deslocamento vertical (em px, numa grade de 128) do CENTRO DE MASSA de cada
+ * arte em relação ao centro da caixa — triângulo (PC) e pentágono (PE) são
+ * mais pesados embaixo e parecem "caídos" ao lado de um número. Medido nos
+ * webp de `assets/icones-moedas`; as imagens em si estão centralizadas. */
+const MASSA_ABAIXO_DO_CENTRO: Record<TipoMoeda, number> = { pc: 13.7, pp: 0.3, pe: 5.5, po: 0.4, pl: 0.6 };
+
+/** `alinharComTexto`: ícone ao lado de um número — sobe 1px (o centro visual
+ * dos dígitos fica ~1px acima do centro da caixa de texto) mais metade da
+ * correção ótica da massa da arte. */
+export function IconeMoeda({
+  tipo,
+  tamanho,
+  alinharComTexto = false,
+}: {
+  tipo: TipoMoeda;
+  tamanho: number;
+  alinharComTexto?: boolean;
+}) {
+  const ajuste = alinharComTexto ? -(1 + (0.5 * MASSA_ABAIXO_DO_CENTRO[tipo] * tamanho) / 128) : 0;
+  return (
+    <img
+      src={ICONE[tipo]}
+      alt={SIGLA[tipo]}
+      style={{
+        width: tamanho,
+        height: tamanho,
+        objectFit: 'contain',
+        display: 'block',
+        transform: ajuste ? `translateY(${ajuste.toFixed(2)}px)` : undefined,
+      }}
+    />
+  );
 }
 const SIGLA: Record<TipoMoeda, string> = { pc: 'PC', pp: 'PP', pe: 'PE', po: 'PO', pl: 'PL' };
 const NOME: Record<TipoMoeda, string> = {

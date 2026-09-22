@@ -265,7 +265,7 @@ export default function LojaStep({ selection, update }: StepProps) {
           <div className={styles.ouroLabelCol}>
             <span className="label">ouro inicial</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, lineHeight: 1 }}>
-              <IconeMoeda tipo="po" tamanho={16} />
+              <IconeMoeda tipo="po" tamanho={18} alinharComTexto />
               {ouroInicial} PO
             </span>
           </div>
@@ -278,7 +278,7 @@ export default function LojaStep({ selection, update }: StepProps) {
             >
               {(['po', 'pp', 'pc'] as const).map((t) => (
                 <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, lineHeight: 1 }}>
-                  <IconeMoeda tipo={t} tamanho={16} />
+                  <IconeMoeda tipo={t} tamanho={18} alinharComTexto />
                   {restanteEmMoedas[t]}
                 </span>
               ))}
