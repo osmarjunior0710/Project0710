@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1727
+
+Tabbar mais compacta: padding vertical dos botões reduzido de 8px pra 4px.
+
 ## v202609_1716
 
 Últimos 3 ícones do menu inferior (Atributos, Perfil, Pets) trocados por arte própria — agora as 6 abas mostram só o ícone, sem texto embaixo.
