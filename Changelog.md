@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1331
+
+Cor do Guerreiro (Recuperar Fôlego) confirmada: azul, o mesmo padrão de sempre.
+
 ## v202609_0049
 
 Loja da criação de personagem: ícones das moedas em 18 px e alinhados ao centro dos números (com correção ótica pro triângulo do cobre e o pentágono do electro, que parecem mais baixos).
