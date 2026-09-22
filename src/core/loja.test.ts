@@ -7,11 +7,13 @@ import {
   classeEhProficiente,
   construirCatalogoLoja,
   itensAdquiridosPorKits,
+  itensAdquiridosPorOrigemOuClasse,
   moedasIniciais,
   type GrupoLoja,
   type LojaItem,
 } from './loja';
 import { criarSelecaoInicial, type WizardSelection } from './personagem';
+import type { ItemMochila } from './mochila';
 
 function selecao(overrides: Partial<WizardSelection> = {}): WizardSelection {
   return { ...criarSelecaoInicial(), ...overrides };
@@ -123,6 +125,38 @@ describe('itensAdquiridosPorKits', () => {
 
   it('borda: nenhum kit no carrinho devolve mapa vazio', () => {
     expect(itensAdquiridosPorKits([], catalogo).size).toBe(0);
+  });
+});
+
+describe('itensAdquiridosPorOrigemOuClasse', () => {
+  const catalogo: GrupoLoja[] = [
+    {
+      id: 'equipamento-aventura',
+      titulo: 'Equipamento de Aventura',
+      itens: [{ nome: 'Corda', grupo: 'equipamento-aventura', custoTexto: '1 PO', custoPO: 1, peso: '2,5 kg' } as LojaItem],
+    },
+  ];
+
+  function item(nome: string, quantidade: number, origemDoItem: ItemMochila['origemDoItem']): ItemMochila {
+    return { id: nome, nome, quantidade, peso: null, origemDoItem };
+  }
+
+  it('marca item da Origem que também está no catálogo', () => {
+    const resultado = itensAdquiridosPorOrigemOuClasse([item('Corda', 1, 'Origem')], catalogo);
+    expect(resultado.get('Corda')).toEqual({ quantidadeOrigem: 1, quantidadeClasse: 0 });
+  });
+
+  it('soma separadamente quando o mesmo item vem de Origem E Classe', () => {
+    const resultado = itensAdquiridosPorOrigemOuClasse([item('Corda', 1, 'Origem'), item('Corda', 2, 'Classe')], catalogo);
+    expect(resultado.get('Corda')).toEqual({ quantidadeOrigem: 1, quantidadeClasse: 2 });
+  });
+
+  it('ignora item que não está no catálogo da Loja e item de origem "Loja"/"Manual"', () => {
+    const resultado = itensAdquiridosPorOrigemOuClasse(
+      [item('Item Fora do Catálogo', 1, 'Origem'), item('Corda', 1, 'Loja'), item('Corda', 1, 'Manual')],
+      catalogo,
+    );
+    expect(resultado.size).toBe(0);
   });
 });
 

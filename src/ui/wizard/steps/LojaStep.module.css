@@ -205,6 +205,15 @@
   margin-top: var(--space-1);
 }
 
+/** Tom mais claro que `.itemCardComprado` (que usa `--accent-dim`
+ * sólido) — é só um lembrete de "já está na lista de graça", não uma
+ * compra de verdade, então precisa ficar visualmente mais discreto. */
+.tagAdquirido {
+  border-color: rgba(74, 95, 217, 0.35);
+  background: rgba(74, 95, 217, 0.08);
+  color: var(--accent);
+}
+
 .stepperBtn {
   width: 32px;
   height: 32px;
