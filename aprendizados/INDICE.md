@@ -22,8 +22,11 @@ Um arquivo por classe de D&D implementada no app.
   Sentido de Perigo, Conhecimento Primordial, Golpe Brutal/
   Fortalecido, Fúria Implacável/Persistente, Força Indomável, Campeão
   Primitivo (+ bug de PV Máximo retroativo, corrigido de forma
-  reutilizável). As 4 Trilhas (subclasses) ficaram deliberadamente
-  pendentes ao fechar o foco — ver `PENDENCIAS.md`.
+  reutilizável). Das 4 Trilhas (subclasses), a 1ª retomada — Trilha da
+  Árvore do Mundo (Vitalidade da Árvore, Ramos da Árvore, Raízes
+  Devastadoras, Percorrer a Árvore) — já foi implementada por completo
+  (2026-09); as outras 3 continuam deliberadamente pendentes — ver
+  `PENDENCIAS.md`.
 
 *(pasta vazia além deste arquivo por enquanto — as classes
 implementadas antes do Bárbaro, Guerreiro/Bardo/Bruxo/Mago, continuam

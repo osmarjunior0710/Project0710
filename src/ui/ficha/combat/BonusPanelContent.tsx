@@ -73,6 +73,13 @@ interface BonusPanelContentProps {
   furiaRestantes: number;
   furiaAtiva: boolean;
   onUsarFuria: () => void;
+  /** Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 14)
+   * — `disponivel` = Fúria ativa + nível 14+. A versão base (18m) não
+   * consome recurso (sempre disponível); `estendidaDisponivel` = ainda
+   * não usou a versão de 45m NESTA Fúria (reseta ao reativar). */
+  percorrerArvoreDisponivel: boolean;
+  percorrerArvoreEstendidaDisponivel: boolean;
+  onUsarPercorrerArvore: () => void;
   /** Revelação Celestial (Aasimar, nível 3+) — natureza
    * `escolha_reutilizavel`: a forma é escolhida de novo a cada uso,
    * por isso as opções vêm daqui (não do wizard). */
@@ -180,6 +187,9 @@ export default function BonusPanelContent({
   furiaRestantes,
   furiaAtiva,
   onUsarFuria,
+  percorrerArvoreDisponivel,
+  percorrerArvoreEstendidaDisponivel,
+  onUsarPercorrerArvore,
   revelacaoCelestialDisponivel,
   revelacaoCelestialGasto,
   revelacaoCelestialFormaAtiva,
@@ -641,6 +651,29 @@ export default function BonusPanelContent({
           {!furiaAtiva && furiaRestantes <= 0 && (
             <div className="label" style={{ marginTop: 6 }}>
               sem usos disponíveis ({furiaMaximo} no total) — descanse pra recuperar.
+            </div>
+          )}
+        </>
+      )}
+      {percorrerArvoreDisponivel && (
+        <>
+          <div
+            className={styles.row}
+            style={!percorrerArvoreEstendidaDisponivel ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+            onClick={onUsarPercorrerArvore}
+          >
+            <div className={styles.rowName}>🌳 Percorrer a Árvore</div>
+            {detalhesAtivo && (
+              <div className={styles.rowDesc}>
+                Teleporta a até 18m pra um espaço desocupado à sua vista, sem custo de recurso. 1x por Fúria, pode
+                estender o alcance pra 45m e levar até 6 criaturas voluntárias a até 3m de você — toque aqui só
+                quando usar essa versão estendida.
+              </div>
+            )}
+          </div>
+          {!percorrerArvoreEstendidaDisponivel && (
+            <div className="label" style={{ marginTop: 6 }}>
+              versão estendida (45m) já usada nesta Fúria — a de 18m continua livre, sem custo de recurso.
             </div>
           )}
         </>
