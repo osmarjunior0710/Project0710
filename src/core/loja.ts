@@ -13,7 +13,7 @@ import { gruposFerramenta } from '../data/rulesets/dnd2024/ferramentas';
 import { proficienciasArmaArmaduraClasse } from '../data/rulesets/dnd2024/proficienciasArmaArmaduraClasse';
 import { calcularOuroInicial, classeDaSelecao } from './calculoPersonagem';
 import { moedasDeOuro, type Moedas } from './moedas';
-import { DESAGREGACAO_KITS } from './mochila';
+import { DESAGREGACAO_KITS, type ItemMochila } from './mochila';
 import { modificador, valorFinalAtributo, type WizardSelection } from './personagem';
 
 export interface ItemCarrinho {
@@ -279,6 +279,34 @@ export function itensAdquiridosPorKits(carrinho: ItemCarrinho[], catalogo: Grupo
         resultado.set(nomeItem, { quantidade: somado, kits: [kit.nome] });
       }
     }
+  }
+  return resultado;
+}
+
+export interface ItemAdquiridoPorOrigemOuClasse {
+  quantidadeOrigem: number;
+  quantidadeClasse: number;
+}
+
+/** Igual `itensAdquiridosPorKits`, mas pro equipamento que a Origem/
+ * Classe já concedeu de graça (`itensMochila`, calculado antes de
+ * qualquer compra) — só entra aqui o que TAMBÉM existe no catálogo da
+ * Loja (senão não teria onde marcar a tag). Usado pra marcar "Nx
+ * adquirido no kit de origem"/"...de classe", mesmo tratamento visual
+ * de "já possui" que os Kits da Loja têm. */
+export function itensAdquiridosPorOrigemOuClasse(
+  itensMochila: ItemMochila[],
+  catalogo: GrupoLoja[],
+): Map<string, ItemAdquiridoPorOrigemOuClasse> {
+  const nomesCatalogo = new Set(catalogo.flatMap((g) => g.itens.map((item) => item.nome)));
+  const resultado = new Map<string, ItemAdquiridoPorOrigemOuClasse>();
+  for (const it of itensMochila) {
+    if (it.origemDoItem !== 'Origem' && it.origemDoItem !== 'Classe') continue;
+    if (!nomesCatalogo.has(it.nome)) continue;
+    const existente = resultado.get(it.nome) ?? { quantidadeOrigem: 0, quantidadeClasse: 0 };
+    if (it.origemDoItem === 'Origem') existente.quantidadeOrigem += it.quantidade;
+    else existente.quantidadeClasse += it.quantidade;
+    resultado.set(it.nome, existente);
   }
   return resultado;
 }

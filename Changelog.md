@@ -5,6 +5,17 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0739
+
+**Melhorias na Loja (criação de personagem):** os títulos "Equipado
+(Origem)/(Classe)" viraram "Escolhido (Origem)/(Classe)" (nada está
+equipado ainda nessa etapa); a tag "Nx adquirido por Kit X" ganhou um
+tom de azul mais claro, pra não confundir com o azul mais forte de um
+item efetivamente comprado; e os itens que vieram de graça pela Origem
+ou Classe (não só de Kits) agora também ganham a mesma tag — "Nx
+adquirido no kit de origem"/"...de classe" — quando aparecem na lista
+de itens à venda.
+
 ## v202609_0107
 
 **Correção: os cards de Percorrer a Árvore fecham o painel de Ação
