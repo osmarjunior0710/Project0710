@@ -653,6 +653,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     aSorteDoProprioTenebroso: sorteDoTenebrosoDisponivel,
     resistenciaInfera: resistenciaInferaDisponivel,
     lancarNoInferno: lancarNoInfernoDisponivel,
+    vitalidadeDaArvore: vitalidadeDaArvoreDisponivel,
   } = caracteristicasSubclasseAtivas(personagem.subclasse, personagem.nivel, [
     'legiaoDosMortos',
     'grimorioDeNecromancia',
@@ -665,6 +666,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'aSorteDoProprioTenebroso',
     'resistenciaInfera',
     'lancarNoInferno',
+    'vitalidadeDaArvore',
   ]);
   // G3.3 (foco de saúde do projeto, ver EmDevB.md): todo o bloco de
   // magia/conjuração/pool combinado (antes ~150 linhas soltas aqui)
@@ -1242,6 +1244,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (furiaRestantes <= 0 || armaduraPesadaEquipada) return false;
     setFuriaGasto((v) => v + 1);
     setFuriaAtiva(true);
+    // Vitalidade da Árvore (Trilha da Árvore do Mundo, nível 3) — Surto
+    // de Vitalidade: PV Temporário = nível NA CLASSE Bárbaro, sempre ao
+    // ativar, sem perguntar (mesmo espírito de Força Indomável/Campeão
+    // Primitivo — nunca teria opção, o jogador nunca ia recusar).
+    if (vitalidadeDaArvoreDisponivel) {
+      setPvTemporario((atual) => ganharPvTemporario(atual, personagem.nivel));
+    }
     return true;
   }
 
@@ -2444,6 +2453,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               onUsar: usarFuria,
               persistenteDisponivel: furiaPersistenteDisponivel,
               onRecuperarPersistente: recuperarFuriaPersistente,
+              vitalidadeDaArvoreDisponivel,
             }}
             ataqueImprudente={{
               disponivel: temAtaqueImprudente,
