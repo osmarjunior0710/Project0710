@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0842
+
+**Popups de Conjuração/CD/Ataque Mágico padronizados:** os 3 ⓘ da aba
+Magias (Mod. de Conjuração, CD da Magia, Ataque Mágico) agora mostram
+a mesma tabela discriminada (label + valor) usada em toda perícia/
+salvaguarda, em vez do parágrafo com a fórmula escrita por extenso.
+
 ## v202609_0835
 
 **Correção: o fim de cada aba da Ficha agora rola por cima dos 2 FABs**

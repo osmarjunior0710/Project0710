@@ -728,3 +728,31 @@ já é o padrão herdado do `body`. Só reative seleção normal
 de digitação — nesse caso, prefira `input`/`textarea`/
 `contentEditable` de verdade (a regra já cobre esses seletores
 automaticamente) em vez de escrever uma exceção nova.
+
+## Popup de "ⓘ" — `InfoValor` é o padrão único pra número calculado, `InfoTexto` só pra regra sem conta
+
+Achado 2026-09 (Osmar reparou: os 3 "ⓘ" de Conjuração/CD/Ataque Mágico
+tinham virado parágrafo corrido com uma frase de fórmula escrita por
+extenso, diferente do resto do app, que sempre mostra tabela
+discriminada). Padrão único, daqui pra frente, pra QUALQUER popup de
+"ⓘ" que explica um número: **Título / Descrição (opcional) / Tabela
+discriminada (label + valor, com linha de Total) / fechar** —
+`InfoValor` (`ui/components/InfoValor.tsx`) ganhou o prop opcional
+`descricao` (string ou string[], vira parágrafo(s) entre título e
+tabela) pra cobrir isso sem precisar de componente novo.
+
+- Todo `ⓘ` de um valor CALCULADO (soma de mod. + Bônus de Proficiência,
+  etc.) usa `InfoValor` com `explicacao` de verdade — nunca escreve a
+  conta como frase (“Fórmula: 8 + 5 + 2 = 15”), sempre como linhas de
+  tabela (reaproveite um `ExplicacaoCalculo` de `core/` já existente
+  quando tiver; SÓ construa um novo objeto inline na UI quando for de
+  fato trivial, tipo 1 linha só reafirmando um valor já calculado —
+  não vale criar/testar uma função de `core/` só pra isso).
+- `InfoTexto` (mesmo ícone/popup, sem tabela) continua existindo só
+  pra regra que não tem número pra discriminar (ex.: "Dados de Vida" e
+  a descrição de um recurso de classe em `RecursosDeClasse.tsx` — é
+  texto de regra corrido, não uma conta).
+- `descricao` vazia é aceitável (nem todo número precisa de uma frase
+  de contexto antes da tabela) — mas quando o `ⓘ` já existir e a
+  descrição estiver faltando, é um bom momento pra ir no livro/regra
+  confirmada e preencher, em vez de deixar em branco por preguiça.
