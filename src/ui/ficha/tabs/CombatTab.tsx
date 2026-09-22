@@ -196,6 +196,16 @@ interface CombatTabProps {
     usadoTurno: boolean;
     onUsar: () => void;
   };
+  /** Ramos da Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 6) —
+   * `disponivel` = Fúria ativa + nível 6+. Reação de verdade (não
+   * ligada ao SEU ataque, diferente de Golpe de Escudo) — mora no
+   * painel de Reação e consome o mesmo slot genérico de Reação do
+   * turno (`turnState.reacao`), não um `usadoTurno` próprio. */
+  ramosDaArvore: {
+    disponivel: boolean;
+    cd: number | null;
+    explicacaoCd: ExplicacaoCalculo | null;
+  };
   /** Esmagador/Talhador — `esmagadorDisponivel`/`talhadorDisponivel` =
    * talento + ataque PRINCIPAL causa o tipo de dano certo + ainda não
    * usado neste turno (checado em `FichaShell.tsx`). Segue o Fluxo
@@ -474,6 +484,11 @@ export default function CombatTab({
     usadoTurno: golpeDeEscudoUsadoTurno,
     onUsar: onUsarGolpeDeEscudo,
   },
+  ramosDaArvore: {
+    disponivel: ramosDaArvoreDisponivel,
+    cd: cdRamosDaArvore,
+    explicacaoCd: explicacaoCdRamosDaArvore,
+  },
   golpeCondicional: {
     esmagadorDisponivel,
     talhadorDisponivel,
@@ -584,6 +599,7 @@ export default function CombatTab({
   const [lancarNoInfernoDano, setLancarNoInfernoDano] = useState<number | null>(null);
   const [ataqueDeSoproDano, setAtaqueDeSoproDano] = useState<number | null>(null);
   const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
+  const [ramosDaArvoreAberto, setRamosDaArvoreAberto] = useState(false);
   // Esmagador/Talhador — qual popup de "Ativar efeito" está aberto
   // agora (`null` = nenhum), disparado pelo botão do talento no popup
   // de dano (mesmo padrão de `golpeBrutalEfeitoPendente`).
@@ -933,6 +949,18 @@ export default function CombatTab({
   function abrirGolpeDeEscudo() {
     onUsarGolpeDeEscudo();
     setGolpeDeEscudoAberto(true);
+  }
+
+  /** Ramos da Árvore — Reação de verdade (gatilho: criatura à vista
+   * começa o turno perto de você), então gasta o slot genérico de
+   * Reação do turno (`onMarcarUsado('reacao')`, mesmo economato de
+   * Contra-Encantamento/Palavras de Interrupção) em vez de um
+   * `usadoTurno` próprio como Golpe de Escudo (aquele é sempre depois
+   * do SEU ataque, não compete pela Reação do turno). */
+  function abrirRamosDaArvore() {
+    onMarcarUsado('reacao');
+    setPainelAberto(null);
+    setRamosDaArvoreAberto(true);
   }
 
   function usarPericiaInigualavel() {
@@ -1596,6 +1624,8 @@ export default function CombatTab({
           mestreDaMorteExplosaoDisponivel={mestreDaMorteDisponivel}
           mestreDaMorteExplosaoLiberada={mestreDaMorteExplosaoLiberada}
           modIntAtual={modIntAtual}
+          ramosDaArvoreDisponivel={ramosDaArvoreDisponivel}
+          onAbrirRamosDaArvore={abrirRamosDaArvore}
         />
       </SidePanel>
       {lancarNoInfernoDano !== null && (
@@ -1650,6 +1680,17 @@ export default function CombatTab({
           textoSucesso="nada acontece"
           textoFalha="empurra 1,5m ou é derrubado (Caído), à sua escolha"
           onFechar={() => setGolpeDeEscudoAberto(false)}
+        />
+      )}
+      {ramosDaArvoreAberto && (
+        <SalvaguardaDoAlvoModal
+          titulo="Ramos da Árvore"
+          atributo="Força"
+          cd={cdRamosDaArvore}
+          explicacaoCd={explicacaoCdRamosDaArvore}
+          textoSucesso="nada acontece"
+          textoFalha="teleporta pra um espaço desocupado à sua vista a até 1,5m de você (ou o mais próximo à sua vista); você pode reduzir o Deslocamento dele a 0 até o final do turno atual"
+          onFechar={() => setRamosDaArvoreAberto(false)}
         />
       )}
       {golpeCondicionalPendente && (

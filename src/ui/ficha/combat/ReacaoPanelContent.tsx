@@ -94,6 +94,12 @@ interface ReacaoPanelContentProps {
   /** Modificador de Inteligência do personagem — dano da explosão
    * (2d10 + esse valor). */
   modIntAtual: number;
+  /** Ramos da Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 6) —
+   * `true` = Fúria ativa + nível 6+. Sem dano/rolagem pro app: só abre
+   * o popup de CD + Sucesso/Falha (`onAbrirRamosDaArvore`, vive em
+   * `CombatTab.tsx`, mesmo padrão de Golpe de Escudo). */
+  ramosDaArvoreDisponivel: boolean;
+  onAbrirRamosDaArvore: () => void;
 }
 
 export default function ReacaoPanelContent({
@@ -133,6 +139,8 @@ export default function ReacaoPanelContent({
   mestreDaMorteExplosaoDisponivel,
   mestreDaMorteExplosaoLiberada,
   modIntAtual,
+  ramosDaArvoreDisponivel,
+  onAbrirRamosDaArvore,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
@@ -329,6 +337,17 @@ export default function ReacaoPanelContent({
             <div className={styles.rowDesc}>
               Você ou uma criatura a até 9m falhou salvaguarda contra Amedrontado/Enfeitiçado — role de novo, com
               Vantagem. Sem custo de recurso.
+            </div>
+          )}
+        </div>
+      )}
+      {ramosDaArvoreDisponivel && (
+        <div className={styles.row} onClick={onAbrirRamosDaArvore}>
+          <div className={styles.rowName}>🌳 Ramos da Árvore</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Criatura à vista começa o turno a até 9m de você — o alvo faz salvaguarda de Força ou é teleportado pra
+              perto de você e pode ter o Deslocamento reduzido a 0 até o final do turno.
             </div>
           )}
         </div>

@@ -72,6 +72,7 @@ import {
 import { ataqueAtual, ataqueBonusMaoSecundaria } from '../../core/ataque';
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
+import { explicarCdRamosDaArvore } from '../../core/ramosDaArvore';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
@@ -654,6 +655,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     resistenciaInfera: resistenciaInferaDisponivel,
     lancarNoInferno: lancarNoInfernoDisponivel,
     vitalidadeDaArvore: vitalidadeDaArvoreDisponivel,
+    ramosDaArvore: ramosDaArvoreDesbloqueada,
   } = caracteristicasSubclasseAtivas(personagem.subclasse, personagem.nivel, [
     'legiaoDosMortos',
     'grimorioDeNecromancia',
@@ -667,6 +669,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'resistenciaInfera',
     'lancarNoInferno',
     'vitalidadeDaArvore',
+    'ramosDaArvore',
   ]);
   // G3.3 (foco de saúde do projeto, ver EmDevB.md): todo o bloco de
   // magia/conjuração/pool combinado (antes ~150 linhas soltas aqui)
@@ -837,6 +840,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const podeOferecerGolpeDeEscudo = temMestreEmEscudos && armaEquipadaEhCorpoACorpo && equipadoAtual.escudo !== null;
   const explicacaoCdGolpeDeEscudo = podeOferecerGolpeDeEscudo
     ? explicarCdGolpeDeEscudo(forMod, bonusProficienciaAtual)
+    : null;
+  // Ramos da Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 6) — só
+  // com a Fúria ativa (o próprio texto da característica: "enquanto sua
+  // Fúria estiver ativa").
+  const podeOferecerRamosDaArvore = ramosDaArvoreDesbloqueada && furiaAtiva;
+  const explicacaoCdRamosDaArvore = podeOferecerRamosDaArvore
+    ? explicarCdRamosDaArvore(forMod, bonusProficienciaAtual)
     : null;
   const ataque = classe
     ? ataqueAtual(
@@ -2480,6 +2490,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               explicacaoCd: explicacaoCdGolpeDeEscudo,
               usadoTurno: golpeDeEscudoUsadoTurno,
               onUsar: () => setGolpeDeEscudoUsadoTurno(true),
+            }}
+            ramosDaArvore={{
+              disponivel: podeOferecerRamosDaArvore,
+              cd: explicacaoCdRamosDaArvore ? Number(explicacaoCdRamosDaArvore.total.valor) : null,
+              explicacaoCd: explicacaoCdRamosDaArvore,
             }}
             golpeCondicional={{
               esmagadorDisponivel: podeOferecerEsmagador,
