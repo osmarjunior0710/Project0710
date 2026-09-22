@@ -783,3 +783,51 @@ ficar vazio depois de aplicar um filtro (não só uma condição de
 regra simples) precisa calcular esse conteúdo ANTES de decidir se
 entra em `luSteps`, não depois — um passo nunca deveria aparecer só
 pra mostrar "nada aqui".
+
+## Recurso com reset — só existem 3 "resetadores" no app inteiro
+
+Achado 2026-09 (postmortem, pedido do Osmar de separar isso como regra
+permanente antes de desenhar qualquer recurso novo). O app só tem 3
+gatilhos de reset de recurso, ponto — **Descanso Longo**, **Descanso
+Curto** e **Fim de Turno** (`fimDoTurno()` em `FichaShell.tsx`). Não
+existe (e não deveria existir sem decisão explícita) um 4º gatilho
+inventado ad-hoc pra um caso específico.
+
+**Regra de design, antes de implementar qualquer recurso novo com
+contador/flag de uso** (recurso de classe, talento, item mágico):
+verifique se o reset dele cabe em algum desses 3 exatamente como já
+existem — se cabe, reaproveite o mecanismo já existente daquele
+resetador (mesmo padrão de `forcaRevigoranteUsadaTurno`/
+`golpeDeEscudoUsadoTurno`/etc., resetados dentro de `fimDoTurno()`; ou
+o equivalente já usado pra Descanso Curto/Longo). **Se não cabe em
+nenhum dos 3** (ex.: "recupera parcial no Descanso Curto, total só no
+Longo", ou uma condição de reset que não é nenhum desses 3 eventos) —
+não invente um mecanismo novo silenciosamente: pare e traga uma
+proposta explícita pro Osmar antes de codar, porque isso é uma exceção
+à regra e merece decisão consciente, não só "mais um `useState` de
+flag" resolvido no meio da implementação.
+
+## Personagem de teste dedicado ao foco em andamento — botão temporário, apaga ao fechar
+
+Ideia do Osmar (2026-09, postmortem) pra cortar retrabalho de validação
+durante um foco. Hoje a área "🧪 PROTÓTIPOS" da lista de personagens
+(`CharacterList.tsx`) já tem 3 atalhos fixos e permanentes —
+Personagem de Teste (sorteia na hora), Char de Teste Fixo (sempre o
+mesmo) e Char Multiclasse (`core/personagemTesteFixo.ts`/
+`core/personagemTesteMulticlasse.ts`) — pensados pra teste genérico,
+não pro que uma entrega específica precisa validar.
+
+**Padrão novo:** ao abrir um foco que vai exigir validar repetidamente
+um personagem num estado específico (ex.: Mago numa especialização X,
+num nível/círculo que dá acesso à magia/recurso sendo implementado),
+monte — como parte da própria entrega — um personagem de teste JÁ
+NESSE ESTADO (mesmo padrão de `core/personagemTesteFixo.ts`: função
+pura que monta o objeto pronto) e exponha um atalho próprio na mesma
+área de protótipos, só durante esse foco. Cada entrega dentro do foco
+reusa esse mesmo atalho pra validar na hora, sem precisar recriar
+personagem/subir XP/repetir wizard toda vez.
+
+**Ao fechar o foco** (seção 6 do `CLAUDE.md`): apague o atalho e o
+personagem de teste dedicado junto com o resto da limpeza de
+fechamento — ele não é permanente como os 3 protótipos genéricos, é
+descartável, específico daquele foco.
