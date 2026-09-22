@@ -398,7 +398,13 @@ em vez de esconder as 2 dentro de 1 card só:
 do turno em nenhuma das duas — o Osmar reparou (testando) que o livro
 trata as 2 como a MESMA Ação Bônus (então gastar o turno é regra real,
 igual qualquer outro recurso desse painel) e que separar em 2 cards
-deixa mais claro qual delas tem a trava de 1x/Fúria.
+deixa mais claro qual delas tem a trava de 1x/Fúria. Logo depois, mais
+um reparo: os 2 cards marcavam `onMarcarUsado('bonus')` na mão sem
+fechar o painel (padrão de vários outros recursos desse painel, ex.
+Voo Dracônico), mas o esperado aqui era "selecionar e fechar", igual
+uma escolha genérica — trocado pra reaproveitar `escolherNoPainel`
+(mesma função das ações genéricas do Cap. 1), que já fecha o painel
+sozinho.
 
 **Padrão pra lembrar (generalizável, candidato a `DECISOES-CLASSES.md`
 se aparecer de novo):** nem todo "1x até resetar" reseta no Descanso —

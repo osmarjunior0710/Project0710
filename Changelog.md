@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0107
+
+**Correção: os cards de Percorrer a Árvore fecham o painel de Ação
+Bônus ao selecionar** — antes ficavam abertos depois de tocar (só o
+"Bônus" lá em cima marcava usado), agora fecham igual qualquer outra
+escolha do painel.
+
 ## v202609_0047
 
 **Percorrer a Árvore virou 2 cards:** o card de Ação Bônus agora
