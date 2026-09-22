@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2233
+
+**Trilha da Árvore do Mundo — Ramos da Árvore (Reação):** com a Fúria
+ativa e nível 6+, um novo card aparece no painel de Reação — toque
+nele quando uma criatura à vista começar o turno perto de você pra ver
+a CD, e o texto de Falha (ela é teleportada pra perto de você, e você
+pode travar o Deslocamento dela a 0 até o fim do turno) ou Sucesso
+(nada acontece).
+
 ## v202609_2204
 
 **Trilha da Árvore do Mundo — Vitalidade da Árvore já funciona de

@@ -56,10 +56,18 @@ Checklist:
       TEMP" no PV), e o botão "🌳 Força Revigorante" aparece dentro
       do card de Fúria e rola 2d6 (bônus de Dano da Fúria no nível 5)
       corretamente.
-- [ ] **Entrega 3** — Ramos da Árvore: card de Reação (só com Fúria
-      ativa + nível 6+) que abre `SalvaguardaDoAlvoModal` (Força, CD
-      8+FOR+Prof, sem dano — sucesso "nada acontece", falha
-      "teleporta perto de você, Deslocamento 0 até o fim do turno").
+- [x] **Entrega 3** — Ramos da Árvore: card de Reação (só com Fúria
+      ativa + nível 6+, `core/ramosDaArvore.ts` CD 8+FOR+Prof) no
+      painel de Reação — abre `SalvaguardaDoAlvoModal` (Força, sem
+      dano, sucesso "nada acontece", falha "teleporta pra perto de
+      você, pode reduzir Deslocamento a 0 até o fim do turno"). Ao
+      tocar, gasta o slot genérico de Reação do turno (mesmo economato
+      de Contra-Encantamento/Palavras de Interrupção) — diferente de
+      Golpe de Escudo (que é depois do SEU ataque, não compete pela
+      Reação). Confirmado via Playwright: nível 6 + Fúria ativa mostra
+      o card no painel de Reação com CD 11 (FOR+2, Prof+3), texto de
+      Falha/Sucesso corretos, e a Reação do turno vira "USADA" ao
+      tocar.
 - [ ] **Entrega 4** — Percorrer a Árvore: card informativo de Ação
       Bônus (nível 14+, Fúria ativa) + toggle "usei a versão
       estendida nesta Fúria" (reseta ao reativar Fúria).
