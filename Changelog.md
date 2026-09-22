@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1749
+
+Ícones da tabbar aumentados de 40x40 pra 50x50px.
+
 ## v202609_1727
 
 Tabbar mais compacta: padding vertical dos botões reduzido de 8px pra 4px.
