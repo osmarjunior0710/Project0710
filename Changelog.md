@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2242
+
+**Trilha da Árvore do Mundo — Percorrer a Árvore (Ação Bônus):** com a
+Fúria ativa e nível 14+, um novo card aparece no painel de Ação Bônus
+explicando o teleporte de 18m (sem custo de recurso) e, quando a
+versão estendida de 45m for usada, um toque marca "já usada nesta
+Fúria" — volta a liberar sozinho na próxima vez que a Fúria for
+ativada. Com isso, a Trilha da Árvore do Mundo (1ª subclasse de
+Bárbaro) está completa.
+
 ## v202609_2233
 
 **Trilha da Árvore do Mundo — Ramos da Árvore (Reação):** com a Fúria

@@ -347,6 +347,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [moedas, setMoedas] = useState<Moedas>(() => normalizarMoedas(personagemSalvo.moedas));
   const [furiaImplacavelUsos, setFuriaImplacavelUsos] = useState(personagemSalvo.furiaImplacavelUsosDesdeDescanso ?? 0);
   const [furiaPersistenteUsada, setFuriaPersistenteUsada] = useState(personagemSalvo.furiaPersistenteUsada ?? false);
+  const [percorrerArvoreEstendidaUsada, setPercorrerArvoreEstendidaUsada] = useState(
+    personagemSalvo.percorrerArvoreEstendidaUsada ?? false,
+  );
   const [furiaImplacavelPendente, setFuriaImplacavelPendente] = useState(false);
   /** `null` = ainda oferecendo (fase 'oferta' do modal), esperando o
    * jogador tocar em rolar; `true`/`false` = dado já rolado, resultado
@@ -656,6 +659,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     lancarNoInferno: lancarNoInfernoDisponivel,
     vitalidadeDaArvore: vitalidadeDaArvoreDisponivel,
     ramosDaArvore: ramosDaArvoreDesbloqueada,
+    percorrerArvore: percorrerArvoreDesbloqueada,
   } = caracteristicasSubclasseAtivas(personagem.subclasse, personagem.nivel, [
     'legiaoDosMortos',
     'grimorioDeNecromancia',
@@ -670,6 +674,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'lancarNoInferno',
     'vitalidadeDaArvore',
     'ramosDaArvore',
+    'percorrerArvore',
   ]);
   // G3.3 (foco de saúde do projeto, ver EmDevB.md): todo o bloco de
   // magia/conjuração/pool combinado (antes ~150 linhas soltas aqui)
@@ -848,6 +853,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const explicacaoCdRamosDaArvore = podeOferecerRamosDaArvore
     ? explicarCdRamosDaArvore(forMod, bonusProficienciaAtual)
     : null;
+  // Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 14) —
+  // só com a Fúria ativa, mesma condição de Ramos da Árvore. Card
+  // informativo (sem CD/rolagem — é só teleporte) + 1 toggle real pra
+  // "usei a versão estendida (45m) nesta Fúria".
+  const podeOferecerPercorrerArvore = percorrerArvoreDesbloqueada && furiaAtiva;
   const ataque = classe
     ? ataqueAtual(
         armaEquipada?.nome ?? null,
@@ -964,6 +974,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     dadosDeVidaGastos,
     moedas,
     furiaPersistenteUsada,
+    percorrerArvoreEstendidaUsada,
     conhecimentoDePedrasGasto,
     picoDeAdrenalinaGasto,
     ataqueDeSoproGasto,
@@ -1060,6 +1071,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       dadosDeVidaGastos,
       moedas,
       furiaPersistenteUsada,
+      percorrerArvoreEstendidaUsada,
       conhecimentoDePedrasGasto,
       picoDeAdrenalinaGasto,
       ataqueDeSoproGasto,
@@ -1216,6 +1228,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return vooDraconico.usar();
   }
 
+  // Percorrer a Árvore (versão estendida, 45m) — 1x por FÚRIA (não por
+  // Descanso, diferente dos outros `recursoFlagUnica` acima): reseta
+  // dentro de `usarFuria()` ao ATIVAR de novo, não em descansoLongo.
+  const percorrerArvoreEstendida = recursoFlagUnica(percorrerArvoreEstendidaUsada, setPercorrerArvoreEstendidaUsada);
+  function usarPercorrerArvoreEstendida(): boolean {
+    return percorrerArvoreEstendida.usar();
+  }
+
   const ancestralidadeGigante = recursoContado(usosAncestralidadeGiganteMaximo, ancestralidadeGiganteGasto, setAncestralidadeGiganteGasto);
   function usarAncestralidadeGigante(): boolean {
     return ancestralidadeGigante.usar();
@@ -1261,6 +1281,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (vitalidadeDaArvoreDisponivel) {
       setPvTemporario((atual) => ganharPvTemporario(atual, personagem.nivel));
     }
+    // Percorrer a Árvore (nível 14) — a versão estendida (45m) é 1x por
+    // FÚRIA: toda ativação nova libera o uso de novo.
+    if (percorrerArvoreDesbloqueada) setPercorrerArvoreEstendidaUsada(false);
     return true;
   }
 
@@ -2495,6 +2518,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               disponivel: podeOferecerRamosDaArvore,
               cd: explicacaoCdRamosDaArvore ? Number(explicacaoCdRamosDaArvore.total.valor) : null,
               explicacaoCd: explicacaoCdRamosDaArvore,
+            }}
+            percorrerArvore={{
+              disponivel: podeOferecerPercorrerArvore,
+              estendidaDisponivel: percorrerArvoreEstendida.disponivel,
+              onUsarEstendida: usarPercorrerArvoreEstendida,
             }}
             golpeCondicional={{
               esmagadorDisponivel: podeOferecerEsmagador,

@@ -206,6 +206,16 @@ interface CombatTabProps {
     cd: number | null;
     explicacaoCd: ExplicacaoCalculo | null;
   };
+  /** Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 14) —
+   * `disponivel` = Fúria ativa + nível 14+. Ação Bônus informativa (sem
+   * CD/rolagem — é só teleporte), com 1 toggle real pra "usei a versão
+   * estendida (45m) nesta Fúria" (`estendidaDisponivel`, reseta ao
+   * reativar a Fúria — ver `usarFuria` em `FichaShell.tsx`). */
+  percorrerArvore: {
+    disponivel: boolean;
+    estendidaDisponivel: boolean;
+    onUsarEstendida: () => boolean;
+  };
   /** Esmagador/Talhador — `esmagadorDisponivel`/`talhadorDisponivel` =
    * talento + ataque PRINCIPAL causa o tipo de dano certo + ainda não
    * usado neste turno (checado em `FichaShell.tsx`). Segue o Fluxo
@@ -488,6 +498,11 @@ export default function CombatTab({
     disponivel: ramosDaArvoreDisponivel,
     cd: cdRamosDaArvore,
     explicacaoCd: explicacaoCdRamosDaArvore,
+  },
+  percorrerArvore: {
+    disponivel: percorrerArvoreDisponivel,
+    estendidaDisponivel: percorrerArvoreEstendidaDisponivel,
+    onUsarEstendida: onUsarPercorrerArvoreEstendida,
   },
   golpeCondicional: {
     esmagadorDisponivel,
@@ -1533,6 +1548,9 @@ export default function CombatTab({
           furiaRestantes={furiaRestantes}
           furiaAtiva={furiaAtiva}
           onUsarFuria={usarFuria}
+          percorrerArvoreDisponivel={percorrerArvoreDisponivel}
+          percorrerArvoreEstendidaDisponivel={percorrerArvoreEstendidaDisponivel}
+          onUsarPercorrerArvore={onUsarPercorrerArvoreEstendida}
           revelacaoCelestialDisponivel={revelacaoCelestialDisponivel}
           revelacaoCelestialGasto={revelacaoCelestialGasto}
           revelacaoCelestialFormaAtiva={revelacaoCelestialFormaAtiva}

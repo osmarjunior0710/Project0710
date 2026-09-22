@@ -1398,14 +1398,17 @@ rastreia automaticamente qual espaço criou qual pet, o jogador agora
 informa o círculo manualmente (select) ao ligar o toggle em
 `PetsTab.tsx` — ver `core/necromante.ts`'s `bonusLegiaoDosMortos`.
 
-## Bárbaro — Trilhas (B5-B8) ainda não implementadas (classe base fechada, 2026-09)
+## Bárbaro — Trilhas (B5, B6, B8) ainda não implementadas (B7 fechada, 2026-09)
 
 **O que é:** o foco "Bárbaro" fechou com a classe base nível 1-20
 completa e testada (B1-B4.10) — ver `aprendizados/classes/barbaro.md`
 pro histórico completo. As 4 Trilhas (subclasses, nível 3/6/10/14
-cada) ficaram **deliberadamente fora do escopo** desta rodada, por
+cada) ficaram **deliberadamente fora do escopo** dessa rodada, por
 decisão do Osmar ao fechar o foco (não é esquecido, é adiado de
-propósito, mesmo padrão já usado com as subclasses de Guerreiro).
+propósito, mesmo padrão já usado com as subclasses de Guerreiro). A
+1ª Trilha retomada (B7 — Trilha da Árvore do Mundo) já foi implementada
+por completo em 2026-09 (ver `aprendizados/classes/barbaro.md`) — as
+outras 3 continuam adiadas.
 
 **Dado já confirmado na planilha mestra** (aba "Subclasses") — não
 precisa reconferir do zero ao retomar, só reler o que já foi extraído:
@@ -1422,16 +1425,13 @@ precisa reconferir do zero ao retomar, só reler o que já foi extraído:
   Selvagens (escolha a cada ativação), Aspecto dos Selvagens (escolha
   entre Descansos), Arauto da Natureza, Poder dos Selvagens (escolha a
   cada ativação) — ainda não extraído em detalhe da planilha.
-- **B7 — Trilha da Árvore do Mundo:** Vitalidade da Árvore, Ramos da
-  Árvore (Reação), Raízes Devastadoras, Percorrer a Árvore — ainda não
-  extraído em detalhe.
 - **B8 — Trilha do Fanático:** Campeão dos Deuses (reserva de dados),
   Fúria Divina, Concentração Fanática, Presença Zelosa, Fúria dos
   Deuses (nível 14, forma temporária) — ainda não extraído em detalhe.
 
 **O que falta pra resolver:** quando o Osmar decidir retomar, seguir o
-ciclo normal de foco (seção 6 do `CLAUDE.md`) — B5-B8 pode reordenar a
-ordem das Trilhas na hora se uma se mostrar mais simples/pronta que a
+ciclo normal de foco (seção 6 do `CLAUDE.md`) — B5/B6/B8 pode reordenar
+a ordem das Trilhas na hora se uma se mostrar mais simples/pronta que a
 outra ao chegar lá (nota já deixada no plano original).
 
 ## Progressão pós-nível-20 / Dádivas Épicas repetíveis (cross-classe, achado fechando o foco Bárbaro)
