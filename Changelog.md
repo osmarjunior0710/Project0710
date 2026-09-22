@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0835
+
+**Correção: o fim de cada aba da Ficha agora rola por cima dos 2 FABs**
+(😴 Descanso, 🎲 Dado 3D) — antes o final de listas longas (ex.:
+Maestria em Arma) ficava escondido atrás deles.
+
 ## v202609_0827
 
 **Desvantagem em Furtividade por armadura, automática:** vestir uma

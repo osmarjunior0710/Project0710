@@ -55,8 +55,15 @@
 .tabContent {
   flex: 1;
   overflow-y: auto;
-  /* espaço pra barra de abas fixa não tapar o fim do conteúdo */
-  padding: var(--space-3) var(--space-4) 76px;
+  /* Espaço pro fim do conteúdo rolar por cima da barra de abas fixa E
+     dos 2 FABs que ficam por cima dela (Descanso/Dado 3D) — mesma
+     conta de altura que os FABs usam pra se posicionar
+     (DescansoFab.module.css/Dice3dFab.module.css: 54px de barra de
+     abas + área segura do aparelho + respiro + 56px do próprio FAB),
+     com mais um respiro por cima. Sem isso, o fim de listas longas
+     (ex.: Maestria em Arma) ficava escondido atrás dos FABs. */
+  padding: var(--space-3) var(--space-4)
+    calc(54px + env(safe-area-inset-bottom, 0px) + var(--space-3) + 56px + var(--space-3));
 }
 
 /* Navigation Bar (M3) fixa no viewport, presa na borda inferior — o
