@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0043
+
+**Criação de personagem — ouro na Loja:** o cabeçalho agora mostra os ícones das moedas e o **Restante** aparece nas 3 moedas (PO, PP e PC) com o cálculo certo — ex.: 84,5 PO = 84 PO + 5 PP + 0 PC.
+
 ## v202609_2232
 
 **Criação de personagem — o 🔀 "Sortear tudo desta etapa" agora existe também no Livro das Sombras, no Talento da Origem e no Talento do Versátil, e todos os 🔀 evitam o que o personagem já possui:** a ferramenta da Origem não repete a que veio da Classe, a perícia da Espécie não repete Classe/Origem/Talento, e os talentos (ex.: Músico, 3 instrumentos; Iniciado em Magia) sorteiam só o que ainda não se tem.

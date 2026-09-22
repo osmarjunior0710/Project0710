@@ -1,3 +1,5 @@
+import { IconeMoeda } from '../../ficha/BolsaDeMoedas';
+import { moedasDeOuro } from '../../../core/moedas';
 import { useState } from 'react';
 import {
   calcularCustoCarrinho,
@@ -246,6 +248,7 @@ export default function LojaStep({ selection, update }: StepProps) {
   const ouroInicial = calcularOuroInicial(selection);
   const custoCarrinho = calcularCustoCarrinho(selection.itens, catalogo);
   const ouroRestante = Math.round((ouroInicial - custoCarrinho) * 100) / 100;
+  const restanteEmMoedas = moedasDeOuro(Math.max(0, ouroRestante));
   const adquiridosPorKits = itensAdquiridosPorKits(selection.itens, catalogo);
 
   const itensMochila = calcularItensIniciais(selection);
@@ -261,11 +264,25 @@ export default function LojaStep({ selection, update }: StepProps) {
         <div className={styles.ouroBoxTopo}>
           <div className={styles.ouroLabelCol}>
             <span className="label">ouro inicial</span>
-            <span>{ouroInicial} PO</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <IconeMoeda tipo="po" tamanho={20} />
+              {ouroInicial} PO
+            </span>
           </div>
           <div className={styles.ouroLabelCol} style={{ alignItems: 'flex-end' }}>
             <span className="label">restante</span>
-            <span className={`${styles.ouroValor} ${ouroRestante <= 0 ? styles.ouroValorZerado : ''}`}>{formatarPO(ouroRestante)}</span>
+            {/* Restante nas 3 moedas (PO, PP, PC) — o que sobra de verdade, ex.: 82,35 PO = 82 PO 3 PP 5 PC */}
+            <span
+              className={`${styles.ouroValor} ${ouroRestante <= 0 ? styles.ouroValorZerado : ''}`}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+            >
+              {(['po', 'pp', 'pc'] as const).map((t) => (
+                <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                  <IconeMoeda tipo={t} tamanho={20} />
+                  {restanteEmMoedas[t]}
+                </span>
+              ))}
+            </span>
           </div>
         </div>
         <div className={styles.cargaRow}>

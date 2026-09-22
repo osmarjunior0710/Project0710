@@ -18,7 +18,7 @@ import styles from '../components/TrocarArmaMaestria.module.css';
  * pentágono, círculo, hexágono — dá pra distinguir sem ler a sigla). */
 const ICONE: Record<TipoMoeda, string> = { pc: iconePC, pp: iconePP, pe: iconePE, po: iconePO, pl: iconePL };
 
-function IconeMoeda({ tipo, tamanho }: { tipo: TipoMoeda; tamanho: number }) {
+export function IconeMoeda({ tipo, tamanho }: { tipo: TipoMoeda; tamanho: number }) {
   return <img src={ICONE[tipo]} alt={SIGLA[tipo]} style={{ width: tamanho, height: tamanho, objectFit: 'contain', display: 'block' }} />;
 }
 const SIGLA: Record<TipoMoeda, string> = { pc: 'PC', pp: 'PP', pe: 'PE', po: 'PO', pl: 'PL' };
