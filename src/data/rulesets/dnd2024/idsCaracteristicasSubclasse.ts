@@ -30,6 +30,8 @@ export const ID_CARACTERISTICA_SUBCLASSE = {
   legiaoDosMortos: 'Legião dos Mortos',
   colheitaDosMortos: 'Colheita dos Mortos',
   mestreDaMorte: 'Mestre da Morte',
+  // Bárbaro — Trilha da Árvore do Mundo
+  vitalidadeDaArvore: 'Vitalidade da Árvore',
 } as const;
 
 export type IdCaracteristicaSubclasse = keyof typeof ID_CARACTERISTICA_SUBCLASSE;

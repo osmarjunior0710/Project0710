@@ -144,6 +144,12 @@ interface CombatTabProps {
      * outros botões condicionais de card (ex.: Bênção do Tenebroso). */
     persistenteDisponivel: boolean;
     onRecuperarPersistente: () => void;
+    /** Trilha da Árvore do Mundo (nível 3+) — Força Revigorante: 1x no
+     * início do turno (confiando no jogador, sem trava de verdade,
+     * decisão do Osmar 2026-09) rola Xd6 (X = bônus de Dano da Fúria)
+     * de PV Temporário pra OUTRA criatura — o app não aplica sozinho
+     * (não modela "outra criatura"), só rola e mostra o total. */
+    vitalidadeDaArvoreDisponivel: boolean;
   };
   /** Ataque Imprudente (Bárbaro, nível 2+) — decidido só na 1ª jogada
    * de ataque do turno (o painel de Ação abre um mini-picker "Ataque
@@ -440,6 +446,7 @@ export default function CombatTab({
     onUsar: onUsarFuria,
     persistenteDisponivel: furiaPersistenteDisponivel,
     onRecuperarPersistente: onRecuperarFuriaPersistente,
+    vitalidadeDaArvoreDisponivel,
   },
   ataqueImprudente: {
     disponivel: ataqueImprudenteDisponivel,
@@ -739,6 +746,21 @@ export default function CombatTab({
     const ativandoAgora = !furiaAtiva;
     if (!onUsarFuria()) return;
     if (ativandoAgora) onMarcarUsado('bonus');
+  }
+
+  /** Força Revigorante (Trilha da Árvore do Mundo, nível 3+) — sempre
+   * pra OUTRA criatura, nunca pro próprio personagem (o app não modela
+   * "outra criatura" na cena, só rola e mostra o total pro jogador
+   * aplicar na mesa). Botão livre enquanto a Fúria está ativa, sem
+   * trava de 1x/turno de verdade — decisão do Osmar (2026-09). */
+  function usarForcaRevigorante() {
+    rolarDados({
+      label: '🌳 Força Revigorante (PV Temp. pra outra criatura)',
+      formula: `${furiaBonusDano}d6`,
+      quantidade: furiaBonusDano,
+      lados: 6,
+      mod: 0,
+    });
   }
 
   function usarRevelacaoCelestial(formaEscolhida: string) {
@@ -1119,6 +1141,11 @@ export default function CombatTab({
               <div className="label" style={{ marginTop: 4 }}>
                 Encerra sozinha ao vestir Armadura Pesada — ou toque abaixo pra encerrar manualmente.
               </div>
+              {vitalidadeDaArvoreDisponivel && (
+                <div className="btn" style={{ marginTop: 8 }} onClick={usarForcaRevigorante}>
+                  🌳 Força Revigorante — {furiaBonusDano}d6 PV Temp. (início do turno, pra outra criatura)
+                </div>
+              )}
               <div
                 className="btn"
                 style={{ marginTop: 8, background: 'rgba(178, 59, 59, 0.16)', borderColor: '#b23b3b' }}

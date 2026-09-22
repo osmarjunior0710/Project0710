@@ -47,11 +47,15 @@ Checklist:
       TRILHA DA ÁRVORE DO MUNDO". 1 teste antigo corrigido
       (`geradorPersonagemTeste.test.ts` assumia "Bárbaro nunca sorteia
       subclasse" — agora sorteia a única implementada).
-- [ ] **Entrega 2** — Vitalidade da Árvore mecânica: Surto de
+- [x] **Entrega 2** — Vitalidade da Árvore mecânica: Surto de
       Vitalidade automático (PV Temp = nível na classe, ao ativar
       Fúria, via `ganharPvTemporario`) + botão de Força Revigorante
       (rola Xd6, X = bônus de Dano da Fúria, mostra o total pro
-      jogador aplicar em outra criatura).
+      jogador aplicar em outra criatura). Confirmado via Playwright:
+      ativar Fúria (nível 5) já soma +5 PV Temp sozinho (pill "+5
+      TEMP" no PV), e o botão "🌳 Força Revigorante" aparece dentro
+      do card de Fúria e rola 2d6 (bônus de Dano da Fúria no nível 5)
+      corretamente.
 - [ ] **Entrega 3** — Ramos da Árvore: card de Reação (só com Fúria
       ativa + nível 6+) que abre `SalvaguardaDoAlvoModal` (Força, CD
       8+FOR+Prof, sem dano — sucesso "nada acontece", falha

@@ -5,6 +5,17 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2203
+
+**Trilha da Árvore do Mundo — Vitalidade da Árvore já funciona de
+verdade:** ativar Fúria (Bárbaro dessa Trilha) já soma Pontos de Vida
+Temporário sozinho, sem precisar fazer nada (igual ao seu nível na
+classe). Enquanto a Fúria está ativa, um novo botão "🌳 Força
+Revigorante" aparece no card de Fúria — rola o dado certo (mesmo
+número de d6 do bônus de Dano da Fúria) pra você aplicar como PV
+Temporário em outro personagem/aliado na mesa (o app não modela outra
+criatura, só rola e mostra o número).
+
 ## v202609_1950
 
 **1ª Trilha do Bárbaro: Trilha da Árvore do Mundo já pode ser
