@@ -5,7 +5,7 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
-## v202609_1731
+## v202609_1907
 
 **Novo protótipo interno — Esmagador + Raízes Devastadoras:** em 🧪 Protótipos, cena nova comparando 3 jeitos de oferecer os 2 efeitos quando gatilham no mesmo golpe (cartões paralelos, fila sequencial, lista única) — ferramenta de decisão, não afeta ficha de personagem nenhuma.
 
