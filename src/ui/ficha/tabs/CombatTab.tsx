@@ -212,11 +212,15 @@ interface CombatTabProps {
     cd: number | null;
     explicacaoCd: ExplicacaoCalculo | null;
   };
-  /** Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 14) —
-   * `disponivel` = Fúria ativa + nível 14+. Ação Bônus informativa (sem
-   * CD/rolagem — é só teleporte), com 1 toggle real pra "usei a versão
-   * estendida (45m) nesta Fúria" (`estendidaDisponivel`, reseta ao
-   * reativar a Fúria — ver `usarFuria` em `FichaShell.tsx`). */
+  /** Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 14)
+   * — `disponivel` = Fúria ativa + nível 14+. 2 cards (pedido do
+   * Osmar, 2026-09, testando): a versão base (18m) é um Ação Bônus
+   * normal, disponível todo turno (só a economia genérica de Ação
+   * Bônus do turno trava, igual qualquer outro recurso desse painel);
+   * "Longa Distância" (45m + até 6 criaturas) é 1x por FÚRIA
+   * (`estendidaDisponivel`, reseta ao reativar a Fúria — ver
+   * `usarFuria` em `FichaShell.tsx`), sem CD/rolagem em nenhuma das
+   * duas (é só teleporte, sem dano). */
   percorrerArvore: {
     disponivel: boolean;
     estendidaDisponivel: boolean;
@@ -803,6 +807,29 @@ export default function CombatTab({
       mod: 0,
     });
     onMarcarForcaRevigoranteUsada();
+  }
+
+  /** Percorrer a Árvore (Trilha da Árvore do Mundo, nível 14) — versão
+   * BASE (18m): Ação Bônus normal, sem custo de recurso próprio, então
+   * só a economia genérica de Ação Bônus do turno trava (mesmo padrão
+   * de qualquer outro recurso deste painel — `onMarcarUsado('bonus')`).
+   * Sem rolagem (o app não modela posição/teleporte, só o texto). */
+  function usarPercorrerArvore() {
+    onMarcarUsado('bonus');
+    setFeedback('🌳 Percorrer a Árvore — teleporte de até 18m pra um espaço desocupado à sua vista.');
+  }
+
+  /** Percorrer a Árvore — Longa Distância (45m + até 6 criaturas
+   * voluntárias a até 3m de você): mesma Ação Bônus de cima, então
+   * também gasta o turno (`onMarcarUsado('bonus')`), mas com a
+   * restrição adicional de 1x por FÚRIA (`onUsarPercorrerArvoreEstendida`,
+   * reseta ao reativar a Fúria). */
+  function usarPercorrerArvoreLongaDistancia() {
+    if (!onUsarPercorrerArvoreEstendida()) return;
+    onMarcarUsado('bonus');
+    setFeedback(
+      '🌳 Percorrer a Árvore — Longa Distância — teleporte de até 45m; pode levar até 6 criaturas voluntárias a até 3m de você.',
+    );
   }
 
   function usarRevelacaoCelestial(formaEscolhida: string) {
@@ -1570,7 +1597,8 @@ export default function CombatTab({
           onUsarFuria={usarFuria}
           percorrerArvoreDisponivel={percorrerArvoreDisponivel}
           percorrerArvoreEstendidaDisponivel={percorrerArvoreEstendidaDisponivel}
-          onUsarPercorrerArvore={onUsarPercorrerArvoreEstendida}
+          onUsarPercorrerArvore={usarPercorrerArvore}
+          onUsarPercorrerArvoreLongaDistancia={usarPercorrerArvoreLongaDistancia}
           revelacaoCelestialDisponivel={revelacaoCelestialDisponivel}
           revelacaoCelestialGasto={revelacaoCelestialGasto}
           revelacaoCelestialFormaAtiva={revelacaoCelestialFormaAtiva}

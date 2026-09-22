@@ -74,12 +74,15 @@ interface BonusPanelContentProps {
   furiaAtiva: boolean;
   onUsarFuria: () => void;
   /** Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 14)
-   * — `disponivel` = Fúria ativa + nível 14+. A versão base (18m) não
-   * consome recurso (sempre disponível); `estendidaDisponivel` = ainda
-   * não usou a versão de 45m NESTA Fúria (reseta ao reativar). */
+   * — `disponivel` = Fúria ativa + nível 14+. 2 cards (pedido do
+   * Osmar, 2026-09): a versão BASE (18m) é um Ação Bônus normal, pode
+   * usar todo turno (só a economia genérica de Ação Bônus trava);
+   * "Longa Distância" (45m + até 6 criaturas) é 1x por FÚRIA
+   * (`estendidaDisponivel`, reseta ao reativar). */
   percorrerArvoreDisponivel: boolean;
   percorrerArvoreEstendidaDisponivel: boolean;
   onUsarPercorrerArvore: () => void;
+  onUsarPercorrerArvoreLongaDistancia: () => void;
   /** Revelação Celestial (Aasimar, nível 3+) — natureza
    * `escolha_reutilizavel`: a forma é escolhida de novo a cada uso,
    * por isso as opções vêm daqui (não do wizard). */
@@ -190,6 +193,7 @@ export default function BonusPanelContent({
   percorrerArvoreDisponivel,
   percorrerArvoreEstendidaDisponivel,
   onUsarPercorrerArvore,
+  onUsarPercorrerArvoreLongaDistancia,
   revelacaoCelestialDisponivel,
   revelacaoCelestialGasto,
   revelacaoCelestialFormaAtiva,
@@ -657,23 +661,31 @@ export default function BonusPanelContent({
       )}
       {percorrerArvoreDisponivel && (
         <>
-          <div
-            className={styles.row}
-            style={!percorrerArvoreEstendidaDisponivel ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onUsarPercorrerArvore}
-          >
+          <div className={styles.row} onClick={onUsarPercorrerArvore}>
             <div className={styles.rowName}>🌳 Percorrer a Árvore</div>
             {detalhesAtivo && (
               <div className={styles.rowDesc}>
-                Teleporta a até 18m pra um espaço desocupado à sua vista, sem custo de recurso. 1x por Fúria, pode
-                estender o alcance pra 45m e levar até 6 criaturas voluntárias a até 3m de você — toque aqui só
-                quando usar essa versão estendida.
+                Teleporta a até 18m pra um espaço desocupado à sua vista, sem custo de recurso — pode usar todo
+                turno, como qualquer Ação Bônus.
+              </div>
+            )}
+          </div>
+          <div
+            className={styles.row}
+            style={!percorrerArvoreEstendidaDisponivel ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+            onClick={onUsarPercorrerArvoreLongaDistancia}
+          >
+            <div className={styles.rowName}>🌳 Percorrer a Árvore — Longa Distância</div>
+            {detalhesAtivo && (
+              <div className={styles.rowDesc}>
+                Estende o alcance pra 45m e permite levar até 6 criaturas voluntárias a até 3m de você. 1x por
+                Fúria.
               </div>
             )}
           </div>
           {!percorrerArvoreEstendidaDisponivel && (
             <div className="label" style={{ marginTop: 6 }}>
-              versão estendida (45m) já usada nesta Fúria — a de 18m continua livre, sem custo de recurso.
+              Longa Distância já usada nesta Fúria — a versão de 18m continua livre, sem custo de recurso.
             </div>
           )}
         </>

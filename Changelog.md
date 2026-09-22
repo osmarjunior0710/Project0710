@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0047
+
+**Percorrer a Árvore virou 2 cards:** o card de Ação Bônus agora
+mostra "🌳 Percorrer a Árvore" (teleporte de 18m, pode usar todo
+turno) separado de "🌳 Percorrer a Árvore — Longa Distância" (45m +
+até 6 criaturas, 1x por Fúria) — antes era 1 card só. Usar qualquer um
+dos dois agora também gasta a Ação Bônus do turno, igual outros
+recursos do painel.
+
 ## v202609_0037
 
 **Força Revigorante agora trava 1x por turno:** o botão "🌳 Força
