@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import iconeMochilaTab from '../../assets/icones-tabbar/icone-mochila.webp';
+import iconeMagiasTab from '../../assets/icones-tabbar/icone-magias.webp';
+import iconeCombateTab from '../../assets/icones-tabbar/icone-combate.webp';
 import { armazenamentoPersonagens, type PersonagemSalvo } from '../../core/armazenamentoPersonagens';
 import { garantirPersonagemDemo, ID_PERSONAGEM_DEMO } from '../../core/personagemDemo';
 import { useColapsavel } from '../hooks/useColapsavel';
@@ -139,12 +142,16 @@ import XpShell from './XpShell';
 
 type TabName = 'atributos' | 'perfil' | 'mochila' | 'magias' | 'combat' | 'pets';
 
-const TABS: { id: TabName; label: string; icon: string }[] = [
+/** `img` = arte própria (webp) em vez de emoji — nesse caso a aba não mostra
+ * o texto do `label` embaixo, só o ícone (pedido do Osmar, 2026-09: as artes
+ * já são reconhecíveis sozinhas, o texto ficava redundante). `label` continua
+ * existindo pra acessibilidade (título/alt), só não é exibido na tela. */
+const TABS: { id: TabName; label: string; icon: string; img?: string }[] = [
   { id: 'atributos', label: 'Atributos', icon: '🧬' },
   { id: 'perfil', label: 'Perfil', icon: '👤' },
-  { id: 'mochila', label: 'Mochila', icon: '🎒' },
-  { id: 'magias', label: 'Magias', icon: '📖' },
-  { id: 'combat', label: 'Combate', icon: '⚔' },
+  { id: 'mochila', label: 'Mochila', icon: '🎒', img: iconeMochilaTab },
+  { id: 'magias', label: 'Magias', icon: '📖', img: iconeMagiasTab },
+  { id: 'combat', label: 'Combate', icon: '⚔', img: iconeCombateTab },
   { id: 'pets', label: 'Pets', icon: '🐾' },
 ];
 
@@ -2648,11 +2655,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               key={t.id}
               className={`${styles.tabBtn} ${tab === t.id ? styles.tabBtnActive : ''}`}
               onClick={() => setTab(t.id)}
+              title={t.label}
             >
-              <span className={styles.tabIconWrap}>
-                <span className={styles.tabIcon}>{t.icon}</span>
+              <span className={`${styles.tabIconWrap} ${t.img ? styles.tabIconWrapImg : ''}`}>
+                {t.img ? (
+                  <img src={t.img} alt={t.label} className={styles.tabIconImg} />
+                ) : (
+                  <span className={styles.tabIcon}>{t.icon}</span>
+                )}
               </span>
-              {t.label}
+              {!t.img && t.label}
             </div>
           ))}
         </div>

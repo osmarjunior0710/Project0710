@@ -118,12 +118,29 @@
   transition: background var(--motion-standard) var(--ease-standard);
 }
 
+/* Abas com arte própria (sem label embaixo) — pill de fundo mais alto pra
+   caber o ícone maior (.tabIconImg) sem cortar quando a aba fica ativa. */
+.tabIconWrapImg {
+  min-width: 46px;
+  height: 44px;
+}
+
 .tabBtnActive .tabIconWrap {
   background: var(--accent-dim);
 }
 
 .tabIcon {
   font-size: 17px;
+  display: block;
+}
+
+/* Abas com arte própria (Mochila/Magias/Combate, 2026-09) — sem texto
+   embaixo (ver TABS em FichaShell.tsx), então o ícone pode ser maior que o
+   emoji das outras abas pra preencher o espaço que o label deixou livre. */
+.tabIconImg {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
   display: block;
 }
 

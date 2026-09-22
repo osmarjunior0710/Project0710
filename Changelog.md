@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1524
+
+Ícones novos de Mochila, Magias e Combate no menu inferior (artes próprias em vez de emoji) — essas 3 abas agora mostram só o ícone, sem texto embaixo.
+
 ## v202609_1332
 
 Cor do Guerreiro (Recuperar Fôlego) confirmada: azul, o mesmo padrão de sempre.
