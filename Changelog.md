@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0827
+
+**Desvantagem em Furtividade por armadura, automática:** vestir uma
+armadura que impõe Desvantagem em Furtividade (Acolchoada, Loriga de
+Escamas, Placas Parcial, e todas as Armaduras Pesadas) agora aplica a
+Desvantagem sozinha ao rolar Furtividade — sem depender do jogador
+lembrar. A perícia ganha um 🔻 ao lado do nome, e o ⓘ explica qual
+armadura está causando isso.
+
 ## v202609_0739
 
 **Melhorias na Loja (criação de personagem):** os títulos "Equipado
