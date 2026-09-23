@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1902
+
+**Mago — Recuperação Arcana (nível 1).** Ao completar um Descanso Curto, se você tem Espaços de Magia gastos que dá pra recuperar, aparece a pergunta "Quer usar Recuperação Arcana?" — respondendo "Sim", escolhe quais espaços recuperar por círculo (pips cinza = ainda gasto, azul = marcado pra recuperar), dentro do orçamento combinado do seu nível de Mago.
+
 ## v202609_1801
 
 **Copiar Magia — corrigido: dava pra acionar o FAB de Descanso/Dado sem querer, por trás do botão "OK" desabilitado.** O jeito de "apagar" o OK sem dinheiro tirava ele do caminho do toque, então o toque vazava pro botão flutuante embaixo dele. Agora o OK continua recebendo o toque (só não faz nada sem dinheiro), sem interferir no que está por trás.

@@ -114,6 +114,7 @@ import {
 } from '../../core/magiasPersonagem';
 import { usosInspiracaoMaximo, dadoInspiracao, fonteDeInspiracaoDesbloqueada } from '../../core/inspiracaoBardo';
 import { caracteristicaDesbloqueada, contarRepeticoesCaracteristica, numeroDeAtaques } from '../../core/levelUp';
+import { orcamentoRecuperacaoArcana, podeUsarRecuperacaoArcana } from '../../core/recuperacaoArcana';
 import { ID_CARACTERISTICA_CLASSE } from '../../data/rulesets/dnd2024/idsCaracteristicasClasse';
 import { estilosDeLuta } from '../../data/rulesets/dnd2024/estilosDeLuta';
 import { armaduras } from '../../data/rulesets/dnd2024/armaduras';
@@ -141,6 +142,7 @@ import LevelUpShell, { type PersonagemNivel } from './levelup/LevelUpShell';
 import CompletarMagiasShell from './levelup/CompletarMagiasShell';
 import LivroDasSombrasShell from './levelup/LivroDasSombrasShell';
 import MemorizarMagiaShell from './levelup/MemorizarMagiaShell';
+import RecuperacaoArcanaShell from './levelup/RecuperacaoArcanaShell';
 import DescansoOverlay, { type FaseDescanso, type TipoDescanso } from './DescansoOverlay';
 import XpShell from './XpShell';
 
@@ -256,6 +258,15 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const temCampeaoPrimitivo = classesAtual.some((c) => {
     const classeCatalogo = catalogoClasses.find((cc) => cc.nome === c.classe);
     return classeCatalogo ? caracteristicaDesbloqueada(classeCatalogo, ID_CARACTERISTICA_CLASSE.campeaoPrimitivo, c.nivel) !== null : false;
+  });
+
+  /** Recuperação Arcana (Mago nível 1) — mesma lógica de
+   * `temCampeaoPrimitivo`: checa TODAS as classes (Mago pode não ser a
+   * ativa numa Multiclasse) e guarda a classe/nível pra ler o pool de
+   * espaços certo no Descanso Curto (`aoFadeInCompleto`). */
+  const classeComRecuperacaoArcana = classesAtual.find((c) => {
+    const classeCatalogo = catalogoClasses.find((cc) => cc.nome === c.classe);
+    return classeCatalogo ? caracteristicaDesbloqueada(classeCatalogo, 'Recuperação Arcana', c.nivel) !== null : false;
   });
 
   const [tab, setTab] = useState<TabName>('atributos');
@@ -519,7 +530,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * `'livre'`) está aberta por cima. */
   const [descansoEmAndamento, setDescansoEmAndamento] = useState<{
     tipo: TipoDescanso;
-    fase: FaseDescanso | 'escolhendoMagias';
+    fase: FaseDescanso | 'escolhendoMagias' | 'recuperandoEspacos';
   } | null>(null);
   const [levelUpHpModo, setLevelUpHpModo] = useState<'media' | 'rolar' | 'manual' | null>(
     personagemSalvo.levelUpHpModo ?? null,
@@ -1549,14 +1560,24 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (!descansoEmAndamento) return;
     if (descansoEmAndamento.tipo === 'curto') {
       descansoCurto();
-    } else {
-      descansoLongo();
+      // Recuperação Arcana não mexe no que `descansoCurto()` já
+      // resetou (Espaços de Magia normais do Mago recuperam no Longo,
+      // não no Curto) — dá pra ler o pool de antes com segurança.
+      const gastosMago = classeComRecuperacaoArcana
+        ? (espacosGastosPorClasseECirculo[classeComRecuperacaoArcana.classe] ?? {})
+        : {};
+      const perguntaRecuperacaoArcana =
+        classeComRecuperacaoArcana !== undefined && podeUsarRecuperacaoArcana(classeComRecuperacaoArcana.nivel, gastosMago);
+      setDescansoEmAndamento((prev) =>
+        prev ? { ...prev, fase: perguntaRecuperacaoArcana ? 'perguntaRecuperacaoArcana' : 'saindo' } : prev,
+      );
+      return;
     }
+    descansoLongo();
     // Só pergunta se sobra alguma Magia Preparada pra redefinir — sem
     // isso, um Mago nível 1 (0 Magias Preparadas ainda escolhidas)
     // veria uma pergunta sem sentido.
-    const perguntaRedefinir =
-      descansoEmAndamento.tipo === 'longo' && usaRedefPorDescanso && magiasPreparadasAtuais.length > 0;
+    const perguntaRedefinir = usaRedefPorDescanso && magiasPreparadasAtuais.length > 0;
     setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: perguntaRedefinir ? 'perguntaRedefinir' : 'saindo' } : prev));
   }
 
@@ -1569,6 +1590,28 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   function aoConfirmarRedefinicao(novaLista: string[]) {
     setMagiasPreparadasAtuais(novaLista);
+    setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: 'saindo' } : prev));
+  }
+
+  /** Resposta ao prompt "quer usar Recuperação Arcana?" — `sim` abre a
+   * tela de escolha por círculo (`RecuperacaoArcanaShell`); `não` já
+   * manda pro fade-out. */
+  function aoResponderRecuperacaoArcana(sim: boolean) {
+    setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: sim ? 'recuperandoEspacos' : 'saindo' } : prev));
+  }
+
+  function aoConfirmarRecuperacaoArcana(escolha: Record<number, number>) {
+    const classeNome = classeComRecuperacaoArcana?.classe;
+    if (classeNome) {
+      setEspacosGastosPorClasseECirculo((prev) => {
+        const poolClasse = { ...(prev[classeNome] ?? {}) };
+        for (const [c, qtd] of Object.entries(escolha)) {
+          const circulo = Number(c);
+          poolClasse[circulo] = Math.max(0, (poolClasse[circulo] ?? 0) - qtd);
+        }
+        return { ...prev, [classeNome]: poolClasse };
+      });
+    }
     setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: 'saindo' } : prev));
   }
 
@@ -2195,6 +2238,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
+  if (descansoEmAndamento?.fase === 'recuperandoEspacos') {
+    // `classeComRecuperacaoArcana` nunca deveria estar ausente aqui (só
+    // entra nesta fase quando `aoFadeInCompleto` já confirmou que
+    // existe) — guarda mesmo assim pra nunca quebrar a tela se sumir.
+    if (!classeComRecuperacaoArcana) return null;
+    return (
+      <RecuperacaoArcanaShell
+        espacosGastosPorCirculo={espacosGastosPorClasseECirculo[classeComRecuperacaoArcana.classe] ?? {}}
+        orcamento={orcamentoRecuperacaoArcana(classeComRecuperacaoArcana.nivel)}
+        onFechar={() => aoResponderRecuperacaoArcana(false)}
+        onConfirmar={aoConfirmarRecuperacaoArcana}
+      />
+    );
+  }
+
   if (ajustarPetAberto) {
     return (
       <AjustarPetShell
@@ -2237,6 +2295,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           fase={descansoEmAndamento.fase}
           onFadeInCompleto={aoFadeInCompleto}
           onResponderRedefinir={aoResponderRedefinir}
+          onResponderRecuperacaoArcana={aoResponderRecuperacaoArcana}
           onFimAnimacao={aoFimDaTransicaoDescanso}
         />
       )}
