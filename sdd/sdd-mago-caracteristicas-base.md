@@ -275,8 +275,10 @@ na lista original.
    características do Mago (retroativo) e cria as 4 funções-esqueleto
    em `core/` das que ainda faltam. Base pra todas as entregas
    seguintes já nascerem com o status certo desde o começo.
+   ✅ Feito (`v202609_1204`/`v202609_1412`).
 3. **Entrega 3 — Copiar Magia pro Livro:** botão na aba Magias, 2
    modos (nova pro livro / backup pra livro reserva), custo em PO.
+   ✅ Feito (`v202609_1731`).
 4. **Entrega 4 — Recuperação Arcana** (nv.1): pergunta condicional no
    Descanso Curto + tela de escolha de círculos com orçamento.
 5. **Entrega 5 — Adepto de Ritual** (nv.1): seção nova na aba Magias

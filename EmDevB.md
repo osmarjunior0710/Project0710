@@ -28,7 +28,7 @@ uma auditoria completa da classe base a pedido do Osmar.
       delta real de cada recurso + `[PH]` automático via
       `statusImplementacao`; classifica as 10 características do Mago
       + cria as 4 funções-esqueleto em `core/`.
-- [ ] Entrega 3 — Copiar Magia pro Livro: botão na aba Magias, 2 modos
+- [x] Entrega 3 — Copiar Magia pro Livro: botão na aba Magias, 2 modos
       (nova pro livro / backup pra livro reserva), custo em PO.
 - [ ] Entrega 4 — Recuperação Arcana (nv.1): pergunta condicional no
       Descanso Curto + tela de escolha de círculos com orçamento.

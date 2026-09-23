@@ -2436,6 +2436,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             truquesAtuais={truquesAtuais}
             magiasPreparadasAtuais={magiasPreparadasAtuais}
             livroDeMagiasAtuais={livroDeMagiasAtuais}
+            moedas={moedas}
+            onMudarMoedas={setMoedas}
+            onAdicionarMagiaAoLivro={(nome) =>
+              setLivroDeMagiasAtuais((atual) => (atual.includes(nome) ? atual : [...atual, nome]))
+            }
             magiasDescobertasMagicasAtuais={magiasDescobertasMagicasAtuais}
             livroDasSombrasAtuais={livroDasSombrasAtuais}
             temPactoDoTomo={invocacoesMisticasAtuais.includes('pacto-do-tomo')}

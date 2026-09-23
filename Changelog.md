@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1731
+
+**Mago — novo botão "Copiar Magia" na aba Magias.** Deixa copiar uma magia encontrada (pergaminho/outro livro) pro seu Livro de Magias, ou copiar uma magia que você já tem pra um livro reserva — cada modo mostra o custo em tempo + PO, a lista de magias por círculo, e desconta o PO de verdade da sua Mochila ao confirmar (só fica bloqueado se faltar dinheiro pra aquela magia específica).
+
 ## v202609_1412
 
 **2 ajustes no Guia do Level Up (feedback direto na tela):** o texto de "Espaços de Magia (1º Círculo) 2 → 3" quebrava em 2 linhas de forma feia — agora o valor sempre fica numa linha só. E características que ganham tela própria (Acadêmico, Subclasse, ASI, etc.) tinham sumido da lista de "Novas Características" — agora aparecem como "escolha pendente", antes de ir pra tela de escolha de verdade.

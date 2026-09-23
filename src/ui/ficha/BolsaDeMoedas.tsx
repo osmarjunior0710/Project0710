@@ -26,7 +26,9 @@ const MASSA_ABAIXO_DO_CENTRO: Record<TipoMoeda, number> = { pc: 13.7, pp: 0.3, p
 
 /** `alinharComTexto`: ícone ao lado de um número — sobe 1px (o centro visual
  * dos dígitos fica ~1px acima do centro da caixa de texto) mais metade da
- * correção ótica da massa da arte. */
+ * correção ótica da massa da arte. Reaproveitado por qualquer tela que
+ * precise mostrar custo em moeda (ex.: `CopiarMagiaShell.tsx`) — CLAUDE.md
+ * §6.5, não duplicar o ícone. */
 export function IconeMoeda({
   tipo,
   tamanho,
@@ -51,7 +53,7 @@ export function IconeMoeda({
     />
   );
 }
-const SIGLA: Record<TipoMoeda, string> = { pc: 'PC', pp: 'PP', pe: 'PE', po: 'PO', pl: 'PL' };
+export const SIGLA: Record<TipoMoeda, string> = { pc: 'PC', pp: 'PP', pe: 'PE', po: 'PO', pl: 'PL' };
 const NOME: Record<TipoMoeda, string> = {
   pc: 'Peça de Cobre',
   pp: 'Peça de Prata',
