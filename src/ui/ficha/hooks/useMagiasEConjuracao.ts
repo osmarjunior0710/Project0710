@@ -15,6 +15,7 @@ import {
 } from '../../../core/multiclasse';
 import { personagemConjura } from '../../../core/conjuracao';
 import { caracteristicaDesbloqueada } from '../../../core/levelUp';
+import { magiasRituaisElegiveis } from '../../../core/adeptoDeRitual';
 import { magiasGratisDasInvocacoes } from '../../../core/invocacoesMagiaGratis';
 import { formasFamiliarDasInvocacoes } from '../../../core/invocacoesFamiliar';
 import {
@@ -160,6 +161,8 @@ export function useMagiasEConjuracao(input: {
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
   const memorizarMagiaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Memorizar Magia', personagem.nivel) !== null : false;
   const livroDeMagias = magiasPreparadasDoPersonagem(livroDeMagiasAtuais);
+  const adeptoDeRitualDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Adepto de Ritual', personagem.nivel) !== null : false;
+  const magiasRituaisDoLivro = adeptoDeRitualDisponivel ? magiasRituaisElegiveis(livroDeMagias, magiasPreparadasAtuais) : [];
   const usaRedefPorDescanso = usaRedefinicaoPorDescanso(classe);
   const magiasGratisConcedidas = magiasGratisDasInvocacoes(invocacoesMisticasAtuais);
   const formasFamiliarElegiveis = formasFamiliarDasInvocacoes(invocacoesMisticasAtuais);
@@ -276,6 +279,8 @@ export function useMagiasEConjuracao(input: {
     livroDasSombras,
     memorizarMagiaDisponivel,
     livroDeMagias,
+    adeptoDeRitualDisponivel,
+    magiasRituaisDoLivro,
     usaRedefPorDescanso,
     magiasGratisConcedidas,
     formasFamiliarElegiveis,

@@ -284,6 +284,7 @@ na lista original.
    ✅ Feito (`v202609_1902`).
 5. **Entrega 5 — Adepto de Ritual** (nv.1): seção nova na aba Magias
    listando magias Rituais do Livro não preparadas, conjuração livre.
+   ✅ Feito (`v202609_2011`).
 6. **Entrega 6 — Maestria de Magias** (nv.18): passo de Level Up +
    conjuração grátis no círculo mais baixo + troca no Descanso Longo
    (mesma tela reaberta).

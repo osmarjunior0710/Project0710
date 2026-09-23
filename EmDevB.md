@@ -32,7 +32,7 @@ uma auditoria completa da classe base a pedido do Osmar.
       (nova pro livro / backup pra livro reserva), custo em PO.
 - [x] Entrega 4 — Recuperação Arcana (nv.1): pergunta condicional no
       Descanso Curto + tela de escolha de círculos com orçamento.
-- [ ] Entrega 5 — Adepto de Ritual (nv.1): seção nova na aba Magias,
+- [x] Entrega 5 — Adepto de Ritual (nv.1): seção nova na aba Magias,
       conjuração livre de magia Ritual do Livro não preparada.
 - [ ] Entrega 6 — Maestria de Magias (nv.18): passo de Level Up +
       conjuração grátis no círculo mais baixo + troca no Descanso

@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2011
+
+**Mago — Adepto de Ritual (nível 1).** Nova seção na aba Magias, "Adepto de Ritual", listando as magias com marcador Ritual do seu Livro de Magias que ainda não estão preparadas — cada uma com botão "🔮 Ritual" pra conjurar na hora, sem gastar Espaço de Magia e sem precisar prepará-la primeiro (as já preparadas continuam conjurando normal, na seção de cima).
+
 ## v202609_1902
 
 **Mago — Recuperação Arcana (nível 1).** Ao completar um Descanso Curto, se você tem Espaços de Magia gastos que dá pra recuperar, aparece a pergunta "Quer usar Recuperação Arcana?" — respondendo "Sim", escolhe quais espaços recuperar por círculo (pips cinza = ainda gasto, azul = marcado pra recuperar), dentro do orçamento combinado do seu nível de Mago.
