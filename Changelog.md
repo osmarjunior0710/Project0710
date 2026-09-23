@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1204
+
+**Mago — a tela "Novas Características" do Level Up virou o guia completo do nível.** Agora, ao subir de nível, ela mostra o antes→depois de cada recurso que mudou (Truques, Magias Preparadas, Livro de Magias, Espaços de Magia por círculo, Talento/ASI disponível) — não só o texto solto de antes. Características ainda sem mecânica de verdade (Adepto de Ritual, Recuperação Arcana, Maestria de Magias, Assinatura Mágica) agora aparecem marcadas com `[PH]`, pra ficar claro o que já funciona e o que ainda é só texto.
+
 ## v202609_0822
 
 **Mago — Acadêmico (nível 2) corrigido: o bug que você achou.** Antes o Level Up mostrava o texto "escolha uma perícia" mas não dava pra escolher nada de verdade — agora, ao subir pro nível 2, aparece uma tela de verdade com as 6 opções (Arcanismo, História, Investigação, Medicina, Natureza, Religião); a escolhida ganha proficiência + Especialização (bônus dobrado) na hora.
