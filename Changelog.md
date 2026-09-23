@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0010
+
+**Emblemas das 4 subclasses oficiais de Mago (Abjurador, Adivinhador, Evocador, Ilusionista):** a tela de "Escolha de Subclasse" do Level Up mostrava um ícone genérico pra essas 4 (só o Necromante tinha emblema próprio) — agora as 4 têm banner próprio, igual ao padrão já usado pelas outras classes/subclasses. Nenhuma mudou de mecânica, ainda aparecem travadas até serem implementadas.
+
 ## v202609_2243
 
 **Esmagador + Raízes Devastadoras podem aparecer juntos no popup de dano:** com uma arma como Malho (Pesada + Contundente), agora dá pra usar os 2 no mesmo acerto — o popup mostra os 2 cartões (Opção A validada em Protótipos), cada um resolve independente sem fechar o outro.
