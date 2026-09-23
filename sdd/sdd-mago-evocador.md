@@ -102,15 +102,15 @@ conjurar, não uma ação própria).
   explica por quê) — mas é o padrão a olhar se algo aqui precisasse de
   pool com máximo fixo (não é o caso).
 
-## 3. Decisões de leitura (confirmar com o Osmar antes da Entrega 1 — ainda em aberto)
+## 3. Decisões de leitura (confirmadas pelo Osmar — não precisa reconfirmar)
 
 - **Truque Potente aplica em QUALQUER truque com dano que o Mago
   conjure, não só truques de Evocação.** O texto não restringe por
   escola ("seus truques que causam dano", sem qualificar escola) —
   diferente de Versado em Evocação/Evocação Potencializada/Sobrecarga
-  (que restringem por escola ou por "magia de Mago"). Confirmar que
-  não há necessidade de checar `escola` aqui, só `danoBaseDado !=
-  null && circulo === 0`.
+  (que restringem por escola ou por "magia de Mago"). Confirmado: não
+  há necessidade de checar `escola` aqui, só `danoBaseDado != null &&
+  circulo === 0`.
 - **Esculpir Magias vira só texto (Perfil), sem card/toggle
   interativo.** A característica protege OUTRAS criaturas (aliados)
   de uma magia de área — o app não modela um roster de criaturas na
@@ -118,20 +118,17 @@ conjurar, não uma ação própria).
   só informa CD/dano, o Mestre resolve quem é atingido e quem se
   salva na mesa). Não tem nada pro app calcular ou marcar — nem
   "quantas criaturas" muda um número que o app usa em algum lugar.
-- **Sobrecarga não interage com Crítico automaticamente — precisa de
-  confirmação.** "Causar dano máximo" (sem rolar dados) e "dobrar
-  dados no crítico" são 2 regras que preveem resultados diferentes
-  quando combinadas (dano máximo x2? ou dano máximo já é o teto,
-  crítico não soma nada?). O livro não cobre esse cruzamento
-  explicitamente. Proposta: Sobrecarga SUBSTITUI a rolagem de dano
-  (não é "role e pegue o maior", é "não role, use o valor máximo
-  possível") — se o ataque também for crítico, dobra os DADOS antes
-  de aplicar o máximo (equivalente a "dano máximo de todos os dados,
-  já contando o dobro do crítico"), já que a mecânica de crítico do
-  app dobra a quantidade de dados antes de rolar (`core/danoCritico.ts`)
-  e "dano máximo" é só "todo dado no valor mais alto possível" —
-  aplicar depois de já saber quantos dados existem. Perguntar ao Osmar
-  se confirma essa leitura antes de codar a Entrega 5.
+- **Sobrecarga + Crítico — confirmado.** "Causar dano máximo" (sem
+  rolar dados) e "dobrar dados no crítico" são 2 regras que o livro
+  não cobre cruzadas explicitamente. Leitura confirmada: Sobrecarga
+  SUBSTITUI a rolagem de dano (não é "role e pegue o maior", é "não
+  role, use o valor máximo possível") — se o ataque também for
+  crítico, dobra os DADOS antes de aplicar o máximo (equivalente a
+  "dano máximo de todos os dados, já contando o dobro do crítico"), já
+  que a mecânica de crítico do app dobra a quantidade de dados antes
+  de rolar (`core/danoCritico.ts`) e "dano máximo" é só "todo dado no
+  valor mais alto possível" — aplicar depois de já saber quantos dados
+  existem.
 
 ## 4. Decisões de implementação (chapéu de execução decide o detalhe fino por entrega)
 
