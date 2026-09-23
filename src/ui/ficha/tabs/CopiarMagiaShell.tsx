@@ -161,10 +161,14 @@ export default function CopiarMagiaShell({
               // Sem dinheiro pra essa magia = mesmo tratamento "cinza,
               // bloqueado" do estado Usada de Combat (DECISOES-COMBATE.md
               // "Combate — estado Ativo vs Usada") — não opacidade.
+              // Pointer-events continua 'auto' de propósito: o pill fica
+              // sobre os FABs de Descanso/Dado (canto inferior) e um
+              // 'none' aqui deixaria o toque VAZAR pra eles por trás —
+              // o próprio `confirmar()` já barra a ação quando !podePagar.
               borderColor: podePagar ? undefined : 'var(--line)',
               background: podePagar ? undefined : 'var(--panel2)',
               color: podePagar ? undefined : 'var(--text-faint)',
-              pointerEvents: podePagar ? 'auto' : 'none',
+              cursor: podePagar ? 'pointer' : 'default',
               display: 'flex',
               alignItems: 'center',
               gap: 6,
