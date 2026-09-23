@@ -1406,8 +1406,12 @@ pro histórico completo. As 4 Trilhas (subclasses, nível 3/6/10/14
 cada) ficaram **deliberadamente fora do escopo** dessa rodada, por
 decisão do Osmar ao fechar o foco (não é esquecido, é adiado de
 propósito, mesmo padrão já usado com as subclasses de Guerreiro). A
-1ª Trilha retomada (B7 — Trilha da Árvore do Mundo) já foi implementada
-por completo em 2026-09 (ver `aprendizados/classes/barbaro.md`) — as
+1ª Trilha retomada (B7 — Trilha da Árvore do Mundo) foi fechada de
+verdade em 2026-09, incluindo Raízes Devastadoras (nível 10), que
+tinha ficado só como texto na 1ª rodada e ganhou mecânica completa
+numa sessão de validação depois (Derrubar/Empurrar, com o achado extra
+de coexistir com Esmagador/Talhador — popup com os 2 cartões, ver
+`DECISOES-COMBATE.md` "Fluxo Acerto/Erro sem 'renunciar'...") — as
 outras 3 continuam adiadas.
 
 **Dado já confirmado na planilha mestra** (aba "Subclasses") — não
@@ -1420,7 +1424,10 @@ precisa reconferir do zero ao retomar, só reler o que já foi extraído:
   corpo de volta ao ser dano dentro de 1,5m), Presença Intimidante
   (nível 14, Ação Bônus, medo em área, CD 8+mod.FOR+Prof, resistida
   por Sabedoria, 1x/Descanso Longo ou gasta 1 uso de Fúria pra
-  recarregar).
+  recarregar). **SDD completo já pronto** em
+  `sdd/sdd-barbaro-berserker.md` (planilha + Livro do Jogador
+  cruzados, quebra em 5 entregas) — não precisa refazer o
+  levantamento, só seguir o SDD quando retomar.
 - **B6 — Trilha do Coração Selvagem:** Arauto da Fauna, Fúria dos
   Selvagens (escolha a cada ativação), Aspecto dos Selvagens (escolha
   entre Descansos), Arauto da Natureza, Poder dos Selvagens (escolha a
