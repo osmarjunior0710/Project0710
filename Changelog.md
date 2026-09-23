@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1801
+
+**Copiar Magia — corrigido: dava pra acionar o FAB de Descanso/Dado sem querer, por trás do botão "OK" desabilitado.** O jeito de "apagar" o OK sem dinheiro tirava ele do caminho do toque, então o toque vazava pro botão flutuante embaixo dele. Agora o OK continua recebendo o toque (só não faz nada sem dinheiro), sem interferir no que está por trás.
+
 ## v202609_1756
 
 **2 ajustes no Copiar Magia (feedback direto na tela):** o botão "OK" sem dinheiro suficiente estava com aparência "apagada/transparente" — agora ele fica cinza/travado, igual ao padrão de "recurso já usado" do resto do app. E toda listagem de magia do personagem (Truques, Magias Preparadas, Livro de Magias e as demais, em Magias e Combate) agora vem sempre ordenada por círculo e depois por ordem alfabética — antes vinha em qualquer ordem, dificultando achar uma magia específica.
