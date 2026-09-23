@@ -16,4 +16,22 @@
 
 ---
 
-(vazio — nenhum foco em andamento nesta conta agora)
+## Foco atual: Mago — Evocador (subclasse)
+
+SDD em `sdd/sdd-mago-evocador.md` (chapéus 1/2/3 aprovados).
+
+- [x] Entrega 1 — Dado no banco: 5 características em
+      `caracteristicasSubclasse.ts`, legenda de margem cortada em
+      Sobrecarga. Evocador selecionável + aparece no Perfil.
+- [ ] Entrega 2 — Versado em Evocação (nível 3): `core/evocador.ts` +
+      wiring em `LevelUpShell.tsx`.
+- [ ] Entrega 3 — Truque Potente (nível 3): metade de dano no erro
+      (ataque) e no sucesso da salvaguarda (truque).
+- [ ] Entrega 4 — Evocação Potencializada (nível 10): mod. de
+      Inteligência somado ao dano de magia de Evocação de Mago.
+- [ ] Entrega 5 — Sobrecarga (nível 14): dano máximo opcional +
+      contador de usos desde o Descanso Longo + dano Necrótico
+      auto-infligido escalando.
+- [ ] Entrega 6 — Fechamento: testes/tsc/build,
+      `aprendizados/classes/mago.md` atualizado, `PENDENCIAS.md`
+      "Escolha de subclasse — versão placeholder" perde o Evocador.

@@ -2,11 +2,12 @@
 // editar valores à mão.
 //
 // Bardo / Colégio do Conhecimento + Bruxo / Patrono Ínfero + Bárbaro /
-// Trilha da Árvore do Mundo importados — as outras 3 de Bardo
-// (Bravura, Dança, Glamour), as outras 3 de Bruxo (Arquifada,
-// Celestial, Grande Antigo) e as outras 3 de Bárbaro (Berserker,
-// Coração Selvagem, Fanático) entram sob demanda, mesmo padrão de
-// `caracteristicasClasse.ts`.
+// Trilha da Árvore do Mundo + Mago / Evocador importados — as outras 3
+// de Bardo (Bravura, Dança, Glamour), as outras 3 de Bruxo (Arquifada,
+// Celestial, Grande Antigo), as outras 3 de Bárbaro (Berserker,
+// Coração Selvagem, Fanático) e as outras 3 subclasses oficiais de
+// Mago (Abjurador, Adivinhador, Ilusionista) entram sob demanda, mesmo
+// padrão de `caracteristicasClasse.ts`.
 //
 // "Tipo de Ação (auto, revisar)" da planilha marcou "Palavras de
 // Interrupção" como "Passiva / Estática" — errado, o texto da própria
@@ -29,6 +30,11 @@
 // Estática" na planilha, mas o texto diz "você pode executar uma
 // Reação" — corrigido pra "Reação" (mesmo ajuste já feito em Palavras
 // de Interrupção do Bardo).
+//
+// Mago / Evocador — "Sobrecarga" (nível 14) tinha a legenda de margem
+// lateral da página impressa ("Subclasse Evocador") colada no fim da
+// célula (mesmo problema de extração da seção 8 do CLAUDE.md) —
+// cortada, confirmado contra o Livro do Jogador (Cap. 3).
 
 export interface CaracteristicaSubclasse {
   classe: string;
@@ -166,5 +172,50 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Ao ativar sua Fúria e, como uma Ação Bônus enquanto ela estiver ativa, você pode se teleportar a até 18 metros para um espaço desocupado à sua vista. Além disso, uma vez por Fúria, você pode aumentar o alcance desse teleporte para 45 metros. Ao fazer isso, você também pode levar até seis criaturas voluntárias que estejam a até 3 metros de você. Cada criatura se teleporta para um espaço desocupado à sua escolha a até 3 metros do seu destino.',
     tipoAcao: 'Ação Bônus',
+  },
+  {
+    classe: 'Mago',
+    subclasse: 'Evocador',
+    nivel: 3,
+    nome: 'Truque Potente',
+    descricao:
+      'Seus truques que causam dano afetam até criaturas que evitam os efeitos deles. Ao conjurar um truque em uma criatura e errar o ataque ou o alvo ser bem-sucedido na salvaguarda contra o truque, ele sofre metade do dano (se houver), mas não sofre efeitos adicionais do truque.',
+    tipoAcao: 'Passiva / Estática',
+  },
+  {
+    classe: 'Mago',
+    subclasse: 'Evocador',
+    nivel: 3,
+    nome: 'Versado em Evocação',
+    descricao:
+      'Escolha duas magias de Mago da escola de Evocação, cada uma deve ser de 2º círculo ou inferior, e adicione-as gratuitamente ao seu livro de magias. Além disso, ao adquirir acesso a um novo círculo de espaços de magia nesta classe, você pode adicionar gratuitamente uma magia de Mago da escola de Evocação ao seu livro de magias. A magia escolhida deve ser de um círculo para o qual você tenha espaços de magia.',
+    tipoAcao: 'Passiva / Estática',
+  },
+  {
+    classe: 'Mago',
+    subclasse: 'Evocador',
+    nivel: 6,
+    nome: 'Esculpir Magias',
+    descricao:
+      'Você pode criar zonas de segurança nos efeitos das suas evocações. Ao conjurar uma magia de Evocação que afeta criaturas à sua vista, você pode escolher um número delas igual a 1 mais o círculo da magia. Criaturas escolhidas são bem-sucedidas automaticamente em suas salvaguardas e não sofrem dano se normalmente sofreriam metade do dano em caso de sucesso.',
+    tipoAcao: 'Passiva / Estática',
+  },
+  {
+    classe: 'Mago',
+    subclasse: 'Evocador',
+    nivel: 10,
+    nome: 'Evocação Potencializada',
+    descricao:
+      'Ao conjurar uma magia de Mago da escola de Evocação, você pode adicionar seu modificador de Inteligência a uma jogada de dano dessa magia.',
+    tipoAcao: 'Passiva / Estática',
+  },
+  {
+    classe: 'Mago',
+    subclasse: 'Evocador',
+    nivel: 14,
+    nome: 'Sobrecarga',
+    descricao:
+      'Você pode aumentar o poder de suas magias. Ao conjurar uma magia de Mago que cause dano com um espaço de magia de 1º a 5º círculo, você pode causar dano máximo com essa magia no turno no qual a conjurar. Ao fazer isso pela primeira vez, você não sofre nenhum efeito adverso. Se usar esta característica novamente antes de completar um Descanso Longo, você sofre 2d12 pontos de dano Necrótico para cada círculo do espaço de magia imediatamente após conjurá-la. Esse dano ignora Resistência e Imunidade. Toda vez que você usa esta característica novamente antes de completar um Descanso Longo, o dano Necrótico por círculo de magia aumenta em 1d12.',
+    tipoAcao: 'Passiva / Estática',
   },
 ];

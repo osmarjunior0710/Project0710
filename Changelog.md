@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0054
+
+**Mago/Evocador — Entrega 1 (dado no banco):** as 5 características da subclasse (Truque Potente, Versado em Evocação, Esculpir Magias, Evocação Potencializada, Sobrecarga) foram cadastradas — o Evocador deixou de aparecer travado na Escolha de Subclasse e já pode ser escolhido normalmente (Level Up ou Personagem de Teste). Ainda sem mecânica interativa — as próximas entregas ligam cada uma de verdade.
+
 ## v202609_0010
 
 **Emblemas das 4 subclasses oficiais de Mago (Abjurador, Adivinhador, Evocador, Ilusionista):** a tela de "Escolha de Subclasse" do Level Up mostrava um ícone genérico pra essas 4 (só o Necromante tinha emblema próprio) — agora as 4 têm banner próprio, igual ao padrão já usado pelas outras classes/subclasses. Nenhuma mudou de mecânica, ainda aparecem travadas até serem implementadas.
