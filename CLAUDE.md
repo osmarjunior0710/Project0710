@@ -263,6 +263,24 @@ características da classe de ponta a ponta antes de considerá-la
   características só-texto é motivo suficiente pra propor uma
   auditoria dessas, mesmo sem o Osmar pedir primeiro.
 
+### 6.1.2 Ler o livro completo, não só as linhas nomeadas da planilha
+
+(2026-09, depois de uma auditoria do Mago que releu só as
+características NOMEADAS da planilha e não achou "Expandindo e
+Substituindo um Livro de Magias" — uma caixa de texto solta no meio
+do capítulo, com uma mecânica real (Copiar Magia pro Livro), que
+nunca virou uma linha própria na aba "Características de Classe".)
+
+- Antes de fechar uma auditoria ou SDD de classe/subclasse, **leia as
+  páginas do PDF do capítulo inteiro da classe** (não só os trechos
+  já extraídos na planilha) — a planilha só captura características
+  NOMEADAS ("Nível X: Nome"); regra solta em caixa de texto/sidebar
+  no meio do capítulo não vira linha própria e passa batido se você
+  só ler o que já foi extraído.
+- Separe o texto em blocos ao ler (mesma disciplina da seção 6.1) —
+  cada caixa de texto/parágrafo isolado é 1 bloco a avaliar sozinho
+  antes de montar a lista de características.
+
 ### 6.2 Chapéu 2 — Game Designer: SDD da feature (garantir que vai funcionar)
 
 Com a quebra em entregas aprovada (chapéu 1), vista o chapéu de Game
@@ -644,6 +662,46 @@ quanto pra descrição, o que fizer mais sentido pro caso.
   são placeholder — são texto de regra real, mesmo sem cálculo por
   trás ainda. `[PH]` é só pra número/nome inventado, não pra texto de
   regra correto com pouca interatividade.
+
+### 12.1 Status de implementação por característica — rastreável no dado e no código
+
+(2026-09, extensão do `[PH]` acima — depois da auditoria do Mago, o
+Osmar pediu um jeito de perguntar "nós implementamos a feature X?" e
+ter uma resposta objetiva, sem precisar reler código ou confiar em
+`[PH]` escrito à mão dentro do texto de descrição.)
+
+Toda `CaracteristicaClasse`/`CaracteristicaSubclasse` pode carregar um
+campo opcional `statusImplementacao`, com 4 valores possíveis — nunca
+apenas 2 (o estado **nunca se apaga**, só transiciona; o histórico de
+quando mudou fica no Git):
+
+- `'placeholder-textonly'` — suspeita de que é só narrativa, ainda
+  não confirmado.
+- `'placeholder-codeimplementation'` — precisa de mecânica real,
+  ainda não implementada.
+- `'textonly'` — confirmado como só narrativo, sem mecânica
+  necessária (permanente).
+- `'codeimplementation'` — mecânica real existe e funciona
+  (permanente).
+
+- Campo **opcional** (`undefined` = ainda não classificado) — não
+  precisa preencher retroativamente em classe que não é o foco atual;
+  preencha só na classe/subclasse do foco em andamento agora. Migração
+  pras outras classes é gradual, sob demanda (mesmo espírito da seção
+  7.2 pra `aprendizados/`).
+- Qualquer linha com `statusImplementacao` começando com
+  `'placeholder-'` aparece com `[PH]` **automaticamente** em qualquer
+  tela que a exibir (Level Up, Perfil) — não precisa mais escrever
+  `[PH]` à mão dentro do texto de descrição pra essas linhas.
+- Ao confirmar/implementar, troca pro par sem `placeholder-` — nunca
+  apaga o campo nem volta pro `undefined`.
+- **Toda característica nova (qualquer classe/subclasse daqui pra
+  frente) ganha uma função própria em `core/`** — mesmo `textonly`
+  (mesmo que a função nunca faça nada) — como marco de existência,
+  com o mesmo status numa doc-comment da função (ex.: `// [PH]
+  [codeimplementation]`), pra bater com o dado. Isso deixa visível,
+  só de olhar `core/`, o que já foi ao menos esboçado vs. o que ainda
+  não tem nem função própria.
 
 ## 13. Testes automatizados e IDs estáveis — obrigatório em `core/` daqui pra frente
 
