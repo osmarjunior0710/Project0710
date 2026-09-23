@@ -18,10 +18,12 @@ import styles from '../components/TrocarArmaMaestria.module.css';
  * pentágono, círculo, hexágono — dá pra distinguir sem ler a sigla). */
 const ICONE: Record<TipoMoeda, string> = { pc: iconePC, pp: iconePP, pe: iconePE, po: iconePO, pl: iconePL };
 
-function IconeMoeda({ tipo, tamanho }: { tipo: TipoMoeda; tamanho: number }) {
+/** Reaproveitado por qualquer tela que precise mostrar custo em moeda
+ * (ex.: `CopiarMagiaShell.tsx`) — CLAUDE.md §6.5, não duplicar o ícone. */
+export function IconeMoeda({ tipo, tamanho }: { tipo: TipoMoeda; tamanho: number }) {
   return <img src={ICONE[tipo]} alt={SIGLA[tipo]} style={{ width: tamanho, height: tamanho, objectFit: 'contain', display: 'block' }} />;
 }
-const SIGLA: Record<TipoMoeda, string> = { pc: 'PC', pp: 'PP', pe: 'PE', po: 'PO', pl: 'PL' };
+export const SIGLA: Record<TipoMoeda, string> = { pc: 'PC', pp: 'PP', pe: 'PE', po: 'PO', pl: 'PL' };
 const NOME: Record<TipoMoeda, string> = {
   pc: 'Peça de Cobre',
   pp: 'Peça de Prata',

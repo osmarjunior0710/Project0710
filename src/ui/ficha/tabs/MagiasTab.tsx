@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import type { Classe } from '../../../data/rulesets/dnd2024/classes';
-import type { Magia } from '../../../data/rulesets/dnd2024/magias';
+import { magiasDaClasse, type Magia } from '../../../data/rulesets/dnd2024/magias';
 import { armas } from '../../../data/rulesets/dnd2024/armas';
 import type { ItemMochila } from '../../../core/mochila';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
+import type { Moedas } from '../../../core/moedas';
 import {
   espacosDeMagiaAtivos,
   truquesDoPersonagem,
@@ -26,6 +27,7 @@ import { useColapsavel } from '../../hooks/useColapsavel';
 import { useRoll } from '../../roll/RollContext';
 import EscolherCirculoShell from '../combat/EscolherCirculoShell';
 import SalvaguardaDoAlvoModal from '../combat/SalvaguardaDoAlvoModal';
+import CopiarMagiaShell from './CopiarMagiaShell';
 import styles from './MagiasTab.module.css';
 
 const armasSimples = armas.filter((a) => a.categoria.includes('Simples'));
@@ -81,6 +83,14 @@ interface MagiasTabProps {
    * (hoje, todo mundo além do Mago) — a seção "Livro de Magias" só
    * aparece quando essa lista não está vazia. */
   livroDeMagiasAtuais: string[];
+  /** Bolsa de moedas atual — só usada pelo custo de "Copiar Magia" (ver
+   * `CopiarMagiaShell.tsx`); a seção só aparece quando `livroDeMagiasAtuais`
+   * não está vazia (hoje, só Mago). */
+  moedas: Moedas;
+  onMudarMoedas: (m: Moedas) => void;
+  /** Soma uma magia nova ao Livro de Magias — usado só pelo modo "Copiar
+   * Magia (nova)" de `CopiarMagiaShell.tsx`. */
+  onAdicionarMagiaAoLivro: (nome: string) => void;
   /** "Descobertas Mágicas" (Colégio do Conhecimento, nível 6) — 2
    * magias sempre preparadas, mostradas numa seção própria (não se
    * misturam com Magias Preparadas normais). */
@@ -218,6 +228,9 @@ export default function MagiasTab({
   truquesAtuais,
   magiasPreparadasAtuais,
   livroDeMagiasAtuais,
+  moedas,
+  onMudarMoedas,
+  onAdicionarMagiaAoLivro,
   magiasDescobertasMagicasAtuais,
   magiasPactoDoInferoAtuais,
   magiasEspecieAtuais,
@@ -262,6 +275,7 @@ export default function MagiasTab({
 }: MagiasTabProps) {
   const { rolarD20, rolarDados } = useRoll();
   const [telaCirculo, setTelaCirculo] = useState<Magia | null>(null);
+  const [telaCopiarMagia, setTelaCopiarMagia] = useState(false);
   const [armaDePactoEscolhida, setArmaDePactoEscolhida] = useState('');
   // `danoRolado`/`upcastNaoAutomatico` — ver o mesmo padrão em
   // `CombatTab.tsx` `abrirSalvaguarda` (Fluxo Acerto/Erro estendido pra
@@ -423,6 +437,20 @@ export default function MagiasTab({
           if (!ok) return;
           processarMagiaAoUsar(magiaConjurada, circulo, true);
         }}
+      />
+    );
+  }
+
+  if (telaCopiarMagia) {
+    return (
+      <CopiarMagiaShell
+        magiasDaClasse={classe ? magiasDaClasse(classe.nome) : []}
+        circuloMaximo={Math.max(0, ...espacos.map((e) => e.circulo))}
+        livroDeMagiasAtuais={livroDeMagiasAtuais}
+        moedas={moedas}
+        onMudarMoedas={onMudarMoedas}
+        onAdicionarMagiaAoLivro={onAdicionarMagiaAoLivro}
+        onFechar={() => setTelaCopiarMagia(false)}
       />
     );
   }
@@ -1060,6 +1088,13 @@ export default function MagiasTab({
               })}
             </>
           )}
+          <div
+            className="btn"
+            style={{ marginTop: 6, textAlign: 'center' }}
+            onClick={() => setTelaCopiarMagia(true)}
+          >
+            📜 Copiar Magia
+          </div>
         </>
       )}
 
