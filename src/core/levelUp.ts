@@ -8,6 +8,7 @@ import { caracteristicasSubclasse } from '../data/rulesets/dnd2024/caracteristic
 import { caracteristicasSubclasseHomebrew } from '../data/rulesets/dnd2024/caracteristicasSubclasseHomebrew';
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { ID_CARACTERISTICA_CLASSE } from '../data/rulesets/dnd2024/idsCaracteristicasClasse';
+import type { StatusImplementacao } from '../data/rulesets/dnd2024/statusImplementacao';
 
 // Junta as características oficiais (planilha) com as homebrew
 // (Necromante, transcrita à mão — ver caracteristicasSubclasseHomebrew.ts)
@@ -19,6 +20,8 @@ const todasCaracteristicasSubclasse = [...caracteristicasSubclasse, ...caracteri
 export interface CaracteristicaNivel {
   nome: string;
   descricao: string | null;
+  /** Ver CLAUDE.md §12.1 — `undefined` = ainda não classificada. */
+  statusImplementacao?: StatusImplementacao;
 }
 
 /** Níveis em que a classe ganha "Aumento no Valor de Atributo" — lido
@@ -73,7 +76,7 @@ export function caracteristicasDoNivel(classe: Classe, nivel: number): Caracteri
       (c) => c.classe === classe.nome && c.nome === nome && c.nivel <= nivel,
     );
     const detalhe = candidatos.sort((a, b) => b.nivel - a.nivel)[0];
-    return { nome, descricao: detalhe?.descricao ?? null };
+    return { nome, descricao: detalhe?.descricao ?? null, statusImplementacao: detalhe?.statusImplementacao };
   });
 }
 
@@ -190,7 +193,7 @@ export function caracteristicasSubclasseDoNivel(nomeSubclasse: string | null, ni
   if (!nomeSubclasse) return [];
   return todasCaracteristicasSubclasse
     .filter((c) => c.subclasse === nomeSubclasse && c.nivel === nivel)
-    .map((c) => ({ nome: c.nome, descricao: c.descricao }));
+    .map((c) => ({ nome: c.nome, descricao: c.descricao, statusImplementacao: c.statusImplementacao }));
 }
 
 /** Nome literal que a planilha usa em `classes.ts` quando a

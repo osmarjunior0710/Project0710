@@ -337,6 +337,33 @@ export default function LevelUpShell({
   const maxInvocacoes = valorRecursoClasse(classe, 'Invocações Místicas', novoNivel);
   const invocacoesCatalogo = invocacoesElegiveisAteNivel(novoNivel);
   const circuloMaximoNovoNivel = Math.max(0, ...espacosDeMagiaAtivos(classe, novoNivel).map((e) => e.circulo));
+
+  // Guia do Level Up (CLAUDE.md §12.1, pedido do Osmar depois do bug do
+  // Acadêmico): "Novas Características" mostra o delta real de cada
+  // recurso que muda neste nível, não só o texto solto das
+  // características passivas — compara o valor no nível ANTERIOR
+  // (`personagem.nivel`) contra o novo, já calculado acima.
+  const deltasDoNivel: { label: string; texto: string }[] = [];
+  const maxTruquesAntes = valorRecursoClasse(classe, 'Truques Conhecidos', personagem.nivel);
+  if (maxTruques !== maxTruquesAntes) deltasDoNivel.push({ label: 'Truques', texto: `${maxTruquesAntes} → ${maxTruques}` });
+  const maxMagiasPreparadasAntes = valorRecursoClasse(classe, 'Magias Preparadas', personagem.nivel);
+  if (maxMagiasPreparadas !== maxMagiasPreparadasAntes) {
+    deltasDoNivel.push({ label: 'Magias Preparadas', texto: `${maxMagiasPreparadasAntes} → ${maxMagiasPreparadas}` });
+  }
+  const maxLivroDeMagiasAntes = valorRecursoClasse(classe, 'Livro de Magias', personagem.nivel);
+  if (maxLivroDeMagias !== maxLivroDeMagiasAntes) {
+    deltasDoNivel.push({ label: 'Livro de Magias', texto: `${maxLivroDeMagiasAntes} → ${maxLivroDeMagias}` });
+  }
+  const espacosAntesDoNivel = espacosDeMagiaAtivos(classe, personagem.nivel);
+  const espacosDepoisDoNivel = espacosDeMagiaAtivos(classe, novoNivel);
+  const circulosComEspaco = [
+    ...new Set([...espacosAntesDoNivel.map((e) => e.circulo), ...espacosDepoisDoNivel.map((e) => e.circulo)]),
+  ].sort((a, b) => a - b);
+  for (const c of circulosComEspaco) {
+    const antes = espacosAntesDoNivel.find((e) => e.circulo === c)?.maximo ?? 0;
+    const depois = espacosDepoisDoNivel.find((e) => e.circulo === c)?.maximo ?? 0;
+    if (antes !== depois) deltasDoNivel.push({ label: `Espaços de Magia (${c}º Círculo)`, texto: `${antes} → ${depois}` });
+  }
   const magiasPreparadasDaClasse = magiasDaClasseDisponiveis.filter((m) => m.circulo <= circuloMaximoNovoNivel);
   const descobertasMagicasCatalogo = poolDescobertasMagicas.filter(
     (m) => m.circulo === 0 || m.circulo <= circuloMaximoNovoNivel,
@@ -665,22 +692,28 @@ export default function LevelUpShell({
   if (luSteps.includes('proficienciasBonus')) nomesComTelaPropria.add('Proficiências Bônus');
   if (luSteps.includes('descobertasMagicas')) nomesComTelaPropria.add('Descobertas Mágicas');
   if (luSteps.includes('peritoNecromancia')) nomesComTelaPropria.add('Perito em Necromancia');
+  if (luSteps.includes('conhecimentoPrimordial')) nomesComTelaPropria.add('Conhecimento Primordial');
+  if (luSteps.includes('academico')) nomesComTelaPropria.add('Acadêmico');
   if (luSteps.includes('estiloDeLuta')) nomesComTelaPropria.add('Estilo de Luta');
   if (luSteps.includes('especialista')) NOMES_ESPECIALISTA.forEach((n) => nomesComTelaPropria.add(n));
-  if (luSteps.includes('asi')) nomesComTelaPropria.add('Aumento no Valor de Atributo');
+  if (luSteps.includes('asi')) {
+    nomesComTelaPropria.add('Aumento no Valor de Atributo');
+    deltasDoNivel.push({ label: 'Aumento no Valor de Atributo / Talento', texto: 'disponível' });
+  }
   if (luSteps.includes('dadivaEpica')) nomesComTelaPropria.add('Dádiva Épica');
   if (luSteps.includes('arcanaMistica') && novoCirculoArcanaMistica !== null) {
     nomesComTelaPropria.add(`Arcana Mística (${novoCirculoArcanaMistica}º círculo)`);
   }
 
-  // "Novas Características" só entra na sequência quando sobra pelo
-  // menos 1 característica passiva pra listar (mesmo padrão
-  // condicional de todo o resto deste array — ver DECISOES-DESIGN.md
-  // acima referenciado).
+  // "Novas Características" agora é o guia do nível inteiro (CLAUDE.md
+  // §12.1) — entra na sequência quando sobra pelo menos 1 característica
+  // passiva OU 1 delta de recurso (Truques/Magias/Espaços/ASI) pra
+  // mostrar (mesmo padrão condicional de todo o resto deste array — ver
+  // DECISOES-DESIGN.md acima referenciado).
   const features = caracteristicasDoNivelComSubclasse(classe, novoNivel, subclasseEscolhida).filter(
     (f) => !nomesComTelaPropria.has(f.nome),
   );
-  if (features.length > 0) luSteps.splice(1, 0, 'features');
+  if (features.length > 0 || deltasDoNivel.length > 0) luSteps.splice(1, 0, 'features');
   luSteps.push('resumo');
 
   const [luIndex, setLuIndex] = useState(0);
@@ -1341,24 +1374,40 @@ export default function LevelUpShell({
 
         {step === 'features' && (
           <>
-            <div className="section-title">Características desbloqueadas no nível {novoNivel}</div>
-            {features.map((f) => (
-              <div key={f.nome} className="opt-card" style={{ cursor: 'default' }}>
-                <div className="opt-card-name">{f.nome}</div>
-                {f.descricao ? (
-                  <div className="opt-card-desc">{f.descricao}</div>
-                ) : f.nome === NOME_PLACEHOLDER_CARACTERISTICA_SUBCLASSE ? (
-                  <div className="opt-card-desc" style={{ color: 'var(--text-faint)' }}>
-                    Depende da subclasse escolhida ({subclasseEscolhida ?? 'nenhuma'}) — essa subclasse ainda não tem
-                    característica de nível {novoNivel} importada.
+            <div className="section-title">Novas características no nível {novoNivel}</div>
+            {deltasDoNivel.length > 0 && (
+              <div className="opt-card" style={{ cursor: 'default', marginBottom: 10 }}>
+                {deltasDoNivel.map((d) => (
+                  <div key={d.label} className="opt-card-row" style={{ justifyContent: 'space-between' }}>
+                    <span>{d.label}</span>
+                    <span style={{ fontWeight: 'bold' }}>{d.texto}</span>
                   </div>
-                ) : (
-                  <div className="opt-card-desc" style={{ color: 'var(--text-faint)' }}>
-                    Descrição detalhada ainda não importada pra esse nível/característica.
-                  </div>
-                )}
+                ))}
               </div>
-            ))}
+            )}
+            {features.map((f) => {
+              const ph = f.statusImplementacao?.startsWith('placeholder-') ?? false;
+              return (
+                <div key={f.nome} className="opt-card" style={{ cursor: 'default' }}>
+                  <div className="opt-card-name">
+                    {ph && <span style={{ color: 'var(--warn)' }}>[PH] </span>}
+                    {f.nome}
+                  </div>
+                  {f.descricao ? (
+                    <div className="opt-card-desc">{f.descricao}</div>
+                  ) : f.nome === NOME_PLACEHOLDER_CARACTERISTICA_SUBCLASSE ? (
+                    <div className="opt-card-desc" style={{ color: 'var(--text-faint)' }}>
+                      Depende da subclasse escolhida ({subclasseEscolhida ?? 'nenhuma'}) — essa subclasse ainda não tem
+                      característica de nível {novoNivel} importada.
+                    </div>
+                  ) : (
+                    <div className="opt-card-desc" style={{ color: 'var(--text-faint)' }}>
+                      Descrição detalhada ainda não importada pra esse nível/característica.
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </>
         )}
 

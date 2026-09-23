@@ -1,3 +1,5 @@
+import type { StatusImplementacao } from './statusImplementacao';
+
 // Gerado a partir de dnd-master-referencia.xlsx, aba "Subclasses". Não
 // editar valores à mão.
 //
@@ -43,6 +45,9 @@ export interface CaracteristicaSubclasse {
   nome: string;
   descricao: string;
   tipoAcao: string;
+  /** Ver CLAUDE.md §12.1. Opcional — preenchido só na classe/subclasse do
+   * foco em andamento; `undefined` nas demais (ainda não classificadas). */
+  statusImplementacao?: StatusImplementacao;
   /** Só "Magias de Pacto do Ínfero" (Bruxo) hoje — lista fixa de
    * magias sempre preparadas por nível de classe, sem escolha do
    * jogador (diferente de "Descobertas Mágicas" do Bardo, que É uma

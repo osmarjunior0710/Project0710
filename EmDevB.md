@@ -24,7 +24,7 @@ uma auditoria completa da classe base a pedido do Osmar.
 
 - [x] Entrega 1 — Acadêmico (nv.2, o bug reportado): passo de Level Up
       + escolha entra em `periciasBonusExtras` e `periciasEspecialista`.
-- [ ] Entrega 2 — Guia do Level Up: tela "Novas Características" mostra
+- [x] Entrega 2 — Guia do Level Up: tela "Novas Características" mostra
       delta real de cada recurso + `[PH]` automático via
       `statusImplementacao`; classifica as 10 características do Mago
       + cria as 4 funções-esqueleto em `core/`.
