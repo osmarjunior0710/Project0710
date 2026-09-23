@@ -125,10 +125,17 @@ reportou), Maestria de Magias (nv.18), Assinatura Mágica (nv.20).
   (nv.18/20), reaproveitando "escolha da lista do Livro de Magias"**
   — mesma UI de "grid de magias pra escolher" já usada em Perito em
   Necromancia, só filtrando por círculo/tempo de conjuração
-  específicos. A TROCA delas (permitida em Descanso Longo) é secundária
-  — como pouquíssimos personagens chegam nível 18-20, a troca pode
-  ficar de fora da primeira entrega e ir pro `PENDENCIAS.md` sem
-  travar o resto.
+  específicos. **Só Maestria de Magias tem regra de troca** ("Ao
+  completar um Descanso Longo, você pode... substituir uma dessas
+  magias por uma magia elegível do mesmo círculo" — Assinatura Mágica
+  não menciona troca nenhuma no texto, escolha é permanente). A troca
+  de Maestria de Magias entra na MESMA entrega da característica (não
+  é trabalho extra de verdade — reaproveita a mesma tela de escolha
+  já construída pra Entrega 4, só disparada por um gatilho novo:
+  pergunta condicional no Descanso Longo, mesmo padrão de
+  "quer redefinir Magias Preparadas?" já usado ali. Corrigido depois
+  do Osmar apontar que "deixar pela metade" não faz sentido quando o
+  custo de fazer certo já é baixo).
 
 ## 4. Decisões de implementação (chapéu de execução decide o detalhe fino por entrega)
 
@@ -166,10 +173,11 @@ reportou), Maestria de Magias (nv.18), Assinatura Mágica (nv.20).
   E `descansoLongo()`) — botão "conjurar de graça" desabilita depois
   do 1º uso do período, com o botão normal (gastando Espaço) sempre
   disponível como alternativa.
-- **Troca de Maestria de Magias/Assinatura Mágica no Descanso Longo**
-  fica de fora da primeira leva de entregas (nenhum personagem de
-  teste chega nível 18-20 hoje) — vai pro `PENDENCIAS.md` ao fechar o
-  foco, não trava as entregas principais.
+- **Maestria de Magias — troca no Descanso Longo:** pergunta
+  condicional (só aparece se a característica já foi adquirida) →
+  mesma tela de escolha da Entrega 4, reaberta com a magia atual
+  pré-selecionada, trocando por outra elegível do mesmo círculo.
+  Nenhum estado novo além do que a Entrega 4 já cria.
 
 ## 5. Quebra em entregas
 
@@ -181,11 +189,10 @@ reportou), Maestria de Magias (nv.18), Assinatura Mágica (nv.20).
 3. **Entrega 3 — Adepto de Ritual** (nv.1): seção nova na aba Magias
    listando magias Rituais do Livro não preparadas, conjuração livre.
 4. **Entrega 4 — Maestria de Magias** (nv.18): passo de Level Up +
-   conjuração grátis no círculo mais baixo.
+   conjuração grátis no círculo mais baixo + troca no Descanso Longo
+   (mesma tela reaberta).
 5. **Entrega 5 — Assinatura Mágica** (nv.20): passo de Level Up +
    conjuração grátis 1x por descanso (2 flags).
 6. **Entrega 6 — Fechamento:** testes/tsc/build,
-   `aprendizados/classes/mago.md` (criar), `PENDENCIAS.md` ganha a
-   troca de Maestria/Assinatura no Descanso Longo (nv.18/20, baixa
-   prioridade). Depois disso, retomar o foco do Evocador (Entrega 2,
-   Versado em Evocação) de onde parou.
+   `aprendizados/classes/mago.md` (criar). Depois disso, retomar o
+   foco do Evocador (Entrega 2, Versado em Evocação) de onde parou.
