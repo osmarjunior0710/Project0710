@@ -30,7 +30,7 @@ uma auditoria completa da classe base a pedido do Osmar.
       + cria as 4 funções-esqueleto em `core/`.
 - [x] Entrega 3 — Copiar Magia pro Livro: botão na aba Magias, 2 modos
       (nova pro livro / backup pra livro reserva), custo em PO.
-- [ ] Entrega 4 — Recuperação Arcana (nv.1): pergunta condicional no
+- [x] Entrega 4 — Recuperação Arcana (nv.1): pergunta condicional no
       Descanso Curto + tela de escolha de círculos com orçamento.
 - [ ] Entrega 5 — Adepto de Ritual (nv.1): seção nova na aba Magias,
       conjuração livre de magia Ritual do Livro não preparada.

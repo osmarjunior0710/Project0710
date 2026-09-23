@@ -281,6 +281,7 @@ na lista original.
    ✅ Feito (`v202609_1731`).
 4. **Entrega 4 — Recuperação Arcana** (nv.1): pergunta condicional no
    Descanso Curto + tela de escolha de círculos com orçamento.
+   ✅ Feito (`v202609_1902`).
 5. **Entrega 5 — Adepto de Ritual** (nv.1): seção nova na aba Magias
    listando magias Rituais do Livro não preparadas, conjuração livre.
 6. **Entrega 6 — Maestria de Magias** (nv.18): passo de Level Up +

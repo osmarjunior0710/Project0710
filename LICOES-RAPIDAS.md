@@ -34,3 +34,14 @@ perguntar antes — o Osmar pediu pra mover pro modal de rolagem depois,
 2ª implementação. Logo em seguida, "Lançar no Inferno" (B6.6) foi
 perguntado ANTES de codar ("onde você tá pensando em colocar isso e
 como o jogador vai ativar?") e saiu certo de primeira.
+
+## Botão desabilitado com `opacity` + `pointer-events:none` num pill fixo vaza clique pro que está atrás
+
+1ª ocorrência (2026-09, Copiar Magia): o OK desabilitado usava
+`opacity`+`pointer-events:none` — como o pill fica no `navLayer`
+(`position: fixed`), sobrepondo os FABs de Descanso/Dado, o clique
+"vazava" pro FAB por trás em vez de ser ignorado (corrigido: manter
+`pointer-events` normal e guardar a ação dentro do handler). 2ª
+ocorrência notada (não corrigida ainda): `MemorizarMagiaShell.tsx`
+("Confirmar") tem o mesmo padrão de risco — só vira arrumação de
+verdade se aparecer de novo em algum lugar novo.

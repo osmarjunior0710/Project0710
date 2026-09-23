@@ -365,7 +365,7 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Você pode recuperar um pouco de sua energia mágica estudando seu livro de magias. Ao completar um Descanso Curto, você pode escolher recuperar espaços de magia gastos. Os espaços de magia podem ter um círculo combinado igual a não mais da metade do seu nível de Mago (arredondado para cima), e nenhum dos espaços pode ser de 6º círculo ou superior. Por exemplo, se você é um Mago de nível 4, pode recuperar um valor de até dois círculos de espaços de magia, recuperando um espaço de magia de 2º círculo ou dois espaços de magia de 1º círculo. Você pode usar esta característica novamente após completar um Descanso Longo.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Mago',
