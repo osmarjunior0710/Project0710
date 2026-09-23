@@ -150,6 +150,10 @@ interface LevelUpShellProps {
      * escolhida NESTE level-up. `null` = passo não apareceu (já tinha
      * sido escolhida antes, ou personagem não é Bárbaro nível 3+). */
     conhecimentoPrimordialPericiaEscolhida: string | null;
+    /** Acadêmico (Mago, nível 2) — perícia escolhida NESTE level-up.
+     * `null` = passo não apareceu (já tinha sido escolhida antes, ou
+     * personagem não é Mago nível 2+). */
+    academicoPericiaEscolhida: string | null;
   }) => void;
   /** Controlado pelo `FichaShell` (persistido junto com o resto do
    * progresso) em vez de estado local — uma vez rolado o dado de
@@ -217,6 +221,10 @@ interface LevelUpShellProps {
    * escolhida (permanente, `null` = ainda não escolhida — o passo
    * aparece de novo até o jogador escolher). */
   conhecimentoPrimordialPericiaAtual: string | null;
+  /** Acadêmico (Mago, nível 2) — perícia já escolhida (permanente,
+   * `null` = ainda não escolhida — o passo aparece de novo até o
+   * jogador escolher). */
+  academicoPericiaAtual: string | null;
   /** "Descobertas Mágicas" (Colégio do Conhecimento, nível 6) — 2
    * magias já escolhidas (pré-marcadas, trocável 1 por level-up, mesmo
    * padrão de Truques). */
@@ -253,6 +261,7 @@ type LuStep =
   | 'subclasse'
   | 'proficienciasBonus'
   | 'conhecimentoPrimordial'
+  | 'academico'
   | 'estiloDeLuta'
   | 'truques'
   | 'livroDeMagias'
@@ -303,6 +312,7 @@ export default function LevelUpShell({
   periciasProficientesDoPersonagem,
   periciasSubclasseBonusAtuais,
   conhecimentoPrimordialPericiaAtual,
+  academicoPericiaAtual,
   magiasDescobertasMagicasAtuais,
   poolDescobertasMagicas,
   atributosAtuais,
@@ -541,6 +551,15 @@ export default function LevelUpShell({
   );
   const [conhecimentoPrimordialEscolhida, setConhecimentoPrimordialEscolhida] = useState<string | null>(null);
 
+  // Acadêmico (Mago, nível 2) — lista fixa da própria característica
+  // (Livro do Jogador), não vem da planilha/proficienciasIniciaisClasse
+  // (diferente de Conhecimento Primordial): sempre as mesmas 6 opções,
+  // independente do que o personagem já é proficiente (a regra real
+  // concede proficiência + Especialização juntas, então não precisa
+  // filtrar quem já tem).
+  const ACADEMICO_PERICIAS = ['Arcanismo', 'História', 'Investigação', 'Medicina', 'Natureza', 'Religião'];
+  const [academicoEscolhida, setAcademicoEscolhida] = useState<string | null>(null);
+
   const luSteps: LuStep[] = ['pv'];
   // Só entra na sequência se sobrar pelo menos 1 subclasse IMPLEMENTADA
   // pra escolher — senão o passo travaria o Level Up pra sempre (todo
@@ -571,6 +590,15 @@ export default function LevelUpShell({
     opcoesConhecimentoPrimordialAtual.length > 0
   ) {
     luSteps.push('conhecimentoPrimordial');
+  }
+  // Acadêmico (Mago, nível 2) — escolha única, permanente, mesmo
+  // padrão de Conhecimento Primordial acima, mas as 6 opções nunca
+  // ficam vazias (não filtra por proficiência já existente).
+  if (
+    caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.academico, novoNivel) !== null &&
+    !academicoPericiaAtual
+  ) {
+    luSteps.push('academico');
   }
   if (temEstiloDeLutaTrocavel(classe, novoNivel)) luSteps.push('estiloDeLuta');
   // Diferente de Truques/Invocações (sempre no array quando a classe
@@ -870,6 +898,7 @@ export default function LevelUpShell({
     subclasse: 'Escolha de Subclasse',
     proficienciasBonus: 'Proficiências Bônus',
     conhecimentoPrimordial: 'Conhecimento Primordial',
+    academico: 'Acadêmico',
     estiloDeLuta: 'Estilo de Luta',
     truques: 'Truques',
     livroDeMagias: 'Livro de Magias',
@@ -926,6 +955,10 @@ export default function LevelUpShell({
     }
     if (step === 'conhecimentoPrimordial' && conhecimentoPrimordialEscolhida === null) {
       setAviso('Escolha a perícia do Conhecimento Primordial antes de avançar.');
+      return;
+    }
+    if (step === 'academico' && academicoEscolhida === null) {
+      setAviso('Escolha a perícia do Acadêmico antes de avançar.');
       return;
     }
     if (step === 'maestriaArmaCrescimento' && maestriaArmaEscolhida.length < maxMaestriaArma) {
@@ -1091,6 +1124,7 @@ export default function LevelUpShell({
         periciaLivreTalentoEscolhida: luSteps.includes('periciaLivreTalento') ? periciaLivreEscolhida : null,
         periciaRestritaTalentoEscolhida: luSteps.includes('periciaRestritaTalento') ? periciaRestritaEscolhida : null,
         conhecimentoPrimordialPericiaEscolhida: luSteps.includes('conhecimentoPrimordial') ? conhecimentoPrimordialEscolhida : null,
+        academicoPericiaEscolhida: luSteps.includes('academico') ? academicoEscolhida : null,
       });
       return;
     }
@@ -1726,6 +1760,25 @@ export default function LevelUpShell({
           </>
         )}
 
+        {step === 'academico' && (
+          <>
+            <div className="section-title">Acadêmico — escolha 1 perícia</div>
+            <div className="label" style={{ marginBottom: 8 }}>
+              Proficiência + Especialização (dobra o bônus) numa das perícias abaixo à sua escolha. Escolha única e
+              permanente.
+            </div>
+            {ACADEMICO_PERICIAS.map((nome) => (
+              <div
+                key={nome}
+                className={`opt-card ${academicoEscolhida === nome ? 'selected' : ''}`}
+                onClick={() => setAcademicoEscolhida(nome)}
+              >
+                <div className="opt-card-name">{nome}</div>
+              </div>
+            ))}
+          </>
+        )}
+
         {step === 'especialista' && (
           <>
             <div className="section-title">
@@ -2207,6 +2260,12 @@ export default function LevelUpShell({
               <div className="summary-row">
                 <span>Conhecimento Primordial</span>
                 <span>{conhecimentoPrimordialEscolhida ?? 'nenhuma escolhida'}</span>
+              </div>
+            )}
+            {luSteps.includes('academico') && (
+              <div className="summary-row">
+                <span>Acadêmico</span>
+                <span>{academicoEscolhida ?? 'nenhuma escolhida'}</span>
               </div>
             )}
             {luSteps.includes('arcanaMistica') && (

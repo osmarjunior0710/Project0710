@@ -35,6 +35,11 @@ export const ID_CARACTERISTICA_CLASSE = {
    * Percepção/Sobrevivência enquanto a Fúria estiver ativa (ver
    * `calcularPericias`, parâmetro `substituicaoForca`). */
   conhecimentoPrimordial: 'Conhecimento Primordial',
+  /** Mago nível 2 — escolha de 1 perícia entre 6 fixas (Arcanismo,
+   * História, Investigação, Medicina, Natureza, Religião), sempre
+   * grátis + Especialização (dobra) na escolhida. Ver
+   * `LevelUpShell.tsx` passo `academico`. */
+  academico: 'Acadêmico',
   /** Bárbaro nível 7 — Vantagem em jogadas de Iniciativa. Ver
    * `CombatTab.tsx` (`alternarIniciativa`). */
   instintosPrimitivos: 'Instintos Primitivos',

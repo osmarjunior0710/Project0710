@@ -372,6 +372,12 @@ export interface PersonagemSalvo {
    * escolhida no Level Up, permanente (nunca reseta). `null`/ausente =
    * ainda não escolhida (o passo aparece de novo no próximo Level Up). */
   conhecimentoPrimordialPericiaEscolhida?: string | null;
+  /** Acadêmico (Mago, nível 2) — perícia escolhida no Level Up,
+   * permanente (nunca reseta). `null`/ausente = ainda não escolhida (o
+   * passo aparece de novo no próximo Level Up). Ganha proficiência +
+   * Especialização ao mesmo tempo (ver `calcularPericias` em
+   * `FichaShell.tsx`). */
+  academicoPericiaEscolhida?: string | null;
   /** `true` = Mãos Curativas (Aasimar) já usada desde o último Descanso
    * Longo — só ele reseta. */
   maosCurativasGasto?: boolean;

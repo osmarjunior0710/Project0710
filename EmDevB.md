@@ -22,7 +22,7 @@ SDD em `sdd/sdd-mago-caracteristicas-base.md`. Aberto no meio do foco
 Evocador (pausado — ver seção abaixo, PAUSADO não fechado) depois de
 uma auditoria completa da classe base a pedido do Osmar.
 
-- [ ] Entrega 1 — Acadêmico (nv.2, o bug reportado): passo de Level Up
+- [x] Entrega 1 — Acadêmico (nv.2, o bug reportado): passo de Level Up
       + escolha entra em `periciasBonusExtras` e `periciasEspecialista`.
 - [ ] Entrega 2 — Recuperação Arcana (nv.1): pergunta condicional no
       Descanso Curto + tela de escolha de círculos com orçamento.
