@@ -687,22 +687,57 @@ export default function LevelUpShell({
   // entra quando sobra algo pra mostrar"). Uma característica passiva
   // sem tela própria (ex: "Ataque Extra") continua aparecendo
   // normalmente — esse passo é o único lugar que mostra ela.
+  // Toda característica que ganha tela própria some do card cheio (evita
+  // duplicar o mesmo nome 2x nesta tela), mas ainda precisa aparecer
+  // como 1 linha de delta aqui — senão ela desaparece da tela por
+  // completo (achado do Osmar: Acadêmico tinha sumido daqui depois da
+  // exclusão). "escolha pendente" é o texto padrão pra escolha ainda não
+  // feita; cada característica com fraseado próprio (ASI/Arcana
+  // Mística) mantém o texto específico.
   const nomesComTelaPropria = new Set<string>();
-  if (luSteps.includes('subclasse')) nomesComTelaPropria.add(`Subclasse de ${classe.nome}`);
-  if (luSteps.includes('proficienciasBonus')) nomesComTelaPropria.add('Proficiências Bônus');
-  if (luSteps.includes('descobertasMagicas')) nomesComTelaPropria.add('Descobertas Mágicas');
-  if (luSteps.includes('peritoNecromancia')) nomesComTelaPropria.add('Perito em Necromancia');
-  if (luSteps.includes('conhecimentoPrimordial')) nomesComTelaPropria.add('Conhecimento Primordial');
-  if (luSteps.includes('academico')) nomesComTelaPropria.add('Acadêmico');
-  if (luSteps.includes('estiloDeLuta')) nomesComTelaPropria.add('Estilo de Luta');
-  if (luSteps.includes('especialista')) NOMES_ESPECIALISTA.forEach((n) => nomesComTelaPropria.add(n));
+  if (luSteps.includes('subclasse')) {
+    nomesComTelaPropria.add(`Subclasse de ${classe.nome}`);
+    deltasDoNivel.push({ label: `Subclasse de ${classe.nome}`, texto: 'escolha pendente' });
+  }
+  if (luSteps.includes('proficienciasBonus')) {
+    nomesComTelaPropria.add('Proficiências Bônus');
+    deltasDoNivel.push({ label: 'Proficiências Bônus', texto: 'escolha pendente' });
+  }
+  if (luSteps.includes('descobertasMagicas')) {
+    nomesComTelaPropria.add('Descobertas Mágicas');
+    deltasDoNivel.push({ label: 'Descobertas Mágicas', texto: 'escolha pendente' });
+  }
+  if (luSteps.includes('peritoNecromancia')) {
+    nomesComTelaPropria.add('Perito em Necromancia');
+    deltasDoNivel.push({ label: 'Perito em Necromancia', texto: 'escolha pendente' });
+  }
+  if (luSteps.includes('conhecimentoPrimordial')) {
+    nomesComTelaPropria.add('Conhecimento Primordial');
+    deltasDoNivel.push({ label: 'Conhecimento Primordial', texto: 'escolha pendente' });
+  }
+  if (luSteps.includes('academico')) {
+    nomesComTelaPropria.add('Acadêmico');
+    deltasDoNivel.push({ label: 'Acadêmico', texto: 'escolha pendente' });
+  }
+  if (luSteps.includes('estiloDeLuta')) {
+    nomesComTelaPropria.add('Estilo de Luta');
+    deltasDoNivel.push({ label: 'Estilo de Luta', texto: 'disponível pra trocar' });
+  }
+  if (luSteps.includes('especialista')) {
+    NOMES_ESPECIALISTA.forEach((n) => nomesComTelaPropria.add(n));
+    deltasDoNivel.push({ label: 'Especialista', texto: 'escolha pendente' });
+  }
   if (luSteps.includes('asi')) {
     nomesComTelaPropria.add('Aumento no Valor de Atributo');
     deltasDoNivel.push({ label: 'Aumento no Valor de Atributo / Talento', texto: 'disponível' });
   }
-  if (luSteps.includes('dadivaEpica')) nomesComTelaPropria.add('Dádiva Épica');
+  if (luSteps.includes('dadivaEpica')) {
+    nomesComTelaPropria.add('Dádiva Épica');
+    deltasDoNivel.push({ label: 'Dádiva Épica', texto: 'disponível' });
+  }
   if (luSteps.includes('arcanaMistica') && novoCirculoArcanaMistica !== null) {
     nomesComTelaPropria.add(`Arcana Mística (${novoCirculoArcanaMistica}º círculo)`);
+    deltasDoNivel.push({ label: `Arcana Mística (${novoCirculoArcanaMistica}º círculo)`, texto: 'escolha pendente' });
   }
 
   // "Novas Características" agora é o guia do nível inteiro (CLAUDE.md
@@ -1378,9 +1413,9 @@ export default function LevelUpShell({
             {deltasDoNivel.length > 0 && (
               <div className="opt-card" style={{ cursor: 'default', marginBottom: 10 }}>
                 {deltasDoNivel.map((d) => (
-                  <div key={d.label} className="opt-card-row" style={{ justifyContent: 'space-between' }}>
-                    <span>{d.label}</span>
-                    <span style={{ fontWeight: 'bold' }}>{d.texto}</span>
+                  <div key={d.label} className="opt-card-row" style={{ justifyContent: 'space-between', gap: 8 }}>
+                    <span style={{ flex: '1 1 auto', minWidth: 0 }}>{d.label}</span>
+                    <span style={{ flex: '0 0 auto', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{d.texto}</span>
                   </div>
                 ))}
               </div>
