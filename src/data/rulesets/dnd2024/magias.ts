@@ -11526,6 +11526,12 @@ export const magias: Magia[] = [
   },
 ];
 
+/** Círculo → alfabético, sempre — padrão de toda listagem de magia
+ * (Magias, Combat, Level Up, criação de personagem). Quem sorteia
+ * aleatoriamente (`embaralhar`) já reordena depois, então essa ordem
+ * de base não afeta o sorteio. */
 export function magiasDaClasse(nomeClasse: string, circulo?: number): Magia[] {
-  return magias.filter((m) => m.classes.includes(nomeClasse) && (circulo === undefined || m.circulo === circulo));
+  return magias
+    .filter((m) => m.classes.includes(nomeClasse) && (circulo === undefined || m.circulo === circulo))
+    .sort((a, b) => a.circulo - b.circulo || a.nome.localeCompare(b.nome, 'pt-BR'));
 }

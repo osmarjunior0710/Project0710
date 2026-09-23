@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1756
+
+**2 ajustes no Copiar Magia (feedback direto na tela):** o botão "OK" sem dinheiro suficiente estava com aparência "apagada/transparente" — agora ele fica cinza/travado, igual ao padrão de "recurso já usado" do resto do app. E toda listagem de magia do personagem (Truques, Magias Preparadas, Livro de Magias e as demais, em Magias e Combate) agora vem sempre ordenada por círculo e depois por ordem alfabética — antes vinha em qualquer ordem, dificultando achar uma magia específica.
+
 ## v202609_1731
 
 **Mago — novo botão "Copiar Magia" na aba Magias.** Deixa copiar uma magia encontrada (pergaminho/outro livro) pro seu Livro de Magias, ou copiar uma magia que você já tem pra um livro reserva — cada modo mostra o custo em tempo + PO, a lista de magias por círculo, e desconta o PO de verdade da sua Mochila ao confirmar (só fica bloqueado se faltar dinheiro pra aquela magia específica).
