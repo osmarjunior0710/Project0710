@@ -22,6 +22,7 @@ import RecursosDeClasse from '../combat/RecursosDeClasse';
 import type { RecursoVisivel } from '../../../core/recursosVisiveis';
 import AcaoPanelContent from '../combat/AcaoPanelContent';
 import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
+import EfeitosDoGolpeModal from '../../components/EfeitosDoGolpeModal';
 import AtivarEfeitoModal from '../../components/AtivarEfeitoModal';
 import BonusPanelContent from '../combat/BonusPanelContent';
 import ReacaoPanelContent from '../combat/ReacaoPanelContent';
@@ -659,6 +660,19 @@ export default function CombatTab({
   // salvaguarda, é automático); Derrubar abre a 2ª tela com a CD.
   const [raizesDevastadorasEscolhaAberta, setRaizesDevastadorasEscolhaAberta] = useState(false);
   const [raizesDevastadorasSalvaguardaAberta, setRaizesDevastadorasSalvaguardaAberta] = useState(false);
+  // Efeitos do Golpe — quando Esmagador/Talhador E Raízes Devastadoras
+  // qualificam JUNTOS no mesmo acerto (arma Pesada/Versátil +
+  // Contundente/Cortante, ex. Malho). `null` = popup fechado. Cada
+  // cartão resolve independente — o talento reaproveita
+  // `golpeCondicionalPendente`/`ativarGolpeCondicional` de sempre (o
+  // status "resolvido" vem de `esmagadorDisponivel`/`talhadorDisponivel`
+  // virarem `false` depois de usado, não precisa de flag própria);
+  // Raízes precisa de 1 flag local (`raizesResolvidaTexto`) porque não
+  // tem "usado no turno" (sem limite de usos).
+  const [efeitosDoGolpePendentes, setEfeitosDoGolpePendentes] = useState<
+    ('esmagador' | 'talhador' | 'raizesDevastadoras')[] | null
+  >(null);
+  const [raizesResolvidaTexto, setRaizesResolvidaTexto] = useState<string | null>(null);
   const cdLancarNoInferno = modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null;
   const temEspacoDePactoDisponivel = espacos.some((e) => (espacosGastosPorCirculo[e.circulo] ?? 0) < e.maximo);
   const { rolarD20, rolarDados } = useRoll();
@@ -1121,10 +1135,17 @@ export default function CombatTab({
     setGolpeCondicionalPendente(null);
   }
 
+  function abrirEfeitosDoGolpe(efeitos: ('esmagador' | 'talhador' | 'raizesDevastadoras')[]) {
+    setRaizesResolvidaTexto(null);
+    setEfeitosDoGolpePendentes(efeitos);
+  }
+
   function escolherRaizesDevastadoras(nomes: string[]) {
     setRaizesDevastadorasEscolhaAberta(false);
     if (nomes[0] === 'Empurrar') {
-      setFeedback('🌳 Raízes Devastadoras — Empurrar: empurra o alvo (Grande ou menor) até 3m pra longe de você.');
+      const texto = 'Empurrar: empurra o alvo (Grande ou menor) até 3m pra longe de você.';
+      setFeedback(`🌳 Raízes Devastadoras — ${texto}`);
+      setRaizesResolvidaTexto(texto);
       return;
     }
     setRaizesDevastadorasSalvaguardaAberta(true);
@@ -1585,6 +1606,7 @@ export default function CombatTab({
           onAbrirGolpeCondicional={setGolpeCondicionalPendente}
           raizesDevastadorasDisponivel={raizesDevastadorasDisponivel}
           onAbrirRaizesDevastadoras={() => setRaizesDevastadorasEscolhaAberta(true)}
+          onAbrirEfeitosDoGolpe={abrirEfeitosDoGolpe}
           ancestralidadeGiganteEscolhida={ancestralidadeGiganteEscolhida}
           usosAncestralidadeGiganteRestantes={usosAncestralidadeGiganteRestantes}
           onAtivarAncestralidadeGigante={usarAncestralidadeGiganteAoAcertar}
@@ -1800,6 +1822,35 @@ export default function CombatTab({
           onFechar={() => setRamosDaArvoreAberto(false)}
         />
       )}
+      {/* Precisa vir ANTES de AtivarEfeitoModal/EscolherEfeitoModal/
+       * SalvaguardaDoAlvoModal no JSX (mesmo z-index base 55 nesses 3
+       * — o mais recente no DOM pinta por cima): quando um cartão daqui
+       * é tocado, o modal de verdade daquele efeito abre por cima
+       * deste popup, que continua montado por baixo. */}
+      {efeitosDoGolpePendentes && (
+        <EfeitosDoGolpeModal
+          titulo="Efeitos do Golpe"
+          cartoes={efeitosDoGolpePendentes.map((efeito) =>
+            efeito === 'raizesDevastadoras'
+              ? {
+                  chave: 'raizesDevastadoras',
+                  titulo: '🌳 Raízes Devastadoras',
+                  descricao: 'Ativa Derrubar ou Empurrar, além da maestria da arma.',
+                  resolvido: raizesResolvidaTexto !== null,
+                  descricaoResolvido: raizesResolvidaTexto ?? undefined,
+                  onTocar: () => setRaizesDevastadorasEscolhaAberta(true),
+                }
+              : {
+                  chave: efeito,
+                  titulo: TEXTOS_GOLPE_CONDICIONAL[efeito].titulo,
+                  descricao: TEXTOS_GOLPE_CONDICIONAL[efeito].textoEfeito,
+                  resolvido: efeito === 'esmagador' ? !esmagadorDisponivel : !talhadorDisponivel,
+                  onTocar: () => setGolpeCondicionalPendente(efeito),
+                },
+          )}
+          onFechar={() => setEfeitosDoGolpePendentes(null)}
+        />
+      )}
       {golpeCondicionalPendente && (
         <AtivarEfeitoModal
           titulo={TEXTOS_GOLPE_CONDICIONAL[golpeCondicionalPendente].titulo}
@@ -1828,7 +1879,10 @@ export default function CombatTab({
           explicacaoCd={explicacaoCdRaizesDevastadoras}
           textoSucesso="nada acontece"
           textoFalha="fica com a condição Caído"
-          onFechar={() => setRaizesDevastadorasSalvaguardaAberta(false)}
+          onFechar={() => {
+            setRaizesDevastadorasSalvaguardaAberta(false);
+            setRaizesResolvidaTexto(`Derrubar: CD ${cdRaizesDevastadoras} informada ao Mestre (Constituição).`);
+          }}
         />
       )}
     </>

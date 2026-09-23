@@ -739,11 +739,33 @@ comportamento de hoje intacto. Isso generaliza o `golpeCondicionalPendente`
 de "no máximo 1 talento pendente" (`'esmagador' | 'talhador' | null`)
 pra "0 ou mais efeitos pendentes ao mesmo tempo".
 
-**Entrega 1 já shipou o caso "exatamente 1 efeito" (2026-09):** Raízes
-Devastadoras tem mecânica de verdade (`core/raizesDevastadoras.ts` — CD
-igual a Ramos da Árvore, arquivo próprio; gate em `FichaShell.tsx`, sem
-depender de Fúria; entra em `confirmarFechamentoDoAtaque` DEPOIS de
-Esmagador/Talhador, ANTES de Ancestralidade Gigante). Quando os 2
-coexistem na mesma arma (caso do Malho), Esmagador/Talhador ainda ganha
-prioridade por ora — o popup com N cartões (Opção A) é a próxima
-entrega, ainda não implementada.
+**Estado final (2026-09) — os 2 casos shipados:** Raízes Devastadoras
+tem mecânica de verdade (`core/raizesDevastadoras.ts` — CD igual a
+Ramos da Árvore, arquivo próprio; gate em `FichaShell.tsx`, sem
+depender de Fúria). Com só 1 efeito qualificando, `confirmarFechamentoDoAtaque`
+vai direto no modal daquele efeito (mesmo comportamento de sempre). Com
+os 2 juntos (arma como Malho), abre `EfeitosDoGolpeModal` (novo
+componente, `ui/components/`) — Opção A do Protótipos: N cartões, cada
+um resolve independente (tocar num abre o modal de verdade daquele
+efeito por cima, sem fechar o popup principal; "Fechar" só fecha
+quando o jogador quiser). Ancestralidade Gigante continua de fora
+desse popup (3º caso raríssimo — Golias + Talento + Bárbaro nível 10)
+— nesse cenário, talento/Raízes ainda ganham prioridade sobre ela.
+
+**Armadilha de z-index resolvida (vale pra qualquer popup empilhado
+novo):** `EfeitosDoGolpeModal` populou com `z-index: 60` (copiado de
+`EscolherEfeitoModal`) — mas `AtivarEfeitoModal`/`SalvaguardaDoAlvoModal`
+usam o `z-index: 55` BASE do `.overlay` (`TrocarArmaMaestria.module.css`),
+sem override. Resultado: ao abrir `AtivarEfeitoModal` por cima
+deste popup, ele renderizava ATRÁS (menor z-index), e um clique no
+botão "✅ Ativar" (force:true no Playwright) acertava, na prática, o
+cartão que estava por baixo dele NO POPUP DE CIMA — abrindo o efeito
+errado. Corrigido: `EfeitosDoGolpeModal` não define `zIndex` próprio
+(fica no 55 base, igual aos outros 2) e é renderizado ANTES deles no
+JSX — com z-index empatado, o mais recente no DOM pinta por cima, e
+esse popup "de base" precisa sempre estar por baixo de qualquer efeito
+específico que abrir a partir dele. **Padrão pra lembrar:** qualquer
+popup novo que sirva de "hub" pra abrir outros popups por cima
+(cartões que levam a outro modal) deve usar o z-index BASE, nunca um
+mais alto — e vir primeiro no JSX entre os popups que podem empilhar
+sobre ele.

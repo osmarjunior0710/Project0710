@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2243
+
+**Esmagador + Raízes Devastadoras podem aparecer juntos no popup de dano:** com uma arma como Malho (Pesada + Contundente), agora dá pra usar os 2 no mesmo acerto — o popup mostra os 2 cartões (Opção A validada em Protótipos), cada um resolve independente sem fechar o outro.
+
 ## v202609_2158
 
 **Raízes Devastadoras (Bárbaro, Trilha da Árvore do Mundo, nível 10) ganhou mecânica de verdade:** acertando com arma Pesada ou Versátil (ex.: Machado Grande, Lança) no seu turno, o popup de dano agora oferece o botão "🌳 Raízes Devastadoras" — escolha Derrubar (salvaguarda de Constituição do alvo, CD calculada) ou Empurrar (automático). Não precisa de Fúria ativa, sem limite de usos por turno.

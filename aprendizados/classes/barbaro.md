@@ -441,8 +441,13 @@ validação e a conversa virou uma entrega real:
   si). Explorado em baixa fidelidade no ambiente de Protótipos
   (`EsmagadorRaizesCena.tsx`, 3 layouts comparados: cartões paralelos/
   fila/lista única — Opção A escolhida) — mas só a entrega do caso
-  "exatamente 1 efeito qualifica" foi ao ar; quando os 2 coexistem,
-  Esmagador/Talhador ainda ganha prioridade (mesma regra que já existia
-  pra Ancestralidade Gigante). Ver `DECISOES-COMBATE.md` "Fluxo Acerto/
-  Erro sem 'renunciar'..." pro estado atual — o popup com N cartões
-  fica pra uma próxima entrega.
+  "exatamente 1 efeito qualifica" foi ao ar primeiro; na sequência (mesma
+  sessão, Osmar pediu pra seguir), o caso de coexistência também foi ao
+  ar: `EfeitosDoGolpeModal` (componente novo) mostra os 2 cartões juntos
+  (Esmagador/Talhador + Raízes Devastadoras), cada um resolvendo
+  independente — testado ao vivo com Malho (Pesada + Contundente) e
+  talento Esmagador escolhido no Level Up até nível 10. Ver
+  `DECISOES-COMBATE.md` "Fluxo Acerto/Erro sem 'renunciar'..." pro
+  estado final e pro bug de z-index encontrado no caminho (popup "hub"
+  precisa do z-index BASE, não um mais alto, senão os cliques no modal
+  de cima acertam o cartão de baixo por engano).
