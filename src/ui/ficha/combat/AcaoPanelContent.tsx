@@ -110,6 +110,17 @@ interface AcaoPanelContentProps {
   esmagadorDisponivel: boolean;
   talhadorDisponivel: boolean;
   onAbrirGolpeCondicional: (talento: 'esmagador' | 'talhador') => void;
+  /** Raízes Devastadoras (Bárbaro, Trilha da Árvore do Mundo) —
+   * `disponivel` já garante nível 10+ e arma Pesada/Versátil (checado
+   * em `FichaShell.tsx`); diferente de Esmagador/Talhador, não trava
+   * por tipo de dano nem por 1x/turno. Só entra na prioridade quando
+   * Esmagador/Talhador NÃO se aplicam nesse ataque (arma como Clava
+   * Grande qualifica pros 2 — ver `DECISOES-COMBATE.md` "Fluxo Acerto/
+   * Erro sem 'renunciar'... Raízes Devastadoras"; popup com os 2
+   * botões juntos fica pra quando o app suportar múltiplos efeitos
+   * pendentes ao mesmo tempo). */
+  raizesDevastadorasDisponivel: boolean;
+  onAbrirRaizesDevastadoras: () => void;
   /** Ancestralidade Gigante (Golias) — as 3 opções "ao acertar"
    * (Arrepio do Gelo/Queimadura de Fogo/Tombo da Colina), retrofit
    * 2026-09 pro Fluxo Acerto/Erro (antes era um card avulso solto na
@@ -200,6 +211,8 @@ export default function AcaoPanelContent({
   esmagadorDisponivel,
   talhadorDisponivel,
   onAbrirGolpeCondicional,
+  raizesDevastadorasDisponivel,
+  onAbrirRaizesDevastadoras,
   ancestralidadeGiganteEscolhida,
   usosAncestralidadeGiganteRestantes,
   onAtivarAncestralidadeGigante,
@@ -334,20 +347,29 @@ export default function AcaoPanelContent({
 
   /** `confirmarFechamento` do popup de dano do ataque principal —
    * Esmagador/Talhador (por tipo de dano da arma) tem prioridade;
-   * sem nenhum dos 2, oferece Ancestralidade Gigante se disponível
+   * sem nenhum dos 2, tenta Raízes Devastadoras (por propriedade da
+   * arma — Pesada/Versátil, independente do tipo de dano); sem
+   * nenhum dos 3, oferece Ancestralidade Gigante se disponível
    * (`ancestralidadeGiganteEscolhida` é uma das 3 opções "ao acertar"
-   * E ainda sobra uso); sem nada aplicável, fica só o "OK". Os 2
-   * "talentos" nunca coexistem numa mesma arma (Contundente vs.
-   * Cortante são mutuamente exclusivos) — Ancestralidade Gigante
-   * TEORICAMENTE poderia coincidir com um dos 2 (espécie Golias +
-   * Talento Geral), mas o popup só tem espaço pra 1 botão extra; nesse
-   * caso raro, o talento (ligado à arma) ganha prioridade. */
+   * E ainda sobra uso); sem nada aplicável, fica só o "OK". Esmagador/
+   * Talhador nunca coexistem numa mesma arma (Contundente vs. Cortante
+   * são mutuamente exclusivos), mas Raízes Devastadoras PODE coexistir
+   * com um dos 2 (arma Pesada/Versátil + Contundente/Cortante, ex.
+   * Clava Grande) — como o popup só tem espaço pra 1 botão extra por
+   * ora, o talento (ligado ao dano) ganha prioridade nesse caso, igual
+   * já acontecia com Ancestralidade Gigante. Ver `DECISOES-COMBATE.md`
+   * "Fluxo Acerto/Erro sem 'renunciar'..." — mostrar os 2 juntos (Opção
+   * A, já validada em Protótipos) fica pra quando o popup suportar
+   * múltiplos efeitos pendentes ao mesmo tempo. */
   function confirmarFechamentoDoAtaque(talento: 'esmagador' | 'talhador' | null): {
     rotulo?: string;
     aoTocar?: () => void;
   } {
     if (talento) {
       return { rotulo: ROTULO_GOLPE_CONDICIONAL[talento], aoTocar: () => onAbrirGolpeCondicional(talento) };
+    }
+    if (raizesDevastadorasDisponivel) {
+      return { rotulo: '🌳 Raízes Devastadoras', aoTocar: onAbrirRaizesDevastadoras };
     }
     const rotuloAncestralidade = ancestralidadeGiganteEscolhida
       ? ROTULO_ANCESTRALIDADE_GIGANTE[ancestralidadeGiganteEscolhida]

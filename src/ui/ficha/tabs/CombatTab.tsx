@@ -212,6 +212,23 @@ interface CombatTabProps {
     cd: number | null;
     explicacaoCd: ExplicacaoCalculo | null;
   };
+  /** Raízes Devastadoras (Bárbaro, Trilha da Árvore do Mundo, nível 10)
+   * — `disponivel` = nível 10+ (SEM checar Fúria — diferente de Ramos
+   * da Árvore/Percorrer a Árvore, o texto não menciona Fúria) + arma do
+   * ataque PRINCIPAL com propriedade Pesada ou Versátil (checado em
+   * `FichaShell.tsx`). Segue o Fluxo Acerto/Erro igual Esmagador/
+   * Talhador: ao ACERTAR com essa arma, o popup de dano ganha o botão
+   * "🌳 Raízes Devastadoras" — toca nele, abre `EscolherEfeitoModal`
+   * (Derrubar/Empurrar); Empurrar é automático (sem salvaguarda),
+   * Derrubar abre `SalvaguardaDoAlvoModal` com esta CD (mesma fórmula
+   * de Ramos da Árvore/Golpe de Escudo, arquivo próprio
+   * `core/raizesDevastadoras.ts`). Sem limite de 1x/turno (o livro não
+   * restringe) — pode oferecer em mais de 1 ataque do mesmo turno. */
+  raizesDevastadoras: {
+    disponivel: boolean;
+    cd: number | null;
+    explicacaoCd: ExplicacaoCalculo | null;
+  };
   /** Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 14)
    * — `disponivel` = Fúria ativa + nível 14+. 2 cards (pedido do
    * Osmar, 2026-09, testando): a versão base (18m) é um Ação Bônus
@@ -511,6 +528,11 @@ export default function CombatTab({
     cd: cdRamosDaArvore,
     explicacaoCd: explicacaoCdRamosDaArvore,
   },
+  raizesDevastadoras: {
+    disponivel: raizesDevastadorasDisponivel,
+    cd: cdRaizesDevastadoras,
+    explicacaoCd: explicacaoCdRaizesDevastadoras,
+  },
   percorrerArvore: {
     disponivel: percorrerArvoreDisponivel,
     estendidaDisponivel: percorrerArvoreEstendidaDisponivel,
@@ -631,6 +653,12 @@ export default function CombatTab({
   // agora (`null` = nenhum), disparado pelo botão do talento no popup
   // de dano (mesmo padrão de `golpeBrutalEfeitoPendente`).
   const [golpeCondicionalPendente, setGolpeCondicionalPendente] = useState<'esmagador' | 'talhador' | null>(null);
+  // Raízes Devastadoras — igual Esmagador/Talhador, mas em vez de
+  // "Ativar/Não usar" é uma ESCOLHA (Derrubar/Empurrar), disparada pelo
+  // mesmo botão no popup de dano. Empurrar fecha direto (sem
+  // salvaguarda, é automático); Derrubar abre a 2ª tela com a CD.
+  const [raizesDevastadorasEscolhaAberta, setRaizesDevastadorasEscolhaAberta] = useState(false);
+  const [raizesDevastadorasSalvaguardaAberta, setRaizesDevastadorasSalvaguardaAberta] = useState(false);
   const cdLancarNoInferno = modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null;
   const temEspacoDePactoDisponivel = espacos.some((e) => (espacosGastosPorCirculo[e.circulo] ?? 0) < e.maximo);
   const { rolarD20, rolarDados } = useRoll();
@@ -1093,6 +1121,15 @@ export default function CombatTab({
     setGolpeCondicionalPendente(null);
   }
 
+  function escolherRaizesDevastadoras(nomes: string[]) {
+    setRaizesDevastadorasEscolhaAberta(false);
+    if (nomes[0] === 'Empurrar') {
+      setFeedback('🌳 Raízes Devastadoras — Empurrar: empurra o alvo (Grande ou menor) até 3m pra longe de você.');
+      return;
+    }
+    setRaizesDevastadorasSalvaguardaAberta(true);
+  }
+
   const temEspacoDisponivel = espacos.some((e) => (espacosGastosPorCirculo[e.circulo] ?? 0) < e.maximo);
   // `espacos` já vem ordenado por círculo crescente (espacosDeMagiaAtivos,
   // core/magiasPersonagem.ts) — o primeiro com sobra é exatamente o que
@@ -1546,6 +1583,8 @@ export default function CombatTab({
           esmagadorDisponivel={esmagadorDisponivel}
           talhadorDisponivel={talhadorDisponivel}
           onAbrirGolpeCondicional={setGolpeCondicionalPendente}
+          raizesDevastadorasDisponivel={raizesDevastadorasDisponivel}
+          onAbrirRaizesDevastadoras={() => setRaizesDevastadorasEscolhaAberta(true)}
           ancestralidadeGiganteEscolhida={ancestralidadeGiganteEscolhida}
           usosAncestralidadeGiganteRestantes={usosAncestralidadeGiganteRestantes}
           onAtivarAncestralidadeGigante={usarAncestralidadeGiganteAoAcertar}
@@ -1768,6 +1807,28 @@ export default function CombatTab({
           restricaoTexto="Este efeito só pode ser usado uma vez por turno."
           onAtivar={ativarGolpeCondicional}
           onNaoUsar={() => setGolpeCondicionalPendente(null)}
+        />
+      )}
+      {raizesDevastadorasEscolhaAberta && (
+        <EscolherEfeitoModal
+          titulo="🌳 Raízes Devastadoras"
+          opcoes={[
+            { nome: 'Derrubar', texto: 'Salvaguarda de Constituição — falha: fica com a condição Caído.' },
+            { nome: 'Empurrar', texto: 'Automático — empurra o alvo (Grande ou menor) até 3m pra longe de você.' },
+          ]}
+          onEscolher={escolherRaizesDevastadoras}
+          onFechar={() => setRaizesDevastadorasEscolhaAberta(false)}
+        />
+      )}
+      {raizesDevastadorasSalvaguardaAberta && (
+        <SalvaguardaDoAlvoModal
+          titulo="Raízes Devastadoras — Derrubar"
+          atributo="Constituição"
+          cd={cdRaizesDevastadoras}
+          explicacaoCd={explicacaoCdRaizesDevastadoras}
+          textoSucesso="nada acontece"
+          textoFalha="fica com a condição Caído"
+          onFechar={() => setRaizesDevastadorasSalvaguardaAberta(false)}
         />
       )}
     </>

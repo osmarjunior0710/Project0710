@@ -33,6 +33,7 @@ export const ID_CARACTERISTICA_SUBCLASSE = {
   // Bárbaro — Trilha da Árvore do Mundo
   vitalidadeDaArvore: 'Vitalidade da Árvore',
   ramosDaArvore: 'Ramos da Árvore',
+  raizesDevastadoras: 'Raízes Devastadoras',
   percorrerArvore: 'Percorrer a Árvore',
 } as const;
 

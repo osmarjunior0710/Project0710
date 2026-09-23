@@ -726,17 +726,24 @@ renunciando Vantagem).
 Devastadoras, Bárbaro):** Esmagador/Talhador disparam por TIPO DE DANO
 da arma; Raízes Devastadoras (Trilha da Árvore do Mundo, nível 10)
 dispara por PROPRIEDADE da arma (Pesada/Versátil) — gatilhos
-independentes, então uma arma como Clava Grande (Pesada + Contundente)
+independentes, então uma arma como Malho (Pesada + Contundente)
 qualifica pros 2 ao mesmo tempo, e nada no livro proíbe usar os 2 no
 mesmo acerto. Layout validado em baixa fidelidade no ambiente de
 Protótipos (`EsmagadorRaizesCena.tsx`, 3 opções comparadas — ver
-`aprendizados/` quando a entrega fechar): quando **mais de 1** efeito
+`aprendizados/classes/barbaro.md`): quando **mais de 1** efeito
 condicional qualifica no mesmo acerto, o botão do popup de dano abre um
 popup com **N cartões** (1 por efeito), cada um resolvendo
 independente — só quando qualifica exatamente 1, o botão continua indo
 direto pro modal daquele efeito (sem essa etapa a mais), mantendo o
 comportamento de hoje intacto. Isso generaliza o `golpeCondicionalPendente`
 de "no máximo 1 talento pendente" (`'esmagador' | 'talhador' | null`)
-pra "0 ou mais efeitos pendentes ao mesmo tempo" — ainda não
-implementado em produção no momento deste registro, só o layout foi
-decidido.
+pra "0 ou mais efeitos pendentes ao mesmo tempo".
+
+**Entrega 1 já shipou o caso "exatamente 1 efeito" (2026-09):** Raízes
+Devastadoras tem mecânica de verdade (`core/raizesDevastadoras.ts` — CD
+igual a Ramos da Árvore, arquivo próprio; gate em `FichaShell.tsx`, sem
+depender de Fúria; entra em `confirmarFechamentoDoAtaque` DEPOIS de
+Esmagador/Talhador, ANTES de Ancestralidade Gigante). Quando os 2
+coexistem na mesma arma (caso do Malho), Esmagador/Talhador ainda ganha
+prioridade por ora — o popup com N cartões (Opção A) é a próxima
+entrega, ainda não implementada.

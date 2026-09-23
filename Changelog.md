@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2158
+
+**Raízes Devastadoras (Bárbaro, Trilha da Árvore do Mundo, nível 10) ganhou mecânica de verdade:** acertando com arma Pesada ou Versátil (ex.: Machado Grande, Lança) no seu turno, o popup de dano agora oferece o botão "🌳 Raízes Devastadoras" — escolha Derrubar (salvaguarda de Constituição do alvo, CD calculada) ou Empurrar (automático). Não precisa de Fúria ativa, sem limite de usos por turno.
+
 ## v202609_1907
 
 **Novo protótipo interno — Esmagador + Raízes Devastadoras:** em 🧪 Protótipos, cena nova comparando 3 jeitos de oferecer os 2 efeitos quando gatilham no mesmo golpe (cartões paralelos, fila sequencial, lista única) — ferramenta de decisão, não afeta ficha de personagem nenhuma.

@@ -412,3 +412,37 @@ uma característica pode ter o próprio ciclo de reset atrelado à
 ativação de OUTRO recurso do personagem (aqui, a Fúria). Vale conferir
 o texto da regra com atenção em vez de assumir Descanso Curto/Longo
 por padrão.
+
+**Raízes Devastadoras ganhou mecânica de verdade, foco reaberto
+(2026-09):** na Entrega 1/B7 original, Raízes Devastadoras (nível 10)
+tinha ficado só como texto (mesmo padrão de "sem estado pra rastrear"
+usado nas outras 3 características) — o app não tinha motor pra
+aplicar efeito de maestria de arma (Derrubar/Empurrar) ao acertar,
+gap conhecido que também afetava Ataque Desarmado e Mestre Tático
+(Guerreiro). O Osmar perguntou sobre isso testando o foco de
+validação e a conversa virou uma entrega real:
+- **Gate**: nível 10+ (subclasse certa) + arma do ataque PRINCIPAL com
+  propriedade Pesada ou Versátil — SEM depender de Fúria ativa
+  (diferente de Vitalidade da Árvore/Ramos da Árvore/Percorrer a
+  Árvore, o texto de Raízes não menciona Fúria). Sem limite de 1x/
+  turno (o livro não restringe).
+- **Fluxo**: reaproveita o Fluxo Acerto/Erro já existente
+  (`confirmarFechamentoDoAtaque` em `AcaoPanelContent.tsx`) — acertando
+  com a arma certa, o popup de dano oferece "🌳 Raízes Devastadoras";
+  toca, abre `EscolherEfeitoModal` (Derrubar/Empurrar); Empurrar é
+  automático (sem salvaguarda, é regra real do Apêndice C); Derrubar
+  abre `SalvaguardaDoAlvoModal` com a CD (`core/raizesDevastadoras.ts`
+  — mesma fórmula de Ramos da Árvore/Golpe de Escudo, arquivo próprio).
+- **Achado no caminho — colisão com Esmagador/Talhador**: Esmagador/
+  Talhador disparam por TIPO de dano; Raízes por PROPRIEDADE de arma —
+  gatilhos diferentes, então uma arma como Malho (Pesada +
+  Contundente) qualifica pros 2 ao mesmo tempo, coisa que nunca
+  acontecia antes (Esmagador/Talhador são mutuamente exclusivos entre
+  si). Explorado em baixa fidelidade no ambiente de Protótipos
+  (`EsmagadorRaizesCena.tsx`, 3 layouts comparados: cartões paralelos/
+  fila/lista única — Opção A escolhida) — mas só a entrega do caso
+  "exatamente 1 efeito qualifica" foi ao ar; quando os 2 coexistem,
+  Esmagador/Talhador ainda ganha prioridade (mesma regra que já existia
+  pra Ancestralidade Gigante). Ver `DECISOES-COMBATE.md` "Fluxo Acerto/
+  Erro sem 'renunciar'..." pro estado atual — o popup com N cartões
+  fica pra uma próxima entrega.

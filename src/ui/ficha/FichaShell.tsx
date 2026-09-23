@@ -79,6 +79,7 @@ import { ataqueAtual, ataqueBonusMaoSecundaria } from '../../core/ataque';
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
 import { explicarCdRamosDaArvore } from '../../core/ramosDaArvore';
+import { explicarCdRaizesDevastadoras } from '../../core/raizesDevastadoras';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
@@ -681,6 +682,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     lancarNoInferno: lancarNoInfernoDisponivel,
     vitalidadeDaArvore: vitalidadeDaArvoreDisponivel,
     ramosDaArvore: ramosDaArvoreDesbloqueada,
+    raizesDevastadoras: raizesDevastadorasDesbloqueada,
     percorrerArvore: percorrerArvoreDesbloqueada,
   } = caracteristicasSubclasseAtivas(personagem.subclasse, personagem.nivel, [
     'legiaoDosMortos',
@@ -696,6 +698,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'lancarNoInferno',
     'vitalidadeDaArvore',
     'ramosDaArvore',
+    'raizesDevastadoras',
     'percorrerArvore',
   ]);
   // G3.3 (foco de saúde do projeto, ver EmDevB.md): todo o bloco de
@@ -880,6 +883,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // informativo (sem CD/rolagem — é só teleporte) + 1 toggle real pra
   // "usei a versão estendida (45m) nesta Fúria".
   const podeOferecerPercorrerArvore = percorrerArvoreDesbloqueada && furiaAtiva;
+  // Raízes Devastadoras (Bárbaro, Trilha da Árvore do Mundo, nível 10)
+  // — diferente das 2 características acima, o texto NÃO menciona
+  // Fúria ("durante o seu turno..."), então não trava em `furiaAtiva`.
+  // Só precisa do nível/subclasse desbloqueados + a arma do ataque
+  // PRINCIPAL ter a propriedade Pesada ou Versátil (mesmo padrão de
+  // checagem de propriedade de arma que `core/ataque.ts` já usa pra
+  // Mestre em Armas Grandes).
+  const armaEquipadaPesadaOuVersatil =
+    armaEquipadaCatalogo?.propriedades.includes('Pesada') ||
+    armaEquipadaCatalogo?.propriedades.includes('Versátil') ||
+    false;
+  const podeOferecerRaizesDevastadoras = raizesDevastadorasDesbloqueada && armaEquipadaPesadaOuVersatil;
+  const explicacaoCdRaizesDevastadoras = podeOferecerRaizesDevastadoras
+    ? explicarCdRaizesDevastadoras(forMod, bonusProficienciaAtual)
+    : null;
   const ataque = classe
     ? ataqueAtual(
         armaEquipada?.nome ?? null,
@@ -2546,6 +2564,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               disponivel: podeOferecerRamosDaArvore,
               cd: explicacaoCdRamosDaArvore ? Number(explicacaoCdRamosDaArvore.total.valor) : null,
               explicacaoCd: explicacaoCdRamosDaArvore,
+            }}
+            raizesDevastadoras={{
+              disponivel: podeOferecerRaizesDevastadoras,
+              cd: explicacaoCdRaizesDevastadoras ? Number(explicacaoCdRaizesDevastadoras.total.valor) : null,
+              explicacaoCd: explicacaoCdRaizesDevastadoras,
             }}
             percorrerArvore={{
               disponivel: podeOferecerPercorrerArvore,
