@@ -230,6 +230,39 @@ vale abrir uma frente nova que ainda não existe no app (ex.: familiar/
 pet) em vez de continuar o que já estava andamento — pergunte ao
 Osmar em vez de decidir sozinho.
 
+### 6.1.1 Lista exaustiva de características — nunca pule nenhuma, quem decide o corte é o Osmar
+
+(2026-09, depois de uma auditoria pedida pelo Osmar achar 5
+características de Mago, do nível 1 ao 20, que eram só texto da
+planilha sem nenhuma mecânica ligada — ninguém tinha lido TODAS as
+características da classe de ponta a ponta antes de considerá-la
+"pronta". Ver `aprendizados/classes/mago.md`.)
+
+- Ao abrir um foco de classe/subclasse/sistema, **leia a planilha e o
+  PDF e liste TODAS as características de regra envolvidas, do nível 1
+  ao nível máximo** — sem pular nenhuma por parecer repetitiva, óbvia,
+  ou "só quem chega no nível 18-20 usa". Nível difícil de alcançar não
+  é motivo pra OMITIR da lista — é no máximo motivo pra ficar mais pro
+  fim da fila, se o Osmar concordar com isso.
+- **Pra cada característica da lista, diga explicitamente** se ela já
+  tem mecânica de verdade no código (`core`/`ui`) ou se é só texto
+  solto que precisa de entrega própria — essa comparação texto-vs-
+  código é obrigatória item por item, não só nas que "parecem"
+  precisar de escolha à primeira vista (foi exatamente aí que o Mago
+  escapou: características com escolha embutida no meio do parágrafo
+  se pareciam com texto narrativo de características vizinhas que
+  eram só narração de verdade).
+- **Apresente essa lista completa pro Osmar** junto da proposta de
+  quebra em entregas — nunca decida sozinho que uma característica
+  "não vale a pena", "é baixa prioridade" ou "pode esperar" e a deixe
+  de fora silenciosamente. Se achar que alguma tem prioridade menor,
+  diga o motivo e pergunte — **quem decide o que entra e o que fica
+  de fora é o Osmar, nunca o Claude Code por conta própria.**
+- Vale tanto pra abrir uma classe/feature NOVA quanto pra revisar uma
+  já considerada "pronta" — suspeitar que uma classe antiga tem
+  características só-texto é motivo suficiente pra propor uma
+  auditoria dessas, mesmo sem o Osmar pedir primeiro.
+
 ### 6.2 Chapéu 2 — Game Designer: SDD da feature (garantir que vai funcionar)
 
 Com a quebra em entregas aprovada (chapéu 1), vista o chapéu de Game
