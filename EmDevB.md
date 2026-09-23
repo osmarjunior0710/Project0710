@@ -24,18 +24,25 @@ uma auditoria completa da classe base a pedido do Osmar.
 
 - [x] Entrega 1 — Acadêmico (nv.2, o bug reportado): passo de Level Up
       + escolha entra em `periciasBonusExtras` e `periciasEspecialista`.
-- [ ] Entrega 2 — Recuperação Arcana (nv.1): pergunta condicional no
+- [ ] Entrega 2 — Guia do Level Up: tela "Novas Características" mostra
+      delta real de cada recurso + `[PH]` automático via
+      `statusImplementacao`; classifica as 10 características do Mago
+      + cria as 4 funções-esqueleto em `core/`.
+- [ ] Entrega 3 — Copiar Magia pro Livro: botão na aba Magias, 2 modos
+      (nova pro livro / backup pra livro reserva), custo em PO.
+- [ ] Entrega 4 — Recuperação Arcana (nv.1): pergunta condicional no
       Descanso Curto + tela de escolha de círculos com orçamento.
-- [ ] Entrega 3 — Adepto de Ritual (nv.1): seção nova na aba Magias,
+- [ ] Entrega 5 — Adepto de Ritual (nv.1): seção nova na aba Magias,
       conjuração livre de magia Ritual do Livro não preparada.
-- [ ] Entrega 4 — Maestria de Magias (nv.18): passo de Level Up +
+- [ ] Entrega 6 — Maestria de Magias (nv.18): passo de Level Up +
       conjuração grátis no círculo mais baixo + troca no Descanso
       Longo (mesma tela reaberta).
-- [ ] Entrega 5 — Assinatura Mágica (nv.20): passo de Level Up +
+- [ ] Entrega 7 — Assinatura Mágica (nv.20): passo de Level Up +
       conjuração grátis 1x por descanso (2 flags).
-- [ ] Entrega 6 — Fechamento: testes/tsc/build,
-      `aprendizados/classes/mago.md` (criar). Depois disso, retomar o
-      foco do Evocador abaixo.
+- [ ] Entrega 8 — Fechamento: testes/tsc/build,
+      `aprendizados/classes/mago.md` (criar), nota no PENDENCIAS.md
+      propondo repetir o Guia do Level Up nas outras 9 classes. Depois
+      disso, retomar o foco do Evocador abaixo.
 
 ---
 
