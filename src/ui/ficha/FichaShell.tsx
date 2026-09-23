@@ -726,6 +726,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     espacosGastosParaConjurar,
     memorizarMagiaDisponivel,
     livroDeMagias,
+    adeptoDeRitualDisponivel,
+    magiasRituaisDoLivro,
     usaRedefPorDescanso,
     magiasGratisConcedidas,
     formasFamiliarElegiveis,
@@ -2498,6 +2500,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             memorizarMagiaDisponivel={memorizarMagiaDisponivel}
             memorizarMagiaGasta={memorizarMagiaGasta}
             onMemorizarMagia={() => !memorizarMagiaGasta && setMemorizarMagiaAberto(true)}
+            adeptoDeRitualDisponivel={adeptoDeRitualDisponivel}
+            magiasRituaisDoLivro={magiasRituaisDoLivro}
             astuciaMagicaDisponivel={astuciaMagicaDisponivel}
             astuciaMagicaGasta={astuciaMagicaGasta}
             astuciaMagicaRecupera={astuciaMagicaRecupera}

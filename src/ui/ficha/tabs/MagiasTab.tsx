@@ -155,6 +155,14 @@ interface MagiasTabProps {
    * travado até o próximo descanso. */
   memorizarMagiaGasta: boolean;
   onMemorizarMagia: () => void;
+  /** `true` só quando o personagem já tem Adepto de Ritual (Mago,
+   * nível 1+) — controla se a seção aparece. */
+  adeptoDeRitualDisponivel: boolean;
+  /** Magias do Livro de Magias com tag Ritual, ainda não preparadas
+   * (as já preparadas conjuram normal, sem precisar desta
+   * característica) — ver `core/adeptoDeRitual.ts`. Ilimitado de
+   * verdade, sem contador/flag de "gasto". */
+  magiasRituaisDoLivro: Magia[];
   /** `true` só quando o personagem já tem Astúcia Mágica (Bruxo,
    * nível 2+) — controla se o botão aparece. */
   astuciaMagicaDisponivel: boolean;
@@ -243,6 +251,8 @@ export default function MagiasTab({
   memorizarMagiaDisponivel,
   memorizarMagiaGasta,
   onMemorizarMagia,
+  adeptoDeRitualDisponivel,
+  magiasRituaisDoLivro,
   astuciaMagicaDisponivel,
   astuciaMagicaGasta,
   astuciaMagicaRecupera,
@@ -411,6 +421,13 @@ export default function MagiasTab({
     if (jaGasta) return;
     onUsarMagiaGratis(item);
     processarMagiaAoUsar(item.magia, item.magia.circulo, false);
+  }
+
+  /** Adepto de Ritual — ilimitado de verdade (RAW não tem contador), sem
+   * gastar Espaço, sem popup de círculo, sem flag de "gasto". */
+  function usarMagiaRitual(m: Magia) {
+    if (desvantagemForcaDestreza) return;
+    processarMagiaAoUsar(m, m.circulo, false);
   }
 
   function usarMagia(m: Magia) {
@@ -1095,6 +1112,27 @@ export default function MagiasTab({
           >
             📜 Copiar Magia
           </div>
+        </>
+      )}
+
+      {adeptoDeRitualDisponivel && magiasRituaisDoLivro.length > 0 && (
+        <>
+          <div className="section-title">Adepto de Ritual</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Magias do seu Livro de Magias com marcador Ritual — conjure sem gastar Espaço de Magia e sem precisar
+            delas preparadas. Ilimitado (só o custo narrativo de +10min de Ritual).
+          </div>
+          {magiasRituaisDoLivro.map((m) => (
+            <div key={m.id} className={styles.spellRow}>
+              <div className={styles.spellName}>
+                <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+              </div>
+              <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
+              <div className={`${styles.usarBtn} ${styles.usarBtnRitual}`} onClick={() => usarMagiaRitual(m)}>
+                🔮 Ritual
+              </div>
+            </div>
+          ))}
         </>
       )}
 
