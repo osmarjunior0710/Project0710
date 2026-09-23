@@ -149,8 +149,15 @@ export function opcoesGastoComPonte(
   return [...opcoesAtiva, ...opcoesPonte];
 }
 
+/** Sempre círculo → alfabético (nunca a ordem de aquisição/sorteio) —
+ * padrão de toda listagem de magia do personagem (Magias e Combat),
+ * pra achar uma magia na lista sem precisar lembrar quando ela foi
+ * pega. */
 function buscarMagiasPorNome(nomes: string[]): Magia[] {
-  return nomes.map((nome) => magias.find((m) => m.nome === nome)).filter((m): m is Magia => m !== undefined);
+  return nomes
+    .map((nome) => magias.find((m) => m.nome === nome))
+    .filter((m): m is Magia => m !== undefined)
+    .sort((a, b) => a.circulo - b.circulo || a.nome.localeCompare(b.nome, 'pt-BR'));
 }
 
 /** Truques reais do personagem (nomes → objeto Magia completo). Recebe

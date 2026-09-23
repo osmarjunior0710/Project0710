@@ -158,7 +158,12 @@ export default function CopiarMagiaShell({
           <div
             className={`btn btn-primary ${styles.pill}`}
             style={{
-              opacity: podePagar ? 1 : 0.4,
+              // Sem dinheiro pra essa magia = mesmo tratamento "cinza,
+              // bloqueado" do estado Usada de Combat (DECISOES-COMBATE.md
+              // "Combate — estado Ativo vs Usada") — não opacidade.
+              borderColor: podePagar ? undefined : 'var(--line)',
+              background: podePagar ? undefined : 'var(--panel2)',
+              color: podePagar ? undefined : 'var(--text-faint)',
               pointerEvents: podePagar ? 'auto' : 'none',
               display: 'flex',
               alignItems: 'center',
