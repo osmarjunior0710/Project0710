@@ -386,6 +386,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [conhecimentoPrimordialPericiaEscolhida, setConhecimentoPrimordialPericiaEscolhida] = useState(
     personagemSalvo.conhecimentoPrimordialPericiaEscolhida ?? null,
   );
+  const [academicoPericiaEscolhida, setAcademicoPericiaEscolhida] = useState(
+    personagemSalvo.academicoPericiaEscolhida ?? null,
+  );
   const [maosCurativasGasto, setMaosCurativasGasto] = useState(personagemSalvo.maosCurativasGasto ?? false);
   const [revelacaoCelestialGasto, setRevelacaoCelestialGasto] = useState(personagemSalvo.revelacaoCelestialGasto ?? false);
   const [revelacaoCelestialFormaAtiva, setRevelacaoCelestialFormaAtiva] = useState(
@@ -579,12 +582,20 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const pericias = calcularPericias(
     selecao,
     personagem.nivel,
-    periciasEspecialistaAtuais,
+    // Acadêmico (Mago nível 2) entra aqui TAMBÉM — a perícia escolhida
+    // já vem com Especialização, não só proficiência (diferente de
+    // Conhecimento Primordial, que só concede proficiência). Somado
+    // aqui na chamada em vez de mexer em `periciasEspecialistaAtuais`
+    // (esse estado é gerido pelo passo "Especialista" do Bardo — juntar
+    // os dois arriscaria confundir a contagem de quantas ele já
+    // escolheu).
+    [...periciasEspecialistaAtuais, ...(academicoPericiaEscolhida ? [academicoPericiaEscolhida] : [])],
     [
       ...periciasSubclasseBonusAtuais,
       ...periciasTalentoGeralAtuais,
       ...periciasMulticlasseAtuais,
       ...(conhecimentoPrimordialPericiaEscolhida ? [conhecimentoPrimordialPericiaEscolhida] : []),
+      ...(academicoPericiaEscolhida ? [academicoPericiaEscolhida] : []),
     ],
     nivelTotalAtual,
     { ativa: temConhecimentoPrimordial && furiaAtiva, mod: forMod, pericias: PERICIAS_CONHECIMENTO_PRIMORDIAL },
@@ -994,6 +1005,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     esmagadorUsadoTurno,
     talhadorUsadoTurno,
     conhecimentoPrimordialPericiaEscolhida,
+    academicoPericiaEscolhida,
     pvMax: personagem.pvMax,
     pvTemporarioAtual: pvTemporario,
     subclasseAtual: personagem.subclasse,
@@ -1845,6 +1857,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     periciaLivreTalentoEscolhida: string | null;
     periciaRestritaTalentoEscolhida: string | null;
     conhecimentoPrimordialPericiaEscolhida: string | null;
+    academicoPericiaEscolhida: string | null;
   }) {
     // Constituição ANTES de qualquer mudança deste Level Up — precisa
     // vir antes do `aumentarAtributos`/`setSelecao` abaixo, senão perde
@@ -1943,6 +1956,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         ...periciasSubclasseBonusAtuais,
         ...periciasTalentoGeralAtuais,
         ...periciasMulticlasseAtuais,
+        ...(academicoPericiaEscolhida ? [academicoPericiaEscolhida] : []),
       ].includes(resultado.periciaRestritaTalentoEscolhida);
       if (jaEraProficiente) {
         setPericiasEspecialistaAtuais((prev) => [...prev, resultado.periciaRestritaTalentoEscolhida!]);
@@ -1952,6 +1966,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
     if (resultado.conhecimentoPrimordialPericiaEscolhida) {
       setConhecimentoPrimordialPericiaEscolhida(resultado.conhecimentoPrimordialPericiaEscolhida);
+    }
+    if (resultado.academicoPericiaEscolhida) {
+      setAcademicoPericiaEscolhida(resultado.academicoPericiaEscolhida);
     }
     setLevelUpHpModo(null);
     setLevelUpHpRolado(null);
@@ -1975,12 +1992,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         ...periciasSubclasseBonusAtuais,
         ...periciasTalentoGeralAtuais,
         ...periciasMulticlasseAtuais,
+        ...(academicoPericiaEscolhida ? [academicoPericiaEscolhida] : []),
       ],
       periciasSubclasseBonusAtuais,
       magiasDescobertasMagicasAtuais,
       atributosFinaisAtuais,
       talentosGeraisAtuais,
       conhecimentoPrimordialPericiaAtual: conhecimentoPrimordialPericiaEscolhida,
+      academicoPericiaAtual: academicoPericiaEscolhida,
     });
     confirmarLevelUp(resultado);
   }
@@ -2064,9 +2083,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           ...periciasSubclasseBonusAtuais,
           ...periciasTalentoGeralAtuais,
           ...periciasMulticlasseAtuais,
+          ...(academicoPericiaEscolhida ? [academicoPericiaEscolhida] : []),
         ]}
         periciasSubclasseBonusAtuais={periciasSubclasseBonusAtuais}
         conhecimentoPrimordialPericiaAtual={conhecimentoPrimordialPericiaEscolhida}
+        academicoPericiaAtual={academicoPericiaEscolhida}
         magiasDescobertasMagicasAtuais={magiasDescobertasMagicasAtuais}
         poolDescobertasMagicas={poolDescobertasMagicas(9)}
         atributosAtuais={selecao.atributos}

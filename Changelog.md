@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0822
+
+**Mago — Acadêmico (nível 2) corrigido: o bug que você achou.** Antes o Level Up mostrava o texto "escolha uma perícia" mas não dava pra escolher nada de verdade — agora, ao subir pro nível 2, aparece uma tela de verdade com as 6 opções (Arcanismo, História, Investigação, Medicina, Natureza, Religião); a escolhida ganha proficiência + Especialização (bônus dobrado) na hora.
+
 ## v202609_0054
 
 **Mago/Evocador — Entrega 1 (dado no banco):** as 5 características da subclasse (Truque Potente, Versado em Evocação, Esculpir Magias, Evocação Potencializada, Sobrecarga) foram cadastradas — o Evocador deixou de aparecer travado na Escolha de Subclasse e já pode ser escolhido normalmente (Level Up ou Personagem de Teste). Ainda sem mecânica interativa — as próximas entregas ligam cada uma de verdade.

@@ -78,6 +78,9 @@ export interface ParamsLevelUpRapido {
    * ainda não escolheu, mesmo sentido de `periciasSubclasseBonusAtuais`
    * vazio). Ver `LevelUpShell.tsx`. */
   conhecimentoPrimordialPericiaAtual: string | null;
+  /** Mago nível 2 — Acadêmico já escolhida (`null` se ainda não
+   * escolheu). Ver `LevelUpShell.tsx`. */
+  academicoPericiaAtual: string | null;
 }
 
 export interface ResultadoLevelUpRapido {
@@ -132,6 +135,11 @@ export interface ResultadoLevelUpRapido {
    * (lista fixa e pequena, mesmo padrão de `periciasSubclasseBonusEscolhidas`
    * — não precisa ficar `null` esperando escolha manual). */
   conhecimentoPrimordialPericiaEscolhida: string | null;
+  /** Mago nível 2 — Acadêmico. Sorteada entre as 6 fixas (nunca
+   * filtrada por proficiência já existente, diferente de Conhecimento
+   * Primordial — ver comentário de `ACADEMICO_PERICIAS` em
+   * `LevelUpShell.tsx`). */
+  academicoPericiaEscolhida: string | null;
 }
 
 /** Escolhe Invocações Místicas respeitando pré-requisito (uma pode
@@ -195,6 +203,17 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
       (nome) => !params.periciasProficientesDoPersonagem.includes(nome),
     );
     conhecimentoPrimordialPericiaEscolhida = sorteiaUm(opcoes) ?? null;
+  }
+
+  // Acadêmico (Mago, nível 2) — mesma lista fixa de `LevelUpShell.tsx`
+  // (não vem de `proficienciasIniciaisClasse`, ver comentário lá).
+  const ACADEMICO_PERICIAS = ['Arcanismo', 'História', 'Investigação', 'Medicina', 'Natureza', 'Religião'];
+  let academicoPericiaEscolhida: string | null = null;
+  if (
+    caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.academico, novoNivel) !== null &&
+    !params.academicoPericiaAtual
+  ) {
+    academicoPericiaEscolhida = sorteiaUm(ACADEMICO_PERICIAS) ?? null;
   }
 
   const estiloDeLutaEscolhido = temEstiloDeLutaTrocavel(classe, novoNivel)
@@ -356,5 +375,6 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     periciaLivreTalentoEscolhida: null,
     periciaRestritaTalentoEscolhida: null,
     conhecimentoPrimordialPericiaEscolhida,
+    academicoPericiaEscolhida,
   };
 }
