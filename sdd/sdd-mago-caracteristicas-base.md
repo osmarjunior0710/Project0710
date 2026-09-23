@@ -19,7 +19,18 @@ própria), Dádiva Épica (nv.19, mecanismo genérico).
 
 **Só texto, zero código (o resto deste SDD):** Adepto de Ritual (nv.1),
 Recuperação Arcana (nv.1), Acadêmico (nv.2 — o bug que o Osmar
-reportou), Maestria de Magias (nv.18), Assinatura Mágica (nv.20).
+reportou, já corrigido na Entrega 1), Maestria de Magias (nv.18),
+Assinatura Mágica (nv.20).
+
+**Achado numa 2ª passada (CLAUDE.md §6.1.2, leitura das páginas 147-149
+do PDF completas, não só as linhas nomeadas da planilha):** "Expandindo
+e Substituindo um Livro de Magias" — uma caixa de texto solta entre
+Acadêmico (nv.2) e Subclasse de Mago (nv.3), sem nome de característica
+própria na planilha, com 2 mecânicas reais de Copiar Magia (ver seção
+1). Confirma o motivo de ter escapado da 1ª auditoria: só existem
+linhas nomeadas "Nível X: Nome" na aba de Características de Classe —
+regra solta no meio do capítulo não vira linha, então nunca apareceu
+na lista original.
 
 ## 1. Regra real de cada uma
 
@@ -51,6 +62,18 @@ reportou), Maestria de Magias (nv.18), Assinatura Mágica (nv.20).
   conjurá-las deste modo novamente até completar um Descanso Curto ou
   Longo. Para conjurar uma das magias em um círculo superior, você deve
   gastar um espaço de magia."
+- **Expandindo e Substituindo um Livro de Magias** (caixa de texto,
+  sem nível — vale desde que o personagem tem Livro de Magias, nv.1+):
+  - **Copiando uma Magia para o Livro**: "Ao encontrar uma magia de
+    Mago de 1º círculo ou superior, você pode copiá-la para o seu
+    livro de magias se for de um círculo que você possa preparar e se
+    tiver tempo para copiá-la. Para cada círculo de magia, a
+    transcrição leva 2 horas e custa 50 PO."
+  - **Copiando o Livro**: "Você pode copiar uma magia do seu livro de
+    magias para outro livro. [...] Você precisa gastar apenas 1 hora e
+    10 PO para cada círculo de magia copiada." (backup/segundo livro —
+    o Osmar confirmou: 1 única feature de "Copiar Magia" com escolha
+    entre os 2 modos, não 2 entregas separadas.)
 
 ## 2. O que já existe no motor (reaproveitar, não reinventar)
 
@@ -105,6 +128,19 @@ reportou), Maestria de Magias (nv.18), Assinatura Mágica (nv.20).
   mas sem "conjura de graça 1x"). Assinatura Mágica precisa de
   contador próprio (2 flags booleanas, uma por magia escolhida,
   resetando em Descanso Curto OU Longo — os 2 resetters, não só 1).
+- **`Moedas`/`totalEmPC`/`totalEmPO`** (`core/moedas.ts`) já modela a
+  bolsa de moedas do personagem (5 denominações, conta interna em PC)
+  — Copiar Magia usa isso pra cobrar o custo (50 PO/círculo pra
+  copiar magia nova; 10 PO/círculo pra copiar pro livro reserva). Hoje
+  nada no app deduz moedas automaticamente (Mochila deixa o jogador
+  editar o total à mão) — decisão de auto-deduzir ou só informar o
+  custo fica pra hora de implementar essa entrega (seção 4).
+- **`valorRecursoClasse`/`espacosDeMagiaAtivos`** (já usados em
+  `LevelUpShell.tsx` pra calcular `maxTruques`/`maxMagiasPreparadas`/
+  espaços por círculo do NOVO nível) são a base do "Guia do Level Up"
+  (seção 3/4) — só falta calcular a MESMA coisa pro nível ANTERIOR
+  (`personagem.nivel`, hoje não computado) pra virar delta
+  antes→depois.
 
 ## 3. Decisões de leitura (sem mecânica nova pro app, ou pendente de confirmação)
 
@@ -136,6 +172,35 @@ reportou), Maestria de Magias (nv.18), Assinatura Mágica (nv.20).
   "quer redefinir Magias Preparadas?" já usado ali. Corrigido depois
   do Osmar apontar que "deixar pela metade" não faz sentido quando o
   custo de fazer certo já é baixo).
+- **Copiar Magia é 1 feature só, com escolha entre 2 modos** (não 2
+  entregas): "Copiar magia nova pro Livro" (de uma fonte externa —
+  pergaminho, outro livro achado na aventura — pra dentro do SEU
+  Livro de Magias, 2h+50 PO/círculo) vs. "Copiar magia conhecida pra
+  outro livro" (backup/livro reserva, 1h+10 PO/círculo). O app não
+  modela um "2º livro" separado — o modo backup fica registrado só
+  como confirmação/nota (não muda `livroDeMagias`, já que a magia já
+  estava lá); o modo "nova" é o que de fato adiciona uma magia ao
+  `livroDeMagias`.
+- **A tela "Novas Características" do Level Up vira o guia completo do
+  nível** (pedido do Osmar, depois do bug do Acadêmico mostrar que
+  texto sem número ao lado engana): toda linha mostra o delta real
+  (Truques: X→Y, Magias Preparadas: X→Y, Espaços de Magia por Círculo:
+  X→Y quando mudar, ASI: disponível) + cada característica nova com
+  seu texto E seu `statusImplementacao` (CLAUDE.md §12.1) — linha
+  `placeholder-*` mostra `[PH]` automaticamente. Característica
+  `textonly` (confirmada) aparece só aqui, sem step depois;
+  característica `codeimplementation` aparece aqui E leva ao step de
+  verdade na sequência (quando o step já existir).
+- **Esta entrega também é o "gancho" pra classificar TODAS as 10
+  características do Mago com `statusImplementacao`** (retroativo,
+  já que são o foco atual — CLAUDE.md §12.1 permite isso só na classe
+  em andamento). Acadêmico vira `codeimplementation` (feito); as
+  outras 4 (Recuperação Arcana, Adepto de Ritual, Maestria de Magias,
+  Assinatura Mágica) viram `placeholder-codeimplementation` (têm
+  mecânica real prevista, ainda não construída); Conjuração/Subclasse
+  de Mago/ASI/Memorizar Magia/Dádiva Épica viram `codeimplementation`
+  (já funcionam). Nenhuma do Mago vira `textonly` — todas as 10 têm
+  mecânica real esperada.
 
 ## 4. Decisões de implementação (chapéu de execução decide o detalhe fino por entrega)
 
@@ -178,21 +243,51 @@ reportou), Maestria de Magias (nv.18), Assinatura Mágica (nv.20).
   mesma tela de escolha da Entrega 4, reaberta com a magia atual
   pré-selecionada, trocando por outra elegível do mesmo círculo.
   Nenhum estado novo além do que a Entrega 4 já cria.
+- **Guia do Level Up:** no passo `'features'` de `LevelUpShell.tsx`,
+  computar `valorRecursoClasse`/`espacosDeMagiaAtivos` pro nível
+  ANTERIOR (`personagem.nivel`) além do novo (já calculado) — mostrar
+  como linhas "X → Y" só quando o valor muda. Cada característica
+  desbloqueada nesse nível ganha um badge `[PH]` quando
+  `statusImplementacao` começa com `placeholder-` (lido direto do
+  dado, não mais escrito à mão no texto). Adiciona `statusImplementacao`
+  nas 10 linhas de `caracteristicasClasse.ts` do Mago (seção 3) e cria
+  as 4 funções-esqueleto em `core/` pras características ainda
+  `placeholder-codeimplementation` (Recuperação Arcana, Adepto de
+  Ritual, Maestria de Magias, Assinatura Mágica) — vazias, só com a
+  doc-comment de status (CLAUDE.md §12.1).
+- **Copiar Magia:** botão novo na aba Magias (`MagiasTab.tsx`), visível
+  pra Mago nível 1+ — abre uma escolha entre "Copiar magia nova pro
+  Livro" (grid do catálogo de magias de Mago 1º círculo+ até o círculo
+  preparável, ao confirmar soma em `livroDeMagiasAtuais` e informa/
+  desconta o custo) e "Copiar pra livro reserva" (grid das magias JÁ
+  no `livroDeMagias`, ao confirmar só mostra/desconta o custo, não
+  muda estado nenhum — é só registro de que a cópia existe fora do
+  livro principal).
 
 ## 5. Quebra em entregas
 
 1. **Entrega 1 — Acadêmico** (nv.2, o bug reportado): passo de Level
-   Up + wiring em `calcularPericias`. Menor e mais urgente (todo Mago
-   passa pelo nível 2).
-2. **Entrega 2 — Recuperação Arcana** (nv.1): pergunta condicional no
+   Up + wiring em `calcularPericias`. ✅ Feito (`v202609_0822`).
+2. **Entrega 2 — Guia do Level Up:** tela "Novas Características"
+   passa a mostrar delta real de cada recurso (Truques/Magias
+   Preparadas/Espaços por Círculo/ASI) + `[PH]` automático por
+   característica via `statusImplementacao`. Classifica as 10
+   características do Mago (retroativo) e cria as 4 funções-esqueleto
+   em `core/` das que ainda faltam. Base pra todas as entregas
+   seguintes já nascerem com o status certo desde o começo.
+3. **Entrega 3 — Copiar Magia pro Livro:** botão na aba Magias, 2
+   modos (nova pro livro / backup pra livro reserva), custo em PO.
+4. **Entrega 4 — Recuperação Arcana** (nv.1): pergunta condicional no
    Descanso Curto + tela de escolha de círculos com orçamento.
-3. **Entrega 3 — Adepto de Ritual** (nv.1): seção nova na aba Magias
+5. **Entrega 5 — Adepto de Ritual** (nv.1): seção nova na aba Magias
    listando magias Rituais do Livro não preparadas, conjuração livre.
-4. **Entrega 4 — Maestria de Magias** (nv.18): passo de Level Up +
+6. **Entrega 6 — Maestria de Magias** (nv.18): passo de Level Up +
    conjuração grátis no círculo mais baixo + troca no Descanso Longo
    (mesma tela reaberta).
-5. **Entrega 5 — Assinatura Mágica** (nv.20): passo de Level Up +
+7. **Entrega 7 — Assinatura Mágica** (nv.20): passo de Level Up +
    conjuração grátis 1x por descanso (2 flags).
-6. **Entrega 6 — Fechamento:** testes/tsc/build,
-   `aprendizados/classes/mago.md` (criar). Depois disso, retomar o
-   foco do Evocador (Entrega 2, Versado em Evocação) de onde parou.
+8. **Entrega 8 — Fechamento:** testes/tsc/build,
+   `aprendizados/classes/mago.md` (criar), nota no `PENDENCIAS.md`
+   propondo repetir o "Guia do Level Up" (Entrega 2) nas outras 9
+   classes já implementadas. Depois disso, retomar o foco do Evocador
+   (Entrega 2, Versado em Evocação) de onde parou.
