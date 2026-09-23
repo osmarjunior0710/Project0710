@@ -721,3 +721,22 @@ condicional dentro da função de ataque já existente + `AtivarEfeitoModal`
 pro popup final — nunca um toggle "antes de atacar" (isso é só pra
 características que EXIGEM uma escolha prévia, tipo Golpe Brutal
 renunciando Vantagem).
+
+**Atualização 2026-09 — a premissa "nunca coexistem" quebrou (Raízes
+Devastadoras, Bárbaro):** Esmagador/Talhador disparam por TIPO DE DANO
+da arma; Raízes Devastadoras (Trilha da Árvore do Mundo, nível 10)
+dispara por PROPRIEDADE da arma (Pesada/Versátil) — gatilhos
+independentes, então uma arma como Clava Grande (Pesada + Contundente)
+qualifica pros 2 ao mesmo tempo, e nada no livro proíbe usar os 2 no
+mesmo acerto. Layout validado em baixa fidelidade no ambiente de
+Protótipos (`EsmagadorRaizesCena.tsx`, 3 opções comparadas — ver
+`aprendizados/` quando a entrega fechar): quando **mais de 1** efeito
+condicional qualifica no mesmo acerto, o botão do popup de dano abre um
+popup com **N cartões** (1 por efeito), cada um resolvendo
+independente — só quando qualifica exatamente 1, o botão continua indo
+direto pro modal daquele efeito (sem essa etapa a mais), mantendo o
+comportamento de hoje intacto. Isso generaliza o `golpeCondicionalPendente`
+de "no máximo 1 talento pendente" (`'esmagador' | 'talhador' | null`)
+pra "0 ou mais efeitos pendentes ao mesmo tempo" — ainda não
+implementado em produção no momento deste registro, só o layout foi
+decidido.
