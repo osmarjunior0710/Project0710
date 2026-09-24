@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte } from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
+import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { danoComCritico } from '../../../core/danoCritico';
@@ -51,6 +52,15 @@ interface UsarMagiaPainelParams {
    * `{}` pra quem não tem a característica. Marca a opção de círculo
    * base como "Conjurar Grátis" (ver `EscolherCirculoShell`). */
   maestriaDeMagiasAtuais: Record<number, string>;
+  /** Assinatura Mágica (Mago, nível 20) — as 2 magias escolhidas, `[]`
+   * pra quem não tem. Mesmo tratamento de "Conjurar Grátis" de
+   * Maestria, mas limitado a 1x por magia até o próximo Descanso
+   * (ver `assinaturaMagicaGastas`/`core/assinaturaMagica.ts`). */
+  assinaturaMagicaAtuais: string[];
+  assinaturaMagicaGastas: string[];
+  /** Chamado sempre que uma magia conjura de graça (Maestria OU
+   * Assinatura) — quem chama decide se precisa marcar "gasta". */
+  onUsarMagiaGratisDeClasse: (nomeMagia: string) => void;
 }
 
 /** Fluxo completo de "Usar Magia" dentro de um painel do Combate
@@ -84,6 +94,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
     // Proficiência": bloqueio de conjuração é pra impedir de verdade,
     // não só avisar).
     if (p.desvantagemForcaDestreza) return;
+    if (gratis) p.onUsarMagiaGratisDeClasse(m.nome);
     if (circulo !== null && !gratis) {
       const ok = p.gastarSlotCirculo(circulo, classeDoEspaco);
       if (!ok) return;
@@ -151,6 +162,8 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         espacos={p.espacos}
         espacosGastosPorCirculo={p.espacosGastosPorCirculo}
         maestriaDeMagiasAtuais={p.maestriaDeMagiasAtuais}
+        assinaturaMagicaAtuais={p.assinaturaMagicaAtuais}
+        assinaturaMagicaGastas={p.assinaturaMagicaGastas}
         onFechar={() => setTelaMagia(null)}
         onEscolherTruque={(m) => conjurarMagia(m, null)}
         onEscolherMagia={(m, circulosDisponiveis) => setTelaMagia({ magia: m, circulos: circulosDisponiveis })}
@@ -164,7 +177,8 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
           p.espacos,
           p.espacosGastosPorCirculo,
           p.ponte,
-          circuloGratisMaestria(telaMagia.magia.nome, p.maestriaDeMagiasAtuais),
+          circuloGratisMaestria(telaMagia.magia.nome, p.maestriaDeMagiasAtuais) ??
+            circuloGratisAssinatura(telaMagia.magia.nome, p.assinaturaMagicaAtuais, p.assinaturaMagicaGastas),
         )}
         onVoltar={() => setTelaMagia('lista')}
         onConjurar={(circulo, classeNome, gratis) => conjurarMagia(telaMagia.magia, circulo, classeNome, gratis)}

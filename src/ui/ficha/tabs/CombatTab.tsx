@@ -296,6 +296,16 @@ interface CombatTabProps {
    * `{}` pra quem não tem a característica. Vale pros painéis de Ação
    * e Ação Bônus (não filtrado por tipo, é só consulta). */
   maestriaDeMagiasAtuais: Record<number, string>;
+  /** Assinatura Mágica (Mago, nível 20) — as 2 magias escolhidas,
+   * `[]` pra quem não tem. Vale pros painéis de Ação e Ação Bônus,
+   * mesmo espírito de `maestriaDeMagiasAtuais`. */
+  assinaturaMagicaAtuais: string[];
+  /** Quais das 2 já conjuraram de graça neste período (zera em
+   * Descanso Curto E Longo) — ver `core/assinaturaMagica.ts`. */
+  assinaturaMagicaGastas: string[];
+  /** Chamado sempre que uma magia conjura de graça (Maestria OU
+   * Assinatura) — quem chama decide se precisa marcar "gasta". */
+  onUsarMagiaGratisDeClasse: (nomeMagia: string) => void;
   modAcertoConjuracao: number | null;
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
@@ -578,6 +588,9 @@ export default function CombatTab({
   magiasPreparadasBonus,
   magiasPreparadasReacao,
   maestriaDeMagiasAtuais,
+  assinaturaMagicaAtuais,
+  assinaturaMagicaGastas,
+  onUsarMagiaGratisDeClasse,
   modAcertoConjuracao,
   explicacaoAcertoConjuracao,
   explicacaoCdConjuracao,
@@ -1580,6 +1593,9 @@ export default function CombatTab({
           truques={truquesAcao}
           magiasPreparadas={magiasPreparadasAcao}
           maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
+          assinaturaMagicaAtuais={assinaturaMagicaAtuais}
+          assinaturaMagicaGastas={assinaturaMagicaGastas}
+          onUsarMagiaGratisDeClasse={onUsarMagiaGratisDeClasse}
           modAcertoConjuracao={modAcertoConjuracao}
           explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
           truqueVinculadoAgonizante={truqueVinculadoAgonizante}
@@ -1686,6 +1702,9 @@ export default function CombatTab({
           truques={truquesBonus}
           magiasPreparadas={magiasPreparadasBonus}
           maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
+          assinaturaMagicaAtuais={assinaturaMagicaAtuais}
+          assinaturaMagicaGastas={assinaturaMagicaGastas}
+          onUsarMagiaGratisDeClasse={onUsarMagiaGratisDeClasse}
           espacos={espacos}
           espacosGastosPorCirculo={espacosGastosPorCirculo}
           onGastarSlotCirculo={onGastarSlotCirculo}
