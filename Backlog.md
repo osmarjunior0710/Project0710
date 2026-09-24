@@ -7,6 +7,27 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
+## Pills configuráveis de info da magia (2026-09-24)
+
+Ideia do Osmar, saída do protótipo de Multiclasse (`/prototipo`, cenas
+`MulticlasseMagiasCena`/`MulticlasseCombateCena`): expandir o pill de
+"círculo + classe" (que o foco de Multiclasse já vai construir) pra
+qualquer combinação de info da magia, com o jogador escolhendo em
+Perfil quais pills quer ver em cada linha. Campos candidatos já no
+catálogo (`data/rulesets/dnd2024/magias.ts`): Escola, Distância
+(`alcance`), Componentes (V/S/M — hoje 1 string só, precisa separar em
+3 pills), Ataque ou Salvaguarda. **Duração** e **Tipo de ação**
+(`tempoConjuracao`) têm texto livre — várias magias de Reação/Ação
+Bônus condicional têm frases inteiras nesse campo (ex.: "Reação, que
+você executa quando..."), então precisam de uma extração pra virar
+pill curto ("Reação"), não dá pra usar o texto direto.
+
+**Por que ficou pra depois:** decidido (2026-09-24) fazer o foco de
+Multiclasse primeiro com o pill simples (círculo + classe), sem
+travar a Entrega 1 (mudança de dado) nessa expansão maior — que
+envolve tela nova de configuração em Perfil e passa pelos 3 chapéus
+de novo antes de codar.
+
 ## Recursos visíveis (área abaixo do HP) — o que ficou de fora de propósito (2026-09)
 
 Pedido do Osmar: a 1ª versão mostra só Fúria, Inspiração de Bardo, Magia de
