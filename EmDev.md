@@ -48,12 +48,25 @@ aprovados pelo Osmar, 2026-09-24). Decisões já tomadas: selo por item
 (não bloco separado) nas listas de truques/magias; pill removido de
 vez, Perfil passa a agrupar por classe também.
 
-- [ ] Entrega 1 — Muda o dado: `truquesAtuais`/`magiasPreparadasAtuais`
-      de `string[]` pra `{nome, classe}[]`, com migração de
-      personagens salvos no formato antigo (palpite pela 1ª classe
-      cujo catálogo contém o nome). Sem mudança visível ainda.
+- [x] Entrega 1 — Muda o dado: `truquesAtuais`/`magiasPreparadasAtuais`
+      de `string[]` pra `MagiaConhecida[]` (`{nome, classe}`), com
+      migração de personagens salvos no formato antigo (palpite pela
+      1ª classe cujo catálogo contém o nome — `normalizarMagiasConhecidas`,
+      `core/magiasPersonagem.ts`). Sem mudança visível — confirmado
+      testando `teste-fixo-mago-clerigo` (formato antigo, migra e
+      re-salva sozinho) e `teste-fixo-multiclasse` (já escreve no
+      formato novo direto). Bônus: achado e corrigido de passagem um
+      bug de Regra dos Hooks pré-existente em `MagiasTab.tsx` (2
+      `useColapsavel` chamados DEPOIS de um `return` condicional —
+      quebrava trocando o pill de uma classe sem conjuração pra uma
+      com, sem remontar a tela).
 - [ ] Entrega 2 — Aba Magias: Truques e Magias Preparadas mostram as
-      2 classes juntas numa lista só, com selo por item.
+      2 classes juntas numa lista só, com selo por item. Achado
+      testando a Entrega 1: personagem com o MESMO truque conhecido
+      por 2 classes (ex.: "Amigos" em Bardo E Bruxo) gera `key`
+      duplicada no React (`m.id` sozinho) — corrigir a key pra incluir
+      a classe (`${m.id}-${item.classe}`) nesta entrega, já que é
+      aqui que cada item passa a saber sua própria classe de verdade.
 - [ ] Entrega 3 — Seletor de magia em Combate (Ação/Bônus/Reação) e o
       "conjurar" da aba Magias oferecem as magias das 2 classes
       juntas.

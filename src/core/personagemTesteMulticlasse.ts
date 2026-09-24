@@ -10,14 +10,20 @@
 import { magiasDaClasse } from '../data/rulesets/dnd2024/magias';
 import { armazenamentoPersonagens, type PersonagemSalvo } from './armazenamentoPersonagens';
 import { gerarPersonagemTeste } from './geradorPersonagemTeste';
+import type { MagiaConhecida } from './magiasPersonagem';
 
 export const ID_PERSONAGEM_TESTE_MULTICLASSE = 'teste-fixo-multiclasse';
 
-const nomes = (classe: string, circulo: number, quantidade: number) =>
+// Já marcadas com a classe (formato de `MagiaConhecida`, ver
+// `sdd/sdd-multiclasse-truques-magias.md`) — escrito direto, sem
+// depender do palpite de `normalizarMagiasConhecidas`, porque este é
+// justamente o personagem usado pra testar a marca de classe na tela.
+const nomesComClasse = (classe: string, circulo: number, quantidade: number): MagiaConhecida[] =>
   magiasDaClasse(classe, circulo)
     .map((m) => m.nome)
     .sort((a, b) => a.localeCompare(b, 'pt-BR'))
-    .slice(0, quantidade);
+    .slice(0, quantidade)
+    .map((nome) => ({ nome, classe }));
 
 export function montarPersonagemTesteMulticlasse(): PersonagemSalvo {
   const base = gerarPersonagemTeste({ classeNome: 'Bárbaro', origemNome: 'Sábio', especieNome: 'Anão', nivelAlvo: 1 });
@@ -41,8 +47,8 @@ export function montarPersonagemTesteMulticlasse(): PersonagemSalvo {
     // Entrada no Bardo: 1 perícia + 1 Instrumento Musical à escolha.
     periciasMulticlasseAtual: ['Persuasão'],
     ferramentasMulticlasseAtual: ['Alaúde'],
-    truquesAtual: [...nomes('Bardo', 0, 2), ...nomes('Bruxo', 0, 2)],
-    magiasPreparadasAtual: [...nomes('Bardo', 1, 2), ...nomes('Bruxo', 1, 2)],
+    truquesAtual: [...nomesComClasse('Bardo', 0, 2), ...nomesComClasse('Bruxo', 0, 2)],
+    magiasPreparadasAtual: [...nomesComClasse('Bardo', 1, 2), ...nomesComClasse('Bruxo', 1, 2)],
   };
 }
 

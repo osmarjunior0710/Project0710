@@ -111,6 +111,10 @@ import {
   explicarCdConjuracao,
   magiasDisponiveisParaPreparar,
   poolDescobertasMagicas,
+  nomesDeMagiasConhecidas,
+  marcarClasseDasEscolhas,
+  normalizarMagiasConhecidas,
+  type MagiaConhecida,
 } from '../../core/magiasPersonagem';
 import { usosInspiracaoMaximo, dadoInspiracao, fonteDeInspiracaoDesbloqueada } from '../../core/inspiracaoBardo';
 import { caracteristicaDesbloqueada, contarRepeticoesCaracteristica, numeroDeAtaques } from '../../core/levelUp';
@@ -302,9 +306,22 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * Fim de Turno (`CombatTab.tsx`), não um toggle contínuo. */
   const [curaEfeitoAtivo, setCuraEfeitoAtivo] = useState(false);
   const [maestriaArma, setMaestriaArma] = useState<string[]>(personagemSalvo.maestriaArmaAtual ?? selecao.maestriaArmaEscolhida);
-  const [truquesAtuais, setTruquesAtuais] = useState<string[]>(personagemSalvo.truquesAtual ?? selecao.truquesEscolhidos);
-  const [magiasPreparadasAtuais, setMagiasPreparadasAtuais] = useState<string[]>(
-    personagemSalvo.magiasPreparadasAtual ?? selecao.magiasPreparadasEscolhidas,
+  // MagiaConhecida[] (marcado com a classe que concedeu, ver
+  // sdd/sdd-multiclasse-truques-magias.md) — `normalizarMagiasConhecidas`
+  // migra sozinho o formato antigo (personagem salvo antes desta
+  // entrega, `string[]` sem marca). Personagem novo/criação (ainda sem
+  // `truquesAtual` salvo) sempre tem 1 classe só (`selecao.classe`),
+  // então marcar tudo com ela é sempre certo, sem precisar de palpite.
+  const classeDaCriacao = classesAtual[0]?.classe ?? '';
+  const [truquesAtuais, setTruquesAtuais] = useState<MagiaConhecida[]>(() =>
+    personagemSalvo.truquesAtual
+      ? normalizarMagiasConhecidas(personagemSalvo.truquesAtual, classesAtual)
+      : selecao.truquesEscolhidos.map((nome) => ({ nome, classe: classeDaCriacao })),
+  );
+  const [magiasPreparadasAtuais, setMagiasPreparadasAtuais] = useState<MagiaConhecida[]>(() =>
+    personagemSalvo.magiasPreparadasAtual
+      ? normalizarMagiasConhecidas(personagemSalvo.magiasPreparadasAtual, classesAtual)
+      : selecao.magiasPreparadasEscolhidas.map((nome) => ({ nome, classe: classeDaCriacao })),
   );
   const [livroDeMagiasAtuais, setLivroDeMagiasAtuais] = useState<string[]>(
     personagemSalvo.livroDeMagiasAtual ?? selecao.livroDeMagiasEscolhido,
@@ -793,8 +810,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     espacosGastosPorClasseECirculo,
     espacosGastosPorCirculo,
     talentosEfetivos,
-    truquesAtuais,
-    magiasPreparadasAtuais,
+    // `useMagiasEConjuracao` ainda só entende nome (Entrega 2 do foco
+    // de Multiclasse é que muda o que a aba Magias EXIBE) — passa só
+    // os nomes por ora, sem mudança visível ainda.
+    truquesAtuais: nomesDeMagiasConhecidas(truquesAtuais),
+    magiasPreparadasAtuais: nomesDeMagiasConhecidas(magiasPreparadasAtuais),
     magiasDescobertasMagicasAtuais,
     livroDasSombrasAtuais,
     livroDeMagiasAtuais,
@@ -1623,7 +1643,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }
 
   function aoConfirmarRedefinicao(novaLista: string[]) {
-    setMagiasPreparadasAtuais(novaLista);
+    setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, classeAtivaNome));
     setDescansoEmAndamento((prev) =>
       prev ? { ...prev, fase: prev.maestriaTrocaPendente ? 'perguntaMaestriaTroca' : 'saindo' } : prev,
     );
@@ -2004,9 +2024,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setPvMax((v) => aplicarAjustePv(v + resultado.pvGanho));
     if (resultado.estiloDeLutaEscolhido) setEstiloDeLutaAtivo(resultado.estiloDeLutaEscolhido);
     setPvAtual((v) => aplicarAjustePv(v + resultado.pvGanho));
-    if (resultado.truquesEscolhidos) setTruquesAtuais(resultado.truquesEscolhidos);
+    if (resultado.truquesEscolhidos) setTruquesAtuais(marcarClasseDasEscolhas(resultado.truquesEscolhidos, truquesAtuais, classeAtivaNome));
     if (resultado.livroDeMagiasEscolhidas) setLivroDeMagiasAtuais(resultado.livroDeMagiasEscolhidas);
-    if (resultado.magiasPreparadasEscolhidas) setMagiasPreparadasAtuais(resultado.magiasPreparadasEscolhidas);
+    if (resultado.magiasPreparadasEscolhidas)
+      setMagiasPreparadasAtuais(marcarClasseDasEscolhas(resultado.magiasPreparadasEscolhidas, magiasPreparadasAtuais, classeAtivaNome));
     if (resultado.invocacoesMisticasEscolhidas) setInvocacoesMisticasAtuais(resultado.invocacoesMisticasEscolhidas);
     if (resultado.invocacoesTruqueVinculadoEscolhido) setInvocacoesTruqueVinculado(resultado.invocacoesTruqueVinculadoEscolhido);
     if (resultado.periciasEspecialistaEscolhidas) setPericiasEspecialistaAtuais(resultado.periciasEspecialistaEscolhidas);
@@ -2085,8 +2106,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     const resultado = sortearLevelUpRapido({
       classe,
       personagem,
-      truquesAtuais,
-      magiasPreparadasAtuais,
+      truquesAtuais: nomesDeMagiasConhecidas(truquesAtuais),
+      magiasPreparadasAtuais: nomesDeMagiasConhecidas(magiasPreparadasAtuais),
       livroDeMagiasAtuais,
       invocacoesMisticasAtuais,
       invocacoesTruqueVinculadoAtuais: invocacoesTruqueVinculado,
@@ -2172,10 +2193,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         onHpModoChange={setLevelUpHpModo}
         hpRolado={levelUpHpRolado}
         onHpRoladoChange={setLevelUpHpRolado}
-        truquesAtuais={truquesAtuais}
+        truquesAtuais={nomesDeMagiasConhecidas(truquesAtuais)}
         maestriaArmaAtual={maestriaArma}
         truquesDaClasse={magiasDaClasse(classe.nome, 0)}
-        magiasPreparadasAtuais={magiasPreparadasAtuais}
+        magiasPreparadasAtuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
         livroDeMagiasAtuais={livroDeMagiasAtuais}
         magiasDaClasseDisponiveis={magiasDisponiveisParaPreparar(classe, personagem.nivel + 1)}
         invocacoesMisticasAtuais={invocacoesMisticasAtuais}
@@ -2211,12 +2232,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <CompletarMagiasShell
         titulo="Truques"
-        atuais={truquesAtuais}
+        atuais={nomesDeMagiasConhecidas(truquesAtuais)}
         catalogo={magiasDaClasse(classe.nome, 0)}
         deficit={faltamTruques}
         onFechar={() => setCompletarAberto(null)}
         onConfirmar={(novaLista) => {
-          setTruquesAtuais(novaLista);
+          setTruquesAtuais(marcarClasseDasEscolhas(novaLista, truquesAtuais, classe.nome));
           setCompletarAberto(null);
         }}
       />
@@ -2235,13 +2256,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <CompletarMagiasShell
         titulo="Magias Preparadas"
-        atuais={magiasPreparadasAtuais}
+        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
         catalogo={catalogoMagiasPreparadas}
         classeNome={classe.nome}
         deficit={faltamMagiasPreparadas}
         onFechar={() => setCompletarAberto(null)}
         onConfirmar={(novaLista) => {
-          setMagiasPreparadasAtuais(novaLista);
+          setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, classe.nome));
           setCompletarAberto(null);
         }}
       />
@@ -2252,8 +2273,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <LivroDasSombrasShell
         atuais={livroDasSombrasAtuais}
-        truquesConhecidos={truquesAtuais}
-        magiasPreparadasConhecidas={magiasPreparadasAtuais}
+        truquesConhecidos={nomesDeMagiasConhecidas(truquesAtuais)}
+        magiasPreparadasConhecidas={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
         onFechar={() => setLivroDasSombrasAberto(false)}
         onConfirmar={(novaLista) => {
           setLivroDasSombrasAtuais(novaLista);
@@ -2268,11 +2289,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <MemorizarMagiaShell
         modo="unica"
-        atuais={magiasPreparadasAtuais}
+        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
         catalogo={livroDeMagias}
         onFechar={() => setMemorizarMagiaAberto(false)}
         onConfirmar={(novaLista) => {
-          setMagiasPreparadasAtuais(novaLista);
+          setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, classeAtivaNome));
           setMemorizarMagiaGasta(true);
           setMemorizarMagiaAberto(false);
         }}
@@ -2284,7 +2305,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <MemorizarMagiaShell
         modo="livre"
-        atuais={magiasPreparadasAtuais}
+        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
         catalogo={livroDeMagias}
         onFechar={() => aoResponderRedefinir(false)}
         onConfirmar={aoConfirmarRedefinicao}
@@ -2558,8 +2579,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             modCarisma={carMod}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             conjura={conjura}
-            truquesAtuais={truquesAtuais}
-            magiasPreparadasAtuais={magiasPreparadasAtuais}
+            truquesAtuais={nomesDeMagiasConhecidas(truquesAtuais)}
+            magiasPreparadasAtuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
             livroDeMagiasAtuais={livroDeMagiasAtuais}
             moedas={moedas}
             onMudarMoedas={setMoedas}

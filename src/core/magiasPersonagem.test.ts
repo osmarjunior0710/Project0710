@@ -15,6 +15,9 @@ import {
   espacosCombinadosComoAtivos,
   ehMagiaDeReacao,
   ehMagiaDeAcaoBonus,
+  nomesDeMagiasConhecidas,
+  marcarClasseDasEscolhas,
+  normalizarMagiasConhecidas,
 } from './magiasPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { magias, magiasDaClasse } from '../data/rulesets/dnd2024/magias';
@@ -32,6 +35,61 @@ const bruxo = classes.find((c) => c.nome === 'Bruxo');
 if (!bruxo) throw new Error('Fixture "Bruxo" não encontrada em data/rulesets/dnd2024/classes.ts');
 const mago = classes.find((c) => c.nome === 'Mago');
 if (!mago) throw new Error('Fixture "Mago" não encontrada em data/rulesets/dnd2024/classes.ts');
+
+describe('nomesDeMagiasConhecidas', () => {
+  it('extrai só os nomes, na ordem', () => {
+    expect(nomesDeMagiasConhecidas([{ nome: 'Luz', classe: 'Mago' }, { nome: 'Sugestão', classe: 'Bardo' }])).toEqual([
+      'Luz',
+      'Sugestão',
+    ]);
+  });
+
+  it('lista vazia devolve lista vazia', () => {
+    expect(nomesDeMagiasConhecidas([])).toEqual([]);
+  });
+});
+
+describe('marcarClasseDasEscolhas', () => {
+  it('mantém a classe de quem já era conhecido, marca quem é novo com a classe em foco', () => {
+    const anteriores = [{ nome: 'Luz', classe: 'Bardo' }, { nome: 'Raio de Fogo', classe: 'Mago' }];
+    const resultado = marcarClasseDasEscolhas(['Luz', 'Raio de Fogo', 'Mísseis Mágicos'], anteriores, 'Mago');
+    expect(resultado).toEqual([
+      { nome: 'Luz', classe: 'Bardo' },
+      { nome: 'Raio de Fogo', classe: 'Mago' },
+      { nome: 'Mísseis Mágicos', classe: 'Mago' },
+    ]);
+  });
+
+  it('lista nova vazia (removeu tudo) devolve lista vazia', () => {
+    expect(marcarClasseDasEscolhas([], [{ nome: 'Luz', classe: 'Bardo' }], 'Mago')).toEqual([]);
+  });
+});
+
+describe('normalizarMagiasConhecidas', () => {
+  const classesDoPersonagem = [{ classe: 'Bardo' }, { classe: 'Mago' }];
+
+  it('formato antigo (string[]): acha a classe certa pelo catálogo (Zombaria Perversa só existe pra Bardo entre as 2)', () => {
+    expect(normalizarMagiasConhecidas(['Zombaria Perversa'], classesDoPersonagem)).toEqual([
+      { nome: 'Zombaria Perversa', classe: 'Bardo' },
+    ]);
+  });
+
+  it('formato novo (MagiaConhecida[]): devolve como está, sem tentar adivinhar de novo', () => {
+    const ja = [{ nome: 'Luz', classe: 'Mago' }];
+    expect(normalizarMagiasConhecidas(ja, classesDoPersonagem)).toBe(ja);
+  });
+
+  it('ausente ou vazio devolve lista vazia', () => {
+    expect(normalizarMagiasConhecidas(undefined, classesDoPersonagem)).toEqual([]);
+    expect(normalizarMagiasConhecidas([], classesDoPersonagem)).toEqual([]);
+  });
+
+  it('nome que não bate com nenhuma classe (caso de borda) cai pra 1ª classe do personagem', () => {
+    expect(normalizarMagiasConhecidas(['Magia Inventada'], classesDoPersonagem)).toEqual([
+      { nome: 'Magia Inventada', classe: 'Bardo' },
+    ]);
+  });
+});
 
 describe('espacosDeMagiaAtivos', () => {
   it('Bardo (1 recurso por círculo): nível 3 tem 1º E 2º círculo simultâneos', () => {

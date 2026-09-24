@@ -177,6 +177,59 @@ function buscarMagiasPorNome(nomes: string[]): Magia[] {
     .sort((a, b) => a.circulo - b.circulo || a.nome.localeCompare(b.nome, 'pt-BR'));
 }
 
+/** Truque/Magia Preparada conhecido pelo personagem, marcado com a
+ * classe que concedeu aquela escolha — necessário pra multiclasse
+ * (2 classes podem ter listas de magia próprias misturadas na mesma
+ * "coleção conhecida"). Ver `sdd/sdd-multiclasse-truques-magias.md`.
+ * `truquesAtuais`/`magiasPreparadasAtuais` (`FichaShell.tsx`) guardam
+ * isso — qualquer função abaixo que só precisa do NOME continua
+ * recebendo `string[]` puro (extraído no chamador com
+ * `nomesDeMagiasConhecidas`), pra não precisar mudar toda a cadeia de
+ * Level Up/sorteio que já funcionava certo com nome só. */
+export interface MagiaConhecida {
+  nome: string;
+  /** Nome da classe que concedeu esta escolha. */
+  classe: string;
+}
+
+/** Só os nomes — ponte pra toda função que já existia e só entende
+ * `string[]` (Level Up, sorteio, cálculo de déficit). */
+export function nomesDeMagiasConhecidas(lista: MagiaConhecida[]): string[] {
+  return lista.map((m) => m.nome);
+}
+
+/** Depois de uma tela devolver uma lista NOVA de nomes (Level Up,
+ * Memorizar Magia, redefinição por Descanso Longo), marca cada nome
+ * com a classe certa: mantém a marca de quem já era conhecido,
+ * marca com `classeParaNovos` (a classe em foco na hora dessa
+ * escolha) quem é novo. */
+export function marcarClasseDasEscolhas(nomesNovos: string[], anteriores: MagiaConhecida[], classeParaNovos: string): MagiaConhecida[] {
+  return nomesNovos.map((nome) => ({
+    nome,
+    classe: anteriores.find((m) => m.nome === nome)?.classe ?? classeParaNovos,
+  }));
+}
+
+/** Migra o formato antigo (`string[]`, sem marca de classe — todo
+ * personagem salvo antes desta entrega) pro novo (`MagiaConhecida[]`).
+ * Palpite: a 1ª classe do personagem cujo catálogo contém aquele
+ * nome; nenhuma bater (não devia acontecer com dado real) cai pra
+ * `classesAtual[0]`. Nunca escreve de volta no formato antigo — só
+ * lê. Ver SDD "Migração de personagens salvos". */
+export function normalizarMagiasConhecidas(
+  valor: string[] | MagiaConhecida[] | undefined,
+  classesAtual: { classe: string }[],
+): MagiaConhecida[] {
+  if (!valor || valor.length === 0) return [];
+  if (typeof valor[0] !== 'string') return valor as MagiaConhecida[];
+  const nomes = valor as string[];
+  const primeiraClasse = classesAtual[0]?.classe ?? '';
+  return nomes.map((nome) => ({
+    nome,
+    classe: classesAtual.find((c) => magiasDaClasse(c.classe).some((m) => m.nome === nome))?.classe ?? primeiraClasse,
+  }));
+}
+
 /** Truques reais do personagem (nomes → objeto Magia completo). Recebe
  * os nomes diretamente (não `WizardSelection`) porque, a partir da
  * Etapa 4.1 (Level Up), a lista pode ter mudado depois da criação —

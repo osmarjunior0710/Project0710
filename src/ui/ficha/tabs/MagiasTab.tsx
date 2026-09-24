@@ -311,6 +311,17 @@ export default function MagiasTab({
     danoRolado: number | null;
     upcastNaoAutomatico: boolean;
   } | null>(null);
+  // Os 4 `useColapsavel` abaixo precisam vir ANTES do `if (!conjura)
+  // return` — Regra dos Hooks: nº de hooks chamados não pode variar
+  // entre renders do MESMO componente montado. Bug pego testando
+  // multiclasse (Osmar, 2026-09-24): pill trocando de uma classe SEM
+  // conjuração (Bárbaro) pra uma COM (Bardo) sem remontar a tela —
+  // antes esses hooks só executavam na 2ª renderização, "Rendered
+  // more hooks than during the previous render".
+  const [espacosExpandido, setEspacosExpandido] = useColapsavel('espacos-de-magia', true);
+  const [truquesExpandido, setTruquesExpandido] = useColapsavel('truques', true);
+  const [magiasPreparadasExpandido, setMagiasPreparadasExpandido] = useColapsavel('magias-preparadas', true);
+  const [livroDeMagiasExpandido, setLivroDeMagiasExpandido] = useColapsavel('livro-de-magias', true);
 
   if (!conjura) {
     return (
@@ -330,10 +341,6 @@ export default function MagiasTab({
   const magiasTalentoOrigem = magiasPreparadasDoPersonagem(magiasTalentoOrigemAtuais);
   const magiasTalentoGeral = magiasPreparadasDoPersonagem(magiasTalentoGeralAtuais);
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
-  const [espacosExpandido, setEspacosExpandido] = useColapsavel('espacos-de-magia', true);
-  const [truquesExpandido, setTruquesExpandido] = useColapsavel('truques', true);
-  const [magiasPreparadasExpandido, setMagiasPreparadasExpandido] = useColapsavel('magias-preparadas', true);
-  const [livroDeMagiasExpandido, setLivroDeMagiasExpandido] = useColapsavel('livro-de-magias', true);
 
   /** `gastouEspacoDeVerdade` — só true quando um Espaço de Magia real foi
    * gasto (não pra truque nem magia concedida de graça por Invocação
