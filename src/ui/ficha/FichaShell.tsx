@@ -2579,8 +2579,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             modCarisma={carMod}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             conjura={conjura}
-            truquesAtuais={nomesDeMagiasConhecidas(truquesAtuais)}
-            magiasPreparadasAtuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
+            truquesAtuais={truquesAtuais}
+            magiasPreparadasAtuais={magiasPreparadasAtuais}
             livroDeMagiasAtuais={livroDeMagiasAtuais}
             moedas={moedas}
             onMudarMoedas={setMoedas}

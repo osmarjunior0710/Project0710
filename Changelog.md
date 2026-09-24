@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2007
+
+**Multiclasse — aba Magias mostra as 2 classes juntas.** Truques e Magias Preparadas de personagem multiclasse (ex.: Bardo/Bruxo) aparecem numa lista só, cada item com um selo colorido de qual classe é — antes só apareciam as da classe do pill.
+
 ## v202609_1957
 
 Corrige um bug real: a aba Magias podia travar (tela branca) trocando o pill de uma classe sem magia pra uma com magia, sem sair da tela. Nenhuma mudança visível além disso — é a base de dado (Entrega 1) do foco de Multiclasse, ainda sem o selo de classe na tela.

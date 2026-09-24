@@ -18,6 +18,7 @@ import {
   nomesDeMagiasConhecidas,
   marcarClasseDasEscolhas,
   normalizarMagiasConhecidas,
+  magiasConhecidasComClasse,
 } from './magiasPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { magias, magiasDaClasse } from '../data/rulesets/dnd2024/magias';
@@ -88,6 +89,36 @@ describe('normalizarMagiasConhecidas', () => {
     expect(normalizarMagiasConhecidas(['Magia Inventada'], classesDoPersonagem)).toEqual([
       { nome: 'Magia Inventada', classe: 'Bardo' },
     ]);
+  });
+});
+
+describe('magiasConhecidasComClasse', () => {
+  it('pareia magia + classe, ordenado por círculo → nome', () => {
+    const resultado = magiasConhecidasComClasse([
+      { nome: 'Bola de Fogo', classe: 'Mago' },
+      { nome: 'Zombaria Perversa', classe: 'Bardo' },
+    ]);
+    expect(resultado).toEqual([
+      { magia: magiaFixture('Zombaria Perversa'), classe: 'Bardo' },
+      { magia: magiaFixture('Bola de Fogo'), classe: 'Mago' },
+    ]);
+  });
+
+  it('NUNCA deduplica — mesma magia conhecida por 2 classes vira 2 linhas', () => {
+    const resultado = magiasConhecidasComClasse([
+      { nome: 'Amigos', classe: 'Bardo' },
+      { nome: 'Amigos', classe: 'Bruxo' },
+    ]);
+    expect(resultado).toHaveLength(2);
+    expect(resultado.map((r) => r.classe)).toEqual(['Bardo', 'Bruxo']);
+  });
+
+  it('nome que não existe no catálogo (caso de borda) é ignorado, não quebra', () => {
+    expect(magiasConhecidasComClasse([{ nome: 'Magia Inventada', classe: 'Mago' }])).toEqual([]);
+  });
+
+  it('lista vazia devolve lista vazia', () => {
+    expect(magiasConhecidasComClasse([])).toEqual([]);
   });
 });
 

@@ -60,13 +60,21 @@ vez, Perfil passa a agrupar por classe também.
       `useColapsavel` chamados DEPOIS de um `return` condicional —
       quebrava trocando o pill de uma classe sem conjuração pra uma
       com, sem remontar a tela).
-- [ ] Entrega 2 — Aba Magias: Truques e Magias Preparadas mostram as
-      2 classes juntas numa lista só, com selo por item. Achado
-      testando a Entrega 1: personagem com o MESMO truque conhecido
-      por 2 classes (ex.: "Amigos" em Bardo E Bruxo) gera `key`
-      duplicada no React (`m.id` sozinho) — corrigir a key pra incluir
-      a classe (`${m.id}-${item.classe}`) nesta entrega, já que é
-      aqui que cada item passa a saber sua própria classe de verdade.
+- [x] Entrega 2 — Aba Magias: Truques e Magias Preparadas mostram as
+      2 classes juntas numa lista só, com selo por item
+      (`PillClasse`, novo componente reutilizável em
+      `ui/components/`). Layout virou 2 linhas nessas 2 seções (nome+
+      Usar / pills de círculo+classe embaixo, pedido do Osmar
+      2026-09-24) — resto da aba (Descobertas Mágicas, Livro de
+      Magias etc., sempre 1 classe só) continua 1 linha, sem selo.
+      `core/magiasPersonagem.ts` ganhou `magiasConhecidasComClasse`
+      (pareia Magia+classe, NUNCA deduplica por nome — testado com
+      "Amigos" conhecido por Bardo E Bruxo ao mesmo tempo, virou 2
+      linhas com `key` própria por classe, sem o bug de key duplicada
+      encontrado na Entrega 1). Mago ganhou cor de pill própria
+      (azul-claro, já registrada em `corRecursoClasse.ts` desde os
+      protótipos). Testado com personagem migrado (Mago/Bardo,
+      formato antigo) e o multiclasse (Bardo/Bruxo, formato novo).
 - [ ] Entrega 3 — Seletor de magia em Combate (Ação/Bônus/Reação) e o
       "conjurar" da aba Magias oferecem as magias das 2 classes
       juntas.

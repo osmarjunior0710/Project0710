@@ -230,6 +230,24 @@ export function normalizarMagiasConhecidas(
   }));
 }
 
+/** Truques/Magias Preparadas reais do personagem, PAREADOS com a
+ * classe que concedeu cada um — usado pela aba Magias pra mostrar o
+ * selo por item (ver `sdd/sdd-multiclasse-truques-magias.md`).
+ * Diferente de `buscarMagiasPorNome`/`truquesDoPersonagem`, NUNCA
+ * deduplica por nome: um personagem multiclasse pode conhecer a
+ * MESMA magia por 2 classes ao mesmo tempo (ex.: "Amigos" tanto de
+ * Bardo quanto de Bruxo) — são 2 escolhas reais, aparecem como 2
+ * linhas. Mesmo critério de ordenação de sempre (círculo → nome). */
+export function magiasConhecidasComClasse(lista: MagiaConhecida[]): { magia: Magia; classe: string }[] {
+  return lista
+    .map((item) => {
+      const magia = magias.find((m) => m.nome === item.nome);
+      return magia ? { magia, classe: item.classe } : null;
+    })
+    .filter((x): x is { magia: Magia; classe: string } => x !== null)
+    .sort((a, b) => a.magia.circulo - b.magia.circulo || a.magia.nome.localeCompare(b.magia.nome, 'pt-BR'));
+}
+
 /** Truques reais do personagem (nomes → objeto Magia completo). Recebe
  * os nomes diretamente (não `WizardSelection`) porque, a partir da
  * Etapa 4.1 (Level Up), a lista pode ter mudado depois da criação —

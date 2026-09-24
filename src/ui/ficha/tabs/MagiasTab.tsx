@@ -7,9 +7,11 @@ import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import type { Moedas } from '../../../core/moedas';
 import {
   espacosDeMagiaAtivos,
-  truquesDoPersonagem,
   magiasPreparadasDoPersonagem,
+  magiasConhecidasComClasse,
+  nomesDeMagiasConhecidas,
   opcoesGastoComPonte,
+  type MagiaConhecida,
   type PoolDePonte,
   type EspacoDeMagiaAtivo,
 } from '../../../core/magiasPersonagem';
@@ -23,6 +25,7 @@ import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
 import { danoComCritico } from '../../../core/danoCritico';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
+import PillClasse from '../../components/PillClasse';
 import TickPips from '../../components/TickPips';
 import { useColapsavel } from '../../hooks/useColapsavel';
 import { useRoll } from '../../roll/RollContext';
@@ -76,8 +79,12 @@ interface MagiasTabProps {
    * esta aba também deixa conjurar truque/magia direto. */
   desvantagemForcaDestreza: boolean;
   conjura: boolean;
-  truquesAtuais: string[];
-  magiasPreparadasAtuais: string[];
+  /** Marcados com a classe que concedeu cada escolha (multiclasse,
+   * ver `sdd/sdd-multiclasse-truques-magias.md`) — a lista já vem com
+   * as magias de TODAS as classes do personagem juntas, cada item
+   * com o selo (`PillClasse`) de qual classe é. */
+  truquesAtuais: MagiaConhecida[];
+  magiasPreparadasAtuais: MagiaConhecida[];
   /** Livro de Magias (grimório) do Mago — pool de magias CONHECIDAS,
    * maior que `magiasPreparadasAtuais` (ver DECISOES-CLASSES.md
    * "Casters", Padrão C). `[]` pra quem não tem essa característica
@@ -332,8 +339,15 @@ export default function MagiasTab({
   }
 
   const espacos = espacosParaConjurar ?? espacosDeMagiaAtivos(classe, nivel);
-  const truques = truquesDoPersonagem(truquesAtuais);
-  const preparadas = magiasPreparadasDoPersonagem(magiasPreparadasAtuais);
+  // Truques/Magias Preparadas mostram as classes do personagem juntas
+  // (2026-09, ver EmDev.md) — pareado com a classe pro selo
+  // (`PillClasse`); `truquesDoPersonagem`/`magiasPreparadasDoPersonagem`
+  // (nome só) continuam servindo pro resto do arquivo (Descobertas
+  // Mágicas, Livro de Magias etc. — listas de 1 classe só, sem
+  // ambiguidade).
+  const truquesComClasse = magiasConhecidasComClasse(truquesAtuais);
+  const preparadasComClasse = magiasConhecidasComClasse(magiasPreparadasAtuais);
+  const nomesMagiasPreparadas = nomesDeMagiasConhecidas(magiasPreparadasAtuais);
   const livroDeMagias = magiasPreparadasDoPersonagem(livroDeMagiasAtuais);
   const descobertasMagicas = magiasPreparadasDoPersonagem(magiasDescobertasMagicasAtuais);
   const pactoDoInfero = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
@@ -781,7 +795,7 @@ export default function MagiasTab({
         </>
       )}
 
-      {(truques.length > 0 || faltamTruques > 0) && (
+      {(truquesComClasse.length > 0 || faltamTruques > 0) && (
         <>
           <div className={styles.grupoHeader} onClick={() => setTruquesExpandido(!truquesExpandido)}>
             <span>Truques</span>
@@ -794,19 +808,24 @@ export default function MagiasTab({
                   ⚠️ Faltam {faltamTruques} truque{faltamTruques > 1 ? 's' : ''} pro seu nível — toque pra escolher
                 </div>
               )}
-              {truques.map((m) => {
+              {truquesComClasse.map(({ magia: m, classe: classeDoItem }) => {
                 const temAcao = usarMagiaTemAcaoAutomatizada(m);
                 return (
-                  <div key={m.id} className={styles.spellRow}>
-                    <div className={styles.spellName}>
-                      <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  <div key={`${m.id}-${classeDoItem}`} className={styles.spellRowComPill}>
+                    <div className={styles.spellRowComPillLinha1}>
+                      <div className={styles.spellName}>
+                        <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                      </div>
+                      <div
+                        className={`${styles.usarBtn} ${temAcao ? '' : styles.usarBtnPendencia}`}
+                        onClick={() => temAcao && usarMagia(m)}
+                      >
+                        {temAcao ? 'Usar' : 'Usar (pendência)'}
+                      </div>
                     </div>
-                    <span className={styles.spellCirculo}>Truque</span>
-                    <div
-                      className={`${styles.usarBtn} ${temAcao ? '' : styles.usarBtnPendencia}`}
-                      onClick={() => temAcao && usarMagia(m)}
-                    >
-                      {temAcao ? 'Usar' : 'Usar (pendência)'}
+                    <div className={styles.spellRowComPillLinha2}>
+                      <span className="tag">Truque</span>
+                      <PillClasse classe={classeDoItem} />
                     </div>
                   </div>
                 );
@@ -1075,7 +1094,7 @@ export default function MagiasTab({
         </div>
       )}
 
-      {(preparadas.length > 0 || faltamMagiasPreparadas > 0) && (
+      {(preparadasComClasse.length > 0 || faltamMagiasPreparadas > 0) && (
         <>
           <div className={styles.grupoHeader} onClick={() => setMagiasPreparadasExpandido(!magiasPreparadasExpandido)}>
             <span>Magias Preparadas</span>
@@ -1089,7 +1108,7 @@ export default function MagiasTab({
                   {faltamMagiasPreparadas > 1 ? 's' : ''} pro seu nível — toque pra escolher
                 </div>
               )}
-              {preparadas.map((m) => {
+              {preparadasComClasse.map(({ magia: m, classe: classeDoItem }) => {
                 const semEspaco =
                   opcoesGastoComPonte(
                     m.circulo,
@@ -1100,16 +1119,21 @@ export default function MagiasTab({
                     circuloGratisMaestria(m.nome, maestriaDeMagiasAtuais),
                   ).length === 0;
                 return (
-                  <div key={m.id} className={styles.spellRow}>
-                    <div className={styles.spellName}>
-                      <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  <div key={`${m.id}-${classeDoItem}`} className={styles.spellRowComPill}>
+                    <div className={styles.spellRowComPillLinha1}>
+                      <div className={styles.spellName}>
+                        <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                      </div>
+                      <div
+                        className={`${styles.usarBtn} ${semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                        onClick={() => usarMagia(m)}
+                      >
+                        Usar
+                      </div>
                     </div>
-                    <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
-                    <div
-                      className={`${styles.usarBtn} ${semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                      onClick={() => usarMagia(m)}
-                    >
-                      Usar
+                    <div className={styles.spellRowComPillLinha2}>
+                      <span className="tag">{m.circulo}º círculo</span>
+                      <PillClasse classe={classeDoItem} />
                     </div>
                   </div>
                 );
@@ -1132,7 +1156,7 @@ export default function MagiasTab({
                 Preparadas, acima). Muda a lista de preparadas ao completar um Descanso Longo.
               </div>
               {livroDeMagias.map((m) => {
-                const preparada = magiasPreparadasAtuais.includes(m.nome);
+                const preparada = nomesMagiasPreparadas.includes(m.nome);
                 return (
                   <div key={m.id} className={styles.spellRow}>
                     <div className={styles.spellName}>
