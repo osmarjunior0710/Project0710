@@ -292,6 +292,10 @@ interface CombatTabProps {
   magiasPreparadasAcao: Magia[];
   magiasPreparadasBonus: Magia[];
   magiasPreparadasReacao: Magia[];
+  /** Maestria de Magias (Mago, nível 18) — `{1: nomeMagia, 2: nomeMagia}`,
+   * `{}` pra quem não tem a característica. Vale pros painéis de Ação
+   * e Ação Bônus (não filtrado por tipo, é só consulta). */
+  maestriaDeMagiasAtuais: Record<number, string>;
   modAcertoConjuracao: number | null;
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
@@ -573,6 +577,7 @@ export default function CombatTab({
   magiasPreparadasAcao,
   magiasPreparadasBonus,
   magiasPreparadasReacao,
+  maestriaDeMagiasAtuais,
   modAcertoConjuracao,
   explicacaoAcertoConjuracao,
   explicacaoCdConjuracao,
@@ -1574,6 +1579,7 @@ export default function CombatTab({
           conjura={conjura}
           truques={truquesAcao}
           magiasPreparadas={magiasPreparadasAcao}
+          maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
           modAcertoConjuracao={modAcertoConjuracao}
           explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
           truqueVinculadoAgonizante={truqueVinculadoAgonizante}
@@ -1679,6 +1685,7 @@ export default function CombatTab({
           conjura={conjura}
           truques={truquesBonus}
           magiasPreparadas={magiasPreparadasBonus}
+          maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
           espacos={espacos}
           espacosGastosPorCirculo={espacosGastosPorCirculo}
           onGastarSlotCirculo={onGastarSlotCirculo}

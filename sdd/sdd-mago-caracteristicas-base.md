@@ -285,9 +285,16 @@ na lista original.
 5. **Entrega 5 — Adepto de Ritual** (nv.1): seção nova na aba Magias
    listando magias Rituais do Livro não preparadas, conjuração livre.
    ✅ Feito (`v202609_2011`).
-6. **Entrega 6 — Maestria de Magias** (nv.18): passo de Level Up +
-   conjuração grátis no círculo mais baixo + troca no Descanso Longo
-   (mesma tela reaberta).
+6. **Entrega 6a — Maestria de Magias, escolha + conjuração grátis**
+   (nv.18): passo de Level Up (1 magia de 1º + 1 de 2º círculo, tempo
+   de Ação, do Livro de Magias) + seção "sempre preparada" na aba
+   Magias + opção "Conjurar Grátis" na tela "Em qual círculo?" (vale
+   pra Magias E Combate — `opcoesGastoComPonte`/`EscolherCirculoShell`
+   ganharam um parâmetro `circuloGratis` reaproveitado nos 2 lugares).
+   ✅ Feito (`v202609_2132`).
+   **Entrega 6b — troca no Descanso Longo:** pergunta condicional
+   (mesmo padrão de "redefinir Magias Preparadas"/Recuperação Arcana)
+   + tela de substituir 1 das 2 escolhidas por outra do mesmo círculo.
 7. **Entrega 7 — Assinatura Mágica** (nv.20): passo de Level Up +
    conjuração grátis 1x por descanso (2 flags).
 8. **Entrega 8 — Fechamento:** testes/tsc/build,

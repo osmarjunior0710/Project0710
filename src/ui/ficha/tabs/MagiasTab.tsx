@@ -17,6 +17,7 @@ import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classif
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { cdConjuracao, type ResumoConjuracao } from '../../../core/magiasPersonagem';
+import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import InfoValor from '../../components/InfoValor';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
@@ -163,6 +164,17 @@ interface MagiasTabProps {
    * característica) — ver `core/adeptoDeRitual.ts`. Ilimitado de
    * verdade, sem contador/flag de "gasto". */
   magiasRituaisDoLivro: Magia[];
+  /** `true` só quando o personagem já tem Maestria de Magias (Mago,
+   * nível 18) — controla se a seção aparece. */
+  maestriaDeMagiasDisponivel: boolean;
+  /** As 2 magias escolhidas (1º e 2º círculo) — sempre preparadas, ver
+   * `core/maestriaDeMagias.ts`. */
+  magiasMaestriaDoLivro: Magia[];
+  /** `{1: nomeMagia, 2: nomeMagia}` — usado pra marcar o círculo base
+   * de cada escolhida como "Conjurar Grátis" na tela "Em qual
+   * círculo?" (ver `EscolherCirculoShell`), em qualquer seção que
+   * mostre essas magias, não só a de Maestria. */
+  maestriaDeMagiasAtuais: Record<number, string>;
   /** `true` só quando o personagem já tem Astúcia Mágica (Bruxo,
    * nível 2+) — controla se o botão aparece. */
   astuciaMagicaDisponivel: boolean;
@@ -253,6 +265,9 @@ export default function MagiasTab({
   onMemorizarMagia,
   adeptoDeRitualDisponivel,
   magiasRituaisDoLivro,
+  maestriaDeMagiasDisponivel,
+  magiasMaestriaDoLivro,
+  maestriaDeMagiasAtuais,
   astuciaMagicaDisponivel,
   astuciaMagicaGasta,
   astuciaMagicaRecupera,
@@ -436,7 +451,14 @@ export default function MagiasTab({
       processarMagiaAoUsar(m, 0, false);
       return;
     }
-    const opcoes = opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte);
+    const opcoes = opcoesGastoComPonte(
+      m.circulo,
+      classeAtivaNome,
+      espacos,
+      espacosGastosPorCirculo,
+      ponte,
+      circuloGratisMaestria(m.nome, maestriaDeMagiasAtuais),
+    );
     if (opcoes.length === 0) return;
     setTelaCirculo(m);
   }
@@ -445,14 +467,21 @@ export default function MagiasTab({
     return (
       <EscolherCirculoShell
         magia={telaCirculo}
-        opcoes={opcoesGastoComPonte(telaCirculo.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte)}
+        opcoes={opcoesGastoComPonte(
+          telaCirculo.circulo,
+          classeAtivaNome,
+          espacos,
+          espacosGastosPorCirculo,
+          ponte,
+          circuloGratisMaestria(telaCirculo.nome, maestriaDeMagiasAtuais),
+        )}
         onVoltar={() => setTelaCirculo(null)}
-        onConjurar={(circulo, classeNome) => {
-          const ok = onGastarSlotCirculo(circulo, classeNome);
+        onConjurar={(circulo, classeNome, gratis) => {
+          const ok = gratis || onGastarSlotCirculo(circulo, classeNome);
           const magiaConjurada = telaCirculo;
           setTelaCirculo(null);
           if (!ok) return;
-          processarMagiaAoUsar(magiaConjurada, circulo, true);
+          processarMagiaAoUsar(magiaConjurada, circulo, !gratis);
         }}
       />
     );
@@ -1054,7 +1083,15 @@ export default function MagiasTab({
                 </div>
               )}
               {preparadas.map((m) => {
-                const semEspaco = opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
+                const semEspaco =
+                  opcoesGastoComPonte(
+                    m.circulo,
+                    classeAtivaNome,
+                    espacos,
+                    espacosGastosPorCirculo,
+                    ponte,
+                    circuloGratisMaestria(m.nome, maestriaDeMagiasAtuais),
+                  ).length === 0;
                 return (
                   <div key={m.id} className={styles.spellRow}>
                     <div className={styles.spellName}>
@@ -1133,6 +1170,33 @@ export default function MagiasTab({
               </div>
             </div>
           ))}
+        </>
+      )}
+
+      {maestriaDeMagiasDisponivel && magiasMaestriaDoLivro.length > 0 && (
+        <>
+          <div className="section-title">Maestria de Magias</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Sempre preparadas, não contam na conta de Magias Preparadas — conjuram no círculo delas sem gastar
+            Espaço ("Conjurar Grátis" na tela de círculo); num círculo maior, gasta Espaço normal.
+          </div>
+          {magiasMaestriaDoLivro.map((m) => {
+            const temAcao = usarMagiaTemAcaoAutomatizada(m);
+            return (
+              <div key={m.id} className={styles.spellRow}>
+                <div className={styles.spellName}>
+                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                </div>
+                <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
+                <div
+                  className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : ''}`}
+                  onClick={() => temAcao && usarMagia(m)}
+                >
+                  {temAcao ? 'Usar' : 'Usar (pendência)'}
+                </div>
+              </div>
+            );
+          })}
         </>
       )}
 

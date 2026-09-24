@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2132
+
+**Mago — Maestria de Magias (nível 18).** No Level Up do nível 18, escolhe 1 magia de 1º e 1 de 2º círculo do Livro de Magias (com tempo de conjuração de Ação) — as 2 ficam sempre preparadas (nova seção na aba Magias) e conjuram no círculo delas sem gastar Espaço. Vale também na aba Combate: ao "Usar Magia" uma dessas 2, a tela "Em qual círculo?" mostra "Conjurar Grátis" no círculo base, no lugar dos pips normais.
+
 ## v202609_2011
 
 **Mago — Adepto de Ritual (nível 1).** Nova seção na aba Magias, "Adepto de Ritual", listando as magias com marcador Ritual do seu Livro de Magias que ainda não estão preparadas — cada uma com botão "🔮 Ritual" pra conjurar na hora, sem gastar Espaço de Magia e sem precisar prepará-la primeiro (as já preparadas continuam conjurando normal, na seção de cima).

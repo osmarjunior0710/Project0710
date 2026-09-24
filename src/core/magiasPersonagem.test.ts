@@ -259,6 +259,22 @@ describe('opcoesGastoComPonte (multiclasse — ponte de Magia de Pacto)', () => 
       { circulo: 2, classeNome: 'Mago', maximo: 2, gasto: 0 },
     ]);
   });
+
+  it('circuloGratis (Maestria de Magias) — marca a opção existente como grátis', () => {
+    const opcoes = opcoesGastoComPonte(1, 'Mago', espacosMago3, {}, null, 1);
+    expect(opcoes).toEqual([
+      { circulo: 1, classeNome: 'Mago', maximo: 4, gasto: 0, gratis: true },
+      { circulo: 2, classeNome: 'Mago', maximo: 2, gasto: 0 },
+    ]);
+  });
+
+  it('circuloGratis — aparece mesmo sem Espaço real sobrando naquele círculo', () => {
+    const opcoes = opcoesGastoComPonte(1, 'Mago', espacosMago3, { 1: 4 }, null, 1); // 1º círculo todo gasto
+    expect(opcoes).toEqual([
+      { circulo: 1, classeNome: 'Mago', maximo: 0, gasto: 0, gratis: true },
+      { circulo: 2, classeNome: 'Mago', maximo: 2, gasto: 0 },
+    ]);
+  });
 });
 
 describe('espacosCombinadosComoAtivos', () => {

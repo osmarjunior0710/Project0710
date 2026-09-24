@@ -34,9 +34,16 @@ uma auditoria completa da classe base a pedido do Osmar.
       Descanso Curto + tela de escolha de círculos com orçamento.
 - [x] Entrega 5 — Adepto de Ritual (nv.1): seção nova na aba Magias,
       conjuração livre de magia Ritual do Livro não preparada.
-- [ ] Entrega 6 — Maestria de Magias (nv.18): passo de Level Up +
-      conjuração grátis no círculo mais baixo + troca no Descanso
-      Longo (mesma tela reaberta).
+- [x] Entrega 6a — Maestria de Magias (nv.18), escolha + conjuração
+      grátis: passo de Level Up (escolhe 1 magia de 1º + 1 de 2º
+      círculo com tempo de Ação do Livro de Magias), seção "sempre
+      preparada" na aba Magias, e opção "Conjurar Grátis" (no lugar
+      dos pips) na tela "Em qual círculo?" — vale pra Magias E
+      Combate, reaproveitando `opcoesGastoComPonte`/`EscolherCirculoShell`.
+- [ ] Entrega 6b — Maestria de Magias, troca no Descanso Longo:
+      pergunta condicional (mesmo padrão de "redefinir Magias
+      Preparadas"/Recuperação Arcana) + tela pra substituir 1 das 2
+      escolhidas por outra do mesmo círculo no Livro de Magias.
 - [ ] Entrega 7 — Assinatura Mágica (nv.20): passo de Level Up +
       conjuração grátis 1x por descanso (2 flags).
 - [ ] Entrega 8 — Fechamento: testes/tsc/build,

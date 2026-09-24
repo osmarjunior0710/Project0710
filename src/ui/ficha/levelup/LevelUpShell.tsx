@@ -40,6 +40,7 @@ import {
 } from '../../../core/invocacoesMisticas';
 import { circulosArcanaMisticaDesbloqueados, magiasElegiveisArcanaMistica, trocasArcanaMistica } from '../../../core/arcanaMistica';
 import { magiasPeritoNecromanciaNesteNivel, catalogoPeritoNecromancia } from '../../../core/necromante';
+import { magiasElegiveisMaestria } from '../../../core/maestriaDeMagias';
 import { iconesMagia } from '../../../core/classificarMagia';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TextoComMagias from '../../components/TextoComMagias';
@@ -154,6 +155,10 @@ interface LevelUpShellProps {
      * `null` = passo não apareceu (já tinha sido escolhida antes, ou
      * personagem não é Mago nível 2+). */
     academicoPericiaEscolhida: string | null;
+    /** Maestria de Magias (Mago, nível 18) — `{1: nomeMagia, 2: nomeMagia}`
+     * escolhidas NESTE level-up. `null` = passo não apareceu (já tinha
+     * sido escolhida antes, ou personagem não é Mago nível 18+). */
+    maestriaDeMagiasEscolhida: Record<number, string> | null;
   }) => void;
   /** Controlado pelo `FichaShell` (persistido junto com o resto do
    * progresso) em vez de estado local — uma vez rolado o dado de
@@ -193,6 +198,10 @@ interface LevelUpShellProps {
    * magia já escolhida pra ele. Só a escolha inicial é feita aqui
    * (trocar depois fica pra outra entrega, ver PENDENCIAS.md). */
   arcanaMisticaAtuais: Record<number, string>;
+  /** Maestria de Magias (Mago, nível 18) — `{1: nomeMagia, 2: nomeMagia}`,
+   * `{}` = ainda não escolhida. Só a escolha inicial é feita aqui —
+   * trocar no Descanso Longo fica pra Entrega 6b (ver SDD do Mago). */
+  maestriaDeMagiasAtuais: Record<number, string>;
   /** Talento "Iniciado em Magia" pego pela Origem (Acólito/Guia/Sábio)
    * — `null` quando o personagem não tem esse talento por essa fonte.
    * Regra real (Cap. 5, p.201, "Substituição de Magia"): a cada
@@ -282,6 +291,7 @@ type LuStep =
   | 'dadivaEpica'
   | 'arcanaMistica'
   | 'iniciadoEmMagia'
+  | 'maestriaDeMagias'
   | 'resumo';
 type FaseDramatica = 'idle' | 'rolando' | 'resultado';
 
@@ -306,6 +316,7 @@ export default function LevelUpShell({
   invocacoesMisticasAtuais,
   invocacoesTruqueVinculadoAtuais,
   arcanaMisticaAtuais,
+  maestriaDeMagiasAtuais,
   magiaIniciadaOrigemAtual,
   magiaIniciadaEspecieAtual,
   periciasEspecialistaAtuais,
@@ -586,6 +597,8 @@ export default function LevelUpShell({
   // filtrar quem já tem).
   const ACADEMICO_PERICIAS = ['Arcanismo', 'História', 'Investigação', 'Medicina', 'Natureza', 'Religião'];
   const [academicoEscolhida, setAcademicoEscolhida] = useState<string | null>(null);
+  const [maestriaCirculo1Escolhida, setMaestriaCirculo1Escolhida] = useState<string | null>(null);
+  const [maestriaCirculo2Escolhida, setMaestriaCirculo2Escolhida] = useState<string | null>(null);
 
   const luSteps: LuStep[] = ['pv'];
   // Só entra na sequência se sobrar pelo menos 1 subclasse IMPLEMENTADA
@@ -626,6 +639,14 @@ export default function LevelUpShell({
     !academicoPericiaAtual
   ) {
     luSteps.push('academico');
+  }
+  // Maestria de Magias (Mago, nível 18) — escolha única inicial, mesmo
+  // padrão de Acadêmico acima. Trocar no Descanso Longo é a Entrega 6b.
+  if (
+    caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.maestriaDeMagias, novoNivel) !== null &&
+    Object.keys(maestriaDeMagiasAtuais).length === 0
+  ) {
+    luSteps.push('maestriaDeMagias');
   }
   if (temEstiloDeLutaTrocavel(classe, novoNivel)) luSteps.push('estiloDeLuta');
   // Diferente de Truques/Invocações (sempre no array quando a classe
@@ -718,6 +739,10 @@ export default function LevelUpShell({
   if (luSteps.includes('academico')) {
     nomesComTelaPropria.add('Acadêmico');
     deltasDoNivel.push({ label: 'Acadêmico', texto: 'escolha pendente' });
+  }
+  if (luSteps.includes('maestriaDeMagias')) {
+    nomesComTelaPropria.add('Maestria de Magias');
+    deltasDoNivel.push({ label: 'Maestria de Magias', texto: 'escolha pendente' });
   }
   if (luSteps.includes('estiloDeLuta')) {
     nomesComTelaPropria.add('Estilo de Luta');
@@ -884,6 +909,14 @@ export default function LevelUpShell({
   );
   const peritoNecromanciaValido = peritoNecromanciaEscolhidas.length === magiasPeritoNecromanciaBonusNesteNivel;
 
+  // Maestria de Magias — pool vem do Livro de Magias JÁ com o que foi
+  // escolhido neste mesmo level-up (`livroDeMagiasEscolhido`), não só
+  // o que já existia antes.
+  const livroDeMagiasComoObjetos = magiasDaClasse(classe.nome).filter((m) => livroDeMagiasEscolhido.includes(m.nome));
+  const poolMaestriaCirculo1 = magiasElegiveisMaestria(livroDeMagiasComoObjetos, 1);
+  const poolMaestriaCirculo2 = magiasElegiveisMaestria(livroDeMagiasComoObjetos, 2);
+  const maestriaDeMagiasValido = maestriaCirculo1Escolhida !== null && maestriaCirculo2Escolhida !== null;
+
   const invocacoesValido = invocacoesEscolhidas.length === maxInvocacoes && trocasDeInvocacao <= 1;
 
   const descobertasMagicasValido =
@@ -987,6 +1020,7 @@ export default function LevelUpShell({
     dadivaEpica: 'Dádiva Épica',
     arcanaMistica: 'Arcana Mística',
     iniciadoEmMagia: 'Iniciado em Magia',
+    maestriaDeMagias: 'Maestria de Magias',
     resumo: 'Resumo',
   };
 
@@ -1027,6 +1061,10 @@ export default function LevelUpShell({
     }
     if (step === 'academico' && academicoEscolhida === null) {
       setAviso('Escolha a perícia do Acadêmico antes de avançar.');
+      return;
+    }
+    if (step === 'maestriaDeMagias' && !maestriaDeMagiasValido) {
+      setAviso('Escolha 1 magia de 1º círculo e 1 de 2º círculo antes de avançar.');
       return;
     }
     if (step === 'maestriaArmaCrescimento' && maestriaArmaEscolhida.length < maxMaestriaArma) {
@@ -1193,6 +1231,10 @@ export default function LevelUpShell({
         periciaRestritaTalentoEscolhida: luSteps.includes('periciaRestritaTalento') ? periciaRestritaEscolhida : null,
         conhecimentoPrimordialPericiaEscolhida: luSteps.includes('conhecimentoPrimordial') ? conhecimentoPrimordialEscolhida : null,
         academicoPericiaEscolhida: luSteps.includes('academico') ? academicoEscolhida : null,
+        maestriaDeMagiasEscolhida:
+          luSteps.includes('maestriaDeMagias') && maestriaDeMagiasValido
+            ? { 1: maestriaCirculo1Escolhida!, 2: maestriaCirculo2Escolhida! }
+            : null,
       });
       return;
     }
@@ -1863,6 +1905,40 @@ export default function LevelUpShell({
           </>
         )}
 
+        {step === 'maestriaDeMagias' && (
+          <>
+            <div className="section-title">Maestria de Magias — escolha 1 de cada círculo</div>
+            <div className="label" style={{ marginBottom: 8 }}>
+              As 2 escolhidas ficam sempre preparadas e conjuram no círculo delas sem gastar Espaço — só magias com
+              tempo de conjuração de uma Ação, do seu Livro de Magias.
+            </div>
+            <div className={styles.subHeader}>1º círculo</div>
+            {poolMaestriaCirculo1.map((m) => (
+              <div
+                key={m.id}
+                className={`opt-card ${maestriaCirculo1Escolhida === m.nome ? 'selected' : ''}`}
+                onClick={() => setMaestriaCirculo1Escolhida(m.nome)}
+              >
+                <div className="opt-card-name">
+                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                </div>
+              </div>
+            ))}
+            <div className={styles.subHeader}>2º círculo</div>
+            {poolMaestriaCirculo2.map((m) => (
+              <div
+                key={m.id}
+                className={`opt-card ${maestriaCirculo2Escolhida === m.nome ? 'selected' : ''}`}
+                onClick={() => setMaestriaCirculo2Escolhida(m.nome)}
+              >
+                <div className="opt-card-name">
+                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
         {step === 'especialista' && (
           <>
             <div className="section-title">
@@ -2350,6 +2426,14 @@ export default function LevelUpShell({
               <div className="summary-row">
                 <span>Acadêmico</span>
                 <span>{academicoEscolhida ?? 'nenhuma escolhida'}</span>
+              </div>
+            )}
+            {luSteps.includes('maestriaDeMagias') && (
+              <div className="summary-row">
+                <span>Maestria de Magias</span>
+                <span>
+                  {maestriaCirculo1Escolhida ?? '—'} / {maestriaCirculo2Escolhida ?? '—'}
+                </span>
               </div>
             )}
             {luSteps.includes('arcanaMistica') && (
