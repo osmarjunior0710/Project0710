@@ -2,6 +2,7 @@ import { createPortal } from 'react-dom';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { agruparMagiasPorCirculo, circulosDisponiveisParaConjurar, type EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
+import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import { iconesMagia } from '../../../core/classificarMagia';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import GrupoMagiaColapsavel from '../../components/GrupoMagiaColapsavel';
@@ -19,6 +20,10 @@ interface SelecionarMagiaShellProps {
    * continua disponível mesmo sem Espaço real sobrando naquele
    * círculo (ver `EscolherCirculoShell`). `{}` pra quem não tem. */
   maestriaDeMagiasAtuais: Record<number, string>;
+  /** Assinatura Mágica (Mago, nível 20) — mesmo tratamento acima, mas
+   * limitado a 1x por magia até o próximo Descanso. */
+  assinaturaMagicaAtuais: string[];
+  assinaturaMagicaGastas: string[];
   onFechar: () => void;
   onEscolherTruque: (m: Magia) => void;
   onEscolherMagia: (m: Magia, circulosDisponiveis: number[]) => void;
@@ -39,6 +44,8 @@ export default function SelecionarMagiaShell({
   espacos,
   espacosGastosPorCirculo,
   maestriaDeMagiasAtuais,
+  assinaturaMagicaAtuais,
+  assinaturaMagicaGastas,
   onFechar,
   onEscolherTruque,
   onEscolherMagia,
@@ -60,7 +67,10 @@ export default function SelecionarMagiaShell({
               {(m) => {
                 const truque = m.circulo === 0;
                 const circulosDisponiveis = truque ? [] : circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo);
-                const circuloGratis = truque ? null : circuloGratisMaestria(m.nome, maestriaDeMagiasAtuais);
+                const circuloGratis = truque
+                  ? null
+                  : (circuloGratisMaestria(m.nome, maestriaDeMagiasAtuais) ??
+                    circuloGratisAssinatura(m.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas));
                 const disponivel = truque || circulosDisponiveis.length > 0 || circuloGratis !== null;
                 return (
                   <div

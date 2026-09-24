@@ -45,6 +45,12 @@ export const ID_CARACTERISTICA_CLASSE = {
    * conjuram no círculo mais baixo sem gastar Espaço. Ver
    * `LevelUpShell.tsx` passo `maestriaDeMagias`, `core/maestriaDeMagias.ts`. */
   maestriaDeMagias: 'Maestria de Magias',
+  /** Mago nível 20 — escolhe 2 magias de 3º círculo do Livro de Magias
+   * (permanente, sem regra de troca); ficam sempre preparadas e cada
+   * uma pode ser conjurada 1x no 3º círculo sem gastar Espaço,
+   * recarregando em Descanso Curto OU Longo. Ver `LevelUpShell.tsx`
+   * passo `assinaturaMagica`, `core/assinaturaMagica.ts`. */
+  assinaturaMagica: 'Assinatura Mágica',
   /** Bárbaro nível 7 — Vantagem em jogadas de Iniciativa. Ver
    * `CombatTab.tsx` (`alternarIniciativa`). */
   instintosPrimitivos: 'Instintos Primitivos',

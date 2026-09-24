@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0124
+
+**Mago — Assinatura Mágica (nível 20).** No Level Up do nível 20, escolhe 2 magias de 3º círculo do Livro de Magias — as 2 ficam sempre preparadas (nova seção na aba Magias) e cada uma pode ser conjurada 1x no 3º círculo sem gastar Espaço de Magia (recarrega no próximo Descanso Curto ou Longo). Vale também na aba Combate: ao "Usar Magia" uma dessas 2 (enquanto ainda não usada no período), a tela "Em qual círculo?" mostra "Conjurar Grátis" no 3º círculo.
+
 ## v202609_2321
 
 **Mago — Maestria de Magias, trocar no Descanso Longo.** Ao completar um Descanso Longo (se você já tem as 2 magias de Maestria escolhidas), depois da pergunta de redefinir Magias Preparadas aparece "Quer estudar seu Livro de Magias e trocar 1 das magias de Maestria?" — respondendo "Sim", abre uma tela pra substituir 1 das 2 (1º ou 2º círculo) por outra elegível do mesmo círculo do seu Livro de Magias.

@@ -44,7 +44,7 @@ uma auditoria completa da classe base a pedido do Osmar.
       pergunta condicional (mesmo padrão de "redefinir Magias
       Preparadas"/Recuperação Arcana) + tela pra substituir 1 das 2
       escolhidas por outra do mesmo círculo no Livro de Magias.
-- [ ] Entrega 7 — Assinatura Mágica (nv.20): passo de Level Up +
+- [x] Entrega 7 — Assinatura Mágica (nv.20): passo de Level Up +
       conjuração grátis 1x por descanso (2 flags).
 - [ ] Entrega 8 — Fechamento: testes/tsc/build,
       `aprendizados/classes/mago.md` (criar), nota no PENDENCIAS.md

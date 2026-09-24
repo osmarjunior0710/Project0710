@@ -198,6 +198,14 @@ export interface PersonagemSalvo {
    * escolhida no Level Up, trocável no Descanso Longo (ver
    * `core/maestriaDeMagias.ts`). */
   maestriaDeMagiasAtual?: Record<number, string>;
+  /** Assinatura Mágica (Mago, nível 20) — as 2 magias de 3º círculo
+   * escolhidas no Level Up (permanente, sem troca — ver
+   * `core/assinaturaMagica.ts`). */
+  assinaturaMagicaAtual?: string[];
+  /** Quais das 2 magias de Assinatura já conjuraram de graça neste
+   * período — zera em Descanso Curto E Longo (diferente de
+   * `maestriaDeMagiasAtual`, que é ilimitada). */
+  assinaturaMagicaGastasAtual?: string[];
   /** IDs de Invocações Místicas cuja magia de graça (`recarga:
    * 'descansoLongo'`, ex: Presente das Profundezas) já foi usada desde
    * o último Descanso Longo — cada uma trava até lá. Invocações

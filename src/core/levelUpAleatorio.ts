@@ -43,6 +43,7 @@ import {
 } from './invocacoesMisticas';
 import { circulosArcanaMisticaDesbloqueados, magiasElegiveisArcanaMistica } from './arcanaMistica';
 import { magiasElegiveisMaestria } from './maestriaDeMagias';
+import { magiasElegiveisAssinatura } from './assinaturaMagica';
 import { embaralhar, sorteiaUm } from './sorteio';
 import { talentoDisponivel, sortearAsiDoTalento } from './geradorPersonagemTeste';
 
@@ -85,6 +86,9 @@ export interface ParamsLevelUpRapido {
   /** Mago nível 18 — Maestria de Magias já escolhida (`{}` se ainda
    * não escolheu). Ver `LevelUpShell.tsx`/`core/maestriaDeMagias.ts`. */
   maestriaDeMagiasAtuais: Record<number, string>;
+  /** Mago nível 20 — Assinatura Mágica já escolhida (`[]` se ainda não
+   * escolheu). Ver `LevelUpShell.tsx`/`core/assinaturaMagica.ts`. */
+  assinaturaMagicaAtuais: string[];
 }
 
 export interface ResultadoLevelUpRapido {
@@ -148,6 +152,10 @@ export interface ResultadoLevelUpRapido {
    * círculo + 1 de 2º, dentro do Livro de Magias já com este nível),
    * mesmo espírito de Acadêmico acima. */
   maestriaDeMagiasEscolhida: Record<number, string> | null;
+  /** Mago nível 20 — Assinatura Mágica. Sorteada de verdade (2 de 3º
+   * círculo, dentro do Livro de Magias já com este nível), mesmo
+   * espírito de Maestria de Magias acima. */
+  assinaturaMagicaEscolhida: string[] | null;
 }
 
 /** Escolhe Invocações Místicas respeitando pré-requisito (uma pode
@@ -266,6 +274,19 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     const circulo1 = sorteiaUm(magiasElegiveisMaestria(livroComoObjetos, 1));
     const circulo2 = sorteiaUm(magiasElegiveisMaestria(livroComoObjetos, 2));
     if (circulo1 && circulo2) maestriaDeMagiasEscolhida = { 1: circulo1.nome, 2: circulo2.nome };
+  }
+
+  // Assinatura Mágica (Mago, nível 20) — mesma pool do Level Up de
+  // verdade, já com o livro deste nível.
+  let assinaturaMagicaEscolhida: string[] | null = null;
+  if (
+    caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.assinaturaMagica, novoNivel) !== null &&
+    params.assinaturaMagicaAtuais.length === 0
+  ) {
+    const livroFinal = livroDeMagiasEscolhidas ?? params.livroDeMagiasAtuais;
+    const livroComoObjetos = magiasDaClasse(classe.nome).filter((m) => livroFinal.includes(m.nome));
+    const sorteadas = embaralhar(magiasElegiveisAssinatura(livroComoObjetos)).slice(0, 2);
+    if (sorteadas.length === 2) assinaturaMagicaEscolhida = sorteadas.map((m) => m.nome);
   }
 
   const maxMagiasPreparadas = valorRecursoClasse(classe, 'Magias Preparadas', novoNivel);
@@ -399,5 +420,6 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     conhecimentoPrimordialPericiaEscolhida,
     academicoPericiaEscolhida,
     maestriaDeMagiasEscolhida,
+    assinaturaMagicaEscolhida,
   };
 }

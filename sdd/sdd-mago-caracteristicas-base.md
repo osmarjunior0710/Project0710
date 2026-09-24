@@ -298,6 +298,7 @@ na lista original.
    ✅ Feito (`v202609_2321`).
 7. **Entrega 7 — Assinatura Mágica** (nv.20): passo de Level Up +
    conjuração grátis 1x por descanso (2 flags).
+   ✅ Feito (`v202609_0124`).
 8. **Entrega 8 — Fechamento:** testes/tsc/build,
    `aprendizados/classes/mago.md` (criar), nota no `PENDENCIAS.md`
    propondo repetir o "Guia do Level Up" (Entrega 2) nas outras 9

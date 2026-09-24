@@ -91,6 +91,8 @@ export function useMagiasEConjuracao(input: {
   arcanaMisticaAtuais: Record<number, string>;
   /** Maestria de Magias (Mago, nível 18) — `{1: nomeMagia, 2: nomeMagia}`. */
   maestriaDeMagiasAtuais: Record<number, string>;
+  /** Assinatura Mágica (Mago, nível 20) — as 2 magias escolhidas. */
+  assinaturaMagicaAtuais: string[];
   escolhaMagiaTalentoGeral: Record<string, string[]>;
   magiasGratisGastas: string[];
   nivelTotalAtual: number;
@@ -119,6 +121,7 @@ export function useMagiasEConjuracao(input: {
     atributos,
     arcanaMisticaAtuais,
     maestriaDeMagiasAtuais,
+    assinaturaMagicaAtuais,
     escolhaMagiaTalentoGeral,
     magiasGratisGastas,
     nivelTotalAtual,
@@ -188,6 +191,12 @@ export function useMagiasEConjuracao(input: {
     ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.maestriaDeMagias, personagem.nivel) !== null
     : false;
   const magiasMaestriaDoLivro = Object.values(maestriaDeMagiasAtuais)
+    .map((nomeMagia) => magias.find((m) => m.nome === nomeMagia))
+    .filter((m): m is Magia => m !== undefined);
+  const assinaturaMagicaDisponivel = classe
+    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.assinaturaMagica, personagem.nivel) !== null
+    : false;
+  const magiasAssinaturaDoLivro = assinaturaMagicaAtuais
     .map((nomeMagia) => magias.find((m) => m.nome === nomeMagia))
     .filter((m): m is Magia => m !== undefined);
   const mestreMisticoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Mestre Místico', personagem.nivel) !== null : false;
@@ -293,6 +302,8 @@ export function useMagiasEConjuracao(input: {
     magiasRituaisDoLivro,
     maestriaDeMagiasDisponivel,
     magiasMaestriaDoLivro,
+    assinaturaMagicaDisponivel,
+    magiasAssinaturaDoLivro,
     usaRedefPorDescanso,
     magiasGratisConcedidas,
     formasFamiliarElegiveis,
