@@ -19,6 +19,7 @@ import {
   marcarClasseDasEscolhas,
   normalizarMagiasConhecidas,
   magiasConhecidasComClasse,
+  agruparMagiasComClassePorCirculo,
 } from './magiasPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { magias, magiasDaClasse } from '../data/rulesets/dnd2024/magias';
@@ -119,6 +120,32 @@ describe('magiasConhecidasComClasse', () => {
 
   it('lista vazia devolve lista vazia', () => {
     expect(magiasConhecidasComClasse([])).toEqual([]);
+  });
+});
+
+describe('agruparMagiasComClassePorCirculo', () => {
+  it('agrupa por círculo (do maior pro menor), preservando a classe de cada item', () => {
+    const grupos = agruparMagiasComClassePorCirculo([
+      { magia: magiaFixture('Bola de Fogo'), classe: 'Mago' },
+      { magia: magiaFixture('Zombaria Perversa'), classe: 'Bardo' },
+      { magia: magiaFixture('Detectar Magia'), classe: null },
+    ]);
+    expect(grupos.map((g) => g.circulo)).toEqual([3, 1, 0]);
+    expect(grupos[2].itens).toEqual([{ magia: magiaFixture('Zombaria Perversa'), classe: 'Bardo' }]);
+    expect(grupos[1].itens).toEqual([{ magia: magiaFixture('Detectar Magia'), classe: null }]);
+  });
+
+  it('NUNCA deduplica — mesma magia com 2 classes vira 2 itens no mesmo grupo', () => {
+    const grupos = agruparMagiasComClassePorCirculo([
+      { magia: magiaFixture('Amigos'), classe: 'Bardo' },
+      { magia: magiaFixture('Amigos'), classe: 'Bruxo' },
+    ]);
+    expect(grupos).toHaveLength(1);
+    expect(grupos[0].itens).toHaveLength(2);
+  });
+
+  it('lista vazia devolve lista de grupos vazia', () => {
+    expect(agruparMagiasComClassePorCirculo([])).toEqual([]);
   });
 });
 

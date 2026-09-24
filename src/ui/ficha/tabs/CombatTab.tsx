@@ -7,7 +7,7 @@ import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
-import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
+import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
@@ -287,11 +287,11 @@ interface CombatTabProps {
   /** Truques/Magias Preparadas já roteados por Tempo de Conjuração
    * (Ação/Ação Bônus/Reação) — ver `useMagiasEConjuracao.ts`. Cada
    * painel do Combate só recebe a lista do seu próprio tipo. */
-  truquesAcao: Magia[];
-  truquesBonus: Magia[];
-  magiasPreparadasAcao: Magia[];
-  magiasPreparadasBonus: Magia[];
-  magiasPreparadasReacao: Magia[];
+  truquesAcao: MagiaComClasseOpcional[];
+  truquesBonus: MagiaComClasseOpcional[];
+  magiasPreparadasAcao: MagiaComClasseOpcional[];
+  magiasPreparadasBonus: MagiaComClasseOpcional[];
+  magiasPreparadasReacao: MagiaComClasseOpcional[];
   /** Maestria de Magias (Mago, nível 18) — `{1: nomeMagia, 2: nomeMagia}`,
    * `{}` pra quem não tem a característica. Vale pros painéis de Ação
    * e Ação Bônus (não filtrado por tipo, é só consulta). */

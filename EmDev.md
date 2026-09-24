@@ -75,9 +75,17 @@ vez, Perfil passa a agrupar por classe também.
       (azul-claro, já registrada em `corRecursoClasse.ts` desde os
       protótipos). Testado com personagem migrado (Mago/Bardo,
       formato antigo) e o multiclasse (Bardo/Bruxo, formato novo).
-- [ ] Entrega 3 — Seletor de magia em Combate (Ação/Bônus/Reação) e o
-      "conjurar" da aba Magias oferecem as magias das 2 classes
-      juntas.
+- [x] Entrega 3 — Seletor de magia em Combate (Ação/Bônus/Reação)
+      oferece as magias das 2 classes juntas, com o mesmo
+      `PillClasse`. Achado importante testando: a DISPONIBILIDADE já
+      estava certa desde a Entrega 1 (o hook já recebia a lista
+      combinada das classes) — só faltava mesmo o selo/pill e a `key`
+      correta (`agruparMagiasComClassePorCirculo`,
+      `GrupoMagiaColapsavel` virou genérico). Gasto de espaço
+      (combinado/ponte) não mudou, não fazia parte do escopo.
+      Testado: "Usar Magia" no painel de Ação mostra Bardo+Bruxo
+      juntos, inclusive "Amigos" (conhecido pelas 2) sem quebrar;
+      conjurar funciona normal.
 - [ ] Entrega 4 — Corrige `deficitTruques`/`deficitMagiasPreparadas`
       pra multiclasse (compara por classe, usando a marca nova).
 - [ ] Entrega 5 — Remove o pill: `classeAtivaNome` sai de

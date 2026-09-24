@@ -4,7 +4,7 @@ import type { Pet } from '../../../core/pets';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { AcaoBase } from '../../../data/exampleCombat';
-import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
+import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
@@ -122,8 +122,8 @@ interface BonusPanelContentProps {
   /** Truques/Magias Preparadas com Tempo de Conjuração "Ação Bônus" —
    * já filtrados em `useMagiasEConjuracao.ts` (`ehMagiaDeAcaoBonus`).
    * Poucos no catálogo hoje (Danação, Palavra Curativa, etc.). */
-  truques: Magia[];
-  magiasPreparadas: Magia[];
+  truques: MagiaComClasseOpcional[];
+  magiasPreparadas: MagiaComClasseOpcional[];
   /** Maestria de Magias (Mago, nível 18) — ver `useUsarMagiaPainel.tsx`. */
   maestriaDeMagiasAtuais: Record<number, string>;
   espacos: EspacoDeMagiaAtivo[];

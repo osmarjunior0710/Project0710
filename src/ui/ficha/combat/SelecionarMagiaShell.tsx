@@ -1,18 +1,27 @@
 import { createPortal } from 'react-dom';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
-import { agruparMagiasPorCirculo, circulosDisponiveisParaConjurar, type EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
+import {
+  agruparMagiasComClassePorCirculo,
+  circulosDisponiveisParaConjurar,
+  type EspacoDeMagiaAtivo,
+  type MagiaComClasseOpcional,
+} from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { iconesMagia } from '../../../core/classificarMagia';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import GrupoMagiaColapsavel from '../../components/GrupoMagiaColapsavel';
+import PillClasse from '../../components/PillClasse';
 import TickPips from '../../components/TickPips';
 import styles from '../levelup/LevelUpShell.module.css';
 import localStyles from './SelecionarMagiaShell.module.css';
 
 interface SelecionarMagiaShellProps {
   titulo: string;
-  truques: Magia[];
-  magiasPreparadas: Magia[];
+  /** Marcadas com a classe que concedeu (multiclasse) — `classe: null`
+   * pras listas fixas de 1 classe só (Descobertas Mágicas etc.), sem
+   * pill nesse caso. Ver `sdd/sdd-multiclasse-truques-magias.md`. */
+  truques: MagiaComClasseOpcional[];
+  magiasPreparadas: MagiaComClasseOpcional[];
   espacos: EspacoDeMagiaAtivo[];
   espacosGastosPorCirculo: Record<number, number>;
   /** Maestria de Magias (Mago, nível 18) — magia com círculo grátis
@@ -43,7 +52,7 @@ export default function SelecionarMagiaShell({
   onEscolherTruque,
   onEscolherMagia,
 }: SelecionarMagiaShellProps) {
-  const grupos = agruparMagiasPorCirculo([...truques, ...magiasPreparadas]);
+  const grupos = agruparMagiasComClassePorCirculo([...truques, ...magiasPreparadas]);
 
   return (
     <div className={styles.screen}>
@@ -56,21 +65,22 @@ export default function SelecionarMagiaShell({
       <div className={styles.body}>
         <div className={localStyles.listCol}>
           {grupos.map((grupo) => (
-            <GrupoMagiaColapsavel key={grupo.circulo} label={grupo.label} magias={grupo.magias}>
-              {(m) => {
+            <GrupoMagiaColapsavel key={grupo.circulo} label={grupo.label} magias={grupo.itens}>
+              {({ magia: m, classe }) => {
                 const truque = m.circulo === 0;
                 const circulosDisponiveis = truque ? [] : circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo);
                 const circuloGratis = truque ? null : circuloGratisMaestria(m.nome, maestriaDeMagiasAtuais);
                 const disponivel = truque || circulosDisponiveis.length > 0 || circuloGratis !== null;
                 return (
                   <div
-                    key={m.id}
+                    key={`${m.id}-${classe ?? 'x'}`}
                     className="check-row"
                     style={disponivel ? undefined : { opacity: 0.45, pointerEvents: 'none' }}
                     onClick={() => (truque ? onEscolherTruque(m) : onEscolherMagia(m, circulosDisponiveis))}
                   >
                     <span className="check-label">
                       <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                      {classe && <PillClasse classe={classe} />}
                       {!disponivel && (
                         <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · sem espaço disponível</span>
                       )}

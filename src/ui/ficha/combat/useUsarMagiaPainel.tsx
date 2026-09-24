@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
-import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte } from '../../../core/magiasPersonagem';
+import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte, type MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
@@ -33,8 +33,8 @@ interface UsarMagiaPainelParams {
   espacosGastosPorCirculo: Record<number, number>;
   classeAtivaNome: string;
   ponte: PoolDePonte | null;
-  truques: Magia[];
-  magiasPreparadas: Magia[];
+  truques: MagiaComClasseOpcional[];
+  magiasPreparadas: MagiaComClasseOpcional[];
   modAcertoConjuracao: number | null;
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */

@@ -46,13 +46,16 @@ import {
   espacosDeMagiaAtivos,
   ehMagiaDeReacao,
   ehMagiaDeAcaoBonus,
-  truquesDoPersonagem,
   magiasPreparadasDoPersonagem,
+  magiasConhecidasComClasse,
+  nomesDeMagiasConhecidas,
   deficitTruques,
   deficitMagiasPreparadas,
   usaRedefinicaoPorDescanso,
   espacosCombinadosComoAtivos,
   type PoolDePonte,
+  type MagiaConhecida,
+  type MagiaComClasseOpcional,
 } from '../../../core/magiasPersonagem';
 
 /** Nome do "Falar com Animais" concedido pelo Gnomo do Bosque — ver
@@ -80,8 +83,10 @@ export function useMagiasEConjuracao(input: {
   espacosGastosPorClasseECirculo: Record<string, Record<number, number>>;
   espacosGastosPorCirculo: Record<number, number>;
   talentosEfetivos: string[];
-  truquesAtuais: string[];
-  magiasPreparadasAtuais: string[];
+  /** Marcados com a classe que concedeu (multiclasse) — ver
+   * `sdd/sdd-multiclasse-truques-magias.md`. */
+  truquesAtuais: MagiaConhecida[];
+  magiasPreparadasAtuais: MagiaConhecida[];
   magiasDescobertasMagicasAtuais: string[];
   livroDasSombrasAtuais: string[];
   livroDeMagiasAtuais: string[];
@@ -159,14 +164,23 @@ export function useMagiasEConjuracao(input: {
       )
     : espacos;
   const espacosGastosParaConjurar = emConjuracaoCombinada ? (espacosGastosPorClasseECirculo['combinado'] ?? {}) : espacosGastosPorCirculo;
-  const truques = truquesDoPersonagem(truquesAtuais);
-  const magiasPreparadas = magiasPreparadasDoPersonagem(magiasPreparadasAtuais);
+  // Pareado com a classe (multiclasse) — o seletor de magia em
+  // Combate mostra o selo (`PillClasse`) nesses 2, ver
+  // `sdd/sdd-multiclasse-truques-magias.md`. As listas fixas abaixo
+  // (Descobertas Mágicas etc.) são sempre de 1 classe só — entram
+  // como `classe: null` (sem pill) quando forem juntadas a estas.
+  const truquesComClasse = magiasConhecidasComClasse(truquesAtuais);
+  const preparadasComClasse = magiasConhecidasComClasse(magiasPreparadasAtuais);
+  const truques = truquesComClasse.map((t) => t.magia);
+  const magiasPreparadas = preparadasComClasse.map((t) => t.magia);
   const magiasDescobertasMagicas = magiasPreparadasDoPersonagem(magiasDescobertasMagicasAtuais);
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
   const memorizarMagiaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Memorizar Magia', personagem.nivel) !== null : false;
   const livroDeMagias = magiasPreparadasDoPersonagem(livroDeMagiasAtuais);
   const adeptoDeRitualDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Adepto de Ritual', personagem.nivel) !== null : false;
-  const magiasRituaisDoLivro = adeptoDeRitualDisponivel ? magiasRituaisElegiveis(livroDeMagias, magiasPreparadasAtuais) : [];
+  const magiasRituaisDoLivro = adeptoDeRitualDisponivel
+    ? magiasRituaisElegiveis(livroDeMagias, nomesDeMagiasConhecidas(magiasPreparadasAtuais))
+    : [];
   const usaRedefPorDescanso = usaRedefinicaoPorDescanso(classe);
   const magiasGratisConcedidas = magiasGratisDasInvocacoes(invocacoesMisticasAtuais);
   const formasFamiliarElegiveis = formasFamiliarDasInvocacoes(invocacoesMisticasAtuais);
@@ -197,8 +211,11 @@ export function useMagiasEConjuracao(input: {
     ? espacosARecuperar(espacoPactoAtual.maximo, espacosGastosPacto, mestreMisticoDisponivel)
     : 0;
   const sentidos = calcularSentidos(selecao.especie, invocacoesMisticasAtuais, selecao.subescolhaEspecieEscolhida);
-  const faltamTruques = deficitTruques(classe, personagem.nivel, truquesAtuais);
-  const faltamMagiasPreparadas = deficitMagiasPreparadas(classe, personagem.nivel, magiasPreparadasAtuais);
+  // Entrega 4 do foco de Multiclasse é que corrige esse déficit pra
+  // comparar por classe — por ora continua com o mesmo comportamento
+  // de antes (TOTAL das 2 classes contra a cota de 1 só).
+  const faltamTruques = deficitTruques(classe, personagem.nivel, nomesDeMagiasConhecidas(truquesAtuais));
+  const faltamMagiasPreparadas = deficitMagiasPreparadas(classe, personagem.nivel, nomesDeMagiasConhecidas(magiasPreparadasAtuais));
   // Descobertas Mágicas/Livro das Sombras contam como magia sempre
   // preparada (fora do limite normal) — entram no que dá pra conjurar
   // em combate, mas são arrays PRÓPRIOS separados, só unidos aqui pra
@@ -254,25 +271,28 @@ export function useMagiasEConjuracao(input: {
   const ritualRapidoGasto = magiasGratisGastas.includes(CHAVE_RITUAL_RAPIDO);
   const nomesAcoesBonusExtras = acoesConvertidasEmBonus(talentosEfetivos);
   const acoesGenericasBonus = acoesBase.filter((a) => nomesAcoesBonusExtras.includes(a.nome));
-  const magiasConjuraveis = [
-    ...magiasPreparadas,
-    ...magiasDescobertasMagicas,
-    ...livroDasSombras,
-    ...magiasPactoDoInferoPreparadas,
-    ...magiasEspeciePreparadasConjuraveis,
-    ...magiasTalentoOrigemPreparadas,
-    ...magiasTalentoGeralPreparadas,
+  // `null` = lista fixa de 1 classe só (sem ambiguidade de
+  // multiclasse pra marcar) — ver `MagiaComClasseOpcional`.
+  const semClasse = (m: Magia): MagiaComClasseOpcional => ({ magia: m, classe: null });
+  const magiasConjuraveis: MagiaComClasseOpcional[] = [
+    ...preparadasComClasse,
+    ...magiasDescobertasMagicas.map(semClasse),
+    ...livroDasSombras.map(semClasse),
+    ...magiasPactoDoInferoPreparadas.map(semClasse),
+    ...magiasEspeciePreparadasConjuraveis.map(semClasse),
+    ...magiasTalentoOrigemPreparadas.map(semClasse),
+    ...magiasTalentoGeralPreparadas.map(semClasse),
   ];
   // Roteia cada magia conjurável pro painel certo do Combate (Ação/
   // Ação Bônus/Reação), pelo próprio Tempo de Conjuração da magia —
   // Reação sempre checada primeiro (nenhuma magia é as 2 coisas ao
   // mesmo tempo). Truques passam pelo mesmo roteamento (poucos, mas
   // existem truques de Ação Bônus — ex.: Bordão Místico/Criar Chamas).
-  const magiasPreparadasReacao = magiasConjuraveis.filter(ehMagiaDeReacao);
-  const magiasPreparadasBonus = magiasConjuraveis.filter((m) => !ehMagiaDeReacao(m) && ehMagiaDeAcaoBonus(m));
-  const magiasPreparadasAcao = magiasConjuraveis.filter((m) => !ehMagiaDeReacao(m) && !ehMagiaDeAcaoBonus(m));
-  const truquesBonus = truques.filter(ehMagiaDeAcaoBonus);
-  const truquesAcao = truques.filter((m) => !ehMagiaDeAcaoBonus(m));
+  const magiasPreparadasReacao = magiasConjuraveis.filter((i) => ehMagiaDeReacao(i.magia));
+  const magiasPreparadasBonus = magiasConjuraveis.filter((i) => !ehMagiaDeReacao(i.magia) && ehMagiaDeAcaoBonus(i.magia));
+  const magiasPreparadasAcao = magiasConjuraveis.filter((i) => !ehMagiaDeReacao(i.magia) && !ehMagiaDeAcaoBonus(i.magia));
+  const truquesBonus = truquesComClasse.filter((i) => ehMagiaDeAcaoBonus(i.magia));
+  const truquesAcao = truquesComClasse.filter((i) => !ehMagiaDeAcaoBonus(i.magia));
 
   return {
     conjura,

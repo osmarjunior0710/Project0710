@@ -810,11 +810,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     espacosGastosPorClasseECirculo,
     espacosGastosPorCirculo,
     talentosEfetivos,
-    // `useMagiasEConjuracao` ainda só entende nome (Entrega 2 do foco
-    // de Multiclasse é que muda o que a aba Magias EXIBE) — passa só
-    // os nomes por ora, sem mudança visível ainda.
-    truquesAtuais: nomesDeMagiasConhecidas(truquesAtuais),
-    magiasPreparadasAtuais: nomesDeMagiasConhecidas(magiasPreparadasAtuais),
+    truquesAtuais,
+    magiasPreparadasAtuais,
     magiasDescobertasMagicasAtuais,
     livroDasSombrasAtuais,
     livroDeMagiasAtuais,

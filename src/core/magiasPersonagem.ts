@@ -409,6 +409,38 @@ export function agruparMagiasPorCirculo(magias: Magia[]): GrupoDeMagias[] {
     }));
 }
 
+/** Magia + a classe de quem a concedeu — `null` quando a magia vem de
+ * uma lista que só pode ter 1 dono (Descobertas Mágicas, Livro das
+ * Sombras, magia de espécie/talento etc.), sem ambiguidade de
+ * multiclasse pra marcar. Ver `sdd/sdd-multiclasse-truques-magias.md`
+ * ("seletor de magia em Combate"). */
+export interface MagiaComClasseOpcional {
+  magia: Magia;
+  classe: string | null;
+}
+
+/** Mesmo agrupamento de `agruparMagiasPorCirculo`, mas preservando a
+ * classe de cada item (ver `MagiaComClasseOpcional`) — usado no
+ * seletor de magia em Combate, que mistura Truques/Magias Preparadas
+ * (com classe, multiclasse) e listas fixas de 1 classe só (sem
+ * classe/pill). NUNCA deduplica — mesma razão de
+ * `magiasConhecidasComClasse`. */
+export function agruparMagiasComClassePorCirculo(itens: MagiaComClasseOpcional[]): { circulo: number; label: string; itens: MagiaComClasseOpcional[] }[] {
+  const porCirculo = new Map<number, MagiaComClasseOpcional[]>();
+  for (const item of itens) {
+    const lista = porCirculo.get(item.magia.circulo) ?? [];
+    lista.push(item);
+    porCirculo.set(item.magia.circulo, lista);
+  }
+  return [...porCirculo.entries()]
+    .sort(([a], [b]) => b - a)
+    .map(([circulo, lista]) => ({
+      circulo,
+      label: circulo === 0 ? 'Truques' : `${circulo}º Círculo`,
+      itens: [...lista].sort((a, b) => a.magia.nome.localeCompare(b.magia.nome, 'pt-BR')),
+    }));
+}
+
 /** Todas as magias marcadas com Tempo de Conjuração "Reação" começam
  * com esse texto na planilha (confirmado nas 4 ocorrências reais) —
  * heurística simples, mesmo padrão de `classificarMagia`. */
