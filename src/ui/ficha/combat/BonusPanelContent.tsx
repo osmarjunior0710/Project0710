@@ -124,6 +124,8 @@ interface BonusPanelContentProps {
    * Poucos no catálogo hoje (Danação, Palavra Curativa, etc.). */
   truques: Magia[];
   magiasPreparadas: Magia[];
+  /** Maestria de Magias (Mago, nível 18) — ver `useUsarMagiaPainel.tsx`. */
+  maestriaDeMagiasAtuais: Record<number, string>;
   espacos: EspacoDeMagiaAtivo[];
   espacosGastosPorCirculo: Record<number, number>;
   onGastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
@@ -212,6 +214,7 @@ export default function BonusPanelContent({
   conjura,
   truques,
   magiasPreparadas,
+  maestriaDeMagiasAtuais,
   espacos,
   espacosGastosPorCirculo,
   onGastarSlotCirculo,
@@ -244,6 +247,7 @@ export default function BonusPanelContent({
     ponte,
     truques,
     magiasPreparadas,
+    maestriaDeMagiasAtuais,
     modAcertoConjuracao,
     explicacaoAcertoConjuracao,
     truqueVinculadoAgonizante,

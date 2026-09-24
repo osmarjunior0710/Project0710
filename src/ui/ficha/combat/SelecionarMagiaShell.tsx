@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { agruparMagiasPorCirculo, circulosDisponiveisParaConjurar, type EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
+import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { iconesMagia } from '../../../core/classificarMagia';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import GrupoMagiaColapsavel from '../../components/GrupoMagiaColapsavel';
@@ -14,6 +15,10 @@ interface SelecionarMagiaShellProps {
   magiasPreparadas: Magia[];
   espacos: EspacoDeMagiaAtivo[];
   espacosGastosPorCirculo: Record<number, number>;
+  /** Maestria de Magias (Mago, nível 18) — magia com círculo grátis
+   * continua disponível mesmo sem Espaço real sobrando naquele
+   * círculo (ver `EscolherCirculoShell`). `{}` pra quem não tem. */
+  maestriaDeMagiasAtuais: Record<number, string>;
   onFechar: () => void;
   onEscolherTruque: (m: Magia) => void;
   onEscolherMagia: (m: Magia, circulosDisponiveis: number[]) => void;
@@ -33,6 +38,7 @@ export default function SelecionarMagiaShell({
   magiasPreparadas,
   espacos,
   espacosGastosPorCirculo,
+  maestriaDeMagiasAtuais,
   onFechar,
   onEscolherTruque,
   onEscolherMagia,
@@ -54,7 +60,8 @@ export default function SelecionarMagiaShell({
               {(m) => {
                 const truque = m.circulo === 0;
                 const circulosDisponiveis = truque ? [] : circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo);
-                const disponivel = truque || circulosDisponiveis.length > 0;
+                const circuloGratis = truque ? null : circuloGratisMaestria(m.nome, maestriaDeMagiasAtuais);
+                const disponivel = truque || circulosDisponiveis.length > 0 || circuloGratis !== null;
                 return (
                   <div
                     key={m.id}

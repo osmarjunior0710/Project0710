@@ -15,6 +15,7 @@ import {
 } from '../../../core/multiclasse';
 import { personagemConjura } from '../../../core/conjuracao';
 import { caracteristicaDesbloqueada } from '../../../core/levelUp';
+import { ID_CARACTERISTICA_CLASSE } from '../../../data/rulesets/dnd2024/idsCaracteristicasClasse';
 import { magiasRituaisElegiveis } from '../../../core/adeptoDeRitual';
 import { magiasGratisDasInvocacoes } from '../../../core/invocacoesMagiaGratis';
 import { formasFamiliarDasInvocacoes } from '../../../core/invocacoesFamiliar';
@@ -88,6 +89,8 @@ export function useMagiasEConjuracao(input: {
   pets: Pet[];
   atributos: AtributoFinal[];
   arcanaMisticaAtuais: Record<number, string>;
+  /** Maestria de Magias (Mago, nível 18) — `{1: nomeMagia, 2: nomeMagia}`. */
+  maestriaDeMagiasAtuais: Record<number, string>;
   escolhaMagiaTalentoGeral: Record<string, string[]>;
   magiasGratisGastas: string[];
   nivelTotalAtual: number;
@@ -115,6 +118,7 @@ export function useMagiasEConjuracao(input: {
     pets,
     atributos,
     arcanaMisticaAtuais,
+    maestriaDeMagiasAtuais,
     escolhaMagiaTalentoGeral,
     magiasGratisGastas,
     nivelTotalAtual,
@@ -180,6 +184,12 @@ export function useMagiasEConjuracao(input: {
     .map(([circulo, nomeMagia]) => ({ circulo: Number(circulo), magia: magias.find((m) => m.nome === nomeMagia) ?? null }))
     .filter((item): item is { circulo: number; magia: Magia } => item.magia !== null)
     .sort((a, b) => a.circulo - b.circulo);
+  const maestriaDeMagiasDisponivel = classe
+    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.maestriaDeMagias, personagem.nivel) !== null
+    : false;
+  const magiasMaestriaDoLivro = Object.values(maestriaDeMagiasAtuais)
+    .map((nomeMagia) => magias.find((m) => m.nome === nomeMagia))
+    .filter((m): m is Magia => m !== undefined);
   const mestreMisticoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Mestre Místico', personagem.nivel) !== null : false;
   const espacoPactoAtual = espacos[0] ?? null;
   const espacosGastosPacto = espacoPactoAtual ? (espacosGastosPorCirculo[espacoPactoAtual.circulo] ?? 0) : 0;
@@ -281,6 +291,8 @@ export function useMagiasEConjuracao(input: {
     livroDeMagias,
     adeptoDeRitualDisponivel,
     magiasRituaisDoLivro,
+    maestriaDeMagiasDisponivel,
+    magiasMaestriaDoLivro,
     usaRedefPorDescanso,
     magiasGratisConcedidas,
     formasFamiliarElegiveis,

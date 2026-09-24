@@ -40,6 +40,11 @@ export const ID_CARACTERISTICA_CLASSE = {
    * grátis + Especialização (dobra) na escolhida. Ver
    * `LevelUpShell.tsx` passo `academico`. */
   academico: 'Acadêmico',
+  /** Mago nível 18 — escolhe 1 magia de 1º e 1 de 2º círculo (tempo de
+   * conjuração de Ação) do Livro de Magias; ficam sempre preparadas e
+   * conjuram no círculo mais baixo sem gastar Espaço. Ver
+   * `LevelUpShell.tsx` passo `maestriaDeMagias`, `core/maestriaDeMagias.ts`. */
+  maestriaDeMagias: 'Maestria de Magias',
   /** Bárbaro nível 7 — Vantagem em jogadas de Iniciativa. Ver
    * `CombatTab.tsx` (`alternarIniciativa`). */
   instintosPrimitivos: 'Instintos Primitivos',

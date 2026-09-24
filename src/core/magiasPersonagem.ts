@@ -117,6 +117,10 @@ export interface OpcaoGastoEspaco {
   classeNome: string;
   maximo: number;
   gasto: number;
+  /** `true` = essa opção não gasta Espaço nenhum (Maestria de Magias,
+   * círculo mais baixo da magia escolhida) — a UI mostra "Conjurar
+   * Grátis" no lugar dos pips, e confirmar pula o desconto. */
+  gratis?: boolean;
 }
 
 /** Junta as opções de espaço da classe ativa com as da `ponte` (Magia
@@ -125,28 +129,41 @@ export interface OpcaoGastoEspaco {
  * 100% dos personagens hoje), devolve só as opções normais, idêntico
  * a `circulosDisponiveisParaConjurar` de sempre. Cada opção já vem
  * rotulada com a classe dona, pra UI mostrar de onde vem cada espaço
- * e a `FichaShell` saber de qual pool descontar. */
+ * e a `FichaShell` saber de qual pool descontar.
+ *
+ * `circuloGratis` (Maestria de Magias) sempre aparece, mesmo sem
+ * Espaço real sobrando naquele círculo — não gasta nada, então a
+ * disponibilidade normal de Espaços não importa pra essa opção. Um
+ * único ponto de mudança aqui já vale pra Magias E Combate, que
+ * reaproveitam esta função (CLAUDE.md §6.5). */
 export function opcoesGastoComPonte(
   magiaCirculo: number,
   classeAtivaNome: string,
   espacos: EspacoDeMagiaAtivo[],
   espacosGastosPorCirculo: Record<number, number>,
   ponte: PoolDePonte | null,
+  circuloGratis?: number | null,
 ): OpcaoGastoEspaco[] {
   const opcoesAtiva = circulosDisponiveisParaConjurar(magiaCirculo, espacos, espacosGastosPorCirculo).map((circulo) => ({
     circulo,
     classeNome: classeAtivaNome,
     maximo: espacos.find((e) => e.circulo === circulo)?.maximo ?? 0,
     gasto: espacosGastosPorCirculo[circulo] ?? 0,
+    gratis: circulo === circuloGratis ? true : undefined,
   }));
-  if (!ponte) return opcoesAtiva;
+  const jaTemCirculoGratis = circuloGratis != null && opcoesAtiva.some((o) => o.circulo === circuloGratis);
+  const opcoesComGratis =
+    circuloGratis != null && !jaTemCirculoGratis
+      ? [{ circulo: circuloGratis, classeNome: classeAtivaNome, maximo: 0, gasto: 0, gratis: true }, ...opcoesAtiva]
+      : opcoesAtiva;
+  if (!ponte) return opcoesComGratis;
   const opcoesPonte = circulosDisponiveisParaConjurar(magiaCirculo, ponte.espacos, ponte.espacosGastosPorCirculo).map((circulo) => ({
     circulo,
     classeNome: ponte.classeNome,
     maximo: ponte.espacos.find((e) => e.circulo === circulo)?.maximo ?? 0,
     gasto: ponte.espacosGastosPorCirculo[circulo] ?? 0,
   }));
-  return [...opcoesAtiva, ...opcoesPonte];
+  return [...opcoesComGratis, ...opcoesPonte];
 }
 
 /** Sempre círculo → alfabético (nunca a ordem de aquisição/sorteio) —

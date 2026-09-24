@@ -42,6 +42,7 @@ import {
   truquesElegiveisParaVinculo,
 } from './invocacoesMisticas';
 import { circulosArcanaMisticaDesbloqueados, magiasElegiveisArcanaMistica } from './arcanaMistica';
+import { magiasElegiveisMaestria } from './maestriaDeMagias';
 import { embaralhar, sorteiaUm } from './sorteio';
 import { talentoDisponivel, sortearAsiDoTalento } from './geradorPersonagemTeste';
 
@@ -81,6 +82,9 @@ export interface ParamsLevelUpRapido {
   /** Mago nível 2 — Acadêmico já escolhida (`null` se ainda não
    * escolheu). Ver `LevelUpShell.tsx`. */
   academicoPericiaAtual: string | null;
+  /** Mago nível 18 — Maestria de Magias já escolhida (`{}` se ainda
+   * não escolheu). Ver `LevelUpShell.tsx`/`core/maestriaDeMagias.ts`. */
+  maestriaDeMagiasAtuais: Record<number, string>;
 }
 
 export interface ResultadoLevelUpRapido {
@@ -140,6 +144,10 @@ export interface ResultadoLevelUpRapido {
    * Primordial — ver comentário de `ACADEMICO_PERICIAS` em
    * `LevelUpShell.tsx`). */
   academicoPericiaEscolhida: string | null;
+  /** Mago nível 18 — Maestria de Magias. Sorteada de verdade (1 de 1º
+   * círculo + 1 de 2º, dentro do Livro de Magias já com este nível),
+   * mesmo espírito de Acadêmico acima. */
+  maestriaDeMagiasEscolhida: Record<number, string> | null;
 }
 
 /** Escolhe Invocações Místicas respeitando pré-requisito (uma pode
@@ -245,6 +253,20 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     maxLivroDeMagias > 0
       ? completarListaDeMagias(params.livroDeMagiasAtuais, embaralhar(poolMagiasDeCirculo), maxLivroDeMagias)
       : null;
+
+  // Maestria de Magias (Mago, nível 18) — mesma pool do Level Up de
+  // verdade (`LevelUpShell.tsx`), já com o livro deste nível.
+  let maestriaDeMagiasEscolhida: Record<number, string> | null = null;
+  if (
+    caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.maestriaDeMagias, novoNivel) !== null &&
+    Object.keys(params.maestriaDeMagiasAtuais).length === 0
+  ) {
+    const livroFinal = livroDeMagiasEscolhidas ?? params.livroDeMagiasAtuais;
+    const livroComoObjetos = magiasDaClasse(classe.nome).filter((m) => livroFinal.includes(m.nome));
+    const circulo1 = sorteiaUm(magiasElegiveisMaestria(livroComoObjetos, 1));
+    const circulo2 = sorteiaUm(magiasElegiveisMaestria(livroComoObjetos, 2));
+    if (circulo1 && circulo2) maestriaDeMagiasEscolhida = { 1: circulo1.nome, 2: circulo2.nome };
+  }
 
   const maxMagiasPreparadas = valorRecursoClasse(classe, 'Magias Preparadas', novoNivel);
   const poolMagiasPreparadas = livroDeMagiasEscolhidas
@@ -376,5 +398,6 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     periciaRestritaTalentoEscolhida: null,
     conhecimentoPrimordialPericiaEscolhida,
     academicoPericiaEscolhida,
+    maestriaDeMagiasEscolhida,
   };
 }

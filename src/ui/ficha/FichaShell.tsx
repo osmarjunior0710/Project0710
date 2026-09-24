@@ -444,6 +444,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagemSalvo.arcanaMisticaAtual ?? {},
   );
   const [arcanaMisticaGastos, setArcanaMisticaGastos] = useState<number[]>(personagemSalvo.arcanaMisticaGastos ?? []);
+  const [maestriaDeMagiasAtuais, setMaestriaDeMagiasAtuais] = useState<Record<number, string>>(
+    personagemSalvo.maestriaDeMagiasAtual ?? {},
+  );
   const [surtoUsadoTurno, setSurtoUsadoTurno] = useState(personagemSalvo.surtoUsadoTurnoAtual ?? false);
   const [restStatus, setRestStatus] = useState<string | null>(null);
   // Aviso temporário na tela (hoje só Vigor Implacável). O texto de
@@ -728,6 +731,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     livroDeMagias,
     adeptoDeRitualDisponivel,
     magiasRituaisDoLivro,
+    maestriaDeMagiasDisponivel,
+    magiasMaestriaDoLivro,
     usaRedefPorDescanso,
     magiasGratisConcedidas,
     formasFamiliarElegiveis,
@@ -781,6 +786,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     pets,
     atributos,
     arcanaMisticaAtuais,
+    maestriaDeMagiasAtuais,
     escolhaMagiaTalentoGeral,
     magiasGratisGastas,
     nivelTotalAtual,
@@ -1072,6 +1078,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     contatarPatronoGasto,
     arcanaMisticaAtual: arcanaMisticaAtuais,
     arcanaMisticaGastos,
+    maestriaDeMagiasAtual: maestriaDeMagiasAtuais,
     magiasGratisInvocacoesGastas: magiasGratisGastas,
     talentosGeraisAtual: talentosGeraisAtuais,
     escolhaMagiaTalentoGeral,
@@ -1170,6 +1177,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       contatarPatronoGasto,
       arcanaMisticaAtuais,
       arcanaMisticaGastos,
+      maestriaDeMagiasAtuais,
       magiasGratisGastas,
       talentosGeraisAtuais,
       escolhaMagiaTalentoGeral,
@@ -1894,6 +1902,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     talentoGeralEscolhido: string | null;
     dadivaEpicaEscolhida: string | null;
     arcanaMisticaAlteracoes: Record<number, string> | null;
+    maestriaDeMagiasEscolhida: Record<number, string> | null;
     magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
     escolhaMagiaTalentoGeral: Record<string, string[]> | null;
     escolhaAtributoTalentoGeral: Record<string, string> | null;
@@ -1967,6 +1976,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
     if (resultado.arcanaMisticaAlteracoes) {
       setArcanaMisticaAtuais((prev) => ({ ...prev, ...resultado.arcanaMisticaAlteracoes }));
+    }
+    if (resultado.maestriaDeMagiasEscolhida) {
+      setMaestriaDeMagiasAtuais(resultado.maestriaDeMagiasEscolhida);
     }
     if (resultado.magiaIniciadaAlteracoes) {
       const { origem, especie } = resultado.magiaIniciadaAlteracoes;
@@ -2045,6 +2057,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       talentosGeraisAtuais,
       conhecimentoPrimordialPericiaAtual: conhecimentoPrimordialPericiaEscolhida,
       academicoPericiaAtual: academicoPericiaEscolhida,
+      maestriaDeMagiasAtuais,
     });
     confirmarLevelUp(resultado);
   }
@@ -2120,6 +2133,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         invocacoesMisticasAtuais={invocacoesMisticasAtuais}
         invocacoesTruqueVinculadoAtuais={invocacoesTruqueVinculado}
         arcanaMisticaAtuais={arcanaMisticaAtuais}
+        maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
         magiaIniciadaOrigemAtual={magiaIniciadaOrigemAtual}
         magiaIniciadaEspecieAtual={magiaIniciadaEspecieAtual}
         periciasEspecialistaAtuais={periciasEspecialistaAtuais}
@@ -2502,6 +2516,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onMemorizarMagia={() => !memorizarMagiaGasta && setMemorizarMagiaAberto(true)}
             adeptoDeRitualDisponivel={adeptoDeRitualDisponivel}
             magiasRituaisDoLivro={magiasRituaisDoLivro}
+            maestriaDeMagiasDisponivel={maestriaDeMagiasDisponivel}
+            magiasMaestriaDoLivro={magiasMaestriaDoLivro}
+            maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
             astuciaMagicaDisponivel={astuciaMagicaDisponivel}
             astuciaMagicaGasta={astuciaMagicaGasta}
             astuciaMagicaRecupera={astuciaMagicaRecupera}
@@ -2686,6 +2703,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             truquesBonus={truquesBonus}
             magiasPreparadasAcao={magiasPreparadasAcao}
             magiasPreparadasBonus={magiasPreparadasBonus}
+            maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
             magiasPreparadasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
             explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}

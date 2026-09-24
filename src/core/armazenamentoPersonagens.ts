@@ -194,6 +194,10 @@ export interface PersonagemSalvo {
   /** Círculos de Arcana Mística já usados de graça desde o último
    * Descanso Longo (usos independentes entre si) — só ele reseta. */
   arcanaMisticaGastos?: number[];
+  /** Maestria de Magias (Mago, nível 18) — `{1: nomeMagia, 2: nomeMagia}`,
+   * escolhida no Level Up, trocável no Descanso Longo (ver
+   * `core/maestriaDeMagias.ts`). */
+  maestriaDeMagiasAtual?: Record<number, string>;
   /** IDs de Invocações Místicas cuja magia de graça (`recarga:
    * 'descansoLongo'`, ex: Presente das Profundezas) já foi usada desde
    * o último Descanso Longo — cada uma trava até lá. Invocações

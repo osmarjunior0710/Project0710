@@ -27,6 +27,7 @@ describe('sortearLevelUpRapido', () => {
       talentosGeraisAtuais: [],
       conhecimentoPrimordialPericiaAtual: null,
       academicoPericiaAtual: null,
+      maestriaDeMagiasAtuais: {},
     });
     expect(resultado.novoNivel).toBe(2);
     expect(resultado.pvGanho).toBe(6 + 2); // média de d10 (6) + mod. CON
@@ -50,6 +51,7 @@ describe('sortearLevelUpRapido', () => {
       talentosGeraisAtuais: [],
       conhecimentoPrimordialPericiaAtual: null,
       academicoPericiaAtual: null,
+      maestriaDeMagiasAtuais: {},
     });
     expect(resultado.subclasseEscolhida).toBeNull();
   });
@@ -72,6 +74,7 @@ describe('sortearLevelUpRapido', () => {
       talentosGeraisAtuais: [],
       conhecimentoPrimordialPericiaAtual: null,
       academicoPericiaAtual: null,
+      maestriaDeMagiasAtuais: {},
     });
     expect(resultado.novoNivel).toBe(3);
     expect(resultado.subclasseEscolhida).toBe('Patrono Ínfero'); // única implementada hoje
@@ -98,6 +101,7 @@ describe('sortearLevelUpRapido', () => {
       talentosGeraisAtuais: [],
       conhecimentoPrimordialPericiaAtual: null,
       academicoPericiaAtual: null,
+      maestriaDeMagiasAtuais: {},
     });
     expect(resultado.novoNivel).toBe(4);
     expect(resultado.talentoGeralEscolhido).not.toBeNull();
@@ -123,6 +127,7 @@ describe('sortearLevelUpRapido', () => {
       talentosGeraisAtuais: [],
       conhecimentoPrimordialPericiaAtual: null,
       academicoPericiaAtual: null,
+      maestriaDeMagiasAtuais: {},
     });
     // Nível 2 = 8 magias no grimório (6 + 2) — cresce exatamente +2.
     expect(resultado.livroDeMagiasEscolhidas).not.toBeNull();

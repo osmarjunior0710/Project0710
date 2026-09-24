@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte } from '../../../core/magiasPersonagem';
+import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { danoComCritico } from '../../../core/danoCritico';
@@ -46,6 +47,10 @@ interface UsarMagiaPainelParams {
    * o efeito visual de Cura — ver `RollDadosOptions.confirmarAlvoCura`
    * ("Me curar") e `FichaShell.tsx` `onCuraDeMagiaAplicada`. */
   onCuraDeMagiaAplicada: (total: number) => void;
+  /** Maestria de Magias (Mago, nível 18) — `{1: nomeMagia, 2: nomeMagia}`,
+   * `{}` pra quem não tem a característica. Marca a opção de círculo
+   * base como "Conjurar Grátis" (ver `EscolherCirculoShell`). */
+  maestriaDeMagiasAtuais: Record<number, string>;
 }
 
 /** Fluxo completo de "Usar Magia" dentro de um painel do Combate
@@ -70,15 +75,16 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
 
   /** `circulo` é o espaço a gastar — pode ser maior que `m.circulo`
    * (upcast, ver `EscolherCirculoShell`); truque passa `null` (não
-   * gasta espaço nenhum). */
-  function conjurarMagia(m: Magia, circulo: number | null, classeDoEspaco: string = p.classeAtivaNome) {
+   * gasta espaço nenhum). `gratis` (Maestria de Magias) pula o
+   * desconto de Espaço mesmo com `circulo` definido. */
+  function conjurarMagia(m: Magia, circulo: number | null, classeDoEspaco: string = p.classeAtivaNome, gratis = false) {
     // Trava dupla — a linha "Usar Magia" já fica desabilitada quando
     // `desvantagemForcaDestreza` é true, mas essa checagem aqui é o
     // ponto único de verdade (SDD "Penalidades por Falta de
     // Proficiência": bloqueio de conjuração é pra impedir de verdade,
     // não só avisar).
     if (p.desvantagemForcaDestreza) return;
-    if (circulo !== null) {
+    if (circulo !== null && !gratis) {
       const ok = p.gastarSlotCirculo(circulo, classeDoEspaco);
       if (!ok) return;
     }
@@ -90,7 +96,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
       p.nivel,
       p.modAcertoConjuracao,
       p.colheitaMacabraDisponivel,
-      circulo !== null,
+      circulo !== null && !gratis,
       p.truqueVinculadoAgonizante,
       p.modCarisma,
       p.explicacaoAcertoConjuracao,
@@ -144,6 +150,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         magiasPreparadas={p.magiasPreparadas}
         espacos={p.espacos}
         espacosGastosPorCirculo={p.espacosGastosPorCirculo}
+        maestriaDeMagiasAtuais={p.maestriaDeMagiasAtuais}
         onFechar={() => setTelaMagia(null)}
         onEscolherTruque={(m) => conjurarMagia(m, null)}
         onEscolherMagia={(m, circulosDisponiveis) => setTelaMagia({ magia: m, circulos: circulosDisponiveis })}
@@ -151,9 +158,16 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
     ) : telaMagia ? (
       <EscolherCirculoShell
         magia={telaMagia.magia}
-        opcoes={opcoesGastoComPonte(telaMagia.magia.circulo, p.classeAtivaNome, p.espacos, p.espacosGastosPorCirculo, p.ponte)}
+        opcoes={opcoesGastoComPonte(
+          telaMagia.magia.circulo,
+          p.classeAtivaNome,
+          p.espacos,
+          p.espacosGastosPorCirculo,
+          p.ponte,
+          circuloGratisMaestria(telaMagia.magia.nome, p.maestriaDeMagiasAtuais),
+        )}
         onVoltar={() => setTelaMagia('lista')}
-        onConjurar={(circulo, classeNome) => conjurarMagia(telaMagia.magia, circulo, classeNome)}
+        onConjurar={(circulo, classeNome, gratis) => conjurarMagia(telaMagia.magia, circulo, classeNome, gratis)}
       />
     ) : null;
 

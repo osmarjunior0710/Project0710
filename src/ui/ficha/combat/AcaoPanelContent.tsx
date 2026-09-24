@@ -50,6 +50,8 @@ interface AcaoPanelContentProps {
   conjura: boolean;
   truques: Magia[];
   magiasPreparadas: Magia[];
+  /** Maestria de Magias (Mago, nível 18) — ver `useUsarMagiaPainel.tsx`. */
+  maestriaDeMagiasAtuais: Record<number, string>;
   modAcertoConjuracao: number | null;
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
@@ -193,6 +195,7 @@ export default function AcaoPanelContent({
   conjura,
   truques,
   magiasPreparadas,
+  maestriaDeMagiasAtuais,
   modAcertoConjuracao,
   explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
@@ -256,6 +259,7 @@ export default function AcaoPanelContent({
     ponte,
     truques,
     magiasPreparadas,
+    maestriaDeMagiasAtuais,
     modAcertoConjuracao,
     explicacaoAcertoConjuracao,
     truqueVinculadoAgonizante,

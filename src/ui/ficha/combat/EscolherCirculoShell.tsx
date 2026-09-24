@@ -12,7 +12,9 @@ interface EscolherCirculoShellProps {
    * as opções vêm da mesma classe (comportamento idêntico a antes). */
   opcoes: OpcaoGastoEspaco[];
   onVoltar: () => void;
-  onConjurar: (circulo: number, classeNome: string) => void;
+  /** `gratis` = true na opção marcada (Maestria de Magias) — quem
+   * chama pula o desconto de Espaço nesse caso. */
+  onConjurar: (circulo: number, classeNome: string, gratis: boolean) => void;
 }
 
 /** Tela cheia (Tela 3 do fluxo "Usar Magia") — sempre aparece antes de
@@ -54,13 +56,17 @@ export default function EscolherCirculoShell({ magia, opcoes, onVoltar, onConjur
           efeito (veja o texto acima).
           {temMaisDeUmaClasse && ' Você tem espaço de mais de 1 classe pra gastar — escolha de qual pool.'}
         </div>
-        {opcoes.map(({ circulo, classeNome, maximo, gasto }) => (
-          <div key={`${classeNome}-${circulo}`} className="opt-card" onClick={() => onConjurar(circulo, classeNome)}>
+        {opcoes.map(({ circulo, classeNome, maximo, gasto, gratis }) => (
+          <div key={`${classeNome}-${circulo}`} className="opt-card" onClick={() => onConjurar(circulo, classeNome, gratis ?? false)}>
             <div className="opt-card-name">
               {circulo}º Círculo{temMaisDeUmaClasse ? ` (${classeNome})` : ''}
             </div>
             <div className="opt-card-desc">
-              <TickPips total={maximo} usados={gasto} tamanho="lg" />
+              {gratis ? (
+                <span style={{ color: 'var(--accent-especial)', fontWeight: 'bold' }}>🔮 Conjurar Grátis</span>
+              ) : (
+                <TickPips total={maximo} usados={gasto} tamanho="lg" />
+              )}
             </div>
           </div>
         ))}
