@@ -137,6 +137,7 @@ import CompletarMagiasShell from './levelup/CompletarMagiasShell';
 import LivroDasSombrasShell from './levelup/LivroDasSombrasShell';
 import MemorizarMagiaShell from './levelup/MemorizarMagiaShell';
 import RecuperacaoArcanaShell from './levelup/RecuperacaoArcanaShell';
+import MaestriaDeMagiasTrocaShell from './levelup/MaestriaDeMagiasTrocaShell';
 import DescansoOverlay, { type FaseDescanso, type TipoDescanso } from './DescansoOverlay';
 import XpShell from './XpShell';
 
@@ -523,7 +524,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * `'livre'`) está aberta por cima. */
   const [descansoEmAndamento, setDescansoEmAndamento] = useState<{
     tipo: TipoDescanso;
-    fase: FaseDescanso | 'escolhendoMagias' | 'recuperandoEspacos';
+    fase: FaseDescanso | 'escolhendoMagias' | 'recuperandoEspacos' | 'trocandoMaestria';
+    /** Descanso Longo — `true` quando ainda falta perguntar sobre a
+     * troca de Maestria de Magias DEPOIS da pergunta de redefinir
+     * Magias Preparadas (as 2 perguntas encadeiam, nunca ao mesmo
+     * tempo na tela). */
+    maestriaTrocaPendente?: boolean;
   } | null>(null);
   const [levelUpHpModo, setLevelUpHpModo] = useState<'media' | 'rolar' | 'manual' | null>(
     personagemSalvo.levelUpHpModo ?? null,
@@ -1578,18 +1584,50 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // isso, um Mago nível 1 (0 Magias Preparadas ainda escolhidas)
     // veria uma pergunta sem sentido.
     const perguntaRedefinir = usaRedefPorDescanso && magiasPreparadasAtuais.length > 0;
-    setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: perguntaRedefinir ? 'perguntaRedefinir' : 'saindo' } : prev));
+    // As 2 perguntas do Descanso Longo (redefinir Magias Preparadas +
+    // trocar Maestria de Magias) encadeiam, nunca ao mesmo tempo na
+    // tela — se a 1ª não se aplica, checa a 2ª direto; se aplica, guarda
+    // a 2ª como pendente pra depois (`aoResponderRedefinir`/`aoConfirmarRedefinicao`).
+    const maestriaTrocaDisponivel = Object.keys(maestriaDeMagiasAtuais).length > 0;
+    setDescansoEmAndamento((prev) =>
+      prev
+        ? {
+            ...prev,
+            fase: perguntaRedefinir ? 'perguntaRedefinir' : maestriaTrocaDisponivel ? 'perguntaMaestriaTroca' : 'saindo',
+            maestriaTrocaPendente: perguntaRedefinir ? maestriaTrocaDisponivel : undefined,
+          }
+        : prev,
+    );
   }
 
   /** Resposta ao prompt "quer alterar suas magias preparadas?" —
    * `sim` abre a tela de escolha livre (`MemorizarMagiaShell`, modo
-   * `'livre'`); `não` já manda pro fade-out. */
+   * `'livre'`); `não` encadeia a pergunta de Maestria de Magias se
+   * pendente, senão já manda pro fade-out. */
   function aoResponderRedefinir(sim: boolean) {
-    setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: sim ? 'escolhendoMagias' : 'saindo' } : prev));
+    setDescansoEmAndamento((prev) =>
+      prev
+        ? { ...prev, fase: sim ? 'escolhendoMagias' : prev.maestriaTrocaPendente ? 'perguntaMaestriaTroca' : 'saindo' }
+        : prev,
+    );
   }
 
   function aoConfirmarRedefinicao(novaLista: string[]) {
     setMagiasPreparadasAtuais(novaLista);
+    setDescansoEmAndamento((prev) =>
+      prev ? { ...prev, fase: prev.maestriaTrocaPendente ? 'perguntaMaestriaTroca' : 'saindo' } : prev,
+    );
+  }
+
+  /** Resposta ao prompt "quer trocar 1 magia de Maestria?" — `sim` abre
+   * a tela de troca (`MaestriaDeMagiasTrocaShell`); `não` já manda pro
+   * fade-out (é a última pergunta possível do Descanso Longo). */
+  function aoResponderMaestriaTroca(sim: boolean) {
+    setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: sim ? 'trocandoMaestria' : 'saindo' } : prev));
+  }
+
+  function aoConfirmarMaestriaTroca(escolha: Record<number, string>) {
+    setMaestriaDeMagiasAtuais(escolha);
     setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: 'saindo' } : prev));
   }
 
@@ -2259,6 +2297,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
+  if (descansoEmAndamento?.fase === 'trocandoMaestria') {
+    return (
+      <MaestriaDeMagiasTrocaShell
+        atuais={maestriaDeMagiasAtuais}
+        livroDeMagias={livroDeMagias}
+        onFechar={() => aoResponderMaestriaTroca(false)}
+        onConfirmar={aoConfirmarMaestriaTroca}
+      />
+    );
+  }
+
   if (ajustarPetAberto) {
     return (
       <AjustarPetShell
@@ -2302,6 +2351,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           onFadeInCompleto={aoFadeInCompleto}
           onResponderRedefinir={aoResponderRedefinir}
           onResponderRecuperacaoArcana={aoResponderRecuperacaoArcana}
+          onResponderMaestriaTroca={aoResponderMaestriaTroca}
           onFimAnimacao={aoFimDaTransicaoDescanso}
         />
       )}

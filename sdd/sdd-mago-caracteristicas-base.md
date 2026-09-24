@@ -295,6 +295,7 @@ na lista original.
    **Entrega 6b — troca no Descanso Longo:** pergunta condicional
    (mesmo padrão de "redefinir Magias Preparadas"/Recuperação Arcana)
    + tela de substituir 1 das 2 escolhidas por outra do mesmo círculo.
+   ✅ Feito (`v202609_2321`).
 7. **Entrega 7 — Assinatura Mágica** (nv.20): passo de Level Up +
    conjuração grátis 1x por descanso (2 flags).
 8. **Entrega 8 — Fechamento:** testes/tsc/build,

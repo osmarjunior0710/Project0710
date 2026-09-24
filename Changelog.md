@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2321
+
+**Mago — Maestria de Magias, trocar no Descanso Longo.** Ao completar um Descanso Longo (se você já tem as 2 magias de Maestria escolhidas), depois da pergunta de redefinir Magias Preparadas aparece "Quer estudar seu Livro de Magias e trocar 1 das magias de Maestria?" — respondendo "Sim", abre uma tela pra substituir 1 das 2 (1º ou 2º círculo) por outra elegível do mesmo círculo do seu Livro de Magias.
+
 ## v202609_2132
 
 **Mago — Maestria de Magias (nível 18).** No Level Up do nível 18, escolhe 1 magia de 1º e 1 de 2º círculo do Livro de Magias (com tempo de conjuração de Ação) — as 2 ficam sempre preparadas (nova seção na aba Magias) e conjuram no círculo delas sem gastar Espaço. Vale também na aba Combate: ao "Usar Magia" uma dessas 2, a tela "Em qual círculo?" mostra "Conjurar Grátis" no círculo base, no lugar dos pips normais.

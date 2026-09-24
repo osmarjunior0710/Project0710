@@ -19,3 +19,9 @@ export function circuloGratisMaestria(nomeMagia: string, escolhas: Record<number
   const entrada = Object.entries(escolhas).find(([, nome]) => nome === nomeMagia);
   return entrada ? Number(entrada[0]) : null;
 }
+
+/** Quantos círculos mudaram entre a escolha ATUAL e uma nova — regra
+ * real permite no máximo 1 troca por Descanso Longo. */
+export function trocasMaestria(atuais: Record<number, string>, escolha: Record<number, string>): number {
+  return Object.keys(atuais).filter((c) => atuais[Number(c)] !== escolha[Number(c)]).length;
+}
