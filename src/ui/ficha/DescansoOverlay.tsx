@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './DescansoOverlay.module.css';
 
 export type TipoDescanso = 'curto' | 'longo';
-export type FaseDescanso = 'entrando' | 'perguntaRedefinir' | 'perguntaRecuperacaoArcana' | 'saindo';
+export type FaseDescanso = 'entrando' | 'perguntaRedefinir' | 'perguntaRecuperacaoArcana' | 'perguntaMaestriaTroca' | 'saindo';
 
 /** Descanso Curto: 0,5s fade-in + 0,5s fade-out (1s total). Descanso
  * Longo: 1s + 1s (2s total) — pedido explícito do Osmar, ver
@@ -22,6 +22,9 @@ interface DescansoOverlayProps {
   /** Só relevante na fase `perguntaRecuperacaoArcana` (Descanso Curto,
    * Mago nível 1+ com espaço elegível gasto — ver `core/recuperacaoArcana.ts`). */
   onResponderRecuperacaoArcana: (sim: boolean) => void;
+  /** Só relevante na fase `perguntaMaestriaTroca` (Descanso Longo, Mago
+   * com Maestria de Magias já escolhida — ver `core/maestriaDeMagias.ts`). */
+  onResponderMaestriaTroca: (sim: boolean) => void;
   /** Chamado quando o fade-out termina — hora de desmontar o overlay. */
   onFimAnimacao: () => void;
 }
@@ -33,17 +36,20 @@ interface DescansoOverlayProps {
  * normal (não substitui, ver `FichaShell.tsx`) — assim o fade-in
  * escurece o que já estava na tela em vez de cortar direto pro preto.
  *
- * A fase `perguntaRedefinir` (Descanso Longo, classe com redefinição
- * livre) e `perguntaRecuperacaoArcana` (Descanso Curto, Recuperação
- * Arcana elegível) pausam a animação com a tela já 100% preta — só
- * quando o jogador responde Sim/Não o `FichaShell` decide o próximo
- * passo (abrir a tela de escolha, ou já mandar pra fase `saindo`). */
+ * As fases `perguntaRedefinir` (Descanso Longo, classe com redefinição
+ * livre), `perguntaRecuperacaoArcana` (Descanso Curto, Recuperação
+ * Arcana elegível) e `perguntaMaestriaTroca` (Descanso Longo, Maestria
+ * de Magias já escolhida) pausam a animação com a tela já 100% preta —
+ * só quando o jogador responde Sim/Não o `FichaShell` decide o próximo
+ * passo (abrir a tela de escolha, encadear outra pergunta, ou já mandar
+ * pra fase `saindo`). */
 export default function DescansoOverlay({
   tipo,
   fase,
   onFadeInCompleto,
   onResponderRedefinir,
   onResponderRecuperacaoArcana,
+  onResponderMaestriaTroca,
   onFimAnimacao,
 }: DescansoOverlayProps) {
   const duracao = DURACAO_MS[tipo];
@@ -97,6 +103,21 @@ export default function DescansoOverlay({
             <div
               className={`${styles.botao} ${styles.botaoPrimario}`}
               onClick={() => onResponderRecuperacaoArcana(true)}
+            >
+              Sim
+            </div>
+          </div>
+        </div>
+      ) : fase === 'perguntaMaestriaTroca' ? (
+        <div className={styles.pergunta}>
+          <div className={styles.texto}>Quer estudar seu Livro de Magias e trocar 1 das magias de Maestria?</div>
+          <div className={styles.botoes}>
+            <div className={styles.botao} onClick={() => onResponderMaestriaTroca(false)}>
+              Não
+            </div>
+            <div
+              className={`${styles.botao} ${styles.botaoPrimario}`}
+              onClick={() => onResponderMaestriaTroca(true)}
             >
               Sim
             </div>

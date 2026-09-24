@@ -40,7 +40,7 @@ uma auditoria completa da classe base a pedido do Osmar.
       preparada" na aba Magias, e opção "Conjurar Grátis" (no lugar
       dos pips) na tela "Em qual círculo?" — vale pra Magias E
       Combate, reaproveitando `opcoesGastoComPonte`/`EscolherCirculoShell`.
-- [ ] Entrega 6b — Maestria de Magias, troca no Descanso Longo:
+- [x] Entrega 6b — Maestria de Magias, troca no Descanso Longo:
       pergunta condicional (mesmo padrão de "redefinir Magias
       Preparadas"/Recuperação Arcana) + tela pra substituir 1 das 2
       escolhidas por outra do mesmo círculo no Livro de Magias.
