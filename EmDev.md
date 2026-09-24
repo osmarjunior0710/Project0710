@@ -34,7 +34,34 @@ código).
 - [x] **Bug (corrigido):** no painel de Reação, magias (ex.: Escudo Arcano 1º círculo, Contramagia 3º círculo) aparecem como ativas mesmo sem espaço de magia disponível do círculo — o aviso vermelho "Sem espaço de magia de 1º círculo disponível" aparece, mas as opções não ficam desabilitadas/cinza (ver `ReacaoPanelContent.tsx`)
 - [x] **Criação de personagem — aleatório sem repetir o que já possui (FEITO: 🎲 por lista no Talento + 🔀 em Livro das Sombras/Talento da Origem/Talento do Versátil; 🔀 de Origem e Espécie também evitam repetir)** — antes: botão "🎲 Aleatório" nas listas de "Escolha N" (pedido do Osmar testando o Artista/Músico, 3 instrumentos): preenche só as vagas que faltam, mantém o que já foi marcado e NUNCA sorteia o que o personagem já possui por outra fonte ("já possui"). Entrega A (Talento da Origem/Espécie + Iniciado em Magia) e B (listas da Classe: perícias, ferramentas, maestria, invocações, truques, livro, magias preparadas + Livro das Sombras). `core/sortearEscolhas.ts` já feito. **Entrega A FEITA** (Talento da Origem/Espécie + Iniciado em Magia, botão `BotaoAleatorio`); falta a B.
 - [x] **Bug (corrigido, passo Loja):** o cabeçalho "Ouro inicial / Restante" só mostra PO — faltam os ícones de PO, PP e PC (webp já existem em `src/assets/icones-moedas/`), e o "Restante" deveria aparecer nas 3 moedas (PO, PP e PC) com o cálculo correto (ex.: 82,35 PO = 82 PO + 3 PP + 5 PC — usar `moedasDeOuro`), pro jogador ver quanto falta.
-- [ ] **Rever toda a integração de Multiclasse com a Ficha/Combate** — tudo foi montado pensando em UMA classe por vez ("classe ativa" via pill `classeAtivaNome`, ~70 pontos que leem nível/subclasse da classe em foco, ver `DECISOES-CLASSES.md` "Multiclasse — nível na classe ativa"). Em combate o personagem É as duas classes ao mesmo tempo: com o pill em Mago, recursos/magias do Bardo somem da tela de Combate/Magias e é preciso trocar o pill pra usar. Direção discutida (ainda sem decisão): mostrar as duas classes juntas (blocos por classe em Combate e Magias), pill vira atalho ou some, cabeçalho mantém o texto "Mago 18 / Bardo 3". É um foco à parte (grande), a abrir com os chapéus de PM/Game Designer/UI (seção 6 do CLAUDE.md), não um retoque.
+- [x] **Rever toda a integração de Multiclasse com a Ficha/Combate** — escopo final ficou mais enxuto que o previsto: Recursos de Combate e Espaços de Magia **já mostravam as 2 classes/pool combinado certos**, não precisou de nada. O que faltava (Truques/Magias Preparadas só da classe do pill) virou o foco novo abaixo.
 
-Nota: itens 1 e 2 e o último dependem do mesmo mecanismo de house
-rules — conferir a ordem de construção ao abrir o item 1.
+Nota: itens 1 e 2 dependem do mesmo mecanismo de house rules —
+conferir a ordem de construção ao abrir o item 1.
+
+---
+
+## Foco: Multiclasse — Truques/Magias Preparadas por classe, tela única, fim do pill
+
+SDD em `sdd/sdd-multiclasse-truques-magias.md` (chapéus 1/2/3
+aprovados pelo Osmar, 2026-09-24). Decisões já tomadas: selo por item
+(não bloco separado) nas listas de truques/magias; pill removido de
+vez, Perfil passa a agrupar por classe também.
+
+- [ ] Entrega 1 — Muda o dado: `truquesAtuais`/`magiasPreparadasAtuais`
+      de `string[]` pra `{nome, classe}[]`, com migração de
+      personagens salvos no formato antigo (palpite pela 1ª classe
+      cujo catálogo contém o nome). Sem mudança visível ainda.
+- [ ] Entrega 2 — Aba Magias: Truques e Magias Preparadas mostram as
+      2 classes juntas numa lista só, com selo por item.
+- [ ] Entrega 3 — Seletor de magia em Combate (Ação/Bônus/Reação) e o
+      "conjurar" da aba Magias oferecem as magias das 2 classes
+      juntas.
+- [ ] Entrega 4 — Corrige `deficitTruques`/`deficitMagiasPreparadas`
+      pra multiclasse (compara por classe, usando a marca nova).
+- [ ] Entrega 5 — Remove o pill: `classeAtivaNome` sai de
+      `FichaShell.tsx`; Perfil passa a mostrar as características das
+      2 classes agrupadas por classe (com título), sem seletor.
+- [ ] Entrega 6 — Fechamento: testes/tsc/build,
+      `aprendizados/classes/multiclasse.md` (criar), limpar
+      `PENDENCIAS.md` do que for resolvido no caminho.
