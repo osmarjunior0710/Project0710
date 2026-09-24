@@ -15,7 +15,7 @@ interface TickPipsProps {
    * vermelho (`--danger`), pra recurso com tema de cor própria
    * vermelho já estabelecido em outra parte da tela (ex.: Fúria, card
    * fixo do Combate). Cinza de "já gasto" continua igual nos 3 casos. */
-  variante?: 'padrao' | 'especial' | 'vermelho' | 'roxo' | 'mostarda' | 'azul';
+  variante?: 'padrao' | 'especial' | 'vermelho' | 'roxo' | 'mostarda' | 'azul' | 'azul-claro';
 }
 
 /** Ticks/pips padronizados pra qualquer recurso "N usos, alguns já
@@ -34,6 +34,7 @@ const CLASSE_DA_VARIANTE: Record<string, string | null> = {
   roxo: 'pipEspecial',
   vermelho: 'pipVermelho',
   mostarda: 'pipMostarda',
+  'azul-claro': 'pipAzulClaro',
 };
 
 export default function TickPips({ total, usados, tamanho = 'sm', variante = 'padrao' }: TickPipsProps) {

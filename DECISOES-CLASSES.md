@@ -74,7 +74,10 @@ conferir.
 recurso dela aparece — Bárbaro/Fúria vermelho, Bardo/Inspiração
 mostarda, Bruxo/Magia de Pacto roxo, Guerreiro/Recuperar Fôlego azul
 (confirmado — mesmo azul padrão, registrado de propósito pra não
-parecer esquecimento). **Classe nova ganha cor na mesma
+parecer esquecimento), Mago/Truques e Magias azul-claro (2026-09-24,
+distinto do azul do Guerreiro de propósito — os dois nunca deveriam
+se confundir na mesma tela, ex.: personagem Guerreiro/Mago
+multiclasse). **Classe nova ganha cor na mesma
 entrega em que ganha o 1º recurso com contador; se o Osmar não disser
 qual, PERGUNTAR** (não escolher sozinho). Sem cor definida, o pip fica no
 azul padrão (`null`) até o Osmar decidir. Os

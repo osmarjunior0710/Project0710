@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1850
+
+Mago ganha cor própria (azul-claro) nos recursos/selos de classe — cor nova em `/prototipo`, ambiente interno (2 cenas novas de protótipo pra planejar Multiclasse, sem efeito no app real ainda).
+
 ## v202609_2321
 
 **Mago — Maestria de Magias, trocar no Descanso Longo.** Ao completar um Descanso Longo (se você já tem as 2 magias de Maestria escolhidas), depois da pergunta de redefinir Magias Preparadas aparece "Quer estudar seu Livro de Magias e trocar 1 das magias de Maestria?" — respondendo "Sim", abre uma tela pra substituir 1 das 2 (1º ou 2º círculo) por outra elegível do mesmo círculo do seu Livro de Magias.

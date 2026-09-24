@@ -8,7 +8,7 @@ interface ContadorUsosProps {
   tamanho?: 'sm' | 'lg';
   /** Repassado pro `TickPips` — `'especial'` = pip roxo/lavanda (ver
    * `TickPips.tsx`). */
-  variante?: 'padrao' | 'especial' | 'vermelho' | 'roxo' | 'mostarda' | 'azul';
+  variante?: 'padrao' | 'especial' | 'vermelho' | 'roxo' | 'mostarda' | 'azul' | 'azul-claro';
 }
 
 /** Pips + "restantes/total", pra colocar ao lado do NOME de qualquer
