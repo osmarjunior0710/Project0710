@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1907
+
+Protótipos de Multiclasse (`/prototipo`) refeitos com a estrutura real da tela (botão Usar, magia de catálogo de verdade) em vez de mockup simplificado.
+
 ## v202609_1850
 
 Mago ganha cor própria (azul-claro) nos recursos/selos de classe — cor nova em `/prototipo`, ambiente interno (2 cenas novas de protótipo pra planejar Multiclasse, sem efeito no app real ainda).
