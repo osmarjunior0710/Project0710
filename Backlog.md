@@ -28,6 +28,35 @@ travar a Entrega 1 (mudança de dado) nessa expansão maior — que
 envolve tela nova de configuração em Perfil e passa pelos 3 chapéus
 de novo antes de codar.
 
+## Combate lendo direto da aba Magias — 1 registro só de fonte extra (2026-09-25)
+
+Achado do Osmar, depois do bug "Maestria de Magias/Assinatura Mágica
+não apareciam no Combate" (corrigido em `v202609_1108`): hoje cada
+característica "sempre preparada" (Descobertas Mágicas, Livro das
+Sombras, Pacto do Ínfero, magia de Espécie/Talento de Origem/Talento
+Geral, Maestria de Magias, Assinatura Mágica — ~8 fontes) tem seu
+próprio array pra desenhar a seção própria na aba Magias E precisa ser
+somada à mão em `magiasConjuraveis` (`useMagiasEConjuracao.ts`) pra
+também aparecer no picker "Usar Magia" do Combate — são 2 pontos de
+manutenção por característica nova, fácil esquecer o 2º (foi
+exatamente o que causou o bug).
+
+**Ideia:** um registro único de "fontes extras de magia sempre
+conjurável" (nome da fonte + lista de magias), que tanto a aba Magias
+(pra desenhar cada seção) quanto o Combate (pra montar
+`magiasConjuraveis`) leem do MESMO lugar — uma característica nova
+entra 1 vez só. O roteamento por Ação/Ação Bônus/Reação/upcast já é
+automático hoje (lê `tempoConjuracao`/círculo direto da magia, não é
+hardcoded por característica) — não precisa mexer nisso, só na parte
+de "de onde vêm as magias extras".
+
+**Por que ficou pra depois:** o Osmar está no meio de uma rodada de
+caça a bugs (não fechar nenhum foco até ele mandar) — isso aqui é
+refatoração de um arquivo central usado por ~8 características já
+implementadas, risco de regressão maior que um ajuste pontual. Vira
+foco próprio (com SDD, chapéu de Engenheiro olhando cada fonte antes
+de mexer) assim que a rodada de bugs terminar.
+
 ## Recursos visíveis (área abaixo do HP) — o que ficou de fora de propósito (2026-09)
 
 Pedido do Osmar: a 1ª versão mostra só Fúria, Inspiração de Bardo, Magia de
