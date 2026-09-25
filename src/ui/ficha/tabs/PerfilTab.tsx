@@ -10,6 +10,7 @@ import {
   NOME_PLACEHOLDER_CARACTERISTICA_SUBCLASSE,
 } from '../../../core/levelUp';
 import type { WizardSelection } from '../../../core/personagem';
+import type { PersonagemClasse } from '../../../core/multiclasse';
 import { invocacoesMisticas } from '../../../data/rulesets/dnd2024/invocacoesMisticas';
 import { invocacaoTemPlaceholder } from '../../../core/invocacoesMisticas';
 import { talentoTemPlaceholder } from '../../../core/classificarTalento';
@@ -17,9 +18,11 @@ import { descricaoTracoResolvida, opcoesSubescolhaNoWizard, tracoComEscolhaDePer
 
 interface PerfilTabProps {
   selecao: WizardSelection;
-  classe: Classe | null;
-  nivel: number;
-  subclasse: string | null;
+  /** TODAS as classes do personagem (multiclasse, ver EmDev.md
+   * "Entrega 5a") — cada uma ganha seu próprio bloco "Classe —
+   * Nome"/"Subclasse", em vez de mostrar só 1. */
+  classesAtual: PersonagemClasse[];
+  catalogoClasses: Classe[];
   talentosGeraisAtuais: string[];
   /** Invocações Místicas (Bruxo) atuais — vazio pra qualquer outra
    * classe, a seção some sozinha. */
@@ -31,23 +34,30 @@ interface PerfilTabProps {
 
 export default function PerfilTab({
   selecao,
-  classe,
-  nivel,
-  subclasse,
+  classesAtual,
+  catalogoClasses,
   talentosGeraisAtuais,
   invocacoesMisticasAtuais,
   invocacoesTruqueVinculado,
 }: PerfilTabProps) {
+  // 1 bloco de Classe/Subclasse POR classe do personagem (Entrega 5a,
+  // ver EmDev.md) — mesmo cálculo de antes (`caracteristicasAcumuladas`/
+  // `caracteristicasSubclasseAcumuladas`), só que repetido pra cada
+  // `PersonagemClasse` em vez de rodar 1 vez só pra "a classe ativa".
   // O placeholder "Característica de Subclasse" (ver levelUp.ts) nunca
-  // vira card aqui — a característica REAL já aparece certa na seção
-  // "Subclasse" logo abaixo (`caracteristicasDaSubclasse`); mostrar o
-  // placeholder aqui também só duplicava a informação com um texto
-  // errado ("descrição não importada", mesmo quando já foi).
-  const caracteristicasClasse = classe
-    ? caracteristicasAcumuladas(classe, nivel).filter((c) => c.nome !== NOME_PLACEHOLDER_CARACTERISTICA_SUBCLASSE)
-    : [];
-  const caracteristicasDaSubclasse = caracteristicasSubclasseAcumuladas(subclasse, nivel);
-  const subclasseInfo = subclasse ? subclasses.find((s) => s.nome === subclasse) ?? null : null;
+  // vira card — a característica REAL já aparece certa na seção
+  // "Subclasse" (`caracteristicasDaSubclasse`); mostrar o placeholder
+  // também só duplicava a informação com um texto errado ("descrição
+  // não importada", mesmo quando já foi).
+  const blocosDeClasse = classesAtual.map((entry) => {
+    const classeObj = catalogoClasses.find((c) => c.nome === entry.classe) ?? null;
+    const caracteristicasClasse = classeObj
+      ? caracteristicasAcumuladas(classeObj, entry.nivel).filter((c) => c.nome !== NOME_PLACEHOLDER_CARACTERISTICA_SUBCLASSE)
+      : [];
+    const caracteristicasDaSubclasse = caracteristicasSubclasseAcumuladas(entry.subclasse ?? null, entry.nivel);
+    const subclasseInfo = entry.subclasse ? subclasses.find((s) => s.nome === entry.subclasse) ?? null : null;
+    return { entry, caracteristicasClasse, caracteristicasDaSubclasse, subclasseInfo };
+  });
   const origem = origens.find((o) => o.nome === selecao.origem) ?? null;
   const talento = origem ? talentosOrigem.find((t) => t.id === origem.talentoOrigemId) ?? null : null;
   const especie = especies.find((e) => e.nome === selecao.especie) ?? null;
@@ -60,21 +70,46 @@ export default function PerfilTab({
 
   return (
     <>
-      <div className="section-title">Classe{classe ? ` — ${classe.nome}` : ''}</div>
-      {caracteristicasClasse.length === 0 && (
-        <div className="label" style={{ marginBottom: 12 }}>
-          Nenhuma característica de classe ainda.
-        </div>
-      )}
-      {caracteristicasClasse.map((c) => (
-        <div key={c.nome} className="opt-card" style={{ cursor: 'default' }}>
-          <div className="opt-card-name">{c.nome}</div>
-          {c.descricao ? (
-            <div className="opt-card-desc">{c.descricao}</div>
-          ) : (
-            <div className="opt-card-desc" style={{ color: 'var(--text-faint)' }}>
-              Descrição detalhada ainda não importada pra essa característica.
+      {blocosDeClasse.map(({ entry, caracteristicasClasse, caracteristicasDaSubclasse, subclasseInfo }) => (
+        <div key={entry.classe}>
+          <div className="section-title">
+            Classe — {entry.classe} (nível {entry.nivel})
+          </div>
+          {caracteristicasClasse.length === 0 && (
+            <div className="label" style={{ marginBottom: 12 }}>
+              Nenhuma característica de classe ainda.
             </div>
+          )}
+          {caracteristicasClasse.map((c) => (
+            <div key={c.nome} className="opt-card" style={{ cursor: 'default' }}>
+              <div className="opt-card-name">{c.nome}</div>
+              {c.descricao ? (
+                <div className="opt-card-desc">{c.descricao}</div>
+              ) : (
+                <div className="opt-card-desc" style={{ color: 'var(--text-faint)' }}>
+                  Descrição detalhada ainda não importada pra essa característica.
+                </div>
+              )}
+            </div>
+          ))}
+
+          {caracteristicasDaSubclasse.length > 0 && (
+            <>
+              <div className="section-title" style={{ marginTop: 16 }}>
+                Subclasse{entry.subclasse ? ` — ${entry.subclasse}` : ''} {subclasseInfo?.homebrew && <BadgeHomebrew />}
+              </div>
+              {subclasseInfo?.homebrew && (
+                <div className="label" style={{ marginBottom: 8 }}>
+                  Não é regra oficial ainda — vai ser revisada quando o livro sair.
+                </div>
+              )}
+              {caracteristicasDaSubclasse.map((c) => (
+                <div key={c.nome} className="opt-card" style={{ cursor: 'default' }}>
+                  <div className="opt-card-name">{c.nome}</div>
+                  <div className="opt-card-desc">{c.descricao}</div>
+                </div>
+              ))}
+            </>
           )}
         </div>
       ))}
@@ -97,25 +132,6 @@ export default function PerfilTab({
               </div>
             );
           })}
-        </>
-      )}
-
-      {caracteristicasDaSubclasse.length > 0 && (
-        <>
-          <div className="section-title" style={{ marginTop: 16 }}>
-            Subclasse{subclasse ? ` — ${subclasse}` : ''} {subclasseInfo?.homebrew && <BadgeHomebrew />}
-          </div>
-          {subclasseInfo?.homebrew && (
-            <div className="label" style={{ marginBottom: 8 }}>
-              Não é regra oficial ainda — vai ser revisada quando o livro sair.
-            </div>
-          )}
-          {caracteristicasDaSubclasse.map((c) => (
-            <div key={c.nome} className="opt-card" style={{ cursor: 'default' }}>
-              <div className="opt-card-name">{c.nome}</div>
-              <div className="opt-card-desc">{c.descricao}</div>
-            </div>
-          ))}
         </>
       )}
 

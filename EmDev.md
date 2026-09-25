@@ -100,10 +100,11 @@ vez, Perfil passa a agrupar por classe também.
       lugar nenhum — não a versão simplificada que só escondia o
       botão). Escopo grande, quebrado em sub-passos pra testar/
       publicar 1 de cada vez:
-  - [ ] 5a — `PerfilTab`: recebe `classesAtual`/catálogo em vez de
+  - [x] 5a — `PerfilTab`: recebe `classesAtual`/catálogo em vez de
         `classe`/`nivel`/`subclasse` únicos; mostra um bloco "Classe —
         Nome" + "Subclasse" POR classe do personagem, em vez de só a
-        ativa.
+        ativa. Testado com o multiclasse (3 blocos: Bárbaro/Bardo/
+        Bruxo) e o migrado (Mago 17, todas as características certas).
   - [ ] 5b — `MagiasTab`/`useMagiasEConjuracao`: "Espaços de Magia"
         mostra os pools de TODAS as classes com pool próprio juntos
         (não combinável entre si — ex.: normal do Bardo + Magia de

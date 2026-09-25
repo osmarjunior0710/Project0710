@@ -2531,9 +2531,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         {tab === 'perfil' && (
           <PerfilTab
             selecao={selecao}
-            classe={classe}
-            nivel={personagem.nivel}
-            subclasse={personagem.subclasse}
+            classesAtual={classesAtual}
+            catalogoClasses={catalogoClasses}
             talentosGeraisAtuais={talentosGeraisAtuais}
             invocacoesMisticasAtuais={invocacoesMisticasAtuais}
             invocacoesTruqueVinculado={invocacoesTruqueVinculado}
