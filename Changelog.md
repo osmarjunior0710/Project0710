@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1147
+
+**Multiclasse — Astúcia Mágica e afins não dependem mais do pill.** Contatar Patrono, Astúcia Mágica, Maestria de Magias e Adepto de Ritual aparecem sempre que o personagem TEM aquela classe, mesmo que o pill esteja em outra. Corrige de brinde um bug: Astúcia Mágica podia recuperar o pool de espaço errado se o pill não estivesse no Bruxo.
+
 ## v202609_1141
 
 **Multiclasse — CD/Ataque Mágico agora é por classe.** Personagem com 2 classes conjuradoras (ex.: Mago + Bardo) vê 1 bloco de "Mod. de Conj./CD/Ataque Mágico" pra cada classe, com os números certos de cada uma — antes só mostrava o da classe no pill.

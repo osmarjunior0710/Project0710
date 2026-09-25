@@ -1723,7 +1723,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   function usarAstuciaMagica() {
     if (astuciaMagicaGasta || !espacoPactoAtual || astuciaMagicaRecupera <= 0) return;
     const circulo = espacoPactoAtual.circulo;
-    atualizarEspacosGastos((prev) => ({ ...prev, [circulo]: Math.max(0, (prev[circulo] ?? 0) - astuciaMagicaRecupera) }));
+    // Recupera espaço de Pacto de verdade — mesmo achado da Entrega
+    // 5d: o pool de Pacto é sempre do Bruxo, mesmo quando ele não é a
+    // classe ativa no pill (`atualizarEspacosGastos` sem 2º argumento
+    // gastaria/devolveria do pool da classe ATIVA errado nesse caso).
+    atualizarEspacosGastos((prev) => ({ ...prev, [circulo]: Math.max(0, (prev[circulo] ?? 0) - astuciaMagicaRecupera) }), 'Bruxo');
     setAstuciaMagicaGasta(true);
   }
 

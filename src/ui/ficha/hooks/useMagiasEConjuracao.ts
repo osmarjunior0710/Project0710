@@ -181,13 +181,26 @@ export function useMagiasEConjuracao(input: {
   const magiasPreparadas = preparadasComClasse.map((t) => t.magia);
   const magiasDescobertasMagicas = magiasPreparadasDoPersonagem(magiasDescobertasMagicasAtuais);
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
-  const memorizarMagiaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Memorizar Magia', personagem.nivel) !== null : false;
+  // Entrega 5d (Multiclasse, ver EmDev.md) — características
+  // específicas do Mago/Bruxo (Memorizar Magia, Adepto de Ritual,
+  // Astúcia Mágica, Contatar Patrono, Maestria de Magias, Mestre
+  // Místico) checam se o personagem TEM aquela classe em
+  // `classesAtual` (com o NÍVEL dessa entrada), não mais "a classe
+  // ativa é X" — do contrário, sumiam da tela sempre que o pill não
+  // estivesse na classe certa.
+  const magoEntry = classesAtual.find((c) => c.classe === 'Mago');
+  const magoObj = magoEntry ? catalogoClasses.find((cc) => cc.nome === 'Mago') ?? null : null;
+  const bruxoEntry = classesAtual.find((c) => c.classe === 'Bruxo');
+  const bruxoObj = bruxoEntry ? catalogoClasses.find((cc) => cc.nome === 'Bruxo') ?? null : null;
+  const memorizarMagiaDisponivel =
+    magoObj && magoEntry ? caracteristicaDesbloqueada(magoObj, 'Memorizar Magia', magoEntry.nivel) !== null : false;
   const livroDeMagias = magiasPreparadasDoPersonagem(livroDeMagiasAtuais);
-  const adeptoDeRitualDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Adepto de Ritual', personagem.nivel) !== null : false;
+  const adeptoDeRitualDisponivel =
+    magoObj && magoEntry ? caracteristicaDesbloqueada(magoObj, 'Adepto de Ritual', magoEntry.nivel) !== null : false;
   const magiasRituaisDoLivro = adeptoDeRitualDisponivel
     ? magiasRituaisElegiveis(livroDeMagias, nomesDeMagiasConhecidas(magiasPreparadasAtuais))
     : [];
-  const usaRedefPorDescanso = usaRedefinicaoPorDescanso(classe);
+  const usaRedefPorDescanso = usaRedefinicaoPorDescanso(magoObj);
   const magiasGratisConcedidas = magiasGratisDasInvocacoes(invocacoesMisticasAtuais);
   const formasFamiliarElegiveis = formasFamiliarDasInvocacoes(invocacoesMisticasAtuais);
   const formasFamiliarMortoVivoElegiveis = formasFamiliarMortoVivoElegiveisNecro(personagem.subclasse, personagem.nivel);
@@ -197,22 +210,34 @@ export function useMagiasEConjuracao(input: {
   const pvTempMestreDaMorteAtual = mestreDaMorteDisponivel ? bonusPvTempMestreDaMorte(personagem.nivel) : 0;
   const petsMortoVivoAtuais = petsMortoVivo(pets);
   const mestreDaMorteExplosaoLiberadaAtual = algumMortoVivoEm0PV(pets);
-  const astuciaMagicaDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Astúcia Mágica', personagem.nivel) !== null : false;
-  const contatarPatronoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contatar Patrono', personagem.nivel) !== null : false;
+  const astuciaMagicaDisponivel =
+    bruxoObj && bruxoEntry ? caracteristicaDesbloqueada(bruxoObj, 'Astúcia Mágica', bruxoEntry.nivel) !== null : false;
+  const contatarPatronoDisponivel =
+    bruxoObj && bruxoEntry ? caracteristicaDesbloqueada(bruxoObj, 'Contatar Patrono', bruxoEntry.nivel) !== null : false;
   const contatoExtraplanar = magias.find((m) => m.nome === 'Contato Extraplanar') ?? null;
   const arcanaMisticaEscolhidas = Object.entries(arcanaMisticaAtuais)
     .map(([circulo, nomeMagia]) => ({ circulo: Number(circulo), magia: magias.find((m) => m.nome === nomeMagia) ?? null }))
     .filter((item): item is { circulo: number; magia: Magia } => item.magia !== null)
     .sort((a, b) => a.circulo - b.circulo);
-  const maestriaDeMagiasDisponivel = classe
-    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.maestriaDeMagias, personagem.nivel) !== null
-    : false;
+  const maestriaDeMagiasDisponivel =
+    magoObj && magoEntry
+      ? caracteristicaDesbloqueada(magoObj, ID_CARACTERISTICA_CLASSE.maestriaDeMagias, magoEntry.nivel) !== null
+      : false;
   const magiasMaestriaDoLivro = Object.values(maestriaDeMagiasAtuais)
     .map((nomeMagia) => magias.find((m) => m.nome === nomeMagia))
     .filter((m): m is Magia => m !== undefined);
-  const mestreMisticoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Mestre Místico', personagem.nivel) !== null : false;
-  const espacoPactoAtual = espacos[0] ?? null;
-  const espacosGastosPacto = espacoPactoAtual ? (espacosGastosPorCirculo[espacoPactoAtual.circulo] ?? 0) : 0;
+  const mestreMisticoDisponivel =
+    bruxoObj && bruxoEntry ? caracteristicaDesbloqueada(bruxoObj, 'Mestre Místico', bruxoEntry.nivel) !== null : false;
+  // Achado corrigido de passagem (Entrega 5d): Astúcia Mágica recupera
+  // espaço de PACTO especificamente — antes usava sempre o `espacos`
+  // (pool da classe ATIVA no pill), errado quando o pill não estava
+  // no Bruxo. Agora usa o pool certo de qualquer forma: o próprio
+  // `espacos` quando a ativa É o Bruxo, ou o da ponte quando não é
+  // (a ponte, quando existe, é sempre o Bruxo nesse caso — ver
+  // `outraClasseEntry` acima).
+  const espacoPactoAtual = classeAtivaNome === 'Bruxo' ? espacos[0] ?? null : ponte?.classeNome === 'Bruxo' ? ponte.espacos[0] ?? null : null;
+  const espacosGastosPactoPool = classeAtivaNome === 'Bruxo' ? espacosGastosPorCirculo : ponte?.espacosGastosPorCirculo ?? {};
+  const espacosGastosPacto = espacoPactoAtual ? (espacosGastosPactoPool[espacoPactoAtual.circulo] ?? 0) : 0;
   const astuciaMagicaRecupera = espacoPactoAtual
     ? espacosARecuperar(espacoPactoAtual.maximo, espacosGastosPacto, mestreMisticoDisponivel)
     : 0;

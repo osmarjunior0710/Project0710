@@ -129,11 +129,21 @@ vez, Perfil passa a agrupar por classe também.
         combos como Mago+Bardo. Trava estruturalmente (precisa saber
         a classe da magia no momento de conjurar, redesenho maior),
         não é mais uma entrega desta Multiclasse.
-  - [ ] 5d — Seções Bruxo-específicas da aba Magias (Contatar
-        Patrono, Astúcia Mágica, Arcana Mística, Livro das Sombras)
-        passam a checar "o personagem TEM Bruxo em `classesAtual`"
-        (usando o nível DESSA entrada) em vez de "a classe ativa é
-        Bruxo".
+  - [x] 5d — Características do Mago/Bruxo (Memorizar Magia, Adepto
+        de Ritual, Maestria de Magias / Astúcia Mágica, Contatar
+        Patrono, Mestre Místico) passam a checar "o personagem TEM
+        essa classe em `classesAtual`" (com o NÍVEL dessa entrada),
+        não mais "a classe ativa é X". (Livro das Sombras já não
+        dependia disso — usa `invocacoesMisticasAtuais`, sempre a
+        nível de personagem.) **Bug real corrigido de passagem:**
+        Astúcia Mágica calculava/recuperava o espaço de PACTO usando
+        sempre o pool da classe ATIVA — com o pill fora do Bruxo,
+        tentava recuperar o pool ERRADO (ex.: do Bardo). Corrigido
+        pra sempre usar o pool do Bruxo (via `ponte` quando ele não é
+        a ativa). Testado ao vivo: subi o Bruxo pra nível 2 com o
+        pill no Bardo, gastei 1 espaço de Pacto conjurando pelo
+        seletor combinado, Astúcia Mágica apareceu e recuperou o
+        pool certo (Bruxo 1/2 → 2/2, Bardo intocado).
   - [ ] 5e — Level Up: remove a dependência de `classeAtivaNome` como
         "classe padrão"/"classe que o Level Up afeta" — usa sempre o
         resultado de `EscolherClasseLevelUp` (já existe, só não
