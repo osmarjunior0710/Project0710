@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1209
+
+**Multiclasse — Level Up não depende mais do pill.** Subir de nível (pela seta de XP ou pelo raio de teste) sempre pergunta/resolve qual classe sobe de forma explícita, não mais "a que estava selecionada no pill".
+
 ## v202609_1147
 
 **Multiclasse — Astúcia Mágica e afins não dependem mais do pill.** Contatar Patrono, Astúcia Mágica, Maestria de Magias e Adepto de Ritual aparecem sempre que o personagem TEM aquela classe, mesmo que o pill esteja em outra. Corrige de brinde um bug: Astúcia Mágica podia recuperar o pool de espaço errado se o pill não estivesse no Bruxo.

@@ -144,10 +144,21 @@ vez, Perfil passa a agrupar por classe também.
         pill no Bardo, gastei 1 espaço de Pacto conjurando pelo
         seletor combinado, Astúcia Mágica apareceu e recuperou o
         pool certo (Bruxo 1/2 → 2/2, Bardo intocado).
-  - [ ] 5e — Level Up: remove a dependência de `classeAtivaNome` como
-        "classe padrão"/"classe que o Level Up afeta" — usa sempre o
-        resultado de `EscolherClasseLevelUp` (já existe, só não
-        recebia mais um `classePadrao` do pill) numa state local nova.
+  - [x] 5e — Level Up (interativo E o raio de teste) não depende mais
+        do pill: `classeParaLevelUp` (state nova) guarda qual classe
+        o Level Up afeta, resolvida por `EscolherClasseLevelUp`
+        quando há ambiguidade real, ou a única opção possível quando
+        não há — nunca mais um efeito colateral de qual pill estava
+        selecionado. `confirmarLevelUp`/`levelUpRapido` usam essa
+        classe (não `classeAtivaNome`) pra atualizar `classesAtual`,
+        marcar truques/magias com `marcarClasseDasEscolhas`, e checar
+        Campeão Primitivo. Redefinição/Memorizar Magia (Mago-só)
+        passam a marcar sempre `'Mago'` fixo, não mais a classe ativa.
+        Testado ao vivo: raio levelou Bárbaro (1ª classe) mesmo com o
+        pill em Bardo; fluxo interativo mostrou "Bárbaro" pré-marcado
+        (última escolha do raio, não o pill), escolhi Bardo
+        manualmente e o Level Up aplicou certinho nele (d8, Pau pra
+        Toda Obra, PV 61→72).
   - [ ] 5f — Remove os botões do pill + `classeAtivaNome`/
         `classeAtivaEntry`/`classe` (singular) de `FichaShell.tsx` de
         vez; qualquer resto que ainda dependa de "1 classe" passa a

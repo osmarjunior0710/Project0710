@@ -286,6 +286,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagemSalvo.ferramentasMulticlasseAtual ?? [],
   );
   const [escolhendoClasseLevelUp, setEscolhendoClasseLevelUp] = useState(false);
+  // Entrega 5e (Multiclasse, ver EmDev.md) — qual classe o Level Up
+  // (interativo OU o raio de teste) afeta agora. Antes disso, era
+  // sempre "a classe ativa no pill"; sem pill, `EscolherClasseLevelUp`
+  // (quando há ambiguidade de verdade) ou a única opção possível
+  // (quando não há) decide e guarda aqui — nunca mais um efeito
+  // colateral de qual botão estava selecionado.
+  const [classeParaLevelUp, setClasseParaLevelUp] = useState<string | null>(null);
   // Objeto derivado (não é state) — nível/subclasse vêm da classe ATIVA
   // (`classeAtivaEntry`); PV máximo/mod. CON/bônus fixo por nível são
   // do personagem inteiro, iguais pra qualquer classe em foco.
@@ -299,6 +306,26 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     bonusPvPorNivel: bonusPvPorNivelDaEspecie(selecao) + bonusPvPorNivelDoTalento(selecao),
     bonusPvPorNivelLabel: rotulosBonusPvPorNivel(selecao).join(' + '),
   };
+  /** Mesma forma de `personagem`, mas pra QUALQUER classe (Entrega 5e)
+   * — usado só pelo Level Up (interativo e o raio de teste), que
+   * precisa do nível/subclasse da classe ESCOLHIDA pra subir, não da
+   * classe "em foco" na ficha (conceito que nem existe mais, ver 5f). */
+  function personagemNivelDaClasse(classeNome: string): PersonagemNivel {
+    const entry = classesAtual.find((c) => c.classe === classeNome);
+    const classeObj = catalogoClasses.find((c) => c.nome === classeNome);
+    return {
+      nivel: entry?.nivel ?? 0,
+      pvMax,
+      dadoVida: classeObj?.dadoDeVida ?? 'd8',
+      conMod: conValor !== null ? modificador(conValor) : 0,
+      subclasse: entry?.subclasse ?? null,
+      estiloDeLuta: estiloDeLutaAtivo,
+      bonusPvPorNivel: bonusPvPorNivelDaEspecie(selecao) + bonusPvPorNivelDoTalento(selecao),
+      bonusPvPorNivelLabel: rotulosBonusPvPorNivel(selecao).join(' + '),
+    };
+  }
+  const classeParaLevelUpObj = classeParaLevelUp ? catalogoClasses.find((c) => c.nome === classeParaLevelUp) ?? null : null;
+  const personagemParaLevelUp = classeParaLevelUp ? personagemNivelDaClasse(classeParaLevelUp) : personagem;
   const [pvAtual, setPvAtual] = useState(personagemSalvo.pvAtual);
   const [pvTemporario, setPvTemporario] = useState(personagemSalvo.pvTemporarioAtual ?? 0);
   /** Efeito de Cura (ver `dispararEfeitoCura`/`onCuraDeMagiaAplicada`)
@@ -1660,7 +1687,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }
 
   function aoConfirmarRedefinicao(novaLista: string[]) {
-    setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, classeAtivaNome));
+    // Redefinição livre por Descanso Longo — só o Mago tem essa
+    // característica (Livro de Magias), sempre 'Mago' mesmo que o
+    // pill não esteja lá (ver Entrega 5d — `usaRedefPorDescanso` já
+    // checa isso por classesAtual, não pela classe ativa).
+    setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, 'Mago'));
     setDescansoEmAndamento((prev) =>
       prev ? { ...prev, fase: prev.maestriaTrocaPendente ? 'perguntaMaestriaTroca' : 'saindo' } : prev,
     );
@@ -2006,19 +2037,23 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // vir antes do `aumentarAtributos`/`setSelecao` abaixo, senão perde
     // o valor de referência pro ajuste retroativo de PV logo adiante.
     const conAntes = valorFinalAtributo(selecao, 'CON') ?? 10;
+    // Entrega 5e — classe que este Level Up afeta é a que foi
+    // resolvida em `classeParaLevelUp` (via `EscolherClasseLevelUp` ou
+    // a única opção possível), nunca mais "a classe ativa no pill".
+    const classeAlvo = classeParaLevelUp ?? classesAtual[0]?.classe ?? '';
     const novosAtributos = resultado.atributosAumentados
       ? aumentarAtributos(selecao.atributos, resultado.atributosAumentados)
       : null;
     if (novosAtributos) setSelecao((prev) => ({ ...prev, atributos: novosAtributos }));
-    // Grava o nível/subclasse novos na classe ATIVA dentro de `classesAtual`
-    // (não mais num `personagem` solto) — cria a entrada se for a
-    // primeira vez que essa classe aparece (multiclasse nova, `nivelAtual`
-    // 0 → 1 escolhido em `EscolherClasseLevelUp`). `conMod` não precisa de
-    // sync manual mais: deriva de `selecao.atributos.CON` a cada render.
+    // Grava o nível/subclasse novos na classe ALVO dentro de
+    // `classesAtual` — cria a entrada se for a primeira vez que essa
+    // classe aparece (multiclasse nova, `nivelAtual` 0 → 1 escolhido
+    // em `EscolherClasseLevelUp`). `conMod` não precisa de sync manual
+    // mais: deriva de `selecao.atributos.CON` a cada render.
     setClassesAtual((prev) => {
-      const idx = prev.findIndex((c) => c.classe === classeAtivaNome);
+      const idx = prev.findIndex((c) => c.classe === classeAlvo);
       if (idx === -1) {
-        return [...prev, { classe: classeAtivaNome, nivel: resultado.novoNivel, subclasse: resultado.subclasseEscolhida ?? null }];
+        return [...prev, { classe: classeAlvo, nivel: resultado.novoNivel, subclasse: resultado.subclasseEscolhida ?? null }];
       }
       return prev.map((c, i) =>
         i === idx ? { ...c, nivel: resultado.novoNivel, subclasse: resultado.subclasseEscolhida ?? c.subclasse } : c,
@@ -2035,7 +2070,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // desse mesmo nível), então até o ganho DESTE nível entra no
     // ajuste — por isso o multiplicador é `nivelTotalAtual + 1` (nível
     // total incluindo o que acabou de ser ganho), não `nivelTotalAtual`.
-    const chegouAoCampeaoPrimitivo = classeAtivaNome === 'Bárbaro' && resultado.novoNivel === 20;
+    const chegouAoCampeaoPrimitivo = classeAlvo === 'Bárbaro' && resultado.novoNivel === 20;
     const conDepoisAsi = novosAtributos ? (valorFinalAtributo({ ...selecao, atributos: novosAtributos }, 'CON') ?? conAntes) : conAntes;
     const conDepois = aplicarCampeaoPrimitivo(conDepoisAsi, 'CON', chegouAoCampeaoPrimitivo);
     const aplicarAjustePv = (v: number) =>
@@ -2045,10 +2080,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setPvMax((v) => aplicarAjustePv(v + resultado.pvGanho));
     if (resultado.estiloDeLutaEscolhido) setEstiloDeLutaAtivo(resultado.estiloDeLutaEscolhido);
     setPvAtual((v) => aplicarAjustePv(v + resultado.pvGanho));
-    if (resultado.truquesEscolhidos) setTruquesAtuais(marcarClasseDasEscolhas(resultado.truquesEscolhidos, truquesAtuais, classeAtivaNome));
+    if (resultado.truquesEscolhidos) setTruquesAtuais(marcarClasseDasEscolhas(resultado.truquesEscolhidos, truquesAtuais, classeAlvo));
     if (resultado.livroDeMagiasEscolhidas) setLivroDeMagiasAtuais(resultado.livroDeMagiasEscolhidas);
     if (resultado.magiasPreparadasEscolhidas)
-      setMagiasPreparadasAtuais(marcarClasseDasEscolhas(resultado.magiasPreparadasEscolhidas, magiasPreparadasAtuais, classeAtivaNome));
+      setMagiasPreparadasAtuais(marcarClasseDasEscolhas(resultado.magiasPreparadasEscolhidas, magiasPreparadasAtuais, classeAlvo));
     if (resultado.invocacoesMisticasEscolhidas) setInvocacoesMisticasAtuais(resultado.invocacoesMisticasEscolhidas);
     if (resultado.invocacoesTruqueVinculadoEscolhido) setInvocacoesTruqueVinculado(resultado.invocacoesTruqueVinculadoEscolhido);
     if (resultado.periciasEspecialistaEscolhidas) setPericiasEspecialistaAtuais(resultado.periciasEspecialistaEscolhidas);
@@ -2123,10 +2158,22 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }
 
   function levelUpRapido() {
-    if (!classe) return;
+    // Raio de teste — mesma resolução de classe do fluxo interativo
+    // (Entrega 5e): só 1 opção possível, usa ela; com 2+, usa a
+    // última escolhida em `EscolherClasseLevelUp` (se ainda fizer
+    // sentido) ou a 1ª classe do personagem por padrão — nunca pede
+    // pra escolher (é ferramenta de teste, não o fluxo real).
+    const opcoes = opcoesLevelUp(classesAtual, atributosFinaisAtuais, catalogoClasses);
+    const classeAlvoRapido = deveEscolherClasseNoLevelUp(opcoes)
+      ? (classeParaLevelUp && opcoes.some((o) => o.classe === classeParaLevelUp) ? classeParaLevelUp : opcoes[0]?.classe)
+      : opcoes[0]?.classe;
+    const classeRapida = classeAlvoRapido ? catalogoClasses.find((c) => c.nome === classeAlvoRapido) ?? null : null;
+    if (!classeRapida || !classeAlvoRapido) return;
+    setClasseParaLevelUp(classeAlvoRapido);
+    const personagemRapido = personagemNivelDaClasse(classeAlvoRapido);
     const resultado = sortearLevelUpRapido({
-      classe,
-      personagem,
+      classe: classeRapida,
+      personagem: personagemRapido,
       truquesAtuais: nomesDeMagiasConhecidas(truquesAtuais),
       magiasPreparadasAtuais: nomesDeMagiasConhecidas(magiasPreparadasAtuais),
       livroDeMagiasAtuais,
@@ -2190,10 +2237,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <EscolherClasseLevelUp
         opcoes={opcoes}
-        classePadrao={classeAtivaNome}
+        classePadrao={classeParaLevelUp ?? classesAtual[0]?.classe ?? ''}
         onFechar={() => setEscolhendoClasseLevelUp(false)}
         onConfirmar={(resultado: ResultadoEscolhaClasseLevelUp) => {
-          setClasseAtivaNome(resultado.classeEscolhida);
+          setClasseParaLevelUp(resultado.classeEscolhida);
           if (resultado.periciasEscolhidas) setPericiasMulticlasseAtuais((prev) => [...prev, ...resultado.periciasEscolhidas!]);
           if (resultado.ferramentasEscolhidas) setFerramentasMulticlasseAtuais((prev) => [...prev, ...resultado.ferramentasEscolhidas!]);
           setEscolhendoClasseLevelUp(false);
@@ -2203,11 +2250,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
-  if (levelUpAberto && classe) {
+  if (levelUpAberto && classeParaLevelUpObj) {
     return (
       <LevelUpShell
-        personagem={personagem}
-        classe={classe}
+        personagem={personagemParaLevelUp}
+        classe={classeParaLevelUpObj}
         onFechar={() => setLevelUpAberto(false)}
         onConfirmar={confirmarLevelUp}
         hpModo={levelUpHpModo}
@@ -2216,10 +2263,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         onHpRoladoChange={setLevelUpHpRolado}
         truquesAtuais={nomesDeMagiasConhecidas(truquesAtuais)}
         maestriaArmaAtual={maestriaArma}
-        truquesDaClasse={magiasDaClasse(classe.nome, 0)}
+        truquesDaClasse={magiasDaClasse(classeParaLevelUpObj.nome, 0)}
         magiasPreparadasAtuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
         livroDeMagiasAtuais={livroDeMagiasAtuais}
-        magiasDaClasseDisponiveis={magiasDisponiveisParaPreparar(classe, personagem.nivel + 1)}
+        magiasDaClasseDisponiveis={magiasDisponiveisParaPreparar(classeParaLevelUpObj, personagemParaLevelUp.nivel + 1)}
         invocacoesMisticasAtuais={invocacoesMisticasAtuais}
         invocacoesTruqueVinculadoAtuais={invocacoesTruqueVinculado}
         arcanaMisticaAtuais={arcanaMisticaAtuais}
@@ -2314,7 +2361,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         catalogo={livroDeMagias}
         onFechar={() => setMemorizarMagiaAberto(false)}
         onConfirmar={(novaLista) => {
-          setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, classeAtivaNome));
+          // Memorizar Magia — só Mago (nível 5+), mesmo motivo de
+          // `aoConfirmarRedefinicao` acima.
+          setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, 'Mago'));
           setMemorizarMagiaGasta(true);
           setMemorizarMagiaAberto(false);
         }}
@@ -2522,6 +2571,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               if (deveEscolherClasseNoLevelUp(opcoes)) {
                 setEscolhendoClasseLevelUp(true);
               } else {
+                setClasseParaLevelUp(opcoes[0].classe);
                 setLevelUpAberto(true);
               }
             }}
