@@ -159,10 +159,26 @@ vez, Perfil passa a agrupar por classe também.
         (última escolha do raio, não o pill), escolhi Bardo
         manualmente e o Level Up aplicou certinho nele (d8, Pau pra
         Toda Obra, PV 61→72).
-  - [ ] 5f — Remove os botões do pill + `classeAtivaNome`/
-        `classeAtivaEntry`/`classe` (singular) de `FichaShell.tsx` de
-        vez; qualquer resto que ainda dependa de "1 classe" passa a
-        iterar `classesAtual`.
+  - [x] 5f — Botões do pill removidos de vez (JSX + CSS
+        `.classePill*`). `classeAtivaNome` deixou de ser `useState`
+        (nada mais escreve nele) — virou constante derivada: a 1ª
+        classe do personagem que TEM recurso de conjuração própria
+        (fallback pra `classesAtual[0]` se nenhuma conjurar), só como
+        âncora interna pra rotular o pool PRINCIPAL de Espaços de
+        Magia (o da(s) outra(s) já aparece via `ponte`). Aviso de
+        déficit de Truques/Magias Preparadas também virou por classe
+        (`deficitsTruques`/`deficitsMagiasPreparadas`, arrays) — cada
+        um abre `CompletarMagiasShell` já scoped pra classe certa.
+        **Bug crítico corrigido no meio do caminho:** a 1ª versão
+        usava sempre `classesAtual[0]` como âncora — quebrava a aba
+        Magias INTEIRA (sumia, "sem fonte de conjuração") sempre que
+        a 1ª classe do personagem não conjura (ex.: Bárbaro/Bardo/
+        Bruxo, onde Bárbaro é a 1ª). Corrigido preferindo a 1ª classe
+        que REALMENTE conjura. Também corrigido `conjura` (gate da
+        aba inteira) pra checar TODAS as classes, não só a âncora.
+        Testado nos 3 personagens (1 classe, Mago+Bardo, Bárbaro+
+        Bardo+Bruxo): Perfil/Magias/Combate certos, completei um
+        déficit de Bardo pelo aviso novo, sem pill em lugar nenhum.
   - [ ] 5g — Checklist completo (tsc/testes/build) + teste manual nos
         3 personagens (1 classe só, Mago/Bardo, Bárbaro/Bardo/Bruxo)
         cobrindo Perfil, Magias, Combate e um Level Up de verdade.

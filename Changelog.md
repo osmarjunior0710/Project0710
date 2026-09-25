@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1220
+
+**Multiclasse — o pill (Mago/Bardo/Bruxo) saiu de vez.** O seletor de classe no topo da ficha não existe mais — Perfil, Magias e Combate já mostram tudo junto sem precisar trocar. O aviso "faltam truques/magias preparadas" agora é por classe.
+
 ## v202609_1209
 
 **Multiclasse — Level Up não depende mais do pill.** Subir de nível (pela seta de XP ou pelo raio de teste) sempre pergunta/resolve qual classe sobe de forma explícita, não mais "a que estava selecionada no pill".

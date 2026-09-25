@@ -133,7 +133,12 @@ export function useMagiasEConjuracao(input: {
     magiasPactoDoInferoDisponivel,
   } = input;
 
-  const conjura = personagemConjura(classe, selecao, talentosEfetivos);
+  // Bug real corrigido (Entrega 5f, achado testando o Char Multiclasse
+  // — Bárbaro/Bardo/Bruxo): `classe` aqui é só a classe ÂNCORA (1ª do
+  // personagem, ver FichaShell.tsx), que pode muito bem não conjurar
+  // (ex.: Bárbaro) mesmo com OUTRA classe do personagem conjurando —
+  // antes disso escondia a aba Magias inteira. Checa TODAS as classes.
+  const conjura = classesAtual.some((c) => personagemConjura(catalogoClasses.find((cc) => cc.nome === c.classe) ?? null, selecao, talentosEfetivos));
   const espacos = espacosDeMagiaAtivos(classe, personagem.nivel);
   // Ponte de Magia de Pacto (SDD Multiclasse seção 8.5) — só quando o
   // personagem tem Bruxo E outra classe conjuradora ao mesmo tempo.

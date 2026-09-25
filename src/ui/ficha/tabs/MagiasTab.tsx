@@ -228,10 +228,15 @@ interface MagiasTabProps {
   armaDePactoAtual: ItemMochila | null;
   onVincularArmaDePacto: (nomeArma: string) => void;
   onDesvincularArmaDePacto: () => void;
-  faltamTruques: number;
-  faltamMagiasPreparadas: number;
-  onCompletarTruques: () => void;
-  onCompletarMagiasPreparadas: () => void;
+  /** 1 entrada por classe com déficit (Entrega 5f, Multiclasse) — cada
+   * classe tem sua PRÓPRIA cota de Truques Conhecidos/Magias
+   * Preparadas, então o aviso "faltam X" precisa ser por classe, não
+   * só da classe "em foco" (conceito que já não existe mais). Lista
+   * vazia = ninguém com déficit. */
+  deficitsTruques: { classeNome: string; faltam: number }[];
+  deficitsMagiasPreparadas: { classeNome: string; faltam: number }[];
+  onCompletarTruques: (classeNome: string) => void;
+  onCompletarMagiasPreparadas: (classeNome: string) => void;
   /** `true` só quando o personagem tem "Grimório de Necromancia"
    * (Necromante, nível 3+) — controla se `onColheitaMacabraDisponivel`
    * dispara depois de conjurar magia de Necromancia com espaço. */
@@ -306,8 +311,8 @@ export default function MagiasTab({
   armaDePactoAtual,
   onVincularArmaDePacto,
   onDesvincularArmaDePacto,
-  faltamTruques,
-  faltamMagiasPreparadas,
+  deficitsTruques,
+  deficitsMagiasPreparadas,
   onCompletarTruques,
   onCompletarMagiasPreparadas,
   colheitaMacabraDisponivel,
@@ -889,7 +894,7 @@ export default function MagiasTab({
         </>
       )}
 
-      {(truquesComClasse.length > 0 || faltamTruques > 0) && (
+      {(truquesComClasse.length > 0 || deficitsTruques.length > 0) && (
         <>
           <div className={styles.grupoHeader} onClick={() => setTruquesExpandido(!truquesExpandido)}>
             <span>Truques</span>
@@ -897,11 +902,11 @@ export default function MagiasTab({
           </div>
           {truquesExpandido && (
             <>
-              {faltamTruques > 0 && (
-                <div className={styles.avisoFaltando} onClick={onCompletarTruques}>
-                  ⚠️ Faltam {faltamTruques} truque{faltamTruques > 1 ? 's' : ''} pro seu nível — toque pra escolher
+              {deficitsTruques.map(({ classeNome, faltam }) => (
+                <div key={classeNome} className={styles.avisoFaltando} onClick={() => onCompletarTruques(classeNome)}>
+                  ⚠️ Faltam {faltam} truque{faltam > 1 ? 's' : ''} de {classeNome} pro nível dela — toque pra escolher
                 </div>
-              )}
+              ))}
               {truquesComClasse.map(({ magia: m, classe: classeDoItem }) => {
                 const temAcao = usarMagiaTemAcaoAutomatizada(m);
                 return (
@@ -1188,7 +1193,7 @@ export default function MagiasTab({
         </div>
       )}
 
-      {(preparadasComClasse.length > 0 || faltamMagiasPreparadas > 0) && (
+      {(preparadasComClasse.length > 0 || deficitsMagiasPreparadas.length > 0) && (
         <>
           <div className={styles.grupoHeader} onClick={() => setMagiasPreparadasExpandido(!magiasPreparadasExpandido)}>
             <span>Magias Preparadas</span>
@@ -1196,12 +1201,11 @@ export default function MagiasTab({
           </div>
           {magiasPreparadasExpandido && (
             <>
-              {faltamMagiasPreparadas > 0 && (
-                <div className={styles.avisoFaltando} onClick={onCompletarMagiasPreparadas}>
-                  ⚠️ Faltam {faltamMagiasPreparadas} magia{faltamMagiasPreparadas > 1 ? 's' : ''} preparada
-                  {faltamMagiasPreparadas > 1 ? 's' : ''} pro seu nível — toque pra escolher
+              {deficitsMagiasPreparadas.map(({ classeNome, faltam }) => (
+                <div key={classeNome} className={styles.avisoFaltando} onClick={() => onCompletarMagiasPreparadas(classeNome)}>
+                  ⚠️ Faltam {faltam} magia{faltam > 1 ? 's' : ''} preparada{faltam > 1 ? 's' : ''} de {classeNome} — toque pra escolher
                 </div>
-              )}
+              ))}
               {preparadasComClasse.map(({ magia: m, classe: classeDoItem }) => {
                 const semEspaco =
                   opcoesGastoComPonte(
