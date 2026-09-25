@@ -12,3 +12,11 @@
 > certo (ver índice em `DECISOES-DESIGN.md`).
 
 ---
+
+## Level Up — "Novas Características" sem separação entre linhas
+
+Na tela "Novas Características" do Level Up (o card com os deltas —
+Magias Preparadas, Livro de Magias, Espaços de Magia, características
+com "escolha pendente"), as linhas ficam todas coladas, sem separação
+visual — difícil de escanear rápido no celular. Pedido do Osmar:
+separar as linhas (ex.: divisor ou espaçamento entre cada uma).

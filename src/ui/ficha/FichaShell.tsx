@@ -517,6 +517,15 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [maestriaDeMagiasAtuais, setMaestriaDeMagiasAtuais] = useState<Record<number, string>>(
     personagemSalvo.maestriaDeMagiasAtual ?? {},
   );
+  const [assinaturaMagicaAtuais, setAssinaturaMagicaAtuais] = useState<string[]>(
+    personagemSalvo.assinaturaMagicaAtual ?? [],
+  );
+  /** Magias de Assinatura já conjuradas de graça neste período — zera
+   * em `descansoCurto()` E `descansoLongo()` (diferente da Maestria de
+   * Magias, que é ilimitada e não precisa desse controle). */
+  const [assinaturaMagicaGastas, setAssinaturaMagicaGastas] = useState<string[]>(
+    personagemSalvo.assinaturaMagicaGastasAtual ?? [],
+  );
   const [surtoUsadoTurno, setSurtoUsadoTurno] = useState(personagemSalvo.surtoUsadoTurnoAtual ?? false);
   const [restStatus, setRestStatus] = useState<string | null>(null);
   // Aviso temporário na tela (hoje só Vigor Implacável). O texto de
@@ -811,6 +820,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasRituaisDoLivro,
     maestriaDeMagiasDisponivel,
     magiasMaestriaDoLivro,
+    assinaturaMagicaDisponivel,
+    magiasAssinaturaDoLivro,
     usaRedefPorDescanso,
     magiasGratisConcedidas,
     formasFamiliarElegiveis,
@@ -863,6 +874,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     atributos,
     arcanaMisticaAtuais,
     maestriaDeMagiasAtuais,
+    assinaturaMagicaAtuais,
     escolhaMagiaTalentoGeral,
     magiasGratisGastas,
     nivelTotalAtual,
@@ -1194,6 +1206,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     arcanaMisticaAtual: arcanaMisticaAtuais,
     arcanaMisticaGastos,
     maestriaDeMagiasAtual: maestriaDeMagiasAtuais,
+    assinaturaMagicaAtual: assinaturaMagicaAtuais,
+    assinaturaMagicaGastasAtual: assinaturaMagicaGastas,
     magiasGratisInvocacoesGastas: magiasGratisGastas,
     talentosGeraisAtual: talentosGeraisAtuais,
     escolhaMagiaTalentoGeral,
@@ -1293,6 +1307,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       arcanaMisticaAtuais,
       arcanaMisticaGastos,
       maestriaDeMagiasAtuais,
+      assinaturaMagicaAtuais,
+      assinaturaMagicaGastas,
       magiasGratisGastas,
       talentosGeraisAtuais,
       escolhaMagiaTalentoGeral,
@@ -1622,6 +1638,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setLancarNoInfernoGasto(false);
     setArcanaMisticaGastos([]);
     setMagiasGratisGastas([]);
+    setAssinaturaMagicaGastas([]);
     fimDoTurno();
   }
 
@@ -1661,6 +1678,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setPicoDeAdrenalinaGasto(0);
     setFuriaGasto((v) => Math.max(0, v - 1));
     setFuriaImplacavelUsos(0);
+    setAssinaturaMagicaGastas([]);
   }
 
   /** Toca em "Descanso Curto"/"Descanso Longo" (aba Atributos) — só
@@ -1810,6 +1828,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   function usarArcanaMistica(circulo: number) {
     if (arcanaMisticaGastos.includes(circulo)) return;
     setArcanaMisticaGastos((prev) => [...prev, circulo]);
+  }
+
+  /** Chamado sempre que uma magia conjura de graça (Maestria de Magias
+   * OU Assinatura Mágica) — só marca "gasta" quando é uma das 2
+   * magias de Assinatura (Maestria é ilimitada, não precisa de
+   * contador). Ver `core/assinaturaMagica.ts`. */
+  function usarMagiaGratis(nomeMagia: string) {
+    if (assinaturaMagicaAtuais.includes(nomeMagia) && !assinaturaMagicaGastas.includes(nomeMagia)) {
+      setAssinaturaMagicaGastas((prev) => [...prev, nomeMagia]);
+    }
   }
 
   function usarMagiaGratisDeInvocacao(item: MagiaGratisDeInvocacao) {
@@ -2058,6 +2086,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     dadivaEpicaEscolhida: string | null;
     arcanaMisticaAlteracoes: Record<number, string> | null;
     maestriaDeMagiasEscolhida: Record<number, string> | null;
+    assinaturaMagicaEscolhida: string[] | null;
     magiaIniciadaAlteracoes: { origem: string | null; especie: string | null } | null;
     escolhaMagiaTalentoGeral: Record<string, string[]> | null;
     escolhaAtributoTalentoGeral: Record<string, string> | null;
@@ -2139,6 +2168,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
     if (resultado.maestriaDeMagiasEscolhida) {
       setMaestriaDeMagiasAtuais(resultado.maestriaDeMagiasEscolhida);
+    }
+    if (resultado.assinaturaMagicaEscolhida) {
+      setAssinaturaMagicaAtuais(resultado.assinaturaMagicaEscolhida);
     }
     if (resultado.magiaIniciadaAlteracoes) {
       const { origem, especie } = resultado.magiaIniciadaAlteracoes;
@@ -2230,6 +2262,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       conhecimentoPrimordialPericiaAtual: conhecimentoPrimordialPericiaEscolhida,
       academicoPericiaAtual: academicoPericiaEscolhida,
       maestriaDeMagiasAtuais,
+      assinaturaMagicaAtuais,
     });
     confirmarLevelUp(resultado);
   }
@@ -2306,6 +2339,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         invocacoesTruqueVinculadoAtuais={invocacoesTruqueVinculado}
         arcanaMisticaAtuais={arcanaMisticaAtuais}
         maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
+        assinaturaMagicaAtuais={assinaturaMagicaAtuais}
         magiaIniciadaOrigemAtual={magiaIniciadaOrigemAtual}
         magiaIniciadaEspecieAtual={magiaIniciadaEspecieAtual}
         periciasEspecialistaAtuais={periciasEspecialistaAtuais}
@@ -2709,6 +2743,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             maestriaDeMagiasDisponivel={maestriaDeMagiasDisponivel}
             magiasMaestriaDoLivro={magiasMaestriaDoLivro}
             maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
+            assinaturaMagicaDisponivel={assinaturaMagicaDisponivel}
+            magiasAssinaturaDoLivro={magiasAssinaturaDoLivro}
+            assinaturaMagicaAtuais={assinaturaMagicaAtuais}
+            assinaturaMagicaGastas={assinaturaMagicaGastas}
+            onUsarMagiaGratisDeClasse={usarMagiaGratis}
             astuciaMagicaDisponivel={astuciaMagicaDisponivel}
             astuciaMagicaGasta={astuciaMagicaGasta}
             astuciaMagicaRecupera={astuciaMagicaRecupera}
@@ -2894,6 +2933,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             magiasPreparadasAcao={magiasPreparadasAcao}
             magiasPreparadasBonus={magiasPreparadasBonus}
             maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
+            assinaturaMagicaAtuais={assinaturaMagicaAtuais}
+            assinaturaMagicaGastas={assinaturaMagicaGastas}
+            onUsarMagiaGratisDeClasse={usarMagiaGratis}
             magiasPreparadasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
             explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}

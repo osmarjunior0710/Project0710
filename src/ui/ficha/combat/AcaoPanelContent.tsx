@@ -52,6 +52,10 @@ interface AcaoPanelContentProps {
   magiasPreparadas: MagiaComClasseOpcional[];
   /** Maestria de Magias (Mago, nível 18) — ver `useUsarMagiaPainel.tsx`. */
   maestriaDeMagiasAtuais: Record<number, string>;
+  /** Assinatura Mágica (Mago, nível 20) — ver `useUsarMagiaPainel.tsx`. */
+  assinaturaMagicaAtuais: string[];
+  assinaturaMagicaGastas: string[];
+  onUsarMagiaGratisDeClasse: (nomeMagia: string) => void;
   modAcertoConjuracao: number | null;
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
@@ -196,6 +200,9 @@ export default function AcaoPanelContent({
   truques,
   magiasPreparadas,
   maestriaDeMagiasAtuais,
+  assinaturaMagicaAtuais,
+  assinaturaMagicaGastas,
+  onUsarMagiaGratisDeClasse,
   modAcertoConjuracao,
   explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
@@ -260,6 +267,9 @@ export default function AcaoPanelContent({
     truques,
     magiasPreparadas,
     maestriaDeMagiasAtuais,
+    assinaturaMagicaAtuais,
+    assinaturaMagicaGastas,
+    onUsarMagiaGratisDeClasse,
     modAcertoConjuracao,
     explicacaoAcertoConjuracao,
     truqueVinculadoAgonizante,

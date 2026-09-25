@@ -41,6 +41,7 @@ import {
 import { circulosArcanaMisticaDesbloqueados, magiasElegiveisArcanaMistica, trocasArcanaMistica } from '../../../core/arcanaMistica';
 import { magiasPeritoNecromanciaNesteNivel, catalogoPeritoNecromancia } from '../../../core/necromante';
 import { magiasElegiveisMaestria } from '../../../core/maestriaDeMagias';
+import { magiasElegiveisAssinatura } from '../../../core/assinaturaMagica';
 import { iconesMagia } from '../../../core/classificarMagia';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TextoComMagias from '../../components/TextoComMagias';
@@ -159,6 +160,10 @@ interface LevelUpShellProps {
      * escolhidas NESTE level-up. `null` = passo não apareceu (já tinha
      * sido escolhida antes, ou personagem não é Mago nível 18+). */
     maestriaDeMagiasEscolhida: Record<number, string> | null;
+    /** Assinatura Mágica (Mago, nível 20) — as 2 magias de 3º círculo
+     * escolhidas NESTE level-up. `null` = passo não apareceu (já tinha
+     * sido escolhida antes, ou personagem não é Mago nível 20+). */
+    assinaturaMagicaEscolhida: string[] | null;
   }) => void;
   /** Controlado pelo `FichaShell` (persistido junto com o resto do
    * progresso) em vez de estado local — uma vez rolado o dado de
@@ -202,6 +207,9 @@ interface LevelUpShellProps {
    * `{}` = ainda não escolhida. Só a escolha inicial é feita aqui —
    * trocar no Descanso Longo fica pra Entrega 6b (ver SDD do Mago). */
   maestriaDeMagiasAtuais: Record<number, string>;
+  /** Assinatura Mágica (Mago, nível 20) — as 2 magias já escolhidas,
+   * `[]` = ainda não escolhida. Escolha permanente, sem troca depois. */
+  assinaturaMagicaAtuais: string[];
   /** Talento "Iniciado em Magia" pego pela Origem (Acólito/Guia/Sábio)
    * — `null` quando o personagem não tem esse talento por essa fonte.
    * Regra real (Cap. 5, p.201, "Substituição de Magia"): a cada
@@ -292,6 +300,7 @@ type LuStep =
   | 'arcanaMistica'
   | 'iniciadoEmMagia'
   | 'maestriaDeMagias'
+  | 'assinaturaMagica'
   | 'resumo';
 type FaseDramatica = 'idle' | 'rolando' | 'resultado';
 
@@ -317,6 +326,7 @@ export default function LevelUpShell({
   invocacoesTruqueVinculadoAtuais,
   arcanaMisticaAtuais,
   maestriaDeMagiasAtuais,
+  assinaturaMagicaAtuais,
   magiaIniciadaOrigemAtual,
   magiaIniciadaEspecieAtual,
   periciasEspecialistaAtuais,
@@ -648,6 +658,14 @@ export default function LevelUpShell({
   ) {
     luSteps.push('maestriaDeMagias');
   }
+  // Assinatura Mágica (Mago, nível 20) — escolha única, permanente
+  // (sem regra de troca, diferente da Maestria de Magias acima).
+  if (
+    caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.assinaturaMagica, novoNivel) !== null &&
+    assinaturaMagicaAtuais.length === 0
+  ) {
+    luSteps.push('assinaturaMagica');
+  }
   if (temEstiloDeLutaTrocavel(classe, novoNivel)) luSteps.push('estiloDeLuta');
   // Diferente de Truques/Invocações (sempre no array quando a classe
   // tem o recurso, mesmo sem vaga nova) — Maestria em Arma só entra
@@ -744,6 +762,10 @@ export default function LevelUpShell({
     nomesComTelaPropria.add('Maestria de Magias');
     deltasDoNivel.push({ label: 'Maestria de Magias', texto: 'escolha pendente' });
   }
+  if (luSteps.includes('assinaturaMagica')) {
+    nomesComTelaPropria.add('Assinatura Mágica');
+    deltasDoNivel.push({ label: 'Assinatura Mágica', texto: 'escolha pendente' });
+  }
   if (luSteps.includes('estiloDeLuta')) {
     nomesComTelaPropria.add('Estilo de Luta');
     deltasDoNivel.push({ label: 'Estilo de Luta', texto: 'disponível pra trocar' });
@@ -815,6 +837,13 @@ export default function LevelUpShell({
   const { escolhidos: peritoNecromanciaEscolhidas, toggle: togglePeritoNecromancia } = useEscolhaMultipla(
     [],
     magiasPeritoNecromanciaBonusNesteNivel,
+  );
+  // Assinatura Mágica — escolha única permanente, mesmo padrão de Perito
+  // em Necromancia acima (sempre começa vazia, sem regra de troca).
+  const MAX_ASSINATURA_MAGICA = 2;
+  const { escolhidos: assinaturaMagicaEscolhidas, toggle: toggleAssinaturaMagica } = useEscolhaMultipla(
+    [],
+    MAX_ASSINATURA_MAGICA,
   );
   const {
     escolhidos: magiasPreparadasEscolhidas,
@@ -916,6 +945,11 @@ export default function LevelUpShell({
   const poolMaestriaCirculo1 = magiasElegiveisMaestria(livroDeMagiasComoObjetos, 1);
   const poolMaestriaCirculo2 = magiasElegiveisMaestria(livroDeMagiasComoObjetos, 2);
   const maestriaDeMagiasValido = maestriaCirculo1Escolhida !== null && maestriaCirculo2Escolhida !== null;
+
+  // Assinatura Mágica — mesmo motivo de "pool com o que foi escolhido
+  // neste mesmo level-up" da Maestria de Magias acima.
+  const poolAssinaturaMagica = magiasElegiveisAssinatura(livroDeMagiasComoObjetos);
+  const assinaturaMagicaValido = assinaturaMagicaEscolhidas.length === MAX_ASSINATURA_MAGICA;
 
   const invocacoesValido = invocacoesEscolhidas.length === maxInvocacoes && trocasDeInvocacao <= 1;
 
@@ -1021,6 +1055,7 @@ export default function LevelUpShell({
     arcanaMistica: 'Arcana Mística',
     iniciadoEmMagia: 'Iniciado em Magia',
     maestriaDeMagias: 'Maestria de Magias',
+    assinaturaMagica: 'Assinatura Mágica',
     resumo: 'Resumo',
   };
 
@@ -1065,6 +1100,10 @@ export default function LevelUpShell({
     }
     if (step === 'maestriaDeMagias' && !maestriaDeMagiasValido) {
       setAviso('Escolha 1 magia de 1º círculo e 1 de 2º círculo antes de avançar.');
+      return;
+    }
+    if (step === 'assinaturaMagica' && !assinaturaMagicaValido) {
+      setAviso(`Escolha exatamente ${MAX_ASSINATURA_MAGICA} magias de 3º círculo antes de avançar.`);
       return;
     }
     if (step === 'maestriaArmaCrescimento' && maestriaArmaEscolhida.length < maxMaestriaArma) {
@@ -1235,6 +1274,8 @@ export default function LevelUpShell({
           luSteps.includes('maestriaDeMagias') && maestriaDeMagiasValido
             ? { 1: maestriaCirculo1Escolhida!, 2: maestriaCirculo2Escolhida! }
             : null,
+        assinaturaMagicaEscolhida:
+          luSteps.includes('assinaturaMagica') && assinaturaMagicaValido ? assinaturaMagicaEscolhidas : null,
       });
       return;
     }
@@ -1939,6 +1980,29 @@ export default function LevelUpShell({
           </>
         )}
 
+        {step === 'assinaturaMagica' && (
+          <>
+            <div className="section-title">
+              Assinatura Mágica — escolha {MAX_ASSINATURA_MAGICA} ({assinaturaMagicaEscolhidas.length}/{MAX_ASSINATURA_MAGICA})
+            </div>
+            <div className="label" style={{ marginBottom: 8 }}>
+              Ficam sempre preparadas e cada uma pode ser conjurada 1x no 3º círculo sem gastar Espaço — recarrega no
+              Descanso Curto ou Longo. Escolha permanente, sem troca depois.
+            </div>
+            {poolAssinaturaMagica.map((m) => (
+              <div
+                key={m.id}
+                className={`opt-card ${assinaturaMagicaEscolhidas.includes(m.nome) ? 'selected' : ''}`}
+                onClick={() => toggleAssinaturaMagica(m.nome)}
+              >
+                <div className="opt-card-name">
+                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
         {step === 'especialista' && (
           <>
             <div className="section-title">
@@ -2434,6 +2498,12 @@ export default function LevelUpShell({
                 <span>
                   {maestriaCirculo1Escolhida ?? '—'} / {maestriaCirculo2Escolhida ?? '—'}
                 </span>
+              </div>
+            )}
+            {luSteps.includes('assinaturaMagica') && (
+              <div className="summary-row">
+                <span>Assinatura Mágica</span>
+                <span>{assinaturaMagicaEscolhidas.join(', ') || 'nenhuma escolhida'}</span>
               </div>
             )}
             {luSteps.includes('arcanaMistica') && (

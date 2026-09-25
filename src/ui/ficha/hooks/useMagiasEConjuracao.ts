@@ -96,6 +96,8 @@ export function useMagiasEConjuracao(input: {
   arcanaMisticaAtuais: Record<number, string>;
   /** Maestria de Magias (Mago, nível 18) — `{1: nomeMagia, 2: nomeMagia}`. */
   maestriaDeMagiasAtuais: Record<number, string>;
+  /** Assinatura Mágica (Mago, nível 20) — as 2 magias escolhidas. */
+  assinaturaMagicaAtuais: string[];
   escolhaMagiaTalentoGeral: Record<string, string[]>;
   magiasGratisGastas: string[];
   nivelTotalAtual: number;
@@ -124,6 +126,7 @@ export function useMagiasEConjuracao(input: {
     atributos,
     arcanaMisticaAtuais,
     maestriaDeMagiasAtuais,
+    assinaturaMagicaAtuais,
     escolhaMagiaTalentoGeral,
     magiasGratisGastas,
     nivelTotalAtual,
@@ -231,6 +234,13 @@ export function useMagiasEConjuracao(input: {
   const magiasMaestriaDoLivro = Object.values(maestriaDeMagiasAtuais)
     .map((nomeMagia) => magias.find((m) => m.nome === nomeMagia))
     .filter((m): m is Magia => m !== undefined);
+  const assinaturaMagicaDisponivel =
+    magoObj && magoEntry
+      ? caracteristicaDesbloqueada(magoObj, ID_CARACTERISTICA_CLASSE.assinaturaMagica, magoEntry.nivel) !== null
+      : false;
+  const magiasAssinaturaDoLivro = assinaturaMagicaAtuais
+    .map((nomeMagia) => magias.find((m) => m.nome === nomeMagia))
+    .filter((m): m is Magia => m !== undefined);
   const mestreMisticoDisponivel =
     bruxoObj && bruxoEntry ? caracteristicaDesbloqueada(bruxoObj, 'Mestre Místico', bruxoEntry.nivel) !== null : false;
   // Achado corrigido de passagem (Entrega 5d): Astúcia Mágica recupera
@@ -309,6 +319,15 @@ export function useMagiasEConjuracao(input: {
   // `null` = lista fixa de 1 classe só (sem ambiguidade de
   // multiclasse pra marcar) — ver `MagiaComClasseOpcional`.
   const semClasse = (m: Magia): MagiaComClasseOpcional => ({ magia: m, classe: null });
+  // Maestria de Magias/Assinatura Mágica também ficam "sempre
+  // preparadas" (fora do limite normal, mesmo espírito de Descobertas
+  // Mágicas/Livro das Sombras acima) — precisam entrar aqui pra
+  // aparecer no picker "Usar Magia" do Combate, não só na aba Magias
+  // (achado do Osmar: nenhuma das 2 aparecia em Combate). Filtra quem
+  // já está em `magiasPreparadasAtuais` pra não duplicar a linha
+  // quando o jogador também preparou a mesma magia normalmente.
+  const magiasMaestriaConjuraveis = magiasMaestriaDoLivro.filter((m) => !magiasPreparadasAtuais.some((mc) => mc.nome === m.nome));
+  const magiasAssinaturaConjuraveis = magiasAssinaturaDoLivro.filter((m) => !magiasPreparadasAtuais.some((mc) => mc.nome === m.nome));
   const magiasConjuraveis: MagiaComClasseOpcional[] = [
     ...preparadasComClasse,
     ...magiasDescobertasMagicas.map(semClasse),
@@ -317,6 +336,8 @@ export function useMagiasEConjuracao(input: {
     ...magiasEspeciePreparadasConjuraveis.map(semClasse),
     ...magiasTalentoOrigemPreparadas.map(semClasse),
     ...magiasTalentoGeralPreparadas.map(semClasse),
+    ...magiasMaestriaConjuraveis.map(semClasse),
+    ...magiasAssinaturaConjuraveis.map(semClasse),
   ];
   // Roteia cada magia conjurável pro painel certo do Combate (Ação/
   // Ação Bônus/Reação), pelo próprio Tempo de Conjuração da magia —
@@ -348,6 +369,8 @@ export function useMagiasEConjuracao(input: {
     magiasRituaisDoLivro,
     maestriaDeMagiasDisponivel,
     magiasMaestriaDoLivro,
+    assinaturaMagicaDisponivel,
+    magiasAssinaturaDoLivro,
     usaRedefPorDescanso,
     magiasGratisConcedidas,
     formasFamiliarElegiveis,

@@ -428,7 +428,7 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Escolha duas magias de 3º círculo em seu livro de magias como suas assinaturas mágicas. Você sempre tem essas magias preparadas e pode conjurá-las, cada uma delas, uma vez no 3º círculo sem gastar um espaço de magia. Ao realizar isso, você não pode conjurá-las deste modo novamente até completar um Descanso Curto ou Longo. Para conjurar uma das magias em um círculo superior, você deve gastar um espaço de magia.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
   // Bárbaro (foco "Bárbaro — 5ª classe implementada", ver EmDevB.md).
   // 3 células tinham conteúdo colado de outra aba, removido ao

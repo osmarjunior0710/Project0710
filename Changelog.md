@@ -5,9 +5,17 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
-## v202609_1633
+## v202609_1638
 
 Cabeçalho da ficha (nome/espécie/classe/nível) quebrado em linhas separadas — texto corrido ficava difícil de ler, principalmente com 2+ classes.
+
+## v202609_1108
+
+**Corrige: Maestria de Magias e Assinatura Mágica não apareciam na aba Combate.** As 2 magias de cada característica (quando ainda não estivessem TAMBÉM marcadas como Magias Preparadas normais) ficavam de fora da lista de "Usar Magia" do Combate — só apareciam na aba Magias. Agora aparecem nos 2 lugares, com "Conjurar Grátis" funcionando igual nos dois.
+
+## v202609_1049
+
+**Mago — Assinatura Mágica (nível 20).** No Level Up do nível 20, escolhe 2 magias de 3º círculo do Livro de Magias — as 2 ficam sempre preparadas (nova seção na aba Magias) e cada uma pode ser conjurada 1x no 3º círculo sem gastar Espaço de Magia (recarrega no próximo Descanso Curto ou Longo). Vale também na aba Combate: ao "Usar Magia" uma dessas 2 (enquanto ainda não usada no período), a tela "Em qual círculo?" mostra "Conjurar Grátis" no 3º círculo.
 
 ## v202609_1220
 
