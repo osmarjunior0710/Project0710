@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1715
+
+Corrige o ícone da aba Pets — a versão anterior (v202609_1656) tinha saído corrompida (bloco de pixels borrado). Voltou a mostrar o emblema do gato/corvo certinho.
+
 ## v202609_1656
 
 Ícone da aba Pets trocado por um novo emblema (gato e corvo).
