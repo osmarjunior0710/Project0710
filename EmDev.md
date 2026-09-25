@@ -95,19 +95,42 @@ vez, Perfil passa a agrupar por classe também.
       do Osmar, respondida testando: 2 sistemas diferentes (contagem
       de truques/magias conhecidas vs. espaço/pool pra conjurar),
       ambos já corretos pra Bruxo multiclasse.
-- [ ] Entrega 5 — Remove o pill: `classeAtivaNome` sai de
-      `FichaShell.tsx`; Perfil passa a mostrar as características das
-      2 classes agrupadas por classe (com título), sem seletor.
-      **Escopo ampliado (achado do Osmar testando a Entrega 4,
-      2026-09-24):** "Espaços de Magia" (aba Magias/Combat) mostra
-      hoje SÓ o pool da classe que está no pill — pill em Bruxo só
-      mostra a Magia de Pacto (nunca junto com o pool normal de outra
-      classe conjuradora). Sem pill pra trocar, isso quebra de vez
-      (nenhum jeito de ver o pool que não é o combinado). Quando o
-      personagem tem 2+ classes com pool NÃO combinável entre si (o
-      caso do Bruxo — nunca combina, mesmo multiclasse), a seção
-      passa a mostrar os pools juntos, cada um com o próprio título
-      (ex.: "Espaços de Magia — Bardo" / "Magia de Pacto — Bruxo").
+- [ ] Entrega 5 — Remove o pill de vez (decisão do Osmar, 2026-09-25:
+      remoção completa, nenhum conceito de "classe ativa" sobra em
+      lugar nenhum — não a versão simplificada que só escondia o
+      botão). Escopo grande, quebrado em sub-passos pra testar/
+      publicar 1 de cada vez:
+  - [ ] 5a — `PerfilTab`: recebe `classesAtual`/catálogo em vez de
+        `classe`/`nivel`/`subclasse` únicos; mostra um bloco "Classe —
+        Nome" + "Subclasse" POR classe do personagem, em vez de só a
+        ativa.
+  - [ ] 5b — `MagiasTab`/`useMagiasEConjuracao`: "Espaços de Magia"
+        mostra os pools de TODAS as classes com pool próprio juntos
+        (não combinável entre si — ex.: normal do Bardo + Magia de
+        Pacto do Bruxo), cada um com título. Confirmado no Livro do
+        Jogador (Cap. 2, Multiclasse) que os 2 pools coexistem de
+        verdade e têm ponte nos 2 sentidos — não é side-by-side
+        cosmético, é a regra real.
+  - [ ] 5c — Resumo de conjuração (CD/Ataque Mágico, hoje 1 bloco só)
+        vira 1 bloco POR classe conjuradora (CD/ataque dependem do
+        atributo de conjuração de CADA classe — Bardo usa CAR, Mago
+        usa INT, são números diferentes de verdade).
+  - [ ] 5d — Seções Bruxo-específicas da aba Magias (Contatar
+        Patrono, Astúcia Mágica, Arcana Mística, Livro das Sombras)
+        passam a checar "o personagem TEM Bruxo em `classesAtual`"
+        (usando o nível DESSA entrada) em vez de "a classe ativa é
+        Bruxo".
+  - [ ] 5e — Level Up: remove a dependência de `classeAtivaNome` como
+        "classe padrão"/"classe que o Level Up afeta" — usa sempre o
+        resultado de `EscolherClasseLevelUp` (já existe, só não
+        recebia mais um `classePadrao` do pill) numa state local nova.
+  - [ ] 5f — Remove os botões do pill + `classeAtivaNome`/
+        `classeAtivaEntry`/`classe` (singular) de `FichaShell.tsx` de
+        vez; qualquer resto que ainda dependa de "1 classe" passa a
+        iterar `classesAtual`.
+  - [ ] 5g — Checklist completo (tsc/testes/build) + teste manual nos
+        3 personagens (1 classe só, Mago/Bardo, Bárbaro/Bardo/Bruxo)
+        cobrindo Perfil, Magias, Combate e um Level Up de verdade.
 - [ ] Entrega 6 — Fechamento: testes/tsc/build,
       `aprendizados/classes/multiclasse.md` (criar), limpar
       `PENDENCIAS.md` do que for resolvido no caminho.
