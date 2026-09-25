@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1449
+
+**Combate — painel flutuante "Espaços" invertido.** No painel "Usar Magia" (aba Combate), o cartão flutuante que mostra os Espaços de Magia por círculo agora lista do maior pro menor (9º em cima, 1º embaixo) — antes era o contrário, ficava diferente da lista de magias ao lado (que já mostra do maior círculo pro menor).
+
 ## v202609_1108
 
 **Corrige: Maestria de Magias e Assinatura Mágica não apareciam na aba Combate.** As 2 magias de cada característica (quando ainda não estivessem TAMBÉM marcadas como Magias Preparadas normais) ficavam de fora da lista de "Usar Magia" do Combate — só apareciam na aba Magias. Agora aparecem nos 2 lugares, com "Conjurar Grátis" funcionando igual nos dois.
