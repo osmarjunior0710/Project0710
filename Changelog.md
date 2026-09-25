@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1633
+
+Cabeçalho da ficha (nome/espécie/classe/nível) quebrado em linhas separadas — texto corrido ficava difícil de ler, principalmente com 2+ classes.
+
 ## v202609_1220
 
 **Multiclasse — o pill (Mago/Bardo/Bruxo) saiu de vez.** O seletor de classe no topo da ficha não existe mais — Perfil, Magias e Combate já mostram tudo junto sem precisar trocar. O aviso "faltam truques/magias preparadas" agora é por classe.

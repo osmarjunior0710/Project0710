@@ -2551,12 +2551,18 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         <div>
           <div className={styles.name}>{selecao.nome || '(sem nome)'}</div>
           <div className={styles.meta}>
-            {selecao.especie ?? '—'}{' '}
-            {classesAtual.length > 1
-              ? classesAtual.map((c) => `${c.classe} ${c.nivel}${c.subclasse ? ` (${c.subclasse})` : ''}`).join(' / ')
-              : `${selecao.classe ?? '—'}${personagem.subclasse ? ` (${personagem.subclasse})` : ''}`}
-            {' · Nível '}
-            {nivelTotalAtual} · CA {ca ?? '—'}
+            {/* Quebrado em linhas próprias (pedido do Osmar, 2026-09):
+                com 2+ classes o texto corrido ficava difícil de ler,
+                virando um parágrafo só sem hierarquia nenhuma. */}
+            <div>{selecao.especie ?? '—'}</div>
+            <div>
+              {classesAtual.length > 1
+                ? classesAtual.map((c) => `${c.classe} ${c.nivel}${c.subclasse ? ` (${c.subclasse})` : ''}`).join(' / ')
+                : `${selecao.classe ?? '—'}${personagem.subclasse ? ` (${personagem.subclasse})` : ''}`}
+            </div>
+            <div>
+              Nível {nivelTotalAtual} · CA {ca ?? '—'}
+            </div>
           </div>
         </div>
         <AvatarMenu
