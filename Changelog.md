@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1656
+
+Ícone da aba Pets trocado por um novo emblema (gato e corvo).
+
 ## v202609_1638
 
 Cabeçalho da ficha (nome/espécie/classe/nível) quebrado em linhas separadas — texto corrido ficava difícil de ler, principalmente com 2+ classes.
