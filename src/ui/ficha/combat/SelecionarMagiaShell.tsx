@@ -5,6 +5,7 @@ import {
   circulosDisponiveisParaConjurar,
   type EspacoDeMagiaAtivo,
   type MagiaComClasseOpcional,
+  type PoolDePonte,
 } from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { iconesMagia } from '../../../core/classificarMagia';
@@ -24,6 +25,10 @@ interface SelecionarMagiaShellProps {
   magiasPreparadas: MagiaComClasseOpcional[];
   espacos: EspacoDeMagiaAtivo[];
   espacosGastosPorCirculo: Record<number, number>;
+  /** Ponte de Magia de Pacto (SDD Multiclasse) — pool da OUTRA classe
+   * conjuradora, mostrado junto (não escondido) no painel flutuante
+   * de Espaços — mesmo padrão da aba Magias, Entrega 5b. */
+  ponte: PoolDePonte | null;
   /** Maestria de Magias (Mago, nível 18) — magia com círculo grátis
    * continua disponível mesmo sem Espaço real sobrando naquele
    * círculo (ver `EscolherCirculoShell`). `{}` pra quem não tem. */
@@ -47,6 +52,7 @@ export default function SelecionarMagiaShell({
   magiasPreparadas,
   espacos,
   espacosGastosPorCirculo,
+  ponte,
   maestriaDeMagiasAtuais,
   onFechar,
   onEscolherTruque,
@@ -106,7 +112,7 @@ export default function SelecionarMagiaShell({
           largura do drawer, não à tela inteira. Só o painel sai da
           árvore — o resto da tela (lista de magias) fica no tamanho
           original de propósito, não é pra cobrir a tela toda. */}
-      {espacos.length > 0 &&
+      {(espacos.length > 0 || (ponte && ponte.espacos.length > 0)) &&
         createPortal(
           <div className={localStyles.painelEspacos}>
             <div className={localStyles.painelEspacosTitulo}>Espaços</div>
@@ -119,6 +125,23 @@ export default function SelecionarMagiaShell({
                 </div>
               );
             })}
+            {/* Ponte de Magia de Pacto (SDD Multiclasse, Entrega 5b) —
+                pool da OUTRA classe conjuradora, mostrado junto. */}
+            {ponte && ponte.espacos.length > 0 && (
+              <>
+                {espacos.length > 0 && <div className={localStyles.painelEspacosSeparador} />}
+                <div className={localStyles.painelEspacosTitulo}>{ponte.classeNome}</div>
+                {ponte.espacos.map((e) => {
+                  const gasto = ponte.espacosGastosPorCirculo[e.circulo] ?? 0;
+                  return (
+                    <div key={e.circulo} className={localStyles.painelEspacosRow}>
+                      <span className={localStyles.painelEspacosLabel}>{e.circulo}º</span>
+                      <TickPips total={e.maximo} usados={gasto} tamanho="sm" variante={ponte.classeNome === 'Bruxo' ? 'roxo' : 'padrao'} />
+                    </div>
+                  );
+                })}
+              </>
+            )}
           </div>,
           document.body,
         )}

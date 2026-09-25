@@ -326,6 +326,7 @@ export default function MagiasTab({
   // antes esses hooks só executavam na 2ª renderização, "Rendered
   // more hooks than during the previous render".
   const [espacosExpandido, setEspacosExpandido] = useColapsavel('espacos-de-magia', true);
+  const [pontEspacosExpandido, setPontEspacosExpandido] = useColapsavel('espacos-de-magia-ponte', true);
   const [truquesExpandido, setTruquesExpandido] = useColapsavel('truques', true);
   const [magiasPreparadasExpandido, setMagiasPreparadasExpandido] = useColapsavel('magias-preparadas', true);
   const [livroDeMagiasExpandido, setLivroDeMagiasExpandido] = useColapsavel('livro-de-magias', true);
@@ -643,6 +644,38 @@ export default function MagiasTab({
                   <div key={espaco.circulo} className={styles.espacoRow} style={i === 0 ? { borderTop: 'none' } : undefined}>
                     <span>{espaco.circulo}º círculo</span>
                     <TickPips total={espaco.maximo} usados={gasto} tamanho="lg" variante={classeAtivaNome === 'Bruxo' ? 'roxo' : 'padrao'} />
+                  </div>
+                );
+              })}
+            </>
+          )}
+        </>
+      )}
+
+      {/* Ponte de Magia de Pacto (SDD Multiclasse) — o pool da OUTRA
+          classe conjuradora, que já pode ser gasto pra qualquer magia
+          preparada (ver EscolherCirculoShell). Mostrado junto do pool
+          principal (não escondido atrás do pill) — Entrega 5b do foco
+          de Multiclasse, confirmado no Livro do Jogador (Cap. 2,
+          Multiclasse "Magia de Pacto"): os 2 pools coexistem de
+          verdade, o jogador precisa ver os 2 pra decidir qual gastar. */}
+      {ponte && ponte.espacos.length > 0 && (
+        <>
+          <div className={styles.grupoHeader} onClick={() => setPontEspacosExpandido(!pontEspacosExpandido)}>
+            <span>Espaços de Magia — {ponte.classeNome}</span>
+            <span>{pontEspacosExpandido ? '▾' : '▸'}</span>
+          </div>
+          {pontEspacosExpandido && (
+            <>
+              <div className="label" style={{ margin: '0 0 var(--space-2)' }}>
+                {ponte.classeNome === 'Bruxo' ? 'Recupera no Descanso Curto ou Longo.' : 'Recupera no Descanso Longo.'}
+              </div>
+              {ponte.espacos.map((espaco, i) => {
+                const gasto = ponte.espacosGastosPorCirculo[espaco.circulo] ?? 0;
+                return (
+                  <div key={espaco.circulo} className={styles.espacoRow} style={i === 0 ? { borderTop: 'none' } : undefined}>
+                    <span>{espaco.circulo}º círculo</span>
+                    <TickPips total={espaco.maximo} usados={gasto} tamanho="lg" variante={ponte.classeNome === 'Bruxo' ? 'roxo' : 'padrao'} />
                   </div>
                 );
               })}

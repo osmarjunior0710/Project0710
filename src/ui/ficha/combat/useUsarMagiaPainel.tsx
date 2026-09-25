@@ -150,6 +150,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         magiasPreparadas={p.magiasPreparadas}
         espacos={p.espacos}
         espacosGastosPorCirculo={p.espacosGastosPorCirculo}
+        ponte={p.ponte}
         maestriaDeMagiasAtuais={p.maestriaDeMagiasAtuais}
         onFechar={() => setTelaMagia(null)}
         onEscolherTruque={(m) => conjurarMagia(m, null)}

@@ -105,13 +105,17 @@ vez, Perfil passa a agrupar por classe também.
         Nome" + "Subclasse" POR classe do personagem, em vez de só a
         ativa. Testado com o multiclasse (3 blocos: Bárbaro/Bardo/
         Bruxo) e o migrado (Mago 17, todas as características certas).
-  - [ ] 5b — `MagiasTab`/`useMagiasEConjuracao`: "Espaços de Magia"
-        mostra os pools de TODAS as classes com pool próprio juntos
-        (não combinável entre si — ex.: normal do Bardo + Magia de
-        Pacto do Bruxo), cada um com título. Confirmado no Livro do
-        Jogador (Cap. 2, Multiclasse) que os 2 pools coexistem de
-        verdade e têm ponte nos 2 sentidos — não é side-by-side
-        cosmético, é a regra real.
+  - [x] 5b — `MagiasTab`/`SelecionarMagiaShell` (painel flutuante de
+        Combate) mostram o pool da ponte (`ponte: PoolDePonte`) junto
+        do pool principal, cada um com título próprio — não escondido
+        atrás do pill. Confirmado no Livro do Jogador (Cap. 2,
+        Multiclasse) que os 2 pools coexistem de verdade e têm ponte
+        nos 2 sentidos. **Bug real corrigido de passagem:** `ponte`
+        pegava a 1ª classe diferente da ativa sem checar se ela
+        CONJURA — com 3+ classes (ex.: Bárbaro no meio, que não
+        conjura), a ponte apontava pro Bárbaro e sumia (0 espaços).
+        Testado nos 2 sentidos (pill em Bardo mostra Bruxo, pill em
+        Bruxo mostra Bardo) no Char Multiclasse (Bárbaro/Bardo/Bruxo).
   - [ ] 5c — Resumo de conjuração (CD/Ataque Mágico, hoje 1 bloco só)
         vira 1 bloco POR classe conjuradora (CD/ataque dependem do
         atributo de conjuração de CADA classe — Bardo usa CAR, Mago

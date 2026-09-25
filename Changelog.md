@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0535
+
+**Multiclasse — Espaços de Magia mostra os 2 pools juntos.** Personagem com Bruxo + outra classe conjuradora (ex.: Bardo) agora vê os 2 pools de espaço de magia ao mesmo tempo (aba Magias e painel flutuante em Combate), não só o da classe no pill. Corrige de brinde um bug: com 3+ classes, o pool "da ponte" podia sumir sozinho.
+
 ## v202609_0530
 
 **Multiclasse — Perfil mostra todas as classes.** A aba Perfil já mostra as características (e subclasse) de CADA classe do personagem, uma embaixo da outra — antes só mostrava a classe que estava no pill.

@@ -137,11 +137,17 @@ export function useMagiasEConjuracao(input: {
   const espacos = espacosDeMagiaAtivos(classe, personagem.nivel);
   // Ponte de Magia de Pacto (SDD Multiclasse seção 8.5) — só quando o
   // personagem tem Bruxo E outra classe conjuradora ao mesmo tempo.
-  // `outraClasseComConjuracao` é a "outra" (não a ativa agora) — com
-  // só 2 classes possíveis hoje (4 classes implementadas, Guerreiro
-  // nunca conjura), é sempre a única candidata; deixa de existir se
-  // um dia o personagem puder ter 3+ classes ao mesmo tempo.
-  const outraClasseEntry = classesAtual.find((c) => c.classe !== classeAtivaNome);
+  // Bug corrigido (Entrega 5b, achado testando o Char Multiclasse —
+  // Bárbaro/Bardo/Bruxo): `outraClasseEntry` pegava a 1ª classe
+  // diferente da ativa, sem checar se ela CONJURA — com 3+ classes
+  // (Bárbaro no meio, que não conjura), a ponte apontava pra ele e
+  // sumia (0 espaços). Agora busca especificamente a classe certa:
+  // Bruxo quando a ativa é outra conjuradora, ou a OUTRA conjuradora
+  // quando a ativa é Bruxo.
+  const outraClasseEntry =
+    classeAtivaNome === 'Bruxo'
+      ? classesAtual.find((c) => c.classe !== 'Bruxo' && contaNaConjuracaoMulticlasse(c))
+      : classesAtual.find((c) => c.classe === 'Bruxo');
   const ponte: PoolDePonte | null =
     temPonteDeMagiaDePacto(classesAtual) && outraClasseEntry
       ? {
