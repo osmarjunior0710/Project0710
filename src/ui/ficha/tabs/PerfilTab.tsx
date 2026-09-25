@@ -106,7 +106,7 @@ export default function PerfilTab({
   }
 
   return (
-    <div onClick={() => setConfirmandoIdioma(null)}>
+    <div className={styles.perfilRoot} onClick={() => setConfirmandoIdioma(null)}>
       {blocosDeClasse.map(({ entry, classeObj, caracteristicasClasse, caracteristicasDaSubclasse, subclasseInfo }) => (
         <div key={entry.classe}>
           <div className="section-title">

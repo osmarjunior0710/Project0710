@@ -10,16 +10,18 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 ## Auditoria de padding em botões/caixas do app inteiro (2026-09-25)
 
 Pedido do Osmar: qualquer botão/caixa clicável deveria ter padding
-visível máximo de 2px em qualquer lado (a caixa acompanha o tamanho
-do conteúdo, sem sobra artificial) — não um touch target inflado por
-`min-width`/`min-height`/`padding` generosos. Corrigido pontualmente
-nos botões novos de Idiomas (aba Perfil, ver `PerfilTab.module.css`
-`.removerBtn`/`.removerBtnConfirm`), mas o app tem dezenas de botões/
-caixas mais antigos (`.btn`, `.opt-card`, `.box`, `removerBtn` de
-Pets, etc.) que ainda não foram revisados com essa régua. Quando for
-puxado como foco: percorrer tela por tela, com prints antes/depois
-pro Osmar aprovar, já que mexer nas classes globais (`.opt-card`,
-`.box` em `index.css`) afeta várias telas de uma vez.
+visível baixo (4px em qualquer lado — testou 1/2/3/4px lado a lado
+antes de decidir) — a caixa acompanha o tamanho do conteúdo, sem
+sobra artificial de touch target inflado por `min-width`/`min-height`/
+`padding` generosos. **Aplicado em toda a aba Perfil** (`.opt-card`/
+`.box` escopados a `.perfilRoot`, `.removerBtn`/`.removerBtnConfirm`
+de Idiomas — ver `PerfilTab.module.css`), mas o resto do app (Combate,
+Magias, Mochila, Atributos, Pets, wizard, Level Up...) ainda usa o
+padding padrão de `.opt-card`/`.box`/`.btn` em `index.css`. Quando for
+puxado como foco: decidir se o valor final vale pro app inteiro
+(mudar as classes globais de vez) ou se cada aba ganha seu próprio
+escopo como Perfil — percorrer tela por tela, com prints antes/depois
+pro Osmar aprovar.
 
 ## Pills configuráveis de info da magia (2026-09-24)
 

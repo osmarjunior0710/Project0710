@@ -1,3 +1,16 @@
+/* Padding visível de 4px em qualquer lado pra toda caixa/botão da aba
+   Perfil (pedido do Osmar, comparou 1/2/3/4px lado a lado antes de
+   decidir) — escopado a `.perfilRoot` pra não vazar pro resto do app,
+   que ainda usa o padding padrão de `.opt-card`/`.box` (ver Backlog.md
+   "Auditoria de padding em botões/caixas do app inteiro"). */
+.perfilRoot :global(.opt-card) {
+  padding: 4px;
+}
+
+.perfilRoot :global(.box) {
+  padding: 4px;
+}
+
 .idiomaRow {
   display: flex;
   justify-content: space-between;
@@ -8,7 +21,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2px;
+  padding: 4px;
   color: var(--text-faint);
   cursor: pointer;
   font-size: 16px;
@@ -25,15 +38,13 @@
 
 /* 1º toque arma (vira isso); 2º toque no mesmo botão remove de vez —
    mesma dupla confirmação de "Apagar personagem"/Pets, ver
-   DECISOES-FICHA.md. Padding visível de 2px em qualquer lado (pedido
-   do Osmar) — a caixa acompanha o tamanho do texto, não um touch
-   target artificialmente grande. */
+   DECISOES-FICHA.md. */
 .removerBtnConfirm {
   background: var(--danger);
   color: #fff;
   font-size: 12px;
   font-weight: bold;
-  padding: 2px;
+  padding: 4px;
 }
 
 .removerBtnConfirm:active {
