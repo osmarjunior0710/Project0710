@@ -86,8 +86,15 @@ vez, Perfil passa a agrupar por classe também.
       Testado: "Usar Magia" no painel de Ação mostra Bardo+Bruxo
       juntos, inclusive "Amigos" (conhecido pelas 2) sem quebrar;
       conjurar funciona normal.
-- [ ] Entrega 4 — Corrige `deficitTruques`/`deficitMagiasPreparadas`
-      pra multiclasse (compara por classe, usando a marca nova).
+- [x] Entrega 4 — Corrige `deficitTruques`/`deficitMagiasPreparadas`
+      pra multiclasse: agora comparam a cota da classe só contra os
+      itens MARCADOS com ela (antes comparava contra o TOTAL das 2+
+      classes juntas — podia mascarar déficit real ou acusar déficit
+      errado). Confirmado que a Magia de Pacto do Bruxo já ficava (e
+      continua ficando) sempre separada dos espaços normais — pergunta
+      do Osmar, respondida testando: 2 sistemas diferentes (contagem
+      de truques/magias conhecidas vs. espaço/pool pra conjurar),
+      ambos já corretos pra Bruxo multiclasse.
 - [ ] Entrega 5 — Remove o pill: `classeAtivaNome` sai de
       `FichaShell.tsx`; Perfil passa a mostrar as características das
       2 classes agrupadas por classe (com título), sem seletor.

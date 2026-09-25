@@ -20,6 +20,8 @@ import {
   normalizarMagiasConhecidas,
   magiasConhecidasComClasse,
   agruparMagiasComClassePorCirculo,
+  deficitTruques,
+  deficitMagiasPreparadas,
 } from './magiasPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { magias, magiasDaClasse } from '../data/rulesets/dnd2024/magias';
@@ -146,6 +148,48 @@ describe('agruparMagiasComClassePorCirculo', () => {
 
   it('lista vazia devolve lista de grupos vazia', () => {
     expect(agruparMagiasComClassePorCirculo([])).toEqual([]);
+  });
+});
+
+describe('deficitTruques (Entrega 4 — corrigido pra multiclasse)', () => {
+  it('compara a cota da classe só contra os itens MARCADOS com ela, ignora os de outra classe', () => {
+    // Bardo nível 1 = 2 Truques Conhecidos. Personagem tem 1 de Bardo
+    // + 2 de Bruxo (4 no total) — antes da correção, comparava os 4
+    // contra a cota de 2 e não achava déficit nenhum (errado).
+    const truquesAtuais = [
+      { nome: 'Amigos', classe: 'Bardo' },
+      { nome: 'Golpe Certeiro', classe: 'Bruxo' },
+      { nome: 'Toque Chocante', classe: 'Bruxo' },
+    ];
+    expect(deficitTruques(bardo, 1, truquesAtuais)).toBe(1);
+  });
+
+  it('cota atingida pela classe devolve 0', () => {
+    const truquesAtuais = [
+      { nome: 'Amigos', classe: 'Bardo' },
+      { nome: 'Luz', classe: 'Bardo' },
+    ];
+    expect(deficitTruques(bardo, 1, truquesAtuais)).toBe(0);
+  });
+
+  it('classe null (personagem sem classe resolvida) devolve 0', () => {
+    expect(deficitTruques(null, 1, [])).toBe(0);
+  });
+});
+
+describe('deficitMagiasPreparadas (Entrega 4 — corrigido pra multiclasse)', () => {
+  it('compara a cota da classe só contra os itens marcados com ela', () => {
+    // Bardo nível 1 = 4 Magias Preparadas.
+    const magiasPreparadasAtuais = [
+      { nome: 'Comando', classe: 'Bardo' },
+      { nome: 'Armadura de Agathys', classe: 'Bruxo' },
+      { nome: 'Braços de Hadar', classe: 'Bruxo' },
+    ];
+    expect(deficitMagiasPreparadas(bardo, 1, magiasPreparadasAtuais)).toBe(3);
+  });
+
+  it('classe null devolve 0', () => {
+    expect(deficitMagiasPreparadas(null, 1, [])).toBe(0);
   });
 });
 

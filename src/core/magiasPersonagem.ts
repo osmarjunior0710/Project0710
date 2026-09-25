@@ -319,14 +319,22 @@ export function completarListaDeMagias(atuais: string[], catalogoEmbaralhado: Ma
  * antes dessa tela existir) — ver PENDENCIAS.md "Detector genérico de
  * ficha atrasada" pro contexto maior (isso aqui é só o caso de
  * Truques/Magias, não um mecanismo genérico ainda). */
-export function deficitTruques(classe: Classe | null, nivel: number, truquesAtuais: string[]): number {
+/** Corrigido pra multiclasse (Entrega 4, ver EmDev.md): compara a
+ * cota da CLASSE contra só os itens MARCADOS com essa classe — antes
+ * comparava contra o TOTAL de truques do personagem (das 2+ classes
+ * juntas), o que dava déficit errado (às vezes some, às vezes sobra)
+ * assim que o personagem tem 2 classes com Truques Conhecidos. */
+export function deficitTruques(classe: Classe | null, nivel: number, truquesAtuais: MagiaConhecida[]): number {
   if (!classe) return 0;
-  return Math.max(0, valorRecursoClasse(classe, 'Truques Conhecidos', nivel) - truquesAtuais.length);
+  const daClasse = truquesAtuais.filter((t) => t.classe === classe.nome).length;
+  return Math.max(0, valorRecursoClasse(classe, 'Truques Conhecidos', nivel) - daClasse);
 }
 
-export function deficitMagiasPreparadas(classe: Classe | null, nivel: number, magiasPreparadasAtuais: string[]): number {
+/** Mesma correção de `deficitTruques`, ver comentário lá. */
+export function deficitMagiasPreparadas(classe: Classe | null, nivel: number, magiasPreparadasAtuais: MagiaConhecida[]): number {
   if (!classe) return 0;
-  return Math.max(0, valorRecursoClasse(classe, 'Magias Preparadas', nivel) - magiasPreparadasAtuais.length);
+  const daClasse = magiasPreparadasAtuais.filter((m) => m.classe === classe.nome).length;
+  return Math.max(0, valorRecursoClasse(classe, 'Magias Preparadas', nivel) - daClasse);
 }
 
 /** "Segredos Mágicos" (Bardo, nível 10, classe base): sempre que o nº

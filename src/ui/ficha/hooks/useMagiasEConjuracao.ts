@@ -211,11 +211,10 @@ export function useMagiasEConjuracao(input: {
     ? espacosARecuperar(espacoPactoAtual.maximo, espacosGastosPacto, mestreMisticoDisponivel)
     : 0;
   const sentidos = calcularSentidos(selecao.especie, invocacoesMisticasAtuais, selecao.subescolhaEspecieEscolhida);
-  // Entrega 4 do foco de Multiclasse é que corrige esse déficit pra
-  // comparar por classe — por ora continua com o mesmo comportamento
-  // de antes (TOTAL das 2 classes contra a cota de 1 só).
-  const faltamTruques = deficitTruques(classe, personagem.nivel, nomesDeMagiasConhecidas(truquesAtuais));
-  const faltamMagiasPreparadas = deficitMagiasPreparadas(classe, personagem.nivel, nomesDeMagiasConhecidas(magiasPreparadasAtuais));
+  // Compara a cota da classe ATIVA contra só os itens marcados com
+  // ela (Entrega 4 — corrigido, ver core/magiasPersonagem.ts).
+  const faltamTruques = deficitTruques(classe, personagem.nivel, truquesAtuais);
+  const faltamMagiasPreparadas = deficitMagiasPreparadas(classe, personagem.nivel, magiasPreparadasAtuais);
   // Descobertas Mágicas/Livro das Sombras contam como magia sempre
   // preparada (fora do limite normal) — entram no que dá pra conjurar
   // em combate, mas são arrays PRÓPRIOS separados, só unidos aqui pra

@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0220
+
+Corrige o aviso "faltam truques/magias preparadas" pra personagem multiclasse — antes comparava o total das 2 classes juntas contra a cota de 1 só (podia esconder ou inventar um aviso errado).
+
 ## v202609_2140
 
 **Multiclasse — Combate também mostra as 2 classes juntas.** O seletor de magia dos painéis de Ação/Ação Bônus/Reação já oferecia as magias das 2 classes (isso já funcionava), mas agora cada uma mostra o selo de qual classe é, igual à aba Magias.
