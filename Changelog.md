@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1836
+
+Emblemas dos títulos de seção da aba Perfil aumentados de 20px pra 30px (pedido do Osmar).
+
 ## v202609_1816
 
 **Perfil ganha os emblemas de classe/subclasse/origem/espécie.** Cada título de seção ("Classe — X", "Subclasse — X", "Origem — X", "Espécie — X") agora mostra o ícone redondo correspondente, quando já existe arte própria importada. Também reorganiza "Invocações Místicas" (Bruxo): antes aparecia como seção solta depois de todas as classes, agora fica junto do resto das características de Bruxo.
