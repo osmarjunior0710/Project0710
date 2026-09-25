@@ -388,16 +388,12 @@ export default function MochilaTab({
           <span>
             {equipado.maoSecundariaOcupadaPorDuasMaos
               ? 'ocupada (arma de 2 mãos)'
-              : (equipado.maoSecundaria?.nome ?? '—')}
+              : (equipado.escudo?.nome ?? equipado.maoSecundaria?.nome ?? '—')}
           </span>
         </div>
         <div className={styles.equipadoLinha}>
           <span>Armadura</span>
           <span>{equipado.armadura?.nome ?? '—'}</span>
-        </div>
-        <div className={styles.equipadoLinha}>
-          <span>Escudo</span>
-          <span>{equipado.escudo?.nome ?? '—'}</span>
         </div>
       </div>
       <div className="label" style={{ marginTop: 4, marginBottom: 4 }}>

@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2154
+
+**Mochila — "Equipado agora" não mostra mais Escudo como slot separado.** Escudo ocupa a mesma mão que uma arma na Mão Secundária (regra real: só dá o bônus de CA se estiver empunhado) — agora aparece direto na linha "Mão Secundária", em vez de 2 linhas confusas (uma sempre vazia).
+
 ## v202609_2004
 
 Altura dos cards de Idiomas (aba Perfil) padronizada em 35px — antes "Comum" (sem botão) ficava mais baixo que os idiomas com botão de remover. Corrige também os ícones de "Talentos"/"Idiomas", que tinham saído trocados na entrega anterior.
