@@ -319,6 +319,15 @@ export function useMagiasEConjuracao(input: {
   // `null` = lista fixa de 1 classe só (sem ambiguidade de
   // multiclasse pra marcar) — ver `MagiaComClasseOpcional`.
   const semClasse = (m: Magia): MagiaComClasseOpcional => ({ magia: m, classe: null });
+  // Maestria de Magias/Assinatura Mágica também ficam "sempre
+  // preparadas" (fora do limite normal, mesmo espírito de Descobertas
+  // Mágicas/Livro das Sombras acima) — precisam entrar aqui pra
+  // aparecer no picker "Usar Magia" do Combate, não só na aba Magias
+  // (achado do Osmar: nenhuma das 2 aparecia em Combate). Filtra quem
+  // já está em `magiasPreparadasAtuais` pra não duplicar a linha
+  // quando o jogador também preparou a mesma magia normalmente.
+  const magiasMaestriaConjuraveis = magiasMaestriaDoLivro.filter((m) => !magiasPreparadasAtuais.some((mc) => mc.nome === m.nome));
+  const magiasAssinaturaConjuraveis = magiasAssinaturaDoLivro.filter((m) => !magiasPreparadasAtuais.some((mc) => mc.nome === m.nome));
   const magiasConjuraveis: MagiaComClasseOpcional[] = [
     ...preparadasComClasse,
     ...magiasDescobertasMagicas.map(semClasse),
@@ -327,6 +336,8 @@ export function useMagiasEConjuracao(input: {
     ...magiasEspeciePreparadasConjuraveis.map(semClasse),
     ...magiasTalentoOrigemPreparadas.map(semClasse),
     ...magiasTalentoGeralPreparadas.map(semClasse),
+    ...magiasMaestriaConjuraveis.map(semClasse),
+    ...magiasAssinaturaConjuraveis.map(semClasse),
   ];
   // Roteia cada magia conjurável pro painel certo do Combate (Ação/
   // Ação Bônus/Reação), pelo próprio Tempo de Conjuração da magia —
