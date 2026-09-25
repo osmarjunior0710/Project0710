@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1945
+
+**Idiomas na aba Perfil ganham gerenciamento de verdade.** Cada idioma agora é uma linha própria (em vez de texto corrido), com botão de remover (dupla confirmação — Comum e idioma fixo de Classe ficam travados). Nova opção "+ Aprender novo idioma" abre uma tela de escolha múltipla com os idiomas que faltam.
+
 ## v202609_1844
 
 Títulos "Talentos" e "Idiomas" da aba Perfil ganharam ícone próprio, igual Classe/Origem/Espécie já tinham.

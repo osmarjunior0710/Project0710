@@ -2682,6 +2682,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             talentosGeraisAtuais={talentosGeraisAtuais}
             invocacoesMisticasAtuais={invocacoesMisticasAtuais}
             invocacoesTruqueVinculado={invocacoesTruqueVinculado}
+            onAdicionarIdiomas={(novos) => setSelecao((prev) => ({ ...prev, linguas: [...prev.linguas, ...novos] }))}
+            onRemoverIdioma={(idioma) =>
+              setSelecao((prev) => ({ ...prev, linguas: prev.linguas.filter((l) => l !== idioma) }))
+            }
           />
         )}
         {tab === 'mochila' && (
