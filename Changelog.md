@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2214
+
+Removido o texto "Armadura, Escudo e arma da Mão Principal/Secundária já valem de verdade..." embaixo de "Equipado agora" na Mochila.
+
 ## v202609_2154
 
 **Mochila — "Equipado agora" não mostra mais Escudo como slot separado.** Escudo ocupa a mesma mão que uma arma na Mão Secundária (regra real: só dá o bônus de CA se estiver empunhado) — agora aparece direto na linha "Mão Secundária", em vez de 2 linhas confusas (uma sempre vazia).
