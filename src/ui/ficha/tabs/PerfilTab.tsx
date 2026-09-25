@@ -4,6 +4,8 @@ import BadgeHomebrew from '../../components/BadgeHomebrew';
 import IconeClasse from '../../components/IconeClasse';
 import IconeOrigem from '../../components/IconeOrigem';
 import IconeEspecie from '../../components/IconeEspecie';
+import iconeTalentos from '../../../assets/icones-ui/talentos.webp';
+import iconeIdiomas from '../../../assets/icones-ui/idiomas.webp';
 import { origens } from '../../../data/rulesets/dnd2024/origens';
 import { especies } from '../../../data/rulesets/dnd2024/especies';
 import { talentos, talentosOrigem } from '../../../data/rulesets/dnd2024/talentos';
@@ -143,6 +145,7 @@ export default function PerfilTab({
       {talentosGeraisEscolhidos.length > 0 && (
         <>
           <div className="section-title" style={{ marginTop: 16 }}>
+            <img src={iconeTalentos} alt="" className="section-title-icone" />
             Talentos
           </div>
           {talentosGeraisEscolhidos.map((t, i) => (
@@ -223,6 +226,7 @@ export default function PerfilTab({
       )}
 
       <div className="section-title" style={{ marginTop: 16 }}>
+        <img src={iconeIdiomas} alt="" className="section-title-icone" />
         Idiomas
       </div>
       <div className="label" style={{ marginBottom: 12 }}>

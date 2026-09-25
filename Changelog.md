@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1844
+
+Títulos "Talentos" e "Idiomas" da aba Perfil ganharam ícone próprio, igual Classe/Origem/Espécie já tinham.
+
 ## v202609_1836
 
 Emblemas dos títulos de seção da aba Perfil aumentados de 20px pra 30px (pedido do Osmar).
