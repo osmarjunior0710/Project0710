@@ -832,6 +832,26 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const resumoConjuracao = calcularResumoConjuracao(selecao, classe, nivelTotalAtual);
   const explicacaoAcertoConjuracao = explicarModAcertoConjuracao(selecao, classe, nivelTotalAtual);
   const explicacaoCdConjuracao = explicarCdConjuracao(selecao, classe, nivelTotalAtual);
+  // Entrega 5c (Multiclasse, ver EmDev.md) — CD/Ataque Mágico dependem
+  // do atributo de conjuração de CADA classe (Bardo usa CAR, Mago usa
+  // INT — números DIFERENTES de verdade, não só cosmético), então o
+  // resumo do topo da aba Magias/Combate mostra 1 bloco por classe
+  // conjuradora, não só o da classe ativa. `calcularResumoConjuracao`
+  // já devolve `null` pra classe sem atributo de conjuração mapeado
+  // (Guerreiro, Bárbaro etc.) — filtra sozinho quem não conjura.
+  const resumosPorClasse = classesAtual
+    .map((entry) => {
+      const classeObj = catalogoClasses.find((c) => c.nome === entry.classe) ?? null;
+      const resumo = calcularResumoConjuracao(selecao, classeObj, nivelTotalAtual);
+      if (!resumo) return null;
+      return {
+        classeNome: entry.classe,
+        resumo,
+        explicacaoAcerto: explicarModAcertoConjuracao(selecao, classeObj, nivelTotalAtual),
+        explicacaoCd: explicarCdConjuracao(selecao, classeObj, nivelTotalAtual),
+      };
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null);
   const usosInspiracaoMax = usosInspiracaoMaximo(selecao, classe, personagem.nivel);
   const usosInspiracaoRestantes = Math.max(0, usosInspiracaoMax - inspiracaoGasto);
   // Recursos de classe com contador, de TODAS as classes (não só a em foco) —
@@ -2569,6 +2589,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}
             resumo={resumoConjuracao}
+            resumosPorClasse={resumosPorClasse}
             explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             explicacaoCdConjuracao={explicacaoCdConjuracao}
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}

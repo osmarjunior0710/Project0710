@@ -66,6 +66,13 @@ interface MagiasTabProps {
   /** Os 3 números de conjuração mostrados no topo da aba (ver
    * `resumoConjuracao`) — `null` = classe sem atributo de conjuração mapeado. */
   resumo: ResumoConjuracao | null;
+  /** 1 bloco de resumo POR classe conjuradora do personagem (Entrega
+   * 5c, Multiclasse — CD/Ataque Mágico dependem do atributo de CADA
+   * classe, ex.: Bardo usa CAR, Mago usa INT). Mostrado no lugar do
+   * bloco único `resumo` sempre que tiver mais de 1 classe conjuradora;
+   * com 0 ou 1, o bloco único de sempre continua igual (menos
+   * repetição visual pro caso comum). */
+  resumosPorClasse: { classeNome: string; resumo: ResumoConjuracao; explicacaoAcerto: ExplicacaoCalculo | null; explicacaoCd: ExplicacaoCalculo | null }[];
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
@@ -246,6 +253,7 @@ export default function MagiasTab({
   onGastarSlotCirculo,
   modAcertoConjuracao,
   resumo,
+  resumosPorClasse,
   explicacaoAcertoConjuracao,
   explicacaoCdConjuracao,
   truqueVinculadoAgonizante,
@@ -551,53 +559,106 @@ export default function MagiasTab({
 
   return (
     <>
-      {resumo && (
-        <div className="stat-grid">
-          <div className="box stat-box" style={{ cursor: 'default' }}>
-            <div className="stat-name">
-              MOD. DE CONJ.{' '}
-              <InfoValor
-                titulo="Modificador de conjuração"
-                descricao={`É o modificador do seu atributo de conjuração (${resumo.atributoNome}) — o atributo que sua classe usa pra conjurar magias. Serve de base pra CD e pro ataque mágico.`}
-                explicacao={{
-                  linhas: [{ label: `mod. ${resumo.atributo}`, valor: fmt(resumo.modAtributo) }],
-                  total: { label: 'Modificador de Conjuração', valor: fmt(resumo.modAtributo) },
-                }}
-              />
+      {resumosPorClasse.length > 1
+        ? resumosPorClasse.map(({ classeNome, resumo: r, explicacaoAcerto, explicacaoCd }) => (
+            <div key={classeNome} style={{ marginBottom: 'var(--space-2)' }}>
+              <div className="label" style={{ marginBottom: 4 }}>
+                {classeNome}
+              </div>
+              <div className="stat-grid">
+                <div className="box stat-box" style={{ cursor: 'default' }}>
+                  <div className="stat-name">
+                    MOD. DE CONJ.{' '}
+                    <InfoValor
+                      titulo="Modificador de conjuração"
+                      descricao={`É o modificador do seu atributo de conjuração (${r.atributoNome}) — o atributo que ${classeNome} usa pra conjurar magias. Serve de base pra CD e pro ataque mágico.`}
+                      explicacao={{
+                        linhas: [{ label: `mod. ${r.atributo}`, valor: fmt(r.modAtributo) }],
+                        total: { label: 'Modificador de Conjuração', valor: fmt(r.modAtributo) },
+                      }}
+                    />
+                  </div>
+                  <div className="stat-mod">{fmt(r.modAtributo)}</div>
+                  <div className="stat-val">{r.atributo}</div>
+                </div>
+                <div className="box stat-box" style={{ cursor: 'default' }}>
+                  <div className="stat-name">
+                    CD DA MAGIA{' '}
+                    {explicacaoCd && (
+                      <InfoValor
+                        titulo="CD da magia"
+                        descricao="É a dificuldade que o alvo precisa igualar ou superar na salvaguarda pra evitar (ou reduzir) o efeito das suas magias que exigem salvaguarda."
+                        explicacao={explicacaoCd}
+                      />
+                    )}
+                  </div>
+                  <div className="stat-mod">{r.cd}</div>
+                  <div className="stat-val">salvaguarda</div>
+                </div>
+                <div className="box stat-box" style={{ cursor: 'default' }}>
+                  <div className="stat-name">
+                    ATAQUE MÁGICO{' '}
+                    {explicacaoAcerto && (
+                      <InfoValor
+                        titulo="Modificador de ataque mágico"
+                        descricao="É o bônus que você soma ao d20 quando faz uma jogada de ataque com uma magia (ex.: Raio de Fogo). O total tem que igualar ou superar a CA do alvo."
+                        explicacao={explicacaoAcerto}
+                      />
+                    )}
+                  </div>
+                  <div className="stat-mod">{fmt(r.modAtaque)}</div>
+                  <div className="stat-val">acerto</div>
+                </div>
+              </div>
             </div>
-            <div className="stat-mod">{fmt(resumo.modAtributo)}</div>
-            <div className="stat-val">{resumo.atributo}</div>
-          </div>
-          <div className="box stat-box" style={{ cursor: 'default' }}>
-            <div className="stat-name">
-              CD DA MAGIA{' '}
-              {explicacaoCdConjuracao && (
-                <InfoValor
-                  titulo="CD da magia"
-                  descricao="É a dificuldade que o alvo precisa igualar ou superar na salvaguarda pra evitar (ou reduzir) o efeito das suas magias que exigem salvaguarda."
-                  explicacao={explicacaoCdConjuracao}
-                />
-              )}
+          ))
+        : resumo && (
+            <div className="stat-grid">
+              <div className="box stat-box" style={{ cursor: 'default' }}>
+                <div className="stat-name">
+                  MOD. DE CONJ.{' '}
+                  <InfoValor
+                    titulo="Modificador de conjuração"
+                    descricao={`É o modificador do seu atributo de conjuração (${resumo.atributoNome}) — o atributo que sua classe usa pra conjurar magias. Serve de base pra CD e pro ataque mágico.`}
+                    explicacao={{
+                      linhas: [{ label: `mod. ${resumo.atributo}`, valor: fmt(resumo.modAtributo) }],
+                      total: { label: 'Modificador de Conjuração', valor: fmt(resumo.modAtributo) },
+                    }}
+                  />
+                </div>
+                <div className="stat-mod">{fmt(resumo.modAtributo)}</div>
+                <div className="stat-val">{resumo.atributo}</div>
+              </div>
+              <div className="box stat-box" style={{ cursor: 'default' }}>
+                <div className="stat-name">
+                  CD DA MAGIA{' '}
+                  {explicacaoCdConjuracao && (
+                    <InfoValor
+                      titulo="CD da magia"
+                      descricao="É a dificuldade que o alvo precisa igualar ou superar na salvaguarda pra evitar (ou reduzir) o efeito das suas magias que exigem salvaguarda."
+                      explicacao={explicacaoCdConjuracao}
+                    />
+                  )}
+                </div>
+                <div className="stat-mod">{resumo.cd}</div>
+                <div className="stat-val">salvaguarda</div>
+              </div>
+              <div className="box stat-box" style={{ cursor: 'default' }}>
+                <div className="stat-name">
+                  ATAQUE MÁGICO{' '}
+                  {explicacaoAcertoConjuracao && (
+                    <InfoValor
+                      titulo="Modificador de ataque mágico"
+                      descricao="É o bônus que você soma ao d20 quando faz uma jogada de ataque com uma magia (ex.: Raio de Fogo). O total tem que igualar ou superar a CA do alvo."
+                      explicacao={explicacaoAcertoConjuracao}
+                    />
+                  )}
+                </div>
+                <div className="stat-mod">{fmt(resumo.modAtaque)}</div>
+                <div className="stat-val">acerto</div>
+              </div>
             </div>
-            <div className="stat-mod">{resumo.cd}</div>
-            <div className="stat-val">salvaguarda</div>
-          </div>
-          <div className="box stat-box" style={{ cursor: 'default' }}>
-            <div className="stat-name">
-              ATAQUE MÁGICO{' '}
-              {explicacaoAcertoConjuracao && (
-                <InfoValor
-                  titulo="Modificador de ataque mágico"
-                  descricao="É o bônus que você soma ao d20 quando faz uma jogada de ataque com uma magia (ex.: Raio de Fogo). O total tem que igualar ou superar a CA do alvo."
-                  explicacao={explicacaoAcertoConjuracao}
-                />
-              )}
-            </div>
-            <div className="stat-mod">{fmt(resumo.modAtaque)}</div>
-            <div className="stat-val">acerto</div>
-          </div>
-        </div>
-      )}
+          )}
 
       {desvantagemForcaDestreza && (
         <div className="label" style={{ color: 'var(--danger)', marginBottom: 10 }}>

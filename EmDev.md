@@ -116,10 +116,19 @@ vez, Perfil passa a agrupar por classe também.
         conjura), a ponte apontava pro Bárbaro e sumia (0 espaços).
         Testado nos 2 sentidos (pill em Bardo mostra Bruxo, pill em
         Bruxo mostra Bardo) no Char Multiclasse (Bárbaro/Bardo/Bruxo).
-  - [ ] 5c — Resumo de conjuração (CD/Ataque Mágico, hoje 1 bloco só)
-        vira 1 bloco POR classe conjuradora (CD/ataque dependem do
-        atributo de conjuração de CADA classe — Bardo usa CAR, Mago
-        usa INT, são números diferentes de verdade).
+  - [x] 5c — Resumo de conjuração (CD/Ataque Mágico) virou 1 bloco POR
+        classe conjuradora quando há 2+ (`resumosPorClasse`,
+        `FichaShell.tsx`/`MagiasTab.tsx`) — com 0 ou 1, continua o
+        bloco único de sempre, sem título extra. Confirmado com Mago
+        17/Bardo 3 que os números são bem diferentes de verdade (Mago
+        +11 acerto/CD 19 por INT; Bardo +5 acerto/CD 13 por CAR).
+        **Achado real, registrado em `PENDENCIAS.md`:** a EXIBIÇÃO já
+        mostra os 2 certos, mas conjurar de verdade ainda usa só 1
+        modificador (o da classe ativa) — invisível em combos que
+        usam o mesmo atributo (Bardo+Bruxo, os 2 CAR), mas errado em
+        combos como Mago+Bardo. Trava estruturalmente (precisa saber
+        a classe da magia no momento de conjurar, redesenho maior),
+        não é mais uma entrega desta Multiclasse.
   - [ ] 5d — Seções Bruxo-específicas da aba Magias (Contatar
         Patrono, Astúcia Mágica, Arcana Mística, Livro das Sombras)
         passam a checar "o personagem TEM Bruxo em `classesAtual`"
