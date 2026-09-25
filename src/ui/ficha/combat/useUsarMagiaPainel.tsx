@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
-import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte } from '../../../core/magiasPersonagem';
+import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte, type MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
@@ -34,8 +34,8 @@ interface UsarMagiaPainelParams {
   espacosGastosPorCirculo: Record<number, number>;
   classeAtivaNome: string;
   ponte: PoolDePonte | null;
-  truques: Magia[];
-  magiasPreparadas: Magia[];
+  truques: MagiaComClasseOpcional[];
+  magiasPreparadas: MagiaComClasseOpcional[];
   modAcertoConjuracao: number | null;
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
@@ -161,6 +161,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         magiasPreparadas={p.magiasPreparadas}
         espacos={p.espacos}
         espacosGastosPorCirculo={p.espacosGastosPorCirculo}
+        ponte={p.ponte}
         maestriaDeMagiasAtuais={p.maestriaDeMagiasAtuais}
         assinaturaMagicaAtuais={p.assinaturaMagicaAtuais}
         assinaturaMagicaGastas={p.assinaturaMagicaGastas}

@@ -1,14 +1,17 @@
 import { useState, type ReactNode } from 'react';
-import type { Magia } from '../../data/rulesets/dnd2024/magias';
 import styles from './GrupoMagiaColapsavel.module.css';
 
-interface GrupoMagiaColapsavelProps {
+// Genérico desde 2026-09 (Multiclasse, ver EmDev.md) — o seletor de
+// magia em Combate passa `MagiaComClasseOpcional[]` (magia + classe),
+// não mais só `Magia[]`; o resto dos usos (Level Up, Memorizar Magia)
+// continua passando `Magia[]` normal, sem mudar nada pra eles.
+interface GrupoMagiaColapsavelProps<T> {
   label: string;
-  magias: Magia[];
-  children: (magia: Magia) => ReactNode;
+  magias: T[];
+  children: (item: T) => ReactNode;
 }
 
-export default function GrupoMagiaColapsavel({ label, magias, children }: GrupoMagiaColapsavelProps) {
+export default function GrupoMagiaColapsavel<T>({ label, magias, children }: GrupoMagiaColapsavelProps<T>) {
   const [expandido, setExpandido] = useState(true);
 
   if (magias.length === 0) return null;

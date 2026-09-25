@@ -7,6 +7,7 @@ import type { ItemMochila } from './mochila';
 import type { Moedas } from './moedas';
 import type { Pet } from './pets';
 import type { PersonagemClasse } from './multiclasse';
+import type { MagiaConhecida } from './magiasPersonagem';
 import { ID_PERSONAGEM_DEMO } from '../data/personagemDemo';
 
 export interface PersonagemSalvo {
@@ -102,14 +103,24 @@ export interface PersonagemSalvo {
   /** Truques conhecidos DEPOIS da criação — cresce/troca no Level Up
    * (Etapa 4.1). Ausente = personagem nunca passou por um Level Up
    * com troca de Truques ainda; `FichaShell.tsx` cai pra
-   * `selecao.truquesEscolhidos` (retrato da criação) nesse caso. */
-  truquesAtual?: string[];
+   * `selecao.truquesEscolhidos` (retrato da criação) nesse caso.
+   *
+   * Desde a entrega "Multiclasse — Truques/Magias por classe"
+   * (2026-09), cada item vem marcado com a classe que concedeu
+   * (`MagiaConhecida`), pra saber de qual classe é cada escolha
+   * quando o personagem é multiclasse (ver `sdd/sdd-multiclasse-
+   * truques-magias.md`). `string[]` só continua aceito aqui pra ler
+   * personagem salvo ANTES dessa entrega — `normalizarMagiasConhecidas`
+   * (`core/magiasPersonagem.ts`) migra na leitura, nunca escreve mais
+   * nesse formato. */
+  truquesAtual?: string[] | MagiaConhecida[];
   /** Magias Preparadas DEPOIS da criação — cresce/troca no Level Up
-   * (Etapa 4.3, mesmo padrão de `truquesAtual`). Ausente = personagem
-   * nunca passou por um Level Up com troca de Magias Preparadas
-   * ainda; `FichaShell.tsx` cai pra `selecao.magiasPreparadasEscolhidas`
-   * (retrato da criação) nesse caso. */
-  magiasPreparadasAtual?: string[];
+   * (Etapa 4.3, mesmo padrão de `truquesAtual`, inclusive a marca de
+   * classe). Ausente = personagem nunca passou por um Level Up com
+   * troca de Magias Preparadas ainda; `FichaShell.tsx` cai pra
+   * `selecao.magiasPreparadasEscolhidas` (retrato da criação) nesse
+   * caso. */
+  magiasPreparadasAtual?: string[] | MagiaConhecida[];
   /** Livro de Magias (grimório) do Mago — pool de magias CONHECIDAS,
    * maior que `magiasPreparadasAtual` (ver DECISOES-CLASSES.md
    * "Casters", Padrão C). Cresce +2 por nível, nunca troca/diminui.

@@ -1,0 +1,36 @@
+/* Selo colorido por classe — mesma forma/tamanho do `.tag` global
+   (branco/outline, ver index.css), só troca fundo/borda/texto pra
+   cor sólida quando a classe tem cor definida. */
+.pill {
+  font-weight: bold;
+}
+
+.pillVermelho {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--panel);
+}
+
+.pillRoxo {
+  background: var(--accent-especial);
+  border-color: var(--accent-especial);
+  color: var(--panel);
+}
+
+.pillMostarda {
+  background: var(--pip-mostarda);
+  border-color: var(--pip-mostarda);
+  color: var(--panel);
+}
+
+.pillAzul {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--panel);
+}
+
+.pillAzulClaro {
+  background: var(--pip-azul-claro);
+  border-color: var(--pip-azul-claro);
+  color: var(--panel);
+}

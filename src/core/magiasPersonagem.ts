@@ -177,6 +177,77 @@ function buscarMagiasPorNome(nomes: string[]): Magia[] {
     .sort((a, b) => a.circulo - b.circulo || a.nome.localeCompare(b.nome, 'pt-BR'));
 }
 
+/** Truque/Magia Preparada conhecido pelo personagem, marcado com a
+ * classe que concedeu aquela escolha — necessário pra multiclasse
+ * (2 classes podem ter listas de magia próprias misturadas na mesma
+ * "coleção conhecida"). Ver `sdd/sdd-multiclasse-truques-magias.md`.
+ * `truquesAtuais`/`magiasPreparadasAtuais` (`FichaShell.tsx`) guardam
+ * isso — qualquer função abaixo que só precisa do NOME continua
+ * recebendo `string[]` puro (extraído no chamador com
+ * `nomesDeMagiasConhecidas`), pra não precisar mudar toda a cadeia de
+ * Level Up/sorteio que já funcionava certo com nome só. */
+export interface MagiaConhecida {
+  nome: string;
+  /** Nome da classe que concedeu esta escolha. */
+  classe: string;
+}
+
+/** Só os nomes — ponte pra toda função que já existia e só entende
+ * `string[]` (Level Up, sorteio, cálculo de déficit). */
+export function nomesDeMagiasConhecidas(lista: MagiaConhecida[]): string[] {
+  return lista.map((m) => m.nome);
+}
+
+/** Depois de uma tela devolver uma lista NOVA de nomes (Level Up,
+ * Memorizar Magia, redefinição por Descanso Longo), marca cada nome
+ * com a classe certa: mantém a marca de quem já era conhecido,
+ * marca com `classeParaNovos` (a classe em foco na hora dessa
+ * escolha) quem é novo. */
+export function marcarClasseDasEscolhas(nomesNovos: string[], anteriores: MagiaConhecida[], classeParaNovos: string): MagiaConhecida[] {
+  return nomesNovos.map((nome) => ({
+    nome,
+    classe: anteriores.find((m) => m.nome === nome)?.classe ?? classeParaNovos,
+  }));
+}
+
+/** Migra o formato antigo (`string[]`, sem marca de classe — todo
+ * personagem salvo antes desta entrega) pro novo (`MagiaConhecida[]`).
+ * Palpite: a 1ª classe do personagem cujo catálogo contém aquele
+ * nome; nenhuma bater (não devia acontecer com dado real) cai pra
+ * `classesAtual[0]`. Nunca escreve de volta no formato antigo — só
+ * lê. Ver SDD "Migração de personagens salvos". */
+export function normalizarMagiasConhecidas(
+  valor: string[] | MagiaConhecida[] | undefined,
+  classesAtual: { classe: string }[],
+): MagiaConhecida[] {
+  if (!valor || valor.length === 0) return [];
+  if (typeof valor[0] !== 'string') return valor as MagiaConhecida[];
+  const nomes = valor as string[];
+  const primeiraClasse = classesAtual[0]?.classe ?? '';
+  return nomes.map((nome) => ({
+    nome,
+    classe: classesAtual.find((c) => magiasDaClasse(c.classe).some((m) => m.nome === nome))?.classe ?? primeiraClasse,
+  }));
+}
+
+/** Truques/Magias Preparadas reais do personagem, PAREADOS com a
+ * classe que concedeu cada um — usado pela aba Magias pra mostrar o
+ * selo por item (ver `sdd/sdd-multiclasse-truques-magias.md`).
+ * Diferente de `buscarMagiasPorNome`/`truquesDoPersonagem`, NUNCA
+ * deduplica por nome: um personagem multiclasse pode conhecer a
+ * MESMA magia por 2 classes ao mesmo tempo (ex.: "Amigos" tanto de
+ * Bardo quanto de Bruxo) — são 2 escolhas reais, aparecem como 2
+ * linhas. Mesmo critério de ordenação de sempre (círculo → nome). */
+export function magiasConhecidasComClasse(lista: MagiaConhecida[]): { magia: Magia; classe: string }[] {
+  return lista
+    .map((item) => {
+      const magia = magias.find((m) => m.nome === item.nome);
+      return magia ? { magia, classe: item.classe } : null;
+    })
+    .filter((x): x is { magia: Magia; classe: string } => x !== null)
+    .sort((a, b) => a.magia.circulo - b.magia.circulo || a.magia.nome.localeCompare(b.magia.nome, 'pt-BR'));
+}
+
 /** Truques reais do personagem (nomes → objeto Magia completo). Recebe
  * os nomes diretamente (não `WizardSelection`) porque, a partir da
  * Etapa 4.1 (Level Up), a lista pode ter mudado depois da criação —
@@ -248,14 +319,22 @@ export function completarListaDeMagias(atuais: string[], catalogoEmbaralhado: Ma
  * antes dessa tela existir) — ver PENDENCIAS.md "Detector genérico de
  * ficha atrasada" pro contexto maior (isso aqui é só o caso de
  * Truques/Magias, não um mecanismo genérico ainda). */
-export function deficitTruques(classe: Classe | null, nivel: number, truquesAtuais: string[]): number {
+/** Corrigido pra multiclasse (Entrega 4, ver EmDev.md): compara a
+ * cota da CLASSE contra só os itens MARCADOS com essa classe — antes
+ * comparava contra o TOTAL de truques do personagem (das 2+ classes
+ * juntas), o que dava déficit errado (às vezes some, às vezes sobra)
+ * assim que o personagem tem 2 classes com Truques Conhecidos. */
+export function deficitTruques(classe: Classe | null, nivel: number, truquesAtuais: MagiaConhecida[]): number {
   if (!classe) return 0;
-  return Math.max(0, valorRecursoClasse(classe, 'Truques Conhecidos', nivel) - truquesAtuais.length);
+  const daClasse = truquesAtuais.filter((t) => t.classe === classe.nome).length;
+  return Math.max(0, valorRecursoClasse(classe, 'Truques Conhecidos', nivel) - daClasse);
 }
 
-export function deficitMagiasPreparadas(classe: Classe | null, nivel: number, magiasPreparadasAtuais: string[]): number {
+/** Mesma correção de `deficitTruques`, ver comentário lá. */
+export function deficitMagiasPreparadas(classe: Classe | null, nivel: number, magiasPreparadasAtuais: MagiaConhecida[]): number {
   if (!classe) return 0;
-  return Math.max(0, valorRecursoClasse(classe, 'Magias Preparadas', nivel) - magiasPreparadasAtuais.length);
+  const daClasse = magiasPreparadasAtuais.filter((m) => m.classe === classe.nome).length;
+  return Math.max(0, valorRecursoClasse(classe, 'Magias Preparadas', nivel) - daClasse);
 }
 
 /** "Segredos Mágicos" (Bardo, nível 10, classe base): sempre que o nº
@@ -335,6 +414,38 @@ export function agruparMagiasPorCirculo(magias: Magia[]): GrupoDeMagias[] {
       circulo,
       label: circulo === 0 ? 'Truques' : `${circulo}º Círculo`,
       magias: [...lista].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')),
+    }));
+}
+
+/** Magia + a classe de quem a concedeu — `null` quando a magia vem de
+ * uma lista que só pode ter 1 dono (Descobertas Mágicas, Livro das
+ * Sombras, magia de espécie/talento etc.), sem ambiguidade de
+ * multiclasse pra marcar. Ver `sdd/sdd-multiclasse-truques-magias.md`
+ * ("seletor de magia em Combate"). */
+export interface MagiaComClasseOpcional {
+  magia: Magia;
+  classe: string | null;
+}
+
+/** Mesmo agrupamento de `agruparMagiasPorCirculo`, mas preservando a
+ * classe de cada item (ver `MagiaComClasseOpcional`) — usado no
+ * seletor de magia em Combate, que mistura Truques/Magias Preparadas
+ * (com classe, multiclasse) e listas fixas de 1 classe só (sem
+ * classe/pill). NUNCA deduplica — mesma razão de
+ * `magiasConhecidasComClasse`. */
+export function agruparMagiasComClassePorCirculo(itens: MagiaComClasseOpcional[]): { circulo: number; label: string; itens: MagiaComClasseOpcional[] }[] {
+  const porCirculo = new Map<number, MagiaComClasseOpcional[]>();
+  for (const item of itens) {
+    const lista = porCirculo.get(item.magia.circulo) ?? [];
+    lista.push(item);
+    porCirculo.set(item.magia.circulo, lista);
+  }
+  return [...porCirculo.entries()]
+    .sort(([a], [b]) => b - a)
+    .map(([circulo, lista]) => ({
+      circulo,
+      label: circulo === 0 ? 'Truques' : `${circulo}º Círculo`,
+      itens: [...lista].sort((a, b) => a.magia.nome.localeCompare(b.magia.nome, 'pt-BR')),
     }));
 }
 

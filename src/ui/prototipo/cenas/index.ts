@@ -2,6 +2,8 @@ import type { ComponentType } from 'react';
 import PopupAtaqueSalvaguardaCena from './PopupAtaqueSalvaguardaCena';
 import ConfirmacaoCriticoCena from './ConfirmacaoCriticoCena';
 import EsmagadorRaizesCena from './EsmagadorRaizesCena';
+import MulticlasseMagiasCena from './MulticlasseMagiasCena';
+import MulticlasseCombateCena from './MulticlasseCombateCena';
 
 export interface CenaPrototipo {
   id: string;
@@ -45,5 +47,19 @@ export const cenasPrototipo: CenaPrototipo[] = [
     descricao:
       'Clava Grande (Pesada + Contundente) qualifica pros 2 ao mesmo tempo. 3 layouts pra decidir como oferecer: cartões paralelos, fila sequencial, ou lista única com 1 confirmação.',
     Componente: EsmagadorRaizesCena,
+  },
+  {
+    id: 'multiclasse-magias',
+    titulo: 'Multiclasse — aba Magias sem pill',
+    descricao:
+      'Mago 5 / Bardo 3: Truques e Magias Preparadas das 2 classes juntos numa lista só, cada item com selo da classe (azul-claro/mostarda) — sem pill Mago/Bardo pra trocar.',
+    Componente: MulticlasseMagiasCena,
+  },
+  {
+    id: 'multiclasse-combate',
+    titulo: 'Multiclasse — seletor de magia em Combate sem pill',
+    descricao:
+      'Mesmo personagem: botão "Conjurar Magia" no painel de Ação já oferece as magias das 2 classes juntas, com selo — gasto continua saindo do pool combinado certo.',
+    Componente: MulticlasseCombateCena,
   },
 ];

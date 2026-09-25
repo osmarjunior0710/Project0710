@@ -5,9 +5,57 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
-## v202609_0124
+## v202609_1049
 
 **Mago — Assinatura Mágica (nível 20).** No Level Up do nível 20, escolhe 2 magias de 3º círculo do Livro de Magias — as 2 ficam sempre preparadas (nova seção na aba Magias) e cada uma pode ser conjurada 1x no 3º círculo sem gastar Espaço de Magia (recarrega no próximo Descanso Curto ou Longo). Vale também na aba Combate: ao "Usar Magia" uma dessas 2 (enquanto ainda não usada no período), a tela "Em qual círculo?" mostra "Conjurar Grátis" no 3º círculo.
+
+## v202609_1220
+
+**Multiclasse — o pill (Mago/Bardo/Bruxo) saiu de vez.** O seletor de classe no topo da ficha não existe mais — Perfil, Magias e Combate já mostram tudo junto sem precisar trocar. O aviso "faltam truques/magias preparadas" agora é por classe.
+
+## v202609_1209
+
+**Multiclasse — Level Up não depende mais do pill.** Subir de nível (pela seta de XP ou pelo raio de teste) sempre pergunta/resolve qual classe sobe de forma explícita, não mais "a que estava selecionada no pill".
+
+## v202609_1147
+
+**Multiclasse — Astúcia Mágica e afins não dependem mais do pill.** Contatar Patrono, Astúcia Mágica, Maestria de Magias e Adepto de Ritual aparecem sempre que o personagem TEM aquela classe, mesmo que o pill esteja em outra. Corrige de brinde um bug: Astúcia Mágica podia recuperar o pool de espaço errado se o pill não estivesse no Bruxo.
+
+## v202609_1141
+
+**Multiclasse — CD/Ataque Mágico agora é por classe.** Personagem com 2 classes conjuradoras (ex.: Mago + Bardo) vê 1 bloco de "Mod. de Conj./CD/Ataque Mágico" pra cada classe, com os números certos de cada uma — antes só mostrava o da classe no pill.
+
+## v202609_0535
+
+**Multiclasse — Espaços de Magia mostra os 2 pools juntos.** Personagem com Bruxo + outra classe conjuradora (ex.: Bardo) agora vê os 2 pools de espaço de magia ao mesmo tempo (aba Magias e painel flutuante em Combate), não só o da classe no pill. Corrige de brinde um bug: com 3+ classes, o pool "da ponte" podia sumir sozinho.
+
+## v202609_0530
+
+**Multiclasse — Perfil mostra todas as classes.** A aba Perfil já mostra as características (e subclasse) de CADA classe do personagem, uma embaixo da outra — antes só mostrava a classe que estava no pill.
+
+## v202609_0220
+
+Corrige o aviso "faltam truques/magias preparadas" pra personagem multiclasse — antes comparava o total das 2 classes juntas contra a cota de 1 só (podia esconder ou inventar um aviso errado).
+
+## v202609_2140
+
+**Multiclasse — Combate também mostra as 2 classes juntas.** O seletor de magia dos painéis de Ação/Ação Bônus/Reação já oferecia as magias das 2 classes (isso já funcionava), mas agora cada uma mostra o selo de qual classe é, igual à aba Magias.
+
+## v202609_2007
+
+**Multiclasse — aba Magias mostra as 2 classes juntas.** Truques e Magias Preparadas de personagem multiclasse (ex.: Bardo/Bruxo) aparecem numa lista só, cada item com um selo colorido de qual classe é — antes só apareciam as da classe do pill.
+
+## v202609_1957
+
+Corrige um bug real: a aba Magias podia travar (tela branca) trocando o pill de uma classe sem magia pra uma com magia, sem sair da tela. Nenhuma mudança visível além disso — é a base de dado (Entrega 1) do foco de Multiclasse, ainda sem o selo de classe na tela.
+
+## v202609_1907
+
+Protótipos de Multiclasse (`/prototipo`) refeitos com a estrutura real da tela (botão Usar, magia de catálogo de verdade) em vez de mockup simplificado.
+
+## v202609_1850
+
+Mago ganha cor própria (azul-claro) nos recursos/selos de classe — cor nova em `/prototipo`, ambiente interno (2 cenas novas de protótipo pra planejar Multiclasse, sem efeito no app real ainda).
 
 ## v202609_2321
 

@@ -3,11 +3,12 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { Pet } from '../../../core/pets';
 import { iconesMagia } from '../../../core/classificarMagia';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
-import { cdConjuracao, circulosDisponiveisParaConjurar, type EspacoDeMagiaAtivo } from '../../../core/magiasPersonagem';
+import { cdConjuracao, circulosDisponiveisParaConjurar, type EspacoDeMagiaAtivo, type MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
+import PillClasse from '../../components/PillClasse';
 import TickPips from '../../components/TickPips';
 import styles from './PanelRows.module.css';
 
@@ -40,7 +41,7 @@ interface ReacaoPanelContentProps {
    * nos níveis 5/11/17, ver `calcularDanoMagia`). */
   nivel: number;
   conjura: boolean;
-  magiasReacao: Magia[];
+  magiasReacao: MagiaComClasseOpcional[];
   modAcertoConjuracao: number | null;
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
@@ -425,13 +426,13 @@ export default function ReacaoPanelContent({
               Bloqueado — Armadura equipada sem treinamento impede conjurar magias.
             </div>
           )}
-          {magiasReacao.map((m) => {
+          {magiasReacao.map(({ magia: m, classe }) => {
             const semEspaco =
               m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
             const bloqueada = desvantagemForcaDestreza || semEspaco;
             return (
               <div
-                key={m.id}
+                key={`${m.id}-${classe ?? 'x'}`}
                 className={styles.spellMiniRow}
                 style={bloqueada ? { opacity: semEspaco ? 0.45 : 0.5, pointerEvents: 'none' } : undefined}
                 onClick={() => conjurarMagia(m)}
@@ -440,7 +441,10 @@ export default function ReacaoPanelContent({
                   <MagiaComDescricao magia={m} /> {iconesMagia(m)}
                   {semEspaco && <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · sem espaço disponível</span>}
                 </span>
-                <span className="tag">{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
+                <span style={{ display: 'flex', gap: 4 }}>
+                  <span className="tag">{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
+                  {classe && <PillClasse classe={classe} />}
+                </span>
               </div>
             );
           })}

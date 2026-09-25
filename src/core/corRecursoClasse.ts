@@ -5,13 +5,14 @@
 // recurso com contador — e se o Osmar não disser qual cor, PERGUNTAR (não
 // escolher sozinho). Ver DECISOES-CLASSES.md.
 
-export type CorRecurso = 'vermelho' | 'roxo' | 'mostarda' | 'azul';
+export type CorRecurso = 'vermelho' | 'roxo' | 'mostarda' | 'azul' | 'azul-claro';
 
 const COR_POR_CLASSE: Record<string, CorRecurso> = {
   Bárbaro: 'vermelho', // Fúria
   Bardo: 'mostarda', // Inspiração de Bardo
   Bruxo: 'roxo', // Magia de Pacto
   Guerreiro: 'azul', // Recuperar Fôlego — confirmado com o Osmar (2026-09): mesmo azul padrão
+  Mago: 'azul-claro', // Truques/Magias (selo por classe) — confirmado com o Osmar (2026-09-24)
 };
 
 /** `null` = a classe ainda não tem cor definida (usa o azul padrão até o

@@ -7,9 +7,11 @@ import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import type { Moedas } from '../../../core/moedas';
 import {
   espacosDeMagiaAtivos,
-  truquesDoPersonagem,
   magiasPreparadasDoPersonagem,
+  magiasConhecidasComClasse,
+  nomesDeMagiasConhecidas,
   opcoesGastoComPonte,
+  type MagiaConhecida,
   type PoolDePonte,
   type EspacoDeMagiaAtivo,
 } from '../../../core/magiasPersonagem';
@@ -24,6 +26,7 @@ import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
 import { danoComCritico } from '../../../core/danoCritico';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
+import PillClasse from '../../components/PillClasse';
 import TickPips from '../../components/TickPips';
 import { useColapsavel } from '../../hooks/useColapsavel';
 import { useRoll } from '../../roll/RollContext';
@@ -64,6 +67,13 @@ interface MagiasTabProps {
   /** Os 3 números de conjuração mostrados no topo da aba (ver
    * `resumoConjuracao`) — `null` = classe sem atributo de conjuração mapeado. */
   resumo: ResumoConjuracao | null;
+  /** 1 bloco de resumo POR classe conjuradora do personagem (Entrega
+   * 5c, Multiclasse — CD/Ataque Mágico dependem do atributo de CADA
+   * classe, ex.: Bardo usa CAR, Mago usa INT). Mostrado no lugar do
+   * bloco único `resumo` sempre que tiver mais de 1 classe conjuradora;
+   * com 0 ou 1, o bloco único de sempre continua igual (menos
+   * repetição visual pro caso comum). */
+  resumosPorClasse: { classeNome: string; resumo: ResumoConjuracao; explicacaoAcerto: ExplicacaoCalculo | null; explicacaoCd: ExplicacaoCalculo | null }[];
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
@@ -77,8 +87,12 @@ interface MagiasTabProps {
    * esta aba também deixa conjurar truque/magia direto. */
   desvantagemForcaDestreza: boolean;
   conjura: boolean;
-  truquesAtuais: string[];
-  magiasPreparadasAtuais: string[];
+  /** Marcados com a classe que concedeu cada escolha (multiclasse,
+   * ver `sdd/sdd-multiclasse-truques-magias.md`) — a lista já vem com
+   * as magias de TODAS as classes do personagem juntas, cada item
+   * com o selo (`PillClasse`) de qual classe é. */
+  truquesAtuais: MagiaConhecida[];
+  magiasPreparadasAtuais: MagiaConhecida[];
   /** Livro de Magias (grimório) do Mago — pool de magias CONHECIDAS,
    * maior que `magiasPreparadasAtuais` (ver DECISOES-CLASSES.md
    * "Casters", Padrão C). `[]` pra quem não tem essa característica
@@ -231,10 +245,15 @@ interface MagiasTabProps {
   armaDePactoAtual: ItemMochila | null;
   onVincularArmaDePacto: (nomeArma: string) => void;
   onDesvincularArmaDePacto: () => void;
-  faltamTruques: number;
-  faltamMagiasPreparadas: number;
-  onCompletarTruques: () => void;
-  onCompletarMagiasPreparadas: () => void;
+  /** 1 entrada por classe com déficit (Entrega 5f, Multiclasse) — cada
+   * classe tem sua PRÓPRIA cota de Truques Conhecidos/Magias
+   * Preparadas, então o aviso "faltam X" precisa ser por classe, não
+   * só da classe "em foco" (conceito que já não existe mais). Lista
+   * vazia = ninguém com déficit. */
+  deficitsTruques: { classeNome: string; faltam: number }[];
+  deficitsMagiasPreparadas: { classeNome: string; faltam: number }[];
+  onCompletarTruques: (classeNome: string) => void;
+  onCompletarMagiasPreparadas: (classeNome: string) => void;
   /** `true` só quando o personagem tem "Grimório de Necromancia"
    * (Necromante, nível 3+) — controla se `onColheitaMacabraDisponivel`
    * dispara depois de conjurar magia de Necromancia com espaço. */
@@ -256,6 +275,7 @@ export default function MagiasTab({
   onGastarSlotCirculo,
   modAcertoConjuracao,
   resumo,
+  resumosPorClasse,
   explicacaoAcertoConjuracao,
   explicacaoCdConjuracao,
   truqueVinculadoAgonizante,
@@ -313,8 +333,8 @@ export default function MagiasTab({
   armaDePactoAtual,
   onVincularArmaDePacto,
   onDesvincularArmaDePacto,
-  faltamTruques,
-  faltamMagiasPreparadas,
+  deficitsTruques,
+  deficitsMagiasPreparadas,
   onCompletarTruques,
   onCompletarMagiasPreparadas,
   colheitaMacabraDisponivel,
@@ -333,6 +353,18 @@ export default function MagiasTab({
     danoRolado: number | null;
     upcastNaoAutomatico: boolean;
   } | null>(null);
+  // Os 4 `useColapsavel` abaixo precisam vir ANTES do `if (!conjura)
+  // return` — Regra dos Hooks: nº de hooks chamados não pode variar
+  // entre renders do MESMO componente montado. Bug pego testando
+  // multiclasse (Osmar, 2026-09-24): pill trocando de uma classe SEM
+  // conjuração (Bárbaro) pra uma COM (Bardo) sem remontar a tela —
+  // antes esses hooks só executavam na 2ª renderização, "Rendered
+  // more hooks than during the previous render".
+  const [espacosExpandido, setEspacosExpandido] = useColapsavel('espacos-de-magia', true);
+  const [pontEspacosExpandido, setPontEspacosExpandido] = useColapsavel('espacos-de-magia-ponte', true);
+  const [truquesExpandido, setTruquesExpandido] = useColapsavel('truques', true);
+  const [magiasPreparadasExpandido, setMagiasPreparadasExpandido] = useColapsavel('magias-preparadas', true);
+  const [livroDeMagiasExpandido, setLivroDeMagiasExpandido] = useColapsavel('livro-de-magias', true);
 
   if (!conjura) {
     return (
@@ -343,8 +375,15 @@ export default function MagiasTab({
   }
 
   const espacos = espacosParaConjurar ?? espacosDeMagiaAtivos(classe, nivel);
-  const truques = truquesDoPersonagem(truquesAtuais);
-  const preparadas = magiasPreparadasDoPersonagem(magiasPreparadasAtuais);
+  // Truques/Magias Preparadas mostram as classes do personagem juntas
+  // (2026-09, ver EmDev.md) — pareado com a classe pro selo
+  // (`PillClasse`); `truquesDoPersonagem`/`magiasPreparadasDoPersonagem`
+  // (nome só) continuam servindo pro resto do arquivo (Descobertas
+  // Mágicas, Livro de Magias etc. — listas de 1 classe só, sem
+  // ambiguidade).
+  const truquesComClasse = magiasConhecidasComClasse(truquesAtuais);
+  const preparadasComClasse = magiasConhecidasComClasse(magiasPreparadasAtuais);
+  const nomesMagiasPreparadas = nomesDeMagiasConhecidas(magiasPreparadasAtuais);
   const livroDeMagias = magiasPreparadasDoPersonagem(livroDeMagiasAtuais);
   const descobertasMagicas = magiasPreparadasDoPersonagem(magiasDescobertasMagicasAtuais);
   const pactoDoInfero = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
@@ -352,10 +391,6 @@ export default function MagiasTab({
   const magiasTalentoOrigem = magiasPreparadasDoPersonagem(magiasTalentoOrigemAtuais);
   const magiasTalentoGeral = magiasPreparadasDoPersonagem(magiasTalentoGeralAtuais);
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
-  const [espacosExpandido, setEspacosExpandido] = useColapsavel('espacos-de-magia', true);
-  const [truquesExpandido, setTruquesExpandido] = useColapsavel('truques', true);
-  const [magiasPreparadasExpandido, setMagiasPreparadasExpandido] = useColapsavel('magias-preparadas', true);
-  const [livroDeMagiasExpandido, setLivroDeMagiasExpandido] = useColapsavel('livro-de-magias', true);
 
   /** `gastouEspacoDeVerdade` — só true quando um Espaço de Magia real foi
    * gasto (não pra truque nem magia concedida de graça por Invocação
@@ -554,53 +589,106 @@ export default function MagiasTab({
 
   return (
     <>
-      {resumo && (
-        <div className="stat-grid">
-          <div className="box stat-box" style={{ cursor: 'default' }}>
-            <div className="stat-name">
-              MOD. DE CONJ.{' '}
-              <InfoValor
-                titulo="Modificador de conjuração"
-                descricao={`É o modificador do seu atributo de conjuração (${resumo.atributoNome}) — o atributo que sua classe usa pra conjurar magias. Serve de base pra CD e pro ataque mágico.`}
-                explicacao={{
-                  linhas: [{ label: `mod. ${resumo.atributo}`, valor: fmt(resumo.modAtributo) }],
-                  total: { label: 'Modificador de Conjuração', valor: fmt(resumo.modAtributo) },
-                }}
-              />
+      {resumosPorClasse.length > 1
+        ? resumosPorClasse.map(({ classeNome, resumo: r, explicacaoAcerto, explicacaoCd }) => (
+            <div key={classeNome} style={{ marginBottom: 'var(--space-2)' }}>
+              <div className="label" style={{ marginBottom: 4 }}>
+                {classeNome}
+              </div>
+              <div className="stat-grid">
+                <div className="box stat-box" style={{ cursor: 'default' }}>
+                  <div className="stat-name">
+                    MOD. DE CONJ.{' '}
+                    <InfoValor
+                      titulo="Modificador de conjuração"
+                      descricao={`É o modificador do seu atributo de conjuração (${r.atributoNome}) — o atributo que ${classeNome} usa pra conjurar magias. Serve de base pra CD e pro ataque mágico.`}
+                      explicacao={{
+                        linhas: [{ label: `mod. ${r.atributo}`, valor: fmt(r.modAtributo) }],
+                        total: { label: 'Modificador de Conjuração', valor: fmt(r.modAtributo) },
+                      }}
+                    />
+                  </div>
+                  <div className="stat-mod">{fmt(r.modAtributo)}</div>
+                  <div className="stat-val">{r.atributo}</div>
+                </div>
+                <div className="box stat-box" style={{ cursor: 'default' }}>
+                  <div className="stat-name">
+                    CD DA MAGIA{' '}
+                    {explicacaoCd && (
+                      <InfoValor
+                        titulo="CD da magia"
+                        descricao="É a dificuldade que o alvo precisa igualar ou superar na salvaguarda pra evitar (ou reduzir) o efeito das suas magias que exigem salvaguarda."
+                        explicacao={explicacaoCd}
+                      />
+                    )}
+                  </div>
+                  <div className="stat-mod">{r.cd}</div>
+                  <div className="stat-val">salvaguarda</div>
+                </div>
+                <div className="box stat-box" style={{ cursor: 'default' }}>
+                  <div className="stat-name">
+                    ATAQUE MÁGICO{' '}
+                    {explicacaoAcerto && (
+                      <InfoValor
+                        titulo="Modificador de ataque mágico"
+                        descricao="É o bônus que você soma ao d20 quando faz uma jogada de ataque com uma magia (ex.: Raio de Fogo). O total tem que igualar ou superar a CA do alvo."
+                        explicacao={explicacaoAcerto}
+                      />
+                    )}
+                  </div>
+                  <div className="stat-mod">{fmt(r.modAtaque)}</div>
+                  <div className="stat-val">acerto</div>
+                </div>
+              </div>
             </div>
-            <div className="stat-mod">{fmt(resumo.modAtributo)}</div>
-            <div className="stat-val">{resumo.atributo}</div>
-          </div>
-          <div className="box stat-box" style={{ cursor: 'default' }}>
-            <div className="stat-name">
-              CD DA MAGIA{' '}
-              {explicacaoCdConjuracao && (
-                <InfoValor
-                  titulo="CD da magia"
-                  descricao="É a dificuldade que o alvo precisa igualar ou superar na salvaguarda pra evitar (ou reduzir) o efeito das suas magias que exigem salvaguarda."
-                  explicacao={explicacaoCdConjuracao}
-                />
-              )}
+          ))
+        : resumo && (
+            <div className="stat-grid">
+              <div className="box stat-box" style={{ cursor: 'default' }}>
+                <div className="stat-name">
+                  MOD. DE CONJ.{' '}
+                  <InfoValor
+                    titulo="Modificador de conjuração"
+                    descricao={`É o modificador do seu atributo de conjuração (${resumo.atributoNome}) — o atributo que sua classe usa pra conjurar magias. Serve de base pra CD e pro ataque mágico.`}
+                    explicacao={{
+                      linhas: [{ label: `mod. ${resumo.atributo}`, valor: fmt(resumo.modAtributo) }],
+                      total: { label: 'Modificador de Conjuração', valor: fmt(resumo.modAtributo) },
+                    }}
+                  />
+                </div>
+                <div className="stat-mod">{fmt(resumo.modAtributo)}</div>
+                <div className="stat-val">{resumo.atributo}</div>
+              </div>
+              <div className="box stat-box" style={{ cursor: 'default' }}>
+                <div className="stat-name">
+                  CD DA MAGIA{' '}
+                  {explicacaoCdConjuracao && (
+                    <InfoValor
+                      titulo="CD da magia"
+                      descricao="É a dificuldade que o alvo precisa igualar ou superar na salvaguarda pra evitar (ou reduzir) o efeito das suas magias que exigem salvaguarda."
+                      explicacao={explicacaoCdConjuracao}
+                    />
+                  )}
+                </div>
+                <div className="stat-mod">{resumo.cd}</div>
+                <div className="stat-val">salvaguarda</div>
+              </div>
+              <div className="box stat-box" style={{ cursor: 'default' }}>
+                <div className="stat-name">
+                  ATAQUE MÁGICO{' '}
+                  {explicacaoAcertoConjuracao && (
+                    <InfoValor
+                      titulo="Modificador de ataque mágico"
+                      descricao="É o bônus que você soma ao d20 quando faz uma jogada de ataque com uma magia (ex.: Raio de Fogo). O total tem que igualar ou superar a CA do alvo."
+                      explicacao={explicacaoAcertoConjuracao}
+                    />
+                  )}
+                </div>
+                <div className="stat-mod">{fmt(resumo.modAtaque)}</div>
+                <div className="stat-val">acerto</div>
+              </div>
             </div>
-            <div className="stat-mod">{resumo.cd}</div>
-            <div className="stat-val">salvaguarda</div>
-          </div>
-          <div className="box stat-box" style={{ cursor: 'default' }}>
-            <div className="stat-name">
-              ATAQUE MÁGICO{' '}
-              {explicacaoAcertoConjuracao && (
-                <InfoValor
-                  titulo="Modificador de ataque mágico"
-                  descricao="É o bônus que você soma ao d20 quando faz uma jogada de ataque com uma magia (ex.: Raio de Fogo). O total tem que igualar ou superar a CA do alvo."
-                  explicacao={explicacaoAcertoConjuracao}
-                />
-              )}
-            </div>
-            <div className="stat-mod">{fmt(resumo.modAtaque)}</div>
-            <div className="stat-val">acerto</div>
-          </div>
-        </div>
-      )}
+          )}
 
       {desvantagemForcaDestreza && (
         <div className="label" style={{ color: 'var(--danger)', marginBottom: 10 }}>
@@ -647,6 +735,38 @@ export default function MagiasTab({
                   <div key={espaco.circulo} className={styles.espacoRow} style={i === 0 ? { borderTop: 'none' } : undefined}>
                     <span>{espaco.circulo}º círculo</span>
                     <TickPips total={espaco.maximo} usados={gasto} tamanho="lg" variante={classeAtivaNome === 'Bruxo' ? 'roxo' : 'padrao'} />
+                  </div>
+                );
+              })}
+            </>
+          )}
+        </>
+      )}
+
+      {/* Ponte de Magia de Pacto (SDD Multiclasse) — o pool da OUTRA
+          classe conjuradora, que já pode ser gasto pra qualquer magia
+          preparada (ver EscolherCirculoShell). Mostrado junto do pool
+          principal (não escondido atrás do pill) — Entrega 5b do foco
+          de Multiclasse, confirmado no Livro do Jogador (Cap. 2,
+          Multiclasse "Magia de Pacto"): os 2 pools coexistem de
+          verdade, o jogador precisa ver os 2 pra decidir qual gastar. */}
+      {ponte && ponte.espacos.length > 0 && (
+        <>
+          <div className={styles.grupoHeader} onClick={() => setPontEspacosExpandido(!pontEspacosExpandido)}>
+            <span>Espaços de Magia — {ponte.classeNome}</span>
+            <span>{pontEspacosExpandido ? '▾' : '▸'}</span>
+          </div>
+          {pontEspacosExpandido && (
+            <>
+              <div className="label" style={{ margin: '0 0 var(--space-2)' }}>
+                {ponte.classeNome === 'Bruxo' ? 'Recupera no Descanso Curto ou Longo.' : 'Recupera no Descanso Longo.'}
+              </div>
+              {ponte.espacos.map((espaco, i) => {
+                const gasto = ponte.espacosGastosPorCirculo[espaco.circulo] ?? 0;
+                return (
+                  <div key={espaco.circulo} className={styles.espacoRow} style={i === 0 ? { borderTop: 'none' } : undefined}>
+                    <span>{espaco.circulo}º círculo</span>
+                    <TickPips total={espaco.maximo} usados={gasto} tamanho="lg" variante={ponte.classeNome === 'Bruxo' ? 'roxo' : 'padrao'} />
                   </div>
                 );
               })}
@@ -799,7 +919,7 @@ export default function MagiasTab({
         </>
       )}
 
-      {(truques.length > 0 || faltamTruques > 0) && (
+      {(truquesComClasse.length > 0 || deficitsTruques.length > 0) && (
         <>
           <div className={styles.grupoHeader} onClick={() => setTruquesExpandido(!truquesExpandido)}>
             <span>Truques</span>
@@ -807,24 +927,29 @@ export default function MagiasTab({
           </div>
           {truquesExpandido && (
             <>
-              {faltamTruques > 0 && (
-                <div className={styles.avisoFaltando} onClick={onCompletarTruques}>
-                  ⚠️ Faltam {faltamTruques} truque{faltamTruques > 1 ? 's' : ''} pro seu nível — toque pra escolher
+              {deficitsTruques.map(({ classeNome, faltam }) => (
+                <div key={classeNome} className={styles.avisoFaltando} onClick={() => onCompletarTruques(classeNome)}>
+                  ⚠️ Faltam {faltam} truque{faltam > 1 ? 's' : ''} de {classeNome} pro nível dela — toque pra escolher
                 </div>
-              )}
-              {truques.map((m) => {
+              ))}
+              {truquesComClasse.map(({ magia: m, classe: classeDoItem }) => {
                 const temAcao = usarMagiaTemAcaoAutomatizada(m);
                 return (
-                  <div key={m.id} className={styles.spellRow}>
-                    <div className={styles.spellName}>
-                      <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  <div key={`${m.id}-${classeDoItem}`} className={styles.spellRowComPill}>
+                    <div className={styles.spellRowComPillLinha1}>
+                      <div className={styles.spellName}>
+                        <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                      </div>
+                      <div
+                        className={`${styles.usarBtn} ${temAcao ? '' : styles.usarBtnPendencia}`}
+                        onClick={() => temAcao && usarMagia(m)}
+                      >
+                        {temAcao ? 'Usar' : 'Usar (pendência)'}
+                      </div>
                     </div>
-                    <span className={styles.spellCirculo}>Truque</span>
-                    <div
-                      className={`${styles.usarBtn} ${temAcao ? '' : styles.usarBtnPendencia}`}
-                      onClick={() => temAcao && usarMagia(m)}
-                    >
-                      {temAcao ? 'Usar' : 'Usar (pendência)'}
+                    <div className={styles.spellRowComPillLinha2}>
+                      <span className="tag">Truque</span>
+                      <PillClasse classe={classeDoItem} />
                     </div>
                   </div>
                 );
@@ -1093,7 +1218,7 @@ export default function MagiasTab({
         </div>
       )}
 
-      {(preparadas.length > 0 || faltamMagiasPreparadas > 0) && (
+      {(preparadasComClasse.length > 0 || deficitsMagiasPreparadas.length > 0) && (
         <>
           <div className={styles.grupoHeader} onClick={() => setMagiasPreparadasExpandido(!magiasPreparadasExpandido)}>
             <span>Magias Preparadas</span>
@@ -1101,13 +1226,12 @@ export default function MagiasTab({
           </div>
           {magiasPreparadasExpandido && (
             <>
-              {faltamMagiasPreparadas > 0 && (
-                <div className={styles.avisoFaltando} onClick={onCompletarMagiasPreparadas}>
-                  ⚠️ Faltam {faltamMagiasPreparadas} magia{faltamMagiasPreparadas > 1 ? 's' : ''} preparada
-                  {faltamMagiasPreparadas > 1 ? 's' : ''} pro seu nível — toque pra escolher
+              {deficitsMagiasPreparadas.map(({ classeNome, faltam }) => (
+                <div key={classeNome} className={styles.avisoFaltando} onClick={() => onCompletarMagiasPreparadas(classeNome)}>
+                  ⚠️ Faltam {faltam} magia{faltam > 1 ? 's' : ''} preparada{faltam > 1 ? 's' : ''} de {classeNome} — toque pra escolher
                 </div>
-              )}
-              {preparadas.map((m) => {
+              ))}
+              {preparadasComClasse.map(({ magia: m, classe: classeDoItem }) => {
                 const semEspaco =
                   opcoesGastoComPonte(
                     m.circulo,
@@ -1119,16 +1243,21 @@ export default function MagiasTab({
                       circuloGratisAssinatura(m.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas),
                   ).length === 0;
                 return (
-                  <div key={m.id} className={styles.spellRow}>
-                    <div className={styles.spellName}>
-                      <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  <div key={`${m.id}-${classeDoItem}`} className={styles.spellRowComPill}>
+                    <div className={styles.spellRowComPillLinha1}>
+                      <div className={styles.spellName}>
+                        <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                      </div>
+                      <div
+                        className={`${styles.usarBtn} ${semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                        onClick={() => usarMagia(m)}
+                      >
+                        Usar
+                      </div>
                     </div>
-                    <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
-                    <div
-                      className={`${styles.usarBtn} ${semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                      onClick={() => usarMagia(m)}
-                    >
-                      Usar
+                    <div className={styles.spellRowComPillLinha2}>
+                      <span className="tag">{m.circulo}º círculo</span>
+                      <PillClasse classe={classeDoItem} />
                     </div>
                   </div>
                 );
@@ -1151,7 +1280,7 @@ export default function MagiasTab({
                 Preparadas, acima). Muda a lista de preparadas ao completar um Descanso Longo.
               </div>
               {livroDeMagias.map((m) => {
-                const preparada = magiasPreparadasAtuais.includes(m.nome);
+                const preparada = nomesMagiasPreparadas.includes(m.nome);
                 return (
                   <div key={m.id} className={styles.spellRow}>
                     <div className={styles.spellName}>

@@ -111,6 +111,12 @@ import {
   explicarCdConjuracao,
   magiasDisponiveisParaPreparar,
   poolDescobertasMagicas,
+  nomesDeMagiasConhecidas,
+  marcarClasseDasEscolhas,
+  normalizarMagiasConhecidas,
+  deficitTruques,
+  deficitMagiasPreparadas,
+  type MagiaConhecida,
 } from '../../core/magiasPersonagem';
 import { usosInspiracaoMaximo, dadoInspiracao, fonteDeInspiracaoDesbloqueada } from '../../core/inspiracaoBardo';
 import { caracteristicaDesbloqueada, contarRepeticoesCaracteristica, numeroDeAtaques } from '../../core/levelUp';
@@ -226,16 +232,29 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   } = useRoll();
   const [selecao, setSelecao] = useState<WizardSelection>(personagemSalvo.selecao);
 
-  // Multiclasse (Fase M2/M3, ver EmDevB.md e SDD Multiclasse) —
-  // `classesAtual` é a fonte de verdade de nível por classe;
-  // `classeAtivaNome` decide qual classe está "em foco" na ficha agora
-  // (Truques/Magias/recursos de classe, e qual classe o Level Up vai
-  // aplicar). Pra 100% dos personagens de hoje (1 classe só),
-  // `classeAtivaNome` sempre bate com essa única classe — nada muda.
+  // Multiclasse — `classesAtual` é a fonte de verdade de nível por
+  // classe. `classeAtivaNome` (Entrega 5f, ver EmDev.md) NÃO é mais um
+  // seletor visível/controlado pelo jogador (o pill sumiu) — é só uma
+  // âncora interna pra "alguma classe conjuradora primária" (rotula o
+  // pool PRINCIPAL de Espaços de Magia; o pool da(s) OUTRA(s)
+  // classe(s) já aparece do lado, via `ponte` — Entrega 5b). Toda
+  // tela que mostra info de UMA classe específica (Perfil, resumo de
+  // CD/Ataque, características de Mago/Bruxo, deficit de Truques/
+  // Magias, Level Up) já itera `classesAtual` inteiro, sem depender
+  // mais disso. Bug real corrigido de passagem: sempre pegar
+  // `classesAtual[0]` quebrava a aba Magias inteira quando a 1ª
+  // classe não conjura (ex.: Bárbaro/Bardo/Bruxo) — agora prefere a
+  // 1ª classe do personagem que TEM recurso de conjuração própria
+  // (Espaços de Magia ou Magias Preparadas), só cai pra
+  // `classesAtual[0]` se nenhuma conjurar.
   const [classesAtual, setClassesAtual] = useState<PersonagemClasse[]>(() => classesDoPersonagem(personagemSalvo));
-  const [classeAtivaNome, setClasseAtivaNome] = useState<string>(
-    () => personagemSalvo.classeAtivaAtual ?? classesDoPersonagem(personagemSalvo)[0]?.classe ?? '',
-  );
+  const classeAtivaNome =
+    classesAtual.find((c) => {
+      const obj = catalogoClasses.find((cc) => cc.nome === c.classe);
+      return obj?.recursos.some((r) => r.nome.includes('Espaços de Magia') || r.nome.includes('Magias Preparadas')) ?? false;
+    })?.classe ??
+    classesAtual[0]?.classe ??
+    '';
   const classeAtivaEntry = classesAtual.find((c) => c.classe === classeAtivaNome);
   const nivelTotalAtual = nivelTotalPersonagem(classesAtual);
 
@@ -282,6 +301,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagemSalvo.ferramentasMulticlasseAtual ?? [],
   );
   const [escolhendoClasseLevelUp, setEscolhendoClasseLevelUp] = useState(false);
+  // Entrega 5e (Multiclasse, ver EmDev.md) — qual classe o Level Up
+  // (interativo OU o raio de teste) afeta agora. Antes disso, era
+  // sempre "a classe ativa no pill"; sem pill, `EscolherClasseLevelUp`
+  // (quando há ambiguidade de verdade) ou a única opção possível
+  // (quando não há) decide e guarda aqui — nunca mais um efeito
+  // colateral de qual botão estava selecionado.
+  const [classeParaLevelUp, setClasseParaLevelUp] = useState<string | null>(null);
   // Objeto derivado (não é state) — nível/subclasse vêm da classe ATIVA
   // (`classeAtivaEntry`); PV máximo/mod. CON/bônus fixo por nível são
   // do personagem inteiro, iguais pra qualquer classe em foco.
@@ -295,6 +321,26 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     bonusPvPorNivel: bonusPvPorNivelDaEspecie(selecao) + bonusPvPorNivelDoTalento(selecao),
     bonusPvPorNivelLabel: rotulosBonusPvPorNivel(selecao).join(' + '),
   };
+  /** Mesma forma de `personagem`, mas pra QUALQUER classe (Entrega 5e)
+   * — usado só pelo Level Up (interativo e o raio de teste), que
+   * precisa do nível/subclasse da classe ESCOLHIDA pra subir, não da
+   * classe "em foco" na ficha (conceito que nem existe mais, ver 5f). */
+  function personagemNivelDaClasse(classeNome: string): PersonagemNivel {
+    const entry = classesAtual.find((c) => c.classe === classeNome);
+    const classeObj = catalogoClasses.find((c) => c.nome === classeNome);
+    return {
+      nivel: entry?.nivel ?? 0,
+      pvMax,
+      dadoVida: classeObj?.dadoDeVida ?? 'd8',
+      conMod: conValor !== null ? modificador(conValor) : 0,
+      subclasse: entry?.subclasse ?? null,
+      estiloDeLuta: estiloDeLutaAtivo,
+      bonusPvPorNivel: bonusPvPorNivelDaEspecie(selecao) + bonusPvPorNivelDoTalento(selecao),
+      bonusPvPorNivelLabel: rotulosBonusPvPorNivel(selecao).join(' + '),
+    };
+  }
+  const classeParaLevelUpObj = classeParaLevelUp ? catalogoClasses.find((c) => c.nome === classeParaLevelUp) ?? null : null;
+  const personagemParaLevelUp = classeParaLevelUp ? personagemNivelDaClasse(classeParaLevelUp) : personagem;
   const [pvAtual, setPvAtual] = useState(personagemSalvo.pvAtual);
   const [pvTemporario, setPvTemporario] = useState(personagemSalvo.pvTemporarioAtual ?? 0);
   /** Efeito de Cura (ver `dispararEfeitoCura`/`onCuraDeMagiaAplicada`)
@@ -302,9 +348,22 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * Fim de Turno (`CombatTab.tsx`), não um toggle contínuo. */
   const [curaEfeitoAtivo, setCuraEfeitoAtivo] = useState(false);
   const [maestriaArma, setMaestriaArma] = useState<string[]>(personagemSalvo.maestriaArmaAtual ?? selecao.maestriaArmaEscolhida);
-  const [truquesAtuais, setTruquesAtuais] = useState<string[]>(personagemSalvo.truquesAtual ?? selecao.truquesEscolhidos);
-  const [magiasPreparadasAtuais, setMagiasPreparadasAtuais] = useState<string[]>(
-    personagemSalvo.magiasPreparadasAtual ?? selecao.magiasPreparadasEscolhidas,
+  // MagiaConhecida[] (marcado com a classe que concedeu, ver
+  // sdd/sdd-multiclasse-truques-magias.md) — `normalizarMagiasConhecidas`
+  // migra sozinho o formato antigo (personagem salvo antes desta
+  // entrega, `string[]` sem marca). Personagem novo/criação (ainda sem
+  // `truquesAtual` salvo) sempre tem 1 classe só (`selecao.classe`),
+  // então marcar tudo com ela é sempre certo, sem precisar de palpite.
+  const classeDaCriacao = classesAtual[0]?.classe ?? '';
+  const [truquesAtuais, setTruquesAtuais] = useState<MagiaConhecida[]>(() =>
+    personagemSalvo.truquesAtual
+      ? normalizarMagiasConhecidas(personagemSalvo.truquesAtual, classesAtual)
+      : selecao.truquesEscolhidos.map((nome) => ({ nome, classe: classeDaCriacao })),
+  );
+  const [magiasPreparadasAtuais, setMagiasPreparadasAtuais] = useState<MagiaConhecida[]>(() =>
+    personagemSalvo.magiasPreparadasAtual
+      ? normalizarMagiasConhecidas(personagemSalvo.magiasPreparadasAtual, classesAtual)
+      : selecao.magiasPreparadasEscolhidas.map((nome) => ({ nome, classe: classeDaCriacao })),
   );
   const [livroDeMagiasAtuais, setLivroDeMagiasAtuais] = useState<string[]>(
     personagemSalvo.livroDeMagiasAtual ?? selecao.livroDeMagiasEscolhido,
@@ -531,7 +590,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * `ColheitaMacabraModal.tsx`. */
   const [colheitaMacabraPendente, setColheitaMacabraPendente] = useState<{ cura: number } | null>(null);
   const [levelUpAberto, setLevelUpAberto] = useState(false);
-  const [completarAberto, setCompletarAberto] = useState<'truques' | 'magiasPreparadas' | null>(null);
+  // Carrega a classe junto (Entrega 5f) — cada classe tem sua própria
+  // cota de Truques/Magias Preparadas, então "completar" precisa saber
+  // QUAL classe, não só o tipo.
+  const [completarAberto, setCompletarAberto] = useState<{ tipo: 'truques' | 'magiasPreparadas'; classeNome: string } | null>(null);
   const [livroDasSombrasAberto, setLivroDasSombrasAberto] = useState(false);
   const [memorizarMagiaAberto, setMemorizarMagiaAberto] = useState(false);
   /** Transição de Descanso (fade + prompt de redefinir Magias
@@ -777,8 +839,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     espacoPactoAtual,
     astuciaMagicaRecupera,
     sentidos,
-    faltamTruques,
-    faltamMagiasPreparadas,
     magiasPactoDoInferoAtuais,
     magiasEspecieAtuais,
     magiasTalentoOrigemAtuais,
@@ -827,6 +887,45 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const resumoConjuracao = calcularResumoConjuracao(selecao, classe, nivelTotalAtual);
   const explicacaoAcertoConjuracao = explicarModAcertoConjuracao(selecao, classe, nivelTotalAtual);
   const explicacaoCdConjuracao = explicarCdConjuracao(selecao, classe, nivelTotalAtual);
+  // Entrega 5c (Multiclasse, ver EmDev.md) — CD/Ataque Mágico dependem
+  // do atributo de conjuração de CADA classe (Bardo usa CAR, Mago usa
+  // INT — números DIFERENTES de verdade, não só cosmético), então o
+  // resumo do topo da aba Magias/Combate mostra 1 bloco por classe
+  // conjuradora, não só o da classe ativa. `calcularResumoConjuracao`
+  // já devolve `null` pra classe sem atributo de conjuração mapeado
+  // (Guerreiro, Bárbaro etc.) — filtra sozinho quem não conjura.
+  const resumosPorClasse = classesAtual
+    .map((entry) => {
+      const classeObj = catalogoClasses.find((c) => c.nome === entry.classe) ?? null;
+      const resumo = calcularResumoConjuracao(selecao, classeObj, nivelTotalAtual);
+      if (!resumo) return null;
+      return {
+        classeNome: entry.classe,
+        resumo,
+        explicacaoAcerto: explicarModAcertoConjuracao(selecao, classeObj, nivelTotalAtual),
+        explicacaoCd: explicarCdConjuracao(selecao, classeObj, nivelTotalAtual),
+      };
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null);
+  // Entrega 5f (Multiclasse) — cada classe tem sua PRÓPRIA cota de
+  // Truques Conhecidos/Magias Preparadas, então o aviso "faltam X"
+  // (e a tela de completar) precisam ser por classe, não só da
+  // classe "em foco" (conceito que não existe mais). Vazio = ninguém
+  // com déficit.
+  const deficitsTruques = classesAtual
+    .map((entry) => {
+      const classeObj = catalogoClasses.find((c) => c.nome === entry.classe) ?? null;
+      const faltam = deficitTruques(classeObj, entry.nivel, truquesAtuais);
+      return faltam > 0 ? { classeNome: entry.classe, faltam } : null;
+    })
+    .filter((d): d is NonNullable<typeof d> => d !== null);
+  const deficitsMagiasPreparadas = classesAtual
+    .map((entry) => {
+      const classeObj = catalogoClasses.find((c) => c.nome === entry.classe) ?? null;
+      const faltam = deficitMagiasPreparadas(classeObj, entry.nivel, magiasPreparadasAtuais);
+      return faltam > 0 ? { classeNome: entry.classe, faltam } : null;
+    })
+    .filter((d): d is NonNullable<typeof d> => d !== null);
   const usosInspiracaoMax = usosInspiracaoMaximo(selecao, classe, personagem.nivel);
   const usosInspiracaoRestantes = Math.max(0, usosInspiracaoMax - inspiracaoGasto);
   // Recursos de classe com contador, de TODAS as classes (não só a em foco) —
@@ -1641,7 +1740,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }
 
   function aoConfirmarRedefinicao(novaLista: string[]) {
-    setMagiasPreparadasAtuais(novaLista);
+    // Redefinição livre por Descanso Longo — só o Mago tem essa
+    // característica (Livro de Magias), sempre 'Mago' mesmo que o
+    // pill não esteja lá (ver Entrega 5d — `usaRedefPorDescanso` já
+    // checa isso por classesAtual, não pela classe ativa).
+    setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, 'Mago'));
     setDescansoEmAndamento((prev) =>
       prev ? { ...prev, fase: prev.maestriaTrocaPendente ? 'perguntaMaestriaTroca' : 'saindo' } : prev,
     );
@@ -1704,7 +1807,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   function usarAstuciaMagica() {
     if (astuciaMagicaGasta || !espacoPactoAtual || astuciaMagicaRecupera <= 0) return;
     const circulo = espacoPactoAtual.circulo;
-    atualizarEspacosGastos((prev) => ({ ...prev, [circulo]: Math.max(0, (prev[circulo] ?? 0) - astuciaMagicaRecupera) }));
+    // Recupera espaço de Pacto de verdade — mesmo achado da Entrega
+    // 5d: o pool de Pacto é sempre do Bruxo, mesmo quando ele não é a
+    // classe ativa no pill (`atualizarEspacosGastos` sem 2º argumento
+    // gastaria/devolveria do pool da classe ATIVA errado nesse caso).
+    atualizarEspacosGastos((prev) => ({ ...prev, [circulo]: Math.max(0, (prev[circulo] ?? 0) - astuciaMagicaRecupera) }), 'Bruxo');
     setAstuciaMagicaGasta(true);
   }
 
@@ -1994,19 +2101,23 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // vir antes do `aumentarAtributos`/`setSelecao` abaixo, senão perde
     // o valor de referência pro ajuste retroativo de PV logo adiante.
     const conAntes = valorFinalAtributo(selecao, 'CON') ?? 10;
+    // Entrega 5e — classe que este Level Up afeta é a que foi
+    // resolvida em `classeParaLevelUp` (via `EscolherClasseLevelUp` ou
+    // a única opção possível), nunca mais "a classe ativa no pill".
+    const classeAlvo = classeParaLevelUp ?? classesAtual[0]?.classe ?? '';
     const novosAtributos = resultado.atributosAumentados
       ? aumentarAtributos(selecao.atributos, resultado.atributosAumentados)
       : null;
     if (novosAtributos) setSelecao((prev) => ({ ...prev, atributos: novosAtributos }));
-    // Grava o nível/subclasse novos na classe ATIVA dentro de `classesAtual`
-    // (não mais num `personagem` solto) — cria a entrada se for a
-    // primeira vez que essa classe aparece (multiclasse nova, `nivelAtual`
-    // 0 → 1 escolhido em `EscolherClasseLevelUp`). `conMod` não precisa de
-    // sync manual mais: deriva de `selecao.atributos.CON` a cada render.
+    // Grava o nível/subclasse novos na classe ALVO dentro de
+    // `classesAtual` — cria a entrada se for a primeira vez que essa
+    // classe aparece (multiclasse nova, `nivelAtual` 0 → 1 escolhido
+    // em `EscolherClasseLevelUp`). `conMod` não precisa de sync manual
+    // mais: deriva de `selecao.atributos.CON` a cada render.
     setClassesAtual((prev) => {
-      const idx = prev.findIndex((c) => c.classe === classeAtivaNome);
+      const idx = prev.findIndex((c) => c.classe === classeAlvo);
       if (idx === -1) {
-        return [...prev, { classe: classeAtivaNome, nivel: resultado.novoNivel, subclasse: resultado.subclasseEscolhida ?? null }];
+        return [...prev, { classe: classeAlvo, nivel: resultado.novoNivel, subclasse: resultado.subclasseEscolhida ?? null }];
       }
       return prev.map((c, i) =>
         i === idx ? { ...c, nivel: resultado.novoNivel, subclasse: resultado.subclasseEscolhida ?? c.subclasse } : c,
@@ -2023,7 +2134,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // desse mesmo nível), então até o ganho DESTE nível entra no
     // ajuste — por isso o multiplicador é `nivelTotalAtual + 1` (nível
     // total incluindo o que acabou de ser ganho), não `nivelTotalAtual`.
-    const chegouAoCampeaoPrimitivo = classeAtivaNome === 'Bárbaro' && resultado.novoNivel === 20;
+    const chegouAoCampeaoPrimitivo = classeAlvo === 'Bárbaro' && resultado.novoNivel === 20;
     const conDepoisAsi = novosAtributos ? (valorFinalAtributo({ ...selecao, atributos: novosAtributos }, 'CON') ?? conAntes) : conAntes;
     const conDepois = aplicarCampeaoPrimitivo(conDepoisAsi, 'CON', chegouAoCampeaoPrimitivo);
     const aplicarAjustePv = (v: number) =>
@@ -2033,9 +2144,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setPvMax((v) => aplicarAjustePv(v + resultado.pvGanho));
     if (resultado.estiloDeLutaEscolhido) setEstiloDeLutaAtivo(resultado.estiloDeLutaEscolhido);
     setPvAtual((v) => aplicarAjustePv(v + resultado.pvGanho));
-    if (resultado.truquesEscolhidos) setTruquesAtuais(resultado.truquesEscolhidos);
+    if (resultado.truquesEscolhidos) setTruquesAtuais(marcarClasseDasEscolhas(resultado.truquesEscolhidos, truquesAtuais, classeAlvo));
     if (resultado.livroDeMagiasEscolhidas) setLivroDeMagiasAtuais(resultado.livroDeMagiasEscolhidas);
-    if (resultado.magiasPreparadasEscolhidas) setMagiasPreparadasAtuais(resultado.magiasPreparadasEscolhidas);
+    if (resultado.magiasPreparadasEscolhidas)
+      setMagiasPreparadasAtuais(marcarClasseDasEscolhas(resultado.magiasPreparadasEscolhidas, magiasPreparadasAtuais, classeAlvo));
     if (resultado.invocacoesMisticasEscolhidas) setInvocacoesMisticasAtuais(resultado.invocacoesMisticasEscolhidas);
     if (resultado.invocacoesTruqueVinculadoEscolhido) setInvocacoesTruqueVinculado(resultado.invocacoesTruqueVinculadoEscolhido);
     if (resultado.periciasEspecialistaEscolhidas) setPericiasEspecialistaAtuais(resultado.periciasEspecialistaEscolhidas);
@@ -2113,12 +2225,24 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }
 
   function levelUpRapido() {
-    if (!classe) return;
+    // Raio de teste — mesma resolução de classe do fluxo interativo
+    // (Entrega 5e): só 1 opção possível, usa ela; com 2+, usa a
+    // última escolhida em `EscolherClasseLevelUp` (se ainda fizer
+    // sentido) ou a 1ª classe do personagem por padrão — nunca pede
+    // pra escolher (é ferramenta de teste, não o fluxo real).
+    const opcoes = opcoesLevelUp(classesAtual, atributosFinaisAtuais, catalogoClasses);
+    const classeAlvoRapido = deveEscolherClasseNoLevelUp(opcoes)
+      ? (classeParaLevelUp && opcoes.some((o) => o.classe === classeParaLevelUp) ? classeParaLevelUp : opcoes[0]?.classe)
+      : opcoes[0]?.classe;
+    const classeRapida = classeAlvoRapido ? catalogoClasses.find((c) => c.nome === classeAlvoRapido) ?? null : null;
+    if (!classeRapida || !classeAlvoRapido) return;
+    setClasseParaLevelUp(classeAlvoRapido);
+    const personagemRapido = personagemNivelDaClasse(classeAlvoRapido);
     const resultado = sortearLevelUpRapido({
-      classe,
-      personagem,
-      truquesAtuais,
-      magiasPreparadasAtuais,
+      classe: classeRapida,
+      personagem: personagemRapido,
+      truquesAtuais: nomesDeMagiasConhecidas(truquesAtuais),
+      magiasPreparadasAtuais: nomesDeMagiasConhecidas(magiasPreparadasAtuais),
       livroDeMagiasAtuais,
       invocacoesMisticasAtuais,
       invocacoesTruqueVinculadoAtuais: invocacoesTruqueVinculado,
@@ -2181,10 +2305,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <EscolherClasseLevelUp
         opcoes={opcoes}
-        classePadrao={classeAtivaNome}
+        classePadrao={classeParaLevelUp ?? classesAtual[0]?.classe ?? ''}
         onFechar={() => setEscolhendoClasseLevelUp(false)}
         onConfirmar={(resultado: ResultadoEscolhaClasseLevelUp) => {
-          setClasseAtivaNome(resultado.classeEscolhida);
+          setClasseParaLevelUp(resultado.classeEscolhida);
           if (resultado.periciasEscolhidas) setPericiasMulticlasseAtuais((prev) => [...prev, ...resultado.periciasEscolhidas!]);
           if (resultado.ferramentasEscolhidas) setFerramentasMulticlasseAtuais((prev) => [...prev, ...resultado.ferramentasEscolhidas!]);
           setEscolhendoClasseLevelUp(false);
@@ -2194,23 +2318,23 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
-  if (levelUpAberto && classe) {
+  if (levelUpAberto && classeParaLevelUpObj) {
     return (
       <LevelUpShell
-        personagem={personagem}
-        classe={classe}
+        personagem={personagemParaLevelUp}
+        classe={classeParaLevelUpObj}
         onFechar={() => setLevelUpAberto(false)}
         onConfirmar={confirmarLevelUp}
         hpModo={levelUpHpModo}
         onHpModoChange={setLevelUpHpModo}
         hpRolado={levelUpHpRolado}
         onHpRoladoChange={setLevelUpHpRolado}
-        truquesAtuais={truquesAtuais}
+        truquesAtuais={nomesDeMagiasConhecidas(truquesAtuais)}
         maestriaArmaAtual={maestriaArma}
-        truquesDaClasse={magiasDaClasse(classe.nome, 0)}
-        magiasPreparadasAtuais={magiasPreparadasAtuais}
+        truquesDaClasse={magiasDaClasse(classeParaLevelUpObj.nome, 0)}
+        magiasPreparadasAtuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
         livroDeMagiasAtuais={livroDeMagiasAtuais}
-        magiasDaClasseDisponiveis={magiasDisponiveisParaPreparar(classe, personagem.nivel + 1)}
+        magiasDaClasseDisponiveis={magiasDisponiveisParaPreparar(classeParaLevelUpObj, personagemParaLevelUp.nivel + 1)}
         invocacoesMisticasAtuais={invocacoesMisticasAtuais}
         invocacoesTruqueVinculadoAtuais={invocacoesTruqueVinculado}
         arcanaMisticaAtuais={arcanaMisticaAtuais}
@@ -2241,53 +2365,63 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
-  if (completarAberto === 'truques' && classe) {
-    return (
-      <CompletarMagiasShell
-        titulo="Truques"
-        atuais={truquesAtuais}
-        catalogo={magiasDaClasse(classe.nome, 0)}
-        deficit={faltamTruques}
-        onFechar={() => setCompletarAberto(null)}
-        onConfirmar={(novaLista) => {
-          setTruquesAtuais(novaLista);
-          setCompletarAberto(null);
-        }}
-      />
-    );
+  if (completarAberto?.tipo === 'truques') {
+    const entry = classesAtual.find((c) => c.classe === completarAberto.classeNome);
+    const classeObj = catalogoClasses.find((c) => c.nome === completarAberto.classeNome);
+    if (entry && classeObj) {
+      const faltam = deficitTruques(classeObj, entry.nivel, truquesAtuais);
+      return (
+        <CompletarMagiasShell
+          titulo={`Truques — ${classeObj.nome}`}
+          atuais={nomesDeMagiasConhecidas(truquesAtuais)}
+          catalogo={magiasDaClasse(classeObj.nome, 0)}
+          deficit={faltam}
+          onFechar={() => setCompletarAberto(null)}
+          onConfirmar={(novaLista) => {
+            setTruquesAtuais(marcarClasseDasEscolhas(novaLista, truquesAtuais, classeObj.nome));
+            setCompletarAberto(null);
+          }}
+        />
+      );
+    }
   }
 
-  if (completarAberto === 'magiasPreparadas' && classe) {
-    const circuloMaximo = Math.max(0, ...espacosDeMagiaAtivos(classe, personagem.nivel).map((e) => e.circulo));
-    // Mago (e qualquer classe futura com Livro de Magias): só pode
-    // preparar o que já está no grimório — restringe o catálogo antes
-    // de mostrar. Sem Livro de Magias (Bardo/Bruxo), catálogo continua
-    // a lista inteira da classe, igual sempre foi.
-    const catalogoBase = magiasDisponiveisParaPreparar(classe, personagem.nivel).filter((m) => m.circulo <= circuloMaximo);
-    const catalogoMagiasPreparadas =
-      livroDeMagiasAtuais.length > 0 ? catalogoBase.filter((m) => livroDeMagiasAtuais.includes(m.nome)) : catalogoBase;
-    return (
-      <CompletarMagiasShell
-        titulo="Magias Preparadas"
-        atuais={magiasPreparadasAtuais}
-        catalogo={catalogoMagiasPreparadas}
-        classeNome={classe.nome}
-        deficit={faltamMagiasPreparadas}
-        onFechar={() => setCompletarAberto(null)}
-        onConfirmar={(novaLista) => {
-          setMagiasPreparadasAtuais(novaLista);
-          setCompletarAberto(null);
-        }}
-      />
-    );
+  if (completarAberto?.tipo === 'magiasPreparadas') {
+    const entry = classesAtual.find((c) => c.classe === completarAberto.classeNome);
+    const classeObj = catalogoClasses.find((c) => c.nome === completarAberto.classeNome);
+    if (entry && classeObj) {
+      const faltam = deficitMagiasPreparadas(classeObj, entry.nivel, magiasPreparadasAtuais);
+      const circuloMaximo = Math.max(0, ...espacosDeMagiaAtivos(classeObj, entry.nivel).map((e) => e.circulo));
+      // Mago (e qualquer classe futura com Livro de Magias): só pode
+      // preparar o que já está no grimório — restringe o catálogo antes
+      // de mostrar. Sem Livro de Magias (Bardo/Bruxo), catálogo continua
+      // a lista inteira da classe, igual sempre foi.
+      const catalogoBase = magiasDisponiveisParaPreparar(classeObj, entry.nivel).filter((m) => m.circulo <= circuloMaximo);
+      const catalogoMagiasPreparadas =
+        livroDeMagiasAtuais.length > 0 ? catalogoBase.filter((m) => livroDeMagiasAtuais.includes(m.nome)) : catalogoBase;
+      return (
+        <CompletarMagiasShell
+          titulo={`Magias Preparadas — ${classeObj.nome}`}
+          atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
+          catalogo={catalogoMagiasPreparadas}
+          classeNome={classeObj.nome}
+          deficit={faltam}
+          onFechar={() => setCompletarAberto(null)}
+          onConfirmar={(novaLista) => {
+            setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, classeObj.nome));
+            setCompletarAberto(null);
+          }}
+        />
+      );
+    }
   }
 
   if (livroDasSombrasAberto) {
     return (
       <LivroDasSombrasShell
         atuais={livroDasSombrasAtuais}
-        truquesConhecidos={truquesAtuais}
-        magiasPreparadasConhecidas={magiasPreparadasAtuais}
+        truquesConhecidos={nomesDeMagiasConhecidas(truquesAtuais)}
+        magiasPreparadasConhecidas={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
         onFechar={() => setLivroDasSombrasAberto(false)}
         onConfirmar={(novaLista) => {
           setLivroDasSombrasAtuais(novaLista);
@@ -2302,11 +2436,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <MemorizarMagiaShell
         modo="unica"
-        atuais={magiasPreparadasAtuais}
+        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
         catalogo={livroDeMagias}
         onFechar={() => setMemorizarMagiaAberto(false)}
         onConfirmar={(novaLista) => {
-          setMagiasPreparadasAtuais(novaLista);
+          // Memorizar Magia — só Mago (nível 5+), mesmo motivo de
+          // `aoConfirmarRedefinicao` acima.
+          setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, 'Mago'));
           setMemorizarMagiaGasta(true);
           setMemorizarMagiaAberto(false);
         }}
@@ -2318,7 +2454,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <MemorizarMagiaShell
         modo="livre"
-        atuais={magiasPreparadasAtuais}
+        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
         catalogo={livroDeMagias}
         onFechar={() => aoResponderRedefinir(false)}
         onConfirmar={aoConfirmarRedefinicao}
@@ -2456,19 +2592,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             {' · Nível '}
             {nivelTotalAtual} · CA {ca ?? '—'}
           </div>
-          {classesAtual.length > 1 && (
-            <div className={styles.classePills}>
-              {classesAtual.map((c) => (
-                <span
-                  key={c.classe}
-                  className={`${styles.classePill} ${c.classe === classeAtivaNome ? styles.classePillAtiva : ''}`}
-                  onClick={() => setClasseAtivaNome(c.classe)}
-                >
-                  {c.classe}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
         <AvatarMenu
           itensDetalhados={itensDetalhados}
@@ -2514,6 +2637,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               if (deveEscolherClasseNoLevelUp(opcoes)) {
                 setEscolhendoClasseLevelUp(true);
               } else {
+                setClasseParaLevelUp(opcoes[0].classe);
                 setLevelUpAberto(true);
               }
             }}
@@ -2547,9 +2671,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         {tab === 'perfil' && (
           <PerfilTab
             selecao={selecao}
-            classe={classe}
-            nivel={personagem.nivel}
-            subclasse={personagem.subclasse}
+            classesAtual={classesAtual}
+            catalogoClasses={catalogoClasses}
             talentosGeraisAtuais={talentosGeraisAtuais}
             invocacoesMisticasAtuais={invocacoesMisticasAtuais}
             invocacoesTruqueVinculado={invocacoesTruqueVinculado}
@@ -2586,6 +2709,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}
             resumo={resumoConjuracao}
+            resumosPorClasse={resumosPorClasse}
             explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             explicacaoCdConjuracao={explicacaoCdConjuracao}
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}
@@ -2645,10 +2769,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             armaDePactoAtual={armaDePactoAtual(itensMochila)}
             onVincularArmaDePacto={vincularArmaDePactoHandler}
             onDesvincularArmaDePacto={desvincularArmaDePactoHandler}
-            faltamTruques={faltamTruques}
-            faltamMagiasPreparadas={faltamMagiasPreparadas}
-            onCompletarTruques={() => setCompletarAberto('truques')}
-            onCompletarMagiasPreparadas={() => setCompletarAberto('magiasPreparadas')}
+            deficitsTruques={deficitsTruques}
+            deficitsMagiasPreparadas={deficitsMagiasPreparadas}
+            onCompletarTruques={(classeNome) => setCompletarAberto({ tipo: 'truques', classeNome })}
+            onCompletarMagiasPreparadas={(classeNome) => setCompletarAberto({ tipo: 'magiasPreparadas', classeNome })}
             colheitaMacabraDisponivel={colheitaMacabraDisponivel}
             onColheitaMacabraDisponivel={(cura) => setColheitaMacabraPendente({ cura })}
           />

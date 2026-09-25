@@ -35,3 +35,7 @@
 .pipMostarda {
   background: var(--pip-mostarda);
 }
+
+.pipAzulClaro {
+  background: var(--pip-azul-claro);
+}

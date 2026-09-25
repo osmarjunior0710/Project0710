@@ -35,6 +35,31 @@
   min-width: 0;
 }
 
+/* Truques/Magias Preparadas de personagem multiclasse (2026-09, ver
+   EmDev.md/sdd-multiclasse-truques-magias.md) — 2 linhas em vez de 1:
+   nome+Usar continuam juntos (mesma altura de toque de sempre), e os
+   pills (círculo + classe, `PillClasse`) ganham uma linha própria
+   embaixo, menor. Só estas 2 seções usam este layout — o resto da
+   aba continua com `.spellRow` de 1 linha só (sem ambiguidade de
+   classe pra marcar). */
+.spellRowComPill {
+  padding: var(--space-2) var(--space-1);
+  border-bottom: 1px dashed var(--line-soft);
+}
+
+.spellRowComPillLinha1 {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.spellRowComPillLinha2 {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
 .spellCirculo {
   font-size: 11px;
   color: var(--text-dim);

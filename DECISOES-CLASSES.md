@@ -74,7 +74,10 @@ conferir.
 recurso dela aparece — Bárbaro/Fúria vermelho, Bardo/Inspiração
 mostarda, Bruxo/Magia de Pacto roxo, Guerreiro/Recuperar Fôlego azul
 (confirmado — mesmo azul padrão, registrado de propósito pra não
-parecer esquecimento). **Classe nova ganha cor na mesma
+parecer esquecimento), Mago/Truques e Magias azul-claro (2026-09-24,
+distinto do azul do Guerreiro de propósito — os dois nunca deveriam
+se confundir na mesma tela, ex.: personagem Guerreiro/Mago
+multiclasse). **Classe nova ganha cor na mesma
 entrega em que ganha o 1º recurso com contador; se o Osmar não disser
 qual, PERGUNTAR** (não escolher sozinho). Sem cor definida, o pip fica no
 azul padrão (`null`) até o Osmar decidir. Os
@@ -991,3 +994,31 @@ tipo de pool no futuro (ex: classe homebrew com recurso próprio) segue
 o mesmo padrão: nova chave, sem mexer nas que já existem.
 
 **Data/origem:** 2026-09, Fase M completa (Multiclasse).
+
+## Multiclasse — sem seletor de classe na tela: sempre 1 bloco/aviso POR classe, nunca 1 valor escondido atrás de pill
+
+**Decisão (2026-09):** o pill Mago/Bardo/Bruxo (que decidia qual
+classe aparecia em Combate/Magias/Perfil) foi removido de vez. Toda
+informação que dependia dele (características em Perfil, resumo de
+CD/Ataque Mágico, pools de Espaço de Magia, aviso de "faltam Truques/
+Magias Preparadas") virou o mesmo padrão: computar um ARRAY iterando
+`classesAtual` e renderizar 1 bloco/aviso por entrada, cada um com o
+nome da classe — nunca escolher 1 pra mostrar. Vale pra qualquer
+característica NOVA que hoje pareça "óbvio, só olha a classe do
+personagem" — se o app permite multiclasse, sempre existe a
+possibilidade de 2+ classes precisarem aparecer ao mesmo tempo.
+
+**Achado real que motivou a revisão completa:** ao trocar a "classe
+âncora interna" (usada só pra rotular o pool PRINCIPAL de Espaços de
+Magia — o pool das outras classes sempre aparece do lado) de "sempre
+`classesAtual[0]`" pra "a 1ª classe que REALMENTE conjura", a aba
+Magias inteira quebrava (sumia) sempre que a 1ª classe do personagem
+não conjurava (ex.: Bárbaro/Bardo/Bruxo, Bárbaro é a 1ª). Lição:
+qualquer "âncora" ou "classe padrão" que sobreviva à remoção de um
+seletor de UI precisa ser resolvida com uma REGRA (aqui: prefere
+quem conjura), nunca um índice fixo (`[0]`) — índice fixo assume que
+a ordem de multiclasse sempre bate com "a classe que importa aqui",
+o que não é verdade fora do caso mais comum de teste.
+
+**Histórico completo** (as 6 entregas, os 4 bugs achados e
+corrigidos, o SDD): `aprendizados/sistemas/multiclasse.md`.

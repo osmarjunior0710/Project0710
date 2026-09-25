@@ -3,7 +3,7 @@ import { acoesBase, type AtaqueInfo } from '../../../data/exampleCombat';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
-import type { EspacoDeMagiaAtivo, PoolDePonte } from '../../../core/magiasPersonagem';
+import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
@@ -48,8 +48,8 @@ interface AcaoPanelContentProps {
    * quem não tem Bruxo + outra classe conjuradora ao mesmo tempo. */
   ponte: PoolDePonte | null;
   conjura: boolean;
-  truques: Magia[];
-  magiasPreparadas: Magia[];
+  truques: MagiaComClasseOpcional[];
+  magiasPreparadas: MagiaComClasseOpcional[];
   /** Maestria de Magias (Mago, nível 18) — ver `useUsarMagiaPainel.tsx`. */
   maestriaDeMagiasAtuais: Record<number, string>;
   /** Assinatura Mágica (Mago, nível 20) — ver `useUsarMagiaPainel.tsx`. */

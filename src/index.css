@@ -22,6 +22,10 @@
   --accent-especial-dim: #e8e1fb;
   /* Pip de recurso do Bardo (Inspiração) — ver core/corRecursoClasse.ts */
   --pip-mostarda: #c9971a;
+  /* Pip de recurso/selo do Mago (Truques/Magias) — ver core/corRecursoClasse.ts.
+     Azul CLARO de propósito, pra não confundir com --accent (azul do
+     Guerreiro/padrão do app). */
+  --pip-azul-claro: #4fc3f7;
   --good: #2f8f52;
   --warn: #a3690f;
   --danger: #b3261e;

@@ -15,6 +15,13 @@ import {
   espacosCombinadosComoAtivos,
   ehMagiaDeReacao,
   ehMagiaDeAcaoBonus,
+  nomesDeMagiasConhecidas,
+  marcarClasseDasEscolhas,
+  normalizarMagiasConhecidas,
+  magiasConhecidasComClasse,
+  agruparMagiasComClassePorCirculo,
+  deficitTruques,
+  deficitMagiasPreparadas,
 } from './magiasPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { magias, magiasDaClasse } from '../data/rulesets/dnd2024/magias';
@@ -32,6 +39,159 @@ const bruxo = classes.find((c) => c.nome === 'Bruxo');
 if (!bruxo) throw new Error('Fixture "Bruxo" não encontrada em data/rulesets/dnd2024/classes.ts');
 const mago = classes.find((c) => c.nome === 'Mago');
 if (!mago) throw new Error('Fixture "Mago" não encontrada em data/rulesets/dnd2024/classes.ts');
+
+describe('nomesDeMagiasConhecidas', () => {
+  it('extrai só os nomes, na ordem', () => {
+    expect(nomesDeMagiasConhecidas([{ nome: 'Luz', classe: 'Mago' }, { nome: 'Sugestão', classe: 'Bardo' }])).toEqual([
+      'Luz',
+      'Sugestão',
+    ]);
+  });
+
+  it('lista vazia devolve lista vazia', () => {
+    expect(nomesDeMagiasConhecidas([])).toEqual([]);
+  });
+});
+
+describe('marcarClasseDasEscolhas', () => {
+  it('mantém a classe de quem já era conhecido, marca quem é novo com a classe em foco', () => {
+    const anteriores = [{ nome: 'Luz', classe: 'Bardo' }, { nome: 'Raio de Fogo', classe: 'Mago' }];
+    const resultado = marcarClasseDasEscolhas(['Luz', 'Raio de Fogo', 'Mísseis Mágicos'], anteriores, 'Mago');
+    expect(resultado).toEqual([
+      { nome: 'Luz', classe: 'Bardo' },
+      { nome: 'Raio de Fogo', classe: 'Mago' },
+      { nome: 'Mísseis Mágicos', classe: 'Mago' },
+    ]);
+  });
+
+  it('lista nova vazia (removeu tudo) devolve lista vazia', () => {
+    expect(marcarClasseDasEscolhas([], [{ nome: 'Luz', classe: 'Bardo' }], 'Mago')).toEqual([]);
+  });
+});
+
+describe('normalizarMagiasConhecidas', () => {
+  const classesDoPersonagem = [{ classe: 'Bardo' }, { classe: 'Mago' }];
+
+  it('formato antigo (string[]): acha a classe certa pelo catálogo (Zombaria Perversa só existe pra Bardo entre as 2)', () => {
+    expect(normalizarMagiasConhecidas(['Zombaria Perversa'], classesDoPersonagem)).toEqual([
+      { nome: 'Zombaria Perversa', classe: 'Bardo' },
+    ]);
+  });
+
+  it('formato novo (MagiaConhecida[]): devolve como está, sem tentar adivinhar de novo', () => {
+    const ja = [{ nome: 'Luz', classe: 'Mago' }];
+    expect(normalizarMagiasConhecidas(ja, classesDoPersonagem)).toBe(ja);
+  });
+
+  it('ausente ou vazio devolve lista vazia', () => {
+    expect(normalizarMagiasConhecidas(undefined, classesDoPersonagem)).toEqual([]);
+    expect(normalizarMagiasConhecidas([], classesDoPersonagem)).toEqual([]);
+  });
+
+  it('nome que não bate com nenhuma classe (caso de borda) cai pra 1ª classe do personagem', () => {
+    expect(normalizarMagiasConhecidas(['Magia Inventada'], classesDoPersonagem)).toEqual([
+      { nome: 'Magia Inventada', classe: 'Bardo' },
+    ]);
+  });
+});
+
+describe('magiasConhecidasComClasse', () => {
+  it('pareia magia + classe, ordenado por círculo → nome', () => {
+    const resultado = magiasConhecidasComClasse([
+      { nome: 'Bola de Fogo', classe: 'Mago' },
+      { nome: 'Zombaria Perversa', classe: 'Bardo' },
+    ]);
+    expect(resultado).toEqual([
+      { magia: magiaFixture('Zombaria Perversa'), classe: 'Bardo' },
+      { magia: magiaFixture('Bola de Fogo'), classe: 'Mago' },
+    ]);
+  });
+
+  it('NUNCA deduplica — mesma magia conhecida por 2 classes vira 2 linhas', () => {
+    const resultado = magiasConhecidasComClasse([
+      { nome: 'Amigos', classe: 'Bardo' },
+      { nome: 'Amigos', classe: 'Bruxo' },
+    ]);
+    expect(resultado).toHaveLength(2);
+    expect(resultado.map((r) => r.classe)).toEqual(['Bardo', 'Bruxo']);
+  });
+
+  it('nome que não existe no catálogo (caso de borda) é ignorado, não quebra', () => {
+    expect(magiasConhecidasComClasse([{ nome: 'Magia Inventada', classe: 'Mago' }])).toEqual([]);
+  });
+
+  it('lista vazia devolve lista vazia', () => {
+    expect(magiasConhecidasComClasse([])).toEqual([]);
+  });
+});
+
+describe('agruparMagiasComClassePorCirculo', () => {
+  it('agrupa por círculo (do maior pro menor), preservando a classe de cada item', () => {
+    const grupos = agruparMagiasComClassePorCirculo([
+      { magia: magiaFixture('Bola de Fogo'), classe: 'Mago' },
+      { magia: magiaFixture('Zombaria Perversa'), classe: 'Bardo' },
+      { magia: magiaFixture('Detectar Magia'), classe: null },
+    ]);
+    expect(grupos.map((g) => g.circulo)).toEqual([3, 1, 0]);
+    expect(grupos[2].itens).toEqual([{ magia: magiaFixture('Zombaria Perversa'), classe: 'Bardo' }]);
+    expect(grupos[1].itens).toEqual([{ magia: magiaFixture('Detectar Magia'), classe: null }]);
+  });
+
+  it('NUNCA deduplica — mesma magia com 2 classes vira 2 itens no mesmo grupo', () => {
+    const grupos = agruparMagiasComClassePorCirculo([
+      { magia: magiaFixture('Amigos'), classe: 'Bardo' },
+      { magia: magiaFixture('Amigos'), classe: 'Bruxo' },
+    ]);
+    expect(grupos).toHaveLength(1);
+    expect(grupos[0].itens).toHaveLength(2);
+  });
+
+  it('lista vazia devolve lista de grupos vazia', () => {
+    expect(agruparMagiasComClassePorCirculo([])).toEqual([]);
+  });
+});
+
+describe('deficitTruques (Entrega 4 — corrigido pra multiclasse)', () => {
+  it('compara a cota da classe só contra os itens MARCADOS com ela, ignora os de outra classe', () => {
+    // Bardo nível 1 = 2 Truques Conhecidos. Personagem tem 1 de Bardo
+    // + 2 de Bruxo (4 no total) — antes da correção, comparava os 4
+    // contra a cota de 2 e não achava déficit nenhum (errado).
+    const truquesAtuais = [
+      { nome: 'Amigos', classe: 'Bardo' },
+      { nome: 'Golpe Certeiro', classe: 'Bruxo' },
+      { nome: 'Toque Chocante', classe: 'Bruxo' },
+    ];
+    expect(deficitTruques(bardo, 1, truquesAtuais)).toBe(1);
+  });
+
+  it('cota atingida pela classe devolve 0', () => {
+    const truquesAtuais = [
+      { nome: 'Amigos', classe: 'Bardo' },
+      { nome: 'Luz', classe: 'Bardo' },
+    ];
+    expect(deficitTruques(bardo, 1, truquesAtuais)).toBe(0);
+  });
+
+  it('classe null (personagem sem classe resolvida) devolve 0', () => {
+    expect(deficitTruques(null, 1, [])).toBe(0);
+  });
+});
+
+describe('deficitMagiasPreparadas (Entrega 4 — corrigido pra multiclasse)', () => {
+  it('compara a cota da classe só contra os itens marcados com ela', () => {
+    // Bardo nível 1 = 4 Magias Preparadas.
+    const magiasPreparadasAtuais = [
+      { nome: 'Comando', classe: 'Bardo' },
+      { nome: 'Armadura de Agathys', classe: 'Bruxo' },
+      { nome: 'Braços de Hadar', classe: 'Bruxo' },
+    ];
+    expect(deficitMagiasPreparadas(bardo, 1, magiasPreparadasAtuais)).toBe(3);
+  });
+
+  it('classe null devolve 0', () => {
+    expect(deficitMagiasPreparadas(null, 1, [])).toBe(0);
+  });
+});
 
 describe('espacosDeMagiaAtivos', () => {
   it('Bardo (1 recurso por círculo): nível 3 tem 1º E 2º círculo simultâneos', () => {

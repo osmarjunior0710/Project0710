@@ -984,6 +984,32 @@ aqui. Os que **não** têm cobertura no plano atual:
   lista real de opções (Cap. 5 do livro) ainda não foi importada da
   planilha nem tem UI de escolha.
 
+## Multiclasse — acerto/CD de magia na hora de rolar usa só 1 modificador, não o da classe da magia
+
+**Achado testando a Entrega 5c** (resumo de conjuração por classe,
+ver `DECISOES-CLASSES.md`/`EmDev.md`): confirmado com um personagem
+Mago 17/Bardo 3 que os 2 números são bem diferentes de verdade — Mago
+usa INT (+11 de ataque, CD 19), Bardo usa CAR (+5 de ataque, CD 13).
+A EXIBIÇÃO já mostra os 2 certos (Entrega 5c). Mas na hora de
+CONJURAR de verdade (`processarMagiaAoUsar` em `MagiasTab.tsx`,
+`conjurarMagia` em `useUsarMagiaPainel.tsx`, e a jogada de ataque/CD
+que sai dali), o app ainda usa 1 `modAcertoConjuracao`/CD SÓ (o da
+classe ativa no pill) — não o da classe DAQUELA magia específica.
+Hoje isso só é invisível pra combos onde as 2 classes usam o MESMO
+atributo (ex.: Bardo+Bruxo, os 2 CAR) — em qualquer combo com
+atributos diferentes (Mago+Bardo, Mago+Bruxo), conjurar uma magia da
+classe que não está no pill rola com o modificador ERRADO.
+
+**Por que trava estruturalmente:** corrigir isso pra valer exige
+saber, no momento de CONJURAR, de qual classe é a magia escolhida —
+truques/magias preparadas já têm essa marca (`MagiaConhecida`, ver
+Entrega 1), mas as listas fixas (Descobertas Mágicas, Livro das
+Sombras etc.) e o próprio fluxo de conjuração (`processarMagiaAoUsar`/
+`conjurarMagia`) recebem hoje um `modAcertoConjuracao: number` fixo,
+não uma função de busca por magia — precisa de um redesenho desses 2
+pontos (não é uma troca de prop simples), então fica registrado aqui
+em vez de virar mais uma entrega da Multiclasse já em andamento.
+
 ## Multiclasse — SDD seção 7 (Ataque Extra/CA por método alternativo) sem dedupe entre classes
 
 Fase M inteira (M0-M4: schema, dados, Level Up com escolha de classe,

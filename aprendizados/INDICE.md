@@ -48,6 +48,14 @@ não obrigatória de uma vez.)*
 Um arquivo por sistema/infraestrutura transversal (não amarrado a 1
 classe/talento específico).
 
+- **`sistemas/multiclasse.md`** — Multiclasse: Truques/Magias
+  Preparadas por classe (com selo), Espaços de Magia mostrando os 2
+  pools juntos, CD/Ataque por classe, e a remoção completa do pill
+  (Mago/Bardo/Bruxo). 4 bugs reais achados e corrigidos no caminho
+  (ponte pegando classe errada com 3+ classes, Astúcia Mágica
+  recuperando pool errado, e o bug crítico de a aba Magias sumir
+  quando a 1ª classe não conjura). Fica pendente: acerto/CD na hora
+  de conjurar ainda usa 1 modificador só, não o da classe da magia.
 - **`sistemas/dado-3d.md`** — Dado 3D com física (`@3d-dice/dice-box`):
   escolha da lib e gotchas de integração, Fase A (FAB avulso
   formalizado) e Fase B1-B6 (motor virou padrão pra toda rolagem
