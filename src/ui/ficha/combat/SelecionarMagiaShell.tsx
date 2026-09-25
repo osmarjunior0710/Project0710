@@ -126,7 +126,12 @@ export default function SelecionarMagiaShell({
         createPortal(
           <div className={localStyles.painelEspacos}>
             <div className={localStyles.painelEspacosTitulo}>Espaços</div>
-            {espacos.map((e) => {
+            {/* Invertido pra círculo maior em cima, menor embaixo — pedido
+                do Osmar (2026-09), só neste painel flutuante. `espacos`
+                vem crescente de `espacosDeMagiaAtivos` (outros lugares que
+                o consomem direto, ex.: aba Magias, continuam crescente de
+                propósito — não peça pra mexer lá também). */}
+            {[...espacos].reverse().map((e) => {
               const gasto = espacosGastosPorCirculo[e.circulo] ?? 0;
               return (
                 <div key={e.circulo} className={localStyles.painelEspacosRow}>
@@ -141,7 +146,7 @@ export default function SelecionarMagiaShell({
               <>
                 {espacos.length > 0 && <div className={localStyles.painelEspacosSeparador} />}
                 <div className={localStyles.painelEspacosTitulo}>{ponte.classeNome}</div>
-                {ponte.espacos.map((e) => {
+                {[...ponte.espacos].reverse().map((e) => {
                   const gasto = ponte.espacosGastosPorCirculo[e.circulo] ?? 0;
                   return (
                     <div key={e.circulo} className={localStyles.painelEspacosRow}>

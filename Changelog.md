@@ -17,6 +17,10 @@ Corrige o ícone da aba Pets — a versão anterior (v202609_1656) tinha saído 
 
 Cabeçalho da ficha (nome/espécie/classe/nível) quebrado em linhas separadas — texto corrido ficava difícil de ler, principalmente com 2+ classes.
 
+## v202609_1450
+
+**Combate — painel flutuante "Espaços" invertido.** No painel "Usar Magia" (aba Combate), o cartão flutuante que mostra os Espaços de Magia por círculo agora lista do maior pro menor (9º em cima, 1º embaixo) — antes era o contrário, ficava diferente da lista de magias ao lado (que já mostra do maior círculo pro menor).
+
 ## v202609_1108
 
 **Corrige: Maestria de Magias e Assinatura Mágica não apareciam na aba Combate.** As 2 magias de cada característica (quando ainda não estivessem TAMBÉM marcadas como Magias Preparadas normais) ficavam de fora da lista de "Usar Magia" do Combate — só apareciam na aba Magias. Agora aparecem nos 2 lugares, com "Conjurar Grátis" funcionando igual nos dois.
