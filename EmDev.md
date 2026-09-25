@@ -98,6 +98,16 @@ vez, Perfil passa a agrupar por classe também.
 - [ ] Entrega 5 — Remove o pill: `classeAtivaNome` sai de
       `FichaShell.tsx`; Perfil passa a mostrar as características das
       2 classes agrupadas por classe (com título), sem seletor.
+      **Escopo ampliado (achado do Osmar testando a Entrega 4,
+      2026-09-24):** "Espaços de Magia" (aba Magias/Combat) mostra
+      hoje SÓ o pool da classe que está no pill — pill em Bruxo só
+      mostra a Magia de Pacto (nunca junto com o pool normal de outra
+      classe conjuradora). Sem pill pra trocar, isso quebra de vez
+      (nenhum jeito de ver o pool que não é o combinado). Quando o
+      personagem tem 2+ classes com pool NÃO combinável entre si (o
+      caso do Bruxo — nunca combina, mesmo multiclasse), a seção
+      passa a mostrar os pools juntos, cada um com o próprio título
+      (ex.: "Espaços de Magia — Bardo" / "Magia de Pacto — Bruxo").
 - [ ] Entrega 6 — Fechamento: testes/tsc/build,
       `aprendizados/classes/multiclasse.md` (criar), limpar
       `PENDENCIAS.md` do que for resolvido no caminho.
