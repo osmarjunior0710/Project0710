@@ -11,10 +11,15 @@
   padding: 4px;
 }
 
+/* Altura padronizada em 35px pra todo card da seção Idiomas (linha de
+   idioma + "+ Aprender novo idioma") — pedido do Osmar, a caixa de
+   "Comum" (sem botão) e a de um idioma com "Confirmar" armado tinham
+   alturas diferentes. */
 .idiomaRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: 35px;
 }
 
 .removerBtn {
@@ -53,6 +58,10 @@
 }
 
 .aprenderBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 35px;
   cursor: pointer;
   text-align: center;
 }

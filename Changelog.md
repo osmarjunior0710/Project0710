@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2004
+
+Altura dos cards de Idiomas (aba Perfil) padronizada em 35px — antes "Comum" (sem botão) ficava mais baixo que os idiomas com botão de remover. Corrige também os ícones de "Talentos"/"Idiomas", que tinham saído trocados na entrega anterior.
+
 ## v202609_1953
 
 Padding de todas as caixas/botões da aba Perfil reduzido pra 4px (visual mais compacto — Osmar comparou 1/2/3/4px antes de decidir). Só a aba Perfil mudou, o resto do app continua igual por enquanto.
