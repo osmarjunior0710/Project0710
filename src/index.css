@@ -213,6 +213,17 @@ button {
   text-transform: uppercase;
 }
 
+.section-title-icone {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: var(--space-2);
+  margin-top: -2px;
+}
+
 .opt-card {
   border: 1px dashed var(--line);
   border-radius: var(--shape-sm);

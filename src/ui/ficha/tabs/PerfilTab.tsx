@@ -1,6 +1,9 @@
 import type { Classe } from '../../../data/rulesets/dnd2024/classes';
 import { subclasses } from '../../../data/rulesets/dnd2024/subclasses';
 import BadgeHomebrew from '../../components/BadgeHomebrew';
+import IconeClasse from '../../components/IconeClasse';
+import IconeOrigem from '../../components/IconeOrigem';
+import IconeEspecie from '../../components/IconeEspecie';
 import { origens } from '../../../data/rulesets/dnd2024/origens';
 import { especies } from '../../../data/rulesets/dnd2024/especies';
 import { talentos, talentosOrigem } from '../../../data/rulesets/dnd2024/talentos';
@@ -56,7 +59,7 @@ export default function PerfilTab({
       : [];
     const caracteristicasDaSubclasse = caracteristicasSubclasseAcumuladas(entry.subclasse ?? null, entry.nivel);
     const subclasseInfo = entry.subclasse ? subclasses.find((s) => s.nome === entry.subclasse) ?? null : null;
-    return { entry, caracteristicasClasse, caracteristicasDaSubclasse, subclasseInfo };
+    return { entry, classeObj, caracteristicasClasse, caracteristicasDaSubclasse, subclasseInfo };
   });
   const origem = origens.find((o) => o.nome === selecao.origem) ?? null;
   const talento = origem ? talentosOrigem.find((t) => t.id === origem.talentoOrigemId) ?? null : null;
@@ -70,9 +73,10 @@ export default function PerfilTab({
 
   return (
     <>
-      {blocosDeClasse.map(({ entry, caracteristicasClasse, caracteristicasDaSubclasse, subclasseInfo }) => (
+      {blocosDeClasse.map(({ entry, classeObj, caracteristicasClasse, caracteristicasDaSubclasse, subclasseInfo }) => (
         <div key={entry.classe}>
           <div className="section-title">
+            {classeObj && <IconeClasse id={classeObj.id} variante="titulo" />}
             Classe — {entry.classe} (nível {entry.nivel})
           </div>
           {caracteristicasClasse.length === 0 && (
@@ -96,6 +100,7 @@ export default function PerfilTab({
           {caracteristicasDaSubclasse.length > 0 && (
             <>
               <div className="section-title" style={{ marginTop: 16 }}>
+                {subclasseInfo && <IconeClasse id={subclasseInfo.id} variante="titulo" />}
                 Subclasse{entry.subclasse ? ` — ${entry.subclasse}` : ''} {subclasseInfo?.homebrew && <BadgeHomebrew />}
               </div>
               {subclasseInfo?.homebrew && (
@@ -111,29 +116,29 @@ export default function PerfilTab({
               ))}
             </>
           )}
+
+          {classeObj?.id === 'bruxo' && invocacoesEscolhidas.length > 0 && (
+            <>
+              <div className="section-title" style={{ marginTop: 16 }}>
+                Invocações Místicas
+              </div>
+              {invocacoesEscolhidas.map((inv) => {
+                const truqueVinculado = invocacoesTruqueVinculado[inv.id];
+                return (
+                  <div key={inv.id} className="opt-card" style={{ cursor: 'default' }}>
+                    <div className="opt-card-name">{inv.nome}</div>
+                    <div className="opt-card-desc">
+                      {invocacaoTemPlaceholder(inv, truqueVinculado) ? '[PH] sem efeito mecânico ainda — ' : ''}
+                      {truqueVinculado && `🎯 Vinculada a ${truqueVinculado} — `}
+                      {inv.beneficios}
+                    </div>
+                  </div>
+                );
+              })}
+            </>
+          )}
         </div>
       ))}
-
-      {invocacoesEscolhidas.length > 0 && (
-        <>
-          <div className="section-title" style={{ marginTop: 16 }}>
-            Invocações Místicas
-          </div>
-          {invocacoesEscolhidas.map((inv) => {
-            const truqueVinculado = invocacoesTruqueVinculado[inv.id];
-            return (
-              <div key={inv.id} className="opt-card" style={{ cursor: 'default' }}>
-                <div className="opt-card-name">{inv.nome}</div>
-                <div className="opt-card-desc">
-                  {invocacaoTemPlaceholder(inv, truqueVinculado) ? '[PH] sem efeito mecânico ainda — ' : ''}
-                  {truqueVinculado && `🎯 Vinculada a ${truqueVinculado} — `}
-                  {inv.beneficios}
-                </div>
-              </div>
-            );
-          })}
-        </>
-      )}
 
       {talentosGeraisEscolhidos.length > 0 && (
         <>
@@ -153,6 +158,7 @@ export default function PerfilTab({
       )}
 
       <div className="section-title" style={{ marginTop: 16 }}>
+        {origem && <IconeOrigem id={origem.id} variante="titulo" />}
         Origem{origem ? ` — ${origem.nome}` : ''}
       </div>
       {talento ? (
@@ -173,6 +179,7 @@ export default function PerfilTab({
       )}
 
       <div className="section-title" style={{ marginTop: 16 }}>
+        {especie && <IconeEspecie id={especie.id} variante="titulo" />}
         Espécie{especie ? ` — ${especie.nome}` : ''}
       </div>
       {especie && opcoesSubescolhaNoWizard(especie) && especie.subescolha && (
