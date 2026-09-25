@@ -1523,7 +1523,6 @@ export default function CombatTab({
         </>
       )}
 
-      <div className="section-title">Ação · Ação Bônus · Reação — estado do turno</div>
       <div className={styles.splitBtns}>
         {(['acao', 'bonus'] as RecursoTurno[]).map((categoria) => (
           <div
@@ -1546,11 +1545,6 @@ export default function CombatTab({
         <div className={styles.sbIcon}>{LABELS.reacao.icone}</div>
         <div className={styles.sbLabel}>{LABELS.reacao.nome}</div>
         <div className={styles.sbState}>{turnState.reacao === 'usada' ? 'usada' : 'ativo'}</div>
-      </div>
-
-      <div className="label">
-        Ação abre da esquerda, Ação Bônus da direita, Reação sobe de baixo. Ao usar um, ele fica cinza/travado até
-        "Fim do Turno".
       </div>
 
       {feedback && <div className={styles.feedback}>{feedback}</div>}

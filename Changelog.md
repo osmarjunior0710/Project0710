@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2220
+
+Removidos o título de seção "Ação · Ação Bônus · Reação — estado do turno" e a nota "Ação abre da esquerda..." na aba Combate.
+
 ## v202609_2214
 
 Removido o texto "Armadura, Escudo e arma da Mão Principal/Secundária já valem de verdade..." embaixo de "Equipado agora" na Mochila.
