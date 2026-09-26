@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2046
+
+Mago/Evocador ganha "Evocação Potencializada" (nível 10): dano de
+magia de Evocação de Mago soma automaticamente o modificador de
+Inteligência (visível na quebra do cálculo, "ⓘ").
+
 ## v202609_1953
 
 Corrigido: Truque Potente (Mago/Evocador) não fazia nada ao clicar

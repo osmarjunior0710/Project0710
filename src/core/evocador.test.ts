@@ -4,6 +4,8 @@ import {
   catalogoVersadoEmEvocacao,
   truquePotenteAtivo,
   truqueElegivelTruquePotente,
+  evocacaoPotencializadaAtiva,
+  bonusEvocacaoPotencializada,
 } from './evocador';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { magias } from '../data/rulesets/dnd2024/magias';
@@ -69,5 +71,43 @@ describe('truqueElegivelTruquePotente', () => {
     const magiaComCirculo = magias.find((m) => m.circulo >= 1 && m.danoBaseDado != null)!;
     expect(magiaComCirculo).toBeDefined();
     expect(truqueElegivelTruquePotente(magiaComCirculo)).toBe(false);
+  });
+});
+
+describe('evocacaoPotencializadaAtiva', () => {
+  it('caso normal — Evocador nível 10+ tem a característica', () => {
+    expect(evocacaoPotencializadaAtiva('Evocador', 10)).toBe(true);
+  });
+
+  it('caso de borda — nível abaixo de 10, ou subclasse ausente/outra, não tem', () => {
+    expect(evocacaoPotencializadaAtiva('Evocador', 9)).toBe(false);
+    expect(evocacaoPotencializadaAtiva(null, 15)).toBe(false);
+    expect(evocacaoPotencializadaAtiva('Necromante', 15)).toBe(false);
+  });
+});
+
+describe('bonusEvocacaoPotencializada', () => {
+  it('caso normal — magia de Evocação de Mago soma o mod. de Inteligência', () => {
+    const raioDeFogo = magias.find((m) => m.nome === 'Raio de Fogo')!;
+    expect(raioDeFogo).toBeDefined();
+    expect(bonusEvocacaoPotencializada(raioDeFogo, true, 3)).toBe(3);
+  });
+
+  it('caso de borda — característica inativa não soma nada', () => {
+    const raioDeFogo = magias.find((m) => m.nome === 'Raio de Fogo')!;
+    expect(bonusEvocacaoPotencializada(raioDeFogo, false, 3)).toBe(0);
+  });
+
+  it('caso de borda — magia de outra escola (mesmo sendo de Mago) não soma', () => {
+    const naoEvocacao = magias.find((m) => m.escola !== 'Evocação' && m.classes.includes('Mago'))!;
+    expect(naoEvocacao).toBeDefined();
+    expect(bonusEvocacaoPotencializada(naoEvocacao, true, 3)).toBe(0);
+  });
+
+  it('caso de borda — magia de Evocação que não é "de Mago" não soma (ex: Chama Sagrada, só Clérigo)', () => {
+    const chamaSagrada = magias.find((m) => m.nome === 'Chama Sagrada')!;
+    expect(chamaSagrada).toBeDefined();
+    expect(chamaSagrada.classes.includes('Mago')).toBe(false);
+    expect(bonusEvocacaoPotencializada(chamaSagrada, true, 3)).toBe(0);
   });
 });

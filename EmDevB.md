@@ -55,8 +55,18 @@ da Entrega 2 — foco "Mago — características base" fechou (ver
       `MagiasTab.tsx`, incluindo um banner de feedback novo (aba Magias
       não tinha `onEscolher` como o Combate) pro resultado do erro
       aparecer. Validado via Playwright nos 2 casos, na aba Magias.
-- [ ] Entrega 4 — Evocação Potencializada (nível 10): mod. de
-      Inteligência somado ao dano de magia de Evocação de Mago.
+- [x] Entrega 4 — Evocação Potencializada (nível 10): mod. de
+      Inteligência somado ao dano de magia de Evocação de Mago, mesmo
+      padrão de Explosão Agonizante (`decidirConjuracao`) no caso
+      Ataque; caso Salvaguarda ganhou helper próprio
+      (`aplicarEvocacaoPotencializadaAoDano`, `core/evocador.ts`)
+      reaproveitado nos 2 lugares que calculam esse dano por fora
+      (`CombatTab.tsx` `abrirSalvaguarda` + `MagiasTab.tsx`
+      `processarMagiaAoUsar`) — dessa vez conferindo as 2 abas desde o
+      início. Auto-aplicado, sem toggle. Validado via Playwright nos 3
+      pontos (ataque em Magias, salvaguarda em Magias, ataque em
+      Combate): linha "Evocação Potencializada +X" aparece certa na
+      quebra do dano.
 - [ ] Entrega 5 — Sobrecarga (nível 14): dano máximo opcional +
       contador de usos desde o Descanso Longo + dano Necrótico
       auto-infligido escalando.

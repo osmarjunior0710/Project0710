@@ -55,6 +55,7 @@ interface ReacaoPanelContentProps {
   truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
   truquePotenteAtivo: boolean;
+  evocacaoPotencializadaAtiva: boolean;
   detalhesAtivo: boolean;
   contraEncantamentoDisponivel: boolean;
   palavrasDeInterrupcaoDisponivel: boolean;
@@ -125,6 +126,7 @@ export default function ReacaoPanelContent({
   truqueVinculadoAgonizante,
   modCarisma,
   truquePotenteAtivo,
+  evocacaoPotencializadaAtiva,
   detalhesAtivo,
   contraEncantamentoDisponivel,
   palavrasDeInterrupcaoDisponivel,
@@ -186,6 +188,8 @@ export default function ReacaoPanelContent({
       truqueVinculadoAgonizante,
       modCarisma,
       explicacaoAcertoConjuracao,
+      evocacaoPotencializadaAtiva,
+      modIntAtual,
     );
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);

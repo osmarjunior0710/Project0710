@@ -15,6 +15,7 @@ import { fmtMod, type ExplicacaoCalculo } from './calculoPersonagem';
 import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia, fmtDado, type MecanicaMagia } from './magiaDano';
 import { curaColheitaMacabra } from './necromante';
 import { bonusExplosaoAgonizante } from './invocacoesMisticas';
+import { bonusEvocacaoPotencializada } from './evocador';
 
 /** Rolagem de 1 dado só (acerto de magia) — mesmo formato mínimo de
  * `RollD20Options` (`useRoll()`), sem `quantidade`/`lados` (sempre 1d20). */
@@ -82,7 +83,11 @@ export interface ConjuracaoDecidida {
  * `truqueVinculadoAgonizante` (NOME do truque escolhido no Level Up
  * pra Explosão Agonizante, `undefined` = invocação ausente/ainda não
  * vinculada) + `modCarisma` só alimentam essa invocação (ver
- * `bonusExplosaoAgonizante`) — sem efeito em qualquer outra magia. */
+ * `bonusExplosaoAgonizante`) — sem efeito em qualquer outra magia.
+ * `evocacaoPotencializadaAtiva` + `modInt` alimentam a característica
+ * homônima do Evocador (ver `bonusEvocacaoPotencializada`) — os 2
+ * bônus são independentes e podem somar juntos (ex.: Multiclasse
+ * Bruxo/Mago). */
 export function decidirConjuracao(
   m: Magia,
   circuloUsado: number,
@@ -93,6 +98,8 @@ export function decidirConjuracao(
   truqueVinculadoAgonizante: string | undefined,
   modCarisma: number,
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null = null,
+  evocacaoPotencializadaAtiva = false,
+  modInt = 0,
 ): ConjuracaoDecidida {
   const curaMacabra =
     colheitaMacabraDisponivel && gastouEspacoDeVerdade && m.escola === 'Necromancia' ? curaColheitaMacabra(circuloUsado) : null;
@@ -102,17 +109,19 @@ export function decidirConjuracao(
   if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
     const dano = calcularDanoMagia(m, circuloUsado, nivelPersonagem);
     const bonusAgonizante = bonusExplosaoAgonizante(m.nome, truqueVinculadoAgonizante, modCarisma);
-    const danoFinal =
-      dano && bonusAgonizante !== 0
+    const bonusEvocacao = bonusEvocacaoPotencializada(m, evocacaoPotencializadaAtiva, modInt);
+    const somarBonus = (base: typeof dano, bonus: number, label: string) =>
+      base && bonus !== 0
         ? {
-            ...dano,
-            mod: dano.mod + bonusAgonizante,
+            ...base,
+            mod: base.mod + bonus,
             explicacao: {
-              linhas: [...dano.explicacao.linhas, { label: 'Explosão Agonizante', valor: fmtMod(bonusAgonizante) }],
-              total: { ...dano.explicacao.total, valor: fmtDado(dano.quantidade, dano.lados, dano.mod + bonusAgonizante) },
+              linhas: [...base.explicacao.linhas, { label, valor: fmtMod(bonus) }],
+              total: { ...base.explicacao.total, valor: fmtDado(base.quantidade, base.lados, base.mod + bonus) },
             },
           }
-        : dano;
+        : base;
+    const danoFinal = somarBonus(somarBonus(dano, bonusAgonizante, 'Explosão Agonizante'), bonusEvocacao, 'Evocação Potencializada');
     return {
       mecanica,
       rollAcerto: {

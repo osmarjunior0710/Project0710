@@ -7,7 +7,7 @@ import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
-import { truqueElegivelTruquePotente } from '../../../core/evocador';
+import { truqueElegivelTruquePotente, aplicarEvocacaoPotencializadaAoDano } from '../../../core/evocador';
 import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
@@ -324,6 +324,10 @@ interface CombatTabProps {
    * `core/evocador.ts`) — metade de dano no erro/salvaguarda de truque
    * com dano, sem efeitos adicionais. */
   truquePotenteAtivo: boolean;
+  /** Evocação Potencializada (Mago/Evocador, nível 10, regra oficial —
+   * ver `core/evocador.ts`) — soma o mod. de Inteligência ao dano de
+   * magia de Evocação de Mago. */
+  evocacaoPotencializadaAtiva: boolean;
   numAtaques: number;
   indomavel: RecursoContado;
   pontosDeSorte: RecursoContado;
@@ -606,6 +610,7 @@ export default function CombatTab({
   truqueVinculadoAgonizante,
   modCarisma,
   truquePotenteAtivo,
+  evocacaoPotencializadaAtiva,
   numAtaques,
   indomavel: { maximo: indomavelMaximo, restantes: indomavelRestantes, onUsar: onUsarIndomavel },
   pontosDeSorte: { maximo: pontosDeSorteMaximo, restantes: pontosDeSorteRestantes, onUsar: onUsarPontoDeSorte },
@@ -763,11 +768,12 @@ export default function CombatTab({
   // botão manual de "Rolar Dano") — o popup final só abre depois que o
   // dado resolve, com Falha/Sucesso já calculados.
   function abrirSalvaguarda(magia: Magia, circuloUsado: number) {
-    const dano = calcularDanoMagia(magia, circuloUsado, nivel);
-    if (!dano) {
+    const danoBase = calcularDanoMagia(magia, circuloUsado, nivel);
+    if (!danoBase) {
       setTelaSalvaguarda({ magia, circuloUsado, danoRolado: null, upcastNaoAutomatico: false });
       return;
     }
+    const dano = aplicarEvocacaoPotencializadaAoDano(danoBase, magia, evocacaoPotencializadaAtiva, modIntAtual);
     let totalRolado = 0;
     rolarDados({
       label: `Dano — ✨ ${magia.nome}`,
@@ -1615,6 +1621,8 @@ export default function CombatTab({
           truqueVinculadoAgonizante={truqueVinculadoAgonizante}
           modCarisma={modCarisma}
           truquePotenteAtivo={truquePotenteAtivo}
+          evocacaoPotencializadaAtiva={evocacaoPotencializadaAtiva}
+          modIntAtual={modIntAtual}
           numAtaques={numAtaques}
           ataquesFeitos={ataquesFeitos}
           surtoMax={surtoMaximo}
@@ -1733,6 +1741,8 @@ export default function CombatTab({
           truqueVinculadoAgonizante={truqueVinculadoAgonizante}
           modCarisma={modCarisma}
           truquePotenteAtivo={truquePotenteAtivo}
+          evocacaoPotencializadaAtiva={evocacaoPotencializadaAtiva}
+          modIntAtual={modIntAtual}
           onAbrirSalvaguarda={abrirSalvaguarda}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
@@ -1776,6 +1786,7 @@ export default function CombatTab({
           truqueVinculadoAgonizante={truqueVinculadoAgonizante}
           modCarisma={modCarisma}
           truquePotenteAtivo={truquePotenteAtivo}
+          evocacaoPotencializadaAtiva={evocacaoPotencializadaAtiva}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
           detalhesAtivo={detalhesAtivo}

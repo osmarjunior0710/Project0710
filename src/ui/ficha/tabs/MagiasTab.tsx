@@ -25,7 +25,7 @@ import InfoValor from '../../components/InfoValor';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
 import { danoComCritico } from '../../../core/danoCritico';
-import { truqueElegivelTruquePotente } from '../../../core/evocador';
+import { truqueElegivelTruquePotente, aplicarEvocacaoPotencializadaAoDano } from '../../../core/evocador';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import PillsMagia from '../../components/PillsMagia';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
@@ -166,6 +166,11 @@ interface MagiasTabProps {
    * `core/evocador.ts`) — metade de dano no erro/salvaguarda de truque
    * com dano, sem efeitos adicionais. */
   truquePotenteAtivo: boolean;
+  /** Evocação Potencializada (Mago/Evocador, nível 10, regra oficial —
+   * ver `core/evocador.ts`) — soma o mod. de Inteligência ao dano de
+   * magia de Evocação de Mago. */
+  evocacaoPotencializadaAtiva: boolean;
+  modIntAtual: number;
   /** `true` = já reconjurado desde o último Descanso Curto/Longo —
    * botão "Reconjurar" fica travado até o próximo descanso. */
   livroDasSombrasGasto: boolean;
@@ -290,6 +295,8 @@ export default function MagiasTab({
   truqueVinculadoAgonizante,
   modCarisma,
   truquePotenteAtivo,
+  evocacaoPotencializadaAtiva,
+  modIntAtual,
   desvantagemForcaDestreza,
   conjura,
   truquesAtuais,
@@ -422,6 +429,8 @@ export default function MagiasTab({
       truqueVinculadoAgonizante,
       modCarisma,
       explicacaoAcertoConjuracao,
+      evocacaoPotencializadaAtiva,
+      modIntAtual,
     );
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
@@ -471,11 +480,12 @@ export default function MagiasTab({
       return;
     }
     if (resultado.mecanica === 'salvaguarda') {
-      const dano = calcularDanoMagia(m, circuloUsado, nivel);
-      if (!dano) {
+      const danoBase = calcularDanoMagia(m, circuloUsado, nivel);
+      if (!danoBase) {
         setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: null, upcastNaoAutomatico: false });
         return;
       }
+      const dano = aplicarEvocacaoPotencializadaAoDano(danoBase, m, evocacaoPotencializadaAtiva, modIntAtual);
       let totalRolado = 0;
       rolarDados({
         label: `Dano — ✨ ${m.nome}`,

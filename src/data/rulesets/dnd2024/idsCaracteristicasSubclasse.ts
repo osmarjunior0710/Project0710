@@ -37,6 +37,7 @@ export const ID_CARACTERISTICA_SUBCLASSE = {
   percorrerArvore: 'Percorrer a Árvore',
   // Mago — Evocador (regra oficial)
   truquePotente: 'Truque Potente',
+  evocacaoPotencializada: 'Evocação Potencializada',
 } as const;
 
 export type IdCaracteristicaSubclasse = keyof typeof ID_CARACTERISTICA_SUBCLASSE;

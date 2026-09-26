@@ -825,6 +825,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     assinaturaMagicaDisponivel,
     magiasAssinaturaDoLivro,
     truquePotenteAtivo,
+    evocacaoPotencializadaAtiva,
     usaRedefPorDescanso,
     magiasGratisConcedidas,
     formasFamiliarElegiveis,
@@ -2730,6 +2731,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}
             modCarisma={carMod}
             truquePotenteAtivo={truquePotenteAtivo}
+            evocacaoPotencializadaAtiva={evocacaoPotencializadaAtiva}
+            modIntAtual={modIntAtual}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             conjura={conjura}
             truquesAtuais={truquesAtuais}
@@ -2954,6 +2957,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}
             modCarisma={carMod}
             truquePotenteAtivo={truquePotenteAtivo}
+            evocacaoPotencializadaAtiva={evocacaoPotencializadaAtiva}
             numAtaques={numAtaques}
             indomavel={{ maximo: indomavelMaximo, restantes: indomavelRestantes, onUsar: usarIndomavel }}
             pontosDeSorte={{ maximo: pontosDeSorteMaximo, restantes: pontosDeSorteRestantes, onUsar: usarPontoDeSorte }}

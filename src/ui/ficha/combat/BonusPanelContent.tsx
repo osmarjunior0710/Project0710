@@ -150,6 +150,8 @@ interface BonusPanelContentProps {
   truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
   truquePotenteAtivo: boolean;
+  evocacaoPotencializadaAtiva: boolean;
+  modIntAtual: number;
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda, que vive em CombatTab. */
   onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
@@ -238,6 +240,8 @@ export default function BonusPanelContent({
   truqueVinculadoAgonizante,
   modCarisma,
   truquePotenteAtivo,
+  evocacaoPotencializadaAtiva,
+  modIntAtual,
   onAbrirSalvaguarda,
   onCuraDeMagiaAplicada,
   colheitaMacabraDisponivel,
@@ -270,6 +274,8 @@ export default function BonusPanelContent({
     truqueVinculadoAgonizante,
     modCarisma,
     truquePotenteAtivo,
+    evocacaoPotencializadaAtiva,
+    modIntAtual,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     preferenciasPillsMagia,

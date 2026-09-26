@@ -66,6 +66,8 @@ interface AcaoPanelContentProps {
   truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
   truquePotenteAtivo: boolean;
+  evocacaoPotencializadaAtiva: boolean;
+  modIntAtual: number;
   numAtaques: number;
   ataquesFeitos: number;
   surtoMax: number;
@@ -213,6 +215,8 @@ export default function AcaoPanelContent({
   truqueVinculadoAgonizante,
   modCarisma,
   truquePotenteAtivo,
+  evocacaoPotencializadaAtiva,
+  modIntAtual,
   numAtaques,
   ataquesFeitos,
   surtoMax,
@@ -282,6 +286,8 @@ export default function AcaoPanelContent({
     truqueVinculadoAgonizante,
     modCarisma,
     truquePotenteAtivo,
+    evocacaoPotencializadaAtiva,
+    modIntAtual,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     preferenciasPillsMagia,

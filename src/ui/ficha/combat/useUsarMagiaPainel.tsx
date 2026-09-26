@@ -48,6 +48,11 @@ interface UsarMagiaPainelParams {
    * `core/evocador.ts`) — metade de dano no erro de truque com dano,
    * sem efeitos adicionais. */
   truquePotenteAtivo: boolean;
+  /** Evocação Potencializada (Mago/Evocador, nível 10, regra oficial —
+   * ver `core/evocador.ts`) — soma o mod. de Inteligência ao dano de
+   * magia de Evocação de Mago. */
+  evocacaoPotencializadaAtiva: boolean;
+  modIntAtual: number;
   colheitaMacabraDisponivel: boolean;
   onColheitaMacabraDisponivel: (cura: number) => void;
   /** Aplica a cura rolada (`rollCura`) no PV do personagem E dispara
@@ -120,6 +125,8 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
       p.truqueVinculadoAgonizante,
       p.modCarisma,
       p.explicacaoAcertoConjuracao,
+      p.evocacaoPotencializadaAtiva,
+      p.modIntAtual,
     );
     if (resultado.curaColheitaMacabra !== null) {
       p.onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
