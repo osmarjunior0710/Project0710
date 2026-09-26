@@ -12,6 +12,16 @@ Evocação" (nível 3) — ao escolher a subclasse, some 2 magias de
 Evocação grátis pro Livro de Magias; a cada novo círculo de magia
 desbloqueado depois, mais 1.
 
+## v202609_1221
+
+Corrigido: as pills configuráveis só apareciam em Truques/Magias
+Preparadas — as listas de "sempre preparada" (Pacto do Ínfero, Pacto
+da Lâmina/Invocações, Descobertas Mágicas, Espécie, Talento de
+Origem/Geral, Livro das Sombras, Livro de Magias, Adepto de Ritual,
+Maestria de Magias, Assinatura Mágica, Contatar Patrono, Arcana
+Mística) ficavam de fora. Agora toda magia da aba Magias respeita a
+mesma configuração de pills.
+
 ## v202609_1204
 
 Corrigido: o FAB do 🎲 Dado 3D ficava flutuando por cima de qualquer

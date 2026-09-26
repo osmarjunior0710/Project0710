@@ -21,27 +21,16 @@
   font-size: 13px;
 }
 
-.spellRow {
-  padding: var(--space-2) var(--space-1);
-  border-bottom: 1px dashed var(--line-soft);
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 .spellName {
   font-size: 13px;
   min-width: 0;
 }
 
-/* Truques/Magias Preparadas de personagem multiclasse (2026-09, ver
-   EmDev.md/sdd-multiclasse-truques-magias.md) — 2 linhas em vez de 1:
-   nome+Usar continuam juntos (mesma altura de toque de sempre), e os
-   pills (círculo + classe, `PillClasse`) ganham uma linha própria
-   embaixo, menor. Só estas 2 seções usam este layout — o resto da
-   aba continua com `.spellRow` de 1 linha só (sem ambiguidade de
-   classe pra marcar). */
+/* Toda linha de magia/truque usa este layout de 2 linhas: nome+botão
+   de ação continuam juntos na 1ª linha (mesma altura de toque de
+   sempre), e as pills configuráveis (`PillsMagia`, ver
+   `core/preferenciasPillsMagia.ts`) ganham uma linha própria embaixo,
+   menor. */
 .spellRowComPill {
   padding: var(--space-2) var(--space-1);
   border-bottom: 1px dashed var(--line-soft);
@@ -59,12 +48,6 @@
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 4px;
-}
-
-.spellCirculo {
-  font-size: 11px;
-  color: var(--text-dim);
-  white-space: nowrap;
 }
 
 .usarBtn {
