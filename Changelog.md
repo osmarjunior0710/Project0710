@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1138
+
+Novo grupo "🃏 Pills de Magia" no menu de preferências (ícone 👤, junto
+com o "Dado 3D" e "House Rules") — ainda não muda nenhuma tela de
+Magias/Combate, só liga a preferência (por enquanto só "Classe" fica
+ligada por padrão, igual já era antes).
+
 ## v202609_0950
 
 Corrigido bug de Multiclasse: subir de nível (ou usar Memorizar

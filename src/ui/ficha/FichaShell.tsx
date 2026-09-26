@@ -10,6 +10,7 @@ import { armazenamentoPersonagens, type PersonagemSalvo } from '../../core/armaz
 import { garantirPersonagemDemo, ID_PERSONAGEM_DEMO } from '../../core/personagemDemo';
 import { useColapsavel } from '../hooks/useColapsavel';
 import { useHouseRules } from './hooks/useHouseRules';
+import { usePreferenciasPillsMagia } from './hooks/usePreferenciasPillsMagia';
 import { useAutosavePersonagem } from './hooks/useAutosavePersonagem';
 import { recursoContado, recursoFlagUnica } from './hooks/recursoGasto';
 import { caracteristicasSubclasseAtivas } from './hooks/caracteristicasSubclasseAtivas';
@@ -632,6 +633,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [itensDetalhados, setItensDetalhados] = useColapsavel('itens-detalhados', false);
   const { regras: houseRules, alternar: alternarHouseRule } = useHouseRules();
   const pesoAtivo = houseRules.pesoMochila;
+  const { preferencias: preferenciasPillsMagia, alternar: alternarPillMagia } = usePreferenciasPillsMagia();
 
   const desValor = valorFinalAtributo(selecao, 'DES') ?? 10;
   const conValorFinal = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'CON') ?? 10, 'CON', temCampeaoPrimitivo);
@@ -2604,6 +2606,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           onToggleItensDetalhados={() => setItensDetalhados(!itensDetalhados)}
           houseRules={houseRules}
           onAlternarHouseRule={alternarHouseRule}
+          preferenciasPillsMagia={preferenciasPillsMagia}
+          onAlternarPillMagia={alternarPillMagia}
           // Nível de personagem máximo é 20 (soma de todas as classes) — a
           // ferramenta de teste não sobe além disso (nível 21 deixava a
           // tabela de espaços de multiclasse sem linha e o personagem sem espaços).
