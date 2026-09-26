@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1230
+
+Corrigido: com várias pills ligadas ao mesmo tempo, a lista de "Usar
+Magia" do Combate ficava cheia de pills coladas com o texto do nome —
+borda de pill cortando por cima de texto da linha seguinte. Nome e
+pills agora ficam em linhas separadas, iguais a como já funcionava na
+aba Magias.
+
 ## v202609_1227
 
 Mago/Evocador ganha a 1ª característica de verdade: "Versado em

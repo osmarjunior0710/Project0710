@@ -103,13 +103,17 @@ export default function SelecionarMagiaShell({
                     style={disponivel ? undefined : { opacity: 0.45, pointerEvents: 'none' }}
                     onClick={() => (truque ? onEscolherTruque(m) : onEscolherMagia(m, circulosDisponiveis))}
                   >
-                    <span className="check-label">
-                      <MagiaComDescricao magia={m} /> {iconesMagia(m)}
-                      <PillsMagia magia={m} classe={classe} preferencias={preferenciasSemCirculo} />
-                      {!disponivel && (
-                        <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · sem espaço disponível</span>
-                      )}
-                    </span>
+                    <div className={`check-label ${localStyles.checkLabelCol}`}>
+                      <div>
+                        <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                        {!disponivel && (
+                          <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · sem espaço disponível</span>
+                        )}
+                      </div>
+                      <div className={localStyles.checkLabelLinha2}>
+                        <PillsMagia magia={m} classe={classe} preferencias={preferenciasSemCirculo} />
+                      </div>
+                    </div>
                   </div>
                 );
               }}
