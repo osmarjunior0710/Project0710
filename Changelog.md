@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1204
+
+Corrigido: o FAB do 🎲 Dado 3D ficava flutuando por cima de qualquer
+painel lateral aberto (achado no "Pills de Magia", mas valia pra
+House Rules e os painéis de Ação/Bônus/Reação também), cobrindo o
+final da lista. Painéis agora ficam por cima do FAB.
+
 ## v202609_1159
 
 As pills configuráveis do menu 👤 "Pills de Magia" agora aparecem de
