@@ -45,6 +45,16 @@ da Entrega 2 — foco "Mago — características base" fechou (ver
       Validado via Playwright (Raio de Fogo errando + Bolha Ácida com
       sucesso na salvaguarda): texto certo nos 2 casos, sem selo
       Homebrew.
+      **Bug achado pelo Osmar no dia seguinte:** clicar "Errei" na aba
+      Magias só fechava o popup, sem aplicar Truque Potente — a aba
+      Magias tem seu PRÓPRIO `processarMagiaAoUsar` (cópia paralela do
+      mesmo fluxo de conjuração, com seu próprio `onErrou`/
+      `telaSalvaguarda`), que eu esqueci de atualizar (violei a própria
+      regra da seção 6.6 do CLAUDE.md, registrada 2 entregas atrás por
+      um bug quase idêntico). Corrigido: mesma lógica replicada em
+      `MagiasTab.tsx`, incluindo um banner de feedback novo (aba Magias
+      não tinha `onEscolher` como o Combate) pro resultado do erro
+      aparecer. Validado via Playwright nos 2 casos, na aba Magias.
 - [ ] Entrega 4 — Evocação Potencializada (nível 10): mod. de
       Inteligência somado ao dano de magia de Evocação de Mago.
 - [ ] Entrega 5 — Sobrecarga (nível 14): dano máximo opcional +

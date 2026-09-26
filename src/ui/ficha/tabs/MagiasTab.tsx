@@ -25,6 +25,7 @@ import InfoValor from '../../components/InfoValor';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
 import { danoComCritico } from '../../../core/danoCritico';
+import { truqueElegivelTruquePotente } from '../../../core/evocador';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import PillsMagia from '../../components/PillsMagia';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
@@ -161,6 +162,10 @@ interface MagiasTabProps {
   truqueVinculadoAgonizante: string | undefined;
   /** Mod. de Carisma atual — mesmo motivo do campo acima. */
   modCarisma: number;
+  /** Truque Potente (Mago/Evocador, nível 3, regra oficial — ver
+   * `core/evocador.ts`) — metade de dano no erro/salvaguarda de truque
+   * com dano, sem efeitos adicionais. */
+  truquePotenteAtivo: boolean;
   /** `true` = já reconjurado desde o último Descanso Curto/Longo —
    * botão "Reconjurar" fica travado até o próximo descanso. */
   livroDasSombrasGasto: boolean;
@@ -284,6 +289,7 @@ export default function MagiasTab({
   explicacaoCdConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
+  truquePotenteAtivo,
   desvantagemForcaDestreza,
   conjura,
   truquesAtuais,
@@ -358,6 +364,10 @@ export default function MagiasTab({
     danoRolado: number | null;
     upcastNaoAutomatico: boolean;
   } | null>(null);
+  // Truque Potente (Mago/Evocador) no caso de ataque errado — aba
+  // Magias não tem um banner de feedback como o Combate (`onEscolher`),
+  // então usa esse estado local só pra esse aviso.
+  const [feedbackTruquePotente, setFeedbackTruquePotente] = useState<string | null>(null);
   // Os 4 `useColapsavel` abaixo precisam vir ANTES do `if (!conjura)
   // return` — Regra dos Hooks: nº de hooks chamados não pode variar
   // entre renders do MESMO componente montado. Bug pego testando
@@ -434,7 +444,28 @@ export default function MagiasTab({
               confirmarFechamento: {},
             });
           },
-          onErrou: () => {},
+          onErrou: () => {
+            if (!dano || !truquePotenteAtivo || !truqueElegivelTruquePotente(m)) return;
+            let totalRolado = 0;
+            rolarDados({
+              label: dano.label,
+              formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+              quantidade: dano.quantidade,
+              lados: dano.lados,
+              mod: dano.mod,
+              explicacaoMod: dano.explicacaoMod,
+              onResultado: (total) => {
+                totalRolado = total;
+              },
+              confirmarFechamento: {
+                rotulo: 'Aplicar Truque Potente ✓',
+                aoTocar: () =>
+                  setFeedbackTruquePotente(
+                    `✨ ${m.nome} — Truque Potente — ${Math.floor(totalRolado / 2)} de dano (metade, sem efeitos adicionais)`,
+                  ),
+              },
+            });
+          },
         },
       });
       return;
@@ -589,11 +620,32 @@ export default function MagiasTab({
       ? `${telaSalvaguarda.danoRolado} — ${telaSalvaguarda.magia.salvaguardaFalha}`
       : telaSalvaguarda.magia.salvaguardaFalha
     : null;
+  // Truque Potente — mesmo padrão de `CombatTab.tsx`
+  // (`textoSucessoSalvaguarda`): truque com dano + salvaguarda
+  // bem-sucedida vira metade do dano, sem efeitos adicionais.
+  const textoSucessoSalvaguarda =
+    telaSalvaguarda && truquePotenteAtivo && truqueElegivelTruquePotente(telaSalvaguarda.magia) && telaSalvaguarda.danoRolado !== null
+      ? `${Math.floor(telaSalvaguarda.danoRolado / 2)} de dano (metade) — sem efeitos adicionais`
+      : (telaSalvaguarda?.magia.salvaguardaSucesso ?? null);
 
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 
   return (
     <>
+      {feedbackTruquePotente && (
+        <div
+          style={{
+            border: '1px dashed var(--accent)',
+            borderRadius: 8,
+            padding: 8,
+            marginBottom: 'var(--space-2)',
+            fontSize: 13,
+          }}
+          onClick={() => setFeedbackTruquePotente(null)}
+        >
+          {feedbackTruquePotente}
+        </div>
+      )}
       {resumosPorClasse.length > 1
         ? resumosPorClasse.map(({ classeNome, resumo: r, explicacaoAcerto, explicacaoCd }) => (
             <div key={classeNome} style={{ marginBottom: 'var(--space-2)' }}>
@@ -707,7 +759,7 @@ export default function MagiasTab({
           atributo={atributoSalvaguarda(telaSalvaguarda.magia)}
           cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
           explicacaoCd={explicacaoCdConjuracao}
-          textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
+          textoSucesso={textoSucessoSalvaguarda}
           textoFalha={textoFalhaSalvaguarda}
           aviso={avisoUpcastSalvaguarda}
           acaoSecundaria={

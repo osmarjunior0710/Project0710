@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1953
+
+Corrigido: Truque Potente (Mago/Evocador) não fazia nada ao clicar
+"Errei" na aba Magias — só funcionava na aba Combate. Agora aplica
+metade do dano nos dois lugares.
+
 ## v202609_1902
 
 Mago/Evocador ganha "Truque Potente" (nível 3): ao errar um ataque de

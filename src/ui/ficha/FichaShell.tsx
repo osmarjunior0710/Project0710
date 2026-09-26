@@ -2729,6 +2729,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             explicacaoCdConjuracao={explicacaoCdConjuracao}
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}
             modCarisma={carMod}
+            truquePotenteAtivo={truquePotenteAtivo}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             conjura={conjura}
             truquesAtuais={truquesAtuais}
