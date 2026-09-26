@@ -72,3 +72,22 @@
   border-top: 1px dashed var(--line-soft);
   margin: var(--space-2) 0;
 }
+
+/* Nome+ícones e pills (`PillsMagia`) em linhas separadas — mesmo motivo
+   de `MagiasTab.module.css` `.spellRowComPillLinha2`: pill (com borda +
+   padding) MISTURADO inline no meio do texto quebra a leitura quando
+   embrulha (borda de um pill corta por cima do texto da linha
+   seguinte). Ver DECISOES-FICHA.md "Pills configuráveis de info de
+   magia". */
+.checkLabelCol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.checkLabelLinha2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
