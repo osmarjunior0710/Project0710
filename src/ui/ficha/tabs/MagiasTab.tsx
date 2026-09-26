@@ -800,16 +800,20 @@ export default function MagiasTab({
           <div className="label" style={{ marginBottom: 4 }}>
             Sempre preparada — conjurável de graça 1x por Descanso Longo, com sucesso automático na salvaguarda.
           </div>
-          <div className={styles.spellRow}>
-            <div className={styles.spellName}>
-              <MagiaComDescricao magia={contatoExtraplanar} /> {iconesMagia(contatoExtraplanar)}
+          <div className={styles.spellRowComPill}>
+            <div className={styles.spellRowComPillLinha1}>
+              <div className={styles.spellName}>
+                <MagiaComDescricao magia={contatoExtraplanar} /> {iconesMagia(contatoExtraplanar)}
+              </div>
+              <div
+                className={`${styles.usarBtn} ${contatarPatronoGasto ? styles.usarBtnDesabilitado : ''}`}
+                onClick={onUsarContatarPatrono}
+              >
+                {contatarPatronoGasto ? 'Usada' : 'Usar de graça'}
+              </div>
             </div>
-            <span className={styles.spellCirculo}>{contatoExtraplanar.circulo}º círculo</span>
-            <div
-              className={`${styles.usarBtn} ${contatarPatronoGasto ? styles.usarBtnDesabilitado : ''}`}
-              onClick={onUsarContatarPatrono}
-            >
-              {contatarPatronoGasto ? 'Usada' : 'Usar de graça'}
+            <div className={styles.spellRowComPillLinha2}>
+              <PillsMagia magia={contatoExtraplanar} preferencias={preferenciasPillsMagia} />
             </div>
           </div>
         </>
@@ -824,16 +828,20 @@ export default function MagiasTab({
           {arcanaMisticaEscolhidas.map(({ circulo, magia }) => {
             const gasta = arcanaMisticaGastos.includes(circulo);
             return (
-              <div key={circulo} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={magia} /> {iconesMagia(magia)}
+              <div key={circulo} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={magia} /> {iconesMagia(magia)}
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${gasta ? styles.usarBtnDesabilitado : ''}`}
+                    onClick={() => onUsarArcanaMistica(circulo)}
+                  >
+                    {gasta ? 'Usada' : 'Usar de graça'}
+                  </div>
                 </div>
-                <span className={styles.spellCirculo}>{circulo}º círculo</span>
-                <div
-                  className={`${styles.usarBtn} ${gasta ? styles.usarBtnDesabilitado : ''}`}
-                  onClick={() => onUsarArcanaMistica(circulo)}
-                >
-                  {gasta ? 'Usada' : 'Usar de graça'}
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={magia} preferencias={preferenciasPillsMagia} />
                 </div>
               </div>
             );
@@ -850,25 +858,29 @@ export default function MagiasTab({
           {magiasGratisConcedidas.map((item) => {
             const jaGasta = item.recarga === 'descansoLongo' && magiasGratisGastas.includes(item.invocacaoId);
             return (
-              <div key={item.invocacaoId} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={item.magia} /> {iconesMagia(item.magia)}
-                  <div style={{ color: 'var(--text-faint)', fontSize: 11 }}>
-                    {item.invocacaoNome}
-                    {item.pvTemporarioConcedido !== null && ` · +${item.pvTemporarioConcedido} PV Temp`}
+              <div key={item.invocacaoId} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={item.magia} /> {iconesMagia(item.magia)}
+                    <div style={{ color: 'var(--text-faint)', fontSize: 11 }}>
+                      {item.invocacaoNome}
+                      {item.pvTemporarioConcedido !== null && ` · +${item.pvTemporarioConcedido} PV Temp`}
+                    </div>
                   </div>
+                  {item.recarga === 'ilimitado' && item.pvTemporarioConcedido === null ? (
+                    <span className="tag">sem custo</span>
+                  ) : (
+                    <div
+                      className={`${styles.usarBtn} ${jaGasta ? styles.usarBtnDesabilitado : ''}`}
+                      onClick={() => usarMagiaGratis(item)}
+                    >
+                      {jaGasta ? 'Usada' : 'Usar de graça'}
+                    </div>
+                  )}
                 </div>
-                <span className={styles.spellCirculo}>{item.magia.circulo}º círculo</span>
-                {item.recarga === 'ilimitado' && item.pvTemporarioConcedido === null ? (
-                  <span className="tag">sem custo</span>
-                ) : (
-                  <div
-                    className={`${styles.usarBtn} ${jaGasta ? styles.usarBtnDesabilitado : ''}`}
-                    onClick={() => usarMagiaGratis(item)}
-                  >
-                    {jaGasta ? 'Usada' : 'Usar de graça'}
-                  </div>
-                )}
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={item.magia} preferencias={preferenciasPillsMagia} />
+                </div>
               </div>
             );
           })}
@@ -973,16 +985,20 @@ export default function MagiasTab({
             const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
-              <div key={m.id} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+              <div key={m.id} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                    onClick={() => temAcao && usarMagia(m)}
+                  >
+                    {temAcao ? 'Usar' : 'Usar (pendência)'}
+                  </div>
                 </div>
-                <span className={styles.spellCirculo}>{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
-                <div
-                  className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                  onClick={() => temAcao && usarMagia(m)}
-                >
-                  {temAcao ? 'Usar' : 'Usar (pendência)'}
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
                 </div>
               </div>
             );
@@ -1000,16 +1016,20 @@ export default function MagiasTab({
             const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
-              <div key={m.id} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+              <div key={m.id} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                    onClick={() => temAcao && usarMagia(m)}
+                  >
+                    {temAcao ? 'Usar' : 'Usar (pendência)'}
+                  </div>
                 </div>
-                <span className={styles.spellCirculo}>{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
-                <div
-                  className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                  onClick={() => temAcao && usarMagia(m)}
-                >
-                  {temAcao ? 'Usar' : 'Usar (pendência)'}
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
                 </div>
               </div>
             );
@@ -1027,16 +1047,20 @@ export default function MagiasTab({
             const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
-              <div key={m.id} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+              <div key={m.id} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                    onClick={() => temAcao && usarMagia(m)}
+                  >
+                    {temAcao ? 'Usar' : 'Usar (pendência)'}
+                  </div>
                 </div>
-                <span className={styles.spellCirculo}>{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
-                <div
-                  className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                  onClick={() => temAcao && usarMagia(m)}
-                >
-                  {temAcao ? 'Usar' : 'Usar (pendência)'}
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
                 </div>
               </div>
             );
@@ -1054,16 +1078,20 @@ export default function MagiasTab({
             const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
-              <div key={m.id} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+              <div key={m.id} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                    onClick={() => temAcao && usarMagia(m)}
+                  >
+                    {temAcao ? 'Usar' : 'Usar (pendência)'}
+                  </div>
                 </div>
-                <span className={styles.spellCirculo}>{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
-                <div
-                  className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                  onClick={() => temAcao && usarMagia(m)}
-                >
-                  {temAcao ? 'Usar' : 'Usar (pendência)'}
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
                 </div>
               </div>
             );
@@ -1092,36 +1120,40 @@ export default function MagiasTab({
             // Guerreiro) não fica travado depois de gastar o grátis.
             const elegivelRitualRapido = ritualRapidoDisponivel && m.tempoConjuracao?.includes('Ritual');
             return (
-              <div key={m.id} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
-                </div>
-                <span className={styles.spellCirculo}>{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
-                {elegivelRitualRapido ? (
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                    <div
-                      className={`${styles.usarBtn} ${styles.usarBtnRitual} ${ritualRapidoGasto ? styles.usarBtnDesabilitado : ''}`}
-                      style={{ minWidth: 0, padding: '0 var(--space-2)' }}
-                      onClick={() => !ritualRapidoGasto && onUsarRitualRapido()}
-                    >
-                      {ritualRapidoGasto ? 'Usada' : 'Grátis'}
+              <div key={m.id} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  </div>
+                  {elegivelRitualRapido ? (
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <div
+                        className={`${styles.usarBtn} ${styles.usarBtnRitual} ${ritualRapidoGasto ? styles.usarBtnDesabilitado : ''}`}
+                        style={{ minWidth: 0, padding: '0 var(--space-2)' }}
+                        onClick={() => !ritualRapidoGasto && onUsarRitualRapido()}
+                      >
+                        {ritualRapidoGasto ? 'Usada' : 'Grátis'}
+                      </div>
+                      <div
+                        className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                        style={{ minWidth: 0, padding: '0 var(--space-2)' }}
+                        onClick={() => temAcao && usarMagia(m)}
+                      >
+                        {temAcao ? 'Usar' : 'Pendência'}
+                      </div>
                     </div>
+                  ) : (
                     <div
                       className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                      style={{ minWidth: 0, padding: '0 var(--space-2)' }}
                       onClick={() => temAcao && usarMagia(m)}
                     >
-                      {temAcao ? 'Usar' : 'Pendência'}
+                      {temAcao ? 'Usar' : 'Usar (pendência)'}
                     </div>
-                  </div>
-                ) : (
-                  <div
-                    className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                    onClick={() => temAcao && usarMagia(m)}
-                  >
-                    {temAcao ? 'Usar' : 'Usar (pendência)'}
-                  </div>
-                )}
+                  )}
+                </div>
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
+                </div>
               </div>
             );
           })}
@@ -1155,17 +1187,21 @@ export default function MagiasTab({
           {magiasGratisTalentoGeral.map((item) => {
             const jaGasta = item.recarga === 'descansoLongo' && magiasGratisGastas.includes(`talento:${item.talentoId}:${item.magia.nome}`);
             return (
-              <div key={`${item.talentoId}-${item.magia.nome}`} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={item.magia} /> {iconesMagia(item.magia)}
-                  <div style={{ color: 'var(--text-faint)', fontSize: 11 }}>{item.talentoNome}</div>
+              <div key={`${item.talentoId}-${item.magia.nome}`} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={item.magia} /> {iconesMagia(item.magia)}
+                    <div style={{ color: 'var(--text-faint)', fontSize: 11 }}>{item.talentoNome}</div>
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${jaGasta ? styles.usarBtnDesabilitado : ''}`}
+                    onClick={() => onUsarMagiaGratisTalentoGeral(item)}
+                  >
+                    {jaGasta ? 'Usada' : 'Usar de graça'}
+                  </div>
                 </div>
-                <span className={styles.spellCirculo}>{item.magia.circulo}º círculo</span>
-                <div
-                  className={`${styles.usarBtn} ${jaGasta ? styles.usarBtnDesabilitado : ''}`}
-                  onClick={() => onUsarMagiaGratisTalentoGeral(item)}
-                >
-                  {jaGasta ? 'Usada' : 'Usar de graça'}
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={item.magia} preferencias={preferenciasPillsMagia} />
                 </div>
               </div>
             );
@@ -1193,16 +1229,20 @@ export default function MagiasTab({
             const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
-              <div key={m.id} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+              <div key={m.id} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                    onClick={() => temAcao && usarMagia(m)}
+                  >
+                    {temAcao ? 'Usar' : 'Usar (pendência)'}
+                  </div>
                 </div>
-                <span className={styles.spellCirculo}>{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
-                <div
-                  className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                  onClick={() => temAcao && usarMagia(m)}
-                >
-                  {temAcao ? 'Usar' : 'Usar (pendência)'}
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
                 </div>
               </div>
             );
@@ -1285,16 +1325,20 @@ export default function MagiasTab({
               {livroDeMagias.map((m) => {
                 const preparada = nomesMagiasPreparadas.includes(m.nome);
                 return (
-                  <div key={m.id} className={styles.spellRow}>
-                    <div className={styles.spellName}>
-                      <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  <div key={m.id} className={styles.spellRowComPill}>
+                    <div className={styles.spellRowComPillLinha1}>
+                      <div className={styles.spellName}>
+                        <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                      </div>
+                      {preparada ? (
+                        <span className="tag">preparada</span>
+                      ) : (
+                        <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>não preparada</span>
+                      )}
                     </div>
-                    <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
-                    {preparada ? (
-                      <span className="tag">preparada</span>
-                    ) : (
-                      <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>não preparada</span>
-                    )}
+                    <div className={styles.spellRowComPillLinha2}>
+                      <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
+                    </div>
                   </div>
                 );
               })}
@@ -1318,13 +1362,17 @@ export default function MagiasTab({
             delas preparadas. Ilimitado (só o custo narrativo de +10min de Ritual).
           </div>
           {magiasRituaisDoLivro.map((m) => (
-            <div key={m.id} className={styles.spellRow}>
-              <div className={styles.spellName}>
-                <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+            <div key={m.id} className={styles.spellRowComPill}>
+              <div className={styles.spellRowComPillLinha1}>
+                <div className={styles.spellName}>
+                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                </div>
+                <div className={`${styles.usarBtn} ${styles.usarBtnRitual}`} onClick={() => usarMagiaRitual(m)}>
+                  🔮 Ritual
+                </div>
               </div>
-              <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
-              <div className={`${styles.usarBtn} ${styles.usarBtnRitual}`} onClick={() => usarMagiaRitual(m)}>
-                🔮 Ritual
+              <div className={styles.spellRowComPillLinha2}>
+                <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
               </div>
             </div>
           ))}
@@ -1341,16 +1389,20 @@ export default function MagiasTab({
           {magiasMaestriaDoLivro.map((m) => {
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
-              <div key={m.id} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+              <div key={m.id} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : ''}`}
+                    onClick={() => temAcao && usarMagia(m)}
+                  >
+                    {temAcao ? 'Usar' : 'Usar (pendência)'}
+                  </div>
                 </div>
-                <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
-                <div
-                  className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : ''}`}
-                  onClick={() => temAcao && usarMagia(m)}
-                >
-                  {temAcao ? 'Usar' : 'Usar (pendência)'}
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
                 </div>
               </div>
             );
@@ -1370,17 +1422,21 @@ export default function MagiasTab({
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             const gasta = assinaturaMagicaGastas.includes(m.nome);
             return (
-              <div key={m.id} className={styles.spellRow}>
-                <div className={styles.spellName}>
-                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
-                  {gasta && <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · já usada de graça</span>}
+              <div key={m.id} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                    {gasta && <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · já usada de graça</span>}
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : ''}`}
+                    onClick={() => temAcao && usarMagia(m)}
+                  >
+                    {temAcao ? 'Usar' : 'Usar (pendência)'}
+                  </div>
                 </div>
-                <span className={styles.spellCirculo}>{m.circulo}º círculo</span>
-                <div
-                  className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : ''}`}
-                  onClick={() => temAcao && usarMagia(m)}
-                >
-                  {temAcao ? 'Usar' : 'Usar (pendência)'}
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
                 </div>
               </div>
             );
