@@ -419,6 +419,31 @@ que não reaproveita o que já existe aumenta esse ruído e torna a
 manutenção mais difícil. Antes de propor o plano da seção 6, gaste um
 momento conferindo o schema/componente mais próximo do que já existe.
 
+## 6.6 Alteração em dado de magia — sempre conferir Magias E Combate juntos
+
+(2026-09, depois de um bug real: Maestria de Magias e Assinatura Mágica
+do Mago apareceram certo na aba Magias, mas não apareciam no picker
+"Usar Magia" da aba Combate — as duas abas leem de listas separadas, e
+só uma foi atualizada na entrega. Ver `aprendizados/classes/mago.md`
+pro histórico completo, e `Backlog.md` "Combate lendo direto da aba
+Magias" pra ideia registrada de unificar isso numa fonte só — ainda não
+feita.)
+
+Toda entrega que mexe em **o que o personagem pode ver/conjurar**
+(fonte nova de magia sempre preparada, mudança em Magias Preparadas/
+Livro de Magias/Truques, nova magia bônus/grátis concedida por
+característica de classe/subclasse/talento/espécie, etc.) precisa,
+antes de considerar a entrega concluída, conferir as **duas** telas que
+consomem esse dado — testando na tela, não só lendo o código:
+- aba **Magias** (`MagiasTab.tsx` e afins).
+- aba **Combate**, painel "Usar Magia" (`SelecionarMagiaShell.tsx` /
+  `useMagiasEConjuracao.ts`).
+
+Enquanto a unificação registrada no `Backlog.md` não for feita (2
+listas mantidas à mão, não 1 fonte única), checar as duas é
+responsabilidade de toda entrega desse tipo, não só um lembrete
+pontual.
+
 ## 7. Regra de atualização da família DECISOES-*.md
 
 Sempre que você tomar (ou o usuário tomar, com sua ajuda) uma decisão de

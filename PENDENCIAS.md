@@ -1543,3 +1543,33 @@ estável na planilha aba Magias pro tipo de sucesso (ex.: algo tipo
 Ataque de Sopro/Lançar no Inferno/Golpe de Escudo (texto hardcoded em
 `CombatTab.tsx`, não vem da planilha) NÃO têm esse problema — a
 semântica de cada um já é conhecida direto no código, sucesso incluso.
+
+## Repetir o "Guia do Level Up" (Mago) nas outras 9 classes já implementadas
+
+**O que é:** o foco "Mago — características base quebradas" (fechado
+2026-09, ver `aprendizados/classes/mago.md`) criou um padrão que vale
+a pena repetir em Guerreiro/Bardo/Bruxo/Bárbaro/Guardião (e nas
+próximas que forem entrando): a tela "Novas Características" do Level
+Up mostrando o delta real de cada recurso (Truques/Magias/Espaços/PV)
++ badge `[PH]` automático via `statusImplementacao` (CLAUDE.md §12.1)
+em vez de texto solto sem número ao lado. Hoje só o Mago tem as 10
+características classificadas com `statusImplementacao` e o guia
+completo — as outras classes ainda mostram só o texto puro de cada
+característica nesse passo, sem o comparativo "X → Y" nem o `[PH]`
+automático.
+
+**Por que não fazer já:** não trava nada estruturalmente — é
+replicar um padrão já validado, não inventar mecânica nova. Fica
+registrado aqui pra não esquecer, mas só vale a pena abrir como foco
+próprio quando o Osmar priorizar (auditoria de "toda característica
+já tem `statusImplementacao`?" classe por classe, mesmo processo do
+Mago, seção 6.1.1 do CLAUDE.md).
+
+**O que falta pra resolver:** pra cada classe, (1) auditar TODAS as
+características nível a nível contra a planilha/PDF (nunca pular
+nenhuma, seção 6.1.1), (2) classificar cada uma com
+`statusImplementacao`, (3) criar as funções-esqueleto em `core/` pras
+ainda não implementadas, (4) conferir se o passo "Novas
+Características" do `LevelUpShell.tsx` já calcula o delta certo pros
+recursos daquela classe (hoje o cálculo é genérico, deve funcionar
+sem mudança, mas precisa confirmar testando).
