@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { magiasVersadoEmEvocacaoNesteNivel, catalogoVersadoEmEvocacao } from './evocador';
+import {
+  magiasVersadoEmEvocacaoNesteNivel,
+  catalogoVersadoEmEvocacao,
+  truquePotenteAtivo,
+  truqueElegivelTruquePotente,
+} from './evocador';
 import { classes } from '../data/rulesets/dnd2024/classes';
+import { magias } from '../data/rulesets/dnd2024/magias';
 
 const mago = classes.find((c) => c.nome === 'Mago')!;
 
@@ -33,5 +39,35 @@ describe('catalogoVersadoEmEvocacao', () => {
 
   it('caso de borda — círculo máximo 0 não inclui nenhuma magia', () => {
     expect(catalogoVersadoEmEvocacao(0)).toEqual([]);
+  });
+});
+
+describe('truquePotenteAtivo', () => {
+  it('caso normal — Evocador nível 3+ tem a característica', () => {
+    expect(truquePotenteAtivo('Evocador', 3)).toBe(true);
+  });
+
+  it('caso de borda — nível abaixo de 3, ou subclasse ausente/outra, não tem', () => {
+    expect(truquePotenteAtivo('Evocador', 2)).toBe(false);
+    expect(truquePotenteAtivo(null, 5)).toBe(false);
+    expect(truquePotenteAtivo('Necromante', 5)).toBe(false);
+  });
+});
+
+describe('truqueElegivelTruquePotente', () => {
+  it('caso normal — truque com dano cadastrado é elegível', () => {
+    const truqueComDano = magias.find((m) => m.circulo === 0 && m.danoBaseDado != null)!;
+    expect(truqueComDano).toBeDefined();
+    expect(truqueElegivelTruquePotente(truqueComDano)).toBe(true);
+  });
+
+  it('caso de borda — truque sem dano, ou magia de círculo 1+, não é elegível', () => {
+    const truqueSemDano = magias.find((m) => m.circulo === 0 && m.danoBaseDado == null)!;
+    expect(truqueSemDano).toBeDefined();
+    expect(truqueElegivelTruquePotente(truqueSemDano)).toBe(false);
+
+    const magiaComCirculo = magias.find((m) => m.circulo >= 1 && m.danoBaseDado != null)!;
+    expect(magiaComCirculo).toBeDefined();
+    expect(truqueElegivelTruquePotente(magiaComCirculo)).toBe(false);
   });
 });

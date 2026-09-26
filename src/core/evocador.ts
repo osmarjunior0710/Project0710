@@ -1,6 +1,8 @@
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { magias, type Magia } from '../data/rulesets/dnd2024/magias';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
+import { caracteristicaSubclasseDesbloqueada } from './levelUp';
+import { ID_CARACTERISTICA_SUBCLASSE } from '../data/rulesets/dnd2024/idsCaracteristicasSubclasse';
 
 function circuloMaximoNoNivel(classe: Classe, nivel: number): number {
   return Math.max(0, ...espacosDeMagiaAtivos(classe, nivel).map((e) => e.circulo));
@@ -27,4 +29,18 @@ export function magiasVersadoEmEvocacaoNesteNivel(classe: Classe, nivelAnterior:
  * restringe por classe) até o círculo máximo disponível. */
 export function catalogoVersadoEmEvocacao(circuloMaximo: number): Magia[] {
   return magias.filter((m) => m.escola === 'Evocação' && m.classes.includes('Mago') && m.circulo >= 1 && m.circulo <= circuloMaximo);
+}
+
+/** Truque Potente (Mago/Evocador, nível 3, regra oficial) —
+ * `true` = personagem já tem a característica nesse nível. */
+export function truquePotenteAtivo(subclasse: string | null, nivel: number): boolean {
+  return caracteristicaSubclasseDesbloqueada(subclasse, ID_CARACTERISTICA_SUBCLASSE.truquePotente, nivel);
+}
+
+/** Truque Potente vale só pra truque (círculo 0) com dano cadastrado —
+ * o texto da característica ("seus truques que causam dano") não
+ * restringe por escola, diferente de Versado em Evocação/Evocação
+ * Potencializada/Sobrecarga (SDD `sdd-mago-evocador.md`, seção 3). */
+export function truqueElegivelTruquePotente(m: Magia): boolean {
+  return m.circulo === 0 && m.danoBaseDado != null;
 }

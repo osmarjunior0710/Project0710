@@ -7,6 +7,7 @@ import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
+import { truqueElegivelTruquePotente } from '../../../core/evocador';
 import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
@@ -319,6 +320,10 @@ interface CombatTabProps {
    * — ver `MagiasTab.tsx`/`core/invocacoesMisticas.ts`. */
   truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
+  /** Truque Potente (Mago/Evocador, nível 3, regra oficial — ver
+   * `core/evocador.ts`) — metade de dano no erro/salvaguarda de truque
+   * com dano, sem efeitos adicionais. */
+  truquePotenteAtivo: boolean;
   numAtaques: number;
   indomavel: RecursoContado;
   pontosDeSorte: RecursoContado;
@@ -600,6 +605,7 @@ export default function CombatTab({
   explicacaoCdConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
+  truquePotenteAtivo,
   numAtaques,
   indomavel: { maximo: indomavelMaximo, restantes: indomavelRestantes, onUsar: onUsarIndomavel },
   pontosDeSorte: { maximo: pontosDeSorteMaximo, restantes: pontosDeSorteRestantes, onUsar: onUsarPontoDeSorte },
@@ -1197,6 +1203,15 @@ export default function CombatTab({
       ? `${telaSalvaguarda.danoRolado} — ${telaSalvaguarda.magia.salvaguardaFalha}`
       : telaSalvaguarda.magia.salvaguardaFalha
     : null;
+  // Truque Potente (Mago/Evocador, nível 3, regra oficial): truque com
+  // dano + salvaguarda bem-sucedida vira metade do dano, sem efeitos
+  // adicionais — sobrescreve o texto fixo da planilha só nesse caso
+  // (mesmo padrão de "Ataque de Sopro", que também calcula o texto de
+  // Sucesso a partir do dano já rolado em vez de usar texto fixo).
+  const textoSucessoSalvaguarda =
+    telaSalvaguarda && truquePotenteAtivo && truqueElegivelTruquePotente(telaSalvaguarda.magia) && telaSalvaguarda.danoRolado !== null
+      ? `${Math.floor(telaSalvaguarda.danoRolado / 2)} de dano (metade) — sem efeitos adicionais`
+      : (telaSalvaguarda?.magia.salvaguardaSucesso ?? null);
 
   return (
     <>
@@ -1599,6 +1614,7 @@ export default function CombatTab({
           explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
           truqueVinculadoAgonizante={truqueVinculadoAgonizante}
           modCarisma={modCarisma}
+          truquePotenteAtivo={truquePotenteAtivo}
           numAtaques={numAtaques}
           ataquesFeitos={ataquesFeitos}
           surtoMax={surtoMaximo}
@@ -1716,6 +1732,7 @@ export default function CombatTab({
           explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
           truqueVinculadoAgonizante={truqueVinculadoAgonizante}
           modCarisma={modCarisma}
+          truquePotenteAtivo={truquePotenteAtivo}
           onAbrirSalvaguarda={abrirSalvaguarda}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
@@ -1758,6 +1775,7 @@ export default function CombatTab({
           explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
           truqueVinculadoAgonizante={truqueVinculadoAgonizante}
           modCarisma={modCarisma}
+          truquePotenteAtivo={truquePotenteAtivo}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
           detalhesAtivo={detalhesAtivo}
@@ -1813,7 +1831,7 @@ export default function CombatTab({
           atributo={atributoSalvaguarda(telaSalvaguarda.magia)}
           cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
           explicacaoCd={explicacaoCdConjuracao}
-          textoSucesso={telaSalvaguarda.magia.salvaguardaSucesso}
+          textoSucesso={textoSucessoSalvaguarda}
           textoFalha={textoFalhaSalvaguarda}
           aviso={avisoUpcastSalvaguarda}
           acaoSecundaria={

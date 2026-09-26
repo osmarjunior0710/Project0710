@@ -36,8 +36,15 @@ da Entrega 2 — foco "Mago — características base" fechou (ver
       Validado via Playwright (nível 1→3, escolhendo Evocador): passo
       aparece certo, 2 magias de Evocação entram no Livro de Magias
       além do crescimento normal, 0 selo Homebrew na aba Magias.
-- [ ] Entrega 3 — Truque Potente (nível 3): metade de dano no erro
-      (ataque) e no sucesso da salvaguarda (truque).
+- [x] Entrega 3 — Truque Potente (nível 3): metade de dano no erro
+      (ataque, via `onErrou` de `useUsarMagiaPainel.tsx` + implementação
+      própria em `ReacaoPanelContent.tsx`) e no sucesso da salvaguarda
+      (`textoSucessoSalvaguarda` em `CombatTab.tsx`, mesmo padrão de
+      "Ataque de Sopro"). Vale pra qualquer truque com dano, não só
+      Evocação (`core/evocador.ts` `truqueElegivelTruquePotente`).
+      Validado via Playwright (Raio de Fogo errando + Bolha Ácida com
+      sucesso na salvaguarda): texto certo nos 2 casos, sem selo
+      Homebrew.
 - [ ] Entrega 4 — Evocação Potencializada (nível 10): mod. de
       Inteligência somado ao dano de magia de Evocação de Mago.
 - [ ] Entrega 5 — Sobrecarga (nível 14): dano máximo opcional +

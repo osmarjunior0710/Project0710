@@ -6,6 +6,7 @@ import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { cdConjuracao, circulosDisponiveisParaConjurar, type EspacoDeMagiaAtivo, type MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
+import { truqueElegivelTruquePotente } from '../../../core/evocador';
 import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import PillsMagia from '../../components/PillsMagia';
@@ -53,6 +54,7 @@ interface ReacaoPanelContentProps {
    * `decidirConjuracao` — mantém a assinatura igual nos 3 painéis. */
   truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
+  truquePotenteAtivo: boolean;
   detalhesAtivo: boolean;
   contraEncantamentoDisponivel: boolean;
   palavrasDeInterrupcaoDisponivel: boolean;
@@ -122,6 +124,7 @@ export default function ReacaoPanelContent({
   explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
+  truquePotenteAtivo,
   detalhesAtivo,
   contraEncantamentoDisponivel,
   palavrasDeInterrupcaoDisponivel,
@@ -205,7 +208,26 @@ export default function ReacaoPanelContent({
               confirmarFechamento: {},
             });
           },
-          onErrou: () => {},
+          onErrou: () => {
+            if (!dano || !truquePotenteAtivo || !truqueElegivelTruquePotente(m)) return;
+            let totalRolado = 0;
+            rolarDados({
+              label: dano.label,
+              formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+              quantidade: dano.quantidade,
+              lados: dano.lados,
+              mod: dano.mod,
+              explicacaoMod: dano.explicacaoMod,
+              onResultado: (total) => {
+                totalRolado = total;
+              },
+              confirmarFechamento: {
+                rotulo: 'Aplicar Truque Potente ✓',
+                aoTocar: () =>
+                  onEscolher(`✨ ${m.nome}`, `Truque Potente — ${Math.floor(totalRolado / 2)} de dano (metade, sem efeitos adicionais)`),
+              },
+            });
+          },
         },
       });
       onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);

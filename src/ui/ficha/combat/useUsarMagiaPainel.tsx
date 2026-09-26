@@ -5,6 +5,7 @@ import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
+import { truqueElegivelTruquePotente } from '../../../core/evocador';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
@@ -43,6 +44,10 @@ interface UsarMagiaPainelParams {
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
   truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
+  /** Truque Potente (Mago/Evocador, nível 3, regra oficial — ver
+   * `core/evocador.ts`) — metade de dano no erro de truque com dano,
+   * sem efeitos adicionais. */
+  truquePotenteAtivo: boolean;
   colheitaMacabraDisponivel: boolean;
   onColheitaMacabraDisponivel: (cura: number) => void;
   /** Aplica a cura rolada (`rollCura`) no PV do personagem E dispara
@@ -137,7 +142,26 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
               confirmarFechamento: {},
             });
           },
-          onErrou: () => {},
+          onErrou: () => {
+            if (!dano || !p.truquePotenteAtivo || !truqueElegivelTruquePotente(m)) return;
+            let totalRolado = 0;
+            rolarDados({
+              label: dano.label,
+              formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+              quantidade: dano.quantidade,
+              lados: dano.lados,
+              mod: dano.mod,
+              explicacaoMod: dano.explicacaoMod,
+              onResultado: (total) => {
+                totalRolado = total;
+              },
+              confirmarFechamento: {
+                rotulo: 'Aplicar Truque Potente ✓',
+                aoTocar: () =>
+                  p.onEscolher(`✨ ${m.nome}`, `Truque Potente — ${Math.floor(totalRolado / 2)} de dano (metade, sem efeitos adicionais)`),
+              },
+            });
+          },
         },
       });
       p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);

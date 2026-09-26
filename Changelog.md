@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1902
+
+Mago/Evocador ganha "Truque Potente" (nível 3): ao errar um ataque de
+truque com dano, ou o alvo passar na salvaguarda contra ele, o
+personagem ainda causa metade do dano (sem efeitos adicionais) — vale
+pra qualquer truque com dano, não só de Evocação.
+
 ## v202609_1230
 
 Corrigido: com várias pills ligadas ao mesmo tempo, a lista de "Usar

@@ -65,6 +65,7 @@ interface AcaoPanelContentProps {
    * — ver `MagiasTab.tsx`/`core/invocacoesMisticas.ts`. */
   truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
+  truquePotenteAtivo: boolean;
   numAtaques: number;
   ataquesFeitos: number;
   surtoMax: number;
@@ -211,6 +212,7 @@ export default function AcaoPanelContent({
   explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
+  truquePotenteAtivo,
   numAtaques,
   ataquesFeitos,
   surtoMax,
@@ -279,6 +281,7 @@ export default function AcaoPanelContent({
     explicacaoAcertoConjuracao,
     truqueVinculadoAgonizante,
     modCarisma,
+    truquePotenteAtivo,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     preferenciasPillsMagia,
