@@ -186,6 +186,7 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Seus truques que causam dano afetam até criaturas que evitam os efeitos deles. Ao conjurar um truque em uma criatura e errar o ataque ou o alvo ser bem-sucedido na salvaguarda contra o truque, ele sofre metade do dano (se houver), mas não sofre efeitos adicionais do truque.',
     tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
   },
   {
     classe: 'Mago',
@@ -195,6 +196,7 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Escolha duas magias de Mago da escola de Evocação, cada uma deve ser de 2º círculo ou inferior, e adicione-as gratuitamente ao seu livro de magias. Além disso, ao adquirir acesso a um novo círculo de espaços de magia nesta classe, você pode adicionar gratuitamente uma magia de Mago da escola de Evocação ao seu livro de magias. A magia escolhida deve ser de um círculo para o qual você tenha espaços de magia.',
     tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Mago',
@@ -204,6 +206,7 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Você pode criar zonas de segurança nos efeitos das suas evocações. Ao conjurar uma magia de Evocação que afeta criaturas à sua vista, você pode escolher um número delas igual a 1 mais o círculo da magia. Criaturas escolhidas são bem-sucedidas automaticamente em suas salvaguardas e não sofrem dano se normalmente sofreriam metade do dano em caso de sucesso.',
     tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'textonly',
   },
   {
     classe: 'Mago',
@@ -213,6 +216,7 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Ao conjurar uma magia de Mago da escola de Evocação, você pode adicionar seu modificador de Inteligência a uma jogada de dano dessa magia.',
     tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
   },
   {
     classe: 'Mago',
@@ -222,5 +226,6 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Você pode aumentar o poder de suas magias. Ao conjurar uma magia de Mago que cause dano com um espaço de magia de 1º a 5º círculo, você pode causar dano máximo com essa magia no turno no qual a conjurar. Ao fazer isso pela primeira vez, você não sofre nenhum efeito adverso. Se usar esta característica novamente antes de completar um Descanso Longo, você sofre 2d12 pontos de dano Necrótico para cada círculo do espaço de magia imediatamente após conjurá-la. Esse dano ignora Resistência e Imunidade. Toda vez que você usa esta característica novamente antes de completar um Descanso Longo, o dano Necrótico por círculo de magia aumenta em 1d12.',
     tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
   },
 ];

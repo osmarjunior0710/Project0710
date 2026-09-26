@@ -25,8 +25,17 @@ da Entrega 2 — foco "Mago — características base" fechou (ver
 - [x] Entrega 1 — Dado no banco: 5 características em
       `caracteristicasSubclasse.ts`, legenda de margem cortada em
       Sobrecarga. Evocador selecionável + aparece no Perfil.
-- [ ] Entrega 2 — Versado em Evocação (nível 3): `core/evocador.ts` +
-      wiring em `LevelUpShell.tsx`.
+- [x] Entrega 2 — Versado em Evocação (nível 3): `core/evocador.ts` +
+      wiring em `LevelUpShell.tsx` (mesmo padrão de Perito em
+      Necromancia, sem o selo Homebrew — regra oficial). Corrigido de
+      quebra: as 5 características do Evocador não tinham
+      `statusImplementacao` desde a Entrega 1 — preenchido agora
+      (Versado em Evocação = `codeimplementation`; Esculpir Magias =
+      `textonly`, confirmado no SDD; as outras 3 =
+      `placeholder-codeimplementation`, aguardando suas entregas).
+      Validado via Playwright (nível 1→3, escolhendo Evocador): passo
+      aparece certo, 2 magias de Evocação entram no Livro de Magias
+      além do crescimento normal, 0 selo Homebrew na aba Magias.
 - [ ] Entrega 3 — Truque Potente (nível 3): metade de dano no erro
       (ataque) e no sucesso da salvaguarda (truque).
 - [ ] Entrega 4 — Evocação Potencializada (nível 10): mod. de

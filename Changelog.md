@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1227
+
+Mago/Evocador ganha a 1ª característica de verdade: "Versado em
+Evocação" (nível 3) — ao escolher a subclasse, some 2 magias de
+Evocação grátis pro Livro de Magias; a cada novo círculo de magia
+desbloqueado depois, mais 1.
+
 ## v202609_1204
 
 Corrigido: o FAB do 🎲 Dado 3D ficava flutuando por cima de qualquer
