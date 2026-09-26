@@ -5,6 +5,73 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1204
+
+Corrigido: o FAB do 🎲 Dado 3D ficava flutuando por cima de qualquer
+painel lateral aberto (achado no "Pills de Magia", mas valia pra
+House Rules e os painéis de Ação/Bônus/Reação também), cobrindo o
+final da lista. Painéis agora ficam por cima do FAB.
+
+## v202609_1159
+
+As pills configuráveis do menu 👤 "Pills de Magia" agora aparecem de
+verdade nas magias/truques — aba Magias, painel de Reação e "Usar
+Magia" do Combate. Ligue Escola/Distância/Componentes/Ataque ou
+Salvaguarda/Duração/Tipo de Ação nas preferências e elas aparecem como
+selo em cada linha, junto do Círculo/Classe que já existiam.
+
+## v202609_1138
+
+Novo grupo "🃏 Pills de Magia" no menu de preferências (ícone 👤, junto
+com o "Dado 3D" e "House Rules") — ainda não muda nenhuma tela de
+Magias/Combate, só liga a preferência (por enquanto só "Classe" fica
+ligada por padrão, igual já era antes).
+
+## v202609_0950
+
+Corrigido bug de Multiclasse: subir de nível (ou usar Memorizar
+Magia/redefinir Truques e Magias por Descanso Longo) comparava a cota
+de Truques/Magias Preparadas contra o total de TODAS as classes do
+personagem, não só da classe que estava subindo — travava a escolha
+mesmo com o número certo. Corrigido pra contar só o que é daquela
+classe, e a lista das outras classes não some mais ao salvar.
+
+## v202609_2220
+
+Removidos o título de seção "Ação · Ação Bônus · Reação — estado do turno" e a nota "Ação abre da esquerda..." na aba Combate.
+
+## v202609_2214
+
+Removido o texto "Armadura, Escudo e arma da Mão Principal/Secundária já valem de verdade..." embaixo de "Equipado agora" na Mochila.
+
+## v202609_2154
+
+**Mochila — "Equipado agora" não mostra mais Escudo como slot separado.** Escudo ocupa a mesma mão que uma arma na Mão Secundária (regra real: só dá o bônus de CA se estiver empunhado) — agora aparece direto na linha "Mão Secundária", em vez de 2 linhas confusas (uma sempre vazia).
+
+## v202609_2004
+
+Altura dos cards de Idiomas (aba Perfil) padronizada em 35px — antes "Comum" (sem botão) ficava mais baixo que os idiomas com botão de remover. Corrige também os ícones de "Talentos"/"Idiomas", que tinham saído trocados na entrega anterior.
+
+## v202609_1953
+
+Padding de todas as caixas/botões da aba Perfil reduzido pra 4px (visual mais compacto — Osmar comparou 1/2/3/4px antes de decidir). Só a aba Perfil mudou, o resto do app continua igual por enquanto.
+
+## v202609_1945
+
+**Idiomas na aba Perfil ganham gerenciamento de verdade.** Cada idioma agora é uma linha própria (em vez de texto corrido), com botão de remover (dupla confirmação — Comum e idioma fixo de Classe ficam travados). Nova opção "+ Aprender novo idioma" abre uma tela de escolha múltipla com os idiomas que faltam.
+
+## v202609_1844
+
+Títulos "Talentos" e "Idiomas" da aba Perfil ganharam ícone próprio, igual Classe/Origem/Espécie já tinham.
+
+## v202609_1836
+
+Emblemas dos títulos de seção da aba Perfil aumentados de 20px pra 30px (pedido do Osmar).
+
+## v202609_1816
+
+**Perfil ganha os emblemas de classe/subclasse/origem/espécie.** Cada título de seção ("Classe — X", "Subclasse — X", "Origem — X", "Espécie — X") agora mostra o ícone redondo correspondente, quando já existe arte própria importada. Também reorganiza "Invocações Místicas" (Bruxo): antes aparecia como seção solta depois de todas as classes, agora fica junto do resto das características de Bruxo.
+
 ## v202609_1715
 
 Corrige o ícone da aba Pets — a versão anterior (v202609_1656) tinha saído corrompida (bloco de pixels borrado). Voltou a mostrar o emblema do gato/corvo certinho.

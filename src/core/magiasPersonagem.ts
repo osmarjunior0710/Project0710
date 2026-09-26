@@ -202,12 +202,20 @@ export function nomesDeMagiasConhecidas(lista: MagiaConhecida[]): string[] {
  * Memorizar Magia, redefinição por Descanso Longo), marca cada nome
  * com a classe certa: mantém a marca de quem já era conhecido,
  * marca com `classeParaNovos` (a classe em foco na hora dessa
- * escolha) quem é novo. */
+ * escolha) quem é novo. `nomesNovos` é sempre só a lista DESSA classe
+ * (ex.: o picker de Truques do Level Up já filtra por classe antes de
+ * chamar) — itens de OUTRAS classes em `anteriores` são preservados
+ * sem tocar, nunca descartados só porque não apareceram em
+ * `nomesNovos` (bug real: multiclasse perdia os truques da outra
+ * classe ao subir de nível/redefinir). */
 export function marcarClasseDasEscolhas(nomesNovos: string[], anteriores: MagiaConhecida[], classeParaNovos: string): MagiaConhecida[] {
-  return nomesNovos.map((nome) => ({
+  const destaClasse = nomesNovos.map((nome) => ({
     nome,
     classe: anteriores.find((m) => m.nome === nome)?.classe ?? classeParaNovos,
   }));
+  const nomesDestaClasse = new Set(destaClasse.map((m) => m.nome));
+  const deOutrasClasses = anteriores.filter((m) => m.classe !== classeParaNovos && !nomesDestaClasse.has(m.nome));
+  return [...deOutrasClasses, ...destaClasse];
 }
 
 /** Migra o formato antigo (`string[]`, sem marca de classe — todo

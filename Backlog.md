@@ -7,26 +7,21 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
-## Pills configuráveis de info da magia (2026-09-24)
+## Auditoria de padding em botões/caixas do app inteiro (2026-09-25)
 
-Ideia do Osmar, saída do protótipo de Multiclasse (`/prototipo`, cenas
-`MulticlasseMagiasCena`/`MulticlasseCombateCena`): expandir o pill de
-"círculo + classe" (que o foco de Multiclasse já vai construir) pra
-qualquer combinação de info da magia, com o jogador escolhendo em
-Perfil quais pills quer ver em cada linha. Campos candidatos já no
-catálogo (`data/rulesets/dnd2024/magias.ts`): Escola, Distância
-(`alcance`), Componentes (V/S/M — hoje 1 string só, precisa separar em
-3 pills), Ataque ou Salvaguarda. **Duração** e **Tipo de ação**
-(`tempoConjuracao`) têm texto livre — várias magias de Reação/Ação
-Bônus condicional têm frases inteiras nesse campo (ex.: "Reação, que
-você executa quando..."), então precisam de uma extração pra virar
-pill curto ("Reação"), não dá pra usar o texto direto.
-
-**Por que ficou pra depois:** decidido (2026-09-24) fazer o foco de
-Multiclasse primeiro com o pill simples (círculo + classe), sem
-travar a Entrega 1 (mudança de dado) nessa expansão maior — que
-envolve tela nova de configuração em Perfil e passa pelos 3 chapéus
-de novo antes de codar.
+Pedido do Osmar: qualquer botão/caixa clicável deveria ter padding
+visível baixo (4px em qualquer lado — testou 1/2/3/4px lado a lado
+antes de decidir) — a caixa acompanha o tamanho do conteúdo, sem
+sobra artificial de touch target inflado por `min-width`/`min-height`/
+`padding` generosos. **Aplicado em toda a aba Perfil** (`.opt-card`/
+`.box` escopados a `.perfilRoot`, `.removerBtn`/`.removerBtnConfirm`
+de Idiomas — ver `PerfilTab.module.css`), mas o resto do app (Combate,
+Magias, Mochila, Atributos, Pets, wizard, Level Up...) ainda usa o
+padding padrão de `.opt-card`/`.box`/`.btn` em `index.css`. Quando for
+puxado como foco: decidir se o valor final vale pro app inteiro
+(mudar as classes globais de vez) ou se cada aba ganha seu próprio
+escopo como Perfil — percorrer tela por tela, com prints antes/depois
+pro Osmar aprovar.
 
 ## Combate lendo direto da aba Magias — 1 registro só de fonte extra (2026-09-25)
 

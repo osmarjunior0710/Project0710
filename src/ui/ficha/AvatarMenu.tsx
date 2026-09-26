@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRoll } from '../roll/RollContext';
 import type { HouseRules } from '../../core/houseRules';
+import type { PreferenciasPillsMagia } from '../../core/preferenciasPillsMagia';
 import SidePanel from './combat/SidePanel';
 import styles from './AvatarMenu.module.css';
 
@@ -9,6 +10,10 @@ interface AvatarMenuProps {
   onToggleItensDetalhados: () => void;
   houseRules: HouseRules;
   onAlternarHouseRule: (chave: keyof HouseRules) => void;
+  /** Quais pills de info aparecem nas magias/truques (Magias, Combate) —
+   * preferência do aparelho, ver `core/preferenciasPillsMagia.ts`. */
+  preferenciasPillsMagia: PreferenciasPillsMagia;
+  onAlternarPillMagia: (chave: keyof PreferenciasPillsMagia) => void;
   /** "⚡ Inst. Level Up" — ferramenta de teste, sobe 1 nível sorteando
    * tudo (mesmo espírito do "🎲 Personagem de Teste"), sem passar por
    * nenhuma tela e sem depender de XP acumulado (ver `XpShell.tsx` e
@@ -36,6 +41,8 @@ export default function AvatarMenu({
   onToggleItensDetalhados,
   houseRules,
   onAlternarHouseRule,
+  preferenciasPillsMagia,
+  onAlternarPillMagia,
   onLevelUpRapido,
   niveisComSnapshot,
   nivelAtualSnapshot,
@@ -43,6 +50,7 @@ export default function AvatarMenu({
 }: AvatarMenuProps) {
   const [aberto, setAberto] = useState(false);
   const [houseRulesAberto, setHouseRulesAberto] = useState(false);
+  const [pillsMagiaAberto, setPillsMagiaAberto] = useState(false);
   const { modoTeste, alternarModoTeste, preferenciaDado3D, alternarPreferenciaDado3D, dado3DDisponivel } = useRoll();
 
   const descDado3D = !dado3DDisponivel
@@ -96,6 +104,25 @@ export default function AvatarMenu({
     },
   ];
 
+  // Pills de info nas linhas de magia/truque (Magias, Combate) — salvas
+  // por conta (ver `core/preferenciasPillsMagia.ts`).
+  const pillsMagia = [
+    { chave: 'circulo' as const, label: 'Círculo', desc: 'Mostra o círculo da magia (ou "Truque").' },
+    { chave: 'classe' as const, label: 'Classe', desc: 'Mostra a classe de onde a magia veio.' },
+    { chave: 'escola' as const, label: 'Escola', desc: 'Mostra a escola de magia (Evocação, Ilusão, etc.).' },
+    { chave: 'alcance' as const, label: 'Distância', desc: 'Mostra o alcance da magia.' },
+    { chave: 'componenteV' as const, label: 'Componente Verbal', desc: 'Mostra quando a magia exige um componente Verbal.' },
+    { chave: 'componenteS' as const, label: 'Componente Somático', desc: 'Mostra quando a magia exige um componente Somático.' },
+    { chave: 'componenteM' as const, label: 'Componente Material', desc: 'Mostra quando a magia exige um componente Material.' },
+    {
+      chave: 'ataqueOuSalvaguarda' as const,
+      label: 'Ataque ou Salvaguarda',
+      desc: 'Mostra se a magia usa jogada de ataque ou pede salvaguarda (e de qual atributo).',
+    },
+    { chave: 'duracao' as const, label: 'Duração', desc: 'Mostra por quanto tempo o efeito da magia dura.' },
+    { chave: 'tipoAcao' as const, label: 'Tipo de Ação', desc: 'Mostra o tempo de conjuração (Ação, Ação Bônus, Reação, etc.).' },
+  ];
+
   return (
     <div className={styles.wrap}>
       <div className={styles.avatar} onClick={() => setAberto((v) => !v)}>
@@ -132,6 +159,19 @@ export default function AvatarMenu({
               <div className={styles.menuRowText}>
                 <div className={styles.menuRowLabel}>📜 House Rules</div>
                 <div className={styles.menuRowDesc}>Regras da mesa — valem pra todos os seus personagens.</div>
+              </div>
+              <span className={styles.menuRowChevron}>›</span>
+            </div>
+            <div
+              className={styles.menuRow}
+              onClick={() => {
+                setPillsMagiaAberto(true);
+                setAberto(false);
+              }}
+            >
+              <div className={styles.menuRowText}>
+                <div className={styles.menuRowLabel}>🃏 Pills de Magia</div>
+                <div className={styles.menuRowDesc}>Escolha quais informações aparecem em cada magia/truque.</div>
               </div>
               <span className={styles.menuRowChevron}>›</span>
             </div>
@@ -195,6 +235,25 @@ export default function AvatarMenu({
               <div className={styles.menuRowDesc}>{r.desc}</div>
             </div>
             <div className={`${styles.switchTrack} ${houseRules[r.chave] ? styles.switchOn : ''}`}>
+              <div className={styles.switchThumb} />
+            </div>
+          </div>
+        ))}
+      </SidePanel>
+      <SidePanel
+        open={pillsMagiaAberto}
+        side="right"
+        tema="casa"
+        title="🃏 Pills de Magia"
+        onClose={() => setPillsMagiaAberto(false)}
+      >
+        {pillsMagia.map((p) => (
+          <div key={p.chave} className={styles.menuRow} onClick={() => onAlternarPillMagia(p.chave)}>
+            <div className={styles.menuRowText}>
+              <div className={styles.menuRowLabel}>{p.label}</div>
+              <div className={styles.menuRowDesc}>{p.desc}</div>
+            </div>
+            <div className={`${styles.switchTrack} ${preferenciasPillsMagia[p.chave] ? styles.switchOn : ''}`}>
               <div className={styles.switchThumb} />
             </div>
           </div>

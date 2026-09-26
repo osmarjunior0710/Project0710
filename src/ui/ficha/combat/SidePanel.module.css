@@ -2,7 +2,10 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 40;
+  /* Acima do FAB do Dado 3D (`Dice3dFab.module.css`, z-index até 102) —
+     senão o FAB fica flutuando por cima do painel aberto, cobrindo o
+     fim da lista (achado do Osmar no painel "Pills de Magia"). */
+  z-index: 110;
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--motion-standard) var(--ease-standard);
@@ -17,7 +20,7 @@
   position: fixed;
   top: 0;
   bottom: 0;
-  z-index: 41;
+  z-index: 111;
   background: var(--panel);
   padding: var(--space-5) var(--space-4);
   overflow-y: auto;

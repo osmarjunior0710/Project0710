@@ -388,21 +388,13 @@ export default function MochilaTab({
           <span>
             {equipado.maoSecundariaOcupadaPorDuasMaos
               ? 'ocupada (arma de 2 mãos)'
-              : (equipado.maoSecundaria?.nome ?? '—')}
+              : (equipado.escudo?.nome ?? equipado.maoSecundaria?.nome ?? '—')}
           </span>
         </div>
         <div className={styles.equipadoLinha}>
           <span>Armadura</span>
           <span>{equipado.armadura?.nome ?? '—'}</span>
         </div>
-        <div className={styles.equipadoLinha}>
-          <span>Escudo</span>
-          <span>{equipado.escudo?.nome ?? '—'}</span>
-        </div>
-      </div>
-      <div className="label" style={{ marginTop: 4, marginBottom: 4 }}>
-        Armadura, Escudo e arma da Mão Principal/Secundária já valem
-        de verdade na CA e no "Atacar" da aba Combat.
       </div>
 
       {sintonizadosAtual > 0 && (

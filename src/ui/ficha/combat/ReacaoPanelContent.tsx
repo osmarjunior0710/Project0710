@@ -8,8 +8,9 @@ import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
-import PillClasse from '../../components/PillClasse';
+import PillsMagia from '../../components/PillsMagia';
 import TickPips from '../../components/TickPips';
+import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import styles from './PanelRows.module.css';
 
 interface ReacaoPanelContentProps {
@@ -101,6 +102,9 @@ interface ReacaoPanelContentProps {
    * `CombatTab.tsx`, mesmo padrão de Golpe de Escudo). */
   ramosDaArvoreDisponivel: boolean;
   onAbrirRamosDaArvore: () => void;
+  /** Quais pills de info aparecem em cada linha de magia — preferência
+   * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
+  preferenciasPillsMagia: PreferenciasPillsMagia;
 }
 
 export default function ReacaoPanelContent({
@@ -142,6 +146,7 @@ export default function ReacaoPanelContent({
   modIntAtual,
   ramosDaArvoreDisponivel,
   onAbrirRamosDaArvore,
+  preferenciasPillsMagia,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
@@ -441,9 +446,8 @@ export default function ReacaoPanelContent({
                   <MagiaComDescricao magia={m} /> {iconesMagia(m)}
                   {semEspaco && <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · sem espaço disponível</span>}
                 </span>
-                <span style={{ display: 'flex', gap: 4 }}>
-                  <span className="tag">{m.circulo === 0 ? 'Truque' : `${m.circulo}º círculo`}</span>
-                  {classe && <PillClasse classe={classe} />}
+                <span style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 4, maxWidth: '55%' }}>
+                  <PillsMagia magia={m} classe={classe} preferencias={preferenciasPillsMagia} />
                 </span>
               </div>
             );

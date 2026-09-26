@@ -11,6 +11,7 @@ import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '..
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
+import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { useRoll } from '../../roll/RollContext';
 import InfoChip from '../../components/InfoChip';
@@ -371,6 +372,9 @@ interface CombatTabProps {
     explosaoLiberada: boolean;
   };
   modIntAtual: number;
+  /** Quais pills de info aparecem em cada linha de magia — preferência
+   * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
+  preferenciasPillsMagia: PreferenciasPillsMagia;
 }
 
 const LABELS: Record<RecursoTurno, { icone: string; nome: string }> = {
@@ -637,6 +641,7 @@ export default function CombatTab({
     explosaoLiberada: mestreDaMorteExplosaoLiberada,
   },
   modIntAtual,
+  preferenciasPillsMagia,
 }: CombatTabProps) {
   const [pvManualAberto, setPvManualAberto] = useState(false);
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
@@ -1523,7 +1528,6 @@ export default function CombatTab({
         </>
       )}
 
-      <div className="section-title">Ação · Ação Bônus · Reação — estado do turno</div>
       <div className={styles.splitBtns}>
         {(['acao', 'bonus'] as RecursoTurno[]).map((categoria) => (
           <div
@@ -1546,11 +1550,6 @@ export default function CombatTab({
         <div className={styles.sbIcon}>{LABELS.reacao.icone}</div>
         <div className={styles.sbLabel}>{LABELS.reacao.nome}</div>
         <div className={styles.sbState}>{turnState.reacao === 'usada' ? 'usada' : 'ativo'}</div>
-      </div>
-
-      <div className="label">
-        Ação abre da esquerda, Ação Bônus da direita, Reação sobe de baixo. Ao usar um, ele fica cinza/travado até
-        "Fim do Turno".
       </div>
 
       {feedback && <div className={styles.feedback}>{feedback}</div>}
@@ -1643,6 +1642,7 @@ export default function CombatTab({
           onUsarFalarComAnimaisGnomo={onUsarFalarComAnimaisGnomo}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
+          preferenciasPillsMagia={preferenciasPillsMagia}
         />
       </SidePanel>
       <SidePanel
@@ -1732,6 +1732,7 @@ export default function CombatTab({
           onUsarInspiracao={usarInspiracaoBardo}
           onRecuperarInspiracaoComEspaco={recuperarInspiracaoComEspaco}
           detalhesAtivo={detalhesAtivo}
+          preferenciasPillsMagia={preferenciasPillsMagia}
         />
       </SidePanel>
       <SidePanel
@@ -1781,6 +1782,7 @@ export default function CombatTab({
           modIntAtual={modIntAtual}
           ramosDaArvoreDisponivel={ramosDaArvoreDisponivel}
           onAbrirRamosDaArvore={abrirRamosDaArvore}
+          preferenciasPillsMagia={preferenciasPillsMagia}
         />
       </SidePanel>
       {lancarNoInfernoDano !== null && (

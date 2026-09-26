@@ -482,3 +482,42 @@ pontual/local) nos dois lugares que resolvem Level Up
 (`FichaShell.tsx`'s `confirmarLevelUp`, que cobre tanto o fluxo real
 quanto "⚡ Inst. Level Up", e `core/geradorPersonagemTeste.ts`, que
 simula toda a progressão de uma vez).
+
+## Pills configuráveis de info de magia — preferência por conta, componente único pra todas as telas
+
+**Decisão:** quando uma linha de lista (magia/truque, aqui; qualquer
+outra lista de "cards com selos" no futuro) ganha vários selos de info
+opcionais, a config de quais aparecem é UM componente único usado em
+TODAS as telas que mostram aquela lista — nunca 1 componente de pill
+por tela. Aqui, `PillsMagia` (recebe `magia`, `classe?`, `preferencias`)
+substituiu o `PillClasse` isolado nos 4 lugares que mostravam magia
+(aba Magias x2, Reação, "Usar Magia" em Combate); qualquer pill nova
+(ex.: se a planilha ganhar mais um campo estruturado) entra só nesse
+componente, sem tocar nas 4 telas.
+
+**Preferência é por conta/aparelho, não por personagem** (mesmo padrão
+de `houseRules.ts`/"Dado 3D"): `core/preferenciasPillsMagia.ts`
+(armazenamento) + hook `usePreferenciasPillsMagia` + grupo de toggles
+no menu de preferências (ícone 👤, `AvatarMenu.tsx`) — o jogador quer
+ver a mesma config em qualquer personagem que abrir no mesmo celular.
+
+**Texto livre vira pill só depois de extração** (`core/pillsMagia.ts`):
+`tempoConjuracao`/`duracao` na planilha têm frase inteira em vários
+casos (ex.: "Reação, que você executa quando..."), não dá pra exibir
+direto — `resumoTipoAcao`/`resumoDuracao` reduzem pro rótulo curto
+("Reação", "1h", "Conc. 1min"). Campo já curto/estruturado
+(`ataqueOuSalvaguarda`, `escola`) usa o valor puro sem extração.
+`componentes` (1 string "V, S, M (...)") vira 3 booleans
+(`componentesVSM`) pra virar 3 pills independentes.
+
+**Tela que já agrupa pelo mesmo campo suprime aquele pill, mesmo com a
+preferência ligada:** `SelecionarMagiaShell` (agrupa por círculo no
+cabeçalho) força `circulo: false` na cópia de preferências que passa
+pro componente — repetir o círculo em toda linha, com o cabeçalho já
+dizendo, é ruído. Cada tela decide isso, o componente central não.
+
+**Linha com várias pills precisa de `flex-wrap: wrap`**, não só
+`display: flex` — com o jogador podendo ligar bastante pill ao mesmo
+tempo, uma linha sem wrap estoura a largura do celular
+(`MagiasTab.module.css` `.spellRowComPillLinha2`,
+`ReacaoPanelContent.tsx` inline).

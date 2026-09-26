@@ -32,6 +32,11 @@ interface IconeClasseProps {
    * "opt-card-img-emblema", que já é responsivo o bastante pra
    * qualquer contexto que o reaproveite (ver DECISOES-DESIGN.md). */
   classeCaixaFallback?: string;
+  /** 'titulo' = ícone pequeno (20px) pra usar ao lado de um
+   * `section-title` (ex: aba Perfil) — sem emblema próprio ainda,
+   * não renderiza nada (nunca o fallback 🖼 genérico ao lado de texto
+   * pequeno). Omitido/`'emblema'` = comportamento de sempre. */
+  variante?: 'emblema' | 'titulo';
 }
 
 /** Emblema redondo da classe (arquivo `{id}-banner.png`) — mesmo
@@ -39,8 +44,11 @@ interface IconeClasseProps {
  * lugar que precise mostrar de qual classe é o personagem (ex: Lista
  * de Personagens). Classes sem arte própria ainda usam uma cópia do
  * emblema do Guerreiro como placeholder. */
-export default function IconeClasse({ id, classeCaixaFallback = 'opt-card-img' }: IconeClasseProps) {
+export default function IconeClasse({ id, classeCaixaFallback = 'opt-card-img', variante = 'emblema' }: IconeClasseProps) {
   const banner = bannerPng(id);
+  if (variante === 'titulo') {
+    return banner ? <img src={banner} alt="" className="section-title-icone" /> : null;
+  }
   if (banner) return <img src={banner} alt="" className="opt-card-img-emblema" />;
   return <div className={classeCaixaFallback}>{iconePng(id) ? <img src={iconePng(id)} alt="" /> : '🖼'}</div>;
 }

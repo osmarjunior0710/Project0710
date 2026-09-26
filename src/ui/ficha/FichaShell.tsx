@@ -10,6 +10,7 @@ import { armazenamentoPersonagens, type PersonagemSalvo } from '../../core/armaz
 import { garantirPersonagemDemo, ID_PERSONAGEM_DEMO } from '../../core/personagemDemo';
 import { useColapsavel } from '../hooks/useColapsavel';
 import { useHouseRules } from './hooks/useHouseRules';
+import { usePreferenciasPillsMagia } from './hooks/usePreferenciasPillsMagia';
 import { useAutosavePersonagem } from './hooks/useAutosavePersonagem';
 import { recursoContado, recursoFlagUnica } from './hooks/recursoGasto';
 import { caracteristicasSubclasseAtivas } from './hooks/caracteristicasSubclasseAtivas';
@@ -632,6 +633,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [itensDetalhados, setItensDetalhados] = useColapsavel('itens-detalhados', false);
   const { regras: houseRules, alternar: alternarHouseRule } = useHouseRules();
   const pesoAtivo = houseRules.pesoMochila;
+  const { preferencias: preferenciasPillsMagia, alternar: alternarPillMagia } = usePreferenciasPillsMagia();
 
   const desValor = valorFinalAtributo(selecao, 'DES') ?? 10;
   const conValorFinal = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'CON') ?? 10, 'CON', temCampeaoPrimitivo);
@@ -2241,8 +2243,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     const resultado = sortearLevelUpRapido({
       classe: classeRapida,
       personagem: personagemRapido,
-      truquesAtuais: nomesDeMagiasConhecidas(truquesAtuais),
-      magiasPreparadasAtuais: nomesDeMagiasConhecidas(magiasPreparadasAtuais),
+      truquesAtuais: nomesDeMagiasConhecidas(truquesAtuais.filter((m) => m.classe === classeAlvoRapido)),
+      magiasPreparadasAtuais: nomesDeMagiasConhecidas(magiasPreparadasAtuais.filter((m) => m.classe === classeAlvoRapido)),
       livroDeMagiasAtuais,
       invocacoesMisticasAtuais,
       invocacoesTruqueVinculadoAtuais: invocacoesTruqueVinculado,
@@ -2329,10 +2331,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         onHpModoChange={setLevelUpHpModo}
         hpRolado={levelUpHpRolado}
         onHpRoladoChange={setLevelUpHpRolado}
-        truquesAtuais={nomesDeMagiasConhecidas(truquesAtuais)}
+        truquesAtuais={nomesDeMagiasConhecidas(truquesAtuais.filter((m) => m.classe === classeParaLevelUpObj.nome))}
         maestriaArmaAtual={maestriaArma}
         truquesDaClasse={magiasDaClasse(classeParaLevelUpObj.nome, 0)}
-        magiasPreparadasAtuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
+        magiasPreparadasAtuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais.filter((m) => m.classe === classeParaLevelUpObj.nome))}
         livroDeMagiasAtuais={livroDeMagiasAtuais}
         magiasDaClasseDisponiveis={magiasDisponiveisParaPreparar(classeParaLevelUpObj, personagemParaLevelUp.nivel + 1)}
         invocacoesMisticasAtuais={invocacoesMisticasAtuais}
@@ -2373,7 +2375,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       return (
         <CompletarMagiasShell
           titulo={`Truques — ${classeObj.nome}`}
-          atuais={nomesDeMagiasConhecidas(truquesAtuais)}
+          atuais={nomesDeMagiasConhecidas(truquesAtuais.filter((m) => m.classe === classeObj.nome))}
           catalogo={magiasDaClasse(classeObj.nome, 0)}
           deficit={faltam}
           onFechar={() => setCompletarAberto(null)}
@@ -2402,7 +2404,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       return (
         <CompletarMagiasShell
           titulo={`Magias Preparadas — ${classeObj.nome}`}
-          atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
+          atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais.filter((m) => m.classe === classeObj.nome))}
           catalogo={catalogoMagiasPreparadas}
           classeNome={classeObj.nome}
           deficit={faltam}
@@ -2436,7 +2438,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <MemorizarMagiaShell
         modo="unica"
-        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
+        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais.filter((m) => m.classe === 'Mago'))}
         catalogo={livroDeMagias}
         onFechar={() => setMemorizarMagiaAberto(false)}
         onConfirmar={(novaLista) => {
@@ -2454,7 +2456,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <MemorizarMagiaShell
         modo="livre"
-        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
+        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais.filter((m) => m.classe === 'Mago'))}
         catalogo={livroDeMagias}
         onFechar={() => aoResponderRedefinir(false)}
         onConfirmar={aoConfirmarRedefinicao}
@@ -2604,6 +2606,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           onToggleItensDetalhados={() => setItensDetalhados(!itensDetalhados)}
           houseRules={houseRules}
           onAlternarHouseRule={alternarHouseRule}
+          preferenciasPillsMagia={preferenciasPillsMagia}
+          onAlternarPillMagia={alternarPillMagia}
           // Nível de personagem máximo é 20 (soma de todas as classes) — a
           // ferramenta de teste não sobe além disso (nível 21 deixava a
           // tabela de espaços de multiclasse sem linha e o personagem sem espaços).
@@ -2682,6 +2686,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             talentosGeraisAtuais={talentosGeraisAtuais}
             invocacoesMisticasAtuais={invocacoesMisticasAtuais}
             invocacoesTruqueVinculado={invocacoesTruqueVinculado}
+            onAdicionarIdiomas={(novos) => setSelecao((prev) => ({ ...prev, linguas: [...prev.linguas, ...novos] }))}
+            onRemoverIdioma={(idioma) =>
+              setSelecao((prev) => ({ ...prev, linguas: prev.linguas.filter((l) => l !== idioma) }))
+            }
           />
         )}
         {tab === 'mochila' && (
@@ -2781,6 +2789,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onCompletarMagiasPreparadas={(classeNome) => setCompletarAberto({ tipo: 'magiasPreparadas', classeNome })}
             colheitaMacabraDisponivel={colheitaMacabraDisponivel}
             onColheitaMacabraDisponivel={(cura) => setColheitaMacabraPendente({ cura })}
+            preferenciasPillsMagia={preferenciasPillsMagia}
           />
         )}
         {tab === 'combat' && (
@@ -2986,6 +2995,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               explosaoLiberada: mestreDaMorteExplosaoLiberadaAtual,
             }}
             modIntAtual={modIntAtual}
+            preferenciasPillsMagia={preferenciasPillsMagia}
           />
         )}
         {tab === 'pets' && (

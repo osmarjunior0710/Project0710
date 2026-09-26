@@ -64,8 +64,29 @@ describe('marcarClasseDasEscolhas', () => {
     ]);
   });
 
-  it('lista nova vazia (removeu tudo) devolve lista vazia', () => {
-    expect(marcarClasseDasEscolhas([], [{ nome: 'Luz', classe: 'Bardo' }], 'Mago')).toEqual([]);
+  it('lista nova vazia (removeu tudo DESSA classe) preserva o que é de OUTRA classe', () => {
+    const anteriores = [{ nome: 'Luz', classe: 'Bardo' }, { nome: 'Raio de Fogo', classe: 'Mago' }];
+    expect(marcarClasseDasEscolhas([], anteriores, 'Mago')).toEqual([{ nome: 'Luz', classe: 'Bardo' }]);
+  });
+
+  it('multiclasse: nomesNovos só da classe em foco nunca descarta o que outra classe já tinha', () => {
+    // Mago 1 + Bardo 1 (2 truques cada), sobe pra Bardo 2 (3 truques) —
+    // `nomesNovos` vem só do picker de Bardo (bug real: antes vazava
+    // os 2 do Mago pra dentro do picker e travava a escolha).
+    const anteriores = [
+      { nome: 'Mãos Mágicas', classe: 'Mago' },
+      { nome: 'Prestidigitação', classe: 'Mago' },
+      { nome: 'Luz', classe: 'Bardo' },
+      { nome: 'Zombaria Cruel', classe: 'Bardo' },
+    ];
+    const resultado = marcarClasseDasEscolhas(['Luz', 'Zombaria Cruel', 'Toque Arrepiante'], anteriores, 'Bardo');
+    expect(resultado).toEqual([
+      { nome: 'Mãos Mágicas', classe: 'Mago' },
+      { nome: 'Prestidigitação', classe: 'Mago' },
+      { nome: 'Luz', classe: 'Bardo' },
+      { nome: 'Zombaria Cruel', classe: 'Bardo' },
+      { nome: 'Toque Arrepiante', classe: 'Bardo' },
+    ]);
   });
 });
 

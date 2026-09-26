@@ -5,6 +5,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
+import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
@@ -155,6 +156,9 @@ interface BonusPanelContentProps {
    * a característica. Ver `core/necromante.ts`. */
   colheitaMacabraDisponivel: boolean;
   onColheitaMacabraDisponivel: (cura: number) => void;
+  /** Quais pills de info aparecem em cada linha de magia — preferência
+   * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
+  preferenciasPillsMagia: PreferenciasPillsMagia;
 }
 
 export default function BonusPanelContent({
@@ -236,6 +240,7 @@ export default function BonusPanelContent({
   onCuraDeMagiaAplicada,
   colheitaMacabraDisponivel,
   onColheitaMacabraDisponivel,
+  preferenciasPillsMagia,
 }: BonusPanelContentProps) {
   const [escolhendoFormaRevelacao, setEscolhendoFormaRevelacao] = useState(false);
   const [escolhendoMestreDaMorte, setEscolhendoMestreDaMorte] = useState(false);
@@ -264,6 +269,7 @@ export default function BonusPanelContent({
     modCarisma,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
+    preferenciasPillsMagia,
   });
   const temMagiaBonus = conjura && (truques.length > 0 || magiasPreparadas.length > 0);
 

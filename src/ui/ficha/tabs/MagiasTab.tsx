@@ -26,7 +26,8 @@ import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
 import { danoComCritico } from '../../../core/danoCritico';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
-import PillClasse from '../../components/PillClasse';
+import PillsMagia from '../../components/PillsMagia';
+import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import TickPips from '../../components/TickPips';
 import { useColapsavel } from '../../hooks/useColapsavel';
 import { useRoll } from '../../roll/RollContext';
@@ -262,6 +263,9 @@ interface MagiasTabProps {
    * troca de aba, ver `ColheitaMacabraModal.tsx`) que a conjuração se
    * qualificou pra Colheita Macabra, com a cura já calculada. */
   onColheitaMacabraDisponivel: (cura: number) => void;
+  /** Quais pills de info aparecem em cada linha de magia/truque —
+   * preferência do aparelho (ver `core/preferenciasPillsMagia.ts`). */
+  preferenciasPillsMagia: PreferenciasPillsMagia;
 }
 
 export default function MagiasTab({
@@ -298,6 +302,7 @@ export default function MagiasTab({
   livroDasSombrasGasto,
   onReconjurarLivro,
   memorizarMagiaDisponivel,
+  preferenciasPillsMagia,
   memorizarMagiaGasta,
   onMemorizarMagia,
   adeptoDeRitualDisponivel,
@@ -948,8 +953,7 @@ export default function MagiasTab({
                       </div>
                     </div>
                     <div className={styles.spellRowComPillLinha2}>
-                      <span className="tag">Truque</span>
-                      <PillClasse classe={classeDoItem} />
+                      <PillsMagia magia={m} classe={classeDoItem} preferencias={preferenciasPillsMagia} />
                     </div>
                   </div>
                 );
@@ -1256,8 +1260,7 @@ export default function MagiasTab({
                       </div>
                     </div>
                     <div className={styles.spellRowComPillLinha2}>
-                      <span className="tag">{m.circulo}º círculo</span>
-                      <PillClasse classe={classeDoItem} />
+                      <PillsMagia magia={m} classe={classeDoItem} preferencias={preferenciasPillsMagia} />
                     </div>
                   </div>
                 );
