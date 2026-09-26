@@ -106,3 +106,42 @@ implementar de verdade — passaram por uma 2ª versão depois do Osmar
 apontar que a 1ª simplificou demais (sem os elementos reais da tela:
 botão Usar, ícones). Continuam no catálogo de protótipos, sem
 obrigação de remover.
+
+## Bug pós-fechamento: Level Up/Memorizar Magia contavam truques/magias de TODAS as classes, não só da classe em foco
+
+Achado pelo Osmar testando: Mago 1 + Bardo 1 (2 truques cada, 4 no
+total) — ao subir Bardo pra nível 2 (3 truques), a tela de escolha
+comparava a nova cota (3, só de Bardo) contra os 4 truques
+COMBINADOS das 2 classes, travando a escolha (não dava pra adicionar
+nada — 4 já era "mais que 3" — e tirar os 2 do Mago fazia sobrar só 2
+do Bardo, "faltando 1" mesmo já tendo os certos).
+
+**Causa raiz:** `FichaShell.tsx` passava `truquesAtuais`/
+`magiasPreparadasAtuais` (o `MagiaConhecida[]` com TODAS as classes,
+ver Entrega 1 acima) direto pra `nomesDeMagiasConhecidas()` sem
+filtrar pela classe em foco, em 6 lugares — Level Up (interativo E o
+raio de teste), Memorizar Magia, redefinição livre por Descanso
+Longo, e as 2 telas de "Completar déficit". Cada um desses recebia a
+lista de nomes de TODAS as classes como se fosse só da classe atual —
+o mesmo tipo de bug já registrado na Entrega 4 (déficit), só que
+dessa vez no "quanto você já tem" da tela de escolha em si, não no
+cálculo do quanto falta.
+
+**Correção:** todo call site agora filtra
+`.filter((m) => m.classe === <classe em foco>)` antes de extrair só
+os nomes. E `marcarClasseDasEscolhas()` (que salva o resultado de
+volta) ganhou uma correção irmã: antes ela SÓ devolvia os nomes que
+vieram da tela (`nomesNovos`), então ao salvar a lista já filtrada de
+uma classe, as OUTRAS classes desapareciam do personagem inteiro.
+Agora ela sempre preserva os itens de outras classes em `anteriores`,
+só substituindo os da classe em foco (com dedupe por nome, pro caso
+raro de duas classes compartilharem magia com o mesmo nome).
+
+**Padrão pra lembrar:** qualquer tela nova que edite
+`truquesAtuais`/`magiasPreparadasAtuais` de UMA classe específica
+precisa (1) filtrar a lista de entrada por essa classe antes de virar
+`string[]`, e (2) usar `marcarClasseDasEscolhas()` pra salvar de
+volta — nunca `setTruquesAtuais(novaLista.map(...))` direto, que
+perderia as outras classes. Testado com caso de multiclasse real em
+`magiasPersonagem.test.ts` (Mago+Bardo, sobe Bardo, truques do Mago
+continuam intactos).

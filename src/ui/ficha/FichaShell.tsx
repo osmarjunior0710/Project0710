@@ -2241,8 +2241,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     const resultado = sortearLevelUpRapido({
       classe: classeRapida,
       personagem: personagemRapido,
-      truquesAtuais: nomesDeMagiasConhecidas(truquesAtuais),
-      magiasPreparadasAtuais: nomesDeMagiasConhecidas(magiasPreparadasAtuais),
+      truquesAtuais: nomesDeMagiasConhecidas(truquesAtuais.filter((m) => m.classe === classeAlvoRapido)),
+      magiasPreparadasAtuais: nomesDeMagiasConhecidas(magiasPreparadasAtuais.filter((m) => m.classe === classeAlvoRapido)),
       livroDeMagiasAtuais,
       invocacoesMisticasAtuais,
       invocacoesTruqueVinculadoAtuais: invocacoesTruqueVinculado,
@@ -2329,10 +2329,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         onHpModoChange={setLevelUpHpModo}
         hpRolado={levelUpHpRolado}
         onHpRoladoChange={setLevelUpHpRolado}
-        truquesAtuais={nomesDeMagiasConhecidas(truquesAtuais)}
+        truquesAtuais={nomesDeMagiasConhecidas(truquesAtuais.filter((m) => m.classe === classeParaLevelUpObj.nome))}
         maestriaArmaAtual={maestriaArma}
         truquesDaClasse={magiasDaClasse(classeParaLevelUpObj.nome, 0)}
-        magiasPreparadasAtuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
+        magiasPreparadasAtuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais.filter((m) => m.classe === classeParaLevelUpObj.nome))}
         livroDeMagiasAtuais={livroDeMagiasAtuais}
         magiasDaClasseDisponiveis={magiasDisponiveisParaPreparar(classeParaLevelUpObj, personagemParaLevelUp.nivel + 1)}
         invocacoesMisticasAtuais={invocacoesMisticasAtuais}
@@ -2373,7 +2373,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       return (
         <CompletarMagiasShell
           titulo={`Truques — ${classeObj.nome}`}
-          atuais={nomesDeMagiasConhecidas(truquesAtuais)}
+          atuais={nomesDeMagiasConhecidas(truquesAtuais.filter((m) => m.classe === classeObj.nome))}
           catalogo={magiasDaClasse(classeObj.nome, 0)}
           deficit={faltam}
           onFechar={() => setCompletarAberto(null)}
@@ -2402,7 +2402,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       return (
         <CompletarMagiasShell
           titulo={`Magias Preparadas — ${classeObj.nome}`}
-          atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
+          atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais.filter((m) => m.classe === classeObj.nome))}
           catalogo={catalogoMagiasPreparadas}
           classeNome={classeObj.nome}
           deficit={faltam}
@@ -2436,7 +2436,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <MemorizarMagiaShell
         modo="unica"
-        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
+        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais.filter((m) => m.classe === 'Mago'))}
         catalogo={livroDeMagias}
         onFechar={() => setMemorizarMagiaAberto(false)}
         onConfirmar={(novaLista) => {
@@ -2454,7 +2454,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return (
       <MemorizarMagiaShell
         modo="livre"
-        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais)}
+        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais.filter((m) => m.classe === 'Mago'))}
         catalogo={livroDeMagias}
         onFechar={() => aoResponderRedefinir(false)}
         onConfirmar={aoConfirmarRedefinicao}

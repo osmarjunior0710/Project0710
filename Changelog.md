@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0950
+
+Corrigido bug de Multiclasse: subir de nível (ou usar Memorizar
+Magia/redefinir Truques e Magias por Descanso Longo) comparava a cota
+de Truques/Magias Preparadas contra o total de TODAS as classes do
+personagem, não só da classe que estava subindo — travava a escolha
+mesmo com o número certo. Corrigido pra contar só o que é daquela
+classe, e a lista das outras classes não some mais ao salvar.
+
 ## v202609_2220
 
 Removidos o título de seção "Ação · Ação Bônus · Reação — estado do turno" e a nota "Ação abre da esquerda..." na aba Combate.
