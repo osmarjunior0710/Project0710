@@ -5,6 +5,9 @@
 // configuráveis de info da magia".
 
 export interface PreferenciasPillsMagia {
+  /** Círculo (ou "Truque") — já aparecia sempre em Magias/Reação antes
+   * desta preferência existir; começa ligado pra não mudar nada de
+   * quem já usa o app. */
   circulo: boolean;
   /** Classe de origem da magia — único pill que já existia antes desta
    * preferência existir; começa ligado pra não mudar nada de quem já
@@ -21,7 +24,7 @@ export interface PreferenciasPillsMagia {
 }
 
 export const PREFERENCIAS_PILLS_MAGIA_PADRAO: PreferenciasPillsMagia = {
-  circulo: false,
+  circulo: true,
   classe: true,
   escola: false,
   alcance: false,

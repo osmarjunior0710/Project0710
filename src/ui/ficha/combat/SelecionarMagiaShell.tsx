@@ -12,8 +12,9 @@ import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import { iconesMagia } from '../../../core/classificarMagia';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import GrupoMagiaColapsavel from '../../components/GrupoMagiaColapsavel';
-import PillClasse from '../../components/PillClasse';
+import PillsMagia from '../../components/PillsMagia';
 import TickPips from '../../components/TickPips';
+import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import styles from '../levelup/LevelUpShell.module.css';
 import localStyles from './SelecionarMagiaShell.module.css';
 
@@ -41,6 +42,12 @@ interface SelecionarMagiaShellProps {
   onFechar: () => void;
   onEscolherTruque: (m: Magia) => void;
   onEscolherMagia: (m: Magia, circulosDisponiveis: number[]) => void;
+  /** Quais pills de info aparecem em cada linha de magia — preferência
+   * do aparelho (ver `core/preferenciasPillsMagia.ts`). O pill de
+   * Círculo fica sempre fora aqui, mesmo que a preferência esteja
+   * ligada: essa tela já agrupa por círculo (cabeçalho de cada grupo),
+   * repetir na linha seria redundante. */
+  preferenciasPillsMagia: PreferenciasPillsMagia;
 }
 
 /** Tela cheia (Tela 2 do fluxo "Usar Magia") — lista Truques + Magias
@@ -64,8 +71,10 @@ export default function SelecionarMagiaShell({
   onFechar,
   onEscolherTruque,
   onEscolherMagia,
+  preferenciasPillsMagia,
 }: SelecionarMagiaShellProps) {
   const grupos = agruparMagiasComClassePorCirculo([...truques, ...magiasPreparadas]);
+  const preferenciasSemCirculo = { ...preferenciasPillsMagia, circulo: false };
 
   return (
     <div className={styles.screen}>
@@ -96,7 +105,7 @@ export default function SelecionarMagiaShell({
                   >
                     <span className="check-label">
                       <MagiaComDescricao magia={m} /> {iconesMagia(m)}
-                      {classe && <PillClasse classe={classe} />}
+                      <PillsMagia magia={m} classe={classe} preferencias={preferenciasSemCirculo} />
                       {!disponivel && (
                         <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · sem espaço disponível</span>
                       )}

@@ -7,6 +7,7 @@ import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
+import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
 
@@ -61,6 +62,9 @@ interface UsarMagiaPainelParams {
   /** Chamado sempre que uma magia conjura de graça (Maestria OU
    * Assinatura) — quem chama decide se precisa marcar "gasta". */
   onUsarMagiaGratisDeClasse: (nomeMagia: string) => void;
+  /** Quais pills de info aparecem em cada linha de magia — preferência
+   * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
+  preferenciasPillsMagia: PreferenciasPillsMagia;
 }
 
 /** Fluxo completo de "Usar Magia" dentro de um painel do Combate
@@ -168,6 +172,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         onFechar={() => setTelaMagia(null)}
         onEscolherTruque={(m) => conjurarMagia(m, null)}
         onEscolherMagia={(m, circulosDisponiveis) => setTelaMagia({ magia: m, circulos: circulosDisponiveis })}
+        preferenciasPillsMagia={p.preferenciasPillsMagia}
       />
     ) : telaMagia ? (
       <EscolherCirculoShell

@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1159
+
+As pills configuráveis do menu 👤 "Pills de Magia" agora aparecem de
+verdade nas magias/truques — aba Magias, painel de Reação e "Usar
+Magia" do Combate. Ligue Escola/Distância/Componentes/Ataque ou
+Salvaguarda/Duração/Tipo de Ação nas preferências e elas aparecem como
+selo em cada linha, junto do Círculo/Classe que já existiam.
+
 ## v202609_1138
 
 Novo grupo "🃏 Pills de Magia" no menu de preferências (ícone 👤, junto

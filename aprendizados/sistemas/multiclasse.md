@@ -94,9 +94,10 @@ estruturalmente (precisa saber a classe da magia no momento de
 conjurar — as fixas tipo Descobertas Mágicas nem têm essa marca hoje
 — redesenho maior, não coube nesta Multiclasse).
 
-**Backlog**: pills configuráveis de info da magia (Escola, Distância,
-Componentes, Ataque-ou-Salvaguarda) — ideia do Osmar saída do
-protótipo desta Multiclasse, decidido fazer depois (ver `Backlog.md`).
+**Pills configuráveis de info da magia** (Escola, Distância,
+Componentes, Ataque-ou-Salvaguarda, Duração, Tipo de Ação) — ideia do
+Osmar saída do protótipo desta Multiclasse, implementada depois (ver
+`DECISOES-FICHA.md` "Pills configuráveis de info de magia").
 
 ## Protótipos usados (histórico, já cumpriram o papel)
 

@@ -4,6 +4,7 @@ import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
+import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
@@ -181,6 +182,9 @@ interface AcaoPanelContentProps {
   temGolpeDeEscudo: boolean;
   golpeDeEscudoUsadoTurno: boolean;
   onUsarGolpeDeEscudo: () => void;
+  /** Quais pills de info aparecem em cada linha de magia — preferência
+   * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
+  preferenciasPillsMagia: PreferenciasPillsMagia;
 }
 
 export default function AcaoPanelContent({
@@ -250,6 +254,7 @@ export default function AcaoPanelContent({
   temGolpeDeEscudo,
   golpeDeEscudoUsadoTurno,
   onUsarGolpeDeEscudo,
+  preferenciasPillsMagia,
 }: AcaoPanelContentProps) {
   const { rolarD20, rolarDados } = useRoll();
   const { picker, abrirLista } = useUsarMagiaPainel({
@@ -276,6 +281,7 @@ export default function AcaoPanelContent({
     modCarisma,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
+    preferenciasPillsMagia,
   });
 
   function usarMaosCurativas() {

@@ -2789,6 +2789,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onCompletarMagiasPreparadas={(classeNome) => setCompletarAberto({ tipo: 'magiasPreparadas', classeNome })}
             colheitaMacabraDisponivel={colheitaMacabraDisponivel}
             onColheitaMacabraDisponivel={(cura) => setColheitaMacabraPendente({ cura })}
+            preferenciasPillsMagia={preferenciasPillsMagia}
           />
         )}
         {tab === 'combat' && (
@@ -2994,6 +2995,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               explosaoLiberada: mestreDaMorteExplosaoLiberadaAtual,
             }}
             modIntAtual={modIntAtual}
+            preferenciasPillsMagia={preferenciasPillsMagia}
           />
         )}
         {tab === 'pets' && (
