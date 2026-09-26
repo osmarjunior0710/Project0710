@@ -16,47 +16,11 @@
 
 ---
 
-## Foco atual: Mago — características base quebradas (auditoria)
+## Foco atual: Mago — Evocador (subclasse)
 
-SDD em `sdd/sdd-mago-caracteristicas-base.md`. Aberto no meio do foco
-Evocador (pausado — ver seção abaixo, PAUSADO não fechado) depois de
-uma auditoria completa da classe base a pedido do Osmar.
-
-- [x] Entrega 1 — Acadêmico (nv.2, o bug reportado): passo de Level Up
-      + escolha entra em `periciasBonusExtras` e `periciasEspecialista`.
-- [x] Entrega 2 — Guia do Level Up: tela "Novas Características" mostra
-      delta real de cada recurso + `[PH]` automático via
-      `statusImplementacao`; classifica as 10 características do Mago
-      + cria as 4 funções-esqueleto em `core/`.
-- [x] Entrega 3 — Copiar Magia pro Livro: botão na aba Magias, 2 modos
-      (nova pro livro / backup pra livro reserva), custo em PO.
-- [x] Entrega 4 — Recuperação Arcana (nv.1): pergunta condicional no
-      Descanso Curto + tela de escolha de círculos com orçamento.
-- [x] Entrega 5 — Adepto de Ritual (nv.1): seção nova na aba Magias,
-      conjuração livre de magia Ritual do Livro não preparada.
-- [x] Entrega 6a — Maestria de Magias (nv.18), escolha + conjuração
-      grátis: passo de Level Up (escolhe 1 magia de 1º + 1 de 2º
-      círculo com tempo de Ação do Livro de Magias), seção "sempre
-      preparada" na aba Magias, e opção "Conjurar Grátis" (no lugar
-      dos pips) na tela "Em qual círculo?" — vale pra Magias E
-      Combate, reaproveitando `opcoesGastoComPonte`/`EscolherCirculoShell`.
-- [x] Entrega 6b — Maestria de Magias, troca no Descanso Longo:
-      pergunta condicional (mesmo padrão de "redefinir Magias
-      Preparadas"/Recuperação Arcana) + tela pra substituir 1 das 2
-      escolhidas por outra do mesmo círculo no Livro de Magias.
-- [x] Entrega 7 — Assinatura Mágica (nv.20): passo de Level Up +
-      conjuração grátis 1x por descanso (2 flags).
-- [ ] Entrega 8 — Fechamento: testes/tsc/build,
-      `aprendizados/classes/mago.md` (criar), nota no PENDENCIAS.md
-      propondo repetir o Guia do Level Up nas outras 9 classes. Depois
-      disso, retomar o foco do Evocador abaixo.
-
----
-
-## Foco PAUSADO: Mago — Evocador (subclasse)
-
-SDD em `sdd/sdd-mago-evocador.md` (chapéus 1/2/3 aprovados). Retomar
-da Entrega 2 assim que o foco acima (características base) fechar.
+SDD em `sdd/sdd-mago-evocador.md` (chapéus 1/2/3 aprovados). Retomado
+da Entrega 2 — foco "Mago — características base" fechou (ver
+`aprendizados/classes/mago.md` pro histórico completo).
 
 - [x] Entrega 1 — Dado no banco: 5 características em
       `caracteristicasSubclasse.ts`, legenda de margem cortada em

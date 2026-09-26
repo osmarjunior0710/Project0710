@@ -28,10 +28,18 @@ Um arquivo por classe de D&D implementada no app.
   (2026-09); as outras 3 continuam deliberadamente pendentes — ver
   `PENDENCIAS.md`.
 
-*(pasta vazia além deste arquivo por enquanto — as classes
-implementadas antes do Bárbaro, Guerreiro/Bardo/Bruxo/Mago, continuam
-só em `DECISOES-CLASSES.md`; migração pra cá é gradual, sob demanda,
-não obrigatória de uma vez.)*
+- **`classes/mago.md`** — Mago, características base nível 1-20
+  (Entregas 1-7): Acadêmico, Guia do Level Up (`statusImplementacao`),
+  Copiar Magia pro Livro, Recuperação Arcana, Adepto de Ritual,
+  Maestria de Magias (escolha + conjuração grátis + troca no Descanso
+  Longo), Assinatura Mágica. Inclui o bug de "Maestria/Assinatura não
+  apareciam no Combate" e a validação manual nível 1-20 que fechou o
+  foco. Subclasse Evocador (dado no banco só) segue como foco
+  separado, retomado depois.
+
+*(as outras classes implementadas antes do Bárbaro/Mago — Guerreiro/
+Bardo/Bruxo — continuam só em `DECISOES-CLASSES.md`; migração pra cá é
+gradual, sob demanda, não obrigatória de uma vez.)*
 
 ## `talentos/`
 
