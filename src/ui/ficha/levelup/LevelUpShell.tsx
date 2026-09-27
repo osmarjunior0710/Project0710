@@ -40,6 +40,7 @@ import {
 } from '../../../core/invocacoesMisticas';
 import { circulosArcanaMisticaDesbloqueados, magiasElegiveisArcanaMistica, trocasArcanaMistica } from '../../../core/arcanaMistica';
 import { magiasPeritoNecromanciaNesteNivel, catalogoPeritoNecromancia } from '../../../core/necromante';
+import { magiasVersadoEmEvocacaoNesteNivel, catalogoVersadoEmEvocacao } from '../../../core/evocador';
 import { magiasElegiveisMaestria } from '../../../core/maestriaDeMagias';
 import { magiasElegiveisAssinatura } from '../../../core/assinaturaMagica';
 import { iconesMagia } from '../../../core/classificarMagia';
@@ -283,6 +284,7 @@ type LuStep =
   | 'truques'
   | 'livroDeMagias'
   | 'peritoNecromancia'
+  | 'versadoEmEvocacao'
   | 'magiasPreparadas'
   | 'invocacoes'
   | 'vinculoTruqueInvocacao'
@@ -455,6 +457,13 @@ export default function LevelUpShell({
   // escolher a subclasse no nível 3, +1 por círculo novo depois disso).
   const magiasPeritoNecromanciaBonusNesteNivel =
     subclasseEscolhida === 'Necromante' ? magiasPeritoNecromanciaNesteNivel(classe, personagem.nivel, novoNivel) : 0;
+
+  // Versado em Evocação (Mago/Evocador, nível 3, regra oficial — ver
+  // core/evocador.ts): quantas magias de Evocação bônus ESTE level-up
+  // concede (2 ao escolher a subclasse no nível 3, +1 por círculo novo
+  // depois disso). Mesmo formato de Perito em Necromancia acima.
+  const magiasVersadoEmEvocacaoBonusNesteNivel =
+    subclasseEscolhida === 'Evocador' ? magiasVersadoEmEvocacaoNesteNivel(classe, personagem.nivel, novoNivel) : 0;
 
   // Precisa vir antes da montagem de `luSteps` — decide se o passo
   // extra "asiAtributo" entra na sequência (ver mais abaixo).
@@ -675,6 +684,7 @@ export default function LevelUpShell({
   if (maxTruques > 0) luSteps.push('truques');
   if (temLivroDeMagias) luSteps.push('livroDeMagias');
   if (magiasPeritoNecromanciaBonusNesteNivel > 0) luSteps.push('peritoNecromancia');
+  if (magiasVersadoEmEvocacaoBonusNesteNivel > 0) luSteps.push('versadoEmEvocacao');
   if (maxMagiasPreparadas > 0) luSteps.push('magiasPreparadas');
   if (maxInvocacoes > 0) luSteps.push('invocacoes');
   // Independe de `maxInvocacoes > 0` — dispara mesmo num level-up que
@@ -749,6 +759,10 @@ export default function LevelUpShell({
   if (luSteps.includes('peritoNecromancia')) {
     nomesComTelaPropria.add('Perito em Necromancia');
     deltasDoNivel.push({ label: 'Perito em Necromancia', texto: 'escolha pendente' });
+  }
+  if (luSteps.includes('versadoEmEvocacao')) {
+    nomesComTelaPropria.add('Versado em Evocação');
+    deltasDoNivel.push({ label: 'Versado em Evocação', texto: 'escolha pendente' });
   }
   if (luSteps.includes('conhecimentoPrimordial')) {
     nomesComTelaPropria.add('Conhecimento Primordial');
@@ -837,6 +851,12 @@ export default function LevelUpShell({
   const { escolhidos: peritoNecromanciaEscolhidas, toggle: togglePeritoNecromancia } = useEscolhaMultipla(
     [],
     magiasPeritoNecromanciaBonusNesteNivel,
+  );
+  // Versado em Evocação — pura adição, mesmo formato de Perito em
+  // Necromancia acima.
+  const { escolhidos: versadoEmEvocacaoEscolhidas, toggle: toggleVersadoEmEvocacao } = useEscolhaMultipla(
+    [],
+    magiasVersadoEmEvocacaoBonusNesteNivel,
   );
   // Assinatura Mágica — escolha única permanente, mesmo padrão de Perito
   // em Necromancia acima (sempre começa vazia, sem regra de troca).
@@ -938,6 +958,13 @@ export default function LevelUpShell({
   );
   const peritoNecromanciaValido = peritoNecromanciaEscolhidas.length === magiasPeritoNecromanciaBonusNesteNivel;
 
+  // Versado em Evocação — mesmo tratamento de pool (exclui o que já
+  // vai entrar no Livro de Magias pelo passo normal).
+  const poolVersadoEmEvocacao = catalogoVersadoEmEvocacao(circuloMaximoNovoNivel).filter(
+    (m) => !livroDeMagiasEscolhido.includes(m.nome),
+  );
+  const versadoEmEvocacaoValido = versadoEmEvocacaoEscolhidas.length === magiasVersadoEmEvocacaoBonusNesteNivel;
+
   // Maestria de Magias — pool vem do Livro de Magias JÁ com o que foi
   // escolhido neste mesmo level-up (`livroDeMagiasEscolhido`), não só
   // o que já existia antes.
@@ -959,12 +986,15 @@ export default function LevelUpShell({
   const magiasPreparadasValido =
     magiasPreparadasEscolhidas.length === maxMagiasPreparadas && trocasDeMagia <= (usaRedefPorDescanso ? 0 : 1);
   // Mago só pode preparar o que já está no grimório (escolhido no passo
-  // anterior, "livroDeMagias", + o bônus de "peritoNecromancia") —
-  // outras classes continuam vendo a lista inteira da classe, igual
-  // sempre foi.
+  // anterior, "livroDeMagias", + os bônus de "peritoNecromancia"/
+  // "versadoEmEvocacao") — outras classes continuam vendo a lista
+  // inteira da classe, igual sempre foi.
   const magiasPreparadasPool = temLivroDeMagias
     ? magiasPreparadasDaClasse.filter(
-        (m) => livroDeMagiasEscolhido.includes(m.nome) || peritoNecromanciaEscolhidas.includes(m.nome),
+        (m) =>
+          livroDeMagiasEscolhido.includes(m.nome) ||
+          peritoNecromanciaEscolhidas.includes(m.nome) ||
+          versadoEmEvocacaoEscolhidas.includes(m.nome),
       )
     : magiasPreparadasDaClasse;
 
@@ -1038,6 +1068,7 @@ export default function LevelUpShell({
     truques: 'Truques',
     livroDeMagias: 'Livro de Magias',
     peritoNecromancia: 'Perito em Necromancia',
+    versadoEmEvocacao: 'Versado em Evocação',
     magiasPreparadas: 'Magias Preparadas',
     invocacoes: 'Invocações Místicas',
     vinculoTruqueInvocacao: 'Truque Vinculado',
@@ -1127,6 +1158,10 @@ export default function LevelUpShell({
     }
     if (step === 'peritoNecromancia' && !peritoNecromanciaValido) {
       setAviso(`Escolha exatamente ${magiasPeritoNecromanciaBonusNesteNivel} magia(s) de Necromancia antes de avançar.`);
+      return;
+    }
+    if (step === 'versadoEmEvocacao' && !versadoEmEvocacaoValido) {
+      setAviso(`Escolha exatamente ${magiasVersadoEmEvocacaoBonusNesteNivel} magia(s) de Evocação antes de avançar.`);
       return;
     }
     if (step === 'magiasPreparadas' && !magiasPreparadasValido) {
@@ -1236,7 +1271,7 @@ export default function LevelUpShell({
         estiloDeLutaEscolhido,
         truquesEscolhidos: luSteps.includes('truques') ? truquesEscolhidos : null,
         livroDeMagiasEscolhidas: luSteps.includes('livroDeMagias')
-          ? [...livroDeMagiasEscolhido, ...peritoNecromanciaEscolhidas]
+          ? [...livroDeMagiasEscolhido, ...peritoNecromanciaEscolhidas, ...versadoEmEvocacaoEscolhidas]
           : null,
         magiasPreparadasEscolhidas: luSteps.includes('magiasPreparadas') ? magiasPreparadasEscolhidas : null,
         invocacoesMisticasEscolhidas: luSteps.includes('invocacoes') ? invocacoesEscolhidas : null,
@@ -1385,6 +1420,19 @@ export default function LevelUpShell({
           <div className="label">
             🏠 Homebrew — magias de Necromancia grátis, direto no Livro de Magias, além das que o passo anterior já
             escolheu. Não conta na conta normal do grimório.
+          </div>
+        </div>
+      )}
+
+      {step === 'versadoEmEvocacao' && (
+        <div className={styles.subHeader}>
+          <div className="section-title" style={{ marginBottom: 4 }}>
+            Versado em Evocação — escolha {magiasVersadoEmEvocacaoBonusNesteNivel} (
+            {versadoEmEvocacaoEscolhidas.length}/{magiasVersadoEmEvocacaoBonusNesteNivel})
+          </div>
+          <div className="label">
+            Regra oficial: magias de Evocação de Mago grátis, direto no Livro de Magias, além das que o passo anterior
+            já escolheu. Não conta na conta normal do grimório.
           </div>
         </div>
       )}
@@ -1708,6 +1756,27 @@ export default function LevelUpShell({
                   const marcado = peritoNecromanciaEscolhidas.includes(m.nome);
                   return (
                     <div key={m.id} className="check-row" onClick={() => togglePeritoNecromancia(m.nome)}>
+                      <div className={`check-box ${marcado ? 'checked' : ''}`} />
+                      <span className="check-label">
+                        <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                        {' '}<span style={{ color: 'var(--text-faint)', fontSize: 11 }}>({m.circulo}º círculo)</span>
+                      </span>
+                    </div>
+                  );
+                }}
+              </GrupoMagiaColapsavel>
+            ))}
+          </>
+        )}
+
+        {step === 'versadoEmEvocacao' && (
+          <>
+            {agruparMagiasPorCirculo(poolVersadoEmEvocacao).map((grupo) => (
+              <GrupoMagiaColapsavel key={grupo.circulo} label={grupo.label} magias={grupo.magias}>
+                {(m) => {
+                  const marcado = versadoEmEvocacaoEscolhidas.includes(m.nome);
+                  return (
+                    <div key={m.id} className="check-row" onClick={() => toggleVersadoEmEvocacao(m.nome)}>
                       <div className={`check-box ${marcado ? 'checked' : ''}`} />
                       <span className="check-label">
                         <MagiaComDescricao magia={m} /> {iconesMagia(m)}
@@ -2429,6 +2498,12 @@ export default function LevelUpShell({
               <div className="summary-row">
                 <span>Perito em Necromancia</span>
                 <span>+{peritoNecromanciaEscolhidas.length} nova(s) 🏠</span>
+              </div>
+            )}
+            {luSteps.includes('versadoEmEvocacao') && (
+              <div className="summary-row">
+                <span>Versado em Evocação</span>
+                <span>+{versadoEmEvocacaoEscolhidas.length} nova(s)</span>
               </div>
             )}
             {luSteps.includes('magiasPreparadas') && (

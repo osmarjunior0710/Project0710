@@ -5,6 +5,7 @@ import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
+import { truqueElegivelTruquePotente, sobrecargaElegivel, danoMaximoSobrecarga, danoNecroticoSobrecarga } from '../../../core/evocador';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
@@ -43,6 +44,35 @@ interface UsarMagiaPainelParams {
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
   truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
+  /** Truque Potente (Mago/Evocador, nível 3, regra oficial — ver
+   * `core/evocador.ts`) — metade de dano no erro de truque com dano,
+   * sem efeitos adicionais. */
+  truquePotenteAtivo: boolean;
+  /** Evocação Potencializada (Mago/Evocador, nível 10, regra oficial —
+   * ver `core/evocador.ts`) — soma o mod. de Inteligência ao dano de
+   * magia de Evocação de Mago. */
+  evocacaoPotencializadaAtiva: boolean;
+  modIntAtual: number;
+  /** Sobrecarga (Mago/Evocador, nível 14, regra oficial — ver
+   * `core/evocador.ts`) — pode causar dano máximo em vez de rolar
+   * (magia de Mago com dano, espaço de 1º a 5º círculo). */
+  sobrecargaAtiva: boolean;
+  sobrecargaUsosDesdeDescanso: number;
+  onUsarSobrecarga: () => void;
+  /** Aplica dano direto ao PV (delta negativo) — usado pelo dano
+   * Necrótico auto-infligido de Sobrecarga. Mesma função pura de
+   * `FichaShell.tsx` `alterarPv`. */
+  onAlterarPv: (delta: number) => void;
+  /** Abre a tela de escolha "Rolar Dano vs. Sobrecarga" — vive em
+   * `CombatTab.tsx` (mesmo padrão de `onAbrirSalvaguarda`), NUNCA
+   * renderizada aqui dentro: este painel fica montado dentro de um
+   * `SidePanel` com `transform` (slide-in), que quebra o
+   * `position: fixed` da `SobrecargaEscolha` (o popup ficava preso
+   * dentro do painel em vez de cobrir a tela toda — bug achado pelo
+   * Osmar). `null` fecha a tela. */
+  onAbrirEscolhaSobrecarga: (
+    dados: { nomeMagia: string; danoMaximo: number; aoRolarNormal: () => void; aoUsarSobrecarga: () => void } | null,
+  ) => void;
   colheitaMacabraDisponivel: boolean;
   onColheitaMacabraDisponivel: (cura: number) => void;
   /** Aplica a cura rolada (`rollCura`) no PV do personagem E dispara
@@ -115,6 +145,8 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
       p.truqueVinculadoAgonizante,
       p.modCarisma,
       p.explicacaoAcertoConjuracao,
+      p.evocacaoPotencializadaAtiva,
+      p.modIntAtual,
     );
     if (resultado.curaColheitaMacabra !== null) {
       p.onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
@@ -126,18 +158,72 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         confirmarAcerto: {
           onAcertou: ({ critico }) => {
             if (!dano) return;
-            const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
+            const rolarNormal = () => {
+              const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
+              rolarDados({
+                label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
+                formula: montado.formula,
+                quantidade: montado.quantidade,
+                lados: dano.lados,
+                mod: dano.mod,
+                explicacaoMod: dano.explicacaoMod,
+                confirmarFechamento: {},
+              });
+            };
+            if (sobrecargaElegivel(m, circuloUsado, p.sobrecargaAtiva)) {
+              p.onAbrirEscolhaSobrecarga({
+                nomeMagia: m.nome,
+                danoMaximo: danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, critico),
+                aoRolarNormal: () => {
+                  p.onAbrirEscolhaSobrecarga(null);
+                  rolarNormal();
+                },
+                aoUsarSobrecarga: () => {
+                  p.onAbrirEscolhaSobrecarga(null);
+                  const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, critico);
+                  p.onEscolher(`✨ ${m.nome}`, `☠️ Sobrecarga — ${max} de dano máximo${critico ? ' (Crítico)' : ''}`);
+                  const necrotico = danoNecroticoSobrecarga(p.sobrecargaUsosDesdeDescanso, circuloUsado);
+                  p.onUsarSobrecarga();
+                  if (necrotico) {
+                    let totalNecrotico = 0;
+                    rolarDados({
+                      label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
+                      formula: `${necrotico.quantidade}d12`,
+                      quantidade: necrotico.quantidade,
+                      lados: necrotico.lados,
+                      mod: 0,
+                      onResultado: (total) => {
+                        totalNecrotico = total;
+                      },
+                      confirmarFechamento: { aoTocar: () => p.onAlterarPv(-totalNecrotico) },
+                    });
+                  }
+                },
+              });
+              return;
+            }
+            rolarNormal();
+          },
+          onErrou: () => {
+            if (!dano || !p.truquePotenteAtivo || !truqueElegivelTruquePotente(m)) return;
+            let totalRolado = 0;
             rolarDados({
-              label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
-              formula: montado.formula,
-              quantidade: montado.quantidade,
+              label: dano.label,
+              formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+              quantidade: dano.quantidade,
               lados: dano.lados,
               mod: dano.mod,
               explicacaoMod: dano.explicacaoMod,
-              confirmarFechamento: {},
+              onResultado: (total) => {
+                totalRolado = total;
+              },
+              confirmarFechamento: {
+                rotulo: 'Aplicar Truque Potente ✓',
+                aoTocar: () =>
+                  p.onEscolher(`✨ ${m.nome}`, `Truque Potente — ${Math.floor(totalRolado / 2)} de dano (metade, sem efeitos adicionais)`),
+              },
             });
           },
-          onErrou: () => {},
         },
       });
       p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);

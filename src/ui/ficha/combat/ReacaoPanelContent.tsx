@@ -6,6 +6,7 @@ import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { cdConjuracao, circulosDisponiveisParaConjurar, type EspacoDeMagiaAtivo, type MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
+import { truqueElegivelTruquePotente, sobrecargaElegivel, danoMaximoSobrecarga, danoNecroticoSobrecarga } from '../../../core/evocador';
 import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import PillsMagia from '../../components/PillsMagia';
@@ -53,6 +54,23 @@ interface ReacaoPanelContentProps {
    * `decidirConjuracao` — mantém a assinatura igual nos 3 painéis. */
   truqueVinculadoAgonizante: string | undefined;
   modCarisma: number;
+  truquePotenteAtivo: boolean;
+  evocacaoPotencializadaAtiva: boolean;
+  sobrecargaAtiva: boolean;
+  sobrecargaUsosDesdeDescanso: number;
+  onUsarSobrecarga: () => void;
+  /** Aplica dano direto ao PV (delta negativo) — usado pelo dano
+   * Necrótico auto-infligido de Sobrecarga. Mesma função pura de
+   * `FichaShell.tsx` `alterarPv`. */
+  onAlterarPv: (delta: number) => void;
+  /** Abre a tela de escolha "Rolar Dano vs. Sobrecarga" — vive em
+   * `CombatTab.tsx` (mesmo padrão de `onAbrirSalvaguarda`), NUNCA
+   * renderizada aqui dentro (ver `useUsarMagiaPainel.tsx` pro motivo:
+   * `SidePanel` usa `transform`, que quebra `position: fixed`). `null`
+   * fecha a tela. */
+  onAbrirEscolhaSobrecarga: (
+    dados: { nomeMagia: string; danoMaximo: number; aoRolarNormal: () => void; aoUsarSobrecarga: () => void } | null,
+  ) => void;
   detalhesAtivo: boolean;
   contraEncantamentoDisponivel: boolean;
   palavrasDeInterrupcaoDisponivel: boolean;
@@ -122,6 +140,13 @@ export default function ReacaoPanelContent({
   explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
+  truquePotenteAtivo,
+  evocacaoPotencializadaAtiva,
+  sobrecargaAtiva,
+  sobrecargaUsosDesdeDescanso,
+  onUsarSobrecarga,
+  onAlterarPv,
+  onAbrirEscolhaSobrecarga,
   detalhesAtivo,
   contraEncantamentoDisponivel,
   palavrasDeInterrupcaoDisponivel,
@@ -183,6 +208,8 @@ export default function ReacaoPanelContent({
       truqueVinculadoAgonizante,
       modCarisma,
       explicacaoAcertoConjuracao,
+      evocacaoPotencializadaAtiva,
+      modIntAtual,
     );
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
@@ -194,18 +221,72 @@ export default function ReacaoPanelContent({
         confirmarAcerto: {
           onAcertou: ({ critico }) => {
             if (!dano) return;
-            const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
+            const rolarNormal = () => {
+              const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
+              rolarDados({
+                label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
+                formula: montado.formula,
+                quantidade: montado.quantidade,
+                lados: dano.lados,
+                mod: dano.mod,
+                explicacaoMod: dano.explicacaoMod,
+                confirmarFechamento: {},
+              });
+            };
+            if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {
+              onAbrirEscolhaSobrecarga({
+                nomeMagia: m.nome,
+                danoMaximo: danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, critico),
+                aoRolarNormal: () => {
+                  onAbrirEscolhaSobrecarga(null);
+                  rolarNormal();
+                },
+                aoUsarSobrecarga: () => {
+                  onAbrirEscolhaSobrecarga(null);
+                  const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, critico);
+                  onEscolher(`✨ ${m.nome}`, `☠️ Sobrecarga — ${max} de dano máximo${critico ? ' (Crítico)' : ''}`);
+                  const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
+                  onUsarSobrecarga();
+                  if (necrotico) {
+                    let totalNecrotico = 0;
+                    rolarDados({
+                      label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
+                      formula: `${necrotico.quantidade}d12`,
+                      quantidade: necrotico.quantidade,
+                      lados: necrotico.lados,
+                      mod: 0,
+                      onResultado: (total) => {
+                        totalNecrotico = total;
+                      },
+                      confirmarFechamento: { aoTocar: () => onAlterarPv(-totalNecrotico) },
+                    });
+                  }
+                },
+              });
+              return;
+            }
+            rolarNormal();
+          },
+          onErrou: () => {
+            if (!dano || !truquePotenteAtivo || !truqueElegivelTruquePotente(m)) return;
+            let totalRolado = 0;
             rolarDados({
-              label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
-              formula: montado.formula,
-              quantidade: montado.quantidade,
+              label: dano.label,
+              formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+              quantidade: dano.quantidade,
               lados: dano.lados,
               mod: dano.mod,
               explicacaoMod: dano.explicacaoMod,
-              confirmarFechamento: {},
+              onResultado: (total) => {
+                totalRolado = total;
+              },
+              confirmarFechamento: {
+                rotulo: 'Aplicar Truque Potente ✓',
+                aoTocar: () =>
+                  onEscolher(`✨ ${m.nome}`, `Truque Potente — ${Math.floor(totalRolado / 2)} de dano (metade, sem efeitos adicionais)`),
+              },
             });
           },
-          onErrou: () => {},
         },
       });
       onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);

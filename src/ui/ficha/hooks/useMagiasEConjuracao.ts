@@ -42,6 +42,7 @@ import {
 } from '../../../core/magiaTalentoGeral';
 import { acoesConvertidasEmBonus } from '../../../core/periciaTalentoGeral';
 import { acoesBase } from '../../../data/exampleCombat';
+import { truquePotenteAtivo, evocacaoPotencializadaAtiva, sobrecargaAtiva } from '../../../core/evocador';
 import {
   espacosDeMagiaAtivos,
   ehMagiaDeReacao,
@@ -241,6 +242,17 @@ export function useMagiasEConjuracao(input: {
   const magiasAssinaturaDoLivro = assinaturaMagicaAtuais
     .map((nomeMagia) => magias.find((m) => m.nome === nomeMagia))
     .filter((m): m is Magia => m !== undefined);
+  // Truque Potente (Mago/Evocador, nível 3, regra oficial) — mesmo
+  // padrão de Maestria/Assinatura acima (subclasse+nível já vêm de
+  // `magoEntry`), mas a checagem é de SUBCLASSE, não de característica
+  // de classe base (ver `core/evocador.ts`).
+  const truquePotenteAtivoFlag = magoEntry ? truquePotenteAtivo(magoEntry.subclasse ?? null, magoEntry.nivel) : false;
+  // Evocação Potencializada (Mago/Evocador, nível 10, regra oficial) —
+  // mesmo padrão de Truque Potente acima.
+  const evocacaoPotencializadaAtivaFlag = magoEntry ? evocacaoPotencializadaAtiva(magoEntry.subclasse ?? null, magoEntry.nivel) : false;
+  // Sobrecarga (Mago/Evocador, nível 14, regra oficial) — mesmo padrão
+  // de Truque Potente/Evocação Potencializada acima.
+  const sobrecargaAtivaFlag = magoEntry ? sobrecargaAtiva(magoEntry.subclasse ?? null, magoEntry.nivel) : false;
   const mestreMisticoDisponivel =
     bruxoObj && bruxoEntry ? caracteristicaDesbloqueada(bruxoObj, 'Mestre Místico', bruxoEntry.nivel) !== null : false;
   // Achado corrigido de passagem (Entrega 5d): Astúcia Mágica recupera
@@ -371,6 +383,9 @@ export function useMagiasEConjuracao(input: {
     magiasMaestriaDoLivro,
     assinaturaMagicaDisponivel,
     magiasAssinaturaDoLivro,
+    truquePotenteAtivo: truquePotenteAtivoFlag,
+    evocacaoPotencializadaAtiva: evocacaoPotencializadaAtivaFlag,
+    sobrecargaAtiva: sobrecargaAtivaFlag,
     usaRedefPorDescanso,
     magiasGratisConcedidas,
     formasFamiliarElegiveis,

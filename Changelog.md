@@ -13,6 +13,44 @@ escolha "Fim do Turno" faz a mesma coisa que o botão grande já fazia.
 Fora da aba Combate, continua sendo o FAB de Descanso Curto/Longo,
 sem mudança nenhuma.
 
+## v202609_1202
+
+Corrigido: na aba Combate, a tela de escolha "Rolar Dano vs.
+Sobrecarga" (Mago/Evocador) aparecia presa dentro do painel de Ação/
+Bônus/Reação em vez de cobrir a tela toda como um popup normal.
+
+## v202609_0023
+
+Corrigido: o dano Necrótico auto-infligido de "Sobrecarga" (Mago/
+Evocador) rolava na tela mas não descontava do PV do personagem —
+agora aplica de verdade, nas 2 abas (Magias e Combate).
+
+## v202609_2304
+
+Mago/Evocador ganha "Sobrecarga" (nível 14): ao usar uma magia de
+1º-5º círculo, escolha entre rolar o dano normal ou causar dano
+máximo direto — usar de novo antes do próximo Descanso Longo causa
+dano Necrótico crescente em você mesmo.
+
+## v202609_2046
+
+Mago/Evocador ganha "Evocação Potencializada" (nível 10): dano de
+magia de Evocação de Mago soma automaticamente o modificador de
+Inteligência (visível na quebra do cálculo, "ⓘ").
+
+## v202609_1953
+
+Corrigido: Truque Potente (Mago/Evocador) não fazia nada ao clicar
+"Errei" na aba Magias — só funcionava na aba Combate. Agora aplica
+metade do dano nos dois lugares.
+
+## v202609_1902
+
+Mago/Evocador ganha "Truque Potente" (nível 3): ao errar um ataque de
+truque com dano, ou o alvo passar na salvaguarda contra ele, o
+personagem ainda causa metade do dano (sem efeitos adicionais) — vale
+pra qualquer truque com dano, não só de Evocação.
+
 ## v202609_1230
 
 Corrigido: com várias pills ligadas ao mesmo tempo, a lista de "Usar
@@ -20,6 +58,13 @@ Magia" do Combate ficava cheia de pills coladas com o texto do nome —
 borda de pill cortando por cima de texto da linha seguinte. Nome e
 pills agora ficam em linhas separadas, iguais a como já funcionava na
 aba Magias.
+
+## v202609_1227
+
+Mago/Evocador ganha a 1ª característica de verdade: "Versado em
+Evocação" (nível 3) — ao escolher a subclasse, some 2 magias de
+Evocação grátis pro Livro de Magias; a cada novo círculo de magia
+desbloqueado depois, mais 1.
 
 ## v202609_1221
 

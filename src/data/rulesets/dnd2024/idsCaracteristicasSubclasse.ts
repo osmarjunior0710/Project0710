@@ -35,6 +35,10 @@ export const ID_CARACTERISTICA_SUBCLASSE = {
   ramosDaArvore: 'Ramos da Árvore',
   raizesDevastadoras: 'Raízes Devastadoras',
   percorrerArvore: 'Percorrer a Árvore',
+  // Mago — Evocador (regra oficial)
+  truquePotente: 'Truque Potente',
+  evocacaoPotencializada: 'Evocação Potencializada',
+  sobrecarga: 'Sobrecarga',
 } as const;
 
 export type IdCaracteristicaSubclasse = keyof typeof ID_CARACTERISTICA_SUBCLASSE;

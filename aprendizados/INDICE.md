@@ -34,8 +34,16 @@ Um arquivo por classe de D&D implementada no app.
   Maestria de Magias (escolha + conjuração grátis + troca no Descanso
   Longo), Assinatura Mágica. Inclui o bug de "Maestria/Assinatura não
   apareciam no Combate" e a validação manual nível 1-20 que fechou o
-  foco. Subclasse Evocador (dado no banco só) segue como foco
-  separado, retomado depois.
+  foco.
+
+- **`classes/mago-evocador.md`** — subclasse Evocador (arquivo
+  separado da classe base — ver seção 7.2 do CLAUDE.md, cada subclasse
+  com foco próprio ganha seu arquivo): Versado em Evocação, Truque
+  Potente, Evocação Potencializada, Sobrecarga. Inclui 2 bugs achados
+  DEPOIS da publicação que passaram pela validação Playwright original
+  sem serem detectados (dano Necrótico não descontava PV; popup de
+  escolha preso dentro do painel de Combate por causa de `transform`
+  no `SidePanel`) — e por que a validação de cada um falhou.
 
 *(as outras classes implementadas antes do Bárbaro/Mago — Guerreiro/
 Bardo/Bruxo — continuam só em `DECISOES-CLASSES.md`; migração pra cá é

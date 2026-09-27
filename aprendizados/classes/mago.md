@@ -137,8 +137,5 @@ mesmo depois dela bater no teto de 20), não do app.
   `Backlog.md`.
 - **Melhoria de UI (Feedback.md):** card "Novas Características" sem
   separação visual entre linhas — ainda não resolvido.
-- Subclasse Evocador só tem a Entrega 1 feita (dado no banco) — as
-  características aparecem no Level Up com texto real, mas sem
-  mecânica de verdade ainda (Versado em Evocação, Truque Potente,
-  Evocação Potencializada, Sobrecarga) — foco próprio, retomado a
-  seguir.
+- Subclasse Evocador — foco próprio, fechado depois (histórico
+  completo em `aprendizados/classes/mago-evocador.md`).
