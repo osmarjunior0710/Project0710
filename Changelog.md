@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1652
+
+Loja (wizard de criação) ganha checkbox "Esconder itens acima do seu
+ouro inicial" — igual o "Filtrar por proficiência" que já existia,
+some da lista quem custa mais que o ouro que você tem pra gastar.
+
 ## v202609_1643
 
 Na tela "Em qual círculo?" (Usar Magia, Magias e Combate), cada opção

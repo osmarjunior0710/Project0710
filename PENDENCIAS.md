@@ -424,25 +424,19 @@ wizard → Ficha, definido junto com o Osmar.
   Pacto foi removida do Perfil por não se aplicar ao Guerreiro; volta
   como texto condicional por classe quando o Bruxo for importado).
 
-## Loja — 2 recursos adiados de propósito na Entrega A5
+## Loja — Desconto de Talento ainda falta (corte por preço resolvido)
 
-**O que é:** ao planejar a Loja com o Osmar, dois recursos de uma versão
-anterior (protótipo separado) ficaram de fora por decisão explícita:
-- **Desconto de Talento (ex: Artífice, 20% em item não-mágico):**
-  depende de seleção de Talentos no wizard, que ainda não existe.
-- **Corte de itens acima de 205 PO** (máximo possível de ouro inicial,
-  somando Origem + Classe): a Loja hoje mostra o catálogo completo
-  sempre, sem esconder itens caros demais pra comprar na criação.
+**O que é:** **Desconto de Talento** (ex: Artífice, 20% em item
+não-mágico) depende de seleção de Talentos no wizard, que ainda não
+existe.
 
-**Por que foi adiado:** o primeiro depende de uma feature que não
-existe ainda (Talentos); o segundo é um "nice to have" que o ouro
-restante já cobre na prática (não dá pra comprar mesmo, só não some da
-lista).
+~~Corte de itens acima do teto de ouro~~ — **resolvido** (2026-09):
+checkbox "Esconder itens acima do seu ouro inicial (N PO)" na Loja,
+mesmo padrão do "Filtrar por proficiência" — usa o `ouroInicial` real
+do personagem (Origem + Classe já escolhidas), não um teto global.
 
-**O que falta pra resolver:** revisitar quando Talentos entrarem no
-wizard (desconto) ou se o Osmar sentir falta do corte por preço
-(filtro adicional, fácil de adicionar depois — só falta calcular o
-teto de ouro por Origem+Classe).
+**O que falta pra resolver:** revisitar o desconto quando Talentos
+entrarem no wizard.
 
 ## Talentos — validação de UI pendente pros 23 já implementados
 

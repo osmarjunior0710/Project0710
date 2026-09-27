@@ -200,7 +200,9 @@ function Grupo({
   selection,
   update,
   ouroRestante,
+  ouroInicial,
   soProficiente,
+  cortarPorPreco,
   adquiridosPorKits,
   adquiridosPorOrigemOuClasse,
 }: {
@@ -208,12 +210,20 @@ function Grupo({
   selection: StepProps['selection'];
   update: StepProps['update'];
   ouroRestante: number;
+  ouroInicial: number;
   soProficiente: boolean;
+  cortarPorPreco: boolean;
   adquiridosPorKits: Map<string, ItemAdquiridoPorKit>;
   adquiridosPorOrigemOuClasse: Map<string, ItemAdquiridoPorOrigemOuClasse>;
 }) {
   const [aberto, setAberto] = useState(false);
-  const itensVisiveis = soProficiente && GRUPOS_ARMA_ARMADURA.has(grupo.id) ? grupo.itens.filter((it) => classeEhProficiente(selection, it)) : grupo.itens;
+  let itensVisiveis = soProficiente && GRUPOS_ARMA_ARMADURA.has(grupo.id) ? grupo.itens.filter((it) => classeEhProficiente(selection, it)) : grupo.itens;
+  // Corte por preço (Backlog "Loja — corte de itens acima do teto de ouro"):
+  // esconde item que custa mais que o ouro inicial (Origem+Classe) inteiro —
+  // ninguém compra isso na criação, mesmo gastando tudo nele. Usa
+  // `ouroInicial`, não `ouroRestante`, pra não sumir item conforme o
+  // jogador for comprando outra coisa (o "+" já trava sozinho pra isso).
+  if (cortarPorPreco) itensVisiveis = itensVisiveis.filter((it) => it.custoPO === null || it.custoPO <= ouroInicial);
 
   if (itensVisiveis.length === 0) return null;
 
@@ -262,6 +272,7 @@ function Grupo({
 
 export default function LojaStep({ selection, update }: StepProps) {
   const [soProficiente, setSoProficiente] = useState(false);
+  const [cortarPorPreco, setCortarPorPreco] = useState(false);
   const ouroInicial = calcularOuroInicial(selection);
   const custoCarrinho = calcularCustoCarrinho(selection.itens, catalogo);
   const ouroRestante = Math.round((ouroInicial - custoCarrinho) * 100) / 100;
@@ -319,6 +330,11 @@ export default function LojaStep({ selection, update }: StepProps) {
         <span style={{ fontSize: 12 }}>Filtrar por proficiência (mostra só armas e armaduras que sua classe usa bem)</span>
       </label>
 
+      <label className={styles.filtroRow}>
+        <input type="checkbox" checked={cortarPorPreco} onChange={(e) => setCortarPorPreco(e.target.checked)} />
+        <span style={{ fontSize: 12 }}>Esconder itens acima do seu ouro inicial ({ouroInicial} PO)</span>
+      </label>
+
       {(itensOrigem.length > 0 || itensClasse.length > 0) && (
         <>
           <div className="section-title">Você já está levando</div>
@@ -335,7 +351,9 @@ export default function LojaStep({ selection, update }: StepProps) {
           selection={selection}
           update={update}
           ouroRestante={ouroRestante}
+          ouroInicial={ouroInicial}
           soProficiente={soProficiente}
+          cortarPorPreco={cortarPorPreco}
           adquiridosPorKits={adquiridosPorKits}
           adquiridosPorOrigemOuClasse={adquiridosPorOrigemOuClasse}
         />
