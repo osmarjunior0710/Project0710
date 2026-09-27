@@ -27,6 +27,7 @@ import EfeitosDoGolpeModal from '../../components/EfeitosDoGolpeModal';
 import AtivarEfeitoModal from '../../components/AtivarEfeitoModal';
 import BonusPanelContent from '../combat/BonusPanelContent';
 import ReacaoPanelContent from '../combat/ReacaoPanelContent';
+import DescansoFab from '../DescansoFab';
 import SalvaguardaDoAlvoModal from '../combat/SalvaguardaDoAlvoModal';
 import styles from './CombatTab.module.css';
 
@@ -1200,6 +1201,7 @@ export default function CombatTab({
 
   return (
     <>
+      <DescansoFab icone="↻" itens={[{ label: 'Fim do Turno', onClick: fimDoTurno }]} />
       {piscando && (
         <div
           className={styles.piscadaOverlay}

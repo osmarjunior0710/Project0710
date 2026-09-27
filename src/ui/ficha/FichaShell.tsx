@@ -3046,7 +3046,15 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           onTerminar={() => setDadosDeVidaAberto(false)}
         />
       )}
-      <DescansoFab onDescansoCurto={() => iniciarDescanso('curto')} onDescansoLongo={() => iniciarDescanso('longo')} />
+      {tab !== 'combat' && (
+        <DescansoFab
+          icone="😴"
+          itens={[
+            { label: '🌙 Descanso Longo', sufixo: '8 horas', onClick: () => iniciarDescanso('longo') },
+            { label: '☕ Descanso Curto', sufixo: '1 hora', onClick: () => iniciarDescanso('curto') },
+          ]}
+        />
+      )}
       <Dice3dFab />
       {restStatus && (
         <div className={styles.avisoDescanso} onClick={() => setRestStatus(null)}>

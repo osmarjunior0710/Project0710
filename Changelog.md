@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1550
+
+O FAB de baixo à esquerda (o de Descanso, ícone 😴) vira o FAB de "Fim
+do Turno" (ícone ↻) enquanto você está na aba Combate — toque nele e
+escolha "Fim do Turno" faz a mesma coisa que o botão grande já fazia.
+Fora da aba Combate, continua sendo o FAB de Descanso Curto/Longo,
+sem mudança nenhuma.
+
 ## v202609_1230
 
 Corrigido: com várias pills ligadas ao mesmo tempo, a lista de "Usar
