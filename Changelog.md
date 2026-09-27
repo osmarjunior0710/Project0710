@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1744
+
+Protótipo "🧪 Cor de cada classe" ganhou um seletor de cor melhor —
+quadrado de Saturação×Brilho (arrasta com o dedo) + barra de Matiz,
+igual o picker do w3schools, no lugar dos sliders separados de antes.
+
 ## v202609_1727
 
 Novo protótipo "🧪 Cor de cada classe" — uma pill por classe (todas as
