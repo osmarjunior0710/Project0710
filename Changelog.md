@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1628
+
+Corrigido: no Level Up, a tela "Novas Características" mostrava
+Truques/Magias Preparadas/Espaços de Magia/etc. tudo colado num card
+só, difícil de escanear. Agora cada linha vira seu próprio card,
+igual as características abaixo dela.
+
 ## v202609_1550
 
 O FAB de baixo à esquerda (o de Descanso, ícone 😴) vira o FAB de "Fim

@@ -1541,16 +1541,14 @@ export default function LevelUpShell({
         {step === 'features' && (
           <>
             <div className="section-title">Novas características no nível {novoNivel}</div>
-            {deltasDoNivel.length > 0 && (
-              <div className="opt-card" style={{ cursor: 'default', marginBottom: 10 }}>
-                {deltasDoNivel.map((d) => (
-                  <div key={d.label} className="opt-card-row" style={{ justifyContent: 'space-between', gap: 8 }}>
-                    <span style={{ flex: '1 1 auto', minWidth: 0 }}>{d.label}</span>
-                    <span style={{ flex: '0 0 auto', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{d.texto}</span>
-                  </div>
-                ))}
+            {deltasDoNivel.map((d) => (
+              <div key={d.label} className="opt-card" style={{ cursor: 'default' }}>
+                <div className="opt-card-row" style={{ justifyContent: 'space-between', gap: 8 }}>
+                  <span style={{ flex: '1 1 auto', minWidth: 0 }}>{d.label}</span>
+                  <span style={{ flex: '0 0 auto', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{d.texto}</span>
+                </div>
               </div>
-            )}
+            ))}
             {features.map((f) => {
               const ph = f.statusImplementacao?.startsWith('placeholder-') ?? false;
               return (
