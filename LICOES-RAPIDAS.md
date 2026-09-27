@@ -35,6 +35,20 @@ perguntar antes — o Osmar pediu pra mover pro modal de rolagem depois,
 perguntado ANTES de codar ("onde você tá pensando em colocar isso e
 como o jogador vai ativar?") e saiu certo de primeira.
 
+## Validar dano auto-infligido: conferir o PV de verdade, não só o texto/fórmula da rolagem
+
+1ª ocorrência (2026-09, Sobrecarga do Mago/Evocador): validei via
+Playwright que a rolagem de dano Necrótico auto-infligido aparecia com
+a fórmula certa (4d12/6d12/12d12 conforme o uso) e considerei a entrega
+pronta — mas nenhum dos 5 pontos de conjuração realmente descontava o
+PV do personagem, só mostrava o número rolado. Rolagem de dano CONTRA
+um alvo (a imensa maioria dos casos no app) não precisa desse cuidado,
+porque o app nunca aplica PV de NPC sozinho — mas dano que o próprio
+personagem sofre é diferente, e só apareceu esse caso agora. Lição: ao
+validar uma mecânica de auto-dano/auto-efeito no próprio personagem,
+sempre ler o PV/recurso antes e depois da rolagem (ex.: no
+`localStorage` salvo), não só conferir que o texto/rolagem aparece.
+
 ## Botão desabilitado com `opacity` + `pointer-events:none` num pill fixo vaza clique pro que está atrás
 
 1ª ocorrência (2026-09, Copiar Magia): o OK desabilitado usava

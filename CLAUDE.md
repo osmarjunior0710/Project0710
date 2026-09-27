@@ -535,6 +535,17 @@ fica frágil pra achar de novo); se quiser um jeito rápido de achar algo
 dentro do próprio arquivo, use um título descritivo que já entrega o
 assunto, não um código.
 
+**Subclasse com foco próprio ganha arquivo próprio, separado da classe
+base** (decidido 2026-09, foco Mago/Evocador): quando uma subclasse é
+implementada como foco separado da classe base (ex.: Mago →
+características base primeiro, Evocador depois), o histórico dela vai
+em `aprendizados/classes/<classe>-<subclasse>.md` (ex.:
+`mago-evocador.md`), não dentro do arquivo da classe base — evita que
+o arquivo da classe base cresça sem parar conforme mais subclasses
+forem implementadas, e mantém cada subclasse fácil de achar sozinha.
+O arquivo da classe base só referencia de volta ("subclasse X — ver
+`aprendizados/classes/<classe>-<subclasse>.md`"), sem duplicar.
+
 **O que entra num arquivo de `aprendizados/`:** o processo de
 construção completo daquele foco — como foi quebrado em entregas,
 decisões técnicas tomadas (inclusive as corrigidas no meio do caminho,

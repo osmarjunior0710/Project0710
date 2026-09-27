@@ -32,6 +32,20 @@ do navegador — o wireframe original simulava um celular dentro de uma div
 `#frame`; o app de verdade não tem esse frame, a tela real já é o
 contêiner. Vale pra qualquer overlay novo daqui pra frente.
 
+**Gotcha achado no foco Mago/Evocador (Sobrecarga, 2026-09):**
+`SidePanel.module.css` anima o painel de Ação/Bônus/Reação com
+`transform: translateX/Y` pro slide-in/out. CSS: `transform` em
+qualquer ancestral cria um novo *containing block* pra descendentes
+`position: fixed` — o filho deixa de ser fixo à viewport e passa a
+ser "fixo ao painel", ficando preso/cortado dentro dele em vez de
+cobrir a tela toda. Por isso **todo modal em tela cheia (mesmo padrão
+de `SalvaguardaDoAlvoModal`) precisa ser renderizado no componente da
+aba (`CombatTab.tsx`/`MagiasTab.tsx`), nunca de dentro de um painel/
+hook que vive aninhado num `SidePanel`** — se a mecânica que abre o
+modal mora num hook/componente aninhado (ex.: `useUsarMagiaPainel.tsx`),
+ele delega pra cima via callback (mesmo padrão de `onAbrirSalvaguarda`)
+em vez de guardar o estado do modal localmente.
+
 ## Fluxo Acerto/Erro — o popup de rolagem pergunta, nunca "atira e esquece"
 
 **Problema resolvido:** até 2026-09, toda rolagem de ataque (e a
