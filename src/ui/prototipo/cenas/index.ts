@@ -4,6 +4,7 @@ import ConfirmacaoCriticoCena from './ConfirmacaoCriticoCena';
 import EsmagadorRaizesCena from './EsmagadorRaizesCena';
 import MulticlasseMagiasCena from './MulticlasseMagiasCena';
 import MulticlasseCombateCena from './MulticlasseCombateCena';
+import CoresDeClasseCena from './CoresDeClasseCena';
 
 export interface CenaPrototipo {
   id: string;
@@ -61,5 +62,12 @@ export const cenasPrototipo: CenaPrototipo[] = [
     descricao:
       'Mesmo personagem: botão "Conjurar Magia" no painel de Ação já oferece as magias das 2 classes juntas, com selo — gasto continua saindo do pool combinado certo.',
     Componente: MulticlasseCombateCena,
+  },
+  {
+    id: 'cores-de-classe',
+    titulo: 'Cor de cada classe — ferramenta de decisão',
+    descricao:
+      '12 pills (1 por classe), cada uma com seletor de cor nativo + switcher de texto branco/preto, atualizando ao vivo. Botão "Exportar" devolve nome + hex + cor do texto em texto pra colar de volta no chat.',
+    Componente: CoresDeClasseCena,
   },
 ];

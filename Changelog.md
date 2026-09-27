@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1727
+
+Novo protótipo "🧪 Cor de cada classe" — uma pill por classe (todas as
+12) com seletor de cor + switcher de texto branco/preto, atualizando
+ao vivo, e botão "Exportar" pra decidir a paleta e me passar de volta.
+
 ## v202609_1703
 
 "🎲 Personagem de Teste" agora abre com Classe/Origem/Espécie em
