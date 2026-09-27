@@ -8,6 +8,10 @@ import styles from './PersonagemTesteModal.module.css';
 
 const NIVEIS = Array.from({ length: 20 }, (_, i) => i + 1);
 
+function sortearNome(opcoes: { nome: string }[]): string {
+  return opcoes[Math.floor(Math.random() * opcoes.length)].nome;
+}
+
 interface PersonagemTesteModalProps {
   onFechar: () => void;
   onCriado: (id: string) => void;
@@ -20,9 +24,16 @@ interface PersonagemTesteModalProps {
 export default function PersonagemTesteModal({ onFechar, onCriado }: PersonagemTesteModalProps) {
   useLockBodyScroll(true);
   const opcoes = opcoesGeradorTeste();
-  const [classeNome, setClasseNome] = useState(opcoes.classes[0]?.nome ?? '');
-  const [origemNome, setOrigemNome] = useState(opcoes.origens[0]?.nome ?? '');
-  const [especieNome, setEspecieNome] = useState(opcoes.especies[0]?.nome ?? '');
+  // Padrão de todo dropdown aqui é "— sortear —" (`''`) — só o Nível
+  // nasce fixo em 1 (pedido do Osmar, 2026-09): o gerador já sorteia
+  // tudo o resto (atributos, perícias, magias, talentos, equipamento),
+  // então Classe/Origem/Espécie sorteadas por padrão deixam "Criar" já
+  // pronto pra gerar um personagem aleatório de ponta a ponta sem
+  // precisar escolher nada — quem quiser uma combinação específica
+  // ainda pode, os dropdowns continuam funcionando igual.
+  const [classeNome, setClasseNome] = useState('');
+  const [origemNome, setOrigemNome] = useState('');
+  const [especieNome, setEspecieNome] = useState('');
   const [nivel, setNivel] = useState(1);
   const [subclasseNome, setSubclasseNome] = useState('');
   const [gerando, setGerando] = useState(false);
@@ -40,9 +51,9 @@ export default function PersonagemTesteModal({ onFechar, onCriado }: PersonagemT
   function criar() {
     setGerando(true);
     const personagem = gerarPersonagemTeste({
-      classeNome,
-      origemNome,
-      especieNome,
+      classeNome: classeNome || sortearNome(opcoes.classes),
+      origemNome: origemNome || sortearNome(opcoes.origens),
+      especieNome: especieNome || sortearNome(opcoes.especies),
       nivelAlvo: nivel,
       subclasseNome: subclasseValida || null,
     });
@@ -64,6 +75,7 @@ export default function PersonagemTesteModal({ onFechar, onCriado }: PersonagemT
             Classe
           </div>
           <select className={styles.select} value={classeNome} onChange={(e) => setClasseNome(e.target.value)}>
+            <option value="">— sortear —</option>
             {opcoes.classes.map((c) => (
               <option key={c.id} value={c.nome}>
                 {c.nome}
@@ -77,6 +89,7 @@ export default function PersonagemTesteModal({ onFechar, onCriado }: PersonagemT
             Origem
           </div>
           <select className={styles.select} value={origemNome} onChange={(e) => setOrigemNome(e.target.value)}>
+            <option value="">— sortear —</option>
             {opcoes.origens.map((o) => (
               <option key={o.id} value={o.nome}>
                 {o.nome}
@@ -90,6 +103,7 @@ export default function PersonagemTesteModal({ onFechar, onCriado }: PersonagemT
             Espécie
           </div>
           <select className={styles.select} value={especieNome} onChange={(e) => setEspecieNome(e.target.value)}>
+            <option value="">— sortear —</option>
             {opcoes.especies.map((e) => (
               <option key={e.id} value={e.nome}>
                 {e.nome}

@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1703
+
+"🎲 Personagem de Teste" agora abre com Classe/Origem/Espécie em
+"— sortear —" por padrão (Nível continua fixo em 1) — toque em "Criar"
+já gera um personagem aleatório de ponta a ponta sem precisar escolher
+nada; quem quiser uma combinação específica ainda pode trocar os
+dropdowns antes de criar.
+
 ## v202609_1652
 
 Loja (wizard de criação) ganha checkbox "Esconder itens acima do seu
