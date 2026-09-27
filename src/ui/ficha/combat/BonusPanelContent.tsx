@@ -159,6 +159,14 @@ interface BonusPanelContentProps {
    * Necrótico auto-infligido de Sobrecarga. Mesma função pura de
    * `FichaShell.tsx` `alterarPv`. */
   onAlterarPv: (delta: number) => void;
+  /** Abre a tela de escolha "Rolar Dano vs. Sobrecarga" — vive em
+   * `CombatTab.tsx` (mesmo padrão de `onAbrirSalvaguarda`), NUNCA
+   * renderizada aqui dentro (ver `useUsarMagiaPainel.tsx` pro motivo:
+   * `SidePanel` usa `transform`, que quebra `position: fixed`). `null`
+   * fecha a tela. */
+  onAbrirEscolhaSobrecarga: (
+    dados: { nomeMagia: string; danoMaximo: number; aoRolarNormal: () => void; aoUsarSobrecarga: () => void } | null,
+  ) => void;
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda, que vive em CombatTab. */
   onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
@@ -253,6 +261,7 @@ export default function BonusPanelContent({
   sobrecargaUsosDesdeDescanso,
   onUsarSobrecarga,
   onAlterarPv,
+  onAbrirEscolhaSobrecarga,
   onAbrirSalvaguarda,
   onCuraDeMagiaAplicada,
   colheitaMacabraDisponivel,
@@ -291,6 +300,7 @@ export default function BonusPanelContent({
     sobrecargaUsosDesdeDescanso,
     onUsarSobrecarga,
     onAlterarPv,
+    onAbrirEscolhaSobrecarga,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     preferenciasPillsMagia,

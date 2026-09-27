@@ -99,6 +99,27 @@ da Entrega 2 — foco "Mago — características base" fechou (ver
       Validado via Playwright checando o PV salvo em `localStorage`
       antes/depois, nos 3 casos (ataque em Magias, ataque em Combate,
       salvaguarda em Magias) — PV cai de verdade agora.
+      **2º bug achado pelo Osmar, mesmo dia:** na aba Combate (painel
+      de Ação/Bônus/Reação), a tela de escolha "Rolar Dano vs.
+      Sobrecarga" aparecia PRESA dentro do painel deslizante em vez de
+      cobrir a tela toda — causa raiz: `SidePanel.module.css` anima o
+      painel com `transform` (`translateX`/`translateY`), e isso cria
+      um novo "containing block" pra qualquer filho com
+      `position: fixed` (a `SobrecargaEscolha` usa `position: fixed`
+      igual a `SalvaguardaDoAlvoModal`) — o popup ficava contido/
+      cortado dentro do painel em vez de cobrir o viewport. A
+      Sobrecarga acionada pela SALVAGUARDA já funcionava certo porque
+      o estado dela sempre viveu em `CombatTab.tsx`, renderizado FORA
+      do `SidePanel` (mesmo padrão de `telaSalvaguarda`) — só a
+      escolha do lado de ATAQUE (`useUsarMagiaPainel.tsx` e sua cópia
+      em `ReacaoPanelContent.tsx`) tinha estado/render LOCAL, preso
+      dentro do painel. Corrigido: os 2 arquivos passaram a chamar um
+      novo prop `onAbrirEscolhaSobrecarga` (mesmo padrão de
+      `onAbrirSalvaguarda`) que delega pro estado/render já existente
+      em `CombatTab.tsx`, em vez de ter estado próprio — nenhum popup
+      de Sobrecarga é mais renderizado de dentro de um painel
+      deslizante. Validado via Playwright medindo a geometria do
+      overlay (`getBoundingClientRect`): cobre 100% do viewport agora.
 - [ ] Entrega 6 — Fechamento: testes/tsc/build,
       `aprendizados/classes/mago.md` atualizado, `PENDENCIAS.md`
       "Escolha de subclasse — versão placeholder" perde o Evocador.

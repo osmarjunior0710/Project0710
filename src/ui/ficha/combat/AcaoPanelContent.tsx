@@ -35,6 +35,14 @@ interface AcaoPanelContentProps {
    * Curativas (Aasimar), sem o efeito visual de Cura (esse é só pra
    * magia, ver `onCuraDeMagiaAplicada` abaixo — pedido do Osmar). */
   onAlterarPv: (delta: number) => void;
+  /** Abre a tela de escolha "Rolar Dano vs. Sobrecarga" — vive em
+   * `CombatTab.tsx` (mesmo padrão de `onAbrirSalvaguarda`), NUNCA
+   * renderizada aqui dentro (ver `useUsarMagiaPainel.tsx` pro motivo:
+   * `SidePanel` usa `transform`, que quebra `position: fixed`). `null`
+   * fecha a tela. */
+  onAbrirEscolhaSobrecarga: (
+    dados: { nomeMagia: string; danoMaximo: number; aoRolarNormal: () => void; aoUsarSobrecarga: () => void } | null,
+  ) => void;
   /** Aplica a cura de MAGIA no PV E dispara o efeito visual de Cura
    * (ver `FichaShell.tsx` `onCuraDeMagiaAplicada`). */
   onCuraDeMagiaAplicada: (total: number) => void;
@@ -200,6 +208,7 @@ export default function AcaoPanelContent({
   onAbrirSalvaguarda,
   gastarSlotCirculo,
   onAlterarPv,
+  onAbrirEscolhaSobrecarga,
   onCuraDeMagiaAplicada,
   nivel,
   espacos,
@@ -298,6 +307,7 @@ export default function AcaoPanelContent({
     sobrecargaUsosDesdeDescanso,
     onUsarSobrecarga,
     onAlterarPv,
+    onAbrirEscolhaSobrecarga,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     preferenciasPillsMagia,

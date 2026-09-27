@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1202
+
+Corrigido: na aba Combate, a tela de escolha "Rolar Dano vs.
+Sobrecarga" (Mago/Evocador) aparecia presa dentro do painel de Ação/
+Bônus/Reação em vez de cobrir a tela toda como um popup normal.
+
 ## v202609_0023
 
 Corrigido: o dano Necrótico auto-infligido de "Sobrecarga" (Mago/

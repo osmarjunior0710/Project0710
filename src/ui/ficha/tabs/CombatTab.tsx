@@ -1671,6 +1671,7 @@ export default function CombatTab({
           onAbrirSalvaguarda={abrirSalvaguarda}
           gastarSlotCirculo={onGastarSlotCirculo}
           onAlterarPv={onAlterarPv}
+          onAbrirEscolhaSobrecarga={setEscolhaSobrecarga}
           onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
           nivel={nivel}
           espacos={espacos}
@@ -1817,6 +1818,7 @@ export default function CombatTab({
           sobrecargaUsosDesdeDescanso={sobrecargaUsosDesdeDescanso}
           onUsarSobrecarga={onUsarSobrecarga}
           onAlterarPv={onAlterarPv}
+          onAbrirEscolhaSobrecarga={setEscolhaSobrecarga}
           modIntAtual={modIntAtual}
           onAbrirSalvaguarda={abrirSalvaguarda}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
@@ -1866,6 +1868,7 @@ export default function CombatTab({
           sobrecargaUsosDesdeDescanso={sobrecargaUsosDesdeDescanso}
           onUsarSobrecarga={onUsarSobrecarga}
           onAlterarPv={onAlterarPv}
+          onAbrirEscolhaSobrecarga={setEscolhaSobrecarga}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
           detalhesAtivo={detalhesAtivo}

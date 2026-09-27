@@ -12,7 +12,6 @@ import MagiaComDescricao from '../../components/MagiaComDescricao';
 import PillsMagia from '../../components/PillsMagia';
 import TickPips from '../../components/TickPips';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
-import SobrecargaEscolha from './SobrecargaEscolha';
 import styles from './PanelRows.module.css';
 
 interface ReacaoPanelContentProps {
@@ -64,6 +63,14 @@ interface ReacaoPanelContentProps {
    * Necrótico auto-infligido de Sobrecarga. Mesma função pura de
    * `FichaShell.tsx` `alterarPv`. */
   onAlterarPv: (delta: number) => void;
+  /** Abre a tela de escolha "Rolar Dano vs. Sobrecarga" — vive em
+   * `CombatTab.tsx` (mesmo padrão de `onAbrirSalvaguarda`), NUNCA
+   * renderizada aqui dentro (ver `useUsarMagiaPainel.tsx` pro motivo:
+   * `SidePanel` usa `transform`, que quebra `position: fixed`). `null`
+   * fecha a tela. */
+  onAbrirEscolhaSobrecarga: (
+    dados: { nomeMagia: string; danoMaximo: number; aoRolarNormal: () => void; aoUsarSobrecarga: () => void } | null,
+  ) => void;
   detalhesAtivo: boolean;
   contraEncantamentoDisponivel: boolean;
   palavrasDeInterrupcaoDisponivel: boolean;
@@ -139,6 +146,7 @@ export default function ReacaoPanelContent({
   sobrecargaUsosDesdeDescanso,
   onUsarSobrecarga,
   onAlterarPv,
+  onAbrirEscolhaSobrecarga,
   detalhesAtivo,
   contraEncantamentoDisponivel,
   palavrasDeInterrupcaoDisponivel,
@@ -167,13 +175,6 @@ export default function ReacaoPanelContent({
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
-  // Sobrecarga (Mago/Evocador) — mesmo padrão de `useUsarMagiaPainel.tsx`.
-  const [escolhaSobrecarga, setEscolhaSobrecarga] = useState<{
-    nomeMagia: string;
-    danoMaximo: number;
-    aoRolarNormal: () => void;
-    aoUsarSobrecarga: () => void;
-  } | null>(null);
   const { rolarD20, rolarDados } = useRoll();
 
   function usarColheitaDosMortos(petId: string, cura: number) {
@@ -233,15 +234,15 @@ export default function ReacaoPanelContent({
               });
             };
             if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {
-              setEscolhaSobrecarga({
+              onAbrirEscolhaSobrecarga({
                 nomeMagia: m.nome,
                 danoMaximo: danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, critico),
                 aoRolarNormal: () => {
-                  setEscolhaSobrecarga(null);
+                  onAbrirEscolhaSobrecarga(null);
                   rolarNormal();
                 },
                 aoUsarSobrecarga: () => {
-                  setEscolhaSobrecarga(null);
+                  onAbrirEscolhaSobrecarga(null);
                   const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, critico);
                   onEscolher(`✨ ${m.nome}`, `☠️ Sobrecarga — ${max} de dano máximo${critico ? ' (Crítico)' : ''}`);
                   const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
@@ -368,17 +369,6 @@ export default function ReacaoPanelContent({
   }
 
   const semUsosInspiracao = usosInspiracaoRestantes <= 0;
-
-  if (escolhaSobrecarga) {
-    return (
-      <SobrecargaEscolha
-        nomeMagia={escolhaSobrecarga.nomeMagia}
-        danoMaximo={escolhaSobrecarga.danoMaximo}
-        onRolarNormal={escolhaSobrecarga.aoRolarNormal}
-        onUsarSobrecarga={escolhaSobrecarga.aoUsarSobrecarga}
-      />
-    );
-  }
 
   if (telaColheitaDosMortos) {
     return (
