@@ -9,7 +9,7 @@
 // que NÃO seja Espaço de Magia comum, entra aqui. Ver DECISOES-CLASSES.md.
 
 import type { Classe } from '../data/rulesets/dnd2024/classes';
-import { corDoRecursoDaClasse, type CorRecurso } from './corRecursoClasse';
+import { corDoRecursoDaClasse, type CorClasse } from './corRecursoClasse';
 import { dadoInspiracao, usosInspiracaoMaximo } from './inspiracaoBardo';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
 import type { PersonagemClasse } from './multiclasse';
@@ -25,7 +25,7 @@ export interface RecursoVisivel {
   /** Um parágrafo por item — vira o texto do ⓘ. */
   descricao: string[];
   /** Cor dos pips (por classe, ver `corRecursoClasse.ts`); `null` = azul padrão. */
-  cor: CorRecurso | null;
+  cor: CorClasse | null;
 }
 
 export interface EntradaRecursosVisiveis {

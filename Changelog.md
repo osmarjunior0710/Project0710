@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1901
+
+Cores finais das 12 classes (decididas no protótipo "Cor de cada
+classe"): Fúria (Bárbaro), Inspiração de Bardo, Espaço de Magia de
+Pacto (Bruxo) e Recuperar Fôlego (Guerreiro) mudam de cor nos pips da
+aba Combate/painéis de Ação, seguindo a paleta final escolhida.
+
 ## v202609_1744
 
 Protótipo "🧪 Cor de cada classe" ganhou um seletor de cor melhor —

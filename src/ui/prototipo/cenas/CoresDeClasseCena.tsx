@@ -27,12 +27,23 @@ const CLASSES = [
 /** Cores já confirmadas com o Osmar hoje (`core/corRecursoClasse.ts`),
  * convertidas do token CSS pro hex real (ver `index.css`) — ponto de
  * partida, não travado: o Osmar pode mudar até essas aqui. */
+// Decisão FINAL do Osmar (2026-09) — as 12 cores confirmadas, já em
+// produção (`core/corRecursoClasse.ts`). Este protótipo continua
+// existindo só como ferramenta de referência/reajuste futuro, se um
+// dia o Osmar quiser revisar alguma.
 const CORES_INICIAIS: Record<string, ClasseCor> = {
-  Bárbaro: { cor: '#b3261e', textoClaro: true }, // vermelho (--danger)
-  Bardo: { cor: '#c9971a', textoClaro: true }, // mostarda (--pip-mostarda)
-  Bruxo: { cor: '#8a5fd9', textoClaro: true }, // roxo (--accent-especial)
-  Guerreiro: { cor: '#4a5fd9', textoClaro: true }, // azul (--accent)
-  Mago: { cor: '#4fc3f7', textoClaro: true }, // azul-claro (--pip-azul-claro)
+  Bárbaro: { cor: '#e30039', textoClaro: true },
+  Bardo: { cor: '#e6bb00', textoClaro: true },
+  Bruxo: { cor: '#7536eb', textoClaro: true },
+  Clérigo: { cor: '#42d4f4', textoClaro: true },
+  Druida: { cor: '#0d8c1e', textoClaro: true },
+  Feiticeiro: { cor: '#ff3df5', textoClaro: true },
+  Guardião: { cor: '#bfef45', textoClaro: false },
+  Guerreiro: { cor: '#a10028', textoClaro: true },
+  Ladino: { cor: '#ff8000', textoClaro: true },
+  Mago: { cor: '#2b53e3', textoClaro: true },
+  Monge: { cor: '#c45200', textoClaro: true },
+  Paladino: { cor: '#000075', textoClaro: true },
 };
 
 const COR_PADRAO = '#9e9e9e';

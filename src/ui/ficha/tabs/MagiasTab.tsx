@@ -5,6 +5,7 @@ import { armas } from '../../../data/rulesets/dnd2024/armas';
 import type { ItemMochila } from '../../../core/mochila';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import type { Moedas } from '../../../core/moedas';
+import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import {
   espacosDeMagiaAtivos,
   magiasPreparadasDoPersonagem,
@@ -914,7 +915,7 @@ export default function MagiasTab({
                 return (
                   <div key={espaco.circulo} className={styles.espacoRow} style={i === 0 ? { borderTop: 'none' } : undefined}>
                     <span>{espaco.circulo}º círculo</span>
-                    <TickPips total={espaco.maximo} usados={gasto} tamanho="lg" variante={classeAtivaNome === 'Bruxo' ? 'roxo' : 'padrao'} />
+                    <TickPips total={espaco.maximo} usados={gasto} tamanho="lg" cor={corDoRecursoDaClasse(classeAtivaNome)} />
                   </div>
                 );
               })}
@@ -946,7 +947,7 @@ export default function MagiasTab({
                 return (
                   <div key={espaco.circulo} className={styles.espacoRow} style={i === 0 ? { borderTop: 'none' } : undefined}>
                     <span>{espaco.circulo}º círculo</span>
-                    <TickPips total={espaco.maximo} usados={gasto} tamanho="lg" variante={ponte.classeNome === 'Bruxo' ? 'roxo' : 'padrao'} />
+                    <TickPips total={espaco.maximo} usados={gasto} tamanho="lg" cor={corDoRecursoDaClasse(ponte.classeNome)} />
                   </div>
                 );
               })}

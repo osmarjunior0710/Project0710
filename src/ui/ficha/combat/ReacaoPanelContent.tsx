@@ -11,6 +11,7 @@ import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import PillsMagia from '../../components/PillsMagia';
 import TickPips from '../../components/TickPips';
+import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import styles from './PanelRows.module.css';
 
@@ -395,7 +396,7 @@ export default function ReacaoPanelContent({
       {usosInspiracaoMaximo > 0 && (
         <div className={styles.slotCounter}>
           <span>Inspiração de Bardo (d{tamanhoDadoInspiracao}):</span>
-          <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} variante="mostarda" />
+          <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} cor={corDoRecursoDaClasse('Bardo')} />
           <span style={{ color: 'var(--text-faint)' }}>
             {usosInspiracaoRestantes}/{usosInspiracaoMaximo} disponíveis
           </span>

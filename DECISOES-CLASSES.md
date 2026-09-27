@@ -69,23 +69,42 @@ continua funcionando nos painéis de Ação/Bônus/Reação, mas some da visão
 geral — o Char Multiclasse (`personagemTesteMulticlasse.ts`) serve pra
 conferir.
 
-**Cor dos pips por classe (`core/corRecursoClasse.ts`, pedido do Osmar
-2026-09):** cada classe tem UMA cor de pip, igual em toda tela onde o
-recurso dela aparece — Bárbaro/Fúria vermelho, Bardo/Inspiração
-mostarda, Bruxo/Magia de Pacto roxo, Guerreiro/Recuperar Fôlego azul
-(confirmado — mesmo azul padrão, registrado de propósito pra não
-parecer esquecimento), Mago/Truques e Magias azul-claro (2026-09-24,
-distinto do azul do Guerreiro de propósito — os dois nunca deveriam
-se confundir na mesma tela, ex.: personagem Guerreiro/Mago
-multiclasse). **Classe nova ganha cor na mesma
-entrega em que ganha o 1º recurso com contador; se o Osmar não disser
-qual, PERGUNTAR** (não escolher sozinho). Sem cor definida, o pip fica no
-azul padrão (`null`) até o Osmar decidir. Os
-pickers de "Usar Magia" (`SelecionarMagiaShell`/`EscolherCirculoShell`)
-ainda não sabem a classe do pool, então mostram o azul padrão mesmo pro
-Bruxo.
+**Cor dos pips/selos por classe (`core/corRecursoClasse.ts`) — as 12
+cores finais, decididas pelo Osmar (2026-09):** cada classe tem UMA cor
+(hex) + 1 flag de texto branco/preto, igual em toda tela onde o recurso
+dela aparece (área de recursos do Combate, painéis de Ação/Bônus/
+Reação, aba Magias, selo de Multiclasse). Decidido com a ajuda do
+protótipo `/prototipo` → "Cor de cada classe" (seletor HSV: quadrado
+Saturação×Valor + barra de Matiz, estilo w3schools/Photoshop — feito
+depois de um color picker mais simples não dar opções suficientes pra
+12 cores mutuamente distinguíveis).
 
-**Data/origem:** 2026-08/09, Guerreiro/Bardo/Bruxo.
+**Arquitetura:** até 2026-09 isso era um enum fechado de 5 nomes
+(`'vermelho' | 'roxo' | 'mostarda' | 'azul' | 'azul-claro'`) atrelados
+a tokens de design COMPARTILHADOS (`--danger`, `--accent-especial`,
+`--pip-mostarda`, `--accent`, `--pip-azul-claro`) — só cobria 5 classes
+e cada hex também tinha OUTRO significado na UI (`--danger` também é o
+vermelho de erro). Virou `CorClasse { hex: string; textoClaro: boolean
+}`, com hex PRÓPRIO de cada classe, sem relação com os tokens de design
+gerais — cobre as 12 classes oficiais de uma vez. `TickPips`/
+`ContadorUsos` trocaram o prop `variante` (fechado, mapeado pra classe
+CSS) por um prop `cor?: CorClasse | null` (aplica `background` inline
+direto do hex); `variante` continua existindo só pros 2 casos que NÃO
+são cor de classe (`'padrao'` = azul do app, `'especial'` = roxo/
+lavanda do Ritual Rápido). `PillClasse` segue o mesmo padrão (inline
+style em vez de classe CSS por cor).
+
+**Classe nova ganha cor na mesma entrega em que ganha o 1º recurso com
+contador; se o Osmar não disser qual, PERGUNTAR** (não escolher
+sozinho) — mas as 12 já estão decididas, então isso só se aplicaria a
+uma 13ª classe/homebrew. Sem cor definida, o pip fica no azul padrão
+(`null`) até o Osmar decidir. Os pickers de "Usar Magia"
+(`SelecionarMagiaShell`/`EscolherCirculoShell`) já leem a cor da classe
+do pool dinamicamente (`corDoRecursoDaClasse(nomeDaClasse)`), inclusive
+pra Ponte de Magia de Pacto (Multiclasse).
+
+**Data/origem:** 2026-08/09, Guerreiro/Bardo/Bruxo (5 cores
+provisórias) → 2026-09, as 12 cores finais + arquitetura hex livre.
 
 ## Motor de Level Up genérico (`core/levelUp.ts`)
 

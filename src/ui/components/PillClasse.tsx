@@ -1,13 +1,5 @@
-import { corDoRecursoDaClasse, type CorRecurso } from '../../core/corRecursoClasse';
+import { corDoRecursoDaClasse } from '../../core/corRecursoClasse';
 import styles from './PillClasse.module.css';
-
-const CLASSE_DA_COR: Record<CorRecurso, string> = {
-  vermelho: styles.pillVermelho,
-  roxo: styles.pillRoxo,
-  mostarda: styles.pillMostarda,
-  azul: styles.pillAzul,
-  'azul-claro': styles.pillAzulClaro,
-};
 
 /** Selo pequeno com o NOME da classe, na mesma cor já usada nos
  * recursos de Combate (`core/corRecursoClasse.ts`) — usado em
@@ -18,5 +10,12 @@ const CLASSE_DA_COR: Record<CorRecurso, string> = {
  * de perícia. */
 export default function PillClasse({ classe }: { classe: string }) {
   const cor = corDoRecursoDaClasse(classe);
-  return <span className={`tag ${styles.pill} ${cor ? CLASSE_DA_COR[cor] : ''}`}>{classe}</span>;
+  return (
+    <span
+      className={`tag ${styles.pill}`}
+      style={cor ? { background: cor.hex, borderColor: cor.hex, color: cor.textoClaro ? '#fff' : '#000' } : undefined}
+    >
+      {classe}
+    </span>
+  );
 }

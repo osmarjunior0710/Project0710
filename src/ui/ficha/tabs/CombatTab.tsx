@@ -25,6 +25,7 @@ import { useRoll } from '../../roll/RollContext';
 import InfoChip from '../../components/InfoChip';
 import BarraDeVida from '../../components/BarraDeVida';
 import ContadorUsos from '../../components/ContadorUsos';
+import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import SidePanel from '../combat/SidePanel';
 import PvManualModal from '../combat/PvManualModal';
 import RecursosDeClasse from '../combat/RecursosDeClasse';
@@ -1572,7 +1573,7 @@ export default function CombatTab({
         <>
           <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span>Perícia Inigualável</span>
-            <ContadorUsos total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} variante="mostarda" />
+            <ContadorUsos total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} cor={corDoRecursoDaClasse('Bardo')} />
           </div>
           {periciaInigualavelPendente ? (
             <div className="box" style={{ padding: 12, marginBottom: 12 }}>

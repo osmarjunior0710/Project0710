@@ -14,6 +14,7 @@ import MagiaComDescricao from '../../components/MagiaComDescricao';
 import GrupoMagiaColapsavel from '../../components/GrupoMagiaColapsavel';
 import PillsMagia from '../../components/PillsMagia';
 import TickPips from '../../components/TickPips';
+import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import styles from '../levelup/LevelUpShell.module.css';
 import localStyles from './SelecionarMagiaShell.module.css';
@@ -164,7 +165,7 @@ export default function SelecionarMagiaShell({
                   return (
                     <div key={e.circulo} className={localStyles.painelEspacosRow}>
                       <span className={localStyles.painelEspacosLabel}>{e.circulo}º</span>
-                      <TickPips total={e.maximo} usados={gasto} tamanho="sm" variante={ponte.classeNome === 'Bruxo' ? 'roxo' : 'padrao'} />
+                      <TickPips total={e.maximo} usados={gasto} tamanho="sm" cor={corDoRecursoDaClasse(ponte.classeNome)} />
                     </div>
                   );
                 })}

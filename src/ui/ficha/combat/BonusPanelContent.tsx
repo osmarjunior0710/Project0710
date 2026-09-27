@@ -9,6 +9,7 @@ import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagi
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
+import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import styles from './PanelRows.module.css';
 
 interface BonusPanelContentProps {
@@ -442,7 +443,7 @@ export default function BonusPanelContent({
         <>
           <div className={styles.slotCounter}>
             <span>Inspiração de Bardo (d{tamanhoDadoInspiracao}):</span>
-            <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} variante="mostarda" />
+            <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} cor={corDoRecursoDaClasse('Bardo')} />
             <span style={{ color: 'var(--text-faint)' }}>
               {usosInspiracaoRestantes}/{usosInspiracaoMaximo} disponíveis
             </span>
@@ -677,7 +678,7 @@ export default function BonusPanelContent({
         <>
           <div className={styles.slotCounter}>
             <span>Fúria:</span>
-            <TickPips total={furiaMaximo} usados={furiaMaximo - furiaRestantes} variante="vermelho" />
+            <TickPips total={furiaMaximo} usados={furiaMaximo - furiaRestantes} cor={corDoRecursoDaClasse('Bárbaro')} />
             <span style={{ color: 'var(--text-faint)' }}>
               {furiaRestantes}/{furiaMaximo} disponíveis
             </span>
