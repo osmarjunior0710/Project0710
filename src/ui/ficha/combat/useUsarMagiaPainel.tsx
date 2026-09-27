@@ -5,12 +5,13 @@ import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
-import { truqueElegivelTruquePotente } from '../../../core/evocador';
+import { truqueElegivelTruquePotente, sobrecargaElegivel, danoMaximoSobrecarga, danoNecroticoSobrecarga } from '../../../core/evocador';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
+import SobrecargaEscolha from './SobrecargaEscolha';
 
 interface UsarMagiaPainelParams {
   /** `SidePanel.open` do drawer que hospeda este painel — o painel de
@@ -53,6 +54,12 @@ interface UsarMagiaPainelParams {
    * magia de Evocação de Mago. */
   evocacaoPotencializadaAtiva: boolean;
   modIntAtual: number;
+  /** Sobrecarga (Mago/Evocador, nível 14, regra oficial — ver
+   * `core/evocador.ts`) — pode causar dano máximo em vez de rolar
+   * (magia de Mago com dano, espaço de 1º a 5º círculo). */
+  sobrecargaAtiva: boolean;
+  sobrecargaUsosDesdeDescanso: number;
+  onUsarSobrecarga: () => void;
   colheitaMacabraDisponivel: boolean;
   onColheitaMacabraDisponivel: (cura: number) => void;
   /** Aplica a cura rolada (`rollCura`) no PV do personagem E dispara
@@ -87,6 +94,15 @@ interface UsarMagiaPainelParams {
  * `abrirLista` é o `onClick` da linha "✨ Usar Magia" de cada painel. */
 export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
   const [telaMagia, setTelaMagia] = useState<'lista' | { magia: Magia; circulos: number[] } | null>(null);
+  // Sobrecarga (Mago/Evocador) — escolha "rolar normal vs. dano
+  // máximo", pausando a rolagem automática só quando
+  // `sobrecargaElegivel` é `true`. Mesmo padrão de `MagiasTab.tsx`.
+  const [escolhaSobrecarga, setEscolhaSobrecarga] = useState<{
+    nomeMagia: string;
+    danoMaximo: number;
+    aoRolarNormal: () => void;
+    aoUsarSobrecarga: () => void;
+  } | null>(null);
   const { rolarD20, rolarDados } = useRoll();
 
   // Fechar o drawer (backdrop/borda) não desmonta o painel — reseta o
@@ -138,16 +154,47 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         confirmarAcerto: {
           onAcertou: ({ critico }) => {
             if (!dano) return;
-            const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
-            rolarDados({
-              label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
-              formula: montado.formula,
-              quantidade: montado.quantidade,
-              lados: dano.lados,
-              mod: dano.mod,
-              explicacaoMod: dano.explicacaoMod,
-              confirmarFechamento: {},
-            });
+            const rolarNormal = () => {
+              const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
+              rolarDados({
+                label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
+                formula: montado.formula,
+                quantidade: montado.quantidade,
+                lados: dano.lados,
+                mod: dano.mod,
+                explicacaoMod: dano.explicacaoMod,
+                confirmarFechamento: {},
+              });
+            };
+            if (sobrecargaElegivel(m, circuloUsado, p.sobrecargaAtiva)) {
+              setEscolhaSobrecarga({
+                nomeMagia: m.nome,
+                danoMaximo: danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, critico),
+                aoRolarNormal: () => {
+                  setEscolhaSobrecarga(null);
+                  rolarNormal();
+                },
+                aoUsarSobrecarga: () => {
+                  setEscolhaSobrecarga(null);
+                  const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, critico);
+                  p.onEscolher(`✨ ${m.nome}`, `☠️ Sobrecarga — ${max} de dano máximo${critico ? ' (Crítico)' : ''}`);
+                  const necrotico = danoNecroticoSobrecarga(p.sobrecargaUsosDesdeDescanso, circuloUsado);
+                  p.onUsarSobrecarga();
+                  if (necrotico) {
+                    rolarDados({
+                      label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
+                      formula: `${necrotico.quantidade}d12`,
+                      quantidade: necrotico.quantidade,
+                      lados: necrotico.lados,
+                      mod: 0,
+                      confirmarFechamento: {},
+                    });
+                  }
+                },
+              });
+              return;
+            }
+            rolarNormal();
           },
           onErrou: () => {
             if (!dano || !p.truquePotenteAtivo || !truqueElegivelTruquePotente(m)) return;
@@ -189,7 +236,14 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
   }
 
   const picker =
-    telaMagia === 'lista' ? (
+    escolhaSobrecarga ? (
+      <SobrecargaEscolha
+        nomeMagia={escolhaSobrecarga.nomeMagia}
+        danoMaximo={escolhaSobrecarga.danoMaximo}
+        onRolarNormal={escolhaSobrecarga.aoRolarNormal}
+        onUsarSobrecarga={escolhaSobrecarga.aoUsarSobrecarga}
+      />
+    ) : telaMagia === 'lista' ? (
       <SelecionarMagiaShell
         titulo="Usar Magia"
         truques={p.truques}

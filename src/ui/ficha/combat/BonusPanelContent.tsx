@@ -152,6 +152,9 @@ interface BonusPanelContentProps {
   truquePotenteAtivo: boolean;
   evocacaoPotencializadaAtiva: boolean;
   modIntAtual: number;
+  sobrecargaAtiva: boolean;
+  sobrecargaUsosDesdeDescanso: number;
+  onUsarSobrecarga: () => void;
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda, que vive em CombatTab. */
   onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
@@ -242,6 +245,9 @@ export default function BonusPanelContent({
   truquePotenteAtivo,
   evocacaoPotencializadaAtiva,
   modIntAtual,
+  sobrecargaAtiva,
+  sobrecargaUsosDesdeDescanso,
+  onUsarSobrecarga,
   onAbrirSalvaguarda,
   onCuraDeMagiaAplicada,
   colheitaMacabraDisponivel,
@@ -276,6 +282,9 @@ export default function BonusPanelContent({
     truquePotenteAtivo,
     evocacaoPotencializadaAtiva,
     modIntAtual,
+    sobrecargaAtiva,
+    sobrecargaUsosDesdeDescanso,
+    onUsarSobrecarga,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     preferenciasPillsMagia,

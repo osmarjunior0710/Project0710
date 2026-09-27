@@ -68,6 +68,9 @@ interface AcaoPanelContentProps {
   truquePotenteAtivo: boolean;
   evocacaoPotencializadaAtiva: boolean;
   modIntAtual: number;
+  sobrecargaAtiva: boolean;
+  sobrecargaUsosDesdeDescanso: number;
+  onUsarSobrecarga: () => void;
   numAtaques: number;
   ataquesFeitos: number;
   surtoMax: number;
@@ -217,6 +220,9 @@ export default function AcaoPanelContent({
   truquePotenteAtivo,
   evocacaoPotencializadaAtiva,
   modIntAtual,
+  sobrecargaAtiva,
+  sobrecargaUsosDesdeDescanso,
+  onUsarSobrecarga,
   numAtaques,
   ataquesFeitos,
   surtoMax,
@@ -288,6 +294,9 @@ export default function AcaoPanelContent({
     truquePotenteAtivo,
     evocacaoPotencializadaAtiva,
     modIntAtual,
+    sobrecargaAtiva,
+    sobrecargaUsosDesdeDescanso,
+    onUsarSobrecarga,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     preferenciasPillsMagia,

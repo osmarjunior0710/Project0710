@@ -7,7 +7,14 @@ import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
-import { truqueElegivelTruquePotente, aplicarEvocacaoPotencializadaAoDano } from '../../../core/evocador';
+import {
+  truqueElegivelTruquePotente,
+  aplicarEvocacaoPotencializadaAoDano,
+  sobrecargaElegivel,
+  danoMaximoSobrecarga,
+  danoNecroticoSobrecarga,
+} from '../../../core/evocador';
+import SobrecargaEscolha from '../combat/SobrecargaEscolha';
 import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { Pet } from '../../../core/pets';
@@ -328,6 +335,12 @@ interface CombatTabProps {
    * ver `core/evocador.ts`) — soma o mod. de Inteligência ao dano de
    * magia de Evocação de Mago. */
   evocacaoPotencializadaAtiva: boolean;
+  /** Sobrecarga (Mago/Evocador, nível 14, regra oficial — ver
+   * `core/evocador.ts`) — pode causar dano máximo em vez de rolar
+   * (magia de Mago com dano, espaço de 1º a 5º círculo). */
+  sobrecargaAtiva: boolean;
+  sobrecargaUsosDesdeDescanso: number;
+  onUsarSobrecarga: () => void;
   numAtaques: number;
   indomavel: RecursoContado;
   pontosDeSorte: RecursoContado;
@@ -611,6 +624,9 @@ export default function CombatTab({
   modCarisma,
   truquePotenteAtivo,
   evocacaoPotencializadaAtiva,
+  sobrecargaAtiva,
+  sobrecargaUsosDesdeDescanso,
+  onUsarSobrecarga,
   numAtaques,
   indomavel: { maximo: indomavelMaximo, restantes: indomavelRestantes, onUsar: onUsarIndomavel },
   pontosDeSorte: { maximo: pontosDeSorteMaximo, restantes: pontosDeSorteRestantes, onUsar: onUsarPontoDeSorte },
@@ -673,6 +689,15 @@ export default function CombatTab({
     circuloUsado: number;
     danoRolado: number | null;
     upcastNaoAutomatico: boolean;
+  } | null>(null);
+  // Sobrecarga (Mago/Evocador) — mesmo padrão de `MagiasTab.tsx`:
+  // escolha "rolar normal vs. dano máximo", pausando a rolagem
+  // automática só quando `sobrecargaElegivel` é `true`.
+  const [escolhaSobrecarga, setEscolhaSobrecarga] = useState<{
+    nomeMagia: string;
+    danoMaximo: number;
+    aoRolarNormal: () => void;
+    aoUsarSobrecarga: () => void;
   } | null>(null);
   const [ataquesFeitos, setAtaquesFeitos] = useState(0);
   const [piscando, setPiscando] = useState(false);
@@ -774,22 +799,53 @@ export default function CombatTab({
       return;
     }
     const dano = aplicarEvocacaoPotencializadaAoDano(danoBase, magia, evocacaoPotencializadaAtiva, modIntAtual);
-    let totalRolado = 0;
-    rolarDados({
-      label: `Dano — ✨ ${magia.nome}`,
-      formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
-      quantidade: dano.quantidade,
-      lados: dano.lados,
-      mod: dano.mod,
-      explicacaoMod: dano.explicacao,
-      onResultado: (total) => {
-        totalRolado = total;
-      },
-      confirmarFechamento: {
-        aoTocar: () =>
-          setTelaSalvaguarda({ magia, circuloUsado, danoRolado: totalRolado, upcastNaoAutomatico: dano.upcastNaoAutomatico }),
-      },
-    });
+    const rolarNormal = () => {
+      let totalRolado = 0;
+      rolarDados({
+        label: `Dano — ✨ ${magia.nome}`,
+        formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+        quantidade: dano.quantidade,
+        lados: dano.lados,
+        mod: dano.mod,
+        explicacaoMod: dano.explicacao,
+        onResultado: (total) => {
+          totalRolado = total;
+        },
+        confirmarFechamento: {
+          aoTocar: () =>
+            setTelaSalvaguarda({ magia, circuloUsado, danoRolado: totalRolado, upcastNaoAutomatico: dano.upcastNaoAutomatico }),
+        },
+      });
+    };
+    if (sobrecargaElegivel(magia, circuloUsado, sobrecargaAtiva)) {
+      setEscolhaSobrecarga({
+        nomeMagia: magia.nome,
+        danoMaximo: danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, false),
+        aoRolarNormal: () => {
+          setEscolhaSobrecarga(null);
+          rolarNormal();
+        },
+        aoUsarSobrecarga: () => {
+          setEscolhaSobrecarga(null);
+          const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, false);
+          const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
+          onUsarSobrecarga();
+          setTelaSalvaguarda({ magia, circuloUsado, danoRolado: max, upcastNaoAutomatico: dano.upcastNaoAutomatico });
+          if (necrotico) {
+            rolarDados({
+              label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
+              formula: `${necrotico.quantidade}d12`,
+              quantidade: necrotico.quantidade,
+              lados: necrotico.lados,
+              mod: 0,
+              confirmarFechamento: {},
+            });
+          }
+        },
+      });
+      return;
+    }
+    rolarNormal();
   }
 
   // Ver `danoCondicionalDado` em magias.ts — só Badalar Fúnebre hoje
@@ -1574,6 +1630,14 @@ export default function CombatTab({
       </div>
 
       {feedback && <div className={styles.feedback}>{feedback}</div>}
+      {escolhaSobrecarga && (
+        <SobrecargaEscolha
+          nomeMagia={escolhaSobrecarga.nomeMagia}
+          danoMaximo={escolhaSobrecarga.danoMaximo}
+          onRolarNormal={escolhaSobrecarga.aoRolarNormal}
+          onUsarSobrecarga={escolhaSobrecarga.aoUsarSobrecarga}
+        />
+      )}
 
       {golpeBrutalEfeitoPendente && (
         <EscolherEfeitoModal
@@ -1622,6 +1686,9 @@ export default function CombatTab({
           modCarisma={modCarisma}
           truquePotenteAtivo={truquePotenteAtivo}
           evocacaoPotencializadaAtiva={evocacaoPotencializadaAtiva}
+          sobrecargaAtiva={sobrecargaAtiva}
+          sobrecargaUsosDesdeDescanso={sobrecargaUsosDesdeDescanso}
+          onUsarSobrecarga={onUsarSobrecarga}
           modIntAtual={modIntAtual}
           numAtaques={numAtaques}
           ataquesFeitos={ataquesFeitos}
@@ -1742,6 +1809,9 @@ export default function CombatTab({
           modCarisma={modCarisma}
           truquePotenteAtivo={truquePotenteAtivo}
           evocacaoPotencializadaAtiva={evocacaoPotencializadaAtiva}
+          sobrecargaAtiva={sobrecargaAtiva}
+          sobrecargaUsosDesdeDescanso={sobrecargaUsosDesdeDescanso}
+          onUsarSobrecarga={onUsarSobrecarga}
           modIntAtual={modIntAtual}
           onAbrirSalvaguarda={abrirSalvaguarda}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
@@ -1787,6 +1857,9 @@ export default function CombatTab({
           modCarisma={modCarisma}
           truquePotenteAtivo={truquePotenteAtivo}
           evocacaoPotencializadaAtiva={evocacaoPotencializadaAtiva}
+          sobrecargaAtiva={sobrecargaAtiva}
+          sobrecargaUsosDesdeDescanso={sobrecargaUsosDesdeDescanso}
+          onUsarSobrecarga={onUsarSobrecarga}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
           detalhesAtivo={detalhesAtivo}

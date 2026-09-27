@@ -527,6 +527,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [assinaturaMagicaGastas, setAssinaturaMagicaGastas] = useState<string[]>(
     personagemSalvo.assinaturaMagicaGastasAtual ?? [],
   );
+  // Sobrecarga (Mago/Evocador, nível 14) — ver core/evocador.ts. Zera
+  // só no Descanso Longo (descansoLongo()), nunca no Curto.
+  const [sobrecargaUsosDesdeDescanso, setSobrecargaUsosDesdeDescanso] = useState(
+    personagemSalvo.sobrecargaUsosDesdeDescansoAtual ?? 0,
+  );
   const [surtoUsadoTurno, setSurtoUsadoTurno] = useState(personagemSalvo.surtoUsadoTurnoAtual ?? false);
   const [restStatus, setRestStatus] = useState<string | null>(null);
   // Aviso temporário na tela (hoje só Vigor Implacável). O texto de
@@ -826,6 +831,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasAssinaturaDoLivro,
     truquePotenteAtivo,
     evocacaoPotencializadaAtiva,
+    sobrecargaAtiva,
     usaRedefPorDescanso,
     magiasGratisConcedidas,
     formasFamiliarElegiveis,
@@ -1212,6 +1218,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     maestriaDeMagiasAtual: maestriaDeMagiasAtuais,
     assinaturaMagicaAtual: assinaturaMagicaAtuais,
     assinaturaMagicaGastasAtual: assinaturaMagicaGastas,
+    sobrecargaUsosDesdeDescansoAtual: sobrecargaUsosDesdeDescanso,
     magiasGratisInvocacoesGastas: magiasGratisGastas,
     talentosGeraisAtual: talentosGeraisAtuais,
     escolhaMagiaTalentoGeral,
@@ -1643,6 +1650,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setArcanaMisticaGastos([]);
     setMagiasGratisGastas([]);
     setAssinaturaMagicaGastas([]);
+    setSobrecargaUsosDesdeDescanso(0);
     fimDoTurno();
   }
 
@@ -1842,6 +1850,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (assinaturaMagicaAtuais.includes(nomeMagia) && !assinaturaMagicaGastas.includes(nomeMagia)) {
       setAssinaturaMagicaGastas((prev) => [...prev, nomeMagia]);
     }
+  }
+
+  /** Sobrecarga (Mago/Evocador) — incrementa o contador de usos desde
+   * o último Descanso Longo, chamado toda vez que o jogador ESCOLHE
+   * o dano máximo (não quando rola normal). */
+  function usarSobrecarga() {
+    setSobrecargaUsosDesdeDescanso((n) => n + 1);
   }
 
   function usarMagiaGratisDeInvocacao(item: MagiaGratisDeInvocacao) {
@@ -2732,6 +2747,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             modCarisma={carMod}
             truquePotenteAtivo={truquePotenteAtivo}
             evocacaoPotencializadaAtiva={evocacaoPotencializadaAtiva}
+            sobrecargaAtiva={sobrecargaAtiva}
+            sobrecargaUsosDesdeDescanso={sobrecargaUsosDesdeDescanso}
+            onUsarSobrecarga={usarSobrecarga}
             modIntAtual={modIntAtual}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             conjura={conjura}
@@ -2958,6 +2976,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             modCarisma={carMod}
             truquePotenteAtivo={truquePotenteAtivo}
             evocacaoPotencializadaAtiva={evocacaoPotencializadaAtiva}
+            sobrecargaAtiva={sobrecargaAtiva}
+            sobrecargaUsosDesdeDescanso={sobrecargaUsosDesdeDescanso}
+            onUsarSobrecarga={usarSobrecarga}
             numAtaques={numAtaques}
             indomavel={{ maximo: indomavelMaximo, restantes: indomavelRestantes, onUsar: usarIndomavel }}
             pontosDeSorte={{ maximo: pontosDeSorteMaximo, restantes: pontosDeSorteRestantes, onUsar: usarPontoDeSorte }}

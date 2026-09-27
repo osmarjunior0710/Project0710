@@ -6,12 +6,13 @@ import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { cdConjuracao, circulosDisponiveisParaConjurar, type EspacoDeMagiaAtivo, type MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
-import { truqueElegivelTruquePotente } from '../../../core/evocador';
+import { truqueElegivelTruquePotente, sobrecargaElegivel, danoMaximoSobrecarga, danoNecroticoSobrecarga } from '../../../core/evocador';
 import { useRoll } from '../../roll/RollContext';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import PillsMagia from '../../components/PillsMagia';
 import TickPips from '../../components/TickPips';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
+import SobrecargaEscolha from './SobrecargaEscolha';
 import styles from './PanelRows.module.css';
 
 interface ReacaoPanelContentProps {
@@ -56,6 +57,9 @@ interface ReacaoPanelContentProps {
   modCarisma: number;
   truquePotenteAtivo: boolean;
   evocacaoPotencializadaAtiva: boolean;
+  sobrecargaAtiva: boolean;
+  sobrecargaUsosDesdeDescanso: number;
+  onUsarSobrecarga: () => void;
   detalhesAtivo: boolean;
   contraEncantamentoDisponivel: boolean;
   palavrasDeInterrupcaoDisponivel: boolean;
@@ -127,6 +131,9 @@ export default function ReacaoPanelContent({
   modCarisma,
   truquePotenteAtivo,
   evocacaoPotencializadaAtiva,
+  sobrecargaAtiva,
+  sobrecargaUsosDesdeDescanso,
+  onUsarSobrecarga,
   detalhesAtivo,
   contraEncantamentoDisponivel,
   palavrasDeInterrupcaoDisponivel,
@@ -155,6 +162,13 @@ export default function ReacaoPanelContent({
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
+  // Sobrecarga (Mago/Evocador) — mesmo padrão de `useUsarMagiaPainel.tsx`.
+  const [escolhaSobrecarga, setEscolhaSobrecarga] = useState<{
+    nomeMagia: string;
+    danoMaximo: number;
+    aoRolarNormal: () => void;
+    aoUsarSobrecarga: () => void;
+  } | null>(null);
   const { rolarD20, rolarDados } = useRoll();
 
   function usarColheitaDosMortos(petId: string, cura: number) {
@@ -201,16 +215,47 @@ export default function ReacaoPanelContent({
         confirmarAcerto: {
           onAcertou: ({ critico }) => {
             if (!dano) return;
-            const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
-            rolarDados({
-              label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
-              formula: montado.formula,
-              quantidade: montado.quantidade,
-              lados: dano.lados,
-              mod: dano.mod,
-              explicacaoMod: dano.explicacaoMod,
-              confirmarFechamento: {},
-            });
+            const rolarNormal = () => {
+              const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
+              rolarDados({
+                label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
+                formula: montado.formula,
+                quantidade: montado.quantidade,
+                lados: dano.lados,
+                mod: dano.mod,
+                explicacaoMod: dano.explicacaoMod,
+                confirmarFechamento: {},
+              });
+            };
+            if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {
+              setEscolhaSobrecarga({
+                nomeMagia: m.nome,
+                danoMaximo: danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, critico),
+                aoRolarNormal: () => {
+                  setEscolhaSobrecarga(null);
+                  rolarNormal();
+                },
+                aoUsarSobrecarga: () => {
+                  setEscolhaSobrecarga(null);
+                  const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, critico);
+                  onEscolher(`✨ ${m.nome}`, `☠️ Sobrecarga — ${max} de dano máximo${critico ? ' (Crítico)' : ''}`);
+                  const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
+                  onUsarSobrecarga();
+                  if (necrotico) {
+                    rolarDados({
+                      label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
+                      formula: `${necrotico.quantidade}d12`,
+                      quantidade: necrotico.quantidade,
+                      lados: necrotico.lados,
+                      mod: 0,
+                      confirmarFechamento: {},
+                    });
+                  }
+                },
+              });
+              return;
+            }
+            rolarNormal();
           },
           onErrou: () => {
             if (!dano || !truquePotenteAtivo || !truqueElegivelTruquePotente(m)) return;
@@ -314,6 +359,17 @@ export default function ReacaoPanelContent({
   }
 
   const semUsosInspiracao = usosInspiracaoRestantes <= 0;
+
+  if (escolhaSobrecarga) {
+    return (
+      <SobrecargaEscolha
+        nomeMagia={escolhaSobrecarga.nomeMagia}
+        danoMaximo={escolhaSobrecarga.danoMaximo}
+        onRolarNormal={escolhaSobrecarga.aoRolarNormal}
+        onUsarSobrecarga={escolhaSobrecarga.aoUsarSobrecarga}
+      />
+    );
+  }
 
   if (telaColheitaDosMortos) {
     return (

@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2304
+
+Mago/Evocador ganha "Sobrecarga" (nível 14): ao usar uma magia de
+1º-5º círculo, escolha entre rolar o dano normal ou causar dano
+máximo direto — usar de novo antes do próximo Descanso Longo causa
+dano Necrótico crescente em você mesmo.
+
 ## v202609_2046
 
 Mago/Evocador ganha "Evocação Potencializada" (nível 10): dano de

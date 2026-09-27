@@ -67,9 +67,24 @@ da Entrega 2 — foco "Mago — características base" fechou (ver
       pontos (ataque em Magias, salvaguarda em Magias, ataque em
       Combate): linha "Evocação Potencializada +X" aparece certa na
       quebra do dano.
-- [ ] Entrega 5 — Sobrecarga (nível 14): dano máximo opcional +
-      contador de usos desde o Descanso Longo + dano Necrótico
-      auto-infligido escalando.
+- [x] Entrega 5 — Sobrecarga (nível 14): escolha "Rolar Dano" (normal)
+      vs. "☠️ Sobrecarga" (dano máximo) numa tela própria
+      (`SobrecargaEscolha.tsx`, reaproveitando overlay/card de
+      `SalvaguardaDoAlvoModal`) — aparece ANTES da rolagem (não dá pra
+      usar o RollOverlay pra 2 botões pós-rolagem, só 1 rótulo
+      suportado), pra qualquer magia de Mago de 1º-5º círculo com
+      dano. Contador `sobrecargaUsosDesdeDescansoAtual` persistido
+      (zera no Descanso Longo); a partir do 2º uso desde o descanso,
+      rola dano Necrótico auto-infligido escalando
+      ((1+usosAnteriores) × círculo, d12). Reaproveitado
+      `danoComCritico` pro dano máximo em crítico. Wiring nos 5 pontos
+      de conjuração (`useUsarMagiaPainel.tsx`, `ReacaoPanelContent.tsx`,
+      `MagiasTab.tsx` ataque+salvaguarda, `CombatTab.tsx`
+      `abrirSalvaguarda`). Validado via Playwright nos 4 casos (ataque
+      e salvaguarda, nas 2 abas Magias e Combate): tela de escolha
+      aparece certa, "Rolar Dano" ainda funciona normal, "Sobrecarga"
+      aplica o dano máximo certo e o Necrótico escala certo
+      (0→sem dano, depois 4d12/6d12/12d12 conforme uso e círculo).
 - [ ] Entrega 6 — Fechamento: testes/tsc/build,
       `aprendizados/classes/mago.md` atualizado, `PENDENCIAS.md`
       "Escolha de subclasse — versão placeholder" perde o Evocador.

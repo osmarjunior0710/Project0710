@@ -25,7 +25,13 @@ import InfoValor from '../../components/InfoValor';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
 import { danoComCritico } from '../../../core/danoCritico';
-import { truqueElegivelTruquePotente, aplicarEvocacaoPotencializadaAoDano } from '../../../core/evocador';
+import {
+  truqueElegivelTruquePotente,
+  aplicarEvocacaoPotencializadaAoDano,
+  sobrecargaElegivel,
+  danoMaximoSobrecarga,
+  danoNecroticoSobrecarga,
+} from '../../../core/evocador';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import PillsMagia from '../../components/PillsMagia';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
@@ -34,6 +40,7 @@ import { useColapsavel } from '../../hooks/useColapsavel';
 import { useRoll } from '../../roll/RollContext';
 import EscolherCirculoShell from '../combat/EscolherCirculoShell';
 import SalvaguardaDoAlvoModal from '../combat/SalvaguardaDoAlvoModal';
+import SobrecargaEscolha from '../combat/SobrecargaEscolha';
 import CopiarMagiaShell from './CopiarMagiaShell';
 import styles from './MagiasTab.module.css';
 
@@ -171,6 +178,12 @@ interface MagiasTabProps {
    * magia de Evocação de Mago. */
   evocacaoPotencializadaAtiva: boolean;
   modIntAtual: number;
+  /** Sobrecarga (Mago/Evocador, nível 14, regra oficial — ver
+   * `core/evocador.ts`) — pode causar dano máximo em vez de rolar
+   * (magia de Mago com dano, espaço de 1º a 5º círculo). */
+  sobrecargaAtiva: boolean;
+  sobrecargaUsosDesdeDescanso: number;
+  onUsarSobrecarga: () => void;
   /** `true` = já reconjurado desde o último Descanso Curto/Longo —
    * botão "Reconjurar" fica travado até o próximo descanso. */
   livroDasSombrasGasto: boolean;
@@ -297,6 +310,9 @@ export default function MagiasTab({
   truquePotenteAtivo,
   evocacaoPotencializadaAtiva,
   modIntAtual,
+  sobrecargaAtiva,
+  sobrecargaUsosDesdeDescanso,
+  onUsarSobrecarga,
   desvantagemForcaDestreza,
   conjura,
   truquesAtuais,
@@ -374,7 +390,19 @@ export default function MagiasTab({
   // Truque Potente (Mago/Evocador) no caso de ataque errado — aba
   // Magias não tem um banner de feedback como o Combate (`onEscolher`),
   // então usa esse estado local só pra esse aviso.
-  const [feedbackTruquePotente, setFeedbackTruquePotente] = useState<string | null>(null);
+  const [feedbackAcaoMagica, setFeedbackAcaoMagica] = useState<string | null>(null);
+  // Sobrecarga (Mago/Evocador) — escolha "rolar normal vs. dano
+  // máximo", pausando o fluxo automático de rolagem só quando
+  // `sobrecargaElegivel` é `true`. Os 2 callbacks já vêm prontos de
+  // quem chamou (ataque ou salvaguarda têm rolagens diferentes por
+  // trás) — o componente `SobrecargaEscolha` só precisa saber o nome/
+  // dano máximo e disparar o callback certo.
+  const [escolhaSobrecarga, setEscolhaSobrecarga] = useState<{
+    nomeMagia: string;
+    danoMaximo: number;
+    aoRolarNormal: () => void;
+    aoUsarSobrecarga: () => void;
+  } | null>(null);
   // Os 4 `useColapsavel` abaixo precisam vir ANTES do `if (!conjura)
   // return` — Regra dos Hooks: nº de hooks chamados não pode variar
   // entre renders do MESMO componente montado. Bug pego testando
@@ -442,16 +470,47 @@ export default function MagiasTab({
         confirmarAcerto: {
           onAcertou: ({ critico }) => {
             if (!dano) return;
-            const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
-            rolarDados({
-              label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
-              formula: montado.formula,
-              quantidade: montado.quantidade,
-              lados: dano.lados,
-              mod: dano.mod,
-              explicacaoMod: dano.explicacaoMod,
-              confirmarFechamento: {},
-            });
+            const rolarNormal = () => {
+              const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
+              rolarDados({
+                label: `${dano.label}${critico ? ' (Crítico)' : ''}`,
+                formula: montado.formula,
+                quantidade: montado.quantidade,
+                lados: dano.lados,
+                mod: dano.mod,
+                explicacaoMod: dano.explicacaoMod,
+                confirmarFechamento: {},
+              });
+            };
+            if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {
+              setEscolhaSobrecarga({
+                nomeMagia: m.nome,
+                danoMaximo: danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, critico),
+                aoRolarNormal: () => {
+                  setEscolhaSobrecarga(null);
+                  rolarNormal();
+                },
+                aoUsarSobrecarga: () => {
+                  setEscolhaSobrecarga(null);
+                  const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, critico);
+                  setFeedbackAcaoMagica(`✨ ${m.nome} — ☠️ Sobrecarga: ${max} de dano máximo${critico ? ' (Crítico)' : ''}`);
+                  const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
+                  onUsarSobrecarga();
+                  if (necrotico) {
+                    rolarDados({
+                      label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
+                      formula: `${necrotico.quantidade}d12`,
+                      quantidade: necrotico.quantidade,
+                      lados: necrotico.lados,
+                      mod: 0,
+                      confirmarFechamento: {},
+                    });
+                  }
+                },
+              });
+              return;
+            }
+            rolarNormal();
           },
           onErrou: () => {
             if (!dano || !truquePotenteAtivo || !truqueElegivelTruquePotente(m)) return;
@@ -469,7 +528,7 @@ export default function MagiasTab({
               confirmarFechamento: {
                 rotulo: 'Aplicar Truque Potente ✓',
                 aoTocar: () =>
-                  setFeedbackTruquePotente(
+                  setFeedbackAcaoMagica(
                     `✨ ${m.nome} — Truque Potente — ${Math.floor(totalRolado / 2)} de dano (metade, sem efeitos adicionais)`,
                   ),
               },
@@ -486,22 +545,53 @@ export default function MagiasTab({
         return;
       }
       const dano = aplicarEvocacaoPotencializadaAoDano(danoBase, m, evocacaoPotencializadaAtiva, modIntAtual);
-      let totalRolado = 0;
-      rolarDados({
-        label: `Dano — ✨ ${m.nome}`,
-        formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
-        quantidade: dano.quantidade,
-        lados: dano.lados,
-        mod: dano.mod,
-        explicacaoMod: dano.explicacao,
-        onResultado: (total) => {
-          totalRolado = total;
-        },
-        confirmarFechamento: {
-          aoTocar: () =>
-            setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: totalRolado, upcastNaoAutomatico: dano.upcastNaoAutomatico }),
-        },
-      });
+      const rolarNormal = () => {
+        let totalRolado = 0;
+        rolarDados({
+          label: `Dano — ✨ ${m.nome}`,
+          formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+          quantidade: dano.quantidade,
+          lados: dano.lados,
+          mod: dano.mod,
+          explicacaoMod: dano.explicacao,
+          onResultado: (total) => {
+            totalRolado = total;
+          },
+          confirmarFechamento: {
+            aoTocar: () =>
+              setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: totalRolado, upcastNaoAutomatico: dano.upcastNaoAutomatico }),
+          },
+        });
+      };
+      if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {
+        setEscolhaSobrecarga({
+          nomeMagia: m.nome,
+          danoMaximo: danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, false),
+          aoRolarNormal: () => {
+            setEscolhaSobrecarga(null);
+            rolarNormal();
+          },
+          aoUsarSobrecarga: () => {
+            setEscolhaSobrecarga(null);
+            const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, false);
+            const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
+            onUsarSobrecarga();
+            setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: max, upcastNaoAutomatico: dano.upcastNaoAutomatico });
+            if (necrotico) {
+              rolarDados({
+                label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
+                formula: `${necrotico.quantidade}d12`,
+                quantidade: necrotico.quantidade,
+                lados: necrotico.lados,
+                mod: 0,
+                confirmarFechamento: {},
+              });
+            }
+          },
+        });
+        return;
+      }
+      rolarNormal();
       return;
     }
     if (resultado.rollCura) {
@@ -642,7 +732,15 @@ export default function MagiasTab({
 
   return (
     <>
-      {feedbackTruquePotente && (
+      {escolhaSobrecarga && (
+        <SobrecargaEscolha
+          nomeMagia={escolhaSobrecarga.nomeMagia}
+          danoMaximo={escolhaSobrecarga.danoMaximo}
+          onRolarNormal={escolhaSobrecarga.aoRolarNormal}
+          onUsarSobrecarga={escolhaSobrecarga.aoUsarSobrecarga}
+        />
+      )}
+      {feedbackAcaoMagica && (
         <div
           style={{
             border: '1px dashed var(--accent)',
@@ -651,9 +749,9 @@ export default function MagiasTab({
             marginBottom: 'var(--space-2)',
             fontSize: 13,
           }}
-          onClick={() => setFeedbackTruquePotente(null)}
+          onClick={() => setFeedbackAcaoMagica(null)}
         >
-          {feedbackTruquePotente}
+          {feedbackAcaoMagica}
         </div>
       )}
       {resumosPorClasse.length > 1

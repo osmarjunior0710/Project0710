@@ -87,3 +87,43 @@ export function aplicarEvocacaoPotencializadaAoDano(
     },
   };
 }
+
+/** Sobrecarga (Mago/Evocador, nível 14, regra oficial) —
+ * `true` = personagem já tem a característica nesse nível. */
+export function sobrecargaAtiva(subclasse: string | null, nivel: number): boolean {
+  return caracteristicaSubclasseDesbloqueada(subclasse, ID_CARACTERISTICA_SUBCLASSE.sobrecarga, nivel);
+}
+
+/** Sobrecarga vale pra qualquer magia "de Mago" com dano, conjurada com
+ * espaço de 1º a 5º círculo — sem restrição de escola (diferente de
+ * Versado em Evocação/Evocação Potencializada). `circuloUsado` é o
+ * círculo do ESPAÇO gasto (upcast conta o círculo do espaço, não o
+ * círculo base da magia); truque (círculo 0) e espaço de 6º+ ficam de
+ * fora. */
+export function sobrecargaElegivel(m: Magia, circuloUsado: number, ativa: boolean): boolean {
+  if (!ativa) return false;
+  if (!m.classes.includes('Mago') || m.danoBaseDado == null) return false;
+  return circuloUsado >= 1 && circuloUsado <= 5;
+}
+
+/** Dano máximo de Sobrecarga — cada dado no valor mais alto possível
+ * (nunca rola), já contando o dobro de dados do Crítico primeiro (SDD
+ * "seção 3": a mecânica de crítico do app dobra a QUANTIDADE de dados
+ * antes de rolar; "dano máximo" só aplica depois de já saber quantos
+ * dados existem). */
+export function danoMaximoSobrecarga(quantidade: number, lados: number, mod: number, critico: boolean): number {
+  const fator = critico ? 2 : 1;
+  return quantidade * fator * lados + mod;
+}
+
+/** Dano Necrótico auto-infligido ao usar Sobrecarga de novo antes do
+ * Descanso Longo — `null` na 1ª vez desde o descanso (regra: "ao fazer
+ * isso pela primeira vez, você não sofre nenhum efeito adverso").
+ * `usosAntesDesteUso` é o contador ANTES de incrementar por este uso
+ * (0 = 1ª vez, 1 = 2ª vez → 2d12/círculo, 2 = 3ª vez → 3d12/círculo,
+ * ...). Ignora Resistência/Imunidade (informativo — o app não modela
+ * nenhuma das duas). */
+export function danoNecroticoSobrecarga(usosAntesDesteUso: number, circuloUsado: number): { quantidade: number; lados: 12 } | null {
+  if (usosAntesDesteUso <= 0) return null;
+  return { quantidade: (1 + usosAntesDesteUso) * circuloUsado, lados: 12 };
+}

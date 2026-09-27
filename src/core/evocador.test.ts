@@ -6,6 +6,10 @@ import {
   truqueElegivelTruquePotente,
   evocacaoPotencializadaAtiva,
   bonusEvocacaoPotencializada,
+  sobrecargaAtiva,
+  sobrecargaElegivel,
+  danoMaximoSobrecarga,
+  danoNecroticoSobrecarga,
 } from './evocador';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { magias } from '../data/rulesets/dnd2024/magias';
@@ -109,5 +113,73 @@ describe('bonusEvocacaoPotencializada', () => {
     expect(chamaSagrada).toBeDefined();
     expect(chamaSagrada.classes.includes('Mago')).toBe(false);
     expect(bonusEvocacaoPotencializada(chamaSagrada, true, 3)).toBe(0);
+  });
+});
+
+describe('sobrecargaAtiva', () => {
+  it('caso normal — Evocador nível 14+ tem a característica', () => {
+    expect(sobrecargaAtiva('Evocador', 14)).toBe(true);
+  });
+
+  it('caso de borda — nível abaixo de 14, ou subclasse ausente/outra, não tem', () => {
+    expect(sobrecargaAtiva('Evocador', 13)).toBe(false);
+    expect(sobrecargaAtiva(null, 20)).toBe(false);
+    expect(sobrecargaAtiva('Necromante', 20)).toBe(false);
+  });
+});
+
+describe('sobrecargaElegivel', () => {
+  it('caso normal — magia de Mago com dano, espaço de 1º a 5º círculo, característica ativa', () => {
+    const raioDeFogo = magias.find((m) => m.nome === 'Raio de Fogo')!;
+    expect(sobrecargaElegivel(raioDeFogo, 3, true)).toBe(true);
+  });
+
+  it('caso de borda — característica inativa nunca é elegível', () => {
+    const raioDeFogo = magias.find((m) => m.nome === 'Raio de Fogo')!;
+    expect(sobrecargaElegivel(raioDeFogo, 3, false)).toBe(false);
+  });
+
+  it('caso de borda — truque (círculo 0 do espaço) não é elegível', () => {
+    const raioDeFogo = magias.find((m) => m.nome === 'Raio de Fogo')!;
+    expect(sobrecargaElegivel(raioDeFogo, 0, true)).toBe(false);
+  });
+
+  it('caso de borda — espaço de 6º círculo ou maior não é elegível', () => {
+    const raioDeFogo = magias.find((m) => m.nome === 'Raio de Fogo')!;
+    expect(sobrecargaElegivel(raioDeFogo, 6, true)).toBe(false);
+  });
+
+  it('caso de borda — magia sem dano cadastrado, ou que não é de Mago, não é elegível', () => {
+    const magiaSemDano = magias.find((m) => m.classes.includes('Mago') && m.circulo >= 1 && m.danoBaseDado == null)!;
+    expect(magiaSemDano).toBeDefined();
+    expect(sobrecargaElegivel(magiaSemDano, 2, true)).toBe(false);
+
+    const naoDeMago = magias.find((m) => !m.classes.includes('Mago') && m.circulo >= 1 && m.danoBaseDado != null)!;
+    expect(naoDeMago).toBeDefined();
+    expect(sobrecargaElegivel(naoDeMago, 2, true)).toBe(false);
+  });
+});
+
+describe('danoMaximoSobrecarga', () => {
+  it('caso normal — cada dado no valor máximo + mod, sem crítico', () => {
+    expect(danoMaximoSobrecarga(2, 10, 4, false)).toBe(2 * 10 + 4);
+  });
+
+  it('caso de borda — crítico dobra a quantidade de dados antes de aplicar o máximo', () => {
+    expect(danoMaximoSobrecarga(2, 10, 4, true)).toBe(2 * 2 * 10 + 4);
+  });
+});
+
+describe('danoNecroticoSobrecarga', () => {
+  it('caso de borda — 1ª vez desde o Descanso Longo não causa dano nenhum', () => {
+    expect(danoNecroticoSobrecarga(0, 3)).toBeNull();
+  });
+
+  it('caso normal — 2ª vez: 2d12 por círculo do espaço gasto', () => {
+    expect(danoNecroticoSobrecarga(1, 3)).toEqual({ quantidade: 6, lados: 12 });
+  });
+
+  it('escala mais 1d12 por círculo a cada uso extra (3ª vez: 3d12/círculo)', () => {
+    expect(danoNecroticoSobrecarga(2, 3)).toEqual({ quantidade: 9, lados: 12 });
   });
 });

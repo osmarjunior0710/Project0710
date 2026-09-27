@@ -217,6 +217,11 @@ export interface PersonagemSalvo {
    * período — zera em Descanso Curto E Longo (diferente de
    * `maestriaDeMagiasAtual`, que é ilimitada). */
   assinaturaMagicaGastasAtual?: string[];
+  /** Sobrecarga (Mago/Evocador, nível 14) — quantas vezes já foi usada
+   * desde o último Descanso Longo (0 = ainda não usou, ou já
+   * descansou) — controla o dano Necrótico escalante de reuso. Zera
+   * só em `descansoLongo()`, NUNCA no Curto. */
+  sobrecargaUsosDesdeDescansoAtual?: number;
   /** IDs de Invocações Místicas cuja magia de graça (`recarga:
    * 'descansoLongo'`, ex: Presente das Profundezas) já foi usada desde
    * o último Descanso Longo — cada uma trava até lá. Invocações
