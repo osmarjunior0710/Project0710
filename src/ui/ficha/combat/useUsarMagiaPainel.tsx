@@ -60,6 +60,10 @@ interface UsarMagiaPainelParams {
   sobrecargaAtiva: boolean;
   sobrecargaUsosDesdeDescanso: number;
   onUsarSobrecarga: () => void;
+  /** Aplica dano direto ao PV (delta negativo) — usado pelo dano
+   * Necrótico auto-infligido de Sobrecarga. Mesma função pura de
+   * `FichaShell.tsx` `alterarPv`. */
+  onAlterarPv: (delta: number) => void;
   colheitaMacabraDisponivel: boolean;
   onColheitaMacabraDisponivel: (cura: number) => void;
   /** Aplica a cura rolada (`rollCura`) no PV do personagem E dispara
@@ -181,13 +185,17 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
                   const necrotico = danoNecroticoSobrecarga(p.sobrecargaUsosDesdeDescanso, circuloUsado);
                   p.onUsarSobrecarga();
                   if (necrotico) {
+                    let totalNecrotico = 0;
                     rolarDados({
                       label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
                       formula: `${necrotico.quantidade}d12`,
                       quantidade: necrotico.quantidade,
                       lados: necrotico.lados,
                       mod: 0,
-                      confirmarFechamento: {},
+                      onResultado: (total) => {
+                        totalNecrotico = total;
+                      },
+                      confirmarFechamento: { aoTocar: () => p.onAlterarPv(-totalNecrotico) },
                     });
                   }
                 },

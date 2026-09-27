@@ -2736,6 +2736,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             classeAtivaNome={chaveDoPoolDeMagia}
             ponte={ponte}
             onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
+            onAlterarPv={alterarPv}
             espacosParaConjurar={espacosParaConjurar}
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}

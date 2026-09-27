@@ -832,13 +832,17 @@ export default function CombatTab({
           onUsarSobrecarga();
           setTelaSalvaguarda({ magia, circuloUsado, danoRolado: max, upcastNaoAutomatico: dano.upcastNaoAutomatico });
           if (necrotico) {
+            let totalNecrotico = 0;
             rolarDados({
               label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
               formula: `${necrotico.quantidade}d12`,
               quantidade: necrotico.quantidade,
               lados: necrotico.lados,
               mod: 0,
-              confirmarFechamento: {},
+              onResultado: (total) => {
+                totalNecrotico = total;
+              },
+              confirmarFechamento: { aoTocar: () => onAlterarPv(-totalNecrotico) },
             });
           }
         },
@@ -1812,6 +1816,7 @@ export default function CombatTab({
           sobrecargaAtiva={sobrecargaAtiva}
           sobrecargaUsosDesdeDescanso={sobrecargaUsosDesdeDescanso}
           onUsarSobrecarga={onUsarSobrecarga}
+          onAlterarPv={onAlterarPv}
           modIntAtual={modIntAtual}
           onAbrirSalvaguarda={abrirSalvaguarda}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
@@ -1860,6 +1865,7 @@ export default function CombatTab({
           sobrecargaAtiva={sobrecargaAtiva}
           sobrecargaUsosDesdeDescanso={sobrecargaUsosDesdeDescanso}
           onUsarSobrecarga={onUsarSobrecarga}
+          onAlterarPv={onAlterarPv}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
           detalhesAtivo={detalhesAtivo}

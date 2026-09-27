@@ -297,6 +297,7 @@ export default function AcaoPanelContent({
     sobrecargaAtiva,
     sobrecargaUsosDesdeDescanso,
     onUsarSobrecarga,
+    onAlterarPv,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     preferenciasPillsMagia,

@@ -60,6 +60,10 @@ interface ReacaoPanelContentProps {
   sobrecargaAtiva: boolean;
   sobrecargaUsosDesdeDescanso: number;
   onUsarSobrecarga: () => void;
+  /** Aplica dano direto ao PV (delta negativo) — usado pelo dano
+   * Necrótico auto-infligido de Sobrecarga. Mesma função pura de
+   * `FichaShell.tsx` `alterarPv`. */
+  onAlterarPv: (delta: number) => void;
   detalhesAtivo: boolean;
   contraEncantamentoDisponivel: boolean;
   palavrasDeInterrupcaoDisponivel: boolean;
@@ -134,6 +138,7 @@ export default function ReacaoPanelContent({
   sobrecargaAtiva,
   sobrecargaUsosDesdeDescanso,
   onUsarSobrecarga,
+  onAlterarPv,
   detalhesAtivo,
   contraEncantamentoDisponivel,
   palavrasDeInterrupcaoDisponivel,
@@ -242,13 +247,17 @@ export default function ReacaoPanelContent({
                   const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
                   onUsarSobrecarga();
                   if (necrotico) {
+                    let totalNecrotico = 0;
                     rolarDados({
                       label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
                       formula: `${necrotico.quantidade}d12`,
                       quantidade: necrotico.quantidade,
                       lados: necrotico.lados,
                       mod: 0,
-                      confirmarFechamento: {},
+                      onResultado: (total) => {
+                        totalNecrotico = total;
+                      },
+                      confirmarFechamento: { aoTocar: () => onAlterarPv(-totalNecrotico) },
                     });
                   }
                 },

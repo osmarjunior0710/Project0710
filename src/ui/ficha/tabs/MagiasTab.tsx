@@ -65,6 +65,11 @@ interface MagiasTabProps {
    * visual de Cura ("Me curar", ver `RollDadosOptions.confirmarAlvoCura`
    * e `FichaShell.tsx` `onCuraDeMagiaAplicada`). */
   onCuraDeMagiaAplicada: (total: number) => void;
+  /** Aplica dano direto ao PV (delta negativo) — usado pelo dano
+   * Necrótico auto-infligido de Sobrecarga (Mago/Evocador, ver
+   * `core/evocador.ts` `danoNecroticoSobrecarga`). Mesma função pura
+   * de `FichaShell.tsx` `alterarPv`, já usada por `CombatTab.tsx`. */
+  onAlterarPv: (delta: number) => void;
   /** Override do pool de Espaços de Magia — presente (M4c) quando a
    * classe ativa é uma de 2+ classes conjuradoras normais combinadas
    * (SDD Multiclasse seção 8.2): mostra o pool COMBINADO em vez do da
@@ -298,6 +303,7 @@ export default function MagiasTab({
   classeAtivaNome,
   ponte,
   onCuraDeMagiaAplicada,
+  onAlterarPv,
   espacosParaConjurar,
   onGastarSlotCirculo,
   modAcertoConjuracao,
@@ -497,13 +503,17 @@ export default function MagiasTab({
                   const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
                   onUsarSobrecarga();
                   if (necrotico) {
+                    let totalNecrotico = 0;
                     rolarDados({
                       label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
                       formula: `${necrotico.quantidade}d12`,
                       quantidade: necrotico.quantidade,
                       lados: necrotico.lados,
                       mod: 0,
-                      confirmarFechamento: {},
+                      onResultado: (total) => {
+                        totalNecrotico = total;
+                      },
+                      confirmarFechamento: { aoTocar: () => onAlterarPv(-totalNecrotico) },
                     });
                   }
                 },
@@ -578,13 +588,17 @@ export default function MagiasTab({
             onUsarSobrecarga();
             setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: max, upcastNaoAutomatico: dano.upcastNaoAutomatico });
             if (necrotico) {
+              let totalNecrotico = 0;
               rolarDados({
                 label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
                 formula: `${necrotico.quantidade}d12`,
                 quantidade: necrotico.quantidade,
                 lados: necrotico.lados,
                 mod: 0,
-                confirmarFechamento: {},
+                onResultado: (total) => {
+                  totalNecrotico = total;
+                },
+                confirmarFechamento: { aoTocar: () => onAlterarPv(-totalNecrotico) },
               });
             }
           },

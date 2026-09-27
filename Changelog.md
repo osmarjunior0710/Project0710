@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0023
+
+Corrigido: o dano Necrótico auto-infligido de "Sobrecarga" (Mago/
+Evocador) rolava na tela mas não descontava do PV do personagem —
+agora aplica de verdade, nas 2 abas (Magias e Combate).
+
 ## v202609_2304
 
 Mago/Evocador ganha "Sobrecarga" (nível 14): ao usar uma magia de

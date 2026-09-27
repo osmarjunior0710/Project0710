@@ -155,6 +155,10 @@ interface BonusPanelContentProps {
   sobrecargaAtiva: boolean;
   sobrecargaUsosDesdeDescanso: number;
   onUsarSobrecarga: () => void;
+  /** Aplica dano direto ao PV (delta negativo) — usado pelo dano
+   * Necrótico auto-infligido de Sobrecarga. Mesma função pura de
+   * `FichaShell.tsx` `alterarPv`. */
+  onAlterarPv: (delta: number) => void;
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda, que vive em CombatTab. */
   onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
@@ -248,6 +252,7 @@ export default function BonusPanelContent({
   sobrecargaAtiva,
   sobrecargaUsosDesdeDescanso,
   onUsarSobrecarga,
+  onAlterarPv,
   onAbrirSalvaguarda,
   onCuraDeMagiaAplicada,
   colheitaMacabraDisponivel,
@@ -285,6 +290,7 @@ export default function BonusPanelContent({
     sobrecargaAtiva,
     sobrecargaUsosDesdeDescanso,
     onUsarSobrecarga,
+    onAlterarPv,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     preferenciasPillsMagia,

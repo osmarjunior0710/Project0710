@@ -85,6 +85,20 @@ da Entrega 2 — foco "Mago — características base" fechou (ver
       aparece certa, "Rolar Dano" ainda funciona normal, "Sobrecarga"
       aplica o dano máximo certo e o Necrótico escala certo
       (0→sem dano, depois 4d12/6d12/12d12 conforme uso e círculo).
+      **Bug achado pelo Osmar no dia seguinte:** a rolagem de dano
+      Necrótico auto-infligido aparecia certa na tela mas não
+      descontava nada do PV — os 5 pontos de conjuração rolavam o
+      dado com `confirmarFechamento: {}` (só fecha o popup) em vez de
+      aplicar o total ao personagem. Faltava também `onAlterarPv` ser
+      passado pra `MagiasTab.tsx` (nunca tinha essa prop),
+      `BonusPanelContent.tsx` e `ReacaoPanelContent.tsx` (não recebiam
+      de `CombatTab.tsx`). Corrigido: cada rolagem agora captura o
+      total (`onResultado`) e aplica com
+      `confirmarFechamento.aoTocar: () => onAlterarPv(-total)` — mesma
+      função pura `alterarPv` já usada pelos botões manuais de PV.
+      Validado via Playwright checando o PV salvo em `localStorage`
+      antes/depois, nos 3 casos (ataque em Magias, ataque em Combate,
+      salvaguarda em Magias) — PV cai de verdade agora.
 - [ ] Entrega 6 — Fechamento: testes/tsc/build,
       `aprendizados/classes/mago.md` atualizado, `PENDENCIAS.md`
       "Escolha de subclasse — versão placeholder" perde o Evocador.
