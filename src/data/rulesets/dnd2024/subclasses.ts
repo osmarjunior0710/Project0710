@@ -34,4 +34,8 @@ export const subclasses: Subclasse[] = [
   { id: 'mago-evocador', classeId: 'mago', nome: 'Evocador', homebrew: false },
   { id: 'mago-ilusionista', classeId: 'mago', nome: 'Ilusionista', homebrew: false },
   { id: 'mago-necromante', classeId: 'mago', nome: 'Necromante', homebrew: true },
+  { id: 'paladino-juramento-da-devocao', classeId: 'paladino', nome: 'Juramento da Devoção', homebrew: false },
+  { id: 'paladino-juramento-da-gloria', classeId: 'paladino', nome: 'Juramento da Glória', homebrew: false },
+  { id: 'paladino-juramento-de-vinganca', classeId: 'paladino', nome: 'Juramento de Vingança', homebrew: false },
+  { id: 'paladino-juramento-dos-ancioes', classeId: 'paladino', nome: 'Juramento dos Anciões', homebrew: false },
 ];

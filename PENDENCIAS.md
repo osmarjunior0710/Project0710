@@ -625,10 +625,12 @@ delas.
 
 **Material de apoio já pronto do Osmar (fora deste repositório, ele
 guarda em documentos próprios):** mapeamento de progressão de Maestria
-em Arma por nível pendente pra Guardião/Ladino/Paladino (Guerreiro e
-Bárbaro já documentados/implementados). Pedir esses documentos ao
-Osmar quando a vez de cada uma dessas entregas chegar, em vez de
-redescobrir do zero.
+em Arma por nível pendente pra Guardião/Ladino (Guerreiro e Bárbaro já
+documentados/implementados). Pedir esses documentos ao Osmar quando a
+vez de cada uma dessas entregas chegar, em vez de redescobrir do zero.
+**Paladino resolvido (2026-09):** confirmado com o Osmar que não tem
+progressão — fixo em 2 tipos de arma do nível 1 ao 20, sem crescer (ver
+`sdd/sdd-paladino.md` seção 3).
 
 ## Características de Guerreiro nos níveis 2, 5, 20 tiveram texto de tabela removido na importação
 
@@ -1067,9 +1069,14 @@ efeito colateral de importar `caracteristicasClasse.ts` de cada uma
 de nível 1 dessas 5 concede idioma extra — nenhuma ação nova precisa,
 só confirmação de que a lista abaixo encolheu.
 
-**O que falta pra resolver:** as outras 5 classes ainda sem dado
-importado (Clérigo, Feiticeiro, Guardião, Monge, Paladino — Druida e
-Ladino já resolvidas, ver acima) ainda não foram auditadas linha a
+**Paladino auditado (2026-09, foco de implementação da classe):**
+nenhuma das 3 características de nível 1 (Conjuração, Maestria em
+Arma, Mãos Consagradas) concede idioma extra — confirmado, ver
+`sdd/sdd-paladino.md` seção 14.
+
+**O que falta pra resolver:** as outras 4 classes ainda sem dado
+importado (Clérigo, Feiticeiro, Guardião, Monge — Druida, Ladino e
+Paladino já resolvidas, ver acima) ainda não foram auditadas linha a
 linha na aba "Características de Classe" pra confirmar se concedem
 idioma extra também — auditar quando cada uma for implementada.
 

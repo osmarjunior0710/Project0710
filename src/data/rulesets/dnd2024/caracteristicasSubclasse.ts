@@ -228,4 +228,250 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     tipoAcao: 'Passiva / Estática',
     statusImplementacao: 'codeimplementation',
   },
+  // Paladino — 4 juramentos. "Arma Sagrada" e "A Ira da Natureza"
+  // tinham a legenda de margem lateral da página impressa colada no
+  // meio do parágrafo (mesmo problema de extração da seção 8 do
+  // CLAUDE.md) — cortada. "Campeão Ancestral" tinha o texto de exemplo
+  // de personagens famosos (repetido 2x) colado no final — cortado.
+  // "Defesa Gloriosa" e "Alma Vingativa" tinham "Tipo de Ação" mal
+  // marcado na planilha, mas o texto diz "executar uma Reação" —
+  // corrigido pra "Reação" (mesmo ajuste já feito em outras classes).
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento da Devoção',
+    nivel: 3,
+    nome: 'Magias do Juramento da Devoção',
+    descricao:
+      'A magia do seu juramento garante que você sempre tenha certas magias prontas; ao atingir um nível de Paladino detalhado na tabela Magias do Juramento da Devoção, você sempre tem as magias apresentadas preparadas.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
+    magiasFixasPorNivel: {
+      3: ['Escudo da Fé', 'Proteção Contra o Bem e o Mal'],
+      5: ['Auxílio', 'Zona da Verdade'],
+      9: ['Dissipar Magia', 'Sinal de Esperança'],
+      13: ['Defensor da Fé', 'Movimentação Livre'],
+      17: ['Coluna de Chamas', 'Comunhão'],
+    },
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento da Devoção',
+    nivel: 3,
+    nome: 'Arma Sagrada',
+    descricao:
+      'Ao executar a ação Atacar, você pode gastar um uso de seu Canalizar Divindade para imbuir uma arma Corpo a Corpo que você está empunhando com energia positiva. Por 10 minutos ou até usar essa característica novamente, você adiciona seu modificador de Carisma às jogadas de ataque que realizar com essa arma (bônus mínimo de +1) e, cada vez que atingir com ela, você causa o tipo de dano normal da arma ou dano Radiante. Além disso, a arma também emite Luz Plena em um raio de 6 metros e Meia-luz por mais 6 metros. Você pode encerrar este efeito mais cedo (nenhuma ação é necessária). Este efeito também encerra se você não estiver carregando a arma.',
+    tipoAcao: 'Grátis',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento da Devoção',
+    nivel: 7,
+    nome: 'Aura de Devoção',
+    descricao:
+      'Você e seus aliados têm Imunidade à condição Enfeitiçado enquanto estiverem em sua Aura de Proteção. Se um aliado Enfeitiçado entrar na aura, essa condição não tem efeito sobre esse aliado enquanto ele estiver na aura.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento da Devoção',
+    nivel: 15,
+    nome: 'Destruição Protetora',
+    descricao:
+      'Sua destruição mágica agora irradia energia protetora. Ao conjurar Destruição Divina, você e seus aliados têm Cobertura Parcial enquanto estiverem em sua Aura de Proteção. A aura mantém este benefício até o início do seu próximo turno.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento da Devoção',
+    nivel: 20,
+    nome: 'Resplendor Sagrado',
+    descricao:
+      'Como uma Ação Bônus, você pode imbuir sua Aura de Proteção com poder sagrado, concedendo os benefícios abaixo por 10 minutos ou até a encerrar (nenhuma ação é necessária). Após usar esta característica, você não pode utilizá-la novamente até completar um Descanso Longo. Você também pode recuperar seu uso gastando um espaço de magia de 5º círculo (nenhuma ação é necessária). Dano Radiante. Sempre que um inimigo inicia o turno na sua aura, essa criatura sofre dano Radiante igual ao seu modificador de Carisma mais seu Bônus de Proficiência. Luz Solar. A aura é preenchida com Luz Plena que é luz solar. Vigília Consagrada. Você tem Vantagem em qualquer salvaguarda que seja forçado a realizar por um Ínfero ou um Morto-Vivo.',
+    tipoAcao: 'Ação Bônus',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento da Glória',
+    nivel: 3,
+    nome: 'Atleta Inigualável',
+    descricao:
+      'Como uma Ação Bônus, você pode gastar um uso do seu Canalizar Divindade para aprimorar seu atletismo. Por 1 hora, você tem Vantagem em testes de Força (Atletismo) e Destreza (Acrobacia), e a distância de seus Saltos Longos e Salto em Altura aumenta em 3 metros (essa distância adicional custa movimento padrão).',
+    tipoAcao: 'Ação Bônus',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento da Glória',
+    nivel: 3,
+    nome: 'Destruição Inspiradora',
+    descricao:
+      'Imediatamente após conjurar Destruição Divina, você pode gastar um uso do seu Canalizar Divindade e distribuir Pontos de Vida Temporários para criaturas à sua escolha a até 9 metros de si, incluindo você. O número total de Pontos de Vida Temporários é igual a 2d8 mais o seu nível de Paladino, dividido entre as criaturas escolhidas, como preferir.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento da Glória',
+    nivel: 3,
+    nome: 'Magias do Juramento da Glória',
+    descricao:
+      'A magia do seu juramento garante que você sempre tenha certas magias prontas; ao atingir um nível de Paladino detalhado na tabela Magias do Juramento da Glória, você sempre tem as magias apresentadas preparadas.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
+    magiasFixasPorNivel: {
+      3: ['Heroísmo', 'Raio Guia'],
+      5: ['Aprimorar Atributo', 'Arma Mágica'],
+      9: ['Celeridade', 'Proteção contra Energia'],
+      13: ['Compulsão', 'Movimentação Livre'],
+      17: ['Lendas e Histórias', 'Presença Régia de Yolande'],
+    },
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento da Glória',
+    nivel: 7,
+    nome: 'Aura de Vivacidade',
+    descricao:
+      'Seu Deslocamento aumenta em 3 metros. Além disso, sempre que um aliado entra em sua Aura de Proteção pela primeira vez em um turno ou inicia o turno dele na aura, o Deslocamento do aliado aumenta em 3 metros até o final do próximo turno dele.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento da Glória',
+    nivel: 15,
+    nome: 'Defesa Gloriosa',
+    descricao:
+      'Você pode transformar a defesa em um ataque repentino. Quando você ou outra criatura à sua vista a até 3 metros de você é atingida por uma jogada de ataque, você pode executar uma Reação para conceder um bônus à CA do alvo contra esse ataque, fazendo potencialmente com que o ataque erre. O bônus é igual ao seu modificador de Carisma (mínimo de +1). Se o ataque falhar, você pode realizar um ataque com uma arma contra o atacante como parte desta Reação se o atacante estiver no alcance da sua arma. Você pode usar essa característica um número de vezes igual ao seu modificador de Carisma (mínimo de uma vez) e restaura todos os usos gastos ao completar um Descanso Longo.',
+    tipoAcao: 'Reação',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento da Glória',
+    nivel: 20,
+    nome: 'Lenda Viva',
+    descricao:
+      'Você pode se fortalecer com as lendas — verdadeiras ou exageradas — de seus grandes feitos. Como uma Ação Bônus, você recebe os benefícios abaixo por 10 minutos. Após usar essa característica, você não pode utilizá-la novamente até completar um Descanso Longo. Você também pode recuperar seu uso gastando um espaço de magia de 5º círculo (nenhuma ação é necessária). Carismático. Você é abençoado com uma presença sobrenatural e tem Vantagem em todos os testes de Carisma. Golpe Infalível. Uma vez em cada um dos seus turnos, ao realizar uma jogada de ataque com uma arma e errar, você pode fazer com que esse ataque atinja. Jogar Novamente a Salvaguarda. Se você falhar em uma salvaguarda, pode usar sua Reação para jogá-la novamente. Você deve usar o novo resultado.',
+    tipoAcao: 'Ação Bônus',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento de Vingança',
+    nivel: 3,
+    nome: 'Magias do Juramento de Vingança',
+    descricao:
+      'A magia do seu juramento garante que você sempre tenha certas magias prontas; quando você atinge um nível de Paladino detalhado na tabela Magias do Juramento de Vingança, você sempre tem as magias apresentadas preparadas.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
+    magiasFixasPorNivel: {
+      3: ['Marca do Predador', 'Perdição'],
+      5: ['Paralisar Pessoa', 'Passo Nebuloso'],
+      9: ['Celeridade', 'Proteção contra Energia'],
+      13: ['Banimento', 'Porta Dimensional'],
+      17: ['Paralisar Monstro', 'Vidência'],
+    },
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento de Vingança',
+    nivel: 3,
+    nome: 'Voto de Inimizade',
+    descricao:
+      'Ao executar a ação Atacar, você pode gastar um uso de seu Canalizar Divindade para proferir um voto de inimizade contra uma criatura à sua vista a até 9 metros de si. Você tem Vantagem em jogadas de ataque contra a criatura por 1 minuto ou até usar essa característica novamente. Caso a criatura caia a 0 Pontos de Vida antes que o voto termine, você pode transferir o voto para uma criatura diferente a até 9 metros de você (nenhuma ação é necessária).',
+    tipoAcao: 'Grátis',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento de Vingança',
+    nivel: 7,
+    nome: 'Vingador Implacável',
+    descricao:
+      'Seu foco sobrenatural permite que você evite a retirada de um inimigo. Ao atingir uma criatura com um Ataque de Oportunidade, você pode reduzir o Deslocamento da criatura para 0 até o final do turno atual. Você pode, então, se mover até metade de seu Deslocamento como parte da mesma Reação. Esse movimento não provoca Ataques de Oportunidade.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento de Vingança',
+    nivel: 15,
+    nome: 'Alma Vingativa',
+    descricao:
+      'Imediatamente após uma criatura sob o efeito do seu Voto de Inimizade acertar ou errar com uma jogada de ataque, você pode executar uma Reação para realizar um ataque corpo a corpo contra essa criatura se ela estiver ao seu alcance.',
+    tipoAcao: 'Reação',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento de Vingança',
+    nivel: 20,
+    nome: 'Anjo Vingador',
+    descricao:
+      'Como uma Ação Bônus, você adquire os benefícios abaixo por 10 minutos ou até a encerrar (nenhuma ação é necessária). Após usar esta característica, você não pode utilizá-la novamente até completar um Descanso Longo. Você também pode recuperar seu uso gastando um espaço de magia de 5º círculo (nenhuma ação é necessária). Aura Amedrontadora. Sempre que um inimigo inicia o turno dele em sua Aura de Proteção, ele deve ser bem-sucedido em uma salvaguarda de Sabedoria ou tem a condição Amedrontado por 1 minuto, ou até sofrer qualquer dano. Jogadas de ataque contra a criatura Amedrontada têm Vantagem. Voo. Você cria asas espectrais nas costas e tem um Deslocamento de Voo de 18 metros, além de poder pairar.',
+    tipoAcao: 'Ação Bônus',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento dos Anciões',
+    nivel: 3,
+    nome: 'A Ira da Natureza',
+    descricao:
+      'Como uma ação Usar Magia, você pode gastar um uso do seu Canalizar Divindade para conjurar videiras espectrais em torno de criaturas próximas. Cada criatura à sua escolha que você possa ver a até 4,5 metros de você deve ser bem-sucedida em uma salvaguarda de Força ou tem a condição Contido por 1 minuto. Uma criatura Contida repete a salvaguarda no final de cada um dos turnos dela, encerrando o efeito em caso de sucesso.',
+    tipoAcao: 'Ação',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento dos Anciões',
+    nivel: 3,
+    nome: 'Magias do Juramento dos Anciões',
+    descricao:
+      'A magia do seu juramento garante que você sempre tenha certas magias prontas; quando você atinge um nível de Paladino detalhado na tabela Magias do Juramento dos Anciões, você sempre tem as magias apresentadas preparadas.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
+    magiasFixasPorNivel: {
+      3: ['Falar com Animais', 'Golpe Constritor'],
+      5: ['Passo Nebuloso', 'Raio Lunar'],
+      9: ['Crescimento de Plantas', 'Proteção contra Energia'],
+      13: ['Pele-Rocha', 'Tempestade Glacial'],
+      17: ['Comunhão com a Natureza', 'Passo Arbóreo'],
+    },
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento dos Anciões',
+    nivel: 7,
+    nome: 'Aura de Resistência',
+    descricao:
+      'Magia antiga repousa tão fortemente em você que forma uma proteção mística, bloqueando a energia que vem de fora do Plano Material; você e seus aliados têm Resistência a dano Necrótico, Psíquico e Radiantes enquanto estiverem em sua Aura de Proteção.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento dos Anciões',
+    nivel: 15,
+    nome: 'Sentinela Imortal',
+    descricao:
+      'Ao ser reduzido a 0 Pontos de Vida e não morto imediatamente, você fica com 1 Ponto de Vida e recupera um número de Pontos de Vida igual a três vezes o seu nível de Paladino. Após usar essa característica, você não pode utilizá-la novamente até completar um Descanso Longo. Além disso, você não pode envelhecer magicamente e sua aparência não envelhece.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Paladino',
+    subclasse: 'Juramento dos Anciões',
+    nivel: 20,
+    nome: 'Campeão Ancestral',
+    descricao:
+      'Como uma Ação Bônus, você pode imbuir sua Aura de Proteção com poder sagrado, concedendo os benefícios abaixo por 1 minuto ou até a encerrar (nenhuma ação é necessária). Após usar esta característica, você não pode utilizá-la novamente até completar um Descanso Longo. Você também pode restaurar seu uso gastando um espaço de magia de 5º círculo (nenhuma ação é necessária). Aliviar Desafio. Inimigos na sua aura têm Desvantagem em salvaguardas contra suas magias e opções de Canalizar Divindade. Magias Ágeis. Sempre que conjurar uma magia que tenha um tempo de conjuração de uma ação, você pode conjurá-la usando uma Ação Bônus. Regeneração. No início de cada um dos seus turnos, você recupera 10 Pontos de Vida.',
+    tipoAcao: 'Ação Bônus',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
 ];

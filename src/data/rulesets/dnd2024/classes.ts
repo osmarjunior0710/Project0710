@@ -17,6 +17,7 @@
 // tem espaço daquele círculo, não é ausência de dado.
 
 import type { Atributo } from '../../wizardFixtures';
+import { recursosDeMagiaMeioConjurador } from './progressao-meio-conjurador';
 
 export interface RecursoClasse {
   nome: string;
@@ -515,6 +516,63 @@ export const classes: Classe[] = [
     // equipamento inicial). Fúria ainda não funciona de verdade
     // (B3, ver EmDevB.md).
     disponivel: true,
+    fonte: FONTE,
+  },
+  {
+    id: 'paladino',
+    nome: 'Paladino',
+    atributoPrimario: 'Força e Carisma',
+    dadoDeVida: 'd10',
+    salvaguardas: ['SAB', 'CAR'],
+    nivelSubclasse: 3,
+    recursos: [
+      {
+        nome: 'Maestria em Arma (nº de tipos de arma)',
+        recuperaEm: null,
+        // Sem progressão — confirmado com o Osmar (2026-09, ver
+        // sdd/sdd-paladino.md seção 3): fixo em 2 do nível 1 ao 20,
+        // diferente de Guerreiro/Bárbaro (a planilha não tem essa
+        // linha pra Paladino, valor definido diretamente aqui).
+        valorPorNivel: {
+          1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 2, 9: 2, 10: 2,
+          11: 2, 12: 2, 13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2, 19: 2, 20: 2,
+        },
+      },
+      {
+        nome: 'Bônus de Canalizar Divindade (usos)',
+        recuperaEm: 'Descanso Longo',
+        valorPorNivel: {
+          1: 0, 2: 0, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 2, 9: 2, 10: 2,
+          11: 3, 12: 3, 13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3, 19: 3, 20: 3,
+        },
+      },
+      ...recursosDeMagiaMeioConjurador(),
+    ],
+    progressao: [
+      { nivel: 1, bonusProficiencia: '+2', caracteristicas: ['Conjuração', 'Maestria em Arma', 'Mãos Consagradas'] },
+      { nivel: 2, bonusProficiencia: '+2', caracteristicas: ['Destruição do Paladino', 'Estilo de Luta'] },
+      { nivel: 3, bonusProficiencia: '+2', caracteristicas: ['Canalizar Divindade', 'Subclasse de Paladino'] },
+      { nivel: 4, bonusProficiencia: '+2', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 5, bonusProficiencia: '+3', caracteristicas: ['Ataque Extra', 'Montaria Fiel'] },
+      { nivel: 6, bonusProficiencia: '+3', caracteristicas: ['Aura de Proteção'] },
+      { nivel: 7, bonusProficiencia: '+3', caracteristicas: ['Característica de Subclasse'] },
+      { nivel: 8, bonusProficiencia: '+3', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 9, bonusProficiencia: '+4', caracteristicas: ['Repudiar Inimigos'] },
+      { nivel: 10, bonusProficiencia: '+4', caracteristicas: ['Aura de Coragem'] },
+      { nivel: 11, bonusProficiencia: '+4', caracteristicas: ['Golpes Radiantes'] },
+      { nivel: 12, bonusProficiencia: '+4', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 13, bonusProficiencia: '+5', caracteristicas: [] },
+      { nivel: 14, bonusProficiencia: '+5', caracteristicas: ['Toque Restaurador'] },
+      { nivel: 15, bonusProficiencia: '+5', caracteristicas: ['Característica de Subclasse'] },
+      { nivel: 16, bonusProficiencia: '+5', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 17, bonusProficiencia: '+6', caracteristicas: [] },
+      { nivel: 18, bonusProficiencia: '+6', caracteristicas: ['Aura Expandida'] },
+      { nivel: 19, bonusProficiencia: '+6', caracteristicas: ['Dádiva Épica'] },
+      { nivel: 20, bonusProficiencia: '+6', caracteristicas: ['Característica de Subclasse'] },
+    ],
+    // Entrega 1 do foco Paladino (dado, ver EmDev.md) — ainda não
+    // habilitado no wizard (Entrega 2 vira `disponivel: true`).
+    disponivel: false,
     fonte: FONTE,
   },
 ];
