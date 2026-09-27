@@ -675,6 +675,7 @@ export default function MagiasTab({
     return (
       <EscolherCirculoShell
         magia={telaCirculo}
+        nivelPersonagem={nivel}
         opcoes={opcoesGastoComPonte(
           telaCirculo.circulo,
           classeAtivaNome,

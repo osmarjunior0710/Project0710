@@ -263,6 +263,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
     ) : telaMagia ? (
       <EscolherCirculoShell
         magia={telaMagia.magia}
+        nivelPersonagem={p.nivel}
         opcoes={opcoesGastoComPonte(
           telaMagia.magia.circulo,
           p.classeAtivaNome,

@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1643
+
+Na tela "Em qual círculo?" (Usar Magia, Magias e Combate), cada opção
+agora mostra o dano/cura já calculado pra aquele círculo (ex.: "3º
+Círculo — 5d8"), em vez de só o texto genérico de upcast — sem
+precisar fazer a conta de cabeça.
+
 ## v202609_1628
 
 Corrigido: no Level Up, a tela "Novas Características" mostrava

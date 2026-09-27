@@ -1,5 +1,6 @@
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoGastoEspaco } from '../../../core/magiasPersonagem';
+import { calcularDanoMagia, calcularCuraMagia, fmtDado } from '../../../core/magiaDano';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import TickPips from '../../components/TickPips';
 import styles from '../levelup/LevelUpShell.module.css';
@@ -11,10 +12,33 @@ interface EscolherCirculoShellProps {
    * classe dona do espaço. Pra 100% dos personagens sem ponte, todas
    * as opções vêm da mesma classe (comportamento idêntico a antes). */
   opcoes: OpcaoGastoEspaco[];
+  /** Nível do personagem — só pra prévia numérica (Aprimoramento de
+   * Truque escala com nível; upcast escala com o círculo gasto, já
+   * calculado por opção). */
+  nivelPersonagem: number;
   onVoltar: () => void;
   /** `gratis` = true na opção marcada (Maestria de Magias) — quem
    * chama pula o desconto de Espaço nesse caso. */
   onConjurar: (circulo: number, classeNome: string, gratis: boolean) => void;
+}
+
+/** Prévia numérica (ex.: "10d6 Fogo") de gastar ESTE círculo — reaproveita
+ * `calcularDanoMagia`/`calcularCuraMagia` (já usados pra rolar de
+ * verdade), sem motor novo. `null` quando a magia não tem dado
+ * estruturado, ou quando o upcast desse círculo não pôde ser somado
+ * automaticamente (`upcastNaoAutomatico`) — nesses casos o texto da
+ * magia (`descricaoCurta`/`upcastTexto`, já mostrado acima) continua
+ * sendo a única fonte, pra não mostrar um número incompleto/errado. */
+function previaPorCirculo(magia: Magia, circulo: number, nivelPersonagem: number): string | null {
+  const dano = calcularDanoMagia(magia, circulo, nivelPersonagem);
+  if (dano && !dano.upcastNaoAutomatico) {
+    return `${fmtDado(dano.quantidade, dano.lados, dano.mod)}${dano.tipo ? ` ${dano.tipo}` : ''}`;
+  }
+  const cura = calcularCuraMagia(magia, circulo, nivelPersonagem);
+  if (cura && !cura.upcastNaoAutomatico) {
+    return `❤️ ${fmtDado(cura.quantidade, cura.lados, cura.mod)}`;
+  }
+  return null;
 }
 
 /** Tela cheia (Tela 3 do fluxo "Usar Magia") — sempre aparece antes de
@@ -28,7 +52,7 @@ interface EscolherCirculoShellProps {
  * cálculo exato por círculo escolhido fica pra quando a planilha tiver
  * esse dado estruturado (ver PENDENCIAS.md "Upcast — efeito calculado
  * por círculo"), por enquanto o jogador lê o texto e faz a conta. */
-export default function EscolherCirculoShell({ magia, opcoes, onVoltar, onConjurar }: EscolherCirculoShellProps) {
+export default function EscolherCirculoShell({ magia, opcoes, nivelPersonagem, onVoltar, onConjurar }: EscolherCirculoShellProps) {
   // Ponte de Magia de Pacto (SDD Multiclasse seção 8.5) — só quando 2+
   // classes diferentes aparecem entre as opções mostra de qual classe
   // é cada espaço; com 1 classe só (100% dos personagens sem essa
@@ -56,20 +80,26 @@ export default function EscolherCirculoShell({ magia, opcoes, onVoltar, onConjur
           efeito (veja o texto acima).
           {temMaisDeUmaClasse && ' Você tem espaço de mais de 1 classe pra gastar — escolha de qual pool.'}
         </div>
-        {opcoes.map(({ circulo, classeNome, maximo, gasto, gratis }) => (
-          <div key={`${classeNome}-${circulo}`} className="opt-card" onClick={() => onConjurar(circulo, classeNome, gratis ?? false)}>
-            <div className="opt-card-name">
-              {circulo}º Círculo{temMaisDeUmaClasse ? ` (${classeNome})` : ''}
+        {opcoes.map(({ circulo, classeNome, maximo, gasto, gratis }) => {
+          const previa = previaPorCirculo(magia, circulo, nivelPersonagem);
+          return (
+            <div key={`${classeNome}-${circulo}`} className="opt-card" onClick={() => onConjurar(circulo, classeNome, gratis ?? false)}>
+              <div className="opt-card-name">
+                {circulo}º Círculo{temMaisDeUmaClasse ? ` (${classeNome})` : ''}
+                {previa && (
+                  <span style={{ fontWeight: 'normal', color: 'var(--text-dim)', fontSize: 12 }}> — {previa}</span>
+                )}
+              </div>
+              <div className="opt-card-desc">
+                {gratis ? (
+                  <span style={{ color: 'var(--accent-especial)', fontWeight: 'bold' }}>🔮 Conjurar Grátis</span>
+                ) : (
+                  <TickPips total={maximo} usados={gasto} tamanho="lg" />
+                )}
+              </div>
             </div>
-            <div className="opt-card-desc">
-              {gratis ? (
-                <span style={{ color: 'var(--accent-especial)', fontWeight: 'bold' }}>🔮 Conjurar Grátis</span>
-              ) : (
-                <TickPips total={maximo} usados={gasto} tamanho="lg" />
-              )}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className={styles.navLayer}>
