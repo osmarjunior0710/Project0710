@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0924
+
+Corrigido: a house rule "Mochila aumenta Capacidade" (v202609_0630)
+não tinha como ser ligada durante a criação de personagem — o toggle
+só existia no menu do avatar da Ficha, que ainda não existe pra quem
+tá criando o 1º personagem. Agora a Loja também tem o próprio toggle,
+atualizando a Capacidade Máxima na hora.
+
 ## v202609_0630
 
 Nova house rule (desligada por padrão, menu do avatar → Regras da

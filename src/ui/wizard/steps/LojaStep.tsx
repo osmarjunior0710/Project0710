@@ -17,6 +17,7 @@ import {
 import { calcularOuroInicial } from '../../../core/calculoPersonagem';
 import {
   bonusCapacidadeMochilas,
+  CAPACIDADE_EXTRA_POR_MOCHILA_KG,
   calcularCapacidadeMaxima,
   calcularCargaTotal,
   calcularItensIniciais,
@@ -287,7 +288,7 @@ export default function LojaStep({ selection, update }: StepProps) {
   const restanteEmMoedas = moedasDeOuro(Math.max(0, ouroRestante));
   const adquiridosPorKits = itensAdquiridosPorKits(selection.itens, catalogo);
 
-  const { regras: houseRules } = useHouseRules();
+  const { regras: houseRules, alternar: alternarHouseRule } = useHouseRules();
   const itensMochila = calcularItensIniciais(selection);
   const adquiridosPorOrigemOuClasse = itensAdquiridosPorOrigemOuClasse(itensMochila, catalogo);
   const carga = calcularCargaTotal(itensMochila);
@@ -343,6 +344,23 @@ export default function LojaStep({ selection, update }: StepProps) {
       <label className={styles.filtroRow}>
         <input type="checkbox" checked={cortarPorPreco} onChange={(e) => setCortarPorPreco(e.target.checked)} />
         <span style={{ fontSize: 12 }}>Esconder itens acima do seu ouro inicial ({ouroInicial} PO)</span>
+      </label>
+
+      {/* House rule (core/houseRules.ts, NÃO regra oficial — ver
+          DECISOES-FICHA.md) — o toggle padrão fica no avatar da Ficha,
+          mas quem ainda tá criando o 1º personagem não tem ficha pra
+          visitar antes, então essa mesma regra (device-wide) também
+          liga/desliga daqui, refletindo na hora na barra de carga
+          acima. */}
+      <label className={styles.filtroRow}>
+        <input
+          type="checkbox"
+          checked={houseRules.mochilaAumentaCapacidade}
+          onChange={() => alternarHouseRule('mochilaAumentaCapacidade')}
+        />
+        <span style={{ fontSize: 12 }}>
+          House rule: Mochila aumenta Capacidade (+{CAPACIDADE_EXTRA_POR_MOCHILA_KG} kg por Mochila — não é regra oficial)
+        </span>
       </label>
 
       {(itensOrigem.length > 0 || itensClasse.length > 0) && (
