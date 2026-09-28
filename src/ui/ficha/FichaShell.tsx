@@ -49,6 +49,7 @@ import {
 import { classes as catalogoClasses } from '../../data/rulesets/dnd2024/classes';
 import EscolherClasseLevelUp, { type ResultadoEscolhaClasseLevelUp } from './levelup/EscolherClasseLevelUp';
 import {
+  bonusCapacidadeMochilas,
   calcularCapacidadeMaxima,
   calcularItensIniciais,
   criarItemManual,
@@ -718,8 +719,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   );
   const proficienciasFerramenta = calcularProficienciasFerramenta(selecao, nivelTotalAtual, ferramentasMulticlasseAtuais);
   const bonusProficienciaAtual = classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
-  const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva, temCampeaoPrimitivo);
-  const explicacaoCapacidadeMaxima = explicarCapacidadeMaxima(selecao, formaGrandeAtiva, temCampeaoPrimitivo);
+  const bonusMochilas = houseRules.mochilaAumentaCapacidade ? bonusCapacidadeMochilas(itensMochila) : 0;
+  const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva, temCampeaoPrimitivo, bonusMochilas);
+  const explicacaoCapacidadeMaxima = explicarCapacidadeMaxima(selecao, formaGrandeAtiva, temCampeaoPrimitivo, bonusMochilas);
   const explicacaoPv = explicarPvMaximo(selecao, personagem.pvMax);
   const explicacaoCa = explicarCAEquipado(itensMochila, desValor, conValorFinal, personagem.estiloDeLuta, talentosEfetivos, classeOriginal, classesMulticlassadasNomes);
   const explicacaoIniciativa = explicarIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularCapacidadeMaxima } from './mochila';
+import { bonusCapacidadeMochilas, calcularCapacidadeMaxima, type ItemMochila } from './mochila';
 import { criarSelecaoInicial, type WizardSelection } from './personagem';
 
 function selecaoComForca(especie: string, forca: number, overrides: Partial<WizardSelection> = {}): WizardSelection {
@@ -28,5 +28,31 @@ describe('calcularCapacidadeMaxima (Força × multiplicador de Tamanho)', () => 
 
   it('retorna null quando Força ainda não foi definida (personagem em criação)', () => {
     expect(calcularCapacidadeMaxima(criarSelecaoInicial())).toBeNull();
+  });
+
+  it('house rule "Mochila aumenta Capacidade" (bonusMochilas) soma por cima do cálculo normal', () => {
+    expect(calcularCapacidadeMaxima(selecaoComForca('Humano', 14), false, false, 15)).toBe(113); // 98 + 15
+  });
+});
+
+function item(nome: string, quantidade = 1): ItemMochila {
+  return { id: nome + quantidade, nome, quantidade, peso: null, origemDoItem: 'Manual' };
+}
+
+describe('bonusCapacidadeMochilas (house rule — NÃO é regra oficial, ver core/houseRules.ts)', () => {
+  it('sem Mochila no inventário, bônus é 0', () => {
+    expect(bonusCapacidadeMochilas([item('Corda'), item('Tocha', 3)])).toBe(0);
+  });
+
+  it('1 Mochila soma 15 kg', () => {
+    expect(bonusCapacidadeMochilas([item('Mochila'), item('Corda')])).toBe(15);
+  });
+
+  it('2 Mochilas (quantidade 2 na mesma linha) somam 30 kg — efeito acumula', () => {
+    expect(bonusCapacidadeMochilas([item('Mochila', 2)])).toBe(30);
+  });
+
+  it('conta só pelo nome exato "Mochila" — outro contêiner não entra', () => {
+    expect(bonusCapacidadeMochilas([item('Alforje')])).toBe(0);
   });
 });

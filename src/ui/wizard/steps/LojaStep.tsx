@@ -15,7 +15,15 @@ import {
   type LojaItem,
 } from '../../../core/loja';
 import { calcularOuroInicial } from '../../../core/calculoPersonagem';
-import { calcularCapacidadeMaxima, calcularCargaTotal, calcularItensIniciais, pesoDaLinha, type ItemMochila } from '../../../core/mochila';
+import {
+  bonusCapacidadeMochilas,
+  calcularCapacidadeMaxima,
+  calcularCargaTotal,
+  calcularItensIniciais,
+  pesoDaLinha,
+  type ItemMochila,
+} from '../../../core/mochila';
+import { useHouseRules } from '../../ficha/hooks/useHouseRules';
 import { buscarDescricaoItem } from '../../../data/rulesets/dnd2024/buscarDescricaoItem';
 import ItemComDescricao from '../../components/ItemComDescricao';
 import { corDaCarga } from '../../utils/corCarga';
@@ -279,10 +287,12 @@ export default function LojaStep({ selection, update }: StepProps) {
   const restanteEmMoedas = moedasDeOuro(Math.max(0, ouroRestante));
   const adquiridosPorKits = itensAdquiridosPorKits(selection.itens, catalogo);
 
+  const { regras: houseRules } = useHouseRules();
   const itensMochila = calcularItensIniciais(selection);
   const adquiridosPorOrigemOuClasse = itensAdquiridosPorOrigemOuClasse(itensMochila, catalogo);
   const carga = calcularCargaTotal(itensMochila);
-  const capacidadeMaxima = calcularCapacidadeMaxima(selection);
+  const bonusMochilas = houseRules.mochilaAumentaCapacidade ? bonusCapacidadeMochilas(itensMochila) : 0;
+  const capacidadeMaxima = calcularCapacidadeMaxima(selection, false, false, bonusMochilas);
   const percentualCarga = capacidadeMaxima ? Math.round((carga.kg / capacidadeMaxima) * 100) : 0;
   const itensOrigem = itensMochila.filter((i) => i.origemDoItem === 'Origem');
   const itensClasse = itensMochila.filter((i) => i.origemDoItem === 'Classe');

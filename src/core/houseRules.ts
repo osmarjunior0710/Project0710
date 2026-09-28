@@ -12,12 +12,19 @@ export interface HouseRules {
   /** Ataque com 1 ou 20 natural rola um 2º d20 de confirmação (só
    * informativo — o Mestre compara com a CA). Ver `RollOverlay.tsx`. */
   confirmacaoCritico: boolean;
+  /** Cada "Mochila" na Mochila do personagem soma 15 kg à Capacidade
+   * Máxima de Carga — NÃO é regra oficial (o Glossário de Regras só
+   * define Capacidade de Carga por Força × Tamanho, nenhum contêiner
+   * altera isso); invenção de mesa, pedido do Osmar (2026-09). Ver
+   * `core/mochila.ts` (`bonusCapacidadeMochilas`). */
+  mochilaAumentaCapacidade: boolean;
 }
 
 export const HOUSE_RULES_PADRAO: HouseRules = {
   pesoMochila: true,
   pesoMoedas: true,
   confirmacaoCritico: false,
+  mochilaAumentaCapacidade: false,
 };
 
 export interface ArmazenamentoHouseRules {

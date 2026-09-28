@@ -116,6 +116,21 @@ saber se passou do limite); só a LARGURA da barra é.
 
 **Data/origem:** 2026-08, plano de Equipamento E1 + ajustes.
 
+**"Mochila aumenta Capacidade de Carga" é house rule, NÃO regra
+oficial (2026-09):** o Osmar pediu esse comportamento achando que era
+regra do livro — conferido no Apêndice C (Glossário de Regras) e a
+Capacidade de Carga oficial é só Força × Tamanho, nenhum contêiner
+altera isso. Virou house rule com toggle (`core/houseRules.ts`,
+`mochilaAumentaCapacidade`, default desligada) em vez de comportamento
+fixo — mesmo padrão de "Dado 3D"/"Confirmação de crítico". Com a
+regra ligada, cada "Mochila" no inventário soma 15 kg à Capacidade
+Máxima (efeito acumula por quantidade — 2 Mochilas = +30 kg), lido
+pela MESMA função em Loja (wizard) e Mochila (Ficha) — `bonusCapacidadeMochilas` conta só pelo nome exato "Mochila";
+outro contêiner (Alforje etc.) não entra até o Osmar pedir.
+**Lição geral:** quando o Osmar descreve algo como regra e ela não bate
+com o Glossário de Regras/planilha, não implementar direto — parar e
+perguntar (house rule vs. regra mal lembrada), CLAUDE.md seção 3.
+
 ## Avatar → menu de preferências (Itens detalhados / Peso da Mochila)
 
 **Decisão:** ícone 👤 no cabeçalho da Ficha abre um dropdown M3 com

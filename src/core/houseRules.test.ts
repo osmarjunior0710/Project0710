@@ -27,4 +27,9 @@ describe('normalizarHouseRules', () => {
   it('ignora lixo que não é objeto', () => {
     expect(normalizarHouseRules('quebrado')).toEqual(HOUSE_RULES_PADRAO);
   });
+
+  it('"Mochila aumenta Capacidade" nasce desligada e respeita o valor salvo', () => {
+    expect(HOUSE_RULES_PADRAO.mochilaAumentaCapacidade).toBe(false);
+    expect(normalizarHouseRules({ mochilaAumentaCapacidade: true }).mochilaAumentaCapacidade).toBe(true);
+  });
 });

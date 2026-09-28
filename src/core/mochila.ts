@@ -40,28 +40,45 @@ function multiplicadorCarga(passosAcima: number): number {
   return MULTIPLICADOR_KG_POR_PASSO_DE_TAMANHO[indice];
 }
 
+/** House rule "Mochila aumenta Capacidade" (`core/houseRules.ts`,
+ * default desligada) — NÃO é regra oficial (Glossário de Regras só
+ * define Capacidade de Carga por Força × Tamanho); invenção de mesa,
+ * pedido do Osmar (2026-09): cada "Mochila" no inventário soma 15 kg
+ * à Capacidade Máxima de Carga, efeito acumulativo (2 Mochilas = +30
+ * kg). Só conta pelo NOME exato "Mochila" — outros contêineres (ex.:
+ * Alforje, Saco) não entram até o Osmar pedir. */
+export const CAPACIDADE_EXTRA_POR_MOCHILA_KG = 15;
+
+export function bonusCapacidadeMochilas(itens: ItemMochila[]): number {
+  const quantidade = itens.filter((i) => i.nome === 'Mochila').reduce((soma, i) => soma + i.quantidade, 0);
+  return quantidade * CAPACIDADE_EXTRA_POR_MOCHILA_KG;
+}
+
 /** `formaGrandeAtiva` — `true` só quando o Golias marcou a Forma
  * Grande como ativa na Ficha agora (ver `combat/BonusPanelContent`);
  * ausente/`false` em todo outro contexto (ex.: resumo do wizard, onde
- * a característica nem existe ainda). */
+ * a característica nem existe ainda). `bonusMochilas` — kg extra da
+ * house rule acima (0/omitido = desligada ou sem Mochila). */
 export function calcularCapacidadeMaxima(
   selection: WizardSelection,
   formaGrandeAtiva = false,
   /** Campeão Primitivo (Bárbaro nível 20, ver `core/campeaoPrimitivo.ts`)
    * — `false`/omitido = comportamento de sempre. */
   temCampeaoPrimitivo = false,
+  bonusMochilas = 0,
 ): number | null {
   const forValorBase = valorFinalAtributo(selection, 'FOR');
   if (forValorBase === null) return null;
   const forValor = aplicarCampeaoPrimitivo(forValorBase, 'FOR', temCampeaoPrimitivo);
   const multiplicador = multiplicadorCarga(passosTamanhoAcimaParaCarga(selection, formaGrandeAtiva));
-  return Math.round(forValor * multiplicador);
+  return Math.round(forValor * multiplicador) + bonusMochilas;
 }
 
 export function explicarCapacidadeMaxima(
   selection: WizardSelection,
   formaGrandeAtiva = false,
   temCampeaoPrimitivo = false,
+  bonusMochilas = 0,
 ): ExplicacaoCalculo {
   const forValorBase = valorFinalAtributo(selection, 'FOR');
   if (forValorBase === null) return { linhas: [], total: { label: 'Capacidade máxima de carga', valor: '—' } };
@@ -82,11 +99,14 @@ export function explicarCapacidadeMaxima(
       valor: '',
     });
   }
+  if (bonusMochilas > 0) {
+    linhas.push({ label: `+ ${bonusMochilas} kg (house rule: Mochila aumenta Capacidade)`, valor: '' });
+  }
   return {
     linhas,
     total: {
       label: 'Capacidade máxima de carga',
-      valor: `${calcularCapacidadeMaxima(selection, formaGrandeAtiva, temCampeaoPrimitivo)} kg`,
+      valor: `${calcularCapacidadeMaxima(selection, formaGrandeAtiva, temCampeaoPrimitivo, bonusMochilas)} kg`,
     },
   };
 }

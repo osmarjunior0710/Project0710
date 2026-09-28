@@ -102,6 +102,11 @@ export default function AvatarMenu({
       label: 'Confirmação de crítico',
       desc: 'Ao tirar 1 ou 20 natural em um ataque, rola um 2º d20 de confirmação (só informativo — o Mestre decide) antes do dano.',
     },
+    {
+      chave: 'mochilaAumentaCapacidade' as const,
+      label: 'Mochila aumenta Capacidade',
+      desc: 'Cada Mochila no inventário soma 15 kg à Capacidade Máxima de Carga (não é regra oficial do livro — invenção de mesa).',
+    },
   ];
 
   // Pills de info nas linhas de magia/truque (Magias, Combate) — salvas

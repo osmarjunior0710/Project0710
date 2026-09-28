@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0630
+
+Nova house rule (desligada por padrão, menu do avatar → Regras da
+Casa): "Mochila aumenta Capacidade" — cada Mochila no inventário soma
+15 kg à Capacidade Máxima de Carga, atualiza na hora na Loja (criação
+de personagem) e na aba Mochila da Ficha. Não é regra oficial do
+livro — conferido no Glossário de Regras, é invenção de mesa.
+
 ## v202609_0125
 
 Emblemas de 3 dos 4 Juramentos do Paladino (Devoção, Anciões, Vingança)
