@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2010
+
+Cabeçalho da ficha ganha os emblemas de Espécie, Origem e Classe(s) —
+lado a lado, entre a seta de voltar e o nome do personagem. Sem ícone
+quando falta arte própria pra alguma delas.
+
 ## v202609_1831
 
 **Paladino — Canalizar Divindade (nível 3+).** A aba Combate mostra o

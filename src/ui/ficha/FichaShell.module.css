@@ -17,6 +17,20 @@
   font-size: 15px;
 }
 
+.iconesHeader {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconeHeader {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .meta {
   font-size: 11px;
   color: var(--text-faint);

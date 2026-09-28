@@ -20,6 +20,9 @@ interface IconeOrigemProps {
    * `section-title` (ex: aba Perfil) — sem emblema próprio ainda,
    * não renderiza nada. Omitido/`'emblema'` = comportamento de sempre. */
   variante?: 'emblema' | 'titulo';
+  /** Só pra `variante="titulo"` — sobrescreve a classe CSS padrão
+   * ("section-title-icone", 30px). Ex.: cabeçalho da ficha, 28px. */
+  classeIconeTitulo?: string;
 }
 
 /** Emblema redondo da origem (arquivo `{id}-banner.webp`) — mesmo
@@ -27,10 +30,15 @@ interface IconeOrigemProps {
  * própria (`assets/icones-origens/`) porque é outra categoria de
  * escolha. Origem sem arte própria ainda usa o placeholder 🖼
  * genérico. */
-export default function IconeOrigem({ id, classeCaixaFallback = 'opt-card-img', variante = 'emblema' }: IconeOrigemProps) {
+export default function IconeOrigem({
+  id,
+  classeCaixaFallback = 'opt-card-img',
+  variante = 'emblema',
+  classeIconeTitulo = 'section-title-icone',
+}: IconeOrigemProps) {
   const banner = bannerPng(id);
   if (variante === 'titulo') {
-    return banner ? <img src={banner} alt="" className="section-title-icone" /> : null;
+    return banner ? <img src={banner} alt="" className={classeIconeTitulo} /> : null;
   }
   if (banner) return <img src={banner} alt="" className="opt-card-img-emblema" />;
   return <div className={classeCaixaFallback}>🖼</div>;

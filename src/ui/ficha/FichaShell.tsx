@@ -129,6 +129,9 @@ import { estilosDeLuta } from '../../data/rulesets/dnd2024/estilosDeLuta';
 import { armaduras } from '../../data/rulesets/dnd2024/armaduras';
 import { origens } from '../../data/rulesets/dnd2024/origens';
 import { especies } from '../../data/rulesets/dnd2024/especies';
+import IconeClasse from '../components/IconeClasse';
+import IconeOrigem from '../components/IconeOrigem';
+import IconeEspecie from '../components/IconeEspecie';
 import { magiasDaClasse } from '../../data/rulesets/dnd2024/magias';
 import AvatarMenu from './AvatarMenu';
 import styles from './FichaShell.module.css';
@@ -2662,6 +2665,24 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         <span className="back" onClick={() => navigate('/lista')}>
           ←
         </span>
+        {/* Espécie → Origem → Classe(s), nessa ordem, um do lado do
+            outro (pedido do Osmar, 2026-09) — mesma variante "titulo"
+            reaproveitada da aba Perfil, só que 28px em vez de 30px.
+            Sem ícone algum quando falta arte própria (nunca 🖼 aqui). */}
+        <div className={styles.iconesHeader}>
+          {especieAtual && (
+            <IconeEspecie id={especieAtual.id} variante="titulo" classeIconeTitulo={styles.iconeHeader} />
+          )}
+          {origemPersonagem && (
+            <IconeOrigem id={origemPersonagem.id} variante="titulo" classeIconeTitulo={styles.iconeHeader} />
+          )}
+          {classesAtual.map((c) => {
+            const classeObj = catalogoClasses.find((cc) => cc.nome === c.classe);
+            return classeObj ? (
+              <IconeClasse key={c.classe} id={classeObj.id} variante="titulo" classeIconeTitulo={styles.iconeHeader} />
+            ) : null;
+          })}
+        </div>
         <div>
           <div className={styles.name}>{selecao.nome || '(sem nome)'}</div>
           <div className={styles.meta}>
