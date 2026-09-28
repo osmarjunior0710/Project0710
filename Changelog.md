@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1650
+
+Corrige o Estilo de Luta do Paladino no Level Up: pelo livro, só o
+Guerreiro pode trocar o estilo a cada nível. O Paladino escolhe uma vez,
+no nível 2, e depois não é mais perguntado (antes aparecia "disponível
+pra trocar" em todo nível).
+
 ## v202609_1524
 
 **Paladino — magias.** A aba Magias do Paladino agora mostra CD, ataque
