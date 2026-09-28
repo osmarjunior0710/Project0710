@@ -52,8 +52,9 @@ na Entrega 5.
     Azagaias/Símbolo Sagrado/Kit de Sacerdote/9 PO; B: 150 PO) — PDF
     Cap. 3, pág. 167
   - [x] `classes.ts`: `disponivel: true`
-  - [x] Banners das 4 subclasses: sem arte própria ainda (Osmar não
-    tem) — cai no fallback 🖼 genérico automaticamente, nada a fazer
+  - [x] Banners das subclasses: Devoção, Anciões e Vingança recebidos
+    do Osmar e importados (512×512 WebP, mesmo padrão das outras
+    artes) — falta só o da Glória, cai no fallback 🖼 até chegar
 - [x] **Entrega 3 — os 20 níveis sem features especiais** (concluída —
   confirmado 100% genérico, zero código novo)
   - [x] `levelUp.test.ts`: 6 casos novos pro Paladino (ASI 4/8/12/16,

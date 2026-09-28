@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0125
+
+Emblemas de 3 dos 4 Juramentos do Paladino (Devoção, Anciões, Vingança)
+— aparecem na tela de escolha de subclasse (Level Up, nível 3). Falta
+só o da Glória.
+
 ## v202609_2208
 
 Paladino deixa de aparecer "(em breve)" no wizard — já dá pra criar um
