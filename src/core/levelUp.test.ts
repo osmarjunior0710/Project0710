@@ -3,6 +3,8 @@ import {
   niveisComASI,
   niveisComDadivaEpica,
   temEstiloDeLutaTrocavel,
+  estiloDeLutaPedidoNoLevelUp,
+  estiloDeLutaTrocaTodoNivel,
   numeroDeAtaques,
   caracteristicasDoNivel,
   caracteristicasSubclasseAcumuladas,
@@ -113,5 +115,25 @@ describe('caracteristicasDoNivelComSubclasse', () => {
     const resultado = caracteristicasDoNivelComSubclasse(bardo, 6, null);
     expect(resultado.map((c) => c.nome)).toEqual([NOME_PLACEHOLDER_CARACTERISTICA_SUBCLASSE]);
     expect(resultado[0].descricao).toBeNull();
+  });
+});
+
+describe('Estilo de Luta — só o Guerreiro troca a cada nível (livro Cap. 3)', () => {
+  it('estiloDeLutaTrocaTodoNivel: Guerreiro sim, Paladino não', () => {
+    expect(estiloDeLutaTrocaTodoNivel(guerreiro)).toBe(true);
+    expect(estiloDeLutaTrocaTodoNivel(paladino)).toBe(false);
+  });
+
+  it('Guerreiro é perguntado em todo nível a partir do 1', () => {
+    expect(estiloDeLutaPedidoNoLevelUp(guerreiro, 1)).toBe(true);
+    expect(estiloDeLutaPedidoNoLevelUp(guerreiro, 9)).toBe(true);
+  });
+
+  it('Paladino é perguntado só no nível 2 (nunca no 1, nunca depois)', () => {
+    expect(estiloDeLutaPedidoNoLevelUp(paladino, 1)).toBe(false);
+    expect(estiloDeLutaPedidoNoLevelUp(paladino, 2)).toBe(true);
+    expect(estiloDeLutaPedidoNoLevelUp(paladino, 3)).toBe(false);
+    expect(estiloDeLutaPedidoNoLevelUp(paladino, 9)).toBe(false);
+    expect(estiloDeLutaPedidoNoLevelUp(paladino, 20)).toBe(false);
   });
 });

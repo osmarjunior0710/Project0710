@@ -17,7 +17,8 @@ import {
   niveisComASI,
   niveisComDadivaEpica,
   niveisComEspecialista,
-  temEstiloDeLutaTrocavel,
+  estiloDeLutaPedidoNoLevelUp,
+  estiloDeLutaTrocaTodoNivel,
   subclasseImplementada,
   caracteristicaDesbloqueada,
   caracteristicaSubclasseDesbloqueada,
@@ -676,7 +677,7 @@ export default function LevelUpShell({
   ) {
     luSteps.push('assinaturaMagica');
   }
-  if (temEstiloDeLutaTrocavel(classe, novoNivel)) luSteps.push('estiloDeLuta');
+  if (estiloDeLutaPedidoNoLevelUp(classe, novoNivel)) luSteps.push('estiloDeLuta');
   // Diferente de Truques/Invocações (sempre no array quando a classe
   // tem o recurso, mesmo sem vaga nova) — Maestria em Arma só entra
   // quando o total de vagas CRESCEU de verdade nesse nível (senão seria
@@ -783,7 +784,10 @@ export default function LevelUpShell({
   }
   if (luSteps.includes('estiloDeLuta')) {
     nomesComTelaPropria.add('Estilo de Luta');
-    deltasDoNivel.push({ label: 'Estilo de Luta', texto: 'disponível pra trocar' });
+    deltasDoNivel.push({
+      label: 'Estilo de Luta',
+      texto: estiloDeLutaTrocaTodoNivel(classe) ? 'disponível pra trocar' : 'escolha pendente',
+    });
   }
   if (luSteps.includes('especialista')) {
     NOMES_ESPECIALISTA.forEach((n) => nomesComTelaPropria.add(n));
@@ -1623,10 +1627,13 @@ export default function LevelUpShell({
 
         {step === 'estiloDeLuta' && (
           <>
-            <div className="section-title">Manter ou trocar seu Estilo de Luta</div>
+            <div className="section-title">
+              {estiloDeLutaTrocaTodoNivel(classe) ? 'Manter ou trocar seu Estilo de Luta' : 'Escolha seu Estilo de Luta'}
+            </div>
             <div className="label" style={{ marginBottom: 8 }}>
-              Regra oficial: a cada nível de {classe.nome}, você pode substituir o Estilo de Luta escolhido por
-              outro — não precisa manter o mesmo.
+              {estiloDeLutaTrocaTodoNivel(classe)
+                ? `Regra oficial: a cada nível de ${classe.nome}, você pode substituir o Estilo de Luta escolhido por outro — não precisa manter o mesmo.`
+                : `Regra oficial: ${classe.nome} escolhe o Estilo de Luta uma vez só, agora — depois ele fica fixo.`}
             </div>
             {estilosDeLuta.map((e) => (
               <div

@@ -25,7 +25,7 @@ import {
   niveisComASI,
   niveisComDadivaEpica,
   niveisComEspecialista,
-  temEstiloDeLutaTrocavel,
+  estiloDeLutaPedidoNoLevelUp,
   subclasseImplementada,
 } from './levelUp';
 import { valorRecursoClasse } from './recursosClasse';
@@ -232,7 +232,7 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     academicoPericiaEscolhida = sorteiaUm(ACADEMICO_PERICIAS) ?? null;
   }
 
-  const estiloDeLutaEscolhido = temEstiloDeLutaTrocavel(classe, novoNivel)
+  const estiloDeLutaEscolhido = estiloDeLutaPedidoNoLevelUp(classe, novoNivel)
     ? (sorteiaUm(estilosDeLuta)?.nome ?? personagem.estiloDeLuta)
     : personagem.estiloDeLuta;
 

@@ -44,17 +44,35 @@ export function niveisComDadivaEpica(classe: Classe): number[] {
 }
 
 /** True se a classe já concedeu "Estilo de Luta" em algum nível até
- * `nivelAtual` (inclusive) — regra confirmada no livro: "sempre que
- * atinge um nível [de Guerreiro], você pode substituir o talento que
- * escolheu por um talento diferente de Estilo de Luta" (não é escolha
- * única do nível 1, é reconsiderável em todo level-up daí em diante).
- * Generalizado por ID de característica, não hardcoded pra
- * Guerreiro — Guardião/Paladino também têm "Estilo de Luta" (concedido
- * no nível 2 deles); quando forem importados, isso já funciona sem
- * mudar código. */
+ * `nivelAtual` (inclusive) — só responde "já tem a característica".
+ * Se o Level Up deve PERGUNTAR o estilo naquele nível é outra coisa
+ * (`estiloDeLutaPedidoNoLevelUp`): só o Guerreiro pode substituir o
+ * talento a cada nível; Paladino/Guardião escolhem 1x no nível 2. */
 export function temEstiloDeLutaTrocavel(classe: Classe, nivelAtual: number): boolean {
   const nome = ID_CARACTERISTICA_CLASSE.estiloDeLuta;
   return classe.progressao.some((p) => p.nivel <= nivelAtual && p.caracteristicas.includes(nome));
+}
+
+/** Só o Guerreiro pode substituir o Estilo de Luta a cada nível (livro
+ * Cap. 3, Guerreiro nível 1: "Sempre que atinge um nível de Guerreiro,
+ * você pode substituir o talento..."). Paladino/Guardião escolhem 1x no
+ * nível 2 e não têm essa regra (a troca a cada nível deles é só dos
+ * truques do Combatente Abençoado/Druídico). Por ID estável da classe. */
+const IDS_CLASSE_ESTILO_DE_LUTA_TROCA_TODO_NIVEL = ['guerreiro'];
+
+export function estiloDeLutaTrocaTodoNivel(classe: Classe): boolean {
+  return IDS_CLASSE_ESTILO_DE_LUTA_TROCA_TODO_NIVEL.includes(classe.id);
+}
+
+/** `true` quando o Level Up de `nivel` deve mostrar o passo "Estilo de
+ * Luta": todo nível a partir da concessão pro Guerreiro; só no nível
+ * exato da concessão (2) pro Paladino/Guardião — depois disso o estilo
+ * já escolhido fica fixo. */
+export function estiloDeLutaPedidoNoLevelUp(classe: Classe, nivel: number): boolean {
+  if (!temEstiloDeLutaTrocavel(classe, nivel)) return false;
+  if (estiloDeLutaTrocaTodoNivel(classe)) return true;
+  const nome = ID_CARACTERISTICA_CLASSE.estiloDeLuta;
+  return classe.progressao.some((p) => p.nivel === nivel && p.caracteristicas.includes(nome));
 }
 
 /** Características (com descrição real, quando `caracteristicasClasse.ts`
