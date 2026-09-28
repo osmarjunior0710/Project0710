@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2101
+
+Emblemas de Espécie/Origem/Classe(s) removidos do cabeçalho da ficha —
+voltou ao layout de antes (seta de voltar, nome, menu do avatar). Vai
+pensar numa outra forma de mostrar isso.
+
 ## v202609_2024
 
 Emblemas do cabeçalho aumentados pra 60x60. Quando não cabem todos
