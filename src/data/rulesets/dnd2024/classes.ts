@@ -570,9 +570,10 @@ export const classes: Classe[] = [
       { nivel: 19, bonusProficiencia: '+6', caracteristicas: ['Dádiva Épica'] },
       { nivel: 20, bonusProficiencia: '+6', caracteristicas: ['Característica de Subclasse'] },
     ],
-    // Entrega 1 do foco Paladino (dado, ver EmDev.md) — ainda não
-    // habilitado no wizard (Entrega 2 vira `disponivel: true`).
-    disponivel: false,
+    // Entrega 2 do foco Paladino (ver EmDev.md) — habilitado no
+    // wizard. Magias/Canalizar Divindade/features ainda sem mecânica
+    // (entregas seguintes).
+    disponivel: true,
     fonte: FONTE,
   },
 ];

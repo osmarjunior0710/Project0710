@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2208
+
+Paladino deixa de aparecer "(em breve)" no wizard — já dá pra criar um
+personagem Paladino completo (perícias, equipamento inicial, escolher
+uma das 4 subclasses no nível 3). Magias/Canalizar Divindade/features
+de combate ainda sem mecânica de verdade (entregas seguintes).
+
 ## v202609_1901
 
 Cores finais das 12 classes (decididas no protótipo "Cor de cada

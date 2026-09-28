@@ -206,4 +206,33 @@ export const proficienciasIniciaisClasse: Record<string, ProficienciasIniciaisCl
     ],
     fonte: 'Livro do Jogador (D&D 5e 2024), Cap. 3, pág. 147',
   },
+  paladino: {
+    classeId: 'paladino',
+    periciasEscolha: {
+      quantidade: 2,
+      opcoes: ['Atletismo', 'Intimidação', 'Intuição', 'Medicina', 'Persuasão', 'Religião'],
+    },
+    // Sem ferramentasEscolha — Paladino não tem proficiência de
+    // ferramenta na criação.
+    equipamentoInicial: [
+      {
+        rotulo: 'A',
+        itens: [
+          { nome: 'Cota de Malha', quantidade: 1, unidade: null },
+          { nome: 'Escudo', quantidade: 1, unidade: null },
+          { nome: 'Espada Longa', quantidade: 1, unidade: null },
+          { nome: 'Azagaia', quantidade: 6, unidade: null },
+          { nome: 'Símbolo Sagrado', quantidade: 1, unidade: null },
+          { nome: 'Kit de Sacerdote', quantidade: 1, unidade: null },
+        ],
+        ouro: 9,
+      },
+      {
+        rotulo: 'B',
+        itens: [],
+        ouro: 150,
+      },
+    ],
+    fonte: 'Livro do Jogador (D&D 5e 2024), Cap. 3, pág. 167',
+  },
 };

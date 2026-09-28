@@ -20,8 +20,9 @@
 SDD: `sdd/sdd-paladino.md` (Chapéu 2, aprovado). Confirmado com o
 Osmar: Maestria em Arma fixa em 2 (sem progressão), Auras só afetam o
 próprio Paladino (efeito em aliados fica manual, fora do app por
-enquanto). Cor do recurso (Canalizar Divindade) é temporária/qualquer
-até o Osmar fechar a cor final da classe no protótipo `/prototipo`.
+enquanto). Cor final da classe já decidida: `#000075`, texto branco
+(ver `core/corRecursoClasse.ts`) — não precisa mais de cor temporária
+na Entrega 5.
 
 - [x] **Entrega 1 — dado sem mudar nada visível** (concluída, `npx tsc
   --noEmit` / `npm test -- --run` / `npm run build` verdes)
@@ -43,8 +44,16 @@ até o Osmar fechar a cor final da classe no protótipo `/prototipo`.
   - [x] `subclasses.ts`: 4 juramentos cadastrados
   - [x] Auditoria idioma nível 1: confirmado que NÃO concede — já
     atualizado em `PENDENCIAS.md`
-- [ ] **Entrega 2 — habilitar Paladino na criação de personagem**
-  (wizard reconhece a classe, equipamento inicial via PDF, Loja)
+- [x] **Entrega 2 — habilitar Paladino na criação de personagem**
+  (concluída, testada no wizard de ponta a ponta)
+  - [x] `classesProficienciasIniciais.ts`: perícias (escolha 2 de
+    Atletismo/Intimidação/Intuição/Medicina/Persuasão/Religião) +
+    equipamento inicial (A: Cota de Malha/Escudo/Espada Longa/6
+    Azagaias/Símbolo Sagrado/Kit de Sacerdote/9 PO; B: 150 PO) — PDF
+    Cap. 3, pág. 167
+  - [x] `classes.ts`: `disponivel: true`
+  - [x] Banners das 4 subclasses: sem arte própria ainda (Osmar não
+    tem) — cai no fallback 🖼 genérico automaticamente, nada a fazer
 - [ ] **Entrega 3 — os 20 níveis sem features especiais** (ASI, Ataque
   Extra, Dádiva Épica — tudo genérico já existente)
 - [ ] **Entrega 4 — Magias/círculos/espaços** (Padrão B: troca 1 magia
