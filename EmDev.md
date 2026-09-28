@@ -64,9 +64,20 @@ na Entrega 5.
     7 sem descrição própria)
   - [x] Testado ao vivo no wizard/Level Up (Playwright): subiu de
     nível sem erro no console, PV por d10 calculado certo
-- [ ] **Entrega 4 — Magias/círculos/espaços** (Padrão B: troca 1 magia
-  por Descanso Longo — mecânica nova, generalizar pra Guardião reusar
-  depois)
+- [x] **Entrega 4 — Magias/círculos/espaços** (concluída, testada ao
+  vivo: criação nv5, Descanso Longo, Level Up 8→9)
+  - [x] Bug: `atributoPrimario` "Força e Carisma" não mapeava → CD/ataque
+    `null`. Novo `atributoDeConjuracao(classe)` por ID (`paladino` → CAR)
+  - [x] Padrão B: `trocaUmaMagiaPorDescanso` + `usaRedefinicaoPorDescanso`
+    agora vale pra B e C (Level Up só cresce); `temLivroDeMagias` separa
+    o texto do Mago
+  - [x] Descanso Longo: mesma pergunta do Mago, abre `MemorizarMagiaShell`
+    `modo="unica"` (novas props `titulo`/`descricao`) — troca 1 magia
+  - Sobra pra Entrega 6: Destruição Divina e Convocar Montaria aparecem
+    na lista normal de preparadas (viram "sempre preparadas", fora do
+    limite)
+  - Sobra pra Entrega 8: Paladino + Mago na mesma ficha — a pergunta do
+    Descanso Longo só atende o Mago (vem primeiro)
 - [ ] **Entrega 5 — Canalizar Divindade como recurso** (banco de N
   usos + Sentido Divino, `core/recursosVisiveis.ts`, cor temporária)
 - [ ] **Entrega 6 — features de combate, uma por vez**: Mãos

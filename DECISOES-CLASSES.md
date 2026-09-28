@@ -186,6 +186,14 @@ prepared":
   Bardo, Bruxo, Feiticeiro.
 - **Padrão B (flexível por descanso):** troca só 1 magia, a cada
   Descanso Longo — Guardião, Paladino (meio-conjuradores).
+  **Implementado no Paladino (2026-09):** ID da classe entra em
+  `IDS_CLASSE_TROCA_UMA_POR_DESCANSO` (`magiasPersonagem.ts`); Level
+  Up só cresce (`usaRedefinicaoPorDescanso` vale pra B e C); no
+  Descanso Longo reaproveita a pergunta do Mago + `MemorizarMagiaShell`
+  `modo="unica"`. Atributo de conjuração de classe com
+  `atributoPrimario` composto ("Força e Carisma") vai em
+  `atributoDeConjuracao` por ID — nunca cai no mapa por nome. Guardião
+  só precisa entrar nas 2 listas de ID.
 - **Padrão C (redefinição livre):** troca qualquer quantidade, a cada
   Descanso Longo — Clérigo, Druida, Mago (Mago tem camada extra: só
   prepara o que está no grimório físico — fora de escopo por ora).

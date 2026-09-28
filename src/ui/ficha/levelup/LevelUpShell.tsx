@@ -28,6 +28,7 @@ import { valorRecursoClasse } from '../../../core/recursosClasse';
 import {
   agruparMagiasPorCirculo,
   espacosDeMagiaAtivos,
+  temLivroDeMagias as classeTemLivroDeMagias,
   usaRedefinicaoPorDescanso,
 } from '../../../core/magiasPersonagem';
 import {
@@ -1444,7 +1445,9 @@ export default function LevelUpShell({
           </div>
           <div className="label">
             {usaRedefPorDescanso
-              ? 'Escolha dentre as magias do seu Livro de Magias (passo anterior) — a troca da lista completa acontece só no Descanso Longo, não aqui.'
+              ? classeTemLivroDeMagias(classe)
+                ? 'Escolha dentre as magias do seu Livro de Magias (passo anterior) — a troca da lista completa acontece só no Descanso Longo, não aqui.'
+                : 'Só cresce aqui — a troca de 1 magia da lista é só no Descanso Longo, não no Level Up. Escolha de um círculo pro qual você tenha espaço.'
               : 'Regra oficial: a cada nível, você pode substituir 1 das magias que já tem preparada por outra da lista (de qualquer círculo pro qual você tenha espaço).'}
           </div>
         </div>
@@ -1913,7 +1916,11 @@ export default function LevelUpShell({
             {trocasDeMagia > (usaRedefPorDescanso ? 0 : 1) && (
               <div className="label" style={{ color: 'var(--danger)', marginTop: 6 }}>
                 ⚠️ {trocasDeMagia} magias trocadas —{' '}
-                {usaRedefPorDescanso ? 'a redefinição livre é só no Descanso Longo.' : 'só pode trocar 1 por level-up.'}
+                {usaRedefPorDescanso
+                  ? classeTemLivroDeMagias(classe)
+                    ? 'a redefinição livre é só no Descanso Longo.'
+                    : 'a troca de 1 magia é só no Descanso Longo.'
+                  : 'só pode trocar 1 por level-up.'}
               </div>
             )}
           </>

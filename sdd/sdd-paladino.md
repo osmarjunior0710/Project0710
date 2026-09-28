@@ -61,16 +61,20 @@ planilha).
 
 ## 4. Mãos Consagradas (nível 1)
 
-Toque que cura, gastando um espaço de magia (cura = nº de dados de
-cura X, onde X = espaço gasto — livro: dado por espaço, mesma tabela
-usada em magias de cura, ver `core/magiaDano.ts`/`calcularCuraMagia`).
-Usos por Descanso Longo = nível de Paladino (não é "N vezes", é "total
-de dados gastáveis ao longo do dia", igual à regra 2024). Reaproveitar
-`calcularCuraMagia` pra prévia, evitando fórmula nova.
+**CORREÇÃO (2026-09-28, lido direto no livro, Cap. 3 "Nível 1: Mãos
+Consagradas"):** NÃO gasta espaço de magia, e não usa dado de cura. É
+uma **reserva de Pontos de Vida** = 5 × nível de Paladino, que
+reabastece no Descanso Longo. Como **Ação Bônus**, toca uma criatura e
+restaura PV tirados dessa reserva (quantos quiser, até o que restar).
+Também pode gastar 5 PV da reserva pra remover a condição Envenenado
+(esses 5 PV não curam). Reaproveitar o padrão de "reserva de pontos"
+que já exista (checar Inspiração de Bardo/Fôlego) antes de criar um
+novo — o que muda é que o gasto é em PV, escolhido pelo jogador.
 
 **Nível 14 (Toque Restaurador):** expande — ao usar Mãos Consagradas,
-pode também remover 1 condição da lista (Cego, Surdo, Enfeitiçado,
-Assustado, Paralisado, Envenenado) por 5 PV do total gasto. Interação:
+pode também remover condições (livro: Amedrontado, Atordoado, Cego,
+Enfeitiçado, Paralisado ou Surdo — lista corrigida, a anterior deste
+SDD estava errada) gastando 5 PV da reserva por condição. Interação:
 é o MESMO recurso de Mãos Consagradas, não um banco separado — a
 entrega 14 só adiciona a opção de condição ao fluxo já existente.
 
@@ -79,11 +83,11 @@ entrega 14 só adiciona a opção de condição ao fluxo já existente.
 **Recurso novo, sem precedente no código** (nenhuma classe implementada
 tem Canalizar Divindade ainda — Clérigo também não foi importado).
 Banco de N usos (coluna "Bônus de Canalizar Divindade" da planilha:
-2 usos nível 3-10, 3 usos nível 11-20), recarrega no Descanso Longo
-(confirmar se também recarrega parcialmente em Descanso Curto — não
-está explícito nas linhas extraídas; verificar na descrição completa
-da característica antes de fechar essa entrega, senão perguntar ao
-Osmar).
+2 usos nível 3-10, 3 usos nível 11-20), recarrega assim (**confirmado
+no livro, Cap. 3 "Canalizar Divindade", 2026-09-28**): **1 uso gasto
+volta ao completar um Descanso Curto**, e todos os usos voltam no
+Descanso Longo. Se um efeito exige salvaguarda, a CD é a CD de magia da
+Conjuração do Paladino.
 
 Opções que gastam 1 uso: Sentido Divino (sempre disponível, built-in
 na própria característica Canalizar Divindade), Destruição do Paladino

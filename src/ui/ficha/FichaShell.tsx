@@ -115,6 +115,7 @@ import {
   poolDescobertasMagicas,
   nomesDeMagiasConhecidas,
   marcarClasseDasEscolhas,
+  trocaUmaMagiaPorDescanso,
   normalizarMagiasConhecidas,
   deficitTruques,
   deficitMagiasPreparadas,
@@ -290,6 +291,18 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     const classeCatalogo = catalogoClasses.find((cc) => cc.nome === c.classe);
     return classeCatalogo ? caracteristicaDesbloqueada(classeCatalogo, 'Recuperação Arcana', c.nivel) !== null : false;
   });
+
+  /** Classe do personagem com Padrão B de troca (Paladino — 1 magia por
+   * Descanso Longo, `DECISOES-CLASSES.md` "Casters") — `undefined` se
+   * nenhuma. Só a 1ª entra por enquanto: com Mago (Padrão C) na mesma
+   * ficha, a pergunta do Mago vem primeiro e essa fica pra Entrega 8
+   * (Multiclasse) do foco Paladino. */
+  const classeComTrocaDeUmaMagia = classesAtual.find((c) =>
+    trocaUmaMagiaPorDescanso(catalogoClasses.find((cc) => cc.nome === c.classe) ?? null),
+  );
+  const classeObjTrocaDeUmaMagia = classeComTrocaDeUmaMagia
+    ? (catalogoClasses.find((cc) => cc.nome === classeComTrocaDeUmaMagia.classe) ?? null)
+    : null;
 
   const [tab, setTab] = useState<TabName>('atributos');
   const [pvMax, setPvMax] = useState(personagemSalvo.pvMax ?? calcularPvMaximoNivel1(selecao) ?? personagemSalvo.pvAtual);
@@ -1724,7 +1737,15 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // Só pergunta se sobra alguma Magia Preparada pra redefinir — sem
     // isso, um Mago nível 1 (0 Magias Preparadas ainda escolhidas)
     // veria uma pergunta sem sentido.
-    const perguntaRedefinir = usaRedefPorDescanso && magiasPreparadasAtuais.length > 0;
+    const perguntaRedefinirMago = usaRedefPorDescanso && magiasPreparadasAtuais.length > 0;
+    // Paladino (Padrão B): mesma pergunta ("quer alterar suas magias
+    // preparadas?"), mas a tela que abre troca só 1 — ver
+    // `aoConfirmarRedefinicao`/render de `escolhendoMagias`.
+    const perguntaTrocarUma =
+      !perguntaRedefinirMago &&
+      classeComTrocaDeUmaMagia !== undefined &&
+      magiasPreparadasAtuais.some((m) => m.classe === classeComTrocaDeUmaMagia.classe);
+    const perguntaRedefinir = perguntaRedefinirMago || perguntaTrocarUma;
     // As 2 perguntas do Descanso Longo (redefinir Magias Preparadas +
     // trocar Maestria de Magias) encadeiam, nunca ao mesmo tempo na
     // tela — se a 1ª não se aplica, checa a 2ª direto; se aplica, guarda
@@ -1753,12 +1774,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
-  function aoConfirmarRedefinicao(novaLista: string[]) {
-    // Redefinição livre por Descanso Longo — só o Mago tem essa
-    // característica (Livro de Magias), sempre 'Mago' mesmo que o
-    // pill não esteja lá (ver Entrega 5d — `usaRedefPorDescanso` já
-    // checa isso por classesAtual, não pela classe ativa).
-    setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, 'Mago'));
+  function aoConfirmarRedefinicao(novaLista: string[], classeNome = 'Mago') {
+    // Redefinição livre por Descanso Longo — Mago (Livro de Magias),
+    // sempre 'Mago' mesmo que o pill não esteja lá (ver Entrega 5d —
+    // `usaRedefPorDescanso` já checa isso por classesAtual, não pela
+    // classe ativa). Paladino (troca de 1) passa a própria classe.
+    setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, classeNome));
     setDescansoEmAndamento((prev) =>
       prev ? { ...prev, fase: prev.maestriaTrocaPendente ? 'perguntaMaestriaTroca' : 'saindo' } : prev,
     );
@@ -2467,6 +2488,26 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           setMemorizarMagiaGasta(true);
           setMemorizarMagiaAberto(false);
         }}
+      />
+    );
+  }
+
+  if (descansoEmAndamento?.fase === 'escolhendoMagias' && !usaRedefPorDescanso && classeComTrocaDeUmaMagia && classeObjTrocaDeUmaMagia) {
+    const circuloMaximo = Math.max(
+      0,
+      ...espacosDeMagiaAtivos(classeObjTrocaDeUmaMagia, classeComTrocaDeUmaMagia.nivel).map((e) => e.circulo),
+    );
+    return (
+      <MemorizarMagiaShell
+        modo="unica"
+        titulo="Trocar Magia Preparada"
+        descricao={`Descanso Longo — substitua 1 das suas magias preparadas por outra de ${classeComTrocaDeUmaMagia.classe} de um círculo pro qual você tenha espaço. Desmarque uma e marque outra, ou cancele pra não trocar.`}
+        atuais={nomesDeMagiasConhecidas(magiasPreparadasAtuais.filter((m) => m.classe === classeComTrocaDeUmaMagia.classe))}
+        catalogo={magiasDisponiveisParaPreparar(classeObjTrocaDeUmaMagia, classeComTrocaDeUmaMagia.nivel).filter(
+          (m) => m.circulo <= circuloMaximo,
+        )}
+        onFechar={() => aoResponderRedefinir(false)}
+        onConfirmar={(novaLista) => aoConfirmarRedefinicao(novaLista, classeComTrocaDeUmaMagia.classe)}
       />
     );
   }

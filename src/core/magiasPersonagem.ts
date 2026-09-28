@@ -20,6 +20,25 @@ const ATRIBUTO_POR_NOME: Record<string, Atributo> = {
   Inteligência: 'INT',
 };
 
+/** Atributo de conjuração de classes cujo `atributoPrimario` NÃO é
+ * 1 atributo só (ex.: Paladino = "Força e Carisma", mas conjura com
+ * Carisma — livro Cap. 3, "Atributo de Conjuração"). Por ID estável
+ * da classe, nunca por nome de exibição (CLAUDE.md seção 13). Consultado
+ * ANTES de `ATRIBUTO_POR_NOME`. */
+const ATRIBUTO_CONJURACAO_POR_ID_CLASSE: Record<string, { sigla: Atributo; nome: string }> = {
+  paladino: { sigla: 'CAR', nome: 'Carisma' },
+};
+
+/** Sigla + nome completo do atributo de conjuração da classe, ou
+ * `null` se a classe não tem atributo de conjuração mapeado. */
+export function atributoDeConjuracao(classe: Classe | null): { sigla: Atributo; nome: string } | null {
+  if (!classe) return null;
+  const porId = ATRIBUTO_CONJURACAO_POR_ID_CLASSE[classe.id];
+  if (porId) return porId;
+  const sigla = ATRIBUTO_POR_NOME[classe.atributoPrimario];
+  return sigla ? { sigla, nome: classe.atributoPrimario } : null;
+}
+
 export interface EspacoDeMagiaAtivo {
   circulo: number;
   maximo: number;
@@ -293,16 +312,34 @@ export function memorizarMagiaValida(atuais: string[], escolhidas: string[]): bo
   return escolhidas.length === atuais.length && contarTrocas(atuais, escolhidas) === 1;
 }
 
-/** `true` quando a classe tem o recurso "Livro de Magias" (grimório) —
- * Padrão C "redefinição livre por Descanso Longo" (ver
- * DECISOES-CLASSES.md "Casters"): truques e magias preparadas só
- * trocam ao completar um Descanso, NUNCA no Level Up — o Level Up é
- * só crescimento (nunca remove o que já tinha). `false` = padrão
- * restritivo/flexível de Bardo/Bruxo, onde o Level Up já permite
- * trocar 1. Hoje só o Mago tem essa característica. */
+/** `true` quando a classe só troca magia ao completar um Descanso, NUNCA
+ * no Level Up — o Level Up é só crescimento (nunca remove o que já
+ * tinha). Vale pro Padrão C (Livro de Magias — hoje só o Mago) e pro
+ * Padrão B (`trocaUmaMagiaPorDescanso` — Paladino); ver
+ * DECISOES-CLASSES.md "Casters". `false` = Padrão A de Bardo/Bruxo,
+ * onde o Level Up já permite trocar 1. */
 export function usaRedefinicaoPorDescanso(classe: Classe | null): boolean {
   if (!classe) return false;
-  return classe.recursos.some((r) => r.nome.startsWith('Livro de Magias'));
+  return temLivroDeMagias(classe) || trocaUmaMagiaPorDescanso(classe);
+}
+
+/** `true` quando a classe tem o recurso "Livro de Magias" (grimório) —
+ * hoje só o Mago. Diferencia o texto/fluxo do Padrão C (redefinição
+ * livre dentro do grimório) do Padrão B (troca de 1 magia por
+ * Descanso Longo), que também "só cresce no Level Up". */
+export function temLivroDeMagias(classe: Classe | null): boolean {
+  return classe?.recursos.some((r) => r.nome.startsWith('Livro de Magias')) ?? false;
+}
+
+/** Padrão B de troca de magia (`DECISOES-CLASSES.md` "Casters"): ao
+ * completar um Descanso Longo, substitui 1 magia preparada por outra
+ * da lista da classe (livro Cap. 3, "Mudando Suas Magias Preparadas").
+ * No Level Up só cresce (nunca troca). Por ID estável da classe — hoje
+ * só o Paladino; o Guardião entra aqui quando for importado. */
+const IDS_CLASSE_TROCA_UMA_POR_DESCANSO = ['paladino'];
+
+export function trocaUmaMagiaPorDescanso(classe: Classe | null): boolean {
+  return classe !== null && IDS_CLASSE_TROCA_UMA_POR_DESCANSO.includes(classe.id);
 }
 
 /** Cresce uma lista de magias conhecidas SEM NUNCA remover o que já
@@ -481,7 +518,7 @@ export function ehMagiaDeAcaoBonus(magia: Magia): boolean {
  * mapeado (ver `ATRIBUTO_POR_NOME`). */
 export function modAcertoConjuracao(selecao: WizardSelection, classe: Classe | null, nivel: number): number | null {
   if (!classe) return null;
-  const atributo = ATRIBUTO_POR_NOME[classe.atributoPrimario];
+  const atributo = atributoDeConjuracao(classe)?.sigla;
   if (!atributo) return null;
   const valor = valorFinalAtributo(selecao, atributo);
   if (valor === null) return null;
@@ -496,7 +533,7 @@ export function modAcertoConjuracao(selecao: WizardSelection, classe: Classe | n
  * atributo de conjuração mapeado). */
 export function explicarModAcertoConjuracao(selecao: WizardSelection, classe: Classe | null, nivel: number): ExplicacaoCalculo | null {
   if (!classe) return null;
-  const atributo = ATRIBUTO_POR_NOME[classe.atributoPrimario];
+  const atributo = atributoDeConjuracao(classe)?.sigla;
   if (!atributo) return null;
   const valor = valorFinalAtributo(selecao, atributo);
   if (valor === null) return null;
@@ -504,7 +541,7 @@ export function explicarModAcertoConjuracao(selecao: WizardSelection, classe: Cl
   const prof = bonusProficiencia(classe, nivel);
   return {
     linhas: [
-      { label: `mod. ${classe.atributoPrimario}`, valor: fmtMod(atribMod) },
+      { label: `mod. ${atributoDeConjuracao(classe)?.nome}`, valor: fmtMod(atribMod) },
       { label: 'Bônus de Proficiência', valor: fmtMod(prof) },
     ],
     total: { label: 'Ataque de Magia', valor: fmtMod(atribMod + prof) },
@@ -543,12 +580,13 @@ export interface ResumoConjuracao {
 
 export function resumoConjuracao(selecao: WizardSelection, classe: Classe | null, nivel: number): ResumoConjuracao | null {
   if (!classe) return null;
-  const atributo = ATRIBUTO_POR_NOME[classe.atributoPrimario];
+  const conj = atributoDeConjuracao(classe);
+  const atributo = conj?.sigla;
   const modAtaque = modAcertoConjuracao(selecao, classe, nivel);
-  if (!atributo || modAtaque === null) return null;
+  if (!conj || !atributo || modAtaque === null) return null;
   const valor = valorFinalAtributo(selecao, atributo);
   if (valor === null) return null;
-  return { atributoNome: classe.atributoPrimario, atributo, modAtributo: modificador(valor), cd: 8 + modAtaque, modAtaque };
+  return { atributoNome: conj.nome, atributo, modAtributo: modificador(valor), cd: 8 + modAtaque, modAtaque };
 }
 
 /** CD pra evitar a magia/característica de conjuração (salvaguarda do

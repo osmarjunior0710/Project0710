@@ -22,6 +22,9 @@ import {
   agruparMagiasComClassePorCirculo,
   deficitTruques,
   deficitMagiasPreparadas,
+  atributoDeConjuracao,
+  trocaUmaMagiaPorDescanso,
+  temLivroDeMagias,
 } from './magiasPersonagem';
 import { classes } from '../data/rulesets/dnd2024/classes';
 import { magias, magiasDaClasse } from '../data/rulesets/dnd2024/magias';
@@ -494,5 +497,66 @@ describe('ehMagiaDeReacao / ehMagiaDeAcaoBonus', () => {
     const m = magiaFixture('Bola de Fogo');
     expect(ehMagiaDeReacao(m)).toBe(false);
     expect(ehMagiaDeAcaoBonus(m)).toBe(false);
+  });
+});
+
+describe('atributoDeConjuracao (Paladino conjura com Carisma)', () => {
+  const paladino = classes.find((c) => c.nome === 'Paladino');
+  if (!paladino) throw new Error('Fixture "Paladino" não encontrada em data/rulesets/dnd2024/classes.ts');
+
+  it('Paladino ("Força e Carisma") devolve Carisma, não null', () => {
+    expect(atributoDeConjuracao(paladino)).toEqual({ sigla: 'CAR', nome: 'Carisma' });
+  });
+
+  it('Mago continua Inteligência (caminho antigo intacto)', () => {
+    expect(atributoDeConjuracao(mago)).toEqual({ sigla: 'INT', nome: 'Inteligência' });
+  });
+
+  it('borda: classe null ou sem atributo de conjuração (Bárbaro) devolve null', () => {
+    expect(atributoDeConjuracao(null)).toBeNull();
+    const barbaro = classes.find((c) => c.nome === 'Bárbaro');
+    expect(atributoDeConjuracao(barbaro ?? null)).toBeNull();
+  });
+
+  it('CD e ataque do Paladino nível 1 com CAR 16: ataque +5, CD 13', () => {
+    const selecao = { ...criarSelecaoInicial(), atributos: { ...criarSelecaoInicial().atributos, CAR: 16 } };
+    expect(resumoConjuracao(selecao, paladino, 1)).toEqual({
+      atributoNome: 'Carisma',
+      atributo: 'CAR',
+      modAtributo: 3,
+      cd: 13,
+      modAtaque: 5,
+    });
+  });
+});
+
+describe('Padrão B — Paladino troca 1 magia por Descanso Longo', () => {
+  const paladino = classes.find((c) => c.nome === 'Paladino');
+  if (!paladino) throw new Error('Fixture "Paladino" não encontrada');
+
+  it('trocaUmaMagiaPorDescanso: Paladino sim; Mago, Bardo e null não', () => {
+    expect(trocaUmaMagiaPorDescanso(paladino)).toBe(true);
+    expect(trocaUmaMagiaPorDescanso(mago)).toBe(false);
+    expect(trocaUmaMagiaPorDescanso(bardo)).toBe(false);
+    expect(trocaUmaMagiaPorDescanso(null)).toBe(false);
+  });
+
+  it('usaRedefinicaoPorDescanso agora vale pro Paladino (Level Up só cresce) e continua valendo pro Mago, não pro Bardo', () => {
+    expect(usaRedefinicaoPorDescanso(paladino)).toBe(true);
+    expect(usaRedefinicaoPorDescanso(mago)).toBe(true);
+    expect(usaRedefinicaoPorDescanso(bardo)).toBe(false);
+  });
+
+  it('temLivroDeMagias: só o Mago (Paladino usa o mesmo fluxo de Level Up mas sem grimório)', () => {
+    expect(temLivroDeMagias(mago)).toBe(true);
+    expect(temLivroDeMagias(paladino)).toBe(false);
+    expect(temLivroDeMagias(null)).toBe(false);
+  });
+
+  it('espaços e Magias Preparadas do Paladino seguem a tabela do livro (nível 1: 2 espaços, 2 preparadas; nível 5: 4+2, 6 preparadas)', () => {
+    expect(espacosDeMagiaAtivos(paladino, 1)).toEqual([{ circulo: 1, maximo: 2, recuperaNoDescansoCurto: false }]);
+    expect(espacosDeMagiaAtivos(paladino, 5).map((e) => [e.circulo, e.maximo])).toEqual([[1, 4], [2, 2]]);
+    expect(deficitMagiasPreparadas(paladino, 5, [])).toBe(6);
+    expect(deficitTruques(paladino, 5, [])).toBe(0);
   });
 });

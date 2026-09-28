@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1524
+
+**Paladino — magias.** A aba Magias do Paladino agora mostra CD, ataque
+de magia e modificador certos (Carisma) — antes saíam vazios. No Level
+Up só entram magias novas (nunca troca); ao completar um Descanso Longo
+aparece "Quer alterar suas magias preparadas?" e abre uma tela pra
+trocar 1 magia.
+
 ## v202609_0924
 
 Corrigido: a house rule "Mochila aumenta Capacidade" (v202609_0630)

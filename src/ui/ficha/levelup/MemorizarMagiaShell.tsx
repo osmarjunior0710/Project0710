@@ -17,6 +17,11 @@ interface MemorizarMagiaShellProps {
   modo: 'unica' | 'livre';
   onConfirmar: (novaLista: string[]) => void;
   onFechar: () => void;
+  /** Sobrescrevem o título/descrição padrão do Mago (Livro de Magias)
+   * — usado pela troca de 1 magia por Descanso Longo do Paladino
+   * (Padrão B), que reaproveita `modo="unica"` mas não tem grimório. */
+  titulo?: string;
+  descricao?: string;
 }
 
 /** Troca de Magias Preparadas dentro do Livro de Magias (grimório) —
@@ -27,7 +32,7 @@ interface MemorizarMagiaShellProps {
  *   libera com exatamente 1 troca (`memorizarMagiaValida`).
  * - `'livre'`: redefinição ao completar Descanso Longo — qualquer
  *   quantidade de trocas (inclusive 0), ver A6.2 em EmDevB.md. */
-export default function MemorizarMagiaShell({ atuais, catalogo, modo, onConfirmar, onFechar }: MemorizarMagiaShellProps) {
+export default function MemorizarMagiaShell({ atuais, catalogo, modo, onConfirmar, onFechar, titulo, descricao }: MemorizarMagiaShellProps) {
   const [escolhidas, setEscolhidas] = useState<string[]>(atuais);
 
   function toggle(nome: string) {
@@ -48,15 +53,16 @@ export default function MemorizarMagiaShell({ atuais, catalogo, modo, onConfirma
     <div className={styles.screen}>
       <div className={styles.header}>
         <div className={styles.titleRow}>
-          <div className={styles.stepName}>{modo === 'unica' ? 'Memorizar Magia' : 'Redefinir Magias Preparadas'}</div>
+          <div className={styles.stepName}>{titulo ?? (modo === 'unica' ? 'Memorizar Magia' : 'Redefinir Magias Preparadas')}</div>
         </div>
       </div>
 
       <div className={styles.body}>
         <div className="label" style={{ marginBottom: 8 }}>
-          {modo === 'unica'
-            ? 'Estude seu Livro de Magias e substitua exatamente 1 das magias preparadas por outra do livro — desmarque uma e marque outra.'
-            : 'Descanso Longo — redefina livremente suas Magias Preparadas dentro do Livro de Magias, trocando quantas quiser (ou nenhuma).'}
+          {descricao ??
+            (modo === 'unica'
+              ? 'Estude seu Livro de Magias e substitua exatamente 1 das magias preparadas por outra do livro — desmarque uma e marque outra.'
+              : 'Descanso Longo — redefina livremente suas Magias Preparadas dentro do Livro de Magias, trocando quantas quiser (ou nenhuma).')}
         </div>
         {agruparMagiasPorCirculo(catalogo).map((grupo) => (
           <GrupoMagiaColapsavel key={grupo.circulo} label={grupo.label} magias={grupo.magias}>
