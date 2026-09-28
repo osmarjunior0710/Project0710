@@ -14,7 +14,7 @@ import { dadoInspiracao, usosInspiracaoMaximo } from './inspiracaoBardo';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
 import type { PersonagemClasse } from './multiclasse';
 import type { WizardSelection } from './personagem';
-import { quantidadeFuria, quantidadeRecuperarFolego } from './recursosClasse';
+import { quantidadeCanalizarDivindade, quantidadeFuria, quantidadeRecuperarFolego } from './recursosClasse';
 
 export interface RecursoVisivel {
   /** Estável, pra key de lista e testes. */
@@ -36,6 +36,7 @@ export interface EntradaRecursosVisiveis {
   gastos: {
     furia: number;
     folego: number;
+    canalizarDivindade: number;
     inspiracao: number;
     /** `espacosGastosPorClasseECirculo` — a chave do pool de Pacto é o nome da classe. */
     espacosPorClasseECirculo: Record<string, Record<number, number>>;
@@ -116,6 +117,23 @@ export function montarRecursosVisiveis(e: EntradaRecursosVisiveis): RecursoVisiv
           descricao: [
             `Ação Bônus: você recupera Pontos de Vida iguais a 1d10 + seu nível de Guerreiro (${c.nivel}).`,
             `Recarrega: ${recuperaEm(classe, 'Recuperar Fôlego (usos)')}.`,
+          ],
+        });
+      }
+    }
+
+    if (classe.id === 'paladino') {
+      const maximo = quantidadeCanalizarDivindade(classe, c.nivel);
+      if (maximo > 0) {
+        lista.push({
+          id: 'canalizar-divindade',
+          nome: 'Canalizar Divindade',
+          maximo,
+          restantes: Math.max(0, maximo - e.gastos.canalizarDivindade),
+          cor: corDoRecursoDaClasse(classe.nome),
+          descricao: [
+            'Cada efeito de Canalizar Divindade (Sentido Divino, e mais opções conforme você sobe de nível) gasta 1 uso. Se pedir salvaguarda, a CD é a CD de magia da Conjuração de Paladino.',
+            'Recarrega: 1 uso no Descanso Curto, todos os usos no Descanso Longo.',
           ],
         });
       }

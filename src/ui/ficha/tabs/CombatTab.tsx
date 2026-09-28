@@ -106,6 +106,9 @@ interface CombatTabProps {
   nivel: number;
   /** Recuperar Fôlego / Mente Tática (Guerreiro). */
   folego: RecursoContado;
+  /** Canalizar Divindade (Paladino) — `maximo` 0 = antes do nível 3 ou
+   * sem a classe. Sentido Divino gasta 1 uso deste banco. */
+  canalizarDivindade: RecursoContado;
   /** Conhecimento de Pedras (Anão) — `maximo` 0 = espécie não é Anão. */
   conhecimentoDePedras: RecursoContado;
   /** Pico de Adrenalina (Orc) — `maximo` 0 = espécie não é Orc. */
@@ -493,6 +496,11 @@ export default function CombatTab({
   estiloDeLuta,
   nivel,
   folego: { maximo: usosFolegoMaximo, restantes: usosFolegoRestantes, onUsar: onUsarUsoFolego },
+  canalizarDivindade: {
+    maximo: usosCanalizarMaximo,
+    restantes: usosCanalizarRestantes,
+    onUsar: onUsarUsoCanalizar,
+  },
   conhecimentoDePedras: {
     maximo: usosConhecimentoDePedrasMaximo,
     restantes: usosConhecimentoDePedrasRestantes,
@@ -992,6 +1000,15 @@ export default function CombatTab({
       },
       confirmarFechamento: { aoTocar: () => setAtaqueDeSoproDano(totalRolado) },
     });
+  }
+
+  function usarSentidoDivino() {
+    if (!onUsarUsoCanalizar()) return;
+    onMarcarUsado('bonus');
+    setPainelAberto(null);
+    setFeedback(
+      '🙏 Sentido Divino — por 10 minutos (ou até ficar Incapacitado) você sabe a localização de Celestiais, Ínferos e Mortos-Vivos a até 18 m e detecta lugares/objetos consagrados ou profanados.',
+    );
   }
 
   function usarRecuperarFolego() {
@@ -1757,6 +1774,9 @@ export default function CombatTab({
           usosFolegoMaximo={usosFolegoMaximo}
           usosFolegoRestantes={usosFolegoRestantes}
           onUsarRecuperarFolego={usarRecuperarFolego}
+          usosCanalizarMaximo={usosCanalizarMaximo}
+          usosCanalizarRestantes={usosCanalizarRestantes}
+          onUsarSentidoDivino={usarSentidoDivino}
           usosConhecimentoDePedrasMaximo={usosConhecimentoDePedrasMaximo}
           usosConhecimentoDePedrasRestantes={usosConhecimentoDePedrasRestantes}
           onUsarConhecimentoDePedras={usarConhecimentoDePedras}

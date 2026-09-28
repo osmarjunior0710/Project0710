@@ -13,7 +13,7 @@ function entrada(classes: EntradaRecursosVisiveis['classes'], gastos: Partial<En
     classes,
     catalogo,
     selecao: selecaoCar20(),
-    gastos: { furia: 0, folego: 0, inspiracao: 0, espacosPorClasseECirculo: {}, ...gastos },
+    gastos: { furia: 0, folego: 0, canalizarDivindade: 0, inspiracao: 0, espacosPorClasseECirculo: {}, ...gastos },
   };
 }
 
@@ -76,5 +76,31 @@ describe('montarRecursosVisiveis', () => {
   it('classe sem recurso desse tipo (Mago) e classe fora do catálogo não geram linha', () => {
     expect(montarRecursosVisiveis(entrada([{ classe: 'Mago', nivel: 5, subclasse: null }]))).toEqual([]);
     expect(montarRecursosVisiveis(entrada([{ classe: 'Inventada', nivel: 3, subclasse: null }]))).toEqual([]);
+  });
+});
+
+describe('Canalizar Divindade (Paladino)', () => {
+  it('nível 2: nenhuma linha (só existe a partir do nível 3)', () => {
+    const r = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 2, subclasse: null }]));
+    expect(r.find((x) => x.id === 'canalizar-divindade')).toBeUndefined();
+  });
+
+  it('nível 3: 2 usos; nível 11: 3 usos', () => {
+    const n3 = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 3, subclasse: null }]));
+    expect(n3.find((x) => x.id === 'canalizar-divindade')).toMatchObject({ maximo: 2, restantes: 2 });
+    const n11 = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 11, subclasse: null }]));
+    expect(n11.find((x) => x.id === 'canalizar-divindade')).toMatchObject({ maximo: 3, restantes: 3 });
+  });
+
+  it('gasto desconta e nunca fica negativo', () => {
+    const r = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 3, subclasse: null }], { canalizarDivindade: 1 }));
+    expect(r.find((x) => x.id === 'canalizar-divindade')?.restantes).toBe(1);
+    const r2 = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 3, subclasse: null }], { canalizarDivindade: 9 }));
+    expect(r2.find((x) => x.id === 'canalizar-divindade')?.restantes).toBe(0);
+  });
+
+  it('descrição diz como recarrega (1 no Curto, todos no Longo)', () => {
+    const r = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 3, subclasse: null }]));
+    expect(r.find((x) => x.id === 'canalizar-divindade')?.descricao.join(' ')).toContain('Descanso Curto');
   });
 });

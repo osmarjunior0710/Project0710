@@ -17,6 +17,14 @@ export function quantidadeRecuperarFolego(classe: Classe, nivel: number): number
   return valorRecursoClasse(classe, 'Recuperar Fôlego', nivel);
 }
 
+/** Nº de usos de Canalizar Divindade (Paladino) no nível atual — 0 antes
+ * do nível 3, 2 do 3 ao 10, 3 do 11 em diante (lido de `classes.ts`).
+ * Sentido Divino e as demais opções gastam usos do mesmo banco. Recarga:
+ * 1 uso no Descanso Curto, todos no Longo (livro Cap. 3). */
+export function quantidadeCanalizarDivindade(classe: Classe, nivel: number): number {
+  return valorRecursoClasse(classe, 'Bônus de Canalizar Divindade', nivel);
+}
+
 /** Nº de usos de Fúria (Bárbaro) no nível atual — banco de ativações,
  * não de turnos (ver `sdd/sdd-barbaro-furia.md`). */
 export function quantidadeFuria(classe: Classe, nivel: number): number {

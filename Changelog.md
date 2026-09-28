@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1831
+
+**Paladino — Canalizar Divindade (nível 3+).** A aba Combate mostra o
+contador de usos (2 do nível 3 ao 10, 3 do nível 11 em diante) com as
+bolinhas azul-marinho do Paladino. O painel de Ação Bônus ganha
+**Sentido Divino**, que gasta 1 uso. Descanso Curto devolve 1 uso;
+Descanso Longo devolve todos.
+
 ## v202609_1653
 
 Level Up do Paladino e do Mago: a tela de escolher Magias Preparadas

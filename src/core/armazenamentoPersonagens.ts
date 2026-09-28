@@ -75,6 +75,9 @@ export interface PersonagemSalvo {
    * (`armasElegiveisParaMaestriaExtra`). */
   maestriaArmaTalentoGeralAtual?: string | null;
   folegoGasto?: number;
+  /** Usos de Canalizar Divindade (Paladino) já gastos — ausente = 0
+   * (fichas salvas antes desse recurso existir). */
+  canalizarDivindadeGasto?: number;
   indomavelGasto?: number;
   surtoGasto?: number;
   /** @deprecated Etapa 4.1 — só existia 1 círculo simultâneo possível.

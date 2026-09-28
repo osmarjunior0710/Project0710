@@ -16,6 +16,10 @@ interface BonusPanelContentProps {
   usosFolegoMaximo: number;
   usosFolegoRestantes: number;
   onUsarRecuperarFolego: () => void;
+  /** Canalizar Divindade (Paladino) — Sentido Divino (Ação Bônus). */
+  usosCanalizarMaximo: number;
+  usosCanalizarRestantes: number;
+  onUsarSentidoDivino: () => void;
   /** Aplica a cura de magia no PV E dispara o efeito visual de Cura
    * ("Me curar", ver `RollDadosOptions.confirmarAlvoCura` e
    * `FichaShell.tsx` `onCuraDeMagiaAplicada`). */
@@ -184,6 +188,9 @@ export default function BonusPanelContent({
   usosFolegoMaximo,
   usosFolegoRestantes,
   onUsarRecuperarFolego,
+  usosCanalizarMaximo,
+  usosCanalizarRestantes,
+  onUsarSentidoDivino,
   ataqueBonus,
   onUsarAtaqueBonus,
   cortarAtaque,
@@ -326,6 +333,7 @@ export default function BonusPanelContent({
 
   if (
     usosFolegoMaximo === 0 &&
+    usosCanalizarMaximo === 0 &&
     usosInspiracaoMaximo === 0 &&
     usosConhecimentoDePedrasMaximo === 0 &&
     usosPicoDeAdrenalinaMaximo === 0 &&
@@ -531,6 +539,40 @@ export default function BonusPanelContent({
             )}
           </div>
           {semUsos && (
+            <div className="label" style={{ marginTop: 6 }}>
+              sem usos disponíveis — descanse pra recuperar.
+            </div>
+          )}
+        </>
+      )}
+      {usosCanalizarMaximo > 0 && (
+        <>
+          <div className={styles.slotCounter}>
+            <span>Canalizar Divindade:</span>
+            <TickPips
+              total={usosCanalizarMaximo}
+              usados={usosCanalizarMaximo - usosCanalizarRestantes}
+              cor={corDoRecursoDaClasse('Paladino')}
+            />
+            <span style={{ color: 'var(--text-faint)' }}>
+              {usosCanalizarRestantes}/{usosCanalizarMaximo} disponíveis
+            </span>
+          </div>
+          <div
+            className={styles.row}
+            style={usosCanalizarRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+            onClick={onUsarSentidoDivino}
+          >
+            <div className={styles.rowName}>🙏 Sentido Divino</div>
+            {detalhesAtivo && (
+              <div className={styles.rowDesc}>
+                Por 10 minutos (ou até ficar Incapacitado), você sabe onde estão Celestiais, Ínferos e Mortos-Vivos a
+                até 18 m e detecta lugares ou objetos consagrados/profanados. Gasta 1 uso de Canalizar Divindade — 1
+                volta no Descanso Curto, todos no Descanso Longo.
+              </div>
+            )}
+          </div>
+          {usosCanalizarRestantes <= 0 && (
             <div className="label" style={{ marginTop: 6 }}>
               sem usos disponíveis — descanse pra recuperar.
             </div>

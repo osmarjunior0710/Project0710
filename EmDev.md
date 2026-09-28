@@ -78,8 +78,17 @@ na Entrega 5.
     limite)
   - Sobra pra Entrega 8: Paladino + Mago na mesma ficha — a pergunta do
     Descanso Longo só atende o Mago (vem primeiro)
-- [ ] **Entrega 5 — Canalizar Divindade como recurso** (banco de N
-  usos + Sentido Divino, `core/recursosVisiveis.ts`, cor temporária)
+- [x] **Entrega 5 — Canalizar Divindade como recurso** (concluída,
+  testada ao vivo nv10: gasto, Descanso Curto devolve 1, persiste ao
+  recarregar)
+  - [x] `quantidadeCanalizarDivindade` (`recursosClasse.ts`), linha em
+    `recursosVisiveis.ts` (cor final `#000075`, não temporária), 4 testes
+  - [x] Recarga: 1 uso no Curto, todos no Longo (igual Recuperar Fôlego);
+    campo `canalizarDivindadeGasto` salvo na ficha (ausente = 0)
+  - [x] Sentido Divino (Ação Bônus) no painel de Bônus, gasta 1 uso
+  - Entrega 6/7 só precisam chamar `canalizarDivindade.onUsar()` pra
+    gastar 1 uso do mesmo banco (Destruição Divina grátis, Repudiar
+    Inimigos, opções dos Juramentos)
 - [ ] **Entrega 6 — features de combate, uma por vez**: Mãos
   Consagradas → Destruição do Paladino → Estilo de Luta/Combatente
   Abençoado → Montaria Fiel → Aura de Proteção → Repudiar Inimigos →

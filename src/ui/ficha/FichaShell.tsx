@@ -85,7 +85,7 @@ import { explicarCdRaizesDevastadoras } from '../../core/raizesDevastadoras';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
-import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria } from '../../core/recursosClasse';
+import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade } from '../../core/recursosClasse';
 import { type MagiaGratisDeInvocacao } from '../../core/invocacoesMagiaGratis';
 import { aplicarAlteracaoPv, ganharPvTemporario } from '../../core/pvTemporario';
 import { deveAplicarVigorImplacavel } from '../../core/vigorImplacavel';
@@ -434,6 +434,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   );
   const [talentosFavoritos, setTalentosFavoritos] = useState<string[]>(personagemSalvo.talentosFavoritosAtual ?? []);
   const [folegoGasto, setFolegoGasto] = useState(personagemSalvo.folegoGasto ?? 0);
+  const [canalizarDivindadeGasto, setCanalizarDivindadeGasto] = useState(personagemSalvo.canalizarDivindadeGasto ?? 0);
   const [vigorImplacavelGasto, setVigorImplacavelGasto] = useState(personagemSalvo.vigorImplacavelGasto ?? false);
   // Dados de Vida gastos por tipo (ver `core/dadosDeVida.ts`) — a reserva
   // sempre soma TODAS as classes, nunca só a classe em foco.
@@ -742,6 +743,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const estiloDeLuta = estilosDeLuta.find((e) => e.nome === personagem.estiloDeLuta) ?? null;
   const usosFolegoMaximo = classe ? quantidadeRecuperarFolego(classe, personagem.nivel) : 0;
   const usosFolegoRestantes = Math.max(0, usosFolegoMaximo - folegoGasto);
+  // Canalizar Divindade (Paladino) — lê o nível DA classe Paladino em
+  // `classesAtual` (não da classe ativa), então vale também em multiclasse.
+  const classeCatalogoPaladino = catalogoClasses.find((c) => c.id === 'paladino');
+  const entradaPaladino = classeCatalogoPaladino ? classesAtual.find((c) => c.classe === classeCatalogoPaladino.nome) : undefined;
+  const usosCanalizarMaximo =
+    classeCatalogoPaladino && entradaPaladino ? quantidadeCanalizarDivindade(classeCatalogoPaladino, entradaPaladino.nivel) : 0;
+  const usosCanalizarRestantes = Math.max(0, usosCanalizarMaximo - canalizarDivindadeGasto);
   // Fúria (Bárbaro) — ver sdd/sdd-barbaro-furia.md. `armaduraPesadaEquipada`
   // também trava a ATIVAÇÃO (regra real) e força o encerramento
   // automático ao equipar (ver `equiparItem`).
@@ -962,6 +970,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     gastos: {
       furia: furiaGasto,
       folego: folegoGasto,
+      canalizarDivindade: canalizarDivindadeGasto,
       inspiracao: inspiracaoGasto,
       espacosPorClasseECirculo: espacosGastosPorClasseECirculo,
     },
@@ -1183,6 +1192,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     estiloDeLutaAtual: personagem.estiloDeLuta,
     maestriaArmaAtual: maestriaArma,
     folegoGasto,
+    canalizarDivindadeGasto,
     vigorImplacavelGasto,
     furiaImplacavelUsosDesdeDescanso: furiaImplacavelUsos,
     dadosDeVidaGastos,
@@ -1285,6 +1295,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       pvTemporario,
       maestriaArma,
       folegoGasto,
+      canalizarDivindadeGasto,
       vigorImplacavelGasto,
       furiaImplacavelUsos,
       dadosDeVidaGastos,
@@ -1633,6 +1644,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (selecao.especie === 'Humano') setInspiracaoHeroicaAtiva(true);
     setEspacosGastosPorClasseECirculo({});
     setFolegoGasto(0);
+    setCanalizarDivindadeGasto(0);
     setVigorImplacavelGasto(false);
     setFuriaImplacavelUsos(0);
     setFuriaPersistenteUsada(false);
@@ -1699,6 +1711,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
     if (fonteDeInspiracao) setInspiracaoGasto(0);
     setFolegoGasto((v) => Math.max(0, v - 1));
+    setCanalizarDivindadeGasto((v) => Math.max(0, v - 1));
     setLivroDasSombrasGasto(false);
     setMemorizarMagiaGasta(false);
     setResistenciaInferaGasto(false);
@@ -2023,6 +2036,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const usoFolego = recursoContado(usosFolegoMaximo, folegoGasto, setFolegoGasto);
   function usarUsoFolego(): boolean {
     return usoFolego.usar();
+  }
+
+  const usoCanalizarDivindade = recursoContado(usosCanalizarMaximo, canalizarDivindadeGasto, setCanalizarDivindadeGasto);
+  function usarUsoCanalizarDivindade(): boolean {
+    return usoCanalizarDivindade.usar();
   }
 
   const indomavel = recursoContado(indomavelMaximo, indomavelGasto, setIndomavelGasto);
@@ -2888,6 +2906,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             estiloDeLuta={estiloDeLuta}
             nivel={personagem.nivel}
             folego={{ maximo: usosFolegoMaximo, restantes: usosFolegoRestantes, onUsar: usarUsoFolego }}
+            canalizarDivindade={{ maximo: usosCanalizarMaximo, restantes: usosCanalizarRestantes, onUsar: usarUsoCanalizarDivindade }}
             conhecimentoDePedras={{
               maximo: usosConhecimentoDePedrasMaximo,
               restantes: usosConhecimentoDePedrasRestantes,
