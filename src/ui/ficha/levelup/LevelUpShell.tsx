@@ -683,11 +683,17 @@ export default function LevelUpShell({
   // quando o total de vagas CRESCEU de verdade nesse nível (senão seria
   // um passo vazio pra Guerreiro/Bárbaro na maioria dos level-ups).
   if (maxMaestriaArma > maestriaArmaAtual.length) luSteps.push('maestriaArmaCrescimento');
-  if (maxTruques > 0) luSteps.push('truques');
+  // Classe que só troca magia no Descanso (`usaRedefPorDescanso` —
+  // Mago/Paladino): o passo só existe pra ADICIONAR, então sem vaga nova
+  // seria uma tela vazia. Bardo/Bruxo/Feiticeiro continuam sempre (podem
+  // trocar 1 a cada level-up).
+  if (maxTruques > 0 && (!usaRedefPorDescanso || maxTruques > truquesAtuais.length)) luSteps.push('truques');
   if (temLivroDeMagias) luSteps.push('livroDeMagias');
   if (magiasPeritoNecromanciaBonusNesteNivel > 0) luSteps.push('peritoNecromancia');
   if (magiasVersadoEmEvocacaoBonusNesteNivel > 0) luSteps.push('versadoEmEvocacao');
-  if (maxMagiasPreparadas > 0) luSteps.push('magiasPreparadas');
+  if (maxMagiasPreparadas > 0 && (!usaRedefPorDescanso || maxMagiasPreparadas > magiasPreparadasAtuais.length)) {
+    luSteps.push('magiasPreparadas');
+  }
   if (maxInvocacoes > 0) luSteps.push('invocacoes');
   // Independe de `maxInvocacoes > 0` — dispara mesmo num level-up que
   // não concede invocação nova, se alguma marcada antes ainda não

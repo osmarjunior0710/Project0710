@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1653
+
+Level Up do Paladino e do Mago: a tela de escolher Magias Preparadas
+(e Truques, no Mago) só aparece quando a lista realmente ganha vaga
+nova naquele nível. Antes aparecia sempre, mesmo sem nada pra
+escolher — já que esses dois só trocam magia no Descanso.
+
 ## v202609_1650
 
 Corrige o Estilo de Luta do Paladino no Level Up: pelo livro, só o
