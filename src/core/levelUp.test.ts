@@ -4,6 +4,7 @@ import {
   niveisComDadivaEpica,
   temEstiloDeLutaTrocavel,
   numeroDeAtaques,
+  caracteristicasDoNivel,
   caracteristicasSubclasseAcumuladas,
   caracteristicasDoNivelComSubclasse,
   NOME_PLACEHOLDER_CARACTERISTICA_SUBCLASSE,
@@ -14,6 +15,8 @@ const guerreiro = classes.find((c) => c.nome === 'Guerreiro');
 if (!guerreiro) throw new Error('Fixture "Guerreiro" não encontrada em data/rulesets/dnd2024/classes.ts');
 const bardo = classes.find((c) => c.nome === 'Bardo');
 if (!bardo) throw new Error('Fixture "Bardo" não encontrada em data/rulesets/dnd2024/classes.ts');
+const paladino = classes.find((c) => c.nome === 'Paladino');
+if (!paladino) throw new Error('Fixture "Paladino" não encontrada em data/rulesets/dnd2024/classes.ts');
 
 describe('niveisComASI (reconhece por ID estável, não por nome de exibição)', () => {
   it('lista os 6 níveis de ASI do Guerreiro (4,6,8,12,14,16)', () => {
@@ -23,11 +26,19 @@ describe('niveisComASI (reconhece por ID estável, não por nome de exibição)'
   it('retorna vazio pra uma classe sem progressão nenhuma (caso de borda)', () => {
     expect(niveisComASI({ ...guerreiro, progressao: [] })).toEqual([]);
   });
+
+  it('Paladino tem os 4 níveis padrão de ASI (4,8,12,16), sem os extras do Guerreiro', () => {
+    expect(niveisComASI(paladino)).toEqual([4, 8, 12, 16]);
+  });
 });
 
 describe('niveisComDadivaEpica', () => {
   it('Guerreiro só ganha Dádiva Épica no nível 19', () => {
     expect(niveisComDadivaEpica(guerreiro)).toEqual([19]);
+  });
+
+  it('Paladino também só ganha Dádiva Épica no nível 19', () => {
+    expect(niveisComDadivaEpica(paladino)).toEqual([19]);
   });
 });
 
@@ -38,6 +49,11 @@ describe('temEstiloDeLutaTrocavel', () => {
 
   it('false pra um nível antes de a classe ter chegado lá (caso de borda: nível 0)', () => {
     expect(temEstiloDeLutaTrocavel(guerreiro, 0)).toBe(false);
+  });
+
+  it('Paladino só ganha Estilo de Luta no nível 2 (diferente do Guerreiro, que já tem no 1)', () => {
+    expect(temEstiloDeLutaTrocavel(paladino, 1)).toBe(false);
+    expect(temEstiloDeLutaTrocavel(paladino, 2)).toBe(true);
   });
 });
 
@@ -50,6 +66,24 @@ describe('numeroDeAtaques', () => {
     expect(numeroDeAtaques(guerreiro, 5)).toBe(2);
     expect(numeroDeAtaques(guerreiro, 11)).toBe(3);
     expect(numeroDeAtaques(guerreiro, 20)).toBe(4);
+  });
+
+  it('Paladino para em 2 ataques pra sempre — só tem "Ataque Extra" (nível 5), nunca "Dois/Três Ataques Extras"', () => {
+    expect(numeroDeAtaques(paladino, 4)).toBe(1);
+    expect(numeroDeAtaques(paladino, 5)).toBe(2);
+    expect(numeroDeAtaques(paladino, 20)).toBe(2);
+  });
+});
+
+describe('caracteristicasDoNivel — níveis sem característica nomeada (Paladino 13/17) e placeholder de subclasse (7)', () => {
+  it('nível sem nada de novo (13) devolve lista vazia, sem quebrar', () => {
+    expect(caracteristicasDoNivel(paladino, 13)).toEqual([]);
+  });
+
+  it('"Característica de Subclasse" (nível 7) vem sem descrição própria (depende do juramento escolhido)', () => {
+    expect(caracteristicasDoNivel(paladino, 7)).toEqual([
+      { nome: 'Característica de Subclasse', descricao: null, statusImplementacao: undefined },
+    ]);
   });
 });
 

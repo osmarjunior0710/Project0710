@@ -54,8 +54,15 @@ na Entrega 5.
   - [x] `classes.ts`: `disponivel: true`
   - [x] Banners das 4 subclasses: sem arte própria ainda (Osmar não
     tem) — cai no fallback 🖼 genérico automaticamente, nada a fazer
-- [ ] **Entrega 3 — os 20 níveis sem features especiais** (ASI, Ataque
-  Extra, Dádiva Épica — tudo genérico já existente)
+- [x] **Entrega 3 — os 20 níveis sem features especiais** (concluída —
+  confirmado 100% genérico, zero código novo)
+  - [x] `levelUp.test.ts`: 6 casos novos pro Paladino (ASI 4/8/12/16,
+    Dádiva Épica 19, Estilo de Luta só a partir do nível 2 — diferente
+    do Guerreiro, Ataque Extra para em 2 pra sempre, níveis 13/17 sem
+    característica nova, "Característica de Subclasse" placeholder no
+    7 sem descrição própria)
+  - [x] Testado ao vivo no wizard/Level Up (Playwright): subiu de
+    nível sem erro no console, PV por d10 calculado certo
 - [ ] **Entrega 4 — Magias/círculos/espaços** (Padrão B: troca 1 magia
   por Descanso Longo — mecânica nova, generalizar pra Guardião reusar
   depois)
