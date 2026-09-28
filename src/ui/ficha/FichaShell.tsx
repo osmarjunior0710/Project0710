@@ -2662,7 +2662,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         />
       )}
       <div className={styles.header}>
-        <span className="back" onClick={() => navigate('/lista')}>
+        <span className="back" style={{ flexShrink: 0 }} onClick={() => navigate('/lista')}>
           ←
         </span>
         {/* Espécie → Origem → Classe(s), nessa ordem, um do lado do
@@ -2683,7 +2683,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             ) : null;
           })}
         </div>
-        <div>
+        <div className={styles.infoWrapper}>
           <div className={styles.name}>{selecao.nome || '(sem nome)'}</div>
           <div className={styles.meta}>
             {/* Quebrado em linhas próprias (pedido do Osmar, 2026-09):
@@ -2700,6 +2700,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             </div>
           </div>
         </div>
+        <div style={{ flexShrink: 0 }}>
         <AvatarMenu
           itensDetalhados={itensDetalhados}
           onToggleItensDetalhados={() => setItensDetalhados(!itensDetalhados)}
@@ -2717,6 +2718,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           nivelAtualSnapshot={nivelTotalAtual}
           onRestaurarNivel={restaurarSnapshotNivel}
         />
+        </div>
       </div>
 
       <div className={styles.tabContent}>

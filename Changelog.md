@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2024
+
+Emblemas do cabeçalho aumentados pra 60x60. Quando não cabem todos
+(nome longo, ou personagem com várias classes), o nome trunca com
+"…" primeiro; só se ainda faltar espaço, os emblemas ganham rolagem
+própria — o menu do avatar nunca some da tela.
+
 ## v202609_2010
 
 Cabeçalho da ficha ganha os emblemas de Espécie, Origem e Classe(s) —

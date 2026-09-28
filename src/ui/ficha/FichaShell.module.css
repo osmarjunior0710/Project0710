@@ -15,20 +15,41 @@
 
 .name {
   font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* Ordem de quem cede espaço quando aperta (nome longo, ou multiclasse
+   com vários ícones de 60px): 1º o nome trunca com "…"
+   (`.infoWrapper` tem `flex-shrink: 999`, bem mais agressivo); só
+   DEPOIS que o nome já encolheu ao mínimo é que essa faixa de ícones
+   ganha rolagem horizontal própria (scrollbar escondida) — nunca o
+   avatar/menu, que fica sempre inteiro e visível. */
 .iconesHeader {
   display: flex;
   gap: 4px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.iconesHeader::-webkit-scrollbar {
+  display: none;
 }
 
 .iconeHeader {
-  width: 28px;
-  height: 28px;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
   border-radius: 50%;
   flex-shrink: 0;
+}
+
+.infoWrapper {
+  flex-shrink: 999;
+  min-width: 0;
 }
 
 .meta {
