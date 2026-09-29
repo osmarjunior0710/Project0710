@@ -106,17 +106,24 @@ o comportamento de quem não passa o campo novo):**
    Fôlego, Fúria Implacável) continua com `onResultado` direto, sem
    esse gate — não tem escolha de alvo pra perguntar.
 
-**Efeito visual de Cura — só em magia, decisão explícita do Osmar:**
-"Me curar" numa magia de cura (não Mãos Curativas, não Recuperar
-Fôlego — "tenho outros planos pra vida subindo") dispara uma vinheta
-verde na base da tela + partículas "+" subindo, 2s, mesma técnica da
-vinheta de Fúria (`CombatTab.module.css` `.furiaVinheta`) mas
-ONE-SHOT (`useState` + `setTimeout`, padrão da "piscada" de Fim de
-Turno) em vez de toggle contínuo. Vive em `FichaShell.tsx`
-(`onCuraDeMagiaAplicada` = `alterarPv` + `dispararEfeitoCura`), não em
-`CombatTab.tsx`, porque o gatilho pode vir da aba Magias (fora da
-árvore do CombatTab) — precisa ficar montado num ancestral comum das
-duas abas pra aparecer independente de qual está ativa.
+**Efeito visual de Cura — vale pra QUALQUER ganho de PV (regra
+ampliada 2026-09):** dispara uma vinheta verde na base da tela +
+partículas "+" subindo, 2s, mesma técnica da vinheta de Fúria
+(`CombatTab.module.css` `.furiaVinheta`) mas ONE-SHOT (`useState` +
+`setTimeout`, padrão da "piscada" de Fim de Turno) em vez de toggle
+contínuo. Vive dentro do próprio `alterarPv` em `FichaShell.tsx`
+(`if (delta > 0) dispararEfeitoCura()`) — não em `CombatTab.tsx`,
+porque o gatilho pode vir da aba Magias (fora da árvore do CombatTab)
+— precisa ficar montado num ancestral comum das duas abas pra
+aparecer independente de qual está ativa. **Histórico:** até 2026-09
+só magia de cura disparava ("Me curar", via `onCuraDeMagiaAplicada`) —
+Mãos Curativas, Recuperar Fôlego e os botões manuais de PV ficavam de
+fora por pedido do Osmar ("tenho outros planos pra vida subindo").
+Revertido no foco de Mãos Consagradas (Paladino): ele quis o efeito
+ali também, e decidiu estender pra toda fonte de cura de uma vez, não
+só pra essa característica. `onCuraDeMagiaAplicada` continua existindo
+só como alias de `alterarPv` (evita trocar prop nos componentes que já
+recebem esse nome).
 
 **Achado importante pra qualquer vinheta full-tela futura — `z-index`
 depende de QUAL borda:** a vinheta de Fúria usa `z-index: -1` porque

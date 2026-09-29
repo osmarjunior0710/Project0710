@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0752
+
+O efeito visual de cura (vinheta verde na base da tela) agora dispara
+em QUALQUER ganho de PV, não só magia de cura — inclui Mãos
+Consagradas, Mãos Curativas, Recuperar Fôlego e os botões manuais de
+PV.
+
 ## v202609_0027
 
 Mãos Consagradas: corrigido bug visual em que o popup ficava empilhado

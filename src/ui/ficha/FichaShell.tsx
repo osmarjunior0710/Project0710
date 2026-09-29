@@ -1383,6 +1383,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     }
     setPvAtual(resultado.pvAtual);
     setPvTemporario(resultado.pvTemporario);
+    // Efeito visual de Cura (vinheta verde) em QUALQUER ganho de PV —
+    // regra ampliada a pedido do Osmar (2026-09): antes só magia de
+    // cura disparava; agora vale pra toda fonte (Mãos Consagradas,
+    // Mãos Curativas, Recuperar Fôlego, botões manuais de PV...).
+    if (delta > 0) dispararEfeitoCura();
     if (temFuriaImplacavel && deveOferecerFuriaImplacavel(pvAtual, resultado.pvAtual, furiaAtiva)) {
       setFuriaImplacavelPendente(true);
     }
@@ -1390,14 +1395,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   /** Aplica a cura de uma MAGIA (mecânica `cura`, ver
    * `core/conjurarMagia.ts`) escolhendo "Me curar" no popup de
-   * rolagem — além de somar o PV (`alterarPv`), dispara o efeito
-   * visual de Cura (pedido do Osmar: "só em magias de cura, tenho
-   * outros planos pra vida subindo" — por isso NÃO usa essa função
-   * pra Mãos Curativas/Recuperar Fôlego/os botões manuais de PV, que
-   * continuam só com `alterarPv` puro). */
+   * rolagem — hoje é só um alias de `alterarPv` (o efeito visual de
+   * Cura já dispara ali pra qualquer ganho de PV), mantido como função
+   * própria pra não precisar trocar a prop nos componentes que já a
+   * recebem com esse nome. */
   function onCuraDeMagiaAplicada(total: number) {
     alterarPv(total);
-    dispararEfeitoCura();
   }
 
   function dispararEfeitoCura() {
