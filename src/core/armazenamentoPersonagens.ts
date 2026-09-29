@@ -174,6 +174,11 @@ export interface PersonagemSalvo {
    * último Descanso Longo — só ele reseta. Conjura Contato Extraplanar
    * sem gastar espaço, sucesso automático na salvaguarda. */
   contatarPatronoGasto?: boolean;
+  /** Usos grátis já gastos de cada magia fixa de classe BASE (ex:
+   * Destruição Divina do Paladino) desde o último Descanso Longo —
+   * chave é o nome da magia. Ausente = nenhum uso gasto ainda. Ver
+   * `core/magiasFixasDeClasse.ts`. */
+  magiasFixasClasseGastas?: Record<string, number>;
   /** Usos gastos de "A Sorte do Próprio Tenebroso" (Bruxo, Patrono
    * Ínfero, nível 6) desde o último Descanso Longo — só ele reseta.
    * Máximo = mod. Carisma (mín. 1), ver `core/sorteDoTenebroso.ts`. */

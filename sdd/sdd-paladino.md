@@ -107,15 +107,30 @@ depois — nunca inventar cor nova sem confirmar.
 
 ## 6. Destruição Divina (nível 2, "Destruição do Paladino")
 
-Ataque especial: gasta um espaço de magia (upcast normal, dano cresce
-por círculo do espaço) — texto real da característica (célula
-limpa, sem a tabela colada): permite conjurar Destruição Divina
-gastando Canalizar Divindade em vez de espaço de magia, 1x sem custo
-de espaço, recuperando esse "grátis" só no Descanso Longo. Interação:
-o BOTÃO de Destruição Divina no painel de Ação sempre existe a partir
-do nível 2 (mesmo sem espaço/Canalizar Divindade — aí fica desabilitado
-até ter recurso); a partir do nível 3 ganha a opção extra "usar
-Canalizar Divindade" quando o banco de Canalizar existir.
+**CORREÇÃO (2026-09-28, lido direto no livro, texto partido em 2
+páginas — "Você sempre tem a magia Destruição Divina preparada. Além
+disso, você pode conjurá-la sem gastar um espaço de magia, não podendo
+conjurá-la dessa forma novamente antes de completar um Descanso
+Longo."):** NÃO tem nenhuma relação com Canalizar Divindade — essa
+versão anterior do SDD estava errada (especulação sem confirmar no
+livro). A mecânica real é: Destruição Divina (magia de Ataque Bônus,
+já no catálogo) fica sempre preparada, fora da conta normal de Magias
+Preparadas, e pode ser conjurada 1x de graça (sem gastar espaço) por
+Descanso Longo. Depois de gasta a de graça, continua conjurável do
+jeito normal (gastando espaço, inclusive upcast pra mais dano).
+
+**Mecanismo genérico (reaproveitado em Montaria Fiel):** campo
+`magiaFixaConcedida?: { nomeMagia; usosGratisPorDescansoLongo }` em
+`CaracteristicaClasse` + `magiasFixasDaClasseBase(classe, nivel)` em
+`core/` (mesmo molde do `magiasPactoDoInfero.ts`, mas pra
+característica de CLASSE BASE, não subclasse) + estado
+`magiasFixasClasseGastas: Record<string, number>` no `FichaShell.tsx`
+(zera no Descanso Longo). Destruição Divina entra em
+`magiasConjuraveis` (`useMagiasEConjuracao.ts`) igual as outras fontes
+"sempre preparada" já existentes (Pacto do Ínfero, Assinatura
+Mágica...) — ver `Backlog.md` "Combate lendo direto da aba Magias"
+pro problema conhecido de cada fonte precisar de 2 pontos de
+manutenção (não resolvido aqui, só mais uma fonte no mesmo molde).
 
 ## 7. Estilo de Luta / Combatente Abençoado (nível 2)
 
@@ -132,10 +147,33 @@ truques necessários, sem precisar da classe inteira).
 
 Convocar Montaria sempre preparada (não conta contra o limite normal
 de Magias Preparadas) + 1 conjuração grátis por Descanso Longo (sem
-gastar espaço). Reaproveitar o padrão de "magia sempre preparada fora
-da lista normal" se já existir precedente (checar Druida — Druídico
-como referência de "coisa extra concedida por característica de
-classe" antes de inventar mecanismo novo); senão, é entrega nova.
+gastar espaço) — mesmo mecanismo genérico da seção 6
+(`magiaFixaConcedida`/`magiasFixasDaClasseBase`).
+
+**Confirmado com o Osmar (2026-09-28):** a montaria vira um Pet de
+verdade, reaproveitando o sistema de Pets que já existe — não é só
+texto. Convocar Montaria (magia, Cap. 7) tem bloco de estatísticas
+completo ("Montaria Sobrenatural" — CA 10+círculo, PV 5+10×círculo,
+FOR 18/DES 12/CON 14/INT 6/SAB 12/CAR 8, Percepção Passiva 11,
+Deslocamento 18m + Voo 18m se círculo 4+, 1 ação Pancada Sobrenatural
+1d8+círculo de dano Radiante/Psíquico/Necrótico conforme o tipo, 1
+Ação Bônus que varia por tipo — Celestial: Toque Curativo 2d8+círculo;
+Feérico: Passo Feérico, teleporte 18m; Ínfero: Derrubar Brilho,
+Amedronta em salvaguarda de Sabedoria — as 3 recarregam no Descanso
+Longo). Traço Vínculo Vital: cura de magia 1º círculo+ no Paladino
+também cura a montaria, se a até 1,5m.
+
+Implementação: criar 3 `Criatura` no catálogo (Montaria Celestial/
+Feérica/Ínfera) + calcular CA/PV/dano pelo círculo REAL usado ao
+conjurar (não fixo) via `ajustes` do Pet — `Pet.origemInvocacaoId`
+(já existe, usado por "1 pet por fonte, conjurar de novo substitui")
+cobre a regra "Se você já tem uma montaria desta magia, a montaria é
+substituída pela nova" direto, sem mecanismo novo.
+
+**Desaparecimento:** só desaparece a 0 PV ou se o Paladino morrer —
+NÃO tem "dispensar quando quiser" (diferente de magias de invocação
+mais antigas). Reconjurar decide se reinvoca a que desapareceu ou
+troca de tipo.
 
 ## 9. Auras (nível 6, 10, 18) — decisão de escopo confirmada com o Osmar
 

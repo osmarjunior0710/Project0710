@@ -9,6 +9,7 @@ import {
 } from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
+import { circuloGratisMagiaFixaDeClasse, type MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import { iconesMagia } from '../../../core/classificarMagia';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import GrupoMagiaColapsavel from '../../components/GrupoMagiaColapsavel';
@@ -40,6 +41,10 @@ interface SelecionarMagiaShellProps {
    * limitado a 1x por magia até o próximo Descanso. */
   assinaturaMagicaAtuais: string[];
   assinaturaMagicaGastas: string[];
+  /** Magia fixa de classe base (Destruição Divina do Paladino...) —
+   * mesmo tratamento acima, sempre no círculo BASE da magia. */
+  magiasFixasClasseAtuais: MagiaFixaDeClasse[];
+  magiasFixasClasseGastas: Record<string, number>;
   onFechar: () => void;
   onEscolherTruque: (m: Magia) => void;
   onEscolherMagia: (m: Magia, circulosDisponiveis: number[]) => void;
@@ -69,6 +74,8 @@ export default function SelecionarMagiaShell({
   maestriaDeMagiasAtuais,
   assinaturaMagicaAtuais,
   assinaturaMagicaGastas,
+  magiasFixasClasseAtuais,
+  magiasFixasClasseGastas,
   onFechar,
   onEscolherTruque,
   onEscolherMagia,
@@ -95,7 +102,8 @@ export default function SelecionarMagiaShell({
                 const circuloGratis = truque
                   ? null
                   : (circuloGratisMaestria(m.nome, maestriaDeMagiasAtuais) ??
-                    circuloGratisAssinatura(m.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas));
+                    circuloGratisAssinatura(m.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas) ??
+                    circuloGratisMagiaFixaDeClasse(m.nome, m.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas));
                 const disponivel = truque || circulosDisponiveis.length > 0 || circuloGratis !== null;
                 return (
                   <div

@@ -31,6 +31,7 @@ import { magias, type Magia } from '../../../data/rulesets/dnd2024/magias';
 import { espacosARecuperar } from '../../../core/astuciaMagica';
 import { calcularSentidos } from '../../../core/sentidos';
 import { magiasPactoDoInfero } from '../../../core/magiasPactoDoInfero';
+import { magiasFixasDaClasseBase } from '../../../core/magiasFixasDeClasse';
 import { truquesEspecie, magiasEspecie as magiasEspecieDoPersonagem } from '../../../core/magiasEspecie';
 import { truquesMagiaIniciada, magiasMagiaIniciada } from '../../../core/magiaTalentoOrigem';
 import {
@@ -283,6 +284,15 @@ export function useMagiasEConjuracao(input: {
   // característica de subclasse em 2 lugares.
   const magiasPactoDoInferoAtuais = magiasPactoDoInferoDisponivel ? magiasPactoDoInfero(personagem.nivel) : [];
   const magiasPactoDoInferoPreparadas = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
+  // Magia fixa de CLASSE BASE (Destruição do Paladino, Montaria Fiel —
+  // ver core/magiasFixasDeClasse.ts) — diferente do Pacto do Ínfero
+  // acima, calcula aqui mesmo (mesmo padrão de `bruxoObj`/`bruxoEntry`
+  // já usado nesta função pra outras características de classe base).
+  const paladinoEntry = classesAtual.find((c) => c.classe === 'Paladino');
+  const paladinoObj = paladinoEntry ? catalogoClasses.find((cc) => cc.nome === 'Paladino') ?? null : null;
+  const magiasFixasClasseAtuais =
+    paladinoObj && paladinoEntry ? magiasFixasDaClasseBase(paladinoObj, paladinoEntry.nivel) : [];
+  const magiasFixasClassePreparadas = magiasPreparadasDoPersonagem(magiasFixasClasseAtuais.map((m) => m.nomeMagia));
   // Truques + magias fixas da Linhagem Élfica/Gnômica (e futuramente
   // Legado Ínfero) — gatilho é nível de PERSONAGEM, não de classe
   // (espécie não tem classe própria), ver `core/magiasEspecie.ts`.
@@ -345,6 +355,7 @@ export function useMagiasEConjuracao(input: {
     ...magiasDescobertasMagicas.map(semClasse),
     ...livroDasSombras.map(semClasse),
     ...magiasPactoDoInferoPreparadas.map(semClasse),
+    ...magiasFixasClassePreparadas.map(semClasse),
     ...magiasEspeciePreparadasConjuraveis.map(semClasse),
     ...magiasTalentoOrigemPreparadas.map(semClasse),
     ...magiasTalentoGeralPreparadas.map(semClasse),
@@ -399,6 +410,8 @@ export function useMagiasEConjuracao(input: {
     astuciaMagicaDisponivel,
     contatarPatronoDisponivel,
     contatoExtraplanar,
+    magiasFixasClasseAtuais,
+    magiasFixasClassePreparadas,
     arcanaMisticaEscolhidas,
     mestreMisticoDisponivel,
     espacoPactoAtual,

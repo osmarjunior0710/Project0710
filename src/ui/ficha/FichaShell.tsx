@@ -527,6 +527,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [inspiracaoGasto, setInspiracaoGasto] = useState(personagemSalvo.inspiracaoGasto ?? 0);
   const [astuciaMagicaGasta, setAstuciaMagicaGasta] = useState(personagemSalvo.astuciaMagicaGasta ?? false);
   const [contatarPatronoGasto, setContatarPatronoGasto] = useState(personagemSalvo.contatarPatronoGasto ?? false);
+  /** Usos grátis (sem espaço de magia) já gastos de cada magia fixa de
+   * classe BASE (ex: Destruição Divina do Paladino) — chave é o nome
+   * da magia, zera em `descansoLongo()`. Ver `core/magiasFixasDeClasse.ts`. */
+  const [magiasFixasClasseGastas, setMagiasFixasClasseGastas] = useState<Record<string, number>>(
+    personagemSalvo.magiasFixasClasseGastas ?? {},
+  );
   const [arcanaMisticaAtuais, setArcanaMisticaAtuais] = useState<Record<number, string>>(
     personagemSalvo.arcanaMisticaAtual ?? {},
   );
@@ -874,6 +880,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     astuciaMagicaDisponivel,
     contatarPatronoDisponivel,
     contatoExtraplanar,
+    magiasFixasClasseAtuais,
+    magiasFixasClassePreparadas,
     arcanaMisticaEscolhidas,
     espacoPactoAtual,
     astuciaMagicaRecupera,
@@ -1246,6 +1254,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     memorizarMagiaGasta,
     astuciaMagicaGasta,
     contatarPatronoGasto,
+    magiasFixasClasseGastas,
     arcanaMisticaAtual: arcanaMisticaAtuais,
     arcanaMisticaGastos,
     maestriaDeMagiasAtual: maestriaDeMagiasAtuais,
@@ -1350,6 +1359,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       memorizarMagiaGasta,
       astuciaMagicaGasta,
       contatarPatronoGasto,
+      magiasFixasClasseGastas,
       arcanaMisticaAtuais,
       arcanaMisticaGastos,
       maestriaDeMagiasAtuais,
@@ -1683,6 +1693,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setMemorizarMagiaGasta(false);
     setAstuciaMagicaGasta(false);
     setContatarPatronoGasto(false);
+    setMagiasFixasClasseGastas({});
     setResistenciaInferaGasto(false);
     setMaestriaArmaTrocaDisponivel(true);
     setMaestriaArmaTalentoTrocaDisponivel(true);
@@ -1891,13 +1902,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setArcanaMisticaGastos((prev) => [...prev, circulo]);
   }
 
-  /** Chamado sempre que uma magia conjura de graça (Maestria de Magias
-   * OU Assinatura Mágica) — só marca "gasta" quando é uma das 2
-   * magias de Assinatura (Maestria é ilimitada, não precisa de
-   * contador). Ver `core/assinaturaMagica.ts`. */
+  /** Chamado sempre que uma magia conjura de graça (Maestria de Magias,
+   * Assinatura Mágica OU magia fixa de classe base — Destruição
+   * Divina/Convocar Montaria) — só marca "gasta" nos 2 últimos casos
+   * (Maestria é ilimitada, não precisa de contador). Ver
+   * `core/assinaturaMagica.ts`/`core/magiasFixasDeClasse.ts`. */
   function usarMagiaGratis(nomeMagia: string) {
     if (assinaturaMagicaAtuais.includes(nomeMagia) && !assinaturaMagicaGastas.includes(nomeMagia)) {
       setAssinaturaMagicaGastas((prev) => [...prev, nomeMagia]);
+    }
+    if (magiasFixasClasseAtuais.some((m) => m.nomeMagia === nomeMagia)) {
+      setMagiasFixasClasseGastas((prev) => ({ ...prev, [nomeMagia]: (prev[nomeMagia] ?? 0) + 1 }));
     }
   }
 
@@ -2876,6 +2891,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             magiasAssinaturaDoLivro={magiasAssinaturaDoLivro}
             assinaturaMagicaAtuais={assinaturaMagicaAtuais}
             assinaturaMagicaGastas={assinaturaMagicaGastas}
+            magiasFixasClasseAtuais={magiasFixasClasseAtuais}
+            magiasFixasClasseGastas={magiasFixasClasseGastas}
+            magiasFixasClassePreparadas={magiasFixasClassePreparadas}
             onUsarMagiaGratisDeClasse={usarMagiaGratis}
             astuciaMagicaDisponivel={astuciaMagicaDisponivel}
             astuciaMagicaGasta={astuciaMagicaGasta}
@@ -3073,6 +3091,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
             assinaturaMagicaAtuais={assinaturaMagicaAtuais}
             assinaturaMagicaGastas={assinaturaMagicaGastas}
+            magiasFixasClasseAtuais={magiasFixasClasseAtuais}
+            magiasFixasClasseGastas={magiasFixasClasseGastas}
             onUsarMagiaGratisDeClasse={usarMagiaGratis}
             magiasPreparadasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}

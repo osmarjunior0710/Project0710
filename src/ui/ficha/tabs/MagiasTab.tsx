@@ -22,6 +22,7 @@ import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { cdConjuracao, type ResumoConjuracao } from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
+import { circuloGratisMagiaFixaDeClasse, type MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import InfoValor from '../../components/InfoValor';
 import type { MagiaGratisDeInvocacao } from '../../../core/invocacoesMagiaGratis';
 import type { MagiaGratisDeTalentoGeral } from '../../../core/magiaTalentoGeral';
@@ -132,6 +133,11 @@ interface MagiasTabProps {
    * própria, fora do limite normal de Magias Preparadas). Vazio pra
    * quem não tem essa característica. */
   magiasPactoDoInferoAtuais: string[];
+  /** Magias de Classe Sempre Preparadas (Destruição do Paladino,
+   * Montaria Fiel...) — já resolvidas em `Magia[]` pelo hook (mesmo
+   * padrão de `magiasPactoDoInferoAtuais`, mas o hook já traz pronto).
+   * Ver `core/magiasFixasDeClasse.ts`. */
+  magiasFixasClassePreparadas: Magia[];
   /** Truque + magias de nível 3/5 concedidos pela sub-escolha de
    * espécie (ex.: Linhagem Élfica do Elfo) — mesmo tratamento de
    * "sempre preparada, fora do limite normal" das outras listas fixas
@@ -231,6 +237,11 @@ interface MagiasTabProps {
    * o próximo Descanso). */
   assinaturaMagicaAtuais: string[];
   assinaturaMagicaGastas: string[];
+  /** Magia fixa de classe base (Destruição Divina do Paladino...) —
+   * sempre preparada + N usos grátis por Descanso Longo. Ver
+   * `core/magiasFixasDeClasse.ts`. */
+  magiasFixasClasseAtuais: MagiaFixaDeClasse[];
+  magiasFixasClasseGastas: Record<string, number>;
   /** Chamado sempre que uma magia conjura de graça via Maestria OU
    * Assinatura Mágica — quem chama decide se precisa marcar "gasta"
    * (nome distinto de `onUsarMagiaGratis` abaixo, que é das Invocações
@@ -350,6 +361,9 @@ export default function MagiasTab({
   magiasAssinaturaDoLivro,
   assinaturaMagicaAtuais,
   assinaturaMagicaGastas,
+  magiasFixasClasseAtuais,
+  magiasFixasClasseGastas,
+  magiasFixasClassePreparadas,
   onUsarMagiaGratisDeClasse,
   astuciaMagicaDisponivel,
   astuciaMagicaGasta,
@@ -666,7 +680,8 @@ export default function MagiasTab({
       espacosGastosPorCirculo,
       ponte,
       circuloGratisMaestria(m.nome, maestriaDeMagiasAtuais) ??
-        circuloGratisAssinatura(m.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas),
+        circuloGratisAssinatura(m.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas) ??
+        circuloGratisMagiaFixaDeClasse(m.nome, m.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas),
     );
     if (opcoes.length === 0) return;
     setTelaCirculo(m);
@@ -684,7 +699,8 @@ export default function MagiasTab({
           espacosGastosPorCirculo,
           ponte,
           circuloGratisMaestria(telaCirculo.nome, maestriaDeMagiasAtuais) ??
-            circuloGratisAssinatura(telaCirculo.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas),
+            circuloGratisAssinatura(telaCirculo.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas) ??
+            circuloGratisMagiaFixaDeClasse(telaCirculo.nome, telaCirculo.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas),
         )}
         onVoltar={() => setTelaCirculo(null)}
         onConjurar={(circulo, classeNome, gratis) => {
@@ -1213,6 +1229,48 @@ export default function MagiasTab({
         </>
       )}
 
+      {magiasFixasClassePreparadas.length > 0 && (
+        <>
+          <div className="section-title">Magias de Classe Sempre Preparadas</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Concedidas por característica de classe — não contam na conta de Magias Preparadas. Cada uma tem um
+            número limitado de conjurações grátis (sem gastar espaço) por Descanso Longo; ao escolher o círculo, a
+            opção grátis aparece separada das opções de espaço normal.
+          </div>
+          {magiasFixasClassePreparadas.map((m) => {
+            const semEspaco =
+              m.circulo > 0 &&
+              opcoesGastoComPonte(
+                m.circulo,
+                classeAtivaNome,
+                espacos,
+                espacosGastosPorCirculo,
+                ponte,
+                circuloGratisMagiaFixaDeClasse(m.nome, m.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas),
+              ).length === 0;
+            const temAcao = usarMagiaTemAcaoAutomatizada(m);
+            return (
+              <div key={m.id} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                    onClick={() => temAcao && usarMagia(m)}
+                  >
+                    {temAcao ? 'Usar' : 'Usar (pendência)'}
+                  </div>
+                </div>
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+
       {magiasEspecie.length > 0 && (
         <>
           <div className="section-title">Magias da Espécie</div>
@@ -1460,7 +1518,8 @@ export default function MagiasTab({
                     espacosGastosPorCirculo,
                     ponte,
                     circuloGratisMaestria(m.nome, maestriaDeMagiasAtuais) ??
-                      circuloGratisAssinatura(m.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas),
+                      circuloGratisAssinatura(m.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas) ??
+                      circuloGratisMagiaFixaDeClasse(m.nome, m.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas),
                   ).length === 0;
                 return (
                   <div key={`${m.id}-${classeDoItem}`} className={styles.spellRowComPill}>

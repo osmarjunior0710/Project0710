@@ -3,6 +3,7 @@ import type { EstiloDeLuta } from '../../../data/rulesets/dnd2024/estilosDeLuta'
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { CaracteristicaNivel } from '../../../core/levelUp';
+import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
@@ -329,8 +330,16 @@ interface CombatTabProps {
   /** Quais das 2 já conjuraram de graça neste período (zera em
    * Descanso Curto E Longo) — ver `core/assinaturaMagica.ts`. */
   assinaturaMagicaGastas: string[];
-  /** Chamado sempre que uma magia conjura de graça (Maestria OU
-   * Assinatura) — quem chama decide se precisa marcar "gasta". */
+  /** Magia fixa de classe base (Destruição Divina do Paladino,
+   * Montaria Fiel...) — `[]` pra quem não tem nenhuma. Mesmo espírito
+   * de `assinaturaMagicaAtuais`, ver `core/magiasFixasDeClasse.ts`. */
+  magiasFixasClasseAtuais: MagiaFixaDeClasse[];
+  /** Usos grátis já gastos de cada magia fixa (chave = nome da magia),
+   * zera só no Descanso Longo. */
+  magiasFixasClasseGastas: Record<string, number>;
+  /** Chamado sempre que uma magia conjura de graça (Maestria,
+   * Assinatura OU magia fixa de classe) — quem chama decide se
+   * precisa marcar "gasta". */
   onUsarMagiaGratisDeClasse: (nomeMagia: string) => void;
   modAcertoConjuracao: number | null;
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
@@ -645,6 +654,8 @@ export default function CombatTab({
   maestriaDeMagiasAtuais,
   assinaturaMagicaAtuais,
   assinaturaMagicaGastas,
+  magiasFixasClasseAtuais,
+  magiasFixasClasseGastas,
   onUsarMagiaGratisDeClasse,
   modAcertoConjuracao,
   explicacaoAcertoConjuracao,
@@ -1761,6 +1772,8 @@ export default function CombatTab({
           maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
           assinaturaMagicaAtuais={assinaturaMagicaAtuais}
           assinaturaMagicaGastas={assinaturaMagicaGastas}
+          magiasFixasClasseAtuais={magiasFixasClasseAtuais}
+          magiasFixasClasseGastas={magiasFixasClasseGastas}
           onUsarMagiaGratisDeClasse={onUsarMagiaGratisDeClasse}
           modAcertoConjuracao={modAcertoConjuracao}
           explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
@@ -1886,6 +1899,8 @@ export default function CombatTab({
           maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
           assinaturaMagicaAtuais={assinaturaMagicaAtuais}
           assinaturaMagicaGastas={assinaturaMagicaGastas}
+          magiasFixasClasseAtuais={magiasFixasClasseAtuais}
+          magiasFixasClasseGastas={magiasFixasClasseGastas}
           onUsarMagiaGratisDeClasse={onUsarMagiaGratisDeClasse}
           espacos={espacos}
           espacosGastosPorCirculo={espacosGastosPorCirculo}

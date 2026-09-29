@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1027
+
+Paladino nível 2 ganha Destruição do Paladino: a magia Destruição
+Divina fica sempre preparada (não gasta vaga de Magia Preparada) e
+pode ser conjurada de graça 1x por Descanso Longo, sem gastar espaço
+— aparece na aba Magias (seção "Magias de Classe Sempre Preparadas")
+e no painel de Ação Bônus da aba Combate, com a opção "Conjurar
+Grátis" ao lado das opções de espaço normal.
+
 ## v202609_0752
 
 O efeito visual de cura (vinheta verde na base da tela) agora dispara

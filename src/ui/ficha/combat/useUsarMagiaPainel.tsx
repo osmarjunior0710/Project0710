@@ -3,6 +3,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte, type MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
+import { circuloGratisMagiaFixaDeClasse, type MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
 import { truqueElegivelTruquePotente, sobrecargaElegivel, danoMaximoSobrecarga, danoNecroticoSobrecarga } from '../../../core/evocador';
@@ -89,6 +90,11 @@ interface UsarMagiaPainelParams {
    * (ver `assinaturaMagicaGastas`/`core/assinaturaMagica.ts`). */
   assinaturaMagicaAtuais: string[];
   assinaturaMagicaGastas: string[];
+  /** Magia fixa de classe base (Destruição Divina do Paladino...) —
+   * mesmo tratamento de "Conjurar Grátis", sempre no círculo BASE da
+   * magia (sem upcast). Ver `core/magiasFixasDeClasse.ts`. */
+  magiasFixasClasseAtuais: MagiaFixaDeClasse[];
+  magiasFixasClasseGastas: Record<string, number>;
   /** Chamado sempre que uma magia conjura de graça (Maestria OU
    * Assinatura) — quem chama decide se precisa marcar "gasta". */
   onUsarMagiaGratisDeClasse: (nomeMagia: string) => void;
@@ -255,6 +261,8 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         maestriaDeMagiasAtuais={p.maestriaDeMagiasAtuais}
         assinaturaMagicaAtuais={p.assinaturaMagicaAtuais}
         assinaturaMagicaGastas={p.assinaturaMagicaGastas}
+        magiasFixasClasseAtuais={p.magiasFixasClasseAtuais}
+        magiasFixasClasseGastas={p.magiasFixasClasseGastas}
         onFechar={() => setTelaMagia(null)}
         onEscolherTruque={(m) => conjurarMagia(m, null)}
         onEscolherMagia={(m, circulosDisponiveis) => setTelaMagia({ magia: m, circulos: circulosDisponiveis })}
@@ -271,7 +279,13 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
           p.espacosGastosPorCirculo,
           p.ponte,
           circuloGratisMaestria(telaMagia.magia.nome, p.maestriaDeMagiasAtuais) ??
-            circuloGratisAssinatura(telaMagia.magia.nome, p.assinaturaMagicaAtuais, p.assinaturaMagicaGastas),
+            circuloGratisAssinatura(telaMagia.magia.nome, p.assinaturaMagicaAtuais, p.assinaturaMagicaGastas) ??
+            circuloGratisMagiaFixaDeClasse(
+              telaMagia.magia.nome,
+              telaMagia.magia.circulo,
+              p.magiasFixasClasseAtuais,
+              p.magiasFixasClasseGastas,
+            ),
         )}
         onVoltar={() => setTelaMagia('lista')}
         onConjurar={(circulo, classeNome, gratis) => conjurarMagia(telaMagia.magia, circulo, classeNome, gratis)}

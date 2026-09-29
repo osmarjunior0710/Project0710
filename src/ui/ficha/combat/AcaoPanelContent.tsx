@@ -5,6 +5,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
+import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
@@ -64,6 +65,10 @@ interface AcaoPanelContentProps {
   /** Assinatura Mágica (Mago, nível 20) — ver `useUsarMagiaPainel.tsx`. */
   assinaturaMagicaAtuais: string[];
   assinaturaMagicaGastas: string[];
+  /** Magia fixa de classe base (Destruição Divina do Paladino...) —
+   * ver `useUsarMagiaPainel.tsx`/`core/magiasFixasDeClasse.ts`. */
+  magiasFixasClasseAtuais: MagiaFixaDeClasse[];
+  magiasFixasClasseGastas: Record<string, number>;
   onUsarMagiaGratisDeClasse: (nomeMagia: string) => void;
   modAcertoConjuracao: number | null;
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
@@ -221,6 +226,8 @@ export default function AcaoPanelContent({
   maestriaDeMagiasAtuais,
   assinaturaMagicaAtuais,
   assinaturaMagicaGastas,
+  magiasFixasClasseAtuais,
+  magiasFixasClasseGastas,
   onUsarMagiaGratisDeClasse,
   modAcertoConjuracao,
   explicacaoAcertoConjuracao,
@@ -295,6 +302,8 @@ export default function AcaoPanelContent({
     maestriaDeMagiasAtuais,
     assinaturaMagicaAtuais,
     assinaturaMagicaGastas,
+    magiasFixasClasseAtuais,
+    magiasFixasClasseGastas,
     onUsarMagiaGratisDeClasse,
     modAcertoConjuracao,
     explicacaoAcertoConjuracao,

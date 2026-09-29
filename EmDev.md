@@ -112,5 +112,50 @@ na Entrega 5.
       `armazenamentoPersonagens.ts` (opcional, ausente = 0)
     - Nível 14 (Toque Restaurador — mais condições) fica pra quando
       chegar a vez desse nível na Entrega 6
+  - [x] **Destruição do Paladino** (nível 2, concluída — testada ao
+    vivo nv2: opção "Conjurar Grátis" aparece no círculo 1, some depois
+    de usada, volta a pedir espaço normal)
+    - Regra confirmada no livro (texto partido em 2 páginas): "Você
+      sempre tem a magia Destruição Divina preparada. Além disso, você
+      pode conjurá-la sem gastar um espaço de magia, não podendo
+      conjurá-la dessa forma novamente antes de completar um Descanso
+      Longo." — corrigida a célula da planilha, que tinha "usando
+      Canalizar Divindade" a mais (não existe no livro; Osmar avisado,
+      vai corrigir a planilha por fora)
+    - [x] Mecanismo genérico novo (reaproveita em Montaria Fiel, e
+      depois em Marca do Predador do Guardião): campo
+      `magiaFixaConcedida?: { nomeMagia; usosGratisPorDescansoLongo }`
+      em `CaracteristicaClasse` + `magiasFixasDaClasseBase`/
+      `circuloGratisMagiaFixaDeClasse` em `core/magiasFixasDeClasse.ts`
+      + estado `magiasFixasClasseGastas: Record<string, number>` no
+      `FichaShell.tsx` (reseta no Descanso Longo, reaproveita
+      `usarMagiaGratis` já existente da Assinatura Mágica)
+    - [x] Destruição Divina entra em `magiasConjuraveis`
+      (`useMagiasEConjuracao.ts`) igual as outras fontes "sempre
+      preparada" — aparece no painel de Ação Bônus do Combate E na
+      aba Magias (seção nova "Magias de Classe Sempre Preparadas");
+      opção "Conjurar Grátis" no círculo base junto das opções de
+      espaço normal (mesmo padrão de Maestria/Assinatura do Mago)
+    - Contatar Patrono do Bruxo (mesma receita, já implementado do
+      jeito antigo com `contatarPatronoGasto`) **não migrou** —
+      registrado no `Backlog.md`, sem risco de retestar código que já
+      funciona
+  - [ ] **Montaria Fiel** (nível 5) — depois de Destruição do Paladino
+    - Regra confirmada: sempre tem Convocar Montaria preparada + 1
+      conjuração grátis (mesmo mecanismo genérico acima)
+    - **Anotado pra quando chegar a vez:** Convocar Montaria (magia,
+      Cap. 7) tem bloco de estatísticas completo ("Montaria
+      Sobrenatural" — CA 10+círculo, PV 5+10×círculo, FOR 18/DES 12/
+      CON 14/INT 6/SAB 12/CAR 8, Deslocamento 18m + Voo 18m se círculo
+      4+, 1 ação Pancada Sobrenatural 1d8+círculo, 1 Ação Bônus que
+      varia por tipo escolhido — Celestial cura/Feérico teleporte/
+      Ínfero amedronta). Osmar confirmou: **aparece na aba Pets** —
+      reaproveita o sistema de Pets que já existe (`Pet.origemInvocacaoId`
+      já cobre "1 pet por essa fonte, conjurar de novo substitui" —
+      regra idêntica da montaria). Precisa criar 3 `Criatura` no
+      catálogo (Montaria Celestial/Feérica/Ínfera) + calcular CA/PV/
+      dano pelo círculo usado na hora de conjurar (via `ajustes` do
+      Pet). Desconjurar: só desaparece a 0 PV ou se o Paladino morrer
+      — sem "dispensar quando quiser".
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

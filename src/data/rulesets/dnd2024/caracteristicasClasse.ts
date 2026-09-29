@@ -21,6 +21,15 @@ export interface CaracteristicaClasse {
   /** Ver CLAUDE.md §12.1. Opcional — preenchido só na classe/subclasse do
    * foco em andamento; `undefined` nas demais (ainda não classificadas). */
   statusImplementacao?: StatusImplementacao;
+  /** Magia concedida como "sempre preparada" por essa característica de
+   * CLASSE BASE (não subclasse — pra isso ver `magiasFixasPorNivel` em
+   * `caracteristicasSubclasse.ts`), com N usos grátis (sem gastar espaço
+   * de magia) que recarregam no Descanso Longo. Padrão confirmado no
+   * livro em pelo menos 3 características (Destruição do Paladino,
+   * Montaria Fiel, Contatar Patrono do Bruxo — esse último ainda não
+   * migrado, ver Backlog.md). `undefined` = essa característica não
+   * concede nenhuma magia fixa. */
+  magiaFixaConcedida?: { nomeMagia: string; usosGratisPorDescansoLongo: number };
 }
 
 export const caracteristicasClasse: CaracteristicaClasse[] = [
@@ -632,9 +641,10 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     nivel: 2,
     nome: 'Destruição do Paladino',
     descricao:
-      'Você sempre tem a magia Destruição Divina preparada. Além disso, você pode conjurá-la sem gastar um espaço de magia, usando Canalizar Divindade, não podendo conjurá-la dessa forma novamente antes de completar um Descanso Longo.',
+      'Você sempre tem a magia Destruição Divina preparada. Além disso, você pode conjurá-la sem gastar um espaço de magia, não podendo conjurá-la dessa forma novamente antes de completar um Descanso Longo.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
+    magiaFixaConcedida: { nomeMagia: 'Destruição Divina', usosGratisPorDescansoLongo: 1 },
   },
   {
     classe: 'Paladino',

@@ -52,6 +52,24 @@ implementadas, risco de regressão maior que um ajuste pontual. Vira
 foco próprio (com SDD, chapéu de Engenheiro olhando cada fonte antes
 de mexer) assim que a rodada de bugs terminar.
 
+## Contatar Patrono (Bruxo) — migrar pro mecanismo genérico de "magia fixa + grátis" (2026-09)
+
+No foco de Destruição do Paladino, criamos um mecanismo genérico pra
+"característica de classe base concede 1 magia sempre preparada + N
+usos grátis (sem espaço) por Descanso Longo" (`magiaFixaConcedida` em
+`CaracteristicaClasse` + `magiasFixasDaClasseBase()` em `core/`) — usado
+por Destruição do Paladino e Montaria Fiel. O Bruxo já tinha essa
+MESMA receita implementada antes, do jeito avulso: "Contatar Patrono"
+(sempre tem Contato Extraplanar preparada, conjura sem espaço 1x,
+recarrega no Descanso Longo) usa uma flag booleana dedicada
+(`contatarPatronoGasto`) direto no `FichaShell.tsx`.
+
+**Por que não migrou já:** já funciona, já foi testado — trocar
+código funcionando por outro que também vai funcionar é risco sem
+ganho imediato nessa entrega. Migrar quando o Bruxo for reaberto como
+foco (ou se `contatarPatronoGasto` der algum bug que force tocar
+nele de qualquer jeito).
+
 ## Recursos visíveis (área abaixo do HP) — o que ficou de fora de propósito (2026-09)
 
 Pedido do Osmar: a 1ª versão mostra só Fúria, Inspiração de Bardo, Magia de

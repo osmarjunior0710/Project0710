@@ -10,6 +10,7 @@ import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
+import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import styles from './PanelRows.module.css';
 
 interface BonusPanelContentProps {
@@ -141,6 +142,10 @@ interface BonusPanelContentProps {
   /** Assinatura Mágica (Mago, nível 20) — ver `useUsarMagiaPainel.tsx`. */
   assinaturaMagicaAtuais: string[];
   assinaturaMagicaGastas: string[];
+  /** Magia fixa de classe base (Destruição Divina do Paladino...) —
+   * ver `useUsarMagiaPainel.tsx`/`core/magiasFixasDeClasse.ts`. */
+  magiasFixasClasseAtuais: MagiaFixaDeClasse[];
+  magiasFixasClasseGastas: Record<string, number>;
   onUsarMagiaGratisDeClasse: (nomeMagia: string) => void;
   espacos: EspacoDeMagiaAtivo[];
   espacosGastosPorCirculo: Record<number, number>;
@@ -260,6 +265,8 @@ export default function BonusPanelContent({
   maestriaDeMagiasAtuais,
   assinaturaMagicaAtuais,
   assinaturaMagicaGastas,
+  magiasFixasClasseAtuais,
+  magiasFixasClasseGastas,
   onUsarMagiaGratisDeClasse,
   espacos,
   espacosGastosPorCirculo,
@@ -305,6 +312,8 @@ export default function BonusPanelContent({
     maestriaDeMagiasAtuais,
     assinaturaMagicaAtuais,
     assinaturaMagicaGastas,
+    magiasFixasClasseAtuais,
+    magiasFixasClasseGastas,
     onUsarMagiaGratisDeClasse,
     modAcertoConjuracao,
     explicacaoAcertoConjuracao,
