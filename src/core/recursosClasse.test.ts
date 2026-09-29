@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { valorRecursoClasse, quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria } from './recursosClasse';
+import { valorRecursoClasse, quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeMaosConsagradas } from './recursosClasse';
 import { classes } from '../data/rulesets/dnd2024/classes';
 
 function classe(nome: string) {
@@ -54,5 +54,17 @@ describe('bonusDanoFuria', () => {
 
   it('borda: classe sem Fúria devolve 0', () => {
     expect(bonusDanoFuria(classe('Guerreiro'), 1)).toBe(0);
+  });
+});
+
+describe('quantidadeMaosConsagradas', () => {
+  it('Paladino: reserva é 5 × nível (nível 1 = 5 PV, nível 20 = 100 PV)', () => {
+    expect(quantidadeMaosConsagradas(classe('Paladino'), 1)).toBe(5);
+    expect(quantidadeMaosConsagradas(classe('Paladino'), 5)).toBe(25);
+    expect(quantidadeMaosConsagradas(classe('Paladino'), 20)).toBe(100);
+  });
+
+  it('borda: classe sem Mãos Consagradas devolve 0', () => {
+    expect(quantidadeMaosConsagradas(classe('Guerreiro'), 5)).toBe(0);
   });
 });

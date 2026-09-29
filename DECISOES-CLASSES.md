@@ -106,6 +106,21 @@ pra Ponte de Magia de Pacto (Multiclasse).
 **Data/origem:** 2026-08/09, Guerreiro/Bardo/Bruxo (5 cores
 provisórias) → 2026-09, as 12 cores finais + arquitetura hex livre.
 
+**Reserva de PONTOS com gasto variável (não "N usos de 1 em 1") — exibe
+como barra, não pips (Paladino, Mãos Consagradas, 2026-09):** todo
+recurso anterior (Fúria, Fôlego, Canalizar Divindade, Inspiração) é "N
+cargas, cada uso consome exatamente 1" — `TickPips` desenha 1 quadrado
+por unidade, o que só funciona pra números pequenos. Uma reserva tipo
+"5×nível PV, jogador escolhe quanto gastar por uso" precisa de 2 coisas
+diferentes: (1) o campo de gasto guarda a SOMA de pontos já gastos, não
+uma contagem de usos; (2) `RecursoVisivel` ganha `exibicao?: 'barra'`
+(omitido = pips, de sempre) — `BarraRecurso.tsx` (novo, em
+`ui/components/`) reaproveita a mesma animação suave da barra de vida
+(`useValorAnimado`, exportado de `LinearProgressBar.tsx`), só que com
+cor FIXA da classe (não varia por % restante, porque aqui não é
+"saúde") e o número escrito dentro da barra. Próxima classe com reserva
+grande parecida (ex: Clérigo) reaproveita os 2 pontos acima direto.
+
 ## Motor de Level Up genérico (`core/levelUp.ts`)
 
 **Funções que leem a progressão real da classe** (nunca constante

@@ -78,6 +78,10 @@ export interface PersonagemSalvo {
   /** Usos de Canalizar Divindade (Paladino) já gastos — ausente = 0
    * (fichas salvas antes desse recurso existir). */
   canalizarDivindadeGasto?: number;
+  /** PONTOS de PV já gastos da reserva de Mãos Consagradas (Paladino) —
+   * ausente = 0. Diferente de `canalizarDivindadeGasto`, esse número não é
+   * uma contagem de usos, é a soma de PV gastos (quantidade variável). */
+  maosConsagradasGasto?: number;
   indomavelGasto?: number;
   surtoGasto?: number;
   /** @deprecated Etapa 4.1 — só existia 1 círculo simultâneo possível.

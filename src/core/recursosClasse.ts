@@ -36,3 +36,12 @@ export function quantidadeFuria(classe: Classe, nivel: number): number {
 export function bonusDanoFuria(classe: Classe, nivel: number): number {
   return valorRecursoClasse(classe, 'Dano da Fúria', nivel);
 }
+
+/** Tamanho da reserva de PV de Mãos Consagradas (Paladino) no nível
+ * atual: 5 × nível de Paladino (livro Cap. 3, "Nível 1: Mãos
+ * Consagradas") — fórmula fixa, não vem de coluna da planilha como os
+ * outros recursos "banco de usos". Diferente deles, o gasto aqui é em
+ * PONTOS (quantidade escolhida pelo jogador), não em usos de 1 em 1. */
+export function quantidadeMaosConsagradas(classe: Classe, nivel: number): number {
+  return classe.id === 'paladino' ? 5 * nivel : 0;
+}

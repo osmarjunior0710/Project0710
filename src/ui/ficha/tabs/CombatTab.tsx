@@ -109,6 +109,17 @@ interface CombatTabProps {
   /** Canalizar Divindade (Paladino) — `maximo` 0 = antes do nível 3 ou
    * sem a classe. Sentido Divino gasta 1 uso deste banco. */
   canalizarDivindade: RecursoContado;
+  /** Mãos Consagradas (Paladino) — `maximo`/`restantes` em PONTOS de PV
+   * (não em usos). `onCurarSelf` aplica a cura no próprio PV; `onCurarOutro`
+   * e `onRemoverEnvenenado` só descontam da reserva (sem ficha de aliado
+   * no app pra aplicar em outra criatura). */
+  maosConsagradas: {
+    maximo: number;
+    restantes: number;
+    onCurarSelf: (pontos: number) => boolean;
+    onCurarOutro: (pontos: number) => boolean;
+    onRemoverEnvenenado: () => boolean;
+  };
   /** Conhecimento de Pedras (Anão) — `maximo` 0 = espécie não é Anão. */
   conhecimentoDePedras: RecursoContado;
   /** Pico de Adrenalina (Orc) — `maximo` 0 = espécie não é Orc. */
@@ -500,6 +511,13 @@ export default function CombatTab({
     maximo: usosCanalizarMaximo,
     restantes: usosCanalizarRestantes,
     onUsar: onUsarUsoCanalizar,
+  },
+  maosConsagradas: {
+    maximo: maosConsagradasMaximo,
+    restantes: maosConsagradasRestantes,
+    onCurarSelf: onCurarSelfMaosConsagradas,
+    onCurarOutro: onCurarOutroMaosConsagradas,
+    onRemoverEnvenenado: onRemoverEnvenenadoMaosConsagradas,
   },
   conhecimentoDePedras: {
     maximo: usosConhecimentoDePedrasMaximo,
@@ -1009,6 +1027,30 @@ export default function CombatTab({
     setFeedback(
       '🙏 Sentido Divino — por 10 minutos (ou até ficar Incapacitado) você sabe a localização de Celestiais, Ínferos e Mortos-Vivos a até 18 m e detecta lugares/objetos consagrados ou profanados.',
     );
+  }
+
+  function curarSelfComMaosConsagradas(pontos: number): boolean {
+    if (!onCurarSelfMaosConsagradas(pontos)) return false;
+    onMarcarUsado('bonus');
+    setPainelAberto(null);
+    setFeedback(`🖐️ Mãos Consagradas — curou ${pontos} PV.`);
+    return true;
+  }
+
+  function curarOutroComMaosConsagradas(pontos: number): boolean {
+    if (!onCurarOutroMaosConsagradas(pontos)) return false;
+    onMarcarUsado('bonus');
+    setPainelAberto(null);
+    setFeedback(`🖐️ Mãos Consagradas — gastou ${pontos} PV da reserva pra curar outra criatura (aplique o PV nela fora do app).`);
+    return true;
+  }
+
+  function removerEnvenenadoComMaosConsagradas(): boolean {
+    if (!onRemoverEnvenenadoMaosConsagradas()) return false;
+    onMarcarUsado('bonus');
+    setPainelAberto(null);
+    setFeedback('🖐️ Mãos Consagradas — gastou 5 PV da reserva pra remover Envenenado.');
+    return true;
   }
 
   function usarRecuperarFolego() {
@@ -1777,6 +1819,11 @@ export default function CombatTab({
           usosCanalizarMaximo={usosCanalizarMaximo}
           usosCanalizarRestantes={usosCanalizarRestantes}
           onUsarSentidoDivino={usarSentidoDivino}
+          maosConsagradasMaximo={maosConsagradasMaximo}
+          maosConsagradasRestantes={maosConsagradasRestantes}
+          onCurarSelfMaosConsagradas={curarSelfComMaosConsagradas}
+          onCurarOutroMaosConsagradas={curarOutroComMaosConsagradas}
+          onRemoverEnvenenadoMaosConsagradas={removerEnvenenadoComMaosConsagradas}
           usosConhecimentoDePedrasMaximo={usosConhecimentoDePedrasMaximo}
           usosConhecimentoDePedrasRestantes={usosConhecimentoDePedrasRestantes}
           onUsarConhecimentoDePedras={usarConhecimentoDePedras}

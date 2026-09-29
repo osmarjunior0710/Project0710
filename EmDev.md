@@ -94,5 +94,23 @@ na Entrega 5.
   Abençoado → Montaria Fiel → Aura de Proteção → Repudiar Inimigos →
   Aura de Coragem → Golpes Radiantes → Toque Restaurador → Aura
   Expandida
+  - [x] **Mãos Consagradas** (concluída, testada ao vivo nv1: curar a
+    si mesmo com PV cheio vira PV Temp., reserva desconta certo, ⚡
+    Bônus trava "Usada")
+    - [x] `quantidadeMaosConsagradas` (`recursosClasse.ts`, 5×nível),
+      `RecursoVisivel.exibicao: 'barra'` novo (pool grande demais pra
+      pips) + `BarraRecurso.tsx` novo (reaproveita a animação de
+      `LinearProgressBar.tsx`, cor fixa da classe, número dentro)
+    - [x] Painel de Ação Bônus: linha "🖐️ Mãos Consagradas" abre
+      cartão com 3 opções — Curar a si mesmo (aplica PV de verdade via
+      `alterarPv`), Curar outro (só desconta a reserva — sem ficha de
+      aliado no app), Remover Envenenado (5 PV fixo, nunca cura)
+    - [x] Recarrega só no Descanso Longo (`descansoLongo` zera
+      `maosConsagradasGasto`; `descansoCurto` não toca, diferente do
+      Canalizar Divindade)
+    - [x] `maosConsagradasGasto` persistido em
+      `armazenamentoPersonagens.ts` (opcional, ausente = 0)
+    - Nível 14 (Toque Restaurador — mais condições) fica pra quando
+      chegar a vez desse nível na Entrega 6
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

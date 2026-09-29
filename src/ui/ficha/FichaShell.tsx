@@ -85,7 +85,7 @@ import { explicarCdRaizesDevastadoras } from '../../core/raizesDevastadoras';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
-import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade } from '../../core/recursosClasse';
+import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas } from '../../core/recursosClasse';
 import { type MagiaGratisDeInvocacao } from '../../core/invocacoesMagiaGratis';
 import { aplicarAlteracaoPv, ganharPvTemporario } from '../../core/pvTemporario';
 import { deveAplicarVigorImplacavel } from '../../core/vigorImplacavel';
@@ -435,6 +435,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [talentosFavoritos, setTalentosFavoritos] = useState<string[]>(personagemSalvo.talentosFavoritosAtual ?? []);
   const [folegoGasto, setFolegoGasto] = useState(personagemSalvo.folegoGasto ?? 0);
   const [canalizarDivindadeGasto, setCanalizarDivindadeGasto] = useState(personagemSalvo.canalizarDivindadeGasto ?? 0);
+  const [maosConsagradasGasto, setMaosConsagradasGasto] = useState(personagemSalvo.maosConsagradasGasto ?? 0);
   const [vigorImplacavelGasto, setVigorImplacavelGasto] = useState(personagemSalvo.vigorImplacavelGasto ?? false);
   // Dados de Vida gastos por tipo (ver `core/dadosDeVida.ts`) — a reserva
   // sempre soma TODAS as classes, nunca só a classe em foco.
@@ -750,6 +751,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const usosCanalizarMaximo =
     classeCatalogoPaladino && entradaPaladino ? quantidadeCanalizarDivindade(classeCatalogoPaladino, entradaPaladino.nivel) : 0;
   const usosCanalizarRestantes = Math.max(0, usosCanalizarMaximo - canalizarDivindadeGasto);
+  // Mãos Consagradas (Paladino) — mesma leitura por classe/nível do Canalizar
+  // Divindade acima, mas o "gasto" é em PONTOS de PV, não em usos de 1 em 1.
+  const maximoMaosConsagradas =
+    classeCatalogoPaladino && entradaPaladino ? quantidadeMaosConsagradas(classeCatalogoPaladino, entradaPaladino.nivel) : 0;
+  const restantesMaosConsagradas = Math.max(0, maximoMaosConsagradas - maosConsagradasGasto);
   // Fúria (Bárbaro) — ver sdd/sdd-barbaro-furia.md. `armaduraPesadaEquipada`
   // também trava a ATIVAÇÃO (regra real) e força o encerramento
   // automático ao equipar (ver `equiparItem`).
@@ -972,6 +978,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       folego: folegoGasto,
       canalizarDivindade: canalizarDivindadeGasto,
       inspiracao: inspiracaoGasto,
+      maosConsagradas: maosConsagradasGasto,
       espacosPorClasseECirculo: espacosGastosPorClasseECirculo,
     },
   });
@@ -1193,6 +1200,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     maestriaArmaAtual: maestriaArma,
     folegoGasto,
     canalizarDivindadeGasto,
+    maosConsagradasGasto,
     vigorImplacavelGasto,
     furiaImplacavelUsosDesdeDescanso: furiaImplacavelUsos,
     dadosDeVidaGastos,
@@ -1296,6 +1304,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       maestriaArma,
       folegoGasto,
       canalizarDivindadeGasto,
+      maosConsagradasGasto,
       vigorImplacavelGasto,
       furiaImplacavelUsos,
       dadosDeVidaGastos,
@@ -1645,6 +1654,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setEspacosGastosPorClasseECirculo({});
     setFolegoGasto(0);
     setCanalizarDivindadeGasto(0);
+    setMaosConsagradasGasto(0);
     setVigorImplacavelGasto(false);
     setFuriaImplacavelUsos(0);
     setFuriaPersistenteUsada(false);
@@ -2041,6 +2051,29 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const usoCanalizarDivindade = recursoContado(usosCanalizarMaximo, canalizarDivindadeGasto, setCanalizarDivindadeGasto);
   function usarUsoCanalizarDivindade(): boolean {
     return usoCanalizarDivindade.usar();
+  }
+
+  // Mãos Consagradas (Paladino) — diferente dos recursos "1 uso por vez"
+  // acima, aqui o jogador escolhe QUANTOS PV gastar da reserva. `onCurarSelf`
+  // também aplica a cura no próprio PV (via `alterarPv`, mesma função dos
+  // botões manuais); `onCurarOutro`/`onRemoverEnvenenado` só descontam da
+  // reserva — o app não tem ficha de aliados na tela pra aplicar em outra
+  // criatura, e remover Envenenado nunca restaura PV de ninguém (regra real).
+  function gastarReservaMaosConsagradas(pontos: number): boolean {
+    if (pontos <= 0 || pontos > restantesMaosConsagradas) return false;
+    setMaosConsagradasGasto((v) => v + pontos);
+    return true;
+  }
+  function curarASiMesmoComMaosConsagradas(pontos: number): boolean {
+    if (!gastarReservaMaosConsagradas(pontos)) return false;
+    alterarPv(pontos);
+    return true;
+  }
+  function curarOutroComMaosConsagradas(pontos: number): boolean {
+    return gastarReservaMaosConsagradas(pontos);
+  }
+  function removerEnvenenadoComMaosConsagradas(): boolean {
+    return gastarReservaMaosConsagradas(5);
   }
 
   const indomavel = recursoContado(indomavelMaximo, indomavelGasto, setIndomavelGasto);
@@ -2907,6 +2940,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             nivel={personagem.nivel}
             folego={{ maximo: usosFolegoMaximo, restantes: usosFolegoRestantes, onUsar: usarUsoFolego }}
             canalizarDivindade={{ maximo: usosCanalizarMaximo, restantes: usosCanalizarRestantes, onUsar: usarUsoCanalizarDivindade }}
+            maosConsagradas={{
+              maximo: maximoMaosConsagradas,
+              restantes: restantesMaosConsagradas,
+              onCurarSelf: curarASiMesmoComMaosConsagradas,
+              onCurarOutro: curarOutroComMaosConsagradas,
+              onRemoverEnvenenado: removerEnvenenadoComMaosConsagradas,
+            }}
             conhecimentoDePedras={{
               maximo: usosConhecimentoDePedrasMaximo,
               restantes: usosConhecimentoDePedrasRestantes,

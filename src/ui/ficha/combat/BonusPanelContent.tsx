@@ -20,6 +20,14 @@ interface BonusPanelContentProps {
   usosCanalizarMaximo: number;
   usosCanalizarRestantes: number;
   onUsarSentidoDivino: () => void;
+  /** Mãos Consagradas (Paladino) — reserva de PV, `maximo`/`restantes` em
+   * pontos (não usos). `onCurarSelf` também aplica a cura no próprio PV;
+   * `onCurarOutro`/`onRemoverEnvenenado` só descontam da reserva. */
+  maosConsagradasMaximo: number;
+  maosConsagradasRestantes: number;
+  onCurarSelfMaosConsagradas: (pontos: number) => boolean;
+  onCurarOutroMaosConsagradas: (pontos: number) => boolean;
+  onRemoverEnvenenadoMaosConsagradas: () => boolean;
   /** Aplica a cura de magia no PV E dispara o efeito visual de Cura
    * ("Me curar", ver `RollDadosOptions.confirmarAlvoCura` e
    * `FichaShell.tsx` `onCuraDeMagiaAplicada`). */
@@ -191,6 +199,11 @@ export default function BonusPanelContent({
   usosCanalizarMaximo,
   usosCanalizarRestantes,
   onUsarSentidoDivino,
+  maosConsagradasMaximo,
+  maosConsagradasRestantes,
+  onCurarSelfMaosConsagradas,
+  onCurarOutroMaosConsagradas,
+  onRemoverEnvenenadoMaosConsagradas,
   ataqueBonus,
   onUsarAtaqueBonus,
   cortarAtaque,
@@ -278,6 +291,8 @@ export default function BonusPanelContent({
 }: BonusPanelContentProps) {
   const [escolhendoFormaRevelacao, setEscolhendoFormaRevelacao] = useState(false);
   const [escolhendoMestreDaMorte, setEscolhendoMestreDaMorte] = useState(false);
+  const [maosConsagradasAberto, setMaosConsagradasAberto] = useState(false);
+  const [textoCuraMaosConsagradas, setTextoCuraMaosConsagradas] = useState('');
   const [petsSelecionados, setPetsSelecionados] = useState<string[]>([]);
   const { picker, abrirLista } = useUsarMagiaPainel({
     aberto,
@@ -423,6 +438,83 @@ export default function BonusPanelContent({
           de dano do tipo acima. Manto Necrótico também impõe Amedrontado (CD {cdMantoNecrotico}) a quem chegar perto.
         </div>
         <div className={styles.row} onClick={() => setEscolhendoFormaRevelacao(false)}>
+          <div className={styles.rowName}>← Voltar</div>
+        </div>
+      </>
+    );
+  }
+
+  if (maosConsagradasAberto) {
+    const pontosDigitados = Number.parseInt(textoCuraMaosConsagradas, 10);
+    const pontosValidos = Number.isFinite(pontosDigitados) && pontosDigitados > 0 && pontosDigitados <= maosConsagradasRestantes;
+    function fechar() {
+      setMaosConsagradasAberto(false);
+      setTextoCuraMaosConsagradas('');
+    }
+    return (
+      <>
+        <div className="section-title">Mãos Consagradas</div>
+        <div className="label" style={{ marginBottom: 8 }}>
+          Reserva: {maosConsagradasRestantes}/{maosConsagradasMaximo} PV. Recarrega só no Descanso Longo.
+        </div>
+        <input
+          type="number"
+          inputMode="numeric"
+          min={1}
+          max={maosConsagradasRestantes}
+          autoFocus
+          value={textoCuraMaosConsagradas}
+          onChange={(e) => setTextoCuraMaosConsagradas(e.target.value)}
+          placeholder={`Quantos PV? (até ${maosConsagradasRestantes})`}
+          style={{
+            width: '100%',
+            boxSizing: 'border-box',
+            fontSize: 18,
+            padding: 'var(--space-2)',
+            border: '1px solid var(--line)',
+            borderRadius: 'var(--shape-sm)',
+            textAlign: 'center',
+            marginBottom: 8,
+            background: 'var(--panel)',
+            color: 'var(--text)',
+          }}
+        />
+        <div
+          className={styles.row}
+          style={!pontosValidos ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+          onClick={() => {
+            if (!pontosValidos) return;
+            if (!onCurarSelfMaosConsagradas(pontosDigitados)) return;
+            fechar();
+          }}
+        >
+          <div className={styles.rowName}>Curar a si mesmo</div>
+        </div>
+        <div
+          className={styles.row}
+          style={!pontosValidos ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+          onClick={() => {
+            if (!pontosValidos) return;
+            if (!onCurarOutroMaosConsagradas(pontosDigitados)) return;
+            fechar();
+          }}
+        >
+          <div className={styles.rowName}>Curar outro</div>
+          <div className={styles.rowDesc}>Só desconta da reserva — aplique o PV no aliado fora do app.</div>
+        </div>
+        <div
+          className={styles.row}
+          style={maosConsagradasRestantes < 5 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+          onClick={() => {
+            if (maosConsagradasRestantes < 5) return;
+            if (!onRemoverEnvenenadoMaosConsagradas()) return;
+            fechar();
+          }}
+        >
+          <div className={styles.rowName}>Remover Envenenado (5 PV)</div>
+          <div className={styles.rowDesc}>Nunca restaura PV — serve pra você ou pra outra criatura.</div>
+        </div>
+        <div className={styles.row} onClick={fechar}>
           <div className={styles.rowName}>← Voltar</div>
         </div>
       </>
@@ -575,6 +667,34 @@ export default function BonusPanelContent({
           {usosCanalizarRestantes <= 0 && (
             <div className="label" style={{ marginTop: 6 }}>
               sem usos disponíveis — descanse pra recuperar.
+            </div>
+          )}
+        </>
+      )}
+      {maosConsagradasMaximo > 0 && (
+        <>
+          <div className={styles.slotCounter}>
+            <span>Mãos Consagradas:</span>
+            <span style={{ color: 'var(--text-faint)' }}>
+              {maosConsagradasRestantes}/{maosConsagradasMaximo} PV
+            </span>
+          </div>
+          <div
+            className={styles.row}
+            style={maosConsagradasRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+            onClick={() => setMaosConsagradasAberto(true)}
+          >
+            <div className={styles.rowName}>🖐️ Mãos Consagradas</div>
+            {detalhesAtivo && (
+              <div className={styles.rowDesc}>
+                Toca uma criatura (você ou outra) e restaura PV da reserva, até o que resta. Ou gasta 5 PV pra remover
+                Envenenado. Recarrega só no Descanso Longo.
+              </div>
+            )}
+          </div>
+          {maosConsagradasRestantes <= 0 && (
+            <div className="label" style={{ marginTop: 6 }}>
+              sem PV na reserva — descanse pra recuperar.
             </div>
           )}
         </>

@@ -13,7 +13,7 @@ function entrada(classes: EntradaRecursosVisiveis['classes'], gastos: Partial<En
     classes,
     catalogo,
     selecao: selecaoCar20(),
-    gastos: { furia: 0, folego: 0, canalizarDivindade: 0, inspiracao: 0, espacosPorClasseECirculo: {}, ...gastos },
+    gastos: { furia: 0, folego: 0, canalizarDivindade: 0, inspiracao: 0, maosConsagradas: 0, espacosPorClasseECirculo: {}, ...gastos },
   };
 }
 
@@ -102,5 +102,29 @@ describe('Canalizar Divindade (Paladino)', () => {
   it('descrição diz como recarrega (1 no Curto, todos no Longo)', () => {
     const r = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 3, subclasse: null }]));
     expect(r.find((x) => x.id === 'canalizar-divindade')?.descricao.join(' ')).toContain('Descanso Curto');
+  });
+});
+
+describe('Mãos Consagradas (Paladino)', () => {
+  it('nível 1: reserva de 5 PV, exibida como barra (não pips)', () => {
+    const r = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 1, subclasse: null }]));
+    expect(r.find((x) => x.id === 'maos-consagradas')).toMatchObject({ maximo: 5, restantes: 5, exibicao: 'barra' });
+  });
+
+  it('nível 5: reserva de 25 PV', () => {
+    const r = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 5, subclasse: null }]));
+    expect(r.find((x) => x.id === 'maos-consagradas')).toMatchObject({ maximo: 25, restantes: 25 });
+  });
+
+  it('gasto desconta em PONTOS (não em usos) e nunca fica negativo', () => {
+    const r = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 5, subclasse: null }], { maosConsagradas: 18 }));
+    expect(r.find((x) => x.id === 'maos-consagradas')?.restantes).toBe(7);
+    const r2 = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 5, subclasse: null }], { maosConsagradas: 999 }));
+    expect(r2.find((x) => x.id === 'maos-consagradas')?.restantes).toBe(0);
+  });
+
+  it('descrição diz que só recarrega no Descanso Longo', () => {
+    const r = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 5, subclasse: null }]));
+    expect(r.find((x) => x.id === 'maos-consagradas')?.descricao.join(' ')).toContain('só no Descanso Longo');
   });
 });

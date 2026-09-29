@@ -14,7 +14,7 @@ import { dadoInspiracao, usosInspiracaoMaximo } from './inspiracaoBardo';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
 import type { PersonagemClasse } from './multiclasse';
 import type { WizardSelection } from './personagem';
-import { quantidadeCanalizarDivindade, quantidadeFuria, quantidadeRecuperarFolego } from './recursosClasse';
+import { quantidadeCanalizarDivindade, quantidadeFuria, quantidadeMaosConsagradas, quantidadeRecuperarFolego } from './recursosClasse';
 
 export interface RecursoVisivel {
   /** Estável, pra key de lista e testes. */
@@ -26,6 +26,11 @@ export interface RecursoVisivel {
   descricao: string[];
   /** Cor dos pips (por classe, ver `corRecursoClasse.ts`); `null` = azul padrão. */
   cor: CorClasse | null;
+  /** `'pips'` (padrão, omitido) = bolinhas de 1 em 1 — só funciona pra
+   * poucos usos. `'barra'` = barra de progresso colorida com o número
+   * dentro, pra reserva de PONTOS que pode chegar em dezenas/centenas
+   * (ex: Mãos Consagradas, 5×nível). */
+  exibicao?: 'pips' | 'barra';
 }
 
 export interface EntradaRecursosVisiveis {
@@ -38,6 +43,9 @@ export interface EntradaRecursosVisiveis {
     folego: number;
     canalizarDivindade: number;
     inspiracao: number;
+    /** Em PONTOS de PV gastos da reserva, não em "usos" — Mãos Consagradas
+     * é a única cujo gasto é uma quantidade variável escolhida pelo jogador. */
+    maosConsagradas: number;
     /** `espacosGastosPorClasseECirculo` — a chave do pool de Pacto é o nome da classe. */
     espacosPorClasseECirculo: Record<string, Record<number, number>>;
   };
@@ -134,6 +142,22 @@ export function montarRecursosVisiveis(e: EntradaRecursosVisiveis): RecursoVisiv
           descricao: [
             'Cada efeito de Canalizar Divindade (Sentido Divino, e mais opções conforme você sobe de nível) gasta 1 uso. Se pedir salvaguarda, a CD é a CD de magia da Conjuração de Paladino.',
             'Recarrega: 1 uso no Descanso Curto, todos os usos no Descanso Longo.',
+          ],
+        });
+      }
+
+      const maximoMaosConsagradas = quantidadeMaosConsagradas(classe, c.nivel);
+      if (maximoMaosConsagradas > 0) {
+        lista.push({
+          id: 'maos-consagradas',
+          nome: 'Mãos Consagradas',
+          maximo: maximoMaosConsagradas,
+          restantes: Math.max(0, maximoMaosConsagradas - e.gastos.maosConsagradas),
+          cor: corDoRecursoDaClasse(classe.nome),
+          exibicao: 'barra',
+          descricao: [
+            'Ação Bônus: toca uma criatura (você ou outra) e restaura PV dessa reserva, até o que resta. Também pode gastar 5 PV da reserva pra remover a condição Envenenado, sem curar.',
+            'Recarrega: só no Descanso Longo (o Descanso Curto não devolve nada).',
           ],
         });
       }

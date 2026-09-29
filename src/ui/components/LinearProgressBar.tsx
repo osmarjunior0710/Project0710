@@ -32,8 +32,10 @@ export function corPorPercentual(pct: number): string {
 }
 
 /** Anima suavemente de um valor numérico pro outro sempre que `alvo`
- * muda, sem depender de CSS transition em geometria SVG. */
-function useValorAnimado(alvo: number, duracaoMs: number): number {
+ * muda, sem depender de CSS transition em geometria SVG. Exportado pra
+ * `BarraRecurso.tsx` reaproveitar a mesma técnica em barras que não são
+ * PV (ex: reserva de Mãos Consagradas). */
+export function useValorAnimado(alvo: number, duracaoMs: number): number {
   const [exibido, setExibido] = useState(alvo);
   const exibidoRef = useRef(alvo);
   const frameRef = useRef<number | null>(null);

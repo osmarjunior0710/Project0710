@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2146
+
+Mãos Consagradas (Paladino nível 1) implementada. Na aba Combate, painel
+de Ação Bônus, aparece uma reserva de PV (barra azul-marinho, esvazia
+conforme usa) — toca em "Mãos Consagradas" pra abrir 3 opções: curar a
+si mesmo (aplica o PV de verdade), curar outro (só desconta a reserva,
+sem ficha de aliado ainda no app) ou remover Envenenado (gasta 5 PV
+fixos). Só recarrega no Descanso Longo.
+
 ## v202609_2101
 
 Emblemas de Espécie/Origem/Classe(s) removidos do cabeçalho da ficha —
