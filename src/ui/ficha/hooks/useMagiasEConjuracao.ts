@@ -293,6 +293,12 @@ export function useMagiasEConjuracao(input: {
   const magiasFixasClasseAtuais =
     paladinoObj && paladinoEntry ? magiasFixasDaClasseBase(paladinoObj, paladinoEntry.nivel) : [];
   const magiasFixasClassePreparadas = magiasPreparadasDoPersonagem(magiasFixasClasseAtuais.map((m) => m.nomeMagia));
+  // Classe concedente pra mostrar o pill igual as magias preparadas
+  // normais (ver `magiasConjuraveis` abaixo) — só existe 1 classe base
+  // com esse mecanismo por vez hoje (Paladino), mas o nome vem de
+  // `paladinoObj` (não hardcoded) pra continuar certo quando o
+  // Guardião (Marca do Predador) ganhar o mesmo mecanismo.
+  const magiasFixasClasseNomeConcedente = paladinoObj?.nome ?? null;
   // Truques + magias fixas da Linhagem Élfica/Gnômica (e futuramente
   // Legado Ínfero) — gatilho é nível de PERSONAGEM, não de classe
   // (espécie não tem classe própria), ver `core/magiasEspecie.ts`.
@@ -355,7 +361,10 @@ export function useMagiasEConjuracao(input: {
     ...magiasDescobertasMagicas.map(semClasse),
     ...livroDasSombras.map(semClasse),
     ...magiasPactoDoInferoPreparadas.map(semClasse),
-    ...magiasFixasClassePreparadas.map(semClasse),
+    // Com pill de classe (diferente do `semClasse` acima) — aqui a
+    // classe concedente é sempre conhecida e sem ambiguidade
+    // (`paladinoObj`), então mostra igual as magias preparadas normais.
+    ...magiasFixasClassePreparadas.map((m): MagiaComClasseOpcional => ({ magia: m, classe: magiasFixasClasseNomeConcedente })),
     ...magiasEspeciePreparadasConjuraveis.map(semClasse),
     ...magiasTalentoOrigemPreparadas.map(semClasse),
     ...magiasTalentoGeralPreparadas.map(semClasse),
@@ -412,6 +421,7 @@ export function useMagiasEConjuracao(input: {
     contatoExtraplanar,
     magiasFixasClasseAtuais,
     magiasFixasClassePreparadas,
+    magiasFixasClasseNomeConcedente,
     arcanaMisticaEscolhidas,
     mestreMisticoDisponivel,
     espacoPactoAtual,

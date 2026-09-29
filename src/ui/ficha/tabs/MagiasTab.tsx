@@ -138,6 +138,9 @@ interface MagiasTabProps {
    * padrão de `magiasPactoDoInferoAtuais`, mas o hook já traz pronto).
    * Ver `core/magiasFixasDeClasse.ts`. */
   magiasFixasClassePreparadas: Magia[];
+  /** Nome da classe que concede (Paladino, hoje) — pra mostrar o pill
+   * junto do nome, igual as magias preparadas normais. */
+  magiasFixasClasseNomeConcedente: string | null;
   /** Truque + magias de nível 3/5 concedidos pela sub-escolha de
    * espécie (ex.: Linhagem Élfica do Elfo) — mesmo tratamento de
    * "sempre preparada, fora do limite normal" das outras listas fixas
@@ -364,6 +367,7 @@ export default function MagiasTab({
   magiasFixasClasseAtuais,
   magiasFixasClasseGastas,
   magiasFixasClassePreparadas,
+  magiasFixasClasseNomeConcedente,
   onUsarMagiaGratisDeClasse,
   astuciaMagicaDisponivel,
   astuciaMagicaGasta,
@@ -628,6 +632,9 @@ export default function MagiasTab({
         ...resultado.rollCura,
         confirmarAlvoCura: { onMeCurar: (total) => onCuraDeMagiaAplicada(total) },
       });
+    }
+    if (resultado.rollDano) {
+      rolarDados({ ...resultado.rollDano, confirmarFechamento: {} });
     }
   }
 
@@ -1263,7 +1270,7 @@ export default function MagiasTab({
                   </div>
                 </div>
                 <div className={styles.spellRowComPillLinha2}>
-                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
+                  <PillsMagia magia={m} classe={magiasFixasClasseNomeConcedente} preferencias={preferenciasPillsMagia} />
                 </div>
               </div>
             );

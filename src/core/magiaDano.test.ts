@@ -247,6 +247,10 @@ describe('mecanicaDaMagia', () => {
   it('sem ataque nem salvaguarda (Luz, utilidade) — "nenhuma"', () => {
     expect(mecanicaDaMagia(magia('luz'))).toBe('nenhuma');
   });
+
+  it('sem ataque/salvaguarda MAS com dano cadastrado (Destruição Divina, Ação Bônus após acertar) — "dano-automatico"', () => {
+    expect(mecanicaDaMagia(magia('destruicaodivina'))).toBe('dano-automatico');
+  });
 });
 
 describe('atributoSalvaguarda', () => {

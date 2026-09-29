@@ -44,6 +44,26 @@ describe('decidirConjuracao', () => {
     expect(resultado.textoFeedback).toBe(magia('luz').descricaoCurta);
   });
 
+  it('dano automático (Destruição Divina) — rolagem de dano direto, sem acerto/salvaguarda antes', () => {
+    const resultado = decidirConjuracao(magia('destruicaodivina'), 1, 2, null, false, false, undefined, 0);
+    expect(resultado.mecanica).toBe('dano-automatico');
+    expect(resultado.rollAcerto).toBeUndefined();
+    expect(resultado.rollDano).toEqual({
+      label: 'Dano — ✨ Destruição Divina',
+      formula: '2d8',
+      quantidade: 2,
+      lados: 8,
+      mod: 0,
+      explicacaoMod: expect.anything(),
+    });
+    expect(resultado.textoFeedback).toBe('Dano automático — role e aplique no alvo.');
+  });
+
+  it('dano automático com upcast (Destruição Divina em 2º círculo) — soma 1d8 no dano', () => {
+    const resultado = decidirConjuracao(magia('destruicaodivina'), 2, 2, null, false, false, undefined, 0);
+    expect(resultado.rollDano).toMatchObject({ formula: '3d8' });
+  });
+
   it('Colheita Macabra qualifica — magia de Necromancia, característica desbloqueada, espaço de verdade gasto', () => {
     const resultado = decidirConjuracao(magia('toquevampirico'), 3, 5, 5, true, true, undefined, 0);
     expect(resultado.curaColheitaMacabra).toBe(6); // curaColheitaMacabra(3) = 3*2

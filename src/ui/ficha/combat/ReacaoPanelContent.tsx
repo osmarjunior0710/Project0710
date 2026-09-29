@@ -304,6 +304,9 @@ export default function ReacaoPanelContent({
         confirmarAlvoCura: { onMeCurar: (total) => onCuraDeMagiaAplicada(total) },
       });
     }
+    if (resultado.rollDano) {
+      rolarDados({ ...resultado.rollDano, confirmarFechamento: {} });
+    }
     onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
   }
 

@@ -220,7 +220,7 @@ export function calcularCuraMagia(magia: Magia, circuloUsado: number, nivelPerso
   return calcularEscalonamento(magia.curaBaseDado, magia, circuloUsado, nivelPersonagem, 'Cura');
 }
 
-export type MecanicaMagia = 'ataque' | 'salvaguarda' | 'cura' | 'nenhuma';
+export type MecanicaMagia = 'ataque' | 'salvaguarda' | 'cura' | 'dano-automatico' | 'nenhuma';
 
 /** Deriva do campo estruturado `ataqueOuSalvaguarda` (extraído do
  * livro, ver DECISOES-DADOS.md) qual dos 2 modais de Combat mostrar ao
@@ -239,7 +239,14 @@ export function mecanicaDaMagia(magia: Magia): MecanicaMagia {
   if (magia.ataqueOuSalvaguarda === 'Ataque à Distância' || magia.ataqueOuSalvaguarda === 'Ataque Corpo a Corpo') {
     return 'ataque';
   }
-  if (magia.ataqueOuSalvaguarda === null) return 'nenhuma';
+  // `ataqueOuSalvaguarda: null` sem dano cadastrado = utilidade/passiva de
+  // verdade ('nenhuma'). Com `danoBaseDado` presente, é dano automático
+  // sem jogada de acerto/salvaguarda própria — ex.: Destruição Divina/
+  // Estrondosa/Radiante (Ação Bônus após já ter acertado com arma) e
+  // Mísseis Mágicos (sempre acerta). Achado 2026-09: essas magias tinham
+  // `danoBaseDado` cadastrado mas nunca rolavam nada — "Usar" só mostrava
+  // o texto da descrição, sem oferecer "Rolar Dano".
+  if (magia.ataqueOuSalvaguarda === null) return magia.danoBaseDado ? 'dano-automatico' : 'nenhuma';
   return 'salvaguarda'; // "Salvaguarda de <Atributo>" ou "aleatório"
 }
 

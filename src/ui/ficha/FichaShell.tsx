@@ -882,6 +882,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     contatoExtraplanar,
     magiasFixasClasseAtuais,
     magiasFixasClassePreparadas,
+    magiasFixasClasseNomeConcedente,
     arcanaMisticaEscolhidas,
     espacoPactoAtual,
     astuciaMagicaRecupera,
@@ -2894,6 +2895,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             magiasFixasClasseAtuais={magiasFixasClasseAtuais}
             magiasFixasClasseGastas={magiasFixasClasseGastas}
             magiasFixasClassePreparadas={magiasFixasClassePreparadas}
+            magiasFixasClasseNomeConcedente={magiasFixasClasseNomeConcedente}
             onUsarMagiaGratisDeClasse={usarMagiaGratis}
             astuciaMagicaDisponivel={astuciaMagicaDisponivel}
             astuciaMagicaGasta={astuciaMagicaGasta}

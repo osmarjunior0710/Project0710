@@ -246,6 +246,9 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         confirmarAlvoCura: { onMeCurar: (total) => p.onCuraDeMagiaAplicada(total) },
       });
     }
+    if (resultado.rollDano) {
+      rolarDados({ ...resultado.rollDano, confirmarFechamento: {} });
+    }
     p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
   }
 

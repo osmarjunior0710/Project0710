@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1337
+
+Dois ajustes em Destruição Divina: agora tem o selo "Paladino" junto
+do círculo (igual as outras magias preparadas) e, principal, "Usar"
+finalmente rola o dano — era um bug antigo do motor de magias (nenhuma
+magia do tipo "Ação Bônus após já ter acertado", sem salvaguarda
+própria, rolava dano; afetava outras magias além dessa).
+
 ## v202609_1027
 
 Paladino nível 2 ganha Destruição do Paladino: a magia Destruição

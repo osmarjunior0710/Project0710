@@ -114,14 +114,28 @@ na Entrega 5.
       chegar a vez desse nível na Entrega 6
   - [x] **Destruição do Paladino** (nível 2, concluída — testada ao
     vivo nv2: opção "Conjurar Grátis" aparece no círculo 1, some depois
-    de usada, volta a pedir espaço normal)
+    de usada, volta a pedir espaço normal; "Usar" rola 2d8 de dano)
     - Regra confirmada no livro (texto partido em 2 páginas): "Você
       sempre tem a magia Destruição Divina preparada. Além disso, você
       pode conjurá-la sem gastar um espaço de magia, não podendo
       conjurá-la dessa forma novamente antes de completar um Descanso
-      Longo." — corrigida a célula da planilha, que tinha "usando
-      Canalizar Divindade" a mais (não existe no livro; Osmar avisado,
-      vai corrigir a planilha por fora)
+      Longo." — corrigida a célula contaminada da planilha (E174,
+      "Características de Classe") que tinha uma tabela colada no
+      meio, sobrando um "usando Canalizar Divindade" que não existe no
+      livro (Osmar autorizou corrigir direto, com backup antes)
+    - [x] **Bug achado testando (pré-existente, não só dessa magia):**
+      `mecanicaDaMagia` não reconhecia nenhuma magia com
+      `ataqueOuSalvaguarda: null` + `danoBaseDado` preenchido — "Usar"
+      não rolava dano nenhum, só mostrava o texto da descrição.
+      Afetava Destruição Divina, Mísseis Mágicos, Marca do Predador,
+      Favor Divino, Explosão Elemental, Manto do Cruzado, Destruição
+      Radiante e outras — nova mecânica `'dano-automatico'` em
+      `core/magiaDano.ts`/`core/conjurarMagia.ts`, com testes.
+      **Achado no caminho, fora do escopo:** "Proibição" e "Palavra de
+      Poder: Matar" têm `danoBaseDado` cadastrado mas não deveriam ter
+      (nenhuma das 2 causa dano por dado na regra real) — dado
+      suspeito da importação original, não confirmado ainda no livro;
+      registrar se aparecer de novo.
     - [x] Mecanismo genérico novo (reaproveita em Montaria Fiel, e
       depois em Marca do Predador do Guardião): campo
       `magiaFixaConcedida?: { nomeMagia; usosGratisPorDescansoLongo }`

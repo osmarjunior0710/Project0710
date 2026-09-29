@@ -63,6 +63,10 @@ export interface ConjuracaoDecidida {
   /** Presente só quando `mecanica === 'cura'` e a magia tem cura
    * cadastrada — rolagem de cura a fazer. */
   rollCura?: RollDadosSpec;
+  /** Presente só quando `mecanica === 'dano-automatico'` — dano a
+   * rolar direto, sem jogada de acerto/salvaguarda antes (a magia já
+   * acerta sozinha, ex.: Destruição Divina/Mísseis Mágicos). */
+  rollDano?: RollDadosSpec;
   /** Texto de feedback pro jogador — já pronto pra cada caso (ataque
    * com/sem dano cadastrado, salvaguarda, cura, nenhuma mecânica
    * especial reconhecida). */
@@ -168,6 +172,25 @@ export function decidirConjuracao(
           explicacaoMod: cura.explicacao,
         },
         textoFeedback: 'Cura rolada — escolha o alvo no popup ("Me curar" ou "Curar outro").',
+        curaColheitaMacabra: curaMacabra,
+      };
+    }
+  }
+
+  if (mecanica === 'dano-automatico') {
+    const dano = calcularDanoMagia(m, circuloUsado, nivelPersonagem);
+    if (dano) {
+      return {
+        mecanica,
+        rollDano: {
+          label: `Dano — ✨ ${m.nome}`,
+          formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+          quantidade: dano.quantidade,
+          lados: dano.lados,
+          mod: dano.mod,
+          explicacaoMod: dano.explicacao,
+        },
+        textoFeedback: 'Dano automático — role e aplique no alvo.',
         curaColheitaMacabra: curaMacabra,
       };
     }
