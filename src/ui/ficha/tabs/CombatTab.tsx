@@ -1836,7 +1836,10 @@ export default function CombatTab({
           onUsarSentidoDivino={usarSentidoDivino}
           maosConsagradasMaximo={maosConsagradasMaximo}
           maosConsagradasRestantes={maosConsagradasRestantes}
-          onAbrirMaosConsagradas={() => setMaosConsagradasAberto(true)}
+          onAbrirMaosConsagradas={() => {
+            setPainelAberto(null);
+            setMaosConsagradasAberto(true);
+          }}
           usosConhecimentoDePedrasMaximo={usosConhecimentoDePedrasMaximo}
           usosConhecimentoDePedrasRestantes={usosConhecimentoDePedrasRestantes}
           onUsarConhecimentoDePedras={usarConhecimentoDePedras}

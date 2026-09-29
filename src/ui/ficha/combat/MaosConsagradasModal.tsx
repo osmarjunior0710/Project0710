@@ -43,6 +43,24 @@ export default function MaosConsagradasModal({
     onFechar();
   }
 
+  function ajustar(delta: number) {
+    const atual = Number.parseInt(texto, 10) || 0;
+    const novo = Math.max(0, Math.min(restantes, atual + delta));
+    setTexto(novo === 0 ? '' : String(novo));
+  }
+
+  const estiloBotaoAjuste = {
+    flex: 1,
+    minHeight: 'var(--touch-target-min)',
+    border: '1px solid var(--line)',
+    borderRadius: 'var(--shape-sm)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    fontSize: 14,
+  } as const;
+
   const estiloOpcao = (habilitado: boolean) => ({
     border: '1px solid var(--line)',
     borderRadius: 'var(--shape-sm)',
@@ -65,7 +83,6 @@ export default function MaosConsagradasModal({
           inputMode="numeric"
           min={1}
           max={restantes}
-          autoFocus
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
           placeholder={`Quantos PV? (até ${restantes})`}
@@ -77,11 +94,25 @@ export default function MaosConsagradasModal({
             border: '1px solid var(--line)',
             borderRadius: 'var(--shape-sm)',
             textAlign: 'center',
-            marginBottom: 'var(--space-3)',
+            marginBottom: 'var(--space-2)',
             background: 'var(--panel)',
             color: 'var(--text)',
           }}
         />
+        <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
+          <div style={estiloBotaoAjuste} onClick={() => ajustar(-5)}>
+            −5
+          </div>
+          <div style={estiloBotaoAjuste} onClick={() => ajustar(-1)}>
+            −1
+          </div>
+          <div style={estiloBotaoAjuste} onClick={() => ajustar(1)}>
+            +1
+          </div>
+          <div style={estiloBotaoAjuste} onClick={() => ajustar(5)}>
+            +5
+          </div>
+        </div>
         <div style={estiloOpcao(valido)} onClick={curarSelf}>
           Curar a si mesmo
         </div>

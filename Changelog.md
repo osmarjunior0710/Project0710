@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_0027
+
+Mãos Consagradas: corrigido bug visual em que o popup ficava empilhado
+por baixo do painel de Ação Bônus (o painel não fechava sozinho).
+Campo de digitar quanto curar não abre mais o teclado automaticamente
+— ganhou botões −5/−1/+1/+5 embaixo, igual os de Pontos de Vida.
+
 ## v202609_2305
 
 Mãos Consagradas (Paladino) agora abre num popup pequeno por cima da
