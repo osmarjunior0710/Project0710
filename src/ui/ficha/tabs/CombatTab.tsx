@@ -28,6 +28,7 @@ import ContadorUsos from '../../components/ContadorUsos';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import SidePanel from '../combat/SidePanel';
 import PvManualModal from '../combat/PvManualModal';
+import MaosConsagradasModal from '../combat/MaosConsagradasModal';
 import RecursosDeClasse from '../combat/RecursosDeClasse';
 import type { RecursoVisivel } from '../../../core/recursosVisiveis';
 import AcaoPanelContent from '../combat/AcaoPanelContent';
@@ -699,6 +700,7 @@ export default function CombatTab({
   preferenciasPillsMagia,
 }: CombatTabProps) {
   const [pvManualAberto, setPvManualAberto] = useState(false);
+  const [maosConsagradasAberto, setMaosConsagradasAberto] = useState(false);
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -1033,6 +1035,7 @@ export default function CombatTab({
     if (!onCurarSelfMaosConsagradas(pontos)) return false;
     onMarcarUsado('bonus');
     setPainelAberto(null);
+    setMaosConsagradasAberto(false);
     setFeedback(`🖐️ Mãos Consagradas — curou ${pontos} PV.`);
     return true;
   }
@@ -1041,6 +1044,7 @@ export default function CombatTab({
     if (!onCurarOutroMaosConsagradas(pontos)) return false;
     onMarcarUsado('bonus');
     setPainelAberto(null);
+    setMaosConsagradasAberto(false);
     setFeedback(`🖐️ Mãos Consagradas — gastou ${pontos} PV da reserva pra curar outra criatura (aplique o PV nela fora do app).`);
     return true;
   }
@@ -1049,6 +1053,7 @@ export default function CombatTab({
     if (!onRemoverEnvenenadoMaosConsagradas()) return false;
     onMarcarUsado('bonus');
     setPainelAberto(null);
+    setMaosConsagradasAberto(false);
     setFeedback('🖐️ Mãos Consagradas — gastou 5 PV da reserva pra remover Envenenado.');
     return true;
   }
@@ -1717,6 +1722,16 @@ export default function CombatTab({
 
 
       {pvManualAberto && <PvManualModal onAplicar={onAlterarPv} onFechar={() => setPvManualAberto(false)} />}
+      {maosConsagradasAberto && (
+        <MaosConsagradasModal
+          maximo={maosConsagradasMaximo}
+          restantes={maosConsagradasRestantes}
+          onCurarSelf={curarSelfComMaosConsagradas}
+          onCurarOutro={curarOutroComMaosConsagradas}
+          onRemoverEnvenenado={removerEnvenenadoComMaosConsagradas}
+          onFechar={() => setMaosConsagradasAberto(false)}
+        />
+      )}
 
       <SidePanel
         open={painelAberto === 'acao'}
@@ -1821,9 +1836,7 @@ export default function CombatTab({
           onUsarSentidoDivino={usarSentidoDivino}
           maosConsagradasMaximo={maosConsagradasMaximo}
           maosConsagradasRestantes={maosConsagradasRestantes}
-          onCurarSelfMaosConsagradas={curarSelfComMaosConsagradas}
-          onCurarOutroMaosConsagradas={curarOutroComMaosConsagradas}
-          onRemoverEnvenenadoMaosConsagradas={removerEnvenenadoComMaosConsagradas}
+          onAbrirMaosConsagradas={() => setMaosConsagradasAberto(true)}
           usosConhecimentoDePedrasMaximo={usosConhecimentoDePedrasMaximo}
           usosConhecimentoDePedrasRestantes={usosConhecimentoDePedrasRestantes}
           onUsarConhecimentoDePedras={usarConhecimentoDePedras}

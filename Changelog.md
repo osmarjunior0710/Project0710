@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_2305
+
+Mãos Consagradas (Paladino) agora abre num popup pequeno por cima da
+tela (igual o ajuste manual de PV), em vez de tomar o painel de Ação
+Bônus inteiro.
+
 ## v202609_2146
 
 Mãos Consagradas (Paladino nível 1) implementada. Na aba Combate, painel
