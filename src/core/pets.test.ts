@@ -8,6 +8,7 @@ import {
   atributoEfetivoPet,
   calcularAjustesPet,
   comBonusExtra,
+  statsMontariaSobrenatural,
 } from './pets';
 import { criaturas } from '../data/rulesets/dnd2024/criaturas';
 
@@ -133,5 +134,19 @@ describe('comBonusExtra / pvMaxEfetivoPet com bônus', () => {
     const semBonus = comBonusExtra(comBonus, null);
     expect(pvMaxEfetivoPet(semBonus, gato)).toBe(2);
     expect(semBonus.bonusExtra).toBeUndefined();
+  });
+});
+
+describe('statsMontariaSobrenatural (Convocar Montaria, Paladino) — "CA 10 + círculo, PV 5 + 10×círculo"', () => {
+  it('círculo base da magia (2)', () => {
+    expect(statsMontariaSobrenatural(2)).toEqual({ ca: 12, pvMax: 25 });
+  });
+
+  it('upcast pra círculo maior (5) escala os dois', () => {
+    expect(statsMontariaSobrenatural(5)).toEqual({ ca: 15, pvMax: 55 });
+  });
+
+  it('caso de borda — círculo 1 (uso grátis só faz upcast automático, mas a fórmula aceita qualquer círculo)', () => {
+    expect(statsMontariaSobrenatural(1)).toEqual({ ca: 11, pvMax: 15 });
   });
 });

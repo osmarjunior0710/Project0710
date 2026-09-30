@@ -93,6 +93,16 @@ export function ganharPvTemporarioPet(pet: Pet, valor: number): Pet {
   return { ...pet, pvTemporario: ganharPvTemporario(pet.pvTemporario ?? 0, valor) };
 }
 
+/** CA/PV Máximo da Montaria Sobrenatural (Convocar Montaria, magia de
+ * Paladino, Cap. 7) pro círculo REAL usado ao conjurar — regra oficial:
+ * "CA 10 + 1 por círculo de magia" / "PV 5 + 10 por círculo de magia
+ * (Dados de Vida = círculo)". Atributos são fixos nas 3 formas
+ * (Celestial/Feérico/Ínfero), só CA/PV escalam — usado como `ajustes`
+ * ao criar o Pet (ver `EscolherMontariaModal.tsx`). */
+export function statsMontariaSobrenatural(circuloUsado: number): { ca: number; pvMax: number } {
+  return { ca: 10 + circuloUsado, pvMax: 5 + 10 * circuloUsado };
+}
+
 export function caEfetivaPet(pet: Pet, criatura: Criatura): number {
   return pet.ajustes?.ca ?? caCriatura(criatura);
 }

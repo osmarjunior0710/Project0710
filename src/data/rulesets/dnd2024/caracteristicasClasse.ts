@@ -698,7 +698,8 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Você pode pedir auxílio de uma montaria sobrenatural. Você sempre tem a magia Convocar Montaria preparada. Você também pode conjurar a magia uma vez sem gastar um espaço de magia, e restaura a capacidade de fazê-lo ao completar um Descanso Longo.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
+    magiaFixaConcedida: { nomeMagia: 'Convocar Montaria', usosGratisPorDescansoLongo: 1 },
   },
   {
     classe: 'Paladino',

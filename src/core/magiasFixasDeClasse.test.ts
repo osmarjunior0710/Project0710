@@ -19,9 +19,12 @@ describe('magiasFixasDaClasseBase', () => {
     ]);
   });
 
-  it('Paladino nível 5: continua só com Destruição Divina (Montaria Fiel ainda não concede magia fixa)', () => {
+  it('Paladino nível 5: soma Convocar Montaria (Montaria Fiel) além de Destruição Divina', () => {
     const r = magiasFixasDaClasseBase(classe('Paladino'), 5);
-    expect(r.map((m) => m.nomeMagia)).toEqual(['Destruição Divina']);
+    expect(r).toEqual([
+      { nomeMagia: 'Destruição Divina', usosGratisPorDescansoLongo: 1 },
+      { nomeMagia: 'Convocar Montaria', usosGratisPorDescansoLongo: 1 },
+    ]);
   });
 
   it('borda: classe sem nenhuma magia fixa devolve []', () => {

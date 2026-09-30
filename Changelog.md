@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202609_1035
+
+Paladino nível 5, Montaria Fiel: "Convocar Montaria" agora vira um Pet
+de verdade na aba Pets, não só texto — escolha o nome e o tipo
+(Celestial/Feérico/Ínfero) ao conjurar, CA e PV já calculados certos
+pro círculo usado. Pancada Sobrenatural, as Ações Bônus e Vínculo
+Vital aparecem no card do Pet como texto (controle manual por
+enquanto).
+
 ## v202609_1337
 
 Dois ajustes em Destruição Divina: agora tem o selo "Paladino" junto

@@ -44,6 +44,8 @@ interface AcaoPanelContentProps {
   onAbrirEscolhaSobrecarga: (
     dados: { nomeMagia: string; danoMaximo: number; aoRolarNormal: () => void; aoUsarSobrecarga: () => void } | null,
   ) => void;
+  /** Convocar Montaria (Paladino) — ver `useUsarMagiaPainel.tsx`. */
+  onAbrirEscolhaDeMontaria: (circuloUsado: number) => void;
   /** Aplica a cura de MAGIA no PV E dispara o efeito visual de Cura
    * (ver `FichaShell.tsx` `onCuraDeMagiaAplicada`). */
   onCuraDeMagiaAplicada: (total: number) => void;
@@ -214,6 +216,7 @@ export default function AcaoPanelContent({
   gastarSlotCirculo,
   onAlterarPv,
   onAbrirEscolhaSobrecarga,
+  onAbrirEscolhaDeMontaria,
   onCuraDeMagiaAplicada,
   nivel,
   espacos,
@@ -317,6 +320,7 @@ export default function AcaoPanelContent({
     onUsarSobrecarga,
     onAlterarPv,
     onAbrirEscolhaSobrecarga,
+    onAbrirEscolhaDeMontaria,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     preferenciasPillsMagia,

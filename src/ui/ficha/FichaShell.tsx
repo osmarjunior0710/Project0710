@@ -2845,6 +2845,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           <MagiasTab
             classe={classe}
             nivel={personagem.nivel}
+            onAdicionarPet={adicionarPet}
             espacosGastosPorCirculo={espacosGastosParaConjurar}
             classeAtivaNome={chaveDoPoolDeMagia}
             ponte={ponte}
@@ -2942,6 +2943,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             pvMax={personagem.pvMax}
             pvTemporario={pvTemporario}
             recursosDeClasse={recursosDeClasse}
+            onAdicionarPet={adicionarPet}
             bencaoDoTenebroso={{ disponivel: bencaoDoTenebrosoDisponivel, onAplicar: aplicarBencaoDoTenebroso }}
             lancarNoInferno={{
               disponivel: lancarNoInfernoDisponivel,

@@ -163,12 +163,24 @@ Amedronta em salvaguarda de Sabedoria — as 3 recarregam no Descanso
 Longo). Traço Vínculo Vital: cura de magia 1º círculo+ no Paladino
 também cura a montaria, se a até 1,5m.
 
+**Confirmado com o Osmar (2026-09-30) — escopo das habilidades do
+Pet:** Pancada Sobrenatural, as 3 Ações Bônus por tipo (Toque
+Curativo/Passo Feérico/Derrubar Brilho) e Vínculo Vital ficam SÓ como
+texto no bloco de estatísticas — sem contador de recarga nem toggle
+interativo. Motivo: o sistema de Pets (`core/pets.ts`) não tem motor
+de recurso próprio com recarga por Descanso (só PV/PV Temp.), e criar
+esse motor agora é desproporcional pro tamanho da entrega — vira
+pendência registrada em `PENDENCIAS.md` "Motor de recursos pra Pets",
+pra quando outro pet precisar da mesma coisa (não só o Paladino) e
+justificar construir de verdade. Fica a cargo do jogador controlar na
+mesa (recarga das Ações Bônus, aplicar ou não o Vínculo Vital).
+
 Implementação: criar 3 `Criatura` no catálogo (Montaria Celestial/
-Feérica/Ínfera) + calcular CA/PV/dano pelo círculo REAL usado ao
-conjurar (não fixo) via `ajustes` do Pet — `Pet.origemInvocacaoId`
-(já existe, usado por "1 pet por fonte, conjurar de novo substitui")
-cobre a regra "Se você já tem uma montaria desta magia, a montaria é
-substituída pela nova" direto, sem mecanismo novo.
+Feérica/Ínfera) + calcular CA/PV pelo círculo REAL usado ao conjurar
+(não fixo) via `ajustes` do Pet — `Pet.origemInvocacaoId` (já existe,
+usado por "1 pet por fonte, conjurar de novo substitui") cobre a regra
+"Se você já tem uma montaria desta magia, a montaria é substituída
+pela nova" direto, sem mecanismo novo.
 
 **Desaparecimento:** só desaparece a 0 PV ou se o Paladino morrer —
 NÃO tem "dispensar quando quiser" (diferente de magias de invocação

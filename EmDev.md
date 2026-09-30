@@ -154,22 +154,46 @@ na Entrega 5.
       jeito antigo com `contatarPatronoGasto`) **não migrou** —
       registrado no `Backlog.md`, sem risco de retestar código que já
       funciona
-  - [ ] **Montaria Fiel** (nível 5) — depois de Destruição do Paladino
-    - Regra confirmada: sempre tem Convocar Montaria preparada + 1
-      conjuração grátis (mesmo mecanismo genérico acima)
-    - **Anotado pra quando chegar a vez:** Convocar Montaria (magia,
-      Cap. 7) tem bloco de estatísticas completo ("Montaria
-      Sobrenatural" — CA 10+círculo, PV 5+10×círculo, FOR 18/DES 12/
-      CON 14/INT 6/SAB 12/CAR 8, Deslocamento 18m + Voo 18m se círculo
-      4+, 1 ação Pancada Sobrenatural 1d8+círculo, 1 Ação Bônus que
-      varia por tipo escolhido — Celestial cura/Feérico teleporte/
-      Ínfero amedronta). Osmar confirmou: **aparece na aba Pets** —
-      reaproveita o sistema de Pets que já existe (`Pet.origemInvocacaoId`
-      já cobre "1 pet por essa fonte, conjurar de novo substitui" —
-      regra idêntica da montaria). Precisa criar 3 `Criatura` no
-      catálogo (Montaria Celestial/Feérica/Ínfera) + calcular CA/PV/
-      dano pelo círculo usado na hora de conjurar (via `ajustes` do
-      Pet). Desconjurar: só desaparece a 0 PV ou se o Paladino morrer
-      — sem "dispensar quando quiser".
+  - [x] **Montaria Fiel** (nível 5, concluída — testada ao vivo nível 5:
+    conjurar grátis Convocar Montaria abre popup de escolha, confirma
+    Pet "Radiante" na aba Pets com CA 12/PV 25 corretos pro círculo 2)
+    - [x] `magiaFixaConcedida: { nomeMagia: 'Convocar Montaria',
+      usosGratisPorDescansoLongo: 1 }` na característica Montaria Fiel
+      — reaproveita 100% o mecanismo genérico de Destruição Divina,
+      zero código novo nessa parte (aparece sozinho no painel de Ação
+      do Combate E na aba Magias, "Conjurar Grátis" incluso)
+    - [x] 3 `Criatura` novas no catálogo (Montaria Celestial/Feérica/
+      Ínfera — `data/rulesets/dnd2024/criaturas.ts`), atributos fixos
+      (FOR 18/DES 12/CON 14/INT 6/SAB 12/CAR 8) e CA/PV base de
+      círculo 2 (sobrescritos por `ajustes` no momento de conjurar)
+    - [x] `core/pets.ts`: `statsMontariaSobrenatural(circuloUsado)` —
+      CA 10+círculo, PV 5+10×círculo (regra oficial, testado em
+      `pets.test.ts`, inclusive upcast e círculo 1)
+    - [x] **Primeiro fluxo "conjurar magia → cria Pet" do app** (nunca
+      existia — Pet sempre foi só manual): interceptação dentro de
+      `conjurarMagia()`/`processarMagiaAoUsar()` (Combate e Magias,
+      duplicado nas 2 telas, mesmo padrão de Destruição Divina) pro
+      nome `'Convocar Montaria'`, abre `EscolherMontariaModal.tsx`
+      (nome + tipo Celestial/Feérico/Ínfero) com estado erguido pro
+      `CombatTab.tsx`/`MagiasTab.tsx` (regra de SidePanel com
+      `transform`, mesmo padrão de `escolhaSobrecarga`)
+    - [x] **Bug achado e corrigido durante o teste ao vivo:** abrir o
+      modal a partir do painel de Ação/Bônus SEM fechar o painel antes
+      deixava o botão "Convocar" clicável na tela mas sem efeito — o
+      `SidePanel` (z-index 111) ficava por cima do modal (z-index 55),
+      interceptando o clique mesmo o modal aparecendo visualmente por
+      cima no screenshot. Corrigido chamando `onMarcarUsado`/
+      `setPainelAberto(null)` no callback que abre o modal, igual todo
+      outro fluxo de "usar magia" que resolve dentro do painel já faz
+      via `escolherNoPainel`.
+    - [x] Pancada Sobrenatural (ação corpo a corpo do Pet), as 3 Ações
+      Bônus por tipo (Toque Curativo/Passo Feérico/Derrubar Brilho) e
+      Vínculo Vital: **decisão do Osmar (2026-09-30) — ficam só como
+      texto** no stat block da criatura (`tracos`/`acoes`/`acoesBonus`),
+      sem toggle/contador — `core/pets.ts` ainda não tem motor de
+      recurso PRÓPRIO de Pet (recarga por Descanso, contador de usos);
+      controle fica manual do jogador por enquanto. Registrado em
+      `PENDENCIAS.md` ("Motor de recursos pra Pets") pra quando
+      aparecer uma 2ª situação que precise da mesma coisa.
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

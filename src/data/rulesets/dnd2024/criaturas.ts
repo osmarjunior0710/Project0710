@@ -1682,4 +1682,119 @@ export const criaturas: Criatura[] = [
     reacoes: null,
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
+  // Montaria Sobrenatural (Convocar Montaria, magia de Paladino, Cap.
+  // 7) — 3 formas (Celestial/Feérico/Ínfero), atributos IGUAIS nas 3,
+  // só muda tipo de dano/Ação Bônus/traço. CA e PV variam com o
+  // círculo REAL usado pra conjurar (upcast inclusive) — os valores
+  // abaixo são o baseline do círculo 2 (círculo base da magia); quem
+  // cria o Pet via `core/pets.ts` sobrescreve com `ajustes.ca`/
+  // `ajustes.pvMax` calculados na hora. Pancada Sobrenatural, as
+  // Ações Bônus por tipo e o traço Vínculo Vital ficam só como texto
+  // (sem contador/recarga própria — ver PENDENCIAS.md "Motor de
+  // recursos pra Pets", decisão do Osmar 2026-09-30).
+  {
+    id: "montaria-celestial",
+    nome: "Montaria Celestial",
+    tipo: "Celestial",
+    tamanho: "Grande",
+    alinhamento: "Neutro",
+    ca: "12",
+    iniciativa: "+1 (11)",
+    pv: "25 (2d10 + 4)",
+    deslocamento: "18 m, Voo 18 m (requer magia de 4º círculo ou superior)",
+    atributos: {
+      FOR: "18 (+4)",
+      DES: "12 (+1)",
+      CON: "14 (+2)",
+      INT: "6 (–2)",
+      SAB: "12 (+1)",
+      CAR: "8 (–1)",
+    },
+    pericias: null,
+    resistencias: null,
+    imunidades: null,
+    vulnerabilidades: null,
+    sentidos: "Percepção Passiva 11",
+    idiomas: "Telepatia 1,5 km (funciona apenas com o conjurador)",
+    equipamento: null,
+    nd: "Nenhum (XP 0; BP é igual ao Bônus de Proficiência do conjurador)",
+    tracos:
+      "Vínculo Vital [PH — só texto, sem toggle: o app não rastreia distância entre personagem e Pet]. Ao recuperar Pontos de Vida de uma magia de 1º círculo ou superior, a montaria recupera o mesmo número de Pontos de Vida se o conjurador estiver a até 1,5 metro dela — controle manual do jogador.",
+    acoes:
+      "Pancada Sobrenatural. Jogada de Ataque Corpo a Corpo: bônus igual ao modificador de ataque mágico do conjurador, alcance 1,5 m. Dano: 1d8 mais o círculo da magia usado para conjurar, de dano Radiante.",
+    acoesBonus:
+      "Toque Curativo (Recarrega após um Descanso Longo) [PH — sem contador próprio ainda]. Uma criatura a até 1,5 metro da montaria recupera um número de Pontos de Vida igual a 2d8 mais o círculo da magia — controle manual do jogador (motor de recurso por Pet ainda não existe, ver PENDENCIAS.md).",
+    reacoes: null,
+    fonte: "Livro do Jogador (D&D 5e 2024)",
+  },
+  {
+    id: "montaria-ferica",
+    nome: "Montaria Feérica",
+    tipo: "Feérico",
+    tamanho: "Grande",
+    alinhamento: "Neutro",
+    ca: "12",
+    iniciativa: "+1 (11)",
+    pv: "25 (2d10 + 4)",
+    deslocamento: "18 m, Voo 18 m (requer magia de 4º círculo ou superior)",
+    atributos: {
+      FOR: "18 (+4)",
+      DES: "12 (+1)",
+      CON: "14 (+2)",
+      INT: "6 (–2)",
+      SAB: "12 (+1)",
+      CAR: "8 (–1)",
+    },
+    pericias: null,
+    resistencias: null,
+    imunidades: null,
+    vulnerabilidades: null,
+    sentidos: "Percepção Passiva 11",
+    idiomas: "Telepatia 1,5 km (funciona apenas com o conjurador)",
+    equipamento: null,
+    nd: "Nenhum (XP 0; BP é igual ao Bônus de Proficiência do conjurador)",
+    tracos:
+      "Vínculo Vital [PH — só texto, sem toggle: o app não rastreia distância entre personagem e Pet]. Ao recuperar Pontos de Vida de uma magia de 1º círculo ou superior, a montaria recupera o mesmo número de Pontos de Vida se o conjurador estiver a até 1,5 metro dela — controle manual do jogador.",
+    acoes:
+      "Pancada Sobrenatural. Jogada de Ataque Corpo a Corpo: bônus igual ao modificador de ataque mágico do conjurador, alcance 1,5 m. Dano: 1d8 mais o círculo da magia usado para conjurar, de dano Psíquico.",
+    acoesBonus:
+      "Passo Feérico (Recarrega após um Descanso Longo) [PH — sem contador próprio ainda]. A montaria se teleporta, junto com o cavaleiro, para um espaço desocupado à sua escolha a até 18 metros de distância de onde está — controle manual do jogador (motor de recurso por Pet ainda não existe, ver PENDENCIAS.md).",
+    reacoes: null,
+    fonte: "Livro do Jogador (D&D 5e 2024)",
+  },
+  {
+    id: "montaria-infera",
+    nome: "Montaria Ínfera",
+    tipo: "Ínfero",
+    tamanho: "Grande",
+    alinhamento: "Neutro",
+    ca: "12",
+    iniciativa: "+1 (11)",
+    pv: "25 (2d10 + 4)",
+    deslocamento: "18 m, Voo 18 m (requer magia de 4º círculo ou superior)",
+    atributos: {
+      FOR: "18 (+4)",
+      DES: "12 (+1)",
+      CON: "14 (+2)",
+      INT: "6 (–2)",
+      SAB: "12 (+1)",
+      CAR: "8 (–1)",
+    },
+    pericias: null,
+    resistencias: null,
+    imunidades: null,
+    vulnerabilidades: null,
+    sentidos: "Percepção Passiva 11",
+    idiomas: "Telepatia 1,5 km (funciona apenas com o conjurador)",
+    equipamento: null,
+    nd: "Nenhum (XP 0; BP é igual ao Bônus de Proficiência do conjurador)",
+    tracos:
+      "Vínculo Vital [PH — só texto, sem toggle: o app não rastreia distância entre personagem e Pet]. Ao recuperar Pontos de Vida de uma magia de 1º círculo ou superior, a montaria recupera o mesmo número de Pontos de Vida se o conjurador estiver a até 1,5 metro dela — controle manual do jogador.",
+    acoes:
+      "Pancada Sobrenatural. Jogada de Ataque Corpo a Corpo: bônus igual ao modificador de ataque mágico do conjurador, alcance 1,5 m. Dano: 1d8 mais o círculo da magia usado para conjurar, de dano Necrótico.",
+    acoesBonus:
+      "Derrubar Brilho (Recarrega após um Descanso Longo) [PH — sem contador próprio ainda]. Salvaguarda de Sabedoria (CD igual à do conjurador): uma criatura a até 18 metros à vista da montaria que falhar tem a condição Amedrontado até o final do próximo turno do conjurador — controle manual do jogador (motor de recurso por Pet ainda não existe, ver PENDENCIAS.md).",
+    reacoes: null,
+    fonte: "Livro do Jogador (D&D 5e 2024)",
+  },
 ];

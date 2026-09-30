@@ -1574,3 +1574,25 @@ ainda não implementadas, (4) conferir se o passo "Novas
 Características" do `LevelUpShell.tsx` já calcula o delta certo pros
 recursos daquela classe (hoje o cálculo é genérico, deve funcionar
 sem mudança, mas precisa confirmar testando).
+
+## Motor de recursos pra Pets (recarga por Descanso, contador de usos)
+
+**O que é:** `core/pets.ts` rastreia PV/PV Temporário do Pet de
+verdade, mas não tem nenhum mecanismo pra um Pet ter um recurso PRÓPRIO
+com contador e recarga (tipo Fúria/Canalizar Divindade, só que do
+lado do Pet, não do personagem) — hoje qualquer habilidade desse tipo
+de um Pet fica só como texto no bloco de estatísticas.
+
+**Onde apareceu:** Montaria Fiel do Paladino (nível 5, foco em
+andamento) — a Ação Bônus da montaria (Toque Curativo/Passo Feérico/
+Derrubar Brilho, cada tipo tem a sua) recarrega no Descanso Longo, e o
+traço Vínculo Vital (cura de magia do Paladino também cura a montaria,
+se por perto) também ficaram só em texto por causa dessa lacuna —
+decisão do Osmar (2026-09-30): não vale a pena construir o motor só
+pra essa 1 característica agora.
+
+**O que falta pra resolver:** esperar aparecer uma 2ª situação que
+precise da mesma coisa (outro pet/montaria/familiar com recurso
+próprio) pra justificar generalizar — aí sim desenhar o mecanismo
+(provavelmente reaproveitando o mesmo molde de `recursosVisiveis.ts`/
+`RecursoClasse`, só que por Pet em vez de por Classe).

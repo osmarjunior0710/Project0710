@@ -74,6 +74,11 @@ interface UsarMagiaPainelParams {
   onAbrirEscolhaSobrecarga: (
     dados: { nomeMagia: string; danoMaximo: number; aoRolarNormal: () => void; aoUsarSobrecarga: () => void } | null,
   ) => void;
+  /** Convocar Montaria (Paladino, Montaria Fiel) desvia do fluxo normal
+   * de dano/salvaguarda/cura — vira Pet em vez de rolagem, ver
+   * `EscolherMontariaModal.tsx` (mesmo padrão de tela flutuante de
+   * `onAbrirEscolhaSobrecarga`, vive em `CombatTab.tsx`). */
+  onAbrirEscolhaDeMontaria: (circuloUsado: number) => void;
   colheitaMacabraDisponivel: boolean;
   onColheitaMacabraDisponivel: (cura: number) => void;
   /** Aplica a cura rolada (`rollCura`) no PV do personagem E dispara
@@ -141,6 +146,13 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
     }
     setTelaMagia(null);
     const circuloUsado = circulo ?? m.circulo;
+    // Convocar Montaria não roda a mecânica normal de dano/salvaguarda/
+    // cura — vira Pet (ver EscolherMontariaModal.tsx). Espaço/uso
+    // grátis já foi descontado acima, igual qualquer outra magia.
+    if (m.nome === 'Convocar Montaria') {
+      p.onAbrirEscolhaDeMontaria(circuloUsado);
+      return;
+    }
     const resultado = decidirConjuracao(
       m,
       circuloUsado,

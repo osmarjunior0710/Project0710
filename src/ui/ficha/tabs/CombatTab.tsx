@@ -16,9 +16,10 @@ import {
   danoNecroticoSobrecarga,
 } from '../../../core/evocador';
 import SobrecargaEscolha from '../combat/SobrecargaEscolha';
+import EscolherMontariaModal from '../combat/EscolherMontariaModal';
 import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
-import type { Pet } from '../../../core/pets';
+import type { AjustesPet, Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
@@ -83,6 +84,10 @@ interface CombatTabProps {
    * `onAlterarPv` puro (usado por Recuperar Fôlego e os botões
    * manuais de PV, que não disparam esse efeito). */
   onCuraDeMagiaAplicada: (total: number) => void;
+  /** Cria um Pet a partir do catálogo de `Criatura` (ver `core/pets.ts`)
+   * — usado por Convocar Montaria (Paladino, Montaria Fiel). Mesma
+   * função que a aba Pets já usa pra "Adicionar Pet"/Familiar. */
+  onAdicionarPet: (nome: string, criaturaId: string, origemInvocacaoId?: string, ajustes?: AjustesPet) => void;
   /** Bênção do Tenebroso (Bruxo, Patrono Ínfero, nível 3+). */
   bencaoDoTenebroso: { disponivel: boolean; onAplicar: () => void };
   /** Lançar no Inferno (Bruxo, Patrono Ínfero, nível 14) — 1x por
@@ -499,6 +504,7 @@ export default function CombatTab({
   recursosDeClasse,
   onAlterarPv,
   onCuraDeMagiaAplicada,
+  onAdicionarPet,
   bencaoDoTenebroso: { disponivel: bencaoDoTenebrosoDisponivel, onAplicar: onAplicarBencaoDoTenebroso },
   lancarNoInferno: {
     disponivel: lancarNoInfernoDisponivel,
@@ -740,6 +746,9 @@ export default function CombatTab({
     aoRolarNormal: () => void;
     aoUsarSobrecarga: () => void;
   } | null>(null);
+  // Convocar Montaria (Paladino) — mesmo padrão de tela flutuante de
+  // `escolhaSobrecarga` acima. `null` = fechado.
+  const [escolhaMontaria, setEscolhaMontaria] = useState<{ circuloUsado: number } | null>(null);
   const [ataquesFeitos, setAtaquesFeitos] = useState(0);
   const [piscando, setPiscando] = useState(false);
   const [iniciativaValor, setIniciativaValor] = useState<number | null>(null);
@@ -1721,6 +1730,14 @@ export default function CombatTab({
         />
       )}
 
+      {escolhaMontaria && (
+        <EscolherMontariaModal
+          circuloUsado={escolhaMontaria.circuloUsado}
+          onConfirmar={(nome, criaturaId, ajustes) => onAdicionarPet(nome, criaturaId, 'paladino-montaria-fiel', ajustes)}
+          onFechar={() => setEscolhaMontaria(null)}
+        />
+      )}
+
       {golpeBrutalEfeitoPendente && (
         <EscolherEfeitoModal
           titulo={golpeBrutalEscolhas > 1 ? `🔨 Golpe Brutal — escolha ${golpeBrutalEscolhas} efeitos` : '🔨 Golpe Brutal — escolha 1 efeito'}
@@ -1760,6 +1777,11 @@ export default function CombatTab({
           gastarSlotCirculo={onGastarSlotCirculo}
           onAlterarPv={onAlterarPv}
           onAbrirEscolhaSobrecarga={setEscolhaSobrecarga}
+          onAbrirEscolhaDeMontaria={(circuloUsado) => {
+            onMarcarUsado('acao');
+            setPainelAberto(null);
+            setEscolhaMontaria({ circuloUsado });
+          }}
           onCuraDeMagiaAplicada={onCuraDeMagiaAplicada}
           nivel={nivel}
           espacos={espacos}
@@ -1920,6 +1942,11 @@ export default function CombatTab({
           onUsarSobrecarga={onUsarSobrecarga}
           onAlterarPv={onAlterarPv}
           onAbrirEscolhaSobrecarga={setEscolhaSobrecarga}
+          onAbrirEscolhaDeMontaria={(circuloUsado) => {
+            onMarcarUsado('bonus');
+            setPainelAberto(null);
+            setEscolhaMontaria({ circuloUsado });
+          }}
           modIntAtual={modIntAtual}
           onAbrirSalvaguarda={abrirSalvaguarda}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}

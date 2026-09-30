@@ -183,6 +183,8 @@ interface BonusPanelContentProps {
   onAbrirEscolhaSobrecarga: (
     dados: { nomeMagia: string; danoMaximo: number; aoRolarNormal: () => void; aoUsarSobrecarga: () => void } | null,
   ) => void;
+  /** Convocar Montaria (Paladino) — ver `useUsarMagiaPainel.tsx`. */
+  onAbrirEscolhaDeMontaria: (circuloUsado: number) => void;
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda, que vive em CombatTab. */
   onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
@@ -286,6 +288,7 @@ export default function BonusPanelContent({
   onUsarSobrecarga,
   onAlterarPv,
   onAbrirEscolhaSobrecarga,
+  onAbrirEscolhaDeMontaria,
   onAbrirSalvaguarda,
   onCuraDeMagiaAplicada,
   colheitaMacabraDisponivel,
@@ -327,6 +330,7 @@ export default function BonusPanelContent({
     onUsarSobrecarga,
     onAlterarPv,
     onAbrirEscolhaSobrecarga,
+    onAbrirEscolhaDeMontaria,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     preferenciasPillsMagia,

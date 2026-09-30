@@ -43,6 +43,7 @@ import { useRoll } from '../../roll/RollContext';
 import EscolherCirculoShell from '../combat/EscolherCirculoShell';
 import SalvaguardaDoAlvoModal from '../combat/SalvaguardaDoAlvoModal';
 import SobrecargaEscolha from '../combat/SobrecargaEscolha';
+import EscolherMontariaModal from '../combat/EscolherMontariaModal';
 import CopiarMagiaShell from './CopiarMagiaShell';
 import styles from './MagiasTab.module.css';
 
@@ -52,6 +53,9 @@ const armasMarciais = armas.filter((a) => a.categoria.includes('Marciais'));
 interface MagiasTabProps {
   classe: Classe | null;
   nivel: number;
+  /** Cria um Pet a partir do catálogo de `Criatura` (ver `core/pets.ts`)
+   * — usado por Convocar Montaria (Paladino, Montaria Fiel). */
+  onAdicionarPet: (nome: string, criaturaId: string, origemInvocacaoId?: string, ajustes?: { ca: number; pvMax: number }) => void;
   espacosGastosPorCirculo: Record<number, number>;
   /** Nome da classe ATIVA — dono do pool `espacosGastosPorCirculo`
    * acima. Só importa pra rotular a opção certa quando `ponte` existe
@@ -314,6 +318,7 @@ interface MagiasTabProps {
 export default function MagiasTab({
   classe,
   nivel,
+  onAdicionarPet,
   espacosGastosPorCirculo,
   classeAtivaNome,
   ponte,
@@ -428,6 +433,9 @@ export default function MagiasTab({
     aoRolarNormal: () => void;
     aoUsarSobrecarga: () => void;
   } | null>(null);
+  // Convocar Montaria (Paladino) — mesmo padrão de `escolhaSobrecarga`
+  // acima, ver `useUsarMagiaPainel.tsx`/`EscolherMontariaModal.tsx`.
+  const [escolhaMontaria, setEscolhaMontaria] = useState<{ circuloUsado: number } | null>(null);
   // Os 4 `useColapsavel` abaixo precisam vir ANTES do `if (!conjura)
   // return` — Regra dos Hooks: nº de hooks chamados não pode variar
   // entre renders do MESMO componente montado. Bug pego testando
@@ -472,6 +480,12 @@ export default function MagiasTab({
    * Mística) — controla se essa conjuração pode disparar a Colheita
    * Macabra (Necromante), ver `core/conjurarMagia.ts`. */
   function processarMagiaAoUsar(m: Magia, circuloUsado: number, gastouEspacoDeVerdade: boolean) {
+    // Convocar Montaria não roda a mecânica normal — vira Pet (ver
+    // EscolherMontariaModal.tsx, mesmo desvio de useUsarMagiaPainel.tsx).
+    if (m.nome === 'Convocar Montaria') {
+      setEscolhaMontaria({ circuloUsado });
+      return;
+    }
     const resultado = decidirConjuracao(
       m,
       circuloUsado,
@@ -777,6 +791,13 @@ export default function MagiasTab({
           danoMaximo={escolhaSobrecarga.danoMaximo}
           onRolarNormal={escolhaSobrecarga.aoRolarNormal}
           onUsarSobrecarga={escolhaSobrecarga.aoUsarSobrecarga}
+        />
+      )}
+      {escolhaMontaria && (
+        <EscolherMontariaModal
+          circuloUsado={escolhaMontaria.circuloUsado}
+          onConfirmar={(nome, criaturaId, ajustes) => onAdicionarPet(nome, criaturaId, 'paladino-montaria-fiel', ajustes)}
+          onFechar={() => setEscolhaMontaria(null)}
         />
       )}
       {feedbackAcaoMagica && (
