@@ -464,6 +464,10 @@ export function calcularSalvaguardas(
   /** Campeão Primitivo (Bárbaro nível 20, ver `core/campeaoPrimitivo.ts`)
    * — `false`/omitido = comportamento de sempre. */
   temCampeaoPrimitivo = false,
+  /** Aura de Proteção (Paladino nível 6, ver `core/recursosClasse.ts`
+   * `temAuraDeProtecao`) — soma nas 6 salvaguardas, mínimo +1. `0`/
+   * omitido = sem bônus. */
+  bonusAuraProtecao = 0,
 ): SalvaguardaFinal[] {
   const bonus = classeOriginal ? bonusProficiencia(classeOriginal, nivelTotal) : 0;
   return atributosOrdem
@@ -478,7 +482,7 @@ export function calcularSalvaguardas(
       const bonusFinal = proficiente ? bonus : 0;
       return {
         atributo,
-        mod: atribMod + bonusFinal,
+        mod: atribMod + bonusFinal + bonusAuraProtecao,
         proficiente,
         explicacao: {
           linhas: [
@@ -486,8 +490,12 @@ export function calcularSalvaguardas(
             { label: `mod. ${atributo}`, valor: fmtMod(atribMod) },
             ...(proficientePelaClasse ? [{ label: 'Bônus de Proficiência (proficiente)', valor: fmtMod(bonusFinal) }] : []),
             ...(proficientePeloTalento ? [{ label: 'Bônus de Proficiência (Resiliente)', valor: fmtMod(bonusFinal) }] : []),
+            ...(bonusAuraProtecao !== 0 ? [{ label: 'Aura de Proteção', valor: fmtMod(bonusAuraProtecao) }] : []),
           ],
-          total: { label: `Salvaguarda de ${NOME_COMPLETO_POR_ATRIBUTO[atributo]}`, valor: fmtMod(atribMod + bonusFinal) },
+          total: {
+            label: `Salvaguarda de ${NOME_COMPLETO_POR_ATRIBUTO[atributo]}`,
+            valor: fmtMod(atribMod + bonusFinal + bonusAuraProtecao),
+          },
         },
       };
     })

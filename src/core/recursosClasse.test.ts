@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { valorRecursoClasse, quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeMaosConsagradas } from './recursosClasse';
+import { valorRecursoClasse, quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeMaosConsagradas, temAuraDeProtecao } from './recursosClasse';
 import { classes } from '../data/rulesets/dnd2024/classes';
 
 function classe(nome: string) {
@@ -66,5 +66,20 @@ describe('quantidadeMaosConsagradas', () => {
 
   it('borda: classe sem Mãos Consagradas devolve 0', () => {
     expect(quantidadeMaosConsagradas(classe('Guerreiro'), 5)).toBe(0);
+  });
+});
+
+describe('temAuraDeProtecao', () => {
+  it('Paladino nível 6+: ativa', () => {
+    expect(temAuraDeProtecao(classe('Paladino'), 6)).toBe(true);
+    expect(temAuraDeProtecao(classe('Paladino'), 20)).toBe(true);
+  });
+
+  it('borda: Paladino nível 5 (ainda não chegou): inativa', () => {
+    expect(temAuraDeProtecao(classe('Paladino'), 5)).toBe(false);
+  });
+
+  it('borda: outra classe no nível 6: inativa', () => {
+    expect(temAuraDeProtecao(classe('Guerreiro'), 6)).toBe(false);
   });
 });

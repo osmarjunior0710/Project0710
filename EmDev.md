@@ -195,5 +195,30 @@ na Entrega 5.
       controle fica manual do jogador por enquanto. Registrado em
       `PENDENCIAS.md` ("Motor de recursos pra Pets") pra quando
       aparecer uma 2ª situação que precise da mesma coisa.
+  - [x] **Aura de Proteção** (nível 6, concluída — testada ao vivo em 3
+    Paladinos nível 6 com CAR variado: bônus bate certo nas 6
+    salvaguardas em todos)
+    - [x] `core/recursosClasse.ts`: `temAuraDeProtecao(classe, nivel)`
+      — `true` a partir do nível 6, mesmo padrão de
+      `quantidadeMaosConsagradas`
+    - [x] `core/calculoPersonagem.ts`: `calcularSalvaguardas` ganhou 6º
+      parâmetro opcional `bonusAuraProtecao` — soma nas 6 salvaguardas
+      (mínimo +1, igual a regra), linha própria "Aura de Proteção" no
+      popup de explicação quando ativo
+    - [x] `FichaShell.tsx`: calcula `bonusAuraProtecao = Math.max(1,
+      carMod)` quando `temAuraDeProtecao` pra classe/nível Paladino
+      (reaproveitando a leitura de nível por classe que Canalizar
+      Divindade/Mãos Consagradas já tinham — unificado num só lugar)
+    - **Escopo confirmado antes (sdd-paladino.md seção 9):** só o
+      efeito no PRÓPRIO Paladino, nunca em aliados — sem UI nova,
+      passiva sempre ativa, sem botão de "ligar" (confirmado com o
+      Osmar: "simplesmente emana")
+    - **Simplificação conhecida:** a regra desliga a aura se o
+      Paladino tiver a condição Incapacitado — o app não rastreia
+      nenhuma condição ativa no próprio personagem ainda, então fica
+      sempre ativa a partir do nível 6. Não registrado em
+      `PENDENCIAS.md` (não é uma entrega faltando, é uma simplificação
+      aceita, mesmo padrão de outras características que dependem de
+      estado não rastreado)
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

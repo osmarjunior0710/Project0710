@@ -243,6 +243,23 @@ describe('calcularSalvaguardas', () => {
     expect(forca?.mod).toBe(2 + bonusProficiencia(guerreiro, 1));
     expect(forca?.explicacao.linhas.filter((l) => l.label.startsWith('Bônus de Proficiência')).length).toBe(1);
   });
+
+  it('Aura de Proteção (6º parâmetro) soma nas 6 salvaguardas, linha própria na explicação', () => {
+    const s = selecaoGuerreiro(); // FOR 15 (mod +2), DES 14 (mod +2), CON 13 (mod +1), SAB 12 (mod +1)
+    const resultado = calcularSalvaguardas(s, guerreiro, 1, [], false, 3);
+    const forca = resultado.find((sv) => sv.atributo === 'FOR');
+    const sabedoria = resultado.find((sv) => sv.atributo === 'SAB');
+    expect(forca?.mod).toBe(2 + bonusProficiencia(guerreiro, 1) + 3); // proficiente + aura
+    expect(sabedoria?.mod).toBe(modificador(12) + 3); // sem proficiência, só a aura
+    expect(sabedoria?.explicacao.linhas.some((l) => l.label === 'Aura de Proteção')).toBe(true);
+  });
+
+  it('borda: Aura de Proteção omitida/0 não adiciona linha nenhuma (comportamento de sempre)', () => {
+    const s = selecaoGuerreiro();
+    const resultado = calcularSalvaguardas(s, guerreiro, 1);
+    const forca = resultado.find((sv) => sv.atributo === 'FOR');
+    expect(forca?.explicacao.linhas.some((l) => l.label === 'Aura de Proteção')).toBe(false);
+  });
 });
 
 describe('calcularAtributosFinais', () => {

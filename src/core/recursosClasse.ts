@@ -45,3 +45,12 @@ export function bonusDanoFuria(classe: Classe, nivel: number): number {
 export function quantidadeMaosConsagradas(classe: Classe, nivel: number): number {
   return classe.id === 'paladino' ? 5 * nivel : 0;
 }
+
+/** Aura de Proteção (Paladino, nível 6) está ativa — passiva, sempre
+ * ligada, sem "ativar" nada (livro Cap. 3: "você irradia uma aura...").
+ * Simplificação conhecida: a regra desliga a aura se o Paladino tiver a
+ * condição Incapacitado, mas o app ainda não rastreia condições ativas
+ * no próprio personagem nenhuma — fica sempre ativa a partir do nível 6. */
+export function temAuraDeProtecao(classe: Classe, nivel: number): boolean {
+  return classe.id === 'paladino' && nivel >= 6;
+}

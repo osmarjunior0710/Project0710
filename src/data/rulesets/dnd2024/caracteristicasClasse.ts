@@ -708,7 +708,12 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Você irradia uma aura protetora e invisível em uma Emanação de 3 metros que se origina em você. A aura fica inativa em você, caso tenha a condição Incapacitado. Você e seus aliados na aura adquirem um bônus em salvaguardas igual ao seu modificador de Carisma (bônus mínimo de +1). Se outro Paladino estiver presente, uma criatura pode se beneficiar de apenas uma Aura de Proteção de cada vez; a criatura escolhe qual aura recebe enquanto estiver nela.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    // Só o efeito no PRÓPRIO Paladino (ver sdd/sdd-paladino.md seção 9)
+    // — aplicado direto nas 6 salvaguardas (`core/calculoPersonagem.ts`
+    // `calcularSalvaguardas`). Simplificação conhecida: sempre ativa,
+    // não desliga com a condição Incapacitado (app não rastreia
+    // condições ativas no próprio personagem ainda).
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Paladino',

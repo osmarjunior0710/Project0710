@@ -85,7 +85,7 @@ import { explicarCdRaizesDevastadoras } from '../../core/raizesDevastadoras';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
-import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas } from '../../core/recursosClasse';
+import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, temAuraDeProtecao } from '../../core/recursosClasse';
 import { type MagiaGratisDeInvocacao } from '../../core/invocacoesMagiaGratis';
 import { aplicarAlteracaoPv, ganharPvTemporario } from '../../core/pvTemporario';
 import { deveAplicarVigorImplacavel } from '../../core/vigorImplacavel';
@@ -731,12 +731,22 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     { ativa: temConhecimentoPrimordial && furiaAtiva, mod: forMod, pericias: PERICIAS_CONHECIMENTO_PRIMORDIAL },
     temCampeaoPrimitivo,
   );
+  // Canalizar Divindade/Mãos Consagradas/Aura de Proteção (Paladino) —
+  // leem o nível DA classe Paladino em `classesAtual` (não da classe
+  // ativa), então valem também em multiclasse.
+  const classeCatalogoPaladino = catalogoClasses.find((c) => c.id === 'paladino');
+  const entradaPaladino = classeCatalogoPaladino ? classesAtual.find((c) => c.classe === classeCatalogoPaladino.nome) : undefined;
+  const bonusAuraProtecao =
+    classeCatalogoPaladino && entradaPaladino && temAuraDeProtecao(classeCatalogoPaladino, entradaPaladino.nivel)
+      ? Math.max(1, carMod)
+      : 0;
   const salvaguardas = calcularSalvaguardas(
     selecao,
     classeOriginal,
     nivelTotalAtual,
     atributosResilienteEscolhidos(talentosEfetivos, escolhaAtributoTalentoGeral),
     temCampeaoPrimitivo,
+    bonusAuraProtecao,
   );
   const proficienciasFerramenta = calcularProficienciasFerramenta(selecao, nivelTotalAtual, ferramentasMulticlasseAtuais);
   const bonusProficienciaAtual = classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
@@ -750,10 +760,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const estiloDeLuta = estilosDeLuta.find((e) => e.nome === personagem.estiloDeLuta) ?? null;
   const usosFolegoMaximo = classe ? quantidadeRecuperarFolego(classe, personagem.nivel) : 0;
   const usosFolegoRestantes = Math.max(0, usosFolegoMaximo - folegoGasto);
-  // Canalizar Divindade (Paladino) — lê o nível DA classe Paladino em
-  // `classesAtual` (não da classe ativa), então vale também em multiclasse.
-  const classeCatalogoPaladino = catalogoClasses.find((c) => c.id === 'paladino');
-  const entradaPaladino = classeCatalogoPaladino ? classesAtual.find((c) => c.classe === classeCatalogoPaladino.nome) : undefined;
   const usosCanalizarMaximo =
     classeCatalogoPaladino && entradaPaladino ? quantidadeCanalizarDivindade(classeCatalogoPaladino, entradaPaladino.nivel) : 0;
   const usosCanalizarRestantes = Math.max(0, usosCanalizarMaximo - canalizarDivindadeGasto);

@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0042
+
+Paladino nível 6, Aura de Proteção: agora soma de verdade o modificador
+de Carisma (mínimo +1) nas 6 salvaguardas — some na conta sozinho,
+aparece no popup ⓘ de cada salvaguarda como linha própria.
+
 ## v202609_1035
 
 Paladino nível 5, Montaria Fiel: "Convocar Montaria" agora vira um Pet
