@@ -768,6 +768,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const maximoMaosConsagradas =
     classeCatalogoPaladino && entradaPaladino ? quantidadeMaosConsagradas(classeCatalogoPaladino, entradaPaladino.nivel) : 0;
   const restantesMaosConsagradas = Math.max(0, maximoMaosConsagradas - maosConsagradasGasto);
+  // Repudiar Inimigos (Paladino nível 9) — gasta uso do mesmo banco de
+  // Canalizar Divindade acima, mesma leitura por classe/nível.
+  const temRepudiarInimigos =
+    classeCatalogoPaladino && entradaPaladino
+      ? caracteristicaDesbloqueada(classeCatalogoPaladino, 'Repudiar Inimigos', entradaPaladino.nivel) !== null
+      : false;
   // Fúria (Bárbaro) — ver sdd/sdd-barbaro-furia.md. `armaduraPesadaEquipada`
   // também trava a ATIVAÇÃO (regra real) e força o encerramento
   // automático ao equipar (ver `equiparItem`).
@@ -3078,6 +3084,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               dados: dadosMaosCurativas,
               onUsar: usarMaosCurativas,
             }}
+            temRepudiarInimigos={temRepudiarInimigos}
             revelacaoCelestial={{
               disponivel: revelacaoCelestialDisponivel,
               gasto: revelacaoCelestialGasto,

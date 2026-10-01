@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1033
+
+Paladino nível 9, Repudiar Inimigos: nova opção no painel de Ação,
+gasta 1 uso de Canalizar Divindade e mostra a CD de salvaguarda e o
+número máximo de alvos — aplicar a condição Amedrontado nos inimigos
+continua manual, o app não tem ficha deles na tela.
+
 ## v202610_0042
 
 Paladino nível 6, Aura de Proteção: agora soma de verdade o modificador

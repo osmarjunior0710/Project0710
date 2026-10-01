@@ -294,6 +294,10 @@ interface CombatTabProps {
   /** Mãos Curativas (Aasimar) — `disponivel` `false` = espécie não é
    * Aasimar. */
   maosCurativas: { disponivel: boolean; gasto: boolean; dados: number; onUsar: () => boolean };
+  /** Repudiar Inimigos (Paladino, nível 9) — `false` antes do nível 9.
+   * Gasta 1 uso do MESMO banco de Canalizar Divindade que Sentido
+   * Divino (`canalizarDivindade` acima), tempo Ação (não Bônus). */
+  temRepudiarInimigos: boolean;
   /** Revelação Celestial (Aasimar, nível 3+) — escolhida de novo a
    * cada uso (natureza `escolha_reutilizavel`), por isso a lista de
    * `opcoes` vem daqui, não do wizard. */
@@ -635,6 +639,7 @@ export default function CombatTab({
     dados: dadosMaosCurativas,
     onUsar: onUsarMaosCurativas,
   },
+  temRepudiarInimigos,
   revelacaoCelestial: {
     disponivel: revelacaoCelestialDisponivel,
     gasto: revelacaoCelestialGasto,
@@ -782,7 +787,7 @@ export default function CombatTab({
     ('esmagador' | 'talhador' | 'raizesDevastadoras')[] | null
   >(null);
   const [raizesResolvidaTexto, setRaizesResolvidaTexto] = useState<string | null>(null);
-  const cdLancarNoInferno = modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null;
+  const cdConjuracaoClasseAtual = modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null;
   const temEspacoDePactoDisponivel = espacos.some((e) => (espacosGastosPorCirculo[e.circulo] ?? 0) < e.maximo);
   const { rolarD20, rolarDados } = useRoll();
 
@@ -1048,6 +1053,16 @@ export default function CombatTab({
     setPainelAberto(null);
     setFeedback(
       '🙏 Sentido Divino — por 10 minutos (ou até ficar Incapacitado) você sabe a localização de Celestiais, Ínferos e Mortos-Vivos a até 18 m e detecta lugares/objetos consagrados ou profanados.',
+    );
+  }
+
+  function usarRepudiarInimigos() {
+    if (!onUsarUsoCanalizar()) return;
+    onMarcarUsado('acao');
+    setPainelAberto(null);
+    const maxAlvos = Math.max(1, modCarisma);
+    setFeedback(
+      `😱 Repudiar Inimigos — escolha até ${maxAlvos} criatura(s) à vista a até 18m. Cada uma faz salvaguarda de Sabedoria (CD ${cdConjuracaoClasseAtual ?? '—'}) ou fica Amedrontada por 1 minuto (ou até sofrer dano). Aplique manualmente.`,
     );
   }
 
@@ -1851,6 +1866,11 @@ export default function CombatTab({
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
           preferenciasPillsMagia={preferenciasPillsMagia}
+          temRepudiarInimigos={temRepudiarInimigos}
+          usosCanalizarMaximo={usosCanalizarMaximo}
+          usosCanalizarRestantes={usosCanalizarRestantes}
+          cdRepudiarInimigos={cdConjuracaoClasseAtual}
+          onUsarRepudiarInimigos={usarRepudiarInimigos}
         />
       </SidePanel>
       <SidePanel
@@ -2028,7 +2048,7 @@ export default function CombatTab({
         <SalvaguardaDoAlvoModal
           titulo="Lançar no Inferno"
           atributo="Carisma"
-          cd={cdLancarNoInferno}
+          cd={cdConjuracaoClasseAtual}
           explicacaoCd={explicacaoCdConjuracao}
           textoSucesso="evita a magia"
           textoFalha={`${lancarNoInfernoDano} de dano Psíquico (Ínferos não sofrem) + Incapacitado até o final do seu próximo turno`}

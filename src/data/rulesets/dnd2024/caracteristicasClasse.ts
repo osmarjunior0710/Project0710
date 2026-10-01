@@ -722,7 +722,11 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Como uma ação Usar Magia, você pode fazer um uso de Canalizar Divindade para subjugar inimigos com temor. Ao apresentar seu Símbolo Sagrado ou arma, você pode escolher um número de criaturas igual ao seu modificador de Carisma (no mínimo uma criatura) à sua vista e a até 18 metros de você. Cada alvo deve ser bem-sucedido em uma salvaguarda de Sabedoria ou tem a condição Amedrontado por 1 minuto ou até sofrer qualquer dano. Enquanto Amedrontado deste modo, um alvo pode realizar apenas uma das opções seguintes nos turnos dele: mover-se, executar uma ação ou executar uma Ação Bônus.',
     tipoAcao: 'Ação',
-    statusImplementacao: 'placeholder-codeimplementation',
+    // Gasta 1 uso do mesmo banco de Canalizar Divindade que Sentido
+    // Divino (`CombatTab.tsx` `usarRepudiarInimigos`) — mostra a CD e o
+    // nº máx. de alvos, mas a aplicação da condição Amedrontado nos
+    // inimigos é manual (o app não tem ficha de inimigos na tela).
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Paladino',

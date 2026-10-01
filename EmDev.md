@@ -220,5 +220,24 @@ na Entrega 5.
       `PENDENCIAS.md` (não é uma entrega faltando, é uma simplificação
       aceita, mesmo padrão de outras características que dependem de
       estado não rastreado)
+  - [x] **Repudiar Inimigos** (nível 9, concluída — testada ao vivo nível
+    9: gasta 1 uso de Canalizar Divindade, marca Ação usada [tempo
+    certo, diferente de Sentido Divino que é Bônus], feedback mostra CD
+    15 e "até 3 criaturas" batendo com CAR+2 do personagem de teste)
+    - [x] Reaproveita 100% o banco de usos de Canalizar Divindade que
+      Sentido Divino já usa (`CombatTab.tsx` `usarRepudiarInimigos`,
+      mesmo padrão de `usarSentidoDivino`, só que no painel de Ação em
+      vez de Bônus) — nenhum estado novo, só mais um jeito de gastar o
+      mesmo banco
+    - [x] CD mostrada reaproveita a MESMA conta de Lançar no Inferno
+      (Bruxo) — `cdConjuracao(modAcertoConjuracao)`, variável
+      renomeada de `cdLancarNoInferno` pra `cdConjuracaoClasseAtual`
+      já que agora serve os 2
+    - [x] Desbloqueio por nível reaproveita `caracteristicaDesbloqueada`
+      genérico (mesmo helper de Conhecimento Primordial) — nenhuma
+      função nova em `core/`
+    - **Escopo:** igual Sentido Divino, o app não tem ficha de
+      inimigos na tela — mostra CD e nº máx. de alvos, mas quem
+      falhou/ficou Amedrontado é controle manual do jogador
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

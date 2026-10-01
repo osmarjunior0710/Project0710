@@ -206,6 +206,16 @@ interface AcaoPanelContentProps {
   /** Quais pills de info aparecem em cada linha de magia — preferência
    * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
+  /** Repudiar Inimigos (Paladino nível 9) — gasta 1 uso do MESMO banco
+   * de Canalizar Divindade que Sentido Divino (Ação Bônus, ver
+   * `BonusPanelContent.tsx`), só que esse é tempo Ação. `temRepudiarInimigos`
+   * = `false` antes do nível 9. CD mostrada é a mesma CD de magia da
+   * Conjuração de Paladino (`cdConjuracao`, calculada no `CombatTab.tsx`). */
+  temRepudiarInimigos: boolean;
+  usosCanalizarMaximo: number;
+  usosCanalizarRestantes: number;
+  cdRepudiarInimigos: number | null;
+  onUsarRepudiarInimigos: () => void;
 }
 
 export default function AcaoPanelContent({
@@ -286,6 +296,11 @@ export default function AcaoPanelContent({
   golpeDeEscudoUsadoTurno,
   onUsarGolpeDeEscudo,
   preferenciasPillsMagia,
+  temRepudiarInimigos,
+  usosCanalizarMaximo,
+  usosCanalizarRestantes,
+  cdRepudiarInimigos,
+  onUsarRepudiarInimigos,
 }: AcaoPanelContentProps) {
   const { rolarD20, rolarDados } = useRoll();
   const { picker, abrirLista } = useUsarMagiaPainel({
@@ -701,6 +716,38 @@ export default function AcaoPanelContent({
           {usosFalarComAnimaisGnomoRestantes <= 0 && (
             <div className="label" style={{ marginTop: 6 }}>
               sem usos grátis disponíveis — descanse pra recuperar.
+            </div>
+          )}
+        </>
+      )}
+
+      {temRepudiarInimigos && (
+        <>
+          <div className={styles.slotCounter}>
+            <span>Canalizar Divindade:</span>
+            <TickPips total={usosCanalizarMaximo} usados={usosCanalizarMaximo - usosCanalizarRestantes} />
+            <span style={{ color: 'var(--text-faint)' }}>
+              {usosCanalizarRestantes}/{usosCanalizarMaximo} disponíveis
+            </span>
+          </div>
+          <div
+            className={styles.row}
+            style={usosCanalizarRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+            onClick={onUsarRepudiarInimigos}
+          >
+            <div className={styles.rowName}>😱 Repudiar Inimigos</div>
+            {detalhesAtivo && (
+              <div className={styles.rowDesc}>
+                Escolha até {Math.max(1, modCarisma)} criatura(s) à vista, a até 18m — cada uma faz salvaguarda de
+                Sabedoria (CD {cdRepudiarInimigos ?? '—'}) ou fica Amedrontada por 1 minuto (ou até sofrer dano).
+                Enquanto Amedrontada assim, só pode fazer 1 das 3: mover-se, Ação ou Ação Bônus. Aplique
+                manualmente — o app não tem ficha dos inimigos. Gasta 1 uso de Canalizar Divindade.
+              </div>
+            )}
+          </div>
+          {usosCanalizarRestantes <= 0 && (
+            <div className="label" style={{ marginTop: 6 }}>
+              sem usos disponíveis — descanse pra recuperar.
             </div>
           )}
         </>
