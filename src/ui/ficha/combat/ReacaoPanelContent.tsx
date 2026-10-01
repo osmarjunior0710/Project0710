@@ -400,9 +400,6 @@ export default function ReacaoPanelContent({
         <div className={styles.slotCounter}>
           <span>Inspiração de Bardo (d{tamanhoDadoInspiracao}):</span>
           <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} cor={corDoRecursoDaClasse('Bardo')} />
-          <span style={{ color: 'var(--text-faint)' }}>
-            {usosInspiracaoRestantes}/{usosInspiracaoMaximo} disponíveis
-          </span>
         </div>
       )}
       {palavrasDeInterrupcaoDisponivel && (

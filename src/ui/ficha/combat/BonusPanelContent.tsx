@@ -474,9 +474,6 @@ export default function BonusPanelContent({
           <div className={styles.slotCounter}>
             <span>Inspiração de Bardo (d{tamanhoDadoInspiracao}):</span>
             <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} cor={corDoRecursoDaClasse('Bardo')} />
-            <span style={{ color: 'var(--text-faint)' }}>
-              {usosInspiracaoRestantes}/{usosInspiracaoMaximo} disponíveis
-            </span>
           </div>
           <div
             className={styles.row}
@@ -543,9 +540,6 @@ export default function BonusPanelContent({
           <div className={styles.slotCounter}>
             <span>Recuperar Fôlego:</span>
             <TickPips total={usosFolegoMaximo} usados={usosFolegoMaximo - usosFolegoRestantes} />
-            <span style={{ color: 'var(--text-faint)' }}>
-              {usosFolegoRestantes}/{usosFolegoMaximo} disponíveis
-            </span>
           </div>
           <div
             className={styles.row}
@@ -576,9 +570,6 @@ export default function BonusPanelContent({
               usados={usosCanalizarMaximo - usosCanalizarRestantes}
               cor={corDoRecursoDaClasse('Paladino')}
             />
-            <span style={{ color: 'var(--text-faint)' }}>
-              {usosCanalizarRestantes}/{usosCanalizarMaximo} disponíveis
-            </span>
           </div>
           <div
             className={styles.row}
@@ -634,9 +625,6 @@ export default function BonusPanelContent({
           <div className={styles.slotCounter}>
             <span>Conhecimento de Pedras:</span>
             <TickPips total={usosConhecimentoDePedrasMaximo} usados={usosConhecimentoDePedrasMaximo - usosConhecimentoDePedrasRestantes} />
-            <span style={{ color: 'var(--text-faint)' }}>
-              {usosConhecimentoDePedrasRestantes}/{usosConhecimentoDePedrasMaximo} disponíveis
-            </span>
           </div>
           <div
             className={styles.row}
@@ -663,9 +651,6 @@ export default function BonusPanelContent({
           <div className={styles.slotCounter}>
             <span>Pico de Adrenalina:</span>
             <TickPips total={usosPicoDeAdrenalinaMaximo} usados={usosPicoDeAdrenalinaMaximo - usosPicoDeAdrenalinaRestantes} />
-            <span style={{ color: 'var(--text-faint)' }}>
-              {usosPicoDeAdrenalinaRestantes}/{usosPicoDeAdrenalinaMaximo} disponíveis
-            </span>
           </div>
           <div
             className={styles.row}
@@ -714,9 +699,6 @@ export default function BonusPanelContent({
           <div className={styles.slotCounter}>
             <span>Salto da Nuvem:</span>
             <TickPips total={usosSaltoDaNuvemMaximo} usados={usosSaltoDaNuvemMaximo - usosSaltoDaNuvemRestantes} />
-            <span style={{ color: 'var(--text-faint)' }}>
-              {usosSaltoDaNuvemRestantes}/{usosSaltoDaNuvemMaximo} disponíveis
-            </span>
           </div>
           <div
             className={styles.row}
@@ -771,9 +753,6 @@ export default function BonusPanelContent({
           <div className={styles.slotCounter}>
             <span>Fúria:</span>
             <TickPips total={furiaMaximo} usados={furiaMaximo - furiaRestantes} cor={corDoRecursoDaClasse('Bárbaro')} />
-            <span style={{ color: 'var(--text-faint)' }}>
-              {furiaRestantes}/{furiaMaximo} disponíveis
-            </span>
           </div>
           <div
             className={`${styles.row} ${styles.toggleRowLine}`}

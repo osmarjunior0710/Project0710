@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2057
+
+Ajuste visual: os contadores de usos dentro dos painéis de Ação/Bônus/
+Reação (Canalizar Divindade, Fúria, Inspiração de Bardo, Fôlego, etc.)
+não repetem mais o número ao lado dos pips — os quadradinhos já mostram
+a quantidade sozinhos.
+
 ## v202610_1033
 
 Paladino nível 9, Repudiar Inimigos: nova opção no painel de Ação,

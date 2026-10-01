@@ -59,3 +59,14 @@ sempre ler o PV/recurso antes e depois da rolagem (ex.: no
 ocorrência notada (não corrigida ainda): `MemorizarMagiaShell.tsx`
 ("Confirmar") tem o mesmo padrão de risco — só vira arrumação de
 verdade se aparecer de novo em algum lugar novo.
+
+## Pips + texto "{restantes}/{máximo} disponíveis" junto é redundante
+
+1ª ocorrência (2026-10, Repudiar Inimigos): ao copiar o padrão de
+Sentido Divino (`TickPips` + `<span>{restantes}/{maximo} disponíveis
+</span>` do lado), o Osmar pediu pra tirar o texto — os pips já mostram
+a quantidade, escrever o número de novo do lado é redundante. Removido
+das 3 telas que tinham esse texto (Ação/Bônus/Reação). Diferente do
+`ContadorUsos.tsx` (resumo da tela principal, "{restantes}/{total}"
+sem a palavra "disponíveis") — esse é um padrão já aprovado antes
+(DECISOES-DESIGN.md), não mexi nele.

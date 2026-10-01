@@ -696,9 +696,6 @@ export default function AcaoPanelContent({
           <div className={styles.slotCounter}>
             <span>Falar com Animais (Traço de Gnomo):</span>
             <TickPips total={usosFalarComAnimaisGnomoMaximo} usados={usosFalarComAnimaisGnomoMaximo - usosFalarComAnimaisGnomoRestantes} />
-            <span style={{ color: 'var(--text-faint)' }}>
-              {usosFalarComAnimaisGnomoRestantes}/{usosFalarComAnimaisGnomoMaximo} disponíveis
-            </span>
           </div>
           <div
             className={styles.row}
@@ -726,9 +723,6 @@ export default function AcaoPanelContent({
           <div className={styles.slotCounter}>
             <span>Canalizar Divindade:</span>
             <TickPips total={usosCanalizarMaximo} usados={usosCanalizarMaximo - usosCanalizarRestantes} />
-            <span style={{ color: 'var(--text-faint)' }}>
-              {usosCanalizarRestantes}/{usosCanalizarMaximo} disponíveis
-            </span>
           </div>
           <div
             className={styles.row}
