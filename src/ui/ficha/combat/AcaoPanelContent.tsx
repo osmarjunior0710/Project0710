@@ -720,10 +720,6 @@ export default function AcaoPanelContent({
 
       {temRepudiarInimigos && (
         <>
-          <div className={styles.slotCounter}>
-            <span>Canalizar Divindade:</span>
-            <TickPips total={usosCanalizarMaximo} usados={usosCanalizarMaximo - usosCanalizarRestantes} />
-          </div>
           <div
             className={styles.row}
             style={usosCanalizarRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
@@ -738,6 +734,10 @@ export default function AcaoPanelContent({
                 manualmente — o app não tem ficha dos inimigos. Gasta 1 uso de Canalizar Divindade.
               </div>
             )}
+          </div>
+          <div className={styles.slotCounter}>
+            <span>Canalizar Divindade:</span>
+            <TickPips total={usosCanalizarMaximo} usados={usosCanalizarMaximo - usosCanalizarRestantes} />
           </div>
           {usosCanalizarRestantes <= 0 && (
             <div className="label" style={{ marginTop: 6 }}>

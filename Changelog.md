@@ -5,6 +5,11 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0030
+
+Ajuste visual em Repudiar Inimigos (Paladino): o contador de Canalizar
+Divindade agora aparece embaixo do texto da característica, não em cima.
+
 ## v202610_2246
 
 Correção no Repudiar Inimigos (Paladino nível 9): agora abre um popup
