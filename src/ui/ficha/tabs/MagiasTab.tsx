@@ -145,6 +145,17 @@ interface MagiasTabProps {
   /** Nome da classe que concede (Paladino, hoje) — pra mostrar o pill
    * junto do nome, igual as magias preparadas normais. */
   magiasFixasClasseNomeConcedente: string | null;
+  /** Canalizar Divindade (Paladino) — Sentido Divino/Repudiar Inimigos
+   * usáveis também daqui (não só do Combate), mesmo banco de usos (ver
+   * `CombatTab.tsx` "sempre conferir Magias E Combate juntos",
+   * CLAUDE.md seção 6.6). `usosCanalizarMaximo` 0 = sem a
+   * característica ainda. */
+  usosCanalizarMaximo: number;
+  usosCanalizarRestantes: number;
+  onUsarUsoCanalizar: () => boolean;
+  /** Repudiar Inimigos (nível 9) — `false` antes do nível 9; Sentido
+   * Divino (nível 1) só depende de `usosCanalizarMaximo > 0`. */
+  temRepudiarInimigos: boolean;
   /** Truque + magias de nível 3/5 concedidos pela sub-escolha de
    * espécie (ex.: Linhagem Élfica do Elfo) — mesmo tratamento de
    * "sempre preparada, fora do limite normal" das outras listas fixas
@@ -373,6 +384,10 @@ export default function MagiasTab({
   magiasFixasClasseGastas,
   magiasFixasClassePreparadas,
   magiasFixasClasseNomeConcedente,
+  usosCanalizarMaximo,
+  usosCanalizarRestantes,
+  onUsarUsoCanalizar,
+  temRepudiarInimigos,
   onUsarMagiaGratisDeClasse,
   astuciaMagicaDisponivel,
   astuciaMagicaGasta,
@@ -421,6 +436,7 @@ export default function MagiasTab({
   // Magias não tem um banner de feedback como o Combate (`onEscolher`),
   // então usa esse estado local só pra esse aviso.
   const [feedbackAcaoMagica, setFeedbackAcaoMagica] = useState<string | null>(null);
+  const [repudiarInimigosAberto, setRepudiarInimigosAberto] = useState(false);
   // Sobrecarga (Mago/Evocador) — escolha "rolar normal vs. dano
   // máximo", pausando o fluxo automático de rolagem só quando
   // `sobrecargaElegivel` é `true`. Os 2 callbacks já vêm prontos de
@@ -708,6 +724,24 @@ export default function MagiasTab({
     setTelaCirculo(m);
   }
 
+  /** Sentido Divino/Repudiar Inimigos (Canalizar Divindade, Paladino) —
+   * mesmo banco de usos do Combate (`CombatTab.tsx`
+   * `usarSentidoDivino`/`usarRepudiarInimigos`), reaproveitado aqui pra
+   * ficar usável das 2 telas (CLAUDE.md seção 6.6). Diferente do
+   * Combate, a aba Magias não tem conceito de Ação/Ação Bônus do
+   * turno — igual conjurar qualquer magia daqui, só gasta o recurso. */
+  function usarSentidoDivino() {
+    if (!onUsarUsoCanalizar()) return;
+    setFeedbackAcaoMagica(
+      '🙏 Sentido Divino — por 10 minutos (ou até ficar Incapacitado) você sabe a localização de Celestiais, Ínferos e Mortos-Vivos a até 18 m e detecta lugares/objetos consagrados ou profanados.',
+    );
+  }
+
+  function usarRepudiarInimigos() {
+    if (!onUsarUsoCanalizar()) return;
+    setRepudiarInimigosAberto(true);
+  }
+
   if (telaCirculo) {
     return (
       <EscolherCirculoShell
@@ -782,6 +816,9 @@ export default function MagiasTab({
       : (telaSalvaguarda?.magia.salvaguardaSucesso ?? null);
 
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
+  // Mesma CD de Repudiar Inimigos no Combate (`cdConjuracaoClasseAtual`
+  // em `CombatTab.tsx`) — fórmula idêntica, reaproveitada aqui.
+  const cdConjuracaoClasseAtual = modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null;
 
   return (
     <>
@@ -798,6 +835,18 @@ export default function MagiasTab({
           circuloUsado={escolhaMontaria.circuloUsado}
           onConfirmar={(nome, criaturaId, ajustes) => onAdicionarPet(nome, criaturaId, 'paladino-montaria-fiel', ajustes)}
           onFechar={() => setEscolhaMontaria(null)}
+        />
+      )}
+      {repudiarInimigosAberto && (
+        <SalvaguardaDoAlvoModal
+          titulo="Repudiar Inimigos"
+          atributo="Sabedoria"
+          cd={cdConjuracaoClasseAtual}
+          explicacaoCd={explicacaoCdConjuracao}
+          textoSucesso="nada acontece"
+          textoFalha="fica Amedrontado por 1 minuto (ou até sofrer dano) — só pode mover-se, executar uma ação OU uma Ação Bônus no turno"
+          aviso={`Escolha até ${Math.max(1, modCarisma)} criatura(s) à vista, a até 18m.`}
+          onFechar={() => setRepudiarInimigosAberto(false)}
         />
       )}
       {feedbackAcaoMagica && (
@@ -1296,6 +1345,42 @@ export default function MagiasTab({
               </div>
             );
           })}
+        </>
+      )}
+
+      {usosCanalizarMaximo > 0 && (
+        <>
+          <div className="section-title">Canalizar Divindade</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Usável daqui ou do Combate — mesmo banco de usos, recupera 1 no Descanso Curto, todos no Longo.
+          </div>
+          <div className={styles.spellRowComPill}>
+            <div className={styles.spellRowComPillLinha1}>
+              <div className={styles.spellName}>🙏 Sentido Divino</div>
+              <div
+                className={`${styles.usarBtn} ${usosCanalizarRestantes <= 0 ? styles.usarBtnDesabilitado : ''}`}
+                onClick={() => usosCanalizarRestantes > 0 && usarSentidoDivino()}
+              >
+                Usar
+              </div>
+            </div>
+          </div>
+          {temRepudiarInimigos && (
+            <div className={styles.spellRowComPill}>
+              <div className={styles.spellRowComPillLinha1}>
+                <div className={styles.spellName}>😱 Repudiar Inimigos</div>
+                <div
+                  className={`${styles.usarBtn} ${usosCanalizarRestantes <= 0 ? styles.usarBtnDesabilitado : ''}`}
+                  onClick={() => usosCanalizarRestantes > 0 && usarRepudiarInimigos()}
+                >
+                  Usar
+                </div>
+              </div>
+            </div>
+          )}
+          <div className={styles.spellRowComPillLinha2} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <TickPips total={usosCanalizarMaximo} usados={usosCanalizarMaximo - usosCanalizarRestantes} />
+          </div>
         </>
       )}
 

@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0924
+
+Sentido Divino e Repudiar Inimigos (Canalizar Divindade do Paladino)
+ganharam grupo próprio na aba Magias, com os pips de usos e totalmente
+usáveis de lá — antes só apareciam no Combate.
+
 ## v202610_0030
 
 Ajuste visual em Repudiar Inimigos (Paladino): o contador de Canalizar

@@ -2909,6 +2909,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             magiasFixasClasseGastas={magiasFixasClasseGastas}
             magiasFixasClassePreparadas={magiasFixasClassePreparadas}
             magiasFixasClasseNomeConcedente={magiasFixasClasseNomeConcedente}
+            usosCanalizarMaximo={usosCanalizarMaximo}
+            usosCanalizarRestantes={usosCanalizarRestantes}
+            onUsarUsoCanalizar={usarUsoCanalizarDivindade}
+            temRepudiarInimigos={temRepudiarInimigos}
             onUsarMagiaGratisDeClasse={usarMagiaGratis}
             astuciaMagicaDisponivel={astuciaMagicaDisponivel}
             astuciaMagicaGasta={astuciaMagicaGasta}

@@ -250,5 +250,17 @@ na Entrega 5.
     - **Escopo:** igual Sentido Divino, o app não tem ficha de
       inimigos na tela — mostra CD e nº máx. de alvos, mas quem
       falhou/ficou Amedrontado é controle manual do jogador
+    - [x] **Correção 2 (2026-10, apontada pelo Osmar — CLAUDE.md seção
+      6.6):** Sentido Divino e Repudiar Inimigos só existiam no
+      Combate, sem grupo próprio na aba Magias (nem os pips, nem o
+      status) — igual o bug antigo de Maestria/Assinatura do Mago que
+      deu origem à seção 6.6. Corrigido com seção nova "Canalizar
+      Divindade" na aba Magias, totalmente usável de lá (não só
+      exibição) — reaproveita o MESMO banco de usos e a MESMA CD do
+      Combate (`onUsarUsoCanalizar`/`cdConjuracaoClasseAtual`, nenhuma
+      função nova em `core/`), com o mesmo popup de salvaguarda
+      (`SalvaguardaDoAlvoModal`) pra Repudiar Inimigos. Testado ao
+      vivo: usar Repudiar Inimigos pela aba Magias gasta o mesmo pip
+      que aparece no Combate.
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)
