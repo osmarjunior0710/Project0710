@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2246
+
+Correção no Repudiar Inimigos (Paladino nível 9): agora abre um popup
+de verdade mostrando a CD e o que acontece em Sucesso/Falha, igual
+outras habilidades parecidas (Golpe de Escudo, Lançar no Inferno) —
+antes só aparecia um texto embaixo dos botões.
+
 ## v202610_2057
 
 Ajuste visual: os contadores de usos dentro dos painéis de Ação/Bônus/

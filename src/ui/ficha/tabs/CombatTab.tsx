@@ -764,6 +764,7 @@ export default function CombatTab({
   const [ataqueDeSoproDano, setAtaqueDeSoproDano] = useState<number | null>(null);
   const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
   const [ramosDaArvoreAberto, setRamosDaArvoreAberto] = useState(false);
+  const [repudiarInimigosAberto, setRepudiarInimigosAberto] = useState(false);
   // Esmagador/Talhador — qual popup de "Ativar efeito" está aberto
   // agora (`null` = nenhum), disparado pelo botão do talento no popup
   // de dano (mesmo padrão de `golpeBrutalEfeitoPendente`).
@@ -1060,10 +1061,7 @@ export default function CombatTab({
     if (!onUsarUsoCanalizar()) return;
     onMarcarUsado('acao');
     setPainelAberto(null);
-    const maxAlvos = Math.max(1, modCarisma);
-    setFeedback(
-      `😱 Repudiar Inimigos — escolha até ${maxAlvos} criatura(s) à vista a até 18m. Cada uma faz salvaguarda de Sabedoria (CD ${cdConjuracaoClasseAtual ?? '—'}) ou fica Amedrontada por 1 minuto (ou até sofrer dano). Aplique manualmente.`,
-    );
+    setRepudiarInimigosAberto(true);
   }
 
   function curarSelfComMaosConsagradas(pontos: number): boolean {
@@ -2096,6 +2094,18 @@ export default function CombatTab({
           textoSucesso="nada acontece"
           textoFalha="empurra 1,5m ou é derrubado (Caído), à sua escolha"
           onFechar={() => setGolpeDeEscudoAberto(false)}
+        />
+      )}
+      {repudiarInimigosAberto && (
+        <SalvaguardaDoAlvoModal
+          titulo="Repudiar Inimigos"
+          atributo="Sabedoria"
+          cd={cdConjuracaoClasseAtual}
+          explicacaoCd={explicacaoCdConjuracao}
+          textoSucesso="nada acontece"
+          textoFalha="fica Amedrontado por 1 minuto (ou até sofrer dano) — só pode mover-se, executar uma ação OU uma Ação Bônus no turno"
+          aviso={`Escolha até ${Math.max(1, modCarisma)} criatura(s) à vista, a até 18m.`}
+          onFechar={() => setRepudiarInimigosAberto(false)}
         />
       )}
       {ramosDaArvoreAberto && (

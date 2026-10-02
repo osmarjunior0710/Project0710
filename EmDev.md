@@ -222,8 +222,8 @@ na Entrega 5.
       estado não rastreado)
   - [x] **Repudiar Inimigos** (nível 9, concluída — testada ao vivo nível
     9: gasta 1 uso de Canalizar Divindade, marca Ação usada [tempo
-    certo, diferente de Sentido Divino que é Bônus], feedback mostra CD
-    15 e "até 3 criaturas" batendo com CAR+2 do personagem de teste)
+    certo, diferente de Sentido Divino que é Bônus], abre popup com CD
+    14 e "até 2 criaturas" batendo com CAR do personagem de teste)
     - [x] Reaproveita 100% o banco de usos de Canalizar Divindade que
       Sentido Divino já usa (`CombatTab.tsx` `usarRepudiarInimigos`,
       mesmo padrão de `usarSentidoDivino`, só que no painel de Ação em
@@ -236,6 +236,17 @@ na Entrega 5.
     - [x] Desbloqueio por nível reaproveita `caracteristicaDesbloqueada`
       genérico (mesmo helper de Conhecimento Primordial) — nenhuma
       função nova em `core/`
+    - [x] **Correção (2026-10, apontada pelo Osmar):** a 1ª versão
+      mostrava CD/alvos só como texto de feedback embaixo dos botões —
+      errado, porque é um caso de "CD do jogador, o ALVO (inimigo) que
+      faz a salvaguarda", que já tinha um padrão genérico pronto
+      (`SalvaguardaDoAlvoModal`, usado por Golpe de Escudo/Lançar no
+      Inferno/Ataque de Sopro — ver DECISOES-COMBATE.md "Salvaguarda do
+      Alvo — popup único"). Troquei pra abrir esse popup de verdade
+      (CD + Sucesso/Falha + aviso do nº de alvos), igual os outros 3
+      casos — lição: ao decupar uma característica nova com salvaguarda
+      de ALVO, checar esse padrão ANTES de inventar um jeito novo de
+      mostrar a CD.
     - **Escopo:** igual Sentido Divino, o app não tem ficha de
       inimigos na tela — mostra CD e nº máx. de alvos, mas quem
       falhou/ficou Amedrontado é controle manual do jogador
