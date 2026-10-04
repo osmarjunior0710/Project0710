@@ -8,11 +8,15 @@
   /* Ancorado embaixo, com margem (pedido do Osmar) — sobra mais espaço
      em cima pro dado físico cair/quicar antes de chegar no card. */
   padding-bottom: var(--space-5);
-  /* Acima do overlay do dado 3D avulso (Dice3dFab, z-index 100) — uma
+  /* Acima do overlay do dado 3D avulso (Dice3dFab, z-index 130) — uma
      rolagem oficial com motor 3D mostra o canvas físico DELE por
      baixo (ver .overlayMotor3D) e este card precisa continuar visível
-     por cima. */
-  z-index: 105;
+     por cima. Também precisa ficar acima do SidePanel aberto
+     (Ação/Bônus/Reação, z-index 110/111, ver SidePanel.module.css) —
+     bug real 2026-10: ao rolar um ataque com o painel ainda aberto
+     (ex.: 1º de 2 ataques do turno), tanto o dado físico quanto este
+     card ficavam escondidos atrás do painel até ele fechar sozinho. */
+  z-index: 135;
 }
 
 /* Rolagem usando o motor 3D (ver `RollState.motor3D`) — o fundo

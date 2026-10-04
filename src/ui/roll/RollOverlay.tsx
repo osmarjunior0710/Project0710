@@ -107,7 +107,15 @@ export default function RollOverlay() {
         <div className={styles.label}>{estado.label}</div>
         {estado.dadosIndividuais ? (
           <div className={styles.diceGridWrap}>
-            {agruparEmLinhas(estado.dadosIndividuais, 4).map((linha, i) => (
+            {/* Dado de 1 lado (1d1) nunca tem resultado variável — é
+                sempre "1" — então não desenha como se tivesse rolado
+                algo (pedido do Osmar, 2026-10: "se não tem dado, não
+                precisa postar nada, só o valor"). O total já soma esse
+                valor fixo normalmente, só a caixinha de dado some. */}
+            {agruparEmLinhas(
+              estado.dadosIndividuais.filter((d) => d.lados !== 1),
+              4,
+            ).map((linha, i) => (
               <div key={i} className={styles.diceGridRow}>
                 {linha.map((d) => {
                   const podeRerolar =

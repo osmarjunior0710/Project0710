@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1313
+
+2 correções de rolagem de dado (achadas testando Golpes Radiantes):
+rolar um ataque com o painel de Ação/Bônus/Reação ainda aberto não
+escondia mais o dado atrás do painel; e um dado de 1 lado só (ex.:
+Ataque Desarmado sem talento) não desenha mais uma caixinha de "dado"
+pro valor fixo "1" — o total continua certo, só a caixinha some.
+
 ## v202610_1227
 
 Paladino nível 11, Golpes Radiantes: qualquer ataque Corpo a Corpo ou

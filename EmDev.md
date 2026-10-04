@@ -294,5 +294,29 @@ na Entrega 5.
       sai de "Rolando..." em modo headless/software-render — confirmado
       que o overlay abre certo, só a física do dado não assenta nesse
       ambiente específico, nada relacionado à mudança em si).
+  - [x] **Correção (2026-10, 2 bugs apontados pelo Osmar testando
+    Golpes Radiantes ao vivo no celular — confirmou que o dado funciona
+    certo, achou 2 bugs de UI pré-existentes, não relacionados à
+    entrega):**
+    1. **Dado 3D "rolou atrás" do painel de Ação/Bônus/Reação aberto**
+       (ex.: 1º de 2 ataques do turno, painel só fecha depois do
+       último) — `RollOverlay`/`Dice3dCanvasHost`/`Dice3dFab` tinham
+       z-index 90-105, todos ABAIXO do `SidePanel` aberto (110/111) —
+       bug real, não só do Golpes Radiantes, afeta QUALQUER rolagem de
+       dado feita com um painel ainda aberto. Todo o grupo subiu pra
+       120-135 (mesma ordem relativa de antes, só acima do SidePanel e
+       ainda abaixo do `DescansoOverlay`, 200).
+    2. **1d1 (Ataque Desarmado sem talento) desenhava uma caixinha de
+       "dado" com borda pro valor fixo "1"** — como 1d1 nunca varia,
+       não faz sentido mostrar como se tivesse rolado algo. Grid de
+       dados do popup agora pula (não desenha) qualquer dado com 1
+       lado só — o total continua somando o valor normalmente, só a
+       caixinha some. `LadosDado` (tipo TS) ganhou `1` na união (já
+       era usado em runtime via cast, só o tipo que não cobria).
+    - **Verificação:** não consegui re-confirmar ao vivo nesta sessão
+      (mesma limitação do motor de dados 3D no ambiente headless, ver
+      item acima) — `tsc`/testes/build passaram, revisão manual do
+      diff confirma a correção. Pedido pro Osmar confirmar visualmente
+      na próxima vez que testar no celular.
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

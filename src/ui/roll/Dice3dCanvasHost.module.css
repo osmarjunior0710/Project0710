@@ -8,7 +8,7 @@
   right: 5px;
   bottom: calc(54px + env(safe-area-inset-bottom, 0px) + var(--space-3) + 56px + 5px);
   left: 5px;
-  z-index: 90;
+  z-index: 120;
   pointer-events: none;
 }
 
@@ -27,7 +27,7 @@
   right: 5px;
   bottom: calc(54px + env(safe-area-inset-bottom, 0px) + var(--space-3) + 56px + 5px);
   left: 5px;
-  z-index: 90;
+  z-index: 120;
   visibility: hidden;
   pointer-events: none;
 }

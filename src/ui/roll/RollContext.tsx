@@ -19,7 +19,7 @@ export type Vantagem = 'vantagem' | 'desvantagem';
  * `RollState.dadosIndividuais`). d100 aqui é 1 rolagem de 1 a 100
  * (na mesa costuma ser 2xd10 — "dado percentual" — mas o app rola
  * direto, sem precisar de 2 dados físicos). */
-export type LadosDado = 4 | 6 | 8 | 10 | 12 | 20 | 100;
+export type LadosDado = 1 | 4 | 6 | 8 | 10 | 12 | 20 | 100;
 
 /** 1 dado individual dentro de uma rolagem 'dados' com 2+ dados no
  * total (mistura de tipos permitida — ex.: 1d20 + 1d4 + 1d6 na mesma
