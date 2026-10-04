@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0059
+
+Ajuste visual: na aba Magias, os pips de Canalizar Divindade agora
+aparecem junto do título da seção (antes de escolher Sentido Divino ou
+Repudiar Inimigos), não depois.
+
 ## v202610_0924
 
 Sentido Divino e Repudiar Inimigos (Canalizar Divindade do Paladino)

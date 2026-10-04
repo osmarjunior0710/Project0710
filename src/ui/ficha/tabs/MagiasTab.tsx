@@ -1350,7 +1350,10 @@ export default function MagiasTab({
 
       {usosCanalizarMaximo > 0 && (
         <>
-          <div className="section-title">Canalizar Divindade</div>
+          <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>Canalizar Divindade</span>
+            <TickPips total={usosCanalizarMaximo} usados={usosCanalizarMaximo - usosCanalizarRestantes} />
+          </div>
           <div className="label" style={{ marginBottom: 4 }}>
             Usável daqui ou do Combate — mesmo banco de usos, recupera 1 no Descanso Curto, todos no Longo.
           </div>
@@ -1378,9 +1381,6 @@ export default function MagiasTab({
               </div>
             </div>
           )}
-          <div className={styles.spellRowComPillLinha2} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <TickPips total={usosCanalizarMaximo} usados={usosCanalizarMaximo - usosCanalizarRestantes} />
-          </div>
         </>
       )}
 
