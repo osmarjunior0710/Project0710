@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0105
+
+Paladino nível 10, Aura de Coragem: confirmada como característica só
+de texto (imunidade a Amedrontado é controle manual do jogador, o app
+não aplica condições automaticamente) — sem mudança visível na tela,
+exceto o selo "[PH]" que sumiu dela e de Aura Expandida.
+
 ## v202610_0059
 
 Ajuste visual: na aba Magias, os pips de Canalizar Divindade agora

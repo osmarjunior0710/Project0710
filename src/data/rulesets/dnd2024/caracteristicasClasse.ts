@@ -735,7 +735,13 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Você e seus aliados têm Imunidade à condição Amedrontado enquanto estiverem em sua Aura de Proteção. Se um aliado Amedrontado entrar na aura, essa condição não tem efeito sobre esse aliado enquanto ele estiver na aura.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    // O app nunca aplica condição nenhuma no próprio personagem
+    // automaticamente (nem Amedrontado, nem outra) — todo efeito que
+    // causaria uma condição vem de fora (magia/ataque de monstro),
+    // resolvido na mesa. Sem nada pra checar essa imunidade, mesmo
+    // caso de Aura Expandida (nível 18) — confirmado `textonly`, não
+    // `placeholder-` (não é lacuna, é escopo confirmado).
+    statusImplementacao: 'textonly',
   },
   {
     classe: 'Paladino',
@@ -763,9 +769,10 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     tipoAcao: 'Passiva / Estática',
     // Ver sdd/sdd-paladino.md seção 9: o app não modela efeito em
     // aliados, e pro próprio Paladino essa característica não muda
-    // nada (ele já estava dentro do raio de 3m). `placeholder-` até
-    // confirmar que realmente não precisa de função própria nenhuma.
-    statusImplementacao: 'placeholder-textonly',
+    // nada (ele já estava dentro do raio de 3m) — confirmado
+    // `textonly` ao decupar Aura de Coragem (2026-10, mesmo raciocínio:
+    // app não aplica condição nenhuma no personagem automaticamente).
+    statusImplementacao: 'textonly',
   },
   {
     classe: 'Paladino',

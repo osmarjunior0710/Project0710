@@ -262,5 +262,12 @@ na Entrega 5.
       (`SalvaguardaDoAlvoModal`) pra Repudiar Inimigos. Testado ao
       vivo: usar Repudiar Inimigos pela aba Magias gasta o mesmo pip
       que aparece no Combate.
+  - [x] **Aura de Coragem** (nível 10, concluída) — confirmado
+    `textonly`: o app nunca aplica condição nenhuma no próprio
+    personagem automaticamente (nem Amedrontado, nem outra), então não
+    tem nada pra checar essa imunidade. Mesmo raciocínio já usado em
+    Aura Expandida (nível 18) — aproveitei pra confirmar ela também
+    como `textonly` (era `placeholder-textonly`, agora resolvido).
+    Testado ao vivo: sem `[PH]` no Perfil pras 2 características.
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)
