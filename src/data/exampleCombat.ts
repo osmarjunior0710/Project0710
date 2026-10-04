@@ -41,5 +41,12 @@ export interface AtaqueInfo {
    * fora agora — precisa disso pra decidir Vantagem do Ataque
    * Imprudente (Bárbaro), que só vale em ataques baseados em Força. */
   usouForca: boolean;
+  /** `true` = arma Corpo a Corpo (ou Ataque Desarmado) — diferente de
+   * `usouForca`: uma arma com Acuidade usada com Destreza continua
+   * Corpo a Corpo, mas `usouForca` fica `false`. Usado por Golpes
+   * Radiantes (Paladino nível 11, ver `AcaoPanelContent.tsx`), que
+   * exige "arma Corpo a Corpo ou Ataque Desarmado", não "baseado em
+   * Força". */
+  corpoACorpo: boolean;
 }
 

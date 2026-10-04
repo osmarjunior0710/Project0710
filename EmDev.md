@@ -269,5 +269,30 @@ na Entrega 5.
     Aura Expandida (nível 18) — aproveitei pra confirmar ela também
     como `textonly` (era `placeholder-textonly`, agora resolvido).
     Testado ao vivo: sem `[PH]` no Perfil pras 2 características.
+  - [x] **Golpes Radiantes** (nível 11, concluída) — sempre ativa, sem
+    toggle: soma 1d8 Radiante automático no dano de qualquer ataque
+    que acertar com arma Corpo a Corpo ou Ataque Desarmado.
+    - [x] **Achado importante:** `AtaqueInfo` só tinha `usouForca`
+      (usa Força no cálculo), que NÃO é a mesma coisa que "é corpo a
+      corpo" — uma arma com Acuidade (ex. Rapieira) usada com Destreza
+      tem `usouForca: false` mas continua corpo a corpo. Campo novo
+      `corpoACorpo: boolean` em `AtaqueInfo`
+      (`data/exampleCombat.ts`), calculado certo nos 2 construtores de
+      `core/ataque.ts` (`ataqueDesarmado` sempre `true`,
+      `ataqueComArma` = `!distancia`) — 4 testes novos cobrindo a
+      distinção dos dois campos.
+    - [x] `AcaoPanelContent.tsx` `rolarAtaque`: reaproveita o MESMO
+      mecanismo de `gruposExtras` que Golpe Brutal (Bárbaro) já usa —
+      soma o 1d8 extra junto no popup de dano, sem toggle nem ação
+      extra do jogador.
+    - **Limitação aceita:** não entra em `rolarAtaqueGolpeBrutal`
+      (fluxo separado do Bárbaro) — combinação Paladino+Bárbaro no
+      mesmo turno é multiclasse rara, fora do escopo desta entrega.
+    - **Verificação:** cobertura por teste automatizado completa
+      (`core/ataque.test.ts`); a confirmação ao vivo do popup de dano
+      ficou travada no ambiente desta sessão (motor de dados 3D nunca
+      sai de "Rolando..." em modo headless/software-render — confirmado
+      que o overlay abre certo, só a física do dado não assenta nesse
+      ambiente específico, nada relacionado à mudança em si).
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

@@ -298,6 +298,10 @@ interface CombatTabProps {
    * Gasta 1 uso do MESMO banco de Canalizar Divindade que Sentido
    * Divino (`canalizarDivindade` acima), tempo Ação (não Bônus). */
   temRepudiarInimigos: boolean;
+  /** Golpes Radiantes (Paladino, nível 11) — `false` antes do nível 11.
+   * Repassada direto pro `AcaoPanelContent.tsx`, sem estado próprio
+   * aqui (sempre ativa, sem gasto de recurso). */
+  temGolpesRadiantes: boolean;
   /** Revelação Celestial (Aasimar, nível 3+) — escolhida de novo a
    * cada uso (natureza `escolha_reutilizavel`), por isso a lista de
    * `opcoes` vem daqui, não do wizard. */
@@ -640,6 +644,7 @@ export default function CombatTab({
     onUsar: onUsarMaosCurativas,
   },
   temRepudiarInimigos,
+  temGolpesRadiantes,
   revelacaoCelestial: {
     disponivel: revelacaoCelestialDisponivel,
     gasto: revelacaoCelestialGasto,
@@ -1843,6 +1848,7 @@ export default function CombatTab({
           temGolpeDeEscudo={golpeDeEscudoDisponivel}
           golpeDeEscudoUsadoTurno={golpeDeEscudoUsadoTurno}
           onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
+          temGolpesRadiantes={temGolpesRadiantes}
           esmagadorDisponivel={esmagadorDisponivel}
           talhadorDisponivel={talhadorDisponivel}
           onAbrirGolpeCondicional={setGolpeCondicionalPendente}

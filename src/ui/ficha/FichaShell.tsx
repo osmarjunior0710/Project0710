@@ -774,6 +774,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     classeCatalogoPaladino && entradaPaladino
       ? caracteristicaDesbloqueada(classeCatalogoPaladino, 'Repudiar Inimigos', entradaPaladino.nivel) !== null
       : false;
+  // Golpes Radiantes (Paladino nível 11) — sem recurso/banco de usos,
+  // só gate por nível (mesma leitura por classe/nível acima).
+  const temGolpesRadiantes =
+    classeCatalogoPaladino && entradaPaladino
+      ? caracteristicaDesbloqueada(classeCatalogoPaladino, 'Golpes Radiantes', entradaPaladino.nivel) !== null
+      : false;
   // Fúria (Bárbaro) — ver sdd/sdd-barbaro-furia.md. `armaduraPesadaEquipada`
   // também trava a ATIVAÇÃO (regra real) e força o encerramento
   // automático ao equipar (ver `equiparItem`).
@@ -3089,6 +3095,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               onUsar: usarMaosCurativas,
             }}
             temRepudiarInimigos={temRepudiarInimigos}
+            temGolpesRadiantes={temGolpesRadiantes}
             revelacaoCelestial={{
               disponivel: revelacaoCelestialDisponivel,
               gasto: revelacaoCelestialGasto,

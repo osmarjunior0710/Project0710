@@ -89,6 +89,29 @@ describe('ataqueComArma — bonusDanoSeForca (Dano da Fúria do Bárbaro)', () =
   });
 });
 
+describe('corpoACorpo — diferente de usouForca (Golpes Radiantes, Paladino nível 11)', () => {
+  it('Ataque Desarmado: sempre corpo a corpo', () => {
+    const r = ataqueDesarmado(guerreiro, 1, 3);
+    expect(r.info.corpoACorpo).toBe(true);
+  });
+
+  it('arma Corpo a Corpo sem Acuidade (Machado Grande): corpo a corpo', () => {
+    const r = ataqueComArma(machadoGrande, guerreiro, 1, 3, 1, false, false, null, false);
+    expect(r.info.corpoACorpo).toBe(true);
+  });
+
+  it('arma à Distância (Arco Longo): NÃO é corpo a corpo', () => {
+    const r = ataqueComArma(arcoLongo, guerreiro, 1, 1, 5, false, false, null, false);
+    expect(r.info.corpoACorpo).toBe(false);
+  });
+
+  it('borda: arma com Acuidade (Rapieira) usada com Destreza — corpoACorpo continua true mesmo com usouForca false', () => {
+    const r = ataqueComArma(rapieira, bruxo, 1, 1, 3, false, false, null, false);
+    expect(r.info.usouForca).toBe(false);
+    expect(r.info.corpoACorpo).toBe(true);
+  });
+});
+
 describe('ataqueComArma — Mestre em Armas Grandes (dano-extra-e-cortar-arma-pesada)', () => {
   it('arma Pesada (Machado Grande) + talento: soma o Bônus de Proficiência no dano', () => {
     const semTalento = ataqueComArma(machadoGrande, guerreiro, 4, 3, 1, false, false, null, false, undefined, []);

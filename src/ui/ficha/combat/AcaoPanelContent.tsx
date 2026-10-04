@@ -203,6 +203,13 @@ interface AcaoPanelContentProps {
   temGolpeDeEscudo: boolean;
   golpeDeEscudoUsadoTurno: boolean;
   onUsarGolpeDeEscudo: () => void;
+  /** Golpes Radiantes (Paladino nível 11) — sempre ativa, sem toggle:
+   * soma 1d8 Radiante automático no dano de qualquer ataque Corpo a
+   * Corpo/Desarmado que acertar (`rolarAtaque`, via `ataque.corpoACorpo`).
+   * Não entra em `rolarAtaqueGolpeBrutal` (Bárbaro) — combinação
+   * Paladino+Bárbaro no mesmo turno é um caso raro de multiclasse,
+   * fora do escopo desta entrega. */
+  temGolpesRadiantes: boolean;
   /** Quais pills de info aparecem em cada linha de magia — preferência
    * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
@@ -295,6 +302,7 @@ export default function AcaoPanelContent({
   temGolpeDeEscudo,
   golpeDeEscudoUsadoTurno,
   onUsarGolpeDeEscudo,
+  temGolpesRadiantes,
   preferenciasPillsMagia,
   temRepudiarInimigos,
   usosCanalizarMaximo,
@@ -489,6 +497,7 @@ export default function AcaoPanelContent({
     // (checados aqui, não em `rerollDanoTalento.ts`, porque dependem
     // do `nome`/`danoTipo` DESSE ataque específico).
     const ehDanoDesarmado = nome.endsWith('Ataque Desarmado');
+    const golpesRadiantesAtivo = temGolpesRadiantes && ataque.corpoACorpo;
     rolarD20({
       label: `Ataque — ${nome}`,
       formula: `1d20 + ${ataque.modAcerto}`,
@@ -498,15 +507,21 @@ export default function AcaoPanelContent({
       confirmarAcerto: {
         onAcertou: ({ critico }) => {
           const dano = danoComCritico(
-            { quantidade: ataque.danoQuantidade, lados: ataque.danoLados, mod: ataque.danoMod },
+            {
+              quantidade: ataque.danoQuantidade,
+              lados: ataque.danoLados,
+              mod: ataque.danoMod,
+              gruposExtras: golpesRadiantesAtivo ? [{ quantidade: 1, lados: 8 }] : undefined,
+            },
             critico,
           );
           rolarDados({
-            label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}`,
+            label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}${golpesRadiantesAtivo ? ' + Golpes Radiantes' : ''}`,
             formula: dano.formula,
             quantidade: dano.quantidade,
             lados: ataque.danoLados,
             mod: ataque.danoMod,
+            gruposExtras: dano.gruposExtras,
             rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
             rerollEscolhido: perfuradorDisponivel && ataque.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
             confirmarFechamento: confirmarFechamentoDoAtaque(talento),

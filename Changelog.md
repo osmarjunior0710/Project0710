@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1227
+
+Paladino nível 11, Golpes Radiantes: qualquer ataque Corpo a Corpo ou
+Ataque Desarmado que acertar agora soma 1d8 de dano Radiante extra
+automaticamente, sem precisar tocar em nada a mais.
+
 ## v202610_0105
 
 Paladino nível 10, Aura de Coragem: confirmada como característica só

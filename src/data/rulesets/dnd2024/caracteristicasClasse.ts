@@ -750,7 +750,10 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Seus golpes agora imbuem poder sobrenatural. Ao atingir alvo com uma jogada de ataque usando uma arma Corpo a Corpo ou um Ataque Desarmado, o alvo sofre 1d8 pontos de dano Radiante adicionais.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    // Sempre ativa, sem toggle — soma 1d8 automático no popup de dano
+    // de qualquer ataque Corpo a Corpo/Desarmado que acertar (ver
+    // `AcaoPanelContent.tsx` `rolarAtaque`, `AtaqueInfo.corpoACorpo`).
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Paladino',

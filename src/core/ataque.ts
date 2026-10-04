@@ -75,6 +75,7 @@ export function ataqueDesarmado(
       danoMod: forMod + bonusDanoSeForca,
       danoTipo: 'Contundente',
       usouForca: true,
+      corpoACorpo: true,
     },
   };
 }
@@ -178,6 +179,7 @@ export function ataqueComArma(
       danoMod: danoMod + bonusDuelismo + bonusArmaPesada + (usouForca ? bonusDanoSeForca : 0),
       danoTipo: tipo,
       usouForca,
+      corpoACorpo: !distancia,
     },
   };
 }
