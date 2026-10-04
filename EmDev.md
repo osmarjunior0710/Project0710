@@ -313,10 +313,22 @@ na Entrega 5.
        lado só — o total continua somando o valor normalmente, só a
        caixinha some. `LadosDado` (tipo TS) ganhou `1` na união (já
        era usado em runtime via cast, só o tipo que não cobria).
-    - **Verificação:** não consegui re-confirmar ao vivo nesta sessão
-      (mesma limitação do motor de dados 3D no ambiente headless, ver
-      item acima) — `tsc`/testes/build passaram, revisão manual do
-      diff confirma a correção. Pedido pro Osmar confirmar visualmente
-      na próxima vez que testar no celular.
+    - **Verificação:** confirmado ao vivo pelo Osmar no celular — dado
+      aparece por cima do painel certinho (z-index corrigido). O 1d1
+      ainda não foi re-testado visualmente (ataque com talento que
+      muda o dado), mas a lógica é a mesma.
+  - [x] **Correção 2 (2026-10, apontada pelo Osmar testando a correção
+    acima):** mesmo com o dado aparecendo por cima, o painel de Ação
+    continuava aberto depois de escolher "Atacar" — só fechava depois
+    do ÚLTIMO ataque de quem tem Ataque Extra. Pedido do Osmar: painel
+    sempre fecha assim que qualquer ação é escolhida, mesmo sobrando
+    ataque (confirmado com ele: prefere reabrir o painel pra cada
+    ataque a deixá-lo aberto entre eles). `registrarAtaqueSemDanoPendente`
+    (`CombatTab.tsx`) agora fecha o painel e marca Ação usada em TODO
+    ataque, não só no último — vale também pra Golpe Brutal (Bárbaro),
+    que passa pelo mesmo bookkeeping. Testado ao vivo (automatizado):
+    painel fecha (perde a classe `panelOpen`) e Ação já marca "usada"
+    logo no 1º ataque, mesmo com Ataque Extra ainda tendo 1 ataque
+    sobrando.
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

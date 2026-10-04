@@ -1285,15 +1285,18 @@ export default function CombatTab({
   /** Bookkeeping do turno pro ataque principal — Fluxo Acerto/Erro
    * sempre (retrofit 2026-09, ver `DECISOES-COMBATE.md`), o popup de
    * dano já resolve tudo sozinho, sem os botões antigos de dano (ver
-   * `AcaoPanelContent.tsx`). */
+   * `AcaoPanelContent.tsx`). O painel fecha a cada ataque (pedido do
+   * Osmar, 2026-10 — mesmo padrão de "escolheu, painel fecha" que
+   * `escolherNoPainel` já usa pras outras opções), mesmo quando ainda
+   * sobra ataque do Ataque Extra — reabre o painel de Ação pra fazer o
+   * próximo. `onMarcarUsado('acao')` também já marca no 1º ataque
+   * (regra real: é 1 Ação só, mesmo com vários ataques dentro dela). */
   function registrarAtaqueSemDanoPendente(nome: string, desc: string) {
     const proximo = ataquesFeitos + 1;
     setAtaquesFeitos(proximo);
     setFeedback(`${nome} — ${desc}`);
-    if (proximo >= numAtaques) {
-      onMarcarUsado('acao');
-      setPainelAberto(null);
-    }
+    onMarcarUsado('acao');
+    setPainelAberto(null);
   }
 
   function usarSurtoDeAcao() {

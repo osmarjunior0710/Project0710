@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1517
+
+O painel de Ação agora fecha assim que você escolhe "Atacar" (ou
+Golpe Brutal), mesmo sobrando ataque do Ataque Extra — antes só
+fechava depois do último ataque do turno. Pra atacar de novo, basta
+reabrir o painel de Ação.
+
 ## v202610_1313
 
 2 correções de rolagem de dado (achadas testando Golpes Radiantes):
