@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0717
+
+Ajuste visual: o popup de Mãos Consagradas ficou mais compacto —
+padding reduzido pra 4px nos botões, caixa de texto e checkboxes de
+condição.
+
 ## v202610_0026
 
 3 correções em Mãos Consagradas (achadas testando o popup novo): a
