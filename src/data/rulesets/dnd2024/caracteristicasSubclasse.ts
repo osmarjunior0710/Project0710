@@ -271,7 +271,7 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Você e seus aliados têm Imunidade à condição Enfeitiçado enquanto estiverem em sua Aura de Proteção. Se um aliado Enfeitiçado entrar na aura, essa condição não tem efeito sobre esse aliado enquanto ele estiver na aura.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'textonly',
   },
   {
     classe: 'Paladino',

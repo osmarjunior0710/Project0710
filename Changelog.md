@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1314
+
+Aura de Devoção (Paladino, Juramento da Devoção, nível 7) confirmada
+como só texto — o efeito é em aliados, que o app não rastreia. Some o
+`[PH]` dela no Perfil/Level Up.
+
 ## v202610_1216
 
 Correção na Arma Sagrada (Paladino): a escolha entre dano Normal e

@@ -427,7 +427,11 @@ na Entrega 5.
       "🗡 Atacar" mostra "Espada Longa" com `1d20 + 14` (9 base de
       Espada Longa + 5 de Arma Sagrada, Carisma 20) — matemática
       bate.
-  - [ ] Aura de Devoção (nível 7)
+  - [x] **Aura de Devoção** (nível 7, concluída) — confirmado `textonly`
+    com o Osmar: efeito só em ALIADOS (Imunidade a Enfeitiçado na Aura
+    de Proteção), mesmo motivo de Aura de Coragem (nível 10) — o app
+    não rastreia condição de outros personagens. `core/auraDeDevocao.ts`
+    novo (função vazia, só marco de existência, CLAUDE.md 12.1).
   - [ ] Destruição Protetora (nível 15)
   - [ ] Resplendor Sagrado (nível 20)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)
