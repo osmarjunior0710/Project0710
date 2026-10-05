@@ -83,17 +83,6 @@ export default function MaosConsagradasModal({
     fontSize: 14,
   } as const;
 
-  const estiloAlvo = (ativo: boolean) => ({
-    flex: 1,
-    border: `1px solid ${ativo ? 'var(--accent)' : 'var(--line)'}`,
-    borderRadius: 'var(--shape-sm)',
-    padding: '4px',
-    textAlign: 'center' as const,
-    cursor: 'pointer',
-    background: ativo ? 'var(--accent-fraco, var(--panel))' : 'var(--panel)',
-    fontWeight: ativo ? 'bold' : 'normal',
-  });
-
   return (
     <div className={styles.overlay} onClick={onFechar}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
@@ -141,15 +130,16 @@ export default function MaosConsagradasModal({
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
-          <div style={estiloAlvo(alvo === 'self')} onClick={() => setAlvo(alvo === 'self' ? null : 'self')}>
-            Curar a si mesmo
-            <div style={{ fontSize: 11, color: 'var(--text-faint)', fontWeight: 'normal' }}>
-              {pvAtual}/{pvMax} PV
-            </div>
+        <div style={{ marginBottom: 'var(--space-3)' }}>
+          <div className="check-row" onClick={() => setAlvo(alvo === 'self' ? null : 'self')}>
+            <div className={`check-box ${alvo === 'self' ? 'checked' : ''}`} />
+            <span className="check-label">
+              Curar a si mesmo <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>({pvAtual}/{pvMax} PV)</span>
+            </span>
           </div>
-          <div style={estiloAlvo(alvo === 'outro')} onClick={() => setAlvo(alvo === 'outro' ? null : 'outro')}>
-            Curar outro
+          <div className="check-row" onClick={() => setAlvo(alvo === 'outro' ? null : 'outro')}>
+            <div className={`check-box ${alvo === 'outro' ? 'checked' : ''}`} />
+            <span className="check-label">Curar outro</span>
           </div>
         </div>
         {alvo === 'outro' && (

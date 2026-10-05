@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0749
+
+"Curar a si mesmo" e "Curar outro" no popup de Mãos Consagradas agora
+são cards horizontais empilhados, igual as condições, em vez de 2
+caixas lado a lado — mesmo padrão visual em toda a lista.
+
 ## v202610_0735
 
 Mais ajustes visuais no popup de Mãos Consagradas: texto de "recarrega
