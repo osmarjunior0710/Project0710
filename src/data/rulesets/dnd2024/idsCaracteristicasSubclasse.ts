@@ -39,6 +39,8 @@ export const ID_CARACTERISTICA_SUBCLASSE = {
   truquePotente: 'Truque Potente',
   evocacaoPotencializada: 'Evocação Potencializada',
   sobrecarga: 'Sobrecarga',
+  // Paladino — Juramento da Devoção
+  magiasDoJuramentoDaDevocao: 'Magias do Juramento da Devoção',
 } as const;
 
 export type IdCaracteristicaSubclasse = keyof typeof ID_CARACTERISTICA_SUBCLASSE;

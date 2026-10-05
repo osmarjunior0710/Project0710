@@ -844,6 +844,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     colheitaDosMortos: colheitaDosMortosDisponivel,
     mestreDaMorte: mestreDaMorteDisponivel,
     magiasDePactoDoInfero: magiasPactoDoInferoDisponivel,
+    magiasDoJuramentoDaDevocao: magiasJuramentoDaDevocaoDisponivel,
     palavrasDeInterrupcao: palavrasDeInterrupcaoDisponivel,
     periciaInigualavel: periciaInigualavelDisponivel,
     bencaoDoTenebroso: bencaoDoTenebrosoDisponivel,
@@ -860,6 +861,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'colheitaDosMortos',
     'mestreDaMorte',
     'magiasDePactoDoInfero',
+    'magiasDoJuramentoDaDevocao',
     'palavrasDeInterrupcao',
     'periciaInigualavel',
     'bencaoDoTenebroso',
@@ -914,6 +916,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     astuciaMagicaRecupera,
     sentidos,
     magiasPactoDoInferoAtuais,
+    magiasJuramentoDaDevocaoAtuais,
     magiasEspecieAtuais,
     magiasTalentoOrigemAtuais,
     magiaIniciadaOrigemAtual,
@@ -956,6 +959,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     pvAtual,
     mestreDaMorteDisponivel,
     magiasPactoDoInferoDisponivel,
+    magiasJuramentoDaDevocaoDisponivel,
   });
   const modAcertoConjuracao = calcularModAcertoConjuracao(selecao, classe, nivelTotalAtual);
   const resumoConjuracao = calcularResumoConjuracao(selecao, classe, nivelTotalAtual);
@@ -2946,6 +2950,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             ritualRapidoGasto={ritualRapidoGasto}
             onUsarRitualRapido={usarRitualRapido}
             magiasPactoDoInferoAtuais={magiasPactoDoInferoAtuais}
+            magiasJuramentoDaDevocaoAtuais={magiasJuramentoDaDevocaoAtuais}
             magiasEspecieAtuais={magiasEspecieAtuais}
             magiasTalentoOrigemAtuais={magiasTalentoOrigemAtuais}
             magiasTalentoGeralAtuais={magiasTalentoGeralAtuais}

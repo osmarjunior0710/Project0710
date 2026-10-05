@@ -244,7 +244,7 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'A magia do seu juramento garante que você sempre tenha certas magias prontas; ao atingir um nível de Paladino detalhado na tabela Magias do Juramento da Devoção, você sempre tem as magias apresentadas preparadas.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
     magiasFixasPorNivel: {
       3: ['Escudo da Fé', 'Proteção Contra o Bem e o Mal'],
       5: ['Auxílio', 'Zona da Verdade'],

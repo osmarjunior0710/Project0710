@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1054
+
+Paladino com Juramento da Devoção: a partir do nível 3, as magias do
+juramento (Escudo da Fé, Proteção Contra o Bem e o Mal, e as próximas
+conforme sobe de nível) aparecem como "sempre preparadas" na aba
+Magias e no painel de Usar Magia do Combate.
+
 ## v202610_0928
 
 Novo atalho "🧪 Char Teste — Paladino Devoção" na lista de personagens

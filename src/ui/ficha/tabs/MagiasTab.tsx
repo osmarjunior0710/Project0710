@@ -137,6 +137,11 @@ interface MagiasTabProps {
    * própria, fora do limite normal de Magias Preparadas). Vazio pra
    * quem não tem essa característica. */
   magiasPactoDoInferoAtuais: string[];
+  /** Magias do Juramento da Devoção (Paladino) — mesmo padrão de
+   * `magiasPactoDoInferoAtuais` (lista fixa por nível, sempre
+   * preparada, fora do limite normal). Ver
+   * `sdd/sdd-paladino-devocao.md` seção 1. */
+  magiasJuramentoDaDevocaoAtuais: string[];
   /** Magias de Classe Sempre Preparadas (Destruição do Paladino,
    * Montaria Fiel...) — já resolvidas em `Magia[]` pelo hook (mesmo
    * padrão de `magiasPactoDoInferoAtuais`, mas o hook já traz pronto).
@@ -360,6 +365,7 @@ export default function MagiasTab({
   onAdicionarMagiaAoLivro,
   magiasDescobertasMagicasAtuais,
   magiasPactoDoInferoAtuais,
+  magiasJuramentoDaDevocaoAtuais,
   magiasEspecieAtuais,
   magiasTalentoOrigemAtuais,
   magiasTalentoGeralAtuais,
@@ -486,6 +492,7 @@ export default function MagiasTab({
   const livroDeMagias = magiasPreparadasDoPersonagem(livroDeMagiasAtuais);
   const descobertasMagicas = magiasPreparadasDoPersonagem(magiasDescobertasMagicasAtuais);
   const pactoDoInfero = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
+  const juramentoDaDevocao = magiasPreparadasDoPersonagem(magiasJuramentoDaDevocaoAtuais);
   const magiasEspecie = magiasPreparadasDoPersonagem(magiasEspecieAtuais);
   const magiasTalentoOrigem = magiasPreparadasDoPersonagem(magiasTalentoOrigemAtuais);
   const magiasTalentoGeral = magiasPreparadasDoPersonagem(magiasTalentoGeralAtuais);
@@ -1282,6 +1289,37 @@ export default function MagiasTab({
             Patrono Ínfero — sempre preparadas, não contam na conta de Magias Preparadas.
           </div>
           {pactoDoInfero.map((m) => {
+            const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
+            const temAcao = usarMagiaTemAcaoAutomatizada(m);
+            return (
+              <div key={m.id} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                    onClick={() => temAcao && usarMagia(m)}
+                  >
+                    {temAcao ? 'Usar' : 'Usar (pendência)'}
+                  </div>
+                </div>
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+
+      {juramentoDaDevocao.length > 0 && (
+        <>
+          <div className="section-title">Magias do Juramento da Devoção</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Juramento da Devoção — sempre preparadas, não contam na conta de Magias Preparadas.
+          </div>
+          {juramentoDaDevocao.map((m) => {
             const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (

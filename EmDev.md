@@ -368,4 +368,27 @@ na Entrega 5.
          desabilitado com 10 PV digitados sem alvo, habilita ao
          escolher "Curar a si mesmo".
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
+
+  SDD: `sdd/sdd-paladino-devocao.md` (Chapéu 2, aprovado). Ordem
+  confirmada: Magias do Juramento → Arma Sagrada → Aura de Devoção
+  (suspeita textonly) → Destruição Protetora (suspeita textonly) →
+  Resplendor Sagrado. Personagem de teste dedicado: 🧪 Char Teste —
+  Paladino Devoção (nível 20, Carisma 20).
+
+  - [x] **Magias do Juramento da Devoção** (nível 3, concluída) —
+    reaproveitou 100% o padrão de Magias de Pacto do Ínfero (Bruxo):
+    `core/magiasJuramentoDaDevocao.ts` novo (mesma assinatura), 5
+    testes. Fiação em `useMagiasEConjuracao.ts`/`FichaShell.tsx`
+    (novo ID `magiasDoJuramentoDaDevocao` em
+    `idsCaracteristicasSubclasse.ts`, consolidado no
+    `caracteristicasSubclasseAtivas`). Testado ao vivo (seção 6.6):
+    aparece como "sempre preparada" na aba Magias (seção própria
+    "Magias do Juramento da Devoção") E no picker "Usar Magia" do
+    Combate (Escudo da Fé no painel de Ação Bônus, Proteção Contra o
+    Bem e o Mal no painel de Ação — cada uma no painel certo pelo
+    próprio Tempo de Conjuração).
+  - [ ] Arma Sagrada (nível 3)
+  - [ ] Aura de Devoção (nível 7)
+  - [ ] Destruição Protetora (nível 15)
+  - [ ] Resplendor Sagrado (nível 20)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

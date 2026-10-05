@@ -31,6 +31,7 @@ import { magias, type Magia } from '../../../data/rulesets/dnd2024/magias';
 import { espacosARecuperar } from '../../../core/astuciaMagica';
 import { calcularSentidos } from '../../../core/sentidos';
 import { magiasPactoDoInfero } from '../../../core/magiasPactoDoInfero';
+import { magiasJuramentoDaDevocao } from '../../../core/magiasJuramentoDaDevocao';
 import { magiasFixasDaClasseBase } from '../../../core/magiasFixasDeClasse';
 import { truquesEspecie, magiasEspecie as magiasEspecieDoPersonagem } from '../../../core/magiasEspecie';
 import { truquesMagiaIniciada, magiasMagiaIniciada } from '../../../core/magiaTalentoOrigem';
@@ -107,6 +108,7 @@ export function useMagiasEConjuracao(input: {
   pvAtual: number;
   mestreDaMorteDisponivel: boolean;
   magiasPactoDoInferoDisponivel: boolean;
+  magiasJuramentoDaDevocaoDisponivel: boolean;
 }) {
   const {
     classe,
@@ -136,6 +138,7 @@ export function useMagiasEConjuracao(input: {
     pvAtual,
     mestreDaMorteDisponivel,
     magiasPactoDoInferoDisponivel,
+    magiasJuramentoDaDevocaoDisponivel,
   } = input;
 
   // Bug real corrigido (Entrega 5f, achado testando o Char Multiclasse
@@ -284,6 +287,12 @@ export function useMagiasEConjuracao(input: {
   // característica de subclasse em 2 lugares.
   const magiasPactoDoInferoAtuais = magiasPactoDoInferoDisponivel ? magiasPactoDoInfero(personagem.nivel) : [];
   const magiasPactoDoInferoPreparadas = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
+  // Magias do Juramento da Devoção (Paladino) — mesmo padrão do Pacto
+  // do Ínfero acima, ver `sdd/sdd-paladino-devocao.md` seção 1.
+  const magiasJuramentoDaDevocaoAtuais = magiasJuramentoDaDevocaoDisponivel
+    ? magiasJuramentoDaDevocao(personagem.nivel)
+    : [];
+  const magiasJuramentoDaDevocaoPreparadas = magiasPreparadasDoPersonagem(magiasJuramentoDaDevocaoAtuais);
   // Magia fixa de CLASSE BASE (Destruição do Paladino, Montaria Fiel —
   // ver core/magiasFixasDeClasse.ts) — diferente do Pacto do Ínfero
   // acima, calcula aqui mesmo (mesmo padrão de `bruxoObj`/`bruxoEntry`
@@ -361,6 +370,7 @@ export function useMagiasEConjuracao(input: {
     ...magiasDescobertasMagicas.map(semClasse),
     ...livroDasSombras.map(semClasse),
     ...magiasPactoDoInferoPreparadas.map(semClasse),
+    ...magiasJuramentoDaDevocaoPreparadas.map(semClasse),
     // Com pill de classe (diferente do `semClasse` acima) — aqui a
     // classe concedente é sempre conhecida e sem ambiguidade
     // (`paladinoObj`), então mostra igual as magias preparadas normais.
@@ -432,6 +442,8 @@ export function useMagiasEConjuracao(input: {
     faltamMagiasPreparadas,
     magiasPactoDoInferoAtuais,
     magiasPactoDoInferoPreparadas,
+    magiasJuramentoDaDevocaoAtuais,
+    magiasJuramentoDaDevocaoPreparadas,
     magiasEspecieAtuais,
     magiasEspeciePreparadas,
     magiasEspeciePreparadasConjuraveis,
