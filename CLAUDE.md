@@ -209,6 +209,12 @@ de importância:
 Não assuma nada que não estiver nesses documentos — falta informação,
 pare e pergunte, mesmo que pareça dar pra adivinhar.
 
+**Ao apresentar a lista exaustiva de características pro Osmar (ver
+6.1.1), traga o texto da planilha/livro junto, não só o seu resumo** —
+o Osmar às vezes está sem acesso ao livro/planilha na hora de ler sua
+proposta, e sem o texto original ele não consegue conferir se o seu
+resumo está fiel à regra.
+
 **Leitura calma de regra nova, antes de propor qualquer coisa** (2026-09,
 lição de um postmortem): se um texto de regra (planilha, PDF, pedido do
 Osmar) descreve VÁRIAS coisas acontecendo ao mesmo tempo, separe cada

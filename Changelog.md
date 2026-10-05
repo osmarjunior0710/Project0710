@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0928
+
+Novo atalho "🧪 Char Teste — Paladino Devoção" na lista de personagens
+(nível 20, Carisma 20) — prepara o terreno pra implementar o Juramento
+da Devoção sem precisar recriar/subir nível de personagem em cada
+entrega.
+
 ## v202610_0749
 
 "Curar a si mesmo" e "Curar outro" no popup de Mãos Consagradas agora
