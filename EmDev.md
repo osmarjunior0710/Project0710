@@ -352,5 +352,20 @@ na Entrega 5.
     - **Testado ao vivo:** PV 5→11 (curou 6) e reserva 70→59 (6 cura +
       5 Envenenado) numa confirmação só; barra mostrou o pedaço
       vermelho de 11 PV certinho antes de confirmar.
+    - [x] **Correção (2026-10, 3 bugs apontados pelo Osmar testando ao
+      vivo):**
+      1. A barra só considerava as condições marcadas, não o PV
+         digitado pra curar — `pontosCurar` só contava DEPOIS de
+         escolher o alvo (self/outro). Corrigido: conta o valor
+         digitado sempre, mesmo antes de escolher quem recebe a cura.
+      2. "Curar a si mesmo" agora mostra `PV atual/máximo` do próprio
+         Paladino embaixo do texto, pra saber quanto tem de PV antes
+         de decidir esse alvo.
+      3. "Confirmar" só habilita se (tem PV pra curar E alvo
+         escolhido) OU (pelo menos 1 condição marcada, mesmo com 0 PV
+         de cura e sem alvo — remover condição nunca aplica PV em
+         ninguém, não precisa de alvo). Testado ao vivo: botão
+         desabilitado com 10 PV digitados sem alvo, habilita ao
+         escolher "Curar a si mesmo".
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

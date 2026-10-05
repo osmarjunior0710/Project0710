@@ -7,6 +7,13 @@ interface MaosConsagradasModalProps {
   maximo: number;
   restantes: number;
   cor: string;
+  /** PV atual/máximo do PRÓPRIO Paladino — só pra mostrar no botão
+   * "Curar a si mesmo", pra ele ver quanto PV tem antes de escolher
+   * esse alvo (pedido do Osmar, 2026-10). Não limita o quanto cura —
+   * curar além do máximo simplesmente não passa de `pvMax` (mesma
+   * regra dos botões manuais de PV). */
+  pvAtual: number;
+  pvMax: number;
   /** Envenenado sempre; + as 6 do Toque Restaurador a partir do nível
    * 14 (ver `core/maosConsagradas.ts` `condicoesDisponiveisMaosConsagradas`). */
   condicoesDisponiveis: string[];
@@ -26,6 +33,8 @@ export default function MaosConsagradasModal({
   maximo,
   restantes,
   cor,
+  pvAtual,
+  pvMax,
   condicoesDisponiveis,
   onConfirmar,
   onFechar,
@@ -34,9 +43,16 @@ export default function MaosConsagradasModal({
   const [alvo, setAlvo] = useState<'self' | 'outro' | null>(null);
   const [condicoesMarcadas, setCondicoesMarcadas] = useState<string[]>([]);
 
-  const pontosCurar = alvo ? Number.parseInt(texto, 10) || 0 : 0;
+  // Conta o que foi digitado SEMPRE (não só depois de escolher alvo) —
+  // senão a barra não mostra a prévia do que vai ser gasto enquanto o
+  // jogador ainda está decidindo quem recebe a cura (bug real,
+  // apontado pelo Osmar testando ao vivo).
+  const pontosCurar = Number.parseInt(texto, 10) || 0;
   const custoTotal = custoTotalMaosConsagradas(pontosCurar, condicoesMarcadas.length);
-  const podeConfirmar = custoTotal > 0 && custoTotal <= restantes && (alvo === null || pontosCurar > 0);
+  // Só exige alvo escolhido quando TEM PV pra curar — remover só
+  // condição, sem curar nada, não precisa de alvo (não existe "de
+  // quem" pra isso: nunca aplica PV em ninguém, regra real).
+  const podeConfirmar = custoTotal > 0 && custoTotal <= restantes && (pontosCurar === 0 || alvo !== null);
 
   function confirmar() {
     if (!podeConfirmar) return;
@@ -139,6 +155,9 @@ export default function MaosConsagradasModal({
         <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
           <div style={estiloAlvo(alvo === 'self')} onClick={() => setAlvo(alvo === 'self' ? null : 'self')}>
             Curar a si mesmo
+            <div style={{ fontSize: 11, color: 'var(--text-faint)', fontWeight: 'normal' }}>
+              {pvAtual}/{pvMax} PV
+            </div>
           </div>
           <div style={estiloAlvo(alvo === 'outro')} onClick={() => setAlvo(alvo === 'outro' ? null : 'outro')}>
             Curar outro

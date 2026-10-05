@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0026
+
+3 correções em Mãos Consagradas (achadas testando o popup novo): a
+barra agora considera o PV digitado pra curar mesmo antes de escolher
+quem recebe (não só as condições marcadas); "Curar a si mesmo" mostra
+quanto PV você tem antes de decidir; e "Confirmar" só liga quando faz
+sentido (tem cura + alvo escolhido, ou pelo menos 1 condição marcada).
+
 ## v202610_0013
 
 Paladino nível 14, Toque Restaurador: Mãos Consagradas virou um popup

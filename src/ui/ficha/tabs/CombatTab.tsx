@@ -1767,6 +1767,8 @@ export default function CombatTab({
           maximo={maosConsagradasMaximo}
           restantes={maosConsagradasRestantes}
           cor={corDoRecursoDaClasse('Paladino')?.hex ?? 'var(--accent)'}
+          pvAtual={pvAtual}
+          pvMax={pvMax}
           condicoesDisponiveis={condicoesMaosConsagradas}
           onConfirmar={confirmarMaosConsagradas}
           onFechar={() => setMaosConsagradasAberto(false)}
