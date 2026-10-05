@@ -4,10 +4,6 @@ import { armazenamentoPersonagens } from '../../core/armazenamentoPersonagens';
 import { ID_PERSONAGEM_DEMO } from '../../core/personagemDemo';
 import { recriarPersonagemTesteFixo, ID_PERSONAGEM_TESTE_FIXO } from '../../core/personagemTesteFixo';
 import { recriarPersonagemTesteMulticlasse, ID_PERSONAGEM_TESTE_MULTICLASSE } from '../../core/personagemTesteMulticlasse';
-import {
-  recriarPersonagemTestePaladinoDevocao,
-  ID_PERSONAGEM_TESTE_PALADINO_DEVOCAO,
-} from '../../core/personagemTestePaladinoDevocao';
 import { calcularPvMaximoNivel1 } from '../../core/calculoPersonagem';
 import { classesDoPersonagem } from '../../core/multiclasse';
 import { classes } from '../../data/rulesets/dnd2024/classes';
@@ -109,17 +105,6 @@ export default function CharacterList() {
         }}
       >
         🧪 Char Multiclasse — Bárbaro 1 / Bardo 1 / Bruxo 1, atributos 20 (recursos de classe juntos)
-      </div>
-
-      <div
-        className="btn"
-        style={{ marginBottom: 10 }}
-        onClick={() => {
-          recriarPersonagemTestePaladinoDevocao();
-          navigate(`/ficha/${ID_PERSONAGEM_TESTE_PALADINO_DEVOCAO}`);
-        }}
-      >
-        🧪 Char Teste — Paladino Devoção — nível 20, Carisma 20, pronto pra testar as 5 características do juramento
       </div>
 
       {personagens.length === 0 && (

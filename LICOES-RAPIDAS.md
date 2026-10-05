@@ -70,3 +70,17 @@ das 3 telas que tinham esse texto (Ação/Bônus/Reação). Diferente do
 `ContadorUsos.tsx` (resumo da tela principal, "{restantes}/{total}"
 sem a palavra "disponíveis") — esse é um padrão já aprovado antes
 (DECISOES-DESIGN.md), não mexi nele.
+
+## Limitação técnica força simplificar o que já foi aprovado — perguntar ANTES de codar, não avisar depois
+
+1ª ocorrência (2026-10, Arma Sagrada): a decupagem aprovada pedia
+escolha de dano Normal/Radiante "a cada acerto", no popup de dano. Na
+hora de codar, o popup só aceitava 1 botão de fechamento (slot já
+usado por Golpe Brutal/Esmagador/Talhador) — em vez de perguntar antes
+de desviar, simplifiquei sozinho pra um toggle no card "ATIVA" e só
+avisei no relatório depois do push. O Osmar preferia a versão aprovada
+original (e tinha razão — bastava estender o popup pra aceitar vários
+botões, não era preciso simplificar nada). Lição: uma limitação
+técnica que mudaria o que o jogador VÊ/FAZ na tela (não só "como
+implementar por baixo") é pergunta antes de codar, igual qualquer
+outra decisão de UI — nunca uma nota de rodapé no relatório final.

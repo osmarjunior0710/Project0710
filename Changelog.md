@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1436
+
+Fechamento do foco Paladino (por agora): removido o atalho temporário
+"🧪 Char Teste — Paladino Devoção" da lista de personagens (só existia
+durante essa entrega). Nada muda pra personagens já criados.
+
 ## v202610_1350
 
 Paladino com Juramento da Devoção: "✨ Resplendor Sagrado" (nível 20)

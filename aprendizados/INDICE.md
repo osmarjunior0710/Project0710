@@ -45,6 +45,25 @@ Um arquivo por classe de D&D implementada no app.
   escolha preso dentro do painel de Combate por causa de `transform`
   no `SidePanel`) — e por que a validação de cada um falhou.
 
+- **`classes/paladino.md`** — Paladino, classe base nível 1-20
+  (Entregas 1-6): Canalizar Divindade (banco compartilhado), magia
+  fixa de classe genérica (Destruição do Paladino/Montaria Fiel, +
+  bug pré-existente de `'dano-automatico'` achado no caminho),
+  primeiro fluxo "conjurar magia → cria Pet" do app, Aura de Proteção,
+  Repudiar Inimigos (padrão de salvaguarda do alvo), Golpes Radiantes
+  (campo `corpoACorpo` ≠ `usouForca`, + 2 bugs de UI pré-existentes de
+  z-index/1d1), Toque Restaurador (Mãos Consagradas vira 1 toque
+  combinado). Pausado em 2026-10 — subclasses (só Devoção feita) e
+  Multiclasse ficam pendentes, ver `PENDENCIAS.md`.
+
+- **`classes/paladino-devocao.md`** — subclasse Juramento da Devoção
+  (arquivo separado da classe base): as 5 características completas
+  (Magias do Juramento, Arma Sagrada, Aura de Devoção, Destruição
+  Protetora, Resplendor Sagrado). Inclui a origem do padrão "toggle
+  sem contador de tempo" (registrado em `DECISOES-COMBATE.md`) e o
+  caso onde uma simplificação técnica foi codada sem perguntar antes
+  (corrigido depois, lição em `LICOES-RAPIDAS.md`).
+
 *(as outras classes implementadas antes do Bárbaro/Mago — Guerreiro/
 Bardo/Bruxo — continuam só em `DECISOES-CLASSES.md`; migração pra cá é
 gradual, sob demanda, não obrigatória de uma vez.)*

@@ -1596,3 +1596,24 @@ precise da mesma coisa (outro pet/montaria/familiar com recurso
 próprio) pra justificar generalizar — aí sim desenhar o mecanismo
 (provavelmente reaproveitando o mesmo molde de `recursosVisiveis.ts`/
 `RecursoClasse`, só que por Pet em vez de por Classe).
+
+## Paladino — classe base e Juramento da Devoção completos, resto pausado (2026-10)
+
+**O que é:** o foco Paladino fechou com a classe base (nível 1-20,
+Entregas 1-6) e a subclasse Juramento da Devoção (Entrega 7, 5
+características) 100% completas e publicadas — ver
+`aprendizados/classes/paladino.md` e
+`aprendizados/classes/paladino-devocao.md` pro histórico completo. O
+Osmar decidiu pausar aqui por prioridade, deixando o resto pra quando
+voltar a esse foco.
+
+**O que falta:**
+- **Entrega 7 — as outras 3 subclasses** (Juramento da Glória,
+  Juramento de Vingança, Juramento dos Anciões): dado já importado
+  (`caracteristicasSubclasse.ts`, todas `placeholder-codeimplementation`),
+  decupagem igual à Devoção ainda não feita pra nenhuma das 3.
+- **Entrega 8 — Multiclasse**: ligar o Paladino em
+  `conjuradorMulticlasse.ts` (hoje só funciona como classe única).
+- Banner da subclasse Juramento da Glória ainda falta (Devoção/
+  Anciões/Vingança já foram importados) — cai no fallback 🖼 até
+  chegar.
