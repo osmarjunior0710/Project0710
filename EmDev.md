@@ -432,6 +432,9 @@ na Entrega 5.
     de Proteção), mesmo motivo de Aura de Coragem (nível 10) — o app
     não rastreia condição de outros personagens. `core/auraDeDevocao.ts`
     novo (função vazia, só marco de existência, CLAUDE.md 12.1).
-  - [ ] Destruição Protetora (nível 15)
+  - [x] **Destruição Protetora** (nível 15, concluída) — confirmado
+    `textonly` com o Osmar: Cobertura Parcial pros ALIADOS ao conjurar
+    Destruição Divina, mesmo motivo de Aura de Devoção/Aura de
+    Coragem. `core/destruicaoProtetora.ts` novo (marco de existência).
   - [ ] Resplendor Sagrado (nível 20)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

@@ -281,7 +281,7 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Sua destruição mágica agora irradia energia protetora. Ao conjurar Destruição Divina, você e seus aliados têm Cobertura Parcial enquanto estiverem em sua Aura de Proteção. A aura mantém este benefício até o início do seu próximo turno.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'textonly',
   },
   {
     classe: 'Paladino',

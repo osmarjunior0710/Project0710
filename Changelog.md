@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1316
+
+Destruição Protetora (Paladino, Juramento da Devoção, nível 15)
+confirmada como só texto — mesmo motivo da Aura de Devoção. Some o
+`[PH]` dela no Perfil/Level Up.
+
 ## v202610_1314
 
 Aura de Devoção (Paladino, Juramento da Devoção, nível 7) confirmada
