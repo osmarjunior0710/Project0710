@@ -5,6 +5,18 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1901
+
+"🧪 Char Multiclasse" (Lista de Personagens) virou um personagem bem
+maior de propósito: nível 20 em TODA classe já implementada no app ao
+mesmo tempo (Bárbaro, Bardo, Bruxo, Guerreiro, Mago, Paladino — todos
+com subclasse oficial, nenhuma homebrew), atributos 24/22/20/18/16/14
+(acima do teto normal). É impossível pela regra — serve só pra ver
+como a tela se comporta com tudo junto de uma vez (recursos de classe
+empilhados no Combate, resumo de cada classe conjuradora na aba
+Magias, etc.). Conforme novas classes forem implementadas, esse
+personagem cresce junto.
+
 ## v202610_1741
 
 Correção de multiclasse: conjurar uma magia/truque agora usa o

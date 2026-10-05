@@ -104,7 +104,7 @@ export default function CharacterList() {
           navigate(`/ficha/${ID_PERSONAGEM_TESTE_MULTICLASSE}`);
         }}
       >
-        🧪 Char Multiclasse — Bárbaro 1 / Bardo 1 / Bruxo 1, atributos 20 (recursos de classe juntos)
+        🧪 Char Multiclasse — nível 20 em TODA classe implementada, atributos 24/22/20/18/16/14 (caos de propósito)
       </div>
 
       {personagens.length === 0 && (
