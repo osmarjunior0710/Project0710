@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0013
+
+Paladino nível 14, Toque Restaurador: Mãos Consagradas virou um popup
+só, com uma barra mostrando a reserva (e em vermelho o quanto vai ser
+gasto antes de confirmar) — agora dá pra curar PV e remover uma ou
+mais condições (Amedrontado, Atordoado, Cego, Enfeitiçado, Paralisado,
+Surdo, além do Envenenado de sempre) tudo junto, num toque só.
+
 ## v202610_1517
 
 O painel de Ação agora fecha assim que você escolhe "Atacar" (ou

@@ -762,7 +762,10 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Ao usar Mãos Consagradas em uma criatura, você também pode remover uma ou mais das seguintes condições da criatura: Amedrontado, Atordoado, Cego, Enfeitiçado, Paralisado ou Surdo. Você deve gastar 5 Pontos de Vida da reserva de cura de Mãos Consagradas para cada uma dessas condições que deseja remover; esses pontos não restauram Pontos de Vida para a criatura.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    // Expande o popup de Mãos Consagradas (`MaosConsagradasModal.tsx`)
+    // com mais 6 condições — mesmo mecanismo de desconto da reserva,
+    // ver `core/maosConsagradas.ts`.
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Paladino',

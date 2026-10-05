@@ -330,5 +330,27 @@ na Entrega 5.
     painel fecha (perde a classe `panelOpen`) e Ação já marca "usada"
     logo no 1º ataque, mesmo com Ataque Extra ainda tendo 1 ataque
     sobrando.
+  - [x] **Toque Restaurador** (nível 14, concluída) — Mãos Consagradas
+    virou 1 toque combinado: cura PV E remove condição(ões) juntos no
+    mesmo gasto (regra real confirmada com o Osmar antes de codar —
+    NÃO é exclusivo, é "você decide como dividir o que vai gastar
+    nesse toque").
+    - [x] `core/maosConsagradas.ts` novo: `custoTotalMaosConsagradas`
+      (PV pra curar + 5×condições) e `condicoesDisponiveisMaosConsagradas`
+      (Envenenado sempre; +6 condições do Toque Restaurador a partir
+      do nível 14) — 8 testes novos.
+    - [x] `MaosConsagradasModal.tsx` reescrito: barra da reserva no
+      topo (pedido do Osmar) com prévia em vermelho do que SERIA
+      gasto antes de confirmar (`BarraRecurso.tsx` ganhou prop
+      `pendente`, mesma ideia do dano pendente na barra de PV) +
+      checkboxes de condição + alvo (si mesmo/outro) + 1 botão
+      "Confirmar (N PV)" só, nada de botões separados por ação.
+    - [x] `CombatTab.tsx`/`FichaShell.tsx`: os 3 handlers antigos
+      (curar self/curar outro/remover Envenenado, cada um fechando o
+      popup sozinho) viraram 1 `confirmarMaosConsagradas` só, desconta
+      tudo de uma vez.
+    - **Testado ao vivo:** PV 5→11 (curou 6) e reserva 70→59 (6 cura +
+      5 Envenenado) numa confirmação só; barra mostrou o pedaço
+      vermelho de 11 PV certinho antes de confirmar.
 - [ ] **Entrega 7 — subclasses**, uma por vez (Devoção primeiro)
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

@@ -117,15 +117,18 @@ interface CombatTabProps {
    * sem a classe. Sentido Divino gasta 1 uso deste banco. */
   canalizarDivindade: RecursoContado;
   /** Mãos Consagradas (Paladino) — `maximo`/`restantes` em PONTOS de PV
-   * (não em usos). `onCurarSelf` aplica a cura no próprio PV; `onCurarOutro`
-   * e `onRemoverEnvenenado` só descontam da reserva (sem ficha de aliado
-   * no app pra aplicar em outra criatura). */
+   * (não em usos). Um toque só pode curar PV E remover condição(ões) ao
+   * mesmo tempo (regra real — Toque Restaurador nível 14 só ADICIONA
+   * opções de condição ao mesmo gasto, não é exclusivo com curar),
+   * então `onConfirmar` recebe tudo junto e desconta o total de uma vez
+   * só. `pontosCurar` só aplica no PV de verdade quando `alvo === 'self'`
+   * (sem ficha de aliado no app pra aplicar em outra criatura — e
+   * remover condição nunca restaura PV de ninguém, regra real). */
   maosConsagradas: {
     maximo: number;
     restantes: number;
-    onCurarSelf: (pontos: number) => boolean;
-    onCurarOutro: (pontos: number) => boolean;
-    onRemoverEnvenenado: () => boolean;
+    condicoesDisponiveis: string[];
+    onConfirmar: (pontosCurar: number, alvo: 'self' | 'outro' | null, condicoes: string[]) => boolean;
   };
   /** Conhecimento de Pedras (Anão) — `maximo` 0 = espécie não é Anão. */
   conhecimentoDePedras: RecursoContado;
@@ -539,9 +542,8 @@ export default function CombatTab({
   maosConsagradas: {
     maximo: maosConsagradasMaximo,
     restantes: maosConsagradasRestantes,
-    onCurarSelf: onCurarSelfMaosConsagradas,
-    onCurarOutro: onCurarOutroMaosConsagradas,
-    onRemoverEnvenenado: onRemoverEnvenenadoMaosConsagradas,
+    condicoesDisponiveis: condicoesMaosConsagradas,
+    onConfirmar: onConfirmarMaosConsagradas,
   },
   conhecimentoDePedras: {
     maximo: usosConhecimentoDePedrasMaximo,
@@ -1069,30 +1071,19 @@ export default function CombatTab({
     setRepudiarInimigosAberto(true);
   }
 
-  function curarSelfComMaosConsagradas(pontos: number): boolean {
-    if (!onCurarSelfMaosConsagradas(pontos)) return false;
+  /** Mãos Consagradas — 1 toque só, cura PV E remove condição(ões)
+   * juntos (regra real, Toque Restaurador nível 14 só adiciona opções
+   * de condição ao mesmo gasto, não troca exclusivamente). */
+  function confirmarMaosConsagradas(pontosCurar: number, alvo: 'self' | 'outro' | null, condicoes: string[]): boolean {
+    if (!onConfirmarMaosConsagradas(pontosCurar, alvo, condicoes)) return false;
     onMarcarUsado('bonus');
     setPainelAberto(null);
     setMaosConsagradasAberto(false);
-    setFeedback(`🖐️ Mãos Consagradas — curou ${pontos} PV.`);
-    return true;
-  }
-
-  function curarOutroComMaosConsagradas(pontos: number): boolean {
-    if (!onCurarOutroMaosConsagradas(pontos)) return false;
-    onMarcarUsado('bonus');
-    setPainelAberto(null);
-    setMaosConsagradasAberto(false);
-    setFeedback(`🖐️ Mãos Consagradas — gastou ${pontos} PV da reserva pra curar outra criatura (aplique o PV nela fora do app).`);
-    return true;
-  }
-
-  function removerEnvenenadoComMaosConsagradas(): boolean {
-    if (!onRemoverEnvenenadoMaosConsagradas()) return false;
-    onMarcarUsado('bonus');
-    setPainelAberto(null);
-    setMaosConsagradasAberto(false);
-    setFeedback('🖐️ Mãos Consagradas — gastou 5 PV da reserva pra remover Envenenado.');
+    const partes: string[] = [];
+    if (pontosCurar > 0 && alvo === 'self') partes.push(`curou ${pontosCurar} PV`);
+    else if (pontosCurar > 0 && alvo === 'outro') partes.push(`gastou ${pontosCurar} PV pra curar outra criatura (aplique fora do app)`);
+    if (condicoes.length > 0) partes.push(`removeu ${condicoes.join(', ')}`);
+    setFeedback(`🖐️ Mãos Consagradas — ${partes.join(' e ')}.`);
     return true;
   }
 
@@ -1775,9 +1766,9 @@ export default function CombatTab({
         <MaosConsagradasModal
           maximo={maosConsagradasMaximo}
           restantes={maosConsagradasRestantes}
-          onCurarSelf={curarSelfComMaosConsagradas}
-          onCurarOutro={curarOutroComMaosConsagradas}
-          onRemoverEnvenenado={removerEnvenenadoComMaosConsagradas}
+          cor={corDoRecursoDaClasse('Paladino')?.hex ?? 'var(--accent)'}
+          condicoesDisponiveis={condicoesMaosConsagradas}
+          onConfirmar={confirmarMaosConsagradas}
           onFechar={() => setMaosConsagradasAberto(false)}
         />
       )}

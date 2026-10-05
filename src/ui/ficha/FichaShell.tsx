@@ -86,6 +86,7 @@ import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
 import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, temAuraDeProtecao } from '../../core/recursosClasse';
+import { condicoesDisponiveisMaosConsagradas, custoTotalMaosConsagradas } from '../../core/maosConsagradas';
 import { type MagiaGratisDeInvocacao } from '../../core/invocacoesMagiaGratis';
 import { aplicarAlteracaoPv, ganharPvTemporario } from '../../core/pvTemporario';
 import { deveAplicarVigorImplacavel } from '../../core/vigorImplacavel';
@@ -780,6 +781,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     classeCatalogoPaladino && entradaPaladino
       ? caracteristicaDesbloqueada(classeCatalogoPaladino, 'Golpes Radiantes', entradaPaladino.nivel) !== null
       : false;
+  // Toque Restaurador (Paladino nível 14) — expande as condições que
+  // Mãos Consagradas remove, mesmo gate por nível das demais.
+  const temToqueRestaurador =
+    classeCatalogoPaladino && entradaPaladino
+      ? caracteristicaDesbloqueada(classeCatalogoPaladino, 'Toque Restaurador', entradaPaladino.nivel) !== null
+      : false;
+  const condicoesMaosConsagradas = condicoesDisponiveisMaosConsagradas(temToqueRestaurador);
   // Fúria (Bárbaro) — ver sdd/sdd-barbaro-furia.md. `armaduraPesadaEquipada`
   // também trava a ATIVAÇÃO (regra real) e força o encerramento
   // automático ao equipar (ver `equiparItem`).
@@ -2091,26 +2099,24 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }
 
   // Mãos Consagradas (Paladino) — diferente dos recursos "1 uso por vez"
-  // acima, aqui o jogador escolhe QUANTOS PV gastar da reserva. `onCurarSelf`
-  // também aplica a cura no próprio PV (via `alterarPv`, mesma função dos
-  // botões manuais); `onCurarOutro`/`onRemoverEnvenenado` só descontam da
-  // reserva — o app não tem ficha de aliados na tela pra aplicar em outra
-  // criatura, e remover Envenenado nunca restaura PV de ninguém (regra real).
+  // acima, aqui o jogador escolhe QUANTOS PV gastar da reserva. 1 toque
+  // só pode curar PV E remover condição(ões) juntos (regra real — Toque
+  // Restaurador nível 14 só adiciona condição à lista, não é exclusivo
+  // com curar, ver `core/maosConsagradas.ts`). Cura só aplica no PV de
+  // verdade quando `alvo === 'self'` (via `alterarPv`, mesma função dos
+  // botões manuais) — `alvo === 'outro'`/condições só descontam da
+  // reserva, o app não tem ficha de aliados pra aplicar em outra
+  // criatura, e remover condição nunca restaura PV de ninguém.
   function gastarReservaMaosConsagradas(pontos: number): boolean {
     if (pontos <= 0 || pontos > restantesMaosConsagradas) return false;
     setMaosConsagradasGasto((v) => v + pontos);
     return true;
   }
-  function curarASiMesmoComMaosConsagradas(pontos: number): boolean {
-    if (!gastarReservaMaosConsagradas(pontos)) return false;
-    alterarPv(pontos);
+  function confirmarMaosConsagradas(pontosCurar: number, alvo: 'self' | 'outro' | null, condicoes: string[]): boolean {
+    const total = custoTotalMaosConsagradas(pontosCurar, condicoes.length);
+    if (!gastarReservaMaosConsagradas(total)) return false;
+    if (alvo === 'self' && pontosCurar > 0) alterarPv(pontosCurar);
     return true;
-  }
-  function curarOutroComMaosConsagradas(pontos: number): boolean {
-    return gastarReservaMaosConsagradas(pontos);
-  }
-  function removerEnvenenadoComMaosConsagradas(): boolean {
-    return gastarReservaMaosConsagradas(5);
   }
 
   const indomavel = recursoContado(indomavelMaximo, indomavelGasto, setIndomavelGasto);
@@ -2990,9 +2996,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             maosConsagradas={{
               maximo: maximoMaosConsagradas,
               restantes: restantesMaosConsagradas,
-              onCurarSelf: curarASiMesmoComMaosConsagradas,
-              onCurarOutro: curarOutroComMaosConsagradas,
-              onRemoverEnvenenado: removerEnvenenadoComMaosConsagradas,
+              condicoesDisponiveis: condicoesMaosConsagradas,
+              onConfirmar: confirmarMaosConsagradas,
             }}
             conhecimentoDePedras={{
               maximo: usosConhecimentoDePedrasMaximo,

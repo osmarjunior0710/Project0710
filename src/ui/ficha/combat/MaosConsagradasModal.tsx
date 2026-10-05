@@ -1,45 +1,46 @@
 import { useState } from 'react';
 import styles from '../../components/TrocarArmaMaestria.module.css';
+import BarraRecurso from '../../components/BarraRecurso';
+import { custoTotalMaosConsagradas } from '../../../core/maosConsagradas';
 
 interface MaosConsagradasModalProps {
   maximo: number;
   restantes: number;
-  onCurarSelf: (pontos: number) => boolean;
-  onCurarOutro: (pontos: number) => boolean;
-  onRemoverEnvenenado: () => boolean;
+  cor: string;
+  /** Envenenado sempre; + as 6 do Toque Restaurador a partir do nível
+   * 14 (ver `core/maosConsagradas.ts` `condicoesDisponiveisMaosConsagradas`). */
+  condicoesDisponiveis: string[];
+  /** 1 toque só — cura E remove condição(ões) juntos, tudo descontado
+   * de uma vez (regra real: não é exclusivo, ver `core/maosConsagradas.ts`). */
+  onConfirmar: (pontosCurar: number, alvo: 'self' | 'outro' | null, condicoes: string[]) => boolean;
   onFechar: () => void;
 }
 
 /** Popup pra gastar a reserva de Mãos Consagradas (Paladino) — mesmo
- * padrão do `PvManualModal.tsx` (cartão flutuante, digita um valor e
- * confirma), não um sub-painel dentro do painel de Bônus: evita que a
- * tela inteira do painel seja tomada só pra uma escolha pontual. */
+ * padrão do `PvManualModal.tsx` (cartão flutuante), mas com 1
+ * confirmação só: a barra no topo mostra a reserva com uma prévia em
+ * vermelho do que SERIA gasto (cura + 5 por condição marcada) antes de
+ * confirmar — pedido do Osmar (2026-10), mesma ideia de dano pendente
+ * na barra de PV. */
 export default function MaosConsagradasModal({
   maximo,
   restantes,
-  onCurarSelf,
-  onCurarOutro,
-  onRemoverEnvenenado,
+  cor,
+  condicoesDisponiveis,
+  onConfirmar,
   onFechar,
 }: MaosConsagradasModalProps) {
   const [texto, setTexto] = useState('');
-  const valor = Number.parseInt(texto, 10);
-  const valido = Number.isFinite(valor) && valor > 0 && valor <= restantes;
-  const podeRemoverEnvenenado = restantes >= 5;
+  const [alvo, setAlvo] = useState<'self' | 'outro' | null>(null);
+  const [condicoesMarcadas, setCondicoesMarcadas] = useState<string[]>([]);
 
-  function curarSelf() {
-    if (!valido) return;
-    if (!onCurarSelf(valor)) return;
-    onFechar();
-  }
-  function curarOutro() {
-    if (!valido) return;
-    if (!onCurarOutro(valor)) return;
-    onFechar();
-  }
-  function removerEnvenenado() {
-    if (!podeRemoverEnvenenado) return;
-    if (!onRemoverEnvenenado()) return;
+  const pontosCurar = alvo ? Number.parseInt(texto, 10) || 0 : 0;
+  const custoTotal = custoTotalMaosConsagradas(pontosCurar, condicoesMarcadas.length);
+  const podeConfirmar = custoTotal > 0 && custoTotal <= restantes && (alvo === null || pontosCurar > 0);
+
+  function confirmar() {
+    if (!podeConfirmar) return;
+    if (!onConfirmar(pontosCurar, alvo, condicoesMarcadas)) return;
     onFechar();
   }
 
@@ -47,6 +48,10 @@ export default function MaosConsagradasModal({
     const atual = Number.parseInt(texto, 10) || 0;
     const novo = Math.max(0, Math.min(restantes, atual + delta));
     setTexto(novo === 0 ? '' : String(novo));
+  }
+
+  function alternarCondicao(nome: string) {
+    setCondicoesMarcadas((prev) => (prev.includes(nome) ? prev.filter((c) => c !== nome) : [...prev, nome]));
   }
 
   const estiloBotaoAjuste = {
@@ -61,31 +66,48 @@ export default function MaosConsagradasModal({
     fontSize: 14,
   } as const;
 
-  const estiloOpcao = (habilitado: boolean) => ({
-    border: '1px solid var(--line)',
+  const estiloAlvo = (ativo: boolean) => ({
+    flex: 1,
+    border: `1px solid ${ativo ? 'var(--accent)' : 'var(--line)'}`,
+    borderRadius: 'var(--shape-sm)',
+    padding: 'var(--space-2)',
+    textAlign: 'center' as const,
+    cursor: 'pointer',
+    background: ativo ? 'var(--accent-fraco, var(--panel))' : 'var(--panel)',
+    fontWeight: ativo ? 'bold' : 'normal',
+  });
+
+  const estiloCheckbox = (marcado: boolean) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--space-2)',
+    border: `1px solid ${marcado ? 'var(--accent)' : 'var(--line)'}`,
     borderRadius: 'var(--shape-sm)',
     padding: 'var(--space-2) var(--space-3)',
-    marginBottom: 8,
-    cursor: habilitado ? 'pointer' : 'default',
-    opacity: habilitado ? 1 : 0.4,
-    background: 'var(--panel)',
+    marginBottom: 6,
+    cursor: 'pointer',
+    background: marcado ? 'var(--accent-fraco, var(--panel))' : 'var(--panel)',
   });
 
   return (
     <div className={styles.overlay} onClick={onFechar}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
         <div className={styles.title}>🖐️ Mãos Consagradas</div>
-        <div className="label" style={{ marginBottom: 'var(--space-2)' }}>
-          Reserva: {restantes}/{maximo} PV. Recarrega só no Descanso Longo.
+        <div style={{ marginBottom: 'var(--space-3)' }}>
+          <BarraRecurso valor={restantes} maximo={maximo} cor={cor} rotulo={`${restantes}/${maximo} PV`} pendente={custoTotal} />
         </div>
+        <div className="label" style={{ marginBottom: 'var(--space-2)' }}>
+          Recarrega só no Descanso Longo. Cura e condições abaixo gastam da MESMA reserva, juntas num toque só.
+        </div>
+
         <input
           type="number"
           inputMode="numeric"
-          min={1}
+          min={0}
           max={restantes}
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
-          placeholder={`Quantos PV? (até ${restantes})`}
+          placeholder={`Curar quantos PV? (até ${restantes})`}
           style={{
             width: '100%',
             boxSizing: 'border-box',
@@ -113,20 +135,37 @@ export default function MaosConsagradasModal({
             +5
           </div>
         </div>
-        <div style={estiloOpcao(valido)} onClick={curarSelf}>
-          Curar a si mesmo
+
+        <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
+          <div style={estiloAlvo(alvo === 'self')} onClick={() => setAlvo(alvo === 'self' ? null : 'self')}>
+            Curar a si mesmo
+          </div>
+          <div style={estiloAlvo(alvo === 'outro')} onClick={() => setAlvo(alvo === 'outro' ? null : 'outro')}>
+            Curar outro
+          </div>
         </div>
-        <div style={estiloOpcao(valido)} onClick={curarOutro}>
-          Curar outro
-          <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>
+        {alvo === 'outro' && (
+          <div className="label" style={{ marginTop: -8, marginBottom: 'var(--space-3)' }}>
             Só desconta da reserva — aplique o PV no aliado fora do app.
           </div>
+        )}
+
+        <div className="label" style={{ marginBottom: 4 }}>
+          Remover condição (5 PV cada, nunca restaura PV):
         </div>
-        <div style={estiloOpcao(podeRemoverEnvenenado)} onClick={removerEnvenenado}>
-          Remover Envenenado (5 PV)
-          <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>
-            Nunca restaura PV — serve pra você ou pra outra criatura.
+        {condicoesDisponiveis.map((nome) => (
+          <div key={nome} style={estiloCheckbox(condicoesMarcadas.includes(nome))} onClick={() => alternarCondicao(nome)}>
+            <span>{condicoesMarcadas.includes(nome) ? '☑' : '☐'}</span>
+            <span>{nome}</span>
           </div>
+        ))}
+
+        <div
+          className="btn btn-primary"
+          style={{ marginTop: 'var(--space-3)', textAlign: 'center', opacity: podeConfirmar ? 1 : 0.4 }}
+          onClick={confirmar}
+        >
+          Confirmar{custoTotal > 0 ? ` (${custoTotal} PV)` : ''}
         </div>
         <div className={styles.close} onClick={onFechar}>
           fechar

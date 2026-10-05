@@ -22,11 +22,22 @@ interface BarraRecursoProps {
   /** Texto centralizado dentro da barra, ex: "23/25 PV". */
   rotulo: string;
   altura?: number;
+  /** Quanto do `valor` atual SERIA gasto se o jogador confirmar agora
+   * (ex.: Mãos Consagradas somando cura + condições marcadas antes de
+   * tocar "Confirmar") — mesma ideia do "pedaço vermelho" de dano
+   * pendente na barra de PV, só que aqui é sempre "vai sair da
+   * reserva", nunca dano de verdade. Desenhado como um pedaço
+   * `var(--danger)` na PONTA do preenchimento (entre `valor - pendente`
+   * e `valor`) — o que sobra depois de confirmar fica a cor normal.
+   * `undefined`/0 = sem prévia, barra sólida como sempre. */
+  pendente?: number;
 }
 
-export default function BarraRecurso({ valor, maximo, cor, rotulo, altura = 32 }: BarraRecursoProps) {
+export default function BarraRecurso({ valor, maximo, cor, rotulo, altura = 32, pendente = 0 }: BarraRecursoProps) {
   const valorAnim = useValorAnimado(valor, DURACAO_MS);
   const xValor = maximo > 0 ? (Math.max(0, Math.min(valorAnim, maximo)) / maximo) * VIEW_W : 0;
+  const pendenteClamped = Math.max(0, Math.min(pendente, valor));
+  const xRestante = maximo > 0 ? (Math.max(0, valor - pendenteClamped) / maximo) * VIEW_W : 0;
 
   return (
     <div style={{ position: 'relative', width: '100%' }}>
@@ -39,6 +50,9 @@ export default function BarraRecurso({ valor, maximo, cor, rotulo, altura = 32 }
       >
         <rect x={0} y={Y} width={VIEW_W} height={ESPESSURA} rx={ESPESSURA / 2} fill="var(--line)" />
         {xValor > 0.01 && <rect x={0} y={Y} width={xValor} height={ESPESSURA} rx={ESPESSURA / 2} fill={cor} />}
+        {pendenteClamped > 0 && xValor > xRestante && (
+          <rect x={xRestante} y={Y} width={xValor - xRestante} height={ESPESSURA} rx={ESPESSURA / 2} fill="var(--danger)" />
+        )}
       </svg>
       <span
         style={{
