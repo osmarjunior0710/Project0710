@@ -94,18 +94,6 @@ export default function MaosConsagradasModal({
     fontWeight: ativo ? 'bold' : 'normal',
   });
 
-  const estiloCheckbox = (marcado: boolean) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: 'var(--space-2)',
-    border: `1px solid ${marcado ? 'var(--accent)' : 'var(--line)'}`,
-    borderRadius: 'var(--shape-sm)',
-    padding: '4px',
-    marginBottom: 6,
-    cursor: 'pointer',
-    background: marcado ? 'var(--accent-fraco, var(--panel))' : 'var(--panel)',
-  });
-
   return (
     <div className={styles.overlay} onClick={onFechar}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
@@ -113,10 +101,10 @@ export default function MaosConsagradasModal({
         <div style={{ marginBottom: 'var(--space-3)' }}>
           <BarraRecurso valor={restantes} maximo={maximo} cor={cor} rotulo={`${restantes}/${maximo} PV`} pendente={custoTotal} />
         </div>
-        <div className="label" style={{ marginBottom: 'var(--space-2)' }}>
-          Recarrega só no Descanso Longo. Cura e condições abaixo gastam da MESMA reserva, juntas num toque só.
-        </div>
 
+        <div className="section-title" style={{ margin: '0 0 var(--space-2)' }}>
+          💊 Curar
+        </div>
         <input
           type="number"
           inputMode="numeric"
@@ -170,15 +158,21 @@ export default function MaosConsagradasModal({
           </div>
         )}
 
-        <div className="label" style={{ marginBottom: 4 }}>
-          Remover condição (5 PV cada, nunca restaura PV):
+        <div className="section-title" style={{ margin: '0 0 var(--space-2)' }}>
+          🧪 Remover
         </div>
-        {condicoesDisponiveis.map((nome) => (
-          <div key={nome} style={estiloCheckbox(condicoesMarcadas.includes(nome))} onClick={() => alternarCondicao(nome)}>
-            <span>{condicoesMarcadas.includes(nome) ? '☑' : '☐'}</span>
-            <span>{nome}</span>
-          </div>
-        ))}
+        <div className="label" style={{ marginBottom: 4 }}>
+          5 PV cada, nunca restaura PV.
+        </div>
+        {condicoesDisponiveis.map((nome) => {
+          const marcado = condicoesMarcadas.includes(nome);
+          return (
+            <div key={nome} className="check-row" onClick={() => alternarCondicao(nome)}>
+              <div className={`check-box ${marcado ? 'checked' : ''}`} />
+              <span className="check-label">{nome}</span>
+            </div>
+          );
+        })}
 
         <div
           className="btn btn-primary"

@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0735
+
+Mais ajustes visuais no popup de Mãos Consagradas: texto de "recarrega
+no Descanso Longo" removido, seções "💊 Curar" e "🧪 Remover" com
+título próprio, e os checkboxes de condição agora usam o mesmo
+quadradinho azul padrão das telas de magia.
+
 ## v202610_0717
 
 Ajuste visual: o popup de Mãos Consagradas ficou mais compacto —
