@@ -297,9 +297,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   /** Classe do personagem com Padrão B de troca (Paladino — 1 magia por
    * Descanso Longo, `DECISOES-CLASSES.md` "Casters") — `undefined` se
-   * nenhuma. Só a 1ª entra por enquanto: com Mago (Padrão C) na mesma
-   * ficha, a pergunta do Mago vem primeiro e essa fica pra Entrega 8
-   * (Multiclasse) do foco Paladino. */
+   * nenhuma. Com Mago (Padrão C) na mesma ficha, as 2 perguntas
+   * encadeiam no Descanso Longo (Mago primeiro) — ver
+   * `aoFadeInCompleto`/`descansoEmAndamento.trocaUmaPendente`. */
   const classeComTrocaDeUmaMagia = classesAtual.find((c) =>
     trocaUmaMagiaPorDescanso(catalogoClasses.find((cc) => cc.nome === c.classe) ?? null),
   );
@@ -645,6 +645,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
      * Magias Preparadas (as 2 perguntas encadeiam, nunca ao mesmo
      * tempo na tela). */
     maestriaTrocaPendente?: boolean;
+    /** Descanso Longo — `true` quando o personagem tem Mago (Padrão C,
+     * redefinição livre) E Paladino/outra classe de Padrão B (troca de
+     * 1) ao mesmo tempo: a pergunta do Mago vem primeiro; isso marca
+     * que a do Paladino ainda falta perguntar depois (nunca as 2 juntas
+     * na tela) — ver `aoFadeInCompleto`/`aoResponderRedefinir`. */
+    trocaUmaPendente?: boolean;
+    /** Qual pergunta de redefinição está na tela AGORA, quando a fase é
+     * `'perguntaRedefinir'`/`'escolhendoMagias'` — só precisa existir
+     * quando as 2 classes (Mago + Paladino) estão presentes, pra saber
+     * qual tela de escolha abrir no "Sim". */
+    redefinicaoAtual?: 'mago' | 'paladino';
   } | null>(null);
   const [levelUpHpModo, setLevelUpHpModo] = useState<'media' | 'rolar' | 'manual' | null>(
     personagemSalvo.levelUpHpModo ?? null,
@@ -1879,38 +1890,64 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     const perguntaRedefinirMago = usaRedefPorDescanso && magiasPreparadasAtuais.length > 0;
     // Paladino (Padrão B): mesma pergunta ("quer alterar suas magias
     // preparadas?"), mas a tela que abre troca só 1 — ver
-    // `aoConfirmarRedefinicao`/render de `escolhendoMagias`.
-    const perguntaTrocarUma =
-      !perguntaRedefinirMago &&
+    // `aoConfirmarRedefinicao`/render de `escolhendoMagias`. Checada
+    // INDEPENDENTE da de Mago (antes, `!perguntaRedefinirMago` fazia a
+    // pergunta do Paladino sumir de vez quando as 2 classes estavam na
+    // mesma ficha — ver PENDENCIAS.md/EmDev.md, foco Multiclasse
+    // Entrega 3) — as 2 encadeiam, Mago primeiro, igual já acontecia
+    // com a pergunta de Maestria de Magias.
+    const perguntaTrocarUmaPaladino =
       classeComTrocaDeUmaMagia !== undefined &&
       magiasPreparadasAtuais.some((m) => m.classe === classeComTrocaDeUmaMagia.classe);
-    const perguntaRedefinir = perguntaRedefinirMago || perguntaTrocarUma;
-    // As 2 perguntas do Descanso Longo (redefinir Magias Preparadas +
-    // trocar Maestria de Magias) encadeiam, nunca ao mesmo tempo na
-    // tela — se a 1ª não se aplica, checa a 2ª direto; se aplica, guarda
-    // a 2ª como pendente pra depois (`aoResponderRedefinir`/`aoConfirmarRedefinicao`).
     const maestriaTrocaDisponivel = Object.keys(maestriaDeMagiasAtuais).length > 0;
+    let fase: FaseDescanso | 'escolhendoMagias' | 'recuperandoEspacos' | 'trocandoMaestria';
+    let redefinicaoAtual: 'mago' | 'paladino' | undefined;
+    if (perguntaRedefinirMago) {
+      fase = 'perguntaRedefinir';
+      redefinicaoAtual = 'mago';
+    } else if (perguntaTrocarUmaPaladino) {
+      fase = 'perguntaRedefinir';
+      redefinicaoAtual = 'paladino';
+    } else if (maestriaTrocaDisponivel) {
+      fase = 'perguntaMaestriaTroca';
+    } else {
+      fase = 'saindo';
+    }
     setDescansoEmAndamento((prev) =>
       prev
         ? {
             ...prev,
-            fase: perguntaRedefinir ? 'perguntaRedefinir' : maestriaTrocaDisponivel ? 'perguntaMaestriaTroca' : 'saindo',
-            maestriaTrocaPendente: perguntaRedefinir ? maestriaTrocaDisponivel : undefined,
+            fase,
+            redefinicaoAtual,
+            // Só fica pendente quando o Mago foi perguntado AGORA e o
+            // Paladino ainda vem depois (as 2 presentes ao mesmo tempo).
+            trocaUmaPendente: redefinicaoAtual === 'mago' ? perguntaTrocarUmaPaladino : undefined,
+            maestriaTrocaPendente: fase === 'perguntaRedefinir' ? maestriaTrocaDisponivel : undefined,
           }
         : prev,
     );
   }
 
+  /** Próxima fase depois que a pergunta de redefinição ATUAL (Mago ou
+   * Paladino) foi respondida (sim confirmado, ou não/cancelado) — se o
+   * Mago acabou de ser perguntado e o Paladino ainda está pendente
+   * (`trocaUmaPendente`), encadeia pra pergunta dele antes de ir pra
+   * Maestria/fade-out (nunca as 2 perguntas de redefinição juntas na
+   * tela, ver `aoFadeInCompleto`). */
+  function proximaFaseAposRedefinir(prev: NonNullable<typeof descansoEmAndamento>): Partial<NonNullable<typeof descansoEmAndamento>> {
+    if (prev.trocaUmaPendente) {
+      return { fase: 'perguntaRedefinir', redefinicaoAtual: 'paladino', trocaUmaPendente: false };
+    }
+    return { fase: prev.maestriaTrocaPendente ? 'perguntaMaestriaTroca' : 'saindo' };
+  }
+
   /** Resposta ao prompt "quer alterar suas magias preparadas?" —
-   * `sim` abre a tela de escolha livre (`MemorizarMagiaShell`, modo
-   * `'livre'`); `não` encadeia a pergunta de Maestria de Magias se
-   * pendente, senão já manda pro fade-out. */
+   * `sim` abre a tela de escolha (Mago: livre; Paladino: troca só 1,
+   * ver `descansoEmAndamento.redefinicaoAtual`); `não` encadeia a
+   * próxima pergunta pendente (Paladino, depois Maestria de Magias),
+   * senão já manda pro fade-out. */
   function aoResponderRedefinir(sim: boolean) {
-    setDescansoEmAndamento((prev) =>
-      prev
-        ? { ...prev, fase: sim ? 'escolhendoMagias' : prev.maestriaTrocaPendente ? 'perguntaMaestriaTroca' : 'saindo' }
-        : prev,
-    );
+    setDescansoEmAndamento((prev) => (prev ? { ...prev, ...(sim ? { fase: 'escolhendoMagias' } : proximaFaseAposRedefinir(prev)) } : prev));
   }
 
   function aoConfirmarRedefinicao(novaLista: string[], classeNome = 'Mago') {
@@ -1919,9 +1956,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // `usaRedefPorDescanso` já checa isso por classesAtual, não pela
     // classe ativa). Paladino (troca de 1) passa a própria classe.
     setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, classeNome));
-    setDescansoEmAndamento((prev) =>
-      prev ? { ...prev, fase: prev.maestriaTrocaPendente ? 'perguntaMaestriaTroca' : 'saindo' } : prev,
-    );
+    setDescansoEmAndamento((prev) => (prev ? { ...prev, ...proximaFaseAposRedefinir(prev) } : prev));
   }
 
   /** Resposta ao prompt "quer trocar 1 magia de Maestria?" — `sim` abre
@@ -2661,7 +2696,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     );
   }
 
-  if (descansoEmAndamento?.fase === 'escolhendoMagias' && !usaRedefPorDescanso && classeComTrocaDeUmaMagia && classeObjTrocaDeUmaMagia) {
+  if (
+    descansoEmAndamento?.fase === 'escolhendoMagias' &&
+    descansoEmAndamento.redefinicaoAtual === 'paladino' &&
+    classeComTrocaDeUmaMagia &&
+    classeObjTrocaDeUmaMagia
+  ) {
     const circuloMaximo = Math.max(
       0,
       ...espacosDeMagiaAtivos(classeObjTrocaDeUmaMagia, classeComTrocaDeUmaMagia.nivel).map((e) => e.circulo),

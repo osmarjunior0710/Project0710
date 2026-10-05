@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1950
+
+Fecha o foco Multiclasse: conferido ao vivo que o Paladino combina
+Espaços de Magia certo com outra classe conjuradora (ex.: Mago), e
+corrigido o Descanso Longo pra não pular mais a pergunta de troca de
+magia do Paladino quando o Mago está na mesma ficha (antes, só a
+pergunta do Mago aparecia).
+
 ## v202610_1901
 
 "🧪 Char Multiclasse" (Lista de Personagens) virou um personagem bem

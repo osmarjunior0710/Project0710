@@ -146,3 +146,60 @@ volta — nunca `setTruquesAtuais(novaLista.map(...))` direto, que
 perderia as outras classes. Testado com caso de multiclasse real em
 `magiasPersonagem.test.ts` (Mago+Bardo, sobe Bardo, truques do Mago
 continuam intactos).
+
+## Foco "Multiclasse — acertos deixados pra trás" (2026-10)
+
+Reaberto depois de fechar o foco Paladino, perguntando "o que faltou
+do multiclasse?" — 3 entregas, nessa ordem.
+
+**Entrega 1 — acerto/CD de magia usava só 1 modificador fixo.**
+Resolve exatamente o bug registrado acima ("Multiclasse — acerto/CD de
+magia na hora de rolar usa só 1 modificador") — função pura nova
+`modAcertoConjuracaoPorClasse` (`core/magiasPersonagem.ts`) resolve
+pela classe DONA da magia (a mesma tag que já aparece como pill de
+informação em cada linha), com fallback pro comportamento antigo só
+quando a classe dona não é conhecida (magia de espécie/talento — gap à
+parte, continua fora de escopo). Corrigido em 10 arquivos — todo ponto
+onde a tag de classe chegava até a UI mas se perdia antes do cast de
+verdade (`SelecionarMagiaShell`, `useUsarMagiaPainel`,
+`ReacaoPanelContent`, e 9 seções distintas de `MagiasTab.tsx`).
+Nenhum pill/seletor de UI voltou — a âncora interna `classeAtivaNome`
+(Entrega 5f, sem seletor desde então) só entra como fallback.
+Validado com Mago 5/Bardo 5 (INT 20/CAR 14, atributos propositalmente
+diferentes): truque do Mago rola +9 (INT), truque do Bardo rola +6
+(CAR), nos dois sentidos, mesmo com a âncora calculando "Bardo".
+
+**Entrega 2 — combos de multiclasse do Paladino, nunca testados na
+tela.** A classificação de meio-conjurador (`conjuradorMulticlasse.ts`)
+e a matemática de Espaços combinados (`nivelEquivalenteConjuracaoMulticlasse`/
+`espacosMagiaParaNivelCombinado`, `core/multiclasse.ts`) já existiam e
+JÁ ESTAVAM ligadas em `useMagiasEConjuracao.ts` — só nunca tinham sido
+clicadas de verdade. Testado ao vivo com Paladino 10/Mago 10: nível
+equivalente = ceil(10/2)+10 = 15, espaços exibidos batem exatamente
+com a tabela oficial ([4,3,3,3,2,1,1,1,0]), e conjurar uma magia
+sempre-preparada do Paladino debita certo do pool combinado (1º
+círculo 4→3). Nenhum bug encontrado — só faltava a confirmação.
+
+**Entrega 3 — pergunta de Descanso Longo sumia pro Paladino quando o
+Mago também estava na ficha.** `perguntaTrocarUma` (a pergunta "quer
+trocar 1 magia?" do Paladino) tinha um `!perguntaRedefinirMago` na
+condição — com as 2 classes juntas, o Mago sempre vencia e a do
+Paladino nunca aparecia (silenciosamente, sem erro). Corrigido
+encadeando as 2 perguntas (nunca juntas na tela, mesmo padrão que já
+existia entre "redefinir" e "trocar Maestria de Magias"): Mago
+primeiro, Paladino depois se ainda pendente — novo campo
+`descansoEmAndamento.trocaUmaPendente` + `redefinicaoAtual: 'mago' |
+'paladino'` pra saber qual tela de escolha abrir no "Sim". Validado ao
+vivo: Paladino 5/Mago 5, "Não" na pergunta do Mago encadeia certo pra
+"Trocar Magia Preparada" (Paladino), que antes nunca aparecia.
+
+**Lição de processo:** as 3 entregas eram puramente de UI/lógica
+(`FichaShell.tsx`/hooks), sem teste automatizado novo em `core/` além
+da função pura da Entrega 1 — a validação das Entregas 2 e 3 foi só ao
+vivo (Playwright), já que a lógica combinada (`core/multiclasse.ts`)
+já tinha teste próprio de antes. Char Multiclasse de teste (ver
+`DECISOES-DESIGN.md`/`EmDev.md`) virou nível 20 em TODA classe
+implementada nesse meio tempo — não foi usado nesta validação
+específica (precisava de uma combinação CONTROLADA de 2 classes pra
+isolar o bug, não o caos de 6 juntas), mas serve de referência pro
+próximo teste parecido.
