@@ -191,6 +191,26 @@ usado) — não cobre classe/situação que concede mais de 1 uso do MESMO
 recurso por turno (ex.: Monge com Rajada de Golpes, Multiclasse).
 Tratamento específico fica pra quando isso for implementado de verdade.
 
+## Toggle de habilidade com duração real ("10 minutos", "até encerrar") — sem contador de tempo, encerra manualmente
+
+**Decisão:** o app não rastreia tempo de jogo (nem turno-a-turno fora
+de combate, nem minutos reais). Toda característica cuja regra diz
+"dura N minutos ou até você encerrar/repetir" vira um **toggle sem
+prazo**: card persistente no corpo da aba Combate (não dentro de um
+painel de Ação/Bônus/Reação — ele precisa continuar visível depois do
+painel fechar), mostrando "NOME ATIVA" + a descrição do efeito
+enquanto ativo, com um botão "Encerrar X" pro jogador desligar quando
+quiser. Nunca simula a contagem dos minutos — fica ativo até o
+jogador decidir, mesmo que a regra real tivesse acabado antes.
+
+**Padrão confirmado em 2+ focos** (origem: Fúria do Bárbaro —
+`furiaAtiva`/"Encerrar Fúria" em `CombatTab.tsx`; reaproveitado no
+Paladino pra Arma Sagrada/Resplendor Sagrado, ambos "por 10 minutos ou
+até encerrar"): toda característica nova com essa mesma forma de regra
+usa o mesmo desenho — card no corpo da aba, nome + "ATIVA", descrição
+do efeito, botão de encerrar — em vez de inventar um cronômetro ou
+contador de turnos.
+
 ## Combate — espaços de magia: pips por círculo, recuperação é regra por classe
 
 **Decisão:** contador visual de pips (preenchido/gasto) por círculo,
