@@ -550,6 +550,26 @@ fora dele.
 
 **Data/origem:** 2026-09, pedido do Osmar.
 
+## Fechamento do popup de dano com 2+ botões — `confirmarFechamento` aceita array
+
+**Decisão:** `confirmarFechamento` (`RollContext.tsx`/`RollDadosOptions`)
+aceita tanto a forma original (1 objeto `{rotulo?, aoTocar?}`, "OK"
+quando `rotulo` ausente) quanto um ARRAY de `{rotulo, aoTocar?}` —
+renderiza um botão por item, lado a lado, qualquer um fecha o popup e
+dispara seu próprio `aoTocar`.
+
+**Quando usar:** característica cuja regra pede "escolha X ou Y ao
+acertar/fechar o popup de dano" (ex.: Arma Sagrada do Paladino — dano
+Normal ou Radiante, só rótulo informativo, sem efeito mecânico na
+rolagem). Diferente do botão único (Golpe Brutal/Esmagador/Talhador,
+que abre outro modal) — aqui as opções não abrem nada, só fecham.
+
+**Convivência com o botão único existente:** quando os 2 poderiam
+qualificar no mesmo ataque (raro), a característica com array ganha
+prioridade — mesmo espírito da exclusão Golpes Radiantes × Golpe
+Brutal, não vale o esforço de um popup multi-efeito pra combinação
+rara.
+
 ## Recurso novo em `CombatTab.tsx` — 1 prop-objeto agrupado, não 3-4 props soltas
 
 Até 2026-09, cada característica de classe/espécie que "gasta e

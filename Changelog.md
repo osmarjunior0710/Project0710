@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1216
+
+Correção na Arma Sagrada (Paladino): a escolha entre dano Normal e
+Radiante agora aparece no popup de dano, no momento de fechar (depois
+de rolar), em vez de um toggle fixo no card — bate certinho com a
+regra ("a cada acerto").
+
 ## v202610_1207
 
 Paladino com Juramento da Devoção: a partir do nível 3, "⚔️ Arma

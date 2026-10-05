@@ -79,6 +79,14 @@ export interface ConfirmarAcerto {
   onErrou: () => void;
 }
 
+/** Botão(ões) de fechamento do popup de dano (ver `RollDadosOptions.
+ * confirmarFechamento`). Forma de objeto único = comportamento
+ * original (1 botão, `rotulo` ausente = "OK"); array = 2+ botões lado
+ * a lado, cada um com `rotulo` obrigatório (ex.: "Normal"/"☀️
+ * Radiante" da Arma Sagrada) — qualquer um fecha o popup, chamando seu
+ * próprio `aoTocar` se tiver. */
+export type ConfirmarFechamento = { rotulo?: string; aoTocar?: () => void } | { rotulo: string; aoTocar?: () => void }[];
+
 export interface RollState {
   label: string;
   formula: string;
@@ -200,7 +208,7 @@ export interface RollState {
   /** [Protótipo, ver `RollD20Options.confirmarAcerto`.] */
   confirmarAcerto?: ConfirmarAcerto | null;
   /** [Protótipo, ver `RollDadosOptions.confirmarFechamento`.] */
-  confirmarFechamento?: { rotulo?: string; aoTocar?: () => void } | null;
+  confirmarFechamento?: ConfirmarFechamento | null;
   /** Ver `RollDadosOptions.confirmarAlvoCura`. */
   confirmarAlvoCura?: { onMeCurar: (total: number) => void; onCurarOutro?: () => void } | null;
   /** Mesma ideia de `resultadoBrutoD20`, só que pra uma rolagem 'dados'
@@ -351,7 +359,7 @@ interface RollDadosOptions {
    * `aoTocar` (normalmente abre outro popup/modal, decidido por quem
    * chama, não por aqui). Ausente = comportamento normal (tap-fora/✕
    * fecham, sem botão extra). */
-  confirmarFechamento?: { rotulo?: string; aoTocar?: () => void };
+  confirmarFechamento?: ConfirmarFechamento;
   /** Cura que pode ter como alvo o próprio personagem ou outra
    * criatura (Pet/PJ) — fluxo Acerto/Erro aplicado à Cura (ver
    * `sdd/sdd-fluxo-rolagem.md`). Substitui o fechamento normal por 2

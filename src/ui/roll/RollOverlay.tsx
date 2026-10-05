@@ -280,16 +280,33 @@ export default function RollOverlay() {
             </div>
           </div>
         )}
-        {estado.fase === 'concluido' && estado.confirmarFechamento && (
+        {estado.fase === 'concluido' && estado.confirmarFechamento && Array.isArray(estado.confirmarFechamento) && (
+          <div className={styles.vantagemButtons}>
+            {estado.confirmarFechamento.map((botao, i) => (
+              <div
+                key={i}
+                className={styles.okBtn}
+                style={{ flex: 1, marginTop: 0 }}
+                onClick={() => {
+                  fechar();
+                  botao.aoTocar?.();
+                }}
+              >
+                {botao.rotulo}
+              </div>
+            ))}
+          </div>
+        )}
+        {estado.fase === 'concluido' && estado.confirmarFechamento && !Array.isArray(estado.confirmarFechamento) && (
           <div
             className={styles.okBtn}
             onClick={() => {
-              const { aoTocar } = estado.confirmarFechamento!;
+              const { aoTocar } = estado.confirmarFechamento as { rotulo?: string; aoTocar?: () => void };
               fechar();
               aoTocar?.();
             }}
           >
-            {estado.confirmarFechamento.rotulo ?? 'OK'}
+            {(estado.confirmarFechamento as { rotulo?: string }).rotulo ?? 'OK'}
           </div>
         )}
         {estado.fase === 'concluido' && estado.confirmarAlvoCura && (

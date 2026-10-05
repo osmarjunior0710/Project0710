@@ -220,7 +220,6 @@ interface AcaoPanelContentProps {
   armaSagradaElegivel: boolean;
   armaSagradaAtiva: boolean;
   armaSagradaBonus: number;
-  armaSagradaTipoDano: 'normal' | 'radiante';
   onUsarArmaSagrada: () => void;
   /** Quais pills de info aparecem em cada linha de magia — preferência
    * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
@@ -319,7 +318,6 @@ export default function AcaoPanelContent({
   armaSagradaElegivel,
   armaSagradaAtiva,
   armaSagradaBonus,
-  armaSagradaTipoDano,
   onUsarArmaSagrada,
   preferenciasPillsMagia,
   temRepudiarInimigos,
@@ -519,11 +517,16 @@ export default function AcaoPanelContent({
     // Arma Sagrada (Paladino) — `armaSagradaBonus` já vem zerado (ver
     // `FichaShell.tsx`) quando a arma atual não é mais elegível, então
     // basta somar sem checar de novo aqui. Tipo de dano (Normal/
-    // Radiante) é só rótulo informativo no popup — o app não calcula
-    // resistência/vulnerabilidade de inimigo (decisão confirmada com
-    // o Osmar, ver `sdd/sdd-paladino-devocao.md` seção 2).
+    // Radiante) é escolhido no fechamento do popup de dano (pedido do
+    // Osmar: "a pessoa escolhe e fecha", mesmo momento da regra real
+    // "a cada acerto") — é só rótulo informativo, o app não calcula
+    // resistência/vulnerabilidade de inimigo (ver
+    // `sdd/sdd-paladino-devocao.md` seção 2). Ganha prioridade sobre o
+    // botão de Esmagador/Talhador/Raízes Devastadoras nesse ataque —
+    // combinação com Arma Sagrada é rara o bastante pra não valer o
+    // popup multi-efeito (mesmo espírito da exclusão de Golpes
+    // Radiantes com Golpe Brutal).
     const modAcertoComArmaSagrada = ataque.modAcerto + armaSagradaBonus;
-    const armaSagradaRadianteAtivo = armaSagradaBonus > 0 && armaSagradaTipoDano === 'radiante';
     const explicacaoAcertoComArmaSagrada =
       armaSagradaBonus > 0
         ? {
@@ -549,7 +552,7 @@ export default function AcaoPanelContent({
             critico,
           );
           rolarDados({
-            label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}${golpesRadiantesAtivo ? ' + Golpes Radiantes' : ''}${armaSagradaRadianteAtivo ? ' (Radiante, Arma Sagrada)' : ''}`,
+            label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}${golpesRadiantesAtivo ? ' + Golpes Radiantes' : ''}`,
             formula: dano.formula,
             quantidade: dano.quantidade,
             lados: ataque.danoLados,
@@ -557,7 +560,8 @@ export default function AcaoPanelContent({
             gruposExtras: dano.gruposExtras,
             rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
             rerollEscolhido: perfuradorDisponivel && ataque.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
-            confirmarFechamento: confirmarFechamentoDoAtaque(talento),
+            confirmarFechamento:
+              armaSagradaBonus > 0 ? [{ rotulo: 'Normal' }, { rotulo: '☀️ Radiante' }] : confirmarFechamentoDoAtaque(talento),
           });
         },
         onErrou: () => {},

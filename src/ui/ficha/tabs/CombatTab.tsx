@@ -791,14 +791,6 @@ export default function CombatTab({
   const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
   const [ramosDaArvoreAberto, setRamosDaArvoreAberto] = useState(false);
   const [repudiarInimigosAberto, setRepudiarInimigosAberto] = useState(false);
-  /** Tipo de dano escolhido pra Arma Sagrada enquanto ativa — regra
-   * real é "a cada acerto" (não fixo na ativação), mas como o popup de
-   * dano já usa o slot de botão único pra Golpe Brutal/Esmagador/
-   * Talhador, a escolha vira um toggle no próprio card "ATIVA" (ver
-   * render abaixo) — o jogador troca a qualquer momento entre
-   * ataques, efeito prático igual. Não persiste entre ativações
-   * (sempre volta pra Normal). */
-  const [armaSagradaTipoDano, setArmaSagradaTipoDano] = useState<'normal' | 'radiante'>('normal');
   // Esmagador/Talhador — qual popup de "Ativar efeito" está aberto
   // agora (`null` = nenhum), disparado pelo botão do talento no popup
   // de dano (mesmo padrão de `golpeBrutalEfeitoPendente`).
@@ -1019,12 +1011,9 @@ export default function CombatTab({
   }
 
   /** Arma Sagrada (Paladino) — grátis dentro da ação Atacar (não marca
-   * Ação/Bônus/Reação como usada, diferente de Fúria/Sentido Divino).
-   * Encerrar reseta o tipo de dano escolhido de volta pra Normal. */
+   * Ação/Bônus/Reação como usada, diferente de Fúria/Sentido Divino). */
   function usarArmaSagrada() {
-    const ativandoAgora = !armaSagrada.ativa;
     if (!armaSagrada.onUsar()) return;
-    if (!ativandoAgora) setArmaSagradaTipoDano('normal');
     setPainelAberto(null);
   }
 
@@ -1561,25 +1550,9 @@ export default function CombatTab({
         <div className="opt-card" style={{ marginBottom: 12, borderColor: '#d9a441' }}>
           <div className="opt-card-name">⚔️ Arma Sagrada ATIVA — {armaSagrada.nomeArma}</div>
           <div className="opt-card-desc">
-            +{Math.max(1, modCarisma)} no acerto com {armaSagrada.nomeArma}; ao acertar, causa dano Normal ou
-            Radiante (escolha abaixo). Emite luz (não simulado pelo app).
+            +{Math.max(1, modCarisma)} no acerto com {armaSagrada.nomeArma}; ao acertar, escolha dano Normal ou
+            Radiante no popup de dano. Emite luz (não simulado pelo app).
             {!armaSagrada.elegivel && ' A arma equipada agora não é elegível — o bônus some até você voltar a usar uma arma Corpo a Corpo.'}
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <div
-              className="btn"
-              style={armaSagradaTipoDano === 'normal' ? { background: 'var(--accent-dim)', borderColor: 'var(--accent)' } : undefined}
-              onClick={() => setArmaSagradaTipoDano('normal')}
-            >
-              Normal
-            </div>
-            <div
-              className="btn"
-              style={armaSagradaTipoDano === 'radiante' ? { background: '#f6e3b4', borderColor: '#d9a441' } : undefined}
-              onClick={() => setArmaSagradaTipoDano('radiante')}
-            >
-              ☀️ Radiante
-            </div>
           </div>
           <div className="btn" style={{ marginTop: 8, background: 'rgba(178, 59, 59, 0.16)', borderColor: '#b23b3b' }} onClick={usarArmaSagrada}>
             Encerrar Arma Sagrada
@@ -1916,7 +1889,6 @@ export default function CombatTab({
           armaSagradaElegivel={armaSagrada.elegivel}
           armaSagradaAtiva={armaSagrada.ativa}
           armaSagradaBonus={armaSagrada.bonus}
-          armaSagradaTipoDano={armaSagradaTipoDano}
           onUsarArmaSagrada={usarArmaSagrada}
           esmagadorDisponivel={esmagadorDisponivel}
           talhadorDisponivel={talhadorDisponivel}

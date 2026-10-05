@@ -399,14 +399,18 @@ na Entrega 5.
       card "⚔️ Arma Sagrada ATIVA — [arma]" no corpo da aba Combate,
       com botão "Encerrar". `armaSagradaAtiva` persistido (mesmo
       padrão de `furiaAtiva`).
-    - [x] **Ajuste técnico na UI combinada (chapéu 4):** a escolha
-      Normal/Radiante é "a cada acerto" na regra, mas o popup de dano
-      já usa o único slot de botão extra pra Golpe Brutal/Esmagador/
-      Talhador — virou um toggle no próprio card "ATIVA" (o jogador
-      troca a qualquer momento entre ataques, efeito prático igual).
-      Tipo de dano é só rótulo informativo no popup (confirmado com o
-      Osmar: o app não calcula resistência/vulnerabilidade de
-      inimigo).
+    - [x] **Escolha Normal/Radiante no popup de dano, como a regra
+      pede** ("a cada acerto") — pedido do Osmar depois de eu propor
+      um toggle no card por simplicidade técnica. `confirmarFechamento`
+      (`RollContext.tsx`/`RollOverlay.tsx`) ganhou suporte a MÚLTIPLOS
+      botões (array), não só 1 — reaproveitável por qualquer
+      característica futura com a mesma forma ("escolha ao fechar o
+      popup de dano"). Com Arma Sagrada ativa, os botões "Normal"/"☀️
+      Radiante" aparecem no fechamento do popup de dano (em vez do
+      botão de Golpe Brutal/Esmagador/Talhador — combinação rara,
+      mesma exclusão de Golpes Radiantes com Golpe Brutal). Tipo de
+      dano continua só rótulo informativo (confirmado com o Osmar: o
+      app não calcula resistência/vulnerabilidade de inimigo).
     - [x] Bônus some automaticamente se o jogador trocar pra uma arma
       não elegível (à distância) com o toggle ainda ativo — não
       desliga sozinho, só o bônus que some até voltar pra arma Corpo
