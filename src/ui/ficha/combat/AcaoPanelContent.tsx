@@ -7,6 +7,7 @@ import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '..
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import { resolverVantagem, fmtMod } from '../../../core/calculoPersonagem';
+import type { ResumoConjuracaoPorClasse } from '../../../core/magiasPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
@@ -73,6 +74,8 @@ interface AcaoPanelContentProps {
   magiasFixasClasseGastas: Record<string, number>;
   onUsarMagiaGratisDeClasse: (nomeMagia: string) => void;
   modAcertoConjuracao: number | null;
+  /** Resumo de conjuração por classe — ver `CombatTab.tsx`. */
+  resumosPorClasse: ResumoConjuracaoPorClasse[];
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
@@ -261,6 +264,7 @@ export default function AcaoPanelContent({
   magiasFixasClasseGastas,
   onUsarMagiaGratisDeClasse,
   modAcertoConjuracao,
+  resumosPorClasse,
   explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
@@ -348,6 +352,7 @@ export default function AcaoPanelContent({
     magiasFixasClasseGastas,
     onUsarMagiaGratisDeClasse,
     modAcertoConjuracao,
+    resumosPorClasse,
     explicacaoAcertoConjuracao,
     truqueVinculadoAgonizante,
     modCarisma,

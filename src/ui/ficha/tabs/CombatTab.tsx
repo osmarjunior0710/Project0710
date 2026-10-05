@@ -17,7 +17,7 @@ import {
 } from '../../../core/evocador';
 import SobrecargaEscolha from '../combat/SobrecargaEscolha';
 import EscolherMontariaModal from '../combat/EscolherMontariaModal';
-import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
+import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional, ResumoConjuracaoPorClasse } from '../../../core/magiasPersonagem';
 import type { AcaoBase } from '../../../data/exampleCombat';
 import type { AjustesPet, Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
@@ -393,6 +393,13 @@ interface CombatTabProps {
    * precisa marcar "gasta". */
   onUsarMagiaGratisDeClasse: (nomeMagia: string) => void;
   modAcertoConjuracao: number | null;
+  /** Resumo de conjuração JÁ calculado por CADA classe conjuradora do
+   * personagem (Entrega 5c) — usado pra resolver o mod./CD pela
+   * classe DONA da magia sendo conjurada, não só pela classe ativa
+   * (pill), ver `core/magiasPersonagem.ts`
+   * `modAcertoConjuracaoPorClasse` e `PENDENCIAS.md` "Multiclasse —
+   * acerto/CD de magia...". */
+  resumosPorClasse: ResumoConjuracaoPorClasse[];
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
@@ -713,6 +720,7 @@ export default function CombatTab({
   magiasFixasClasseGastas,
   onUsarMagiaGratisDeClasse,
   modAcertoConjuracao,
+  resumosPorClasse,
   explicacaoAcertoConjuracao,
   explicacaoCdConjuracao,
   truqueVinculadoAgonizante,
@@ -1911,6 +1919,7 @@ export default function CombatTab({
           magiasFixasClasseGastas={magiasFixasClasseGastas}
           onUsarMagiaGratisDeClasse={onUsarMagiaGratisDeClasse}
           modAcertoConjuracao={modAcertoConjuracao}
+          resumosPorClasse={resumosPorClasse}
           explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
           truqueVinculadoAgonizante={truqueVinculadoAgonizante}
           modCarisma={modCarisma}
@@ -2058,6 +2067,7 @@ export default function CombatTab({
           ponte={ponte}
           nivel={nivel}
           modAcertoConjuracao={modAcertoConjuracao}
+          resumosPorClasse={resumosPorClasse}
           explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
           truqueVinculadoAgonizante={truqueVinculadoAgonizante}
           modCarisma={modCarisma}
@@ -2113,6 +2123,7 @@ export default function CombatTab({
           conjura={conjura}
           magiasReacao={magiasPreparadasReacao}
           modAcertoConjuracao={modAcertoConjuracao}
+          resumosPorClasse={resumosPorClasse}
           explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
           truqueVinculadoAgonizante={truqueVinculadoAgonizante}
           modCarisma={modCarisma}

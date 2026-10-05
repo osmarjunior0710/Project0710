@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
-import { opcoesGastoComPonte, type EspacoDeMagiaAtivo, type PoolDePonte, type MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
+import {
+  opcoesGastoComPonte,
+  modAcertoConjuracaoPorClasse,
+  type EspacoDeMagiaAtivo,
+  type PoolDePonte,
+  type MagiaComClasseOpcional,
+  type ResumoConjuracaoPorClasse,
+} from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import { circuloGratisMagiaFixaDeClasse, type MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
@@ -40,6 +47,11 @@ interface UsarMagiaPainelParams {
   truques: MagiaComClasseOpcional[];
   magiasPreparadas: MagiaComClasseOpcional[];
   modAcertoConjuracao: number | null;
+  /** Resumo de conjuração por classe — ver `CombatTab.tsx`. Usado pra
+   * resolver o mod./CD pela classe DONA da magia escolhida (ver
+   * `conjurarMagia`), não pela classe ativa — PENDENCIAS.md
+   * "Multiclasse — acerto/CD de magia...". */
+  resumosPorClasse: ResumoConjuracaoPorClasse[];
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
@@ -117,7 +129,9 @@ interface UsarMagiaPainelParams {
  * quem chama faz `if (picker) return picker;` antes do resto do JSX).
  * `abrirLista` é o `onClick` da linha "✨ Usar Magia" de cada painel. */
 export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
-  const [telaMagia, setTelaMagia] = useState<'lista' | { magia: Magia; circulos: number[] } | null>(null);
+  const [telaMagia, setTelaMagia] = useState<'lista' | { magia: Magia; circulos: number[]; classeDonaDaMagia: string | null } | null>(
+    null,
+  );
   const { rolarD20, rolarDados } = useRoll();
 
   // Fechar o drawer (backdrop/borda) não desmonta o painel — reseta o
@@ -132,7 +146,13 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
    * (upcast, ver `EscolherCirculoShell`); truque passa `null` (não
    * gasta espaço nenhum). `gratis` (Maestria de Magias) pula o
    * desconto de Espaço mesmo com `circulo` definido. */
-  function conjurarMagia(m: Magia, circulo: number | null, classeDoEspaco: string = p.classeAtivaNome, gratis = false) {
+  function conjurarMagia(
+    m: Magia,
+    circulo: number | null,
+    classeDoEspaco: string = p.classeAtivaNome,
+    gratis = false,
+    classeDonaDaMagia: string | null = null,
+  ) {
     // Trava dupla — a linha "Usar Magia" já fica desabilitada quando
     // `desvantagemForcaDestreza` é true, mas essa checagem aqui é o
     // ponto único de verdade (SDD "Penalidades por Falta de
@@ -153,16 +173,25 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
       p.onAbrirEscolhaDeMontaria(circuloUsado);
       return;
     }
+    // Resolve o mod. pela classe DONA da magia (multiclasse), não pela
+    // classe ativa — ver PENDENCIAS.md "Multiclasse — acerto/CD de
+    // magia...".
+    const { mod: modAcertoReal, explicacao: explicacaoReal } = modAcertoConjuracaoPorClasse(
+      p.resumosPorClasse,
+      classeDonaDaMagia,
+      p.modAcertoConjuracao,
+      p.explicacaoAcertoConjuracao,
+    );
     const resultado = decidirConjuracao(
       m,
       circuloUsado,
       p.nivel,
-      p.modAcertoConjuracao,
+      modAcertoReal,
       p.colheitaMacabraDisponivel,
       circulo !== null && !gratis,
       p.truqueVinculadoAgonizante,
       p.modCarisma,
-      p.explicacaoAcertoConjuracao,
+      explicacaoReal,
       p.evocacaoPotencializadaAtiva,
       p.modIntAtual,
     );
@@ -279,8 +308,10 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         magiasFixasClasseAtuais={p.magiasFixasClasseAtuais}
         magiasFixasClasseGastas={p.magiasFixasClasseGastas}
         onFechar={() => setTelaMagia(null)}
-        onEscolherTruque={(m) => conjurarMagia(m, null)}
-        onEscolherMagia={(m, circulosDisponiveis) => setTelaMagia({ magia: m, circulos: circulosDisponiveis })}
+        onEscolherTruque={(m, classe) => conjurarMagia(m, null, p.classeAtivaNome, false, classe)}
+        onEscolherMagia={(m, circulosDisponiveis, classe) =>
+          setTelaMagia({ magia: m, circulos: circulosDisponiveis, classeDonaDaMagia: classe })
+        }
         preferenciasPillsMagia={p.preferenciasPillsMagia}
       />
     ) : telaMagia ? (
@@ -303,7 +334,9 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
             ),
         )}
         onVoltar={() => setTelaMagia('lista')}
-        onConjurar={(circulo, classeNome, gratis) => conjurarMagia(telaMagia.magia, circulo, classeNome, gratis)}
+        onConjurar={(circulo, classeNome, gratis) =>
+          conjurarMagia(telaMagia.magia, circulo, classeNome, gratis, telaMagia.classeDonaDaMagia)
+        }
       />
     ) : null;
 

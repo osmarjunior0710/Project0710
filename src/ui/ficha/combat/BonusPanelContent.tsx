@@ -4,7 +4,7 @@ import type { Pet } from '../../../core/pets';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { AcaoBase } from '../../../data/exampleCombat';
-import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
+import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional, ResumoConjuracaoPorClasse } from '../../../core/magiasPersonagem';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
@@ -165,6 +165,8 @@ interface BonusPanelContentProps {
   /** Nível do personagem — pro Aprimoramento de Truque. */
   nivel: number;
   modAcertoConjuracao: number | null;
+  /** Resumo de conjuração por classe — ver `CombatTab.tsx`. */
+  resumosPorClasse: ResumoConjuracaoPorClasse[];
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
@@ -286,6 +288,7 @@ export default function BonusPanelContent({
   ponte,
   nivel,
   modAcertoConjuracao,
+  resumosPorClasse,
   explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
@@ -328,6 +331,7 @@ export default function BonusPanelContent({
     magiasFixasClasseGastas,
     onUsarMagiaGratisDeClasse,
     modAcertoConjuracao,
+    resumosPorClasse,
     explicacaoAcertoConjuracao,
     truqueVinculadoAgonizante,
     modCarisma,

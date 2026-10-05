@@ -3,7 +3,14 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { Pet } from '../../../core/pets';
 import { iconesMagia } from '../../../core/classificarMagia';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
-import { cdConjuracao, circulosDisponiveisParaConjurar, type EspacoDeMagiaAtivo, type MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
+import {
+  cdConjuracao,
+  circulosDisponiveisParaConjurar,
+  modAcertoConjuracaoPorClasse,
+  type EspacoDeMagiaAtivo,
+  type MagiaComClasseOpcional,
+  type ResumoConjuracaoPorClasse,
+} from '../../../core/magiasPersonagem';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import { truqueElegivelTruquePotente, sobrecargaElegivel, danoMaximoSobrecarga, danoNecroticoSobrecarga } from '../../../core/evocador';
@@ -46,6 +53,8 @@ interface ReacaoPanelContentProps {
   conjura: boolean;
   magiasReacao: MagiaComClasseOpcional[];
   modAcertoConjuracao: number | null;
+  /** Resumo de conjuração por classe — ver `CombatTab.tsx`. */
+  resumosPorClasse: ResumoConjuracaoPorClasse[];
   /** Quebra do `modAcertoConjuracao` pro popup de rolagem (B7) —
    * `null` nos mesmos casos que `modAcertoConjuracao`. */
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null;
@@ -138,6 +147,7 @@ export default function ReacaoPanelContent({
   conjura,
   magiasReacao,
   modAcertoConjuracao,
+  resumosPorClasse,
   explicacaoAcertoConjuracao,
   truqueVinculadoAgonizante,
   modCarisma,
@@ -184,7 +194,7 @@ export default function ReacaoPanelContent({
     onEscolher('💀 Colheita dos Mortos', `Morto-Vivo reduzido a 0 PV — você recupera ${cura} Pontos de Vida.`);
   }
 
-  function conjurarMagia(m: Magia) {
+  function conjurarMagia(m: Magia, classeDonaDaMagia: string | null) {
     if (desvantagemForcaDestreza) return;
     // Reação não tem tela de escolha de círculo: gasta o MENOR espaço que
     // ainda sirva (>= círculo da magia) — regra normal de conjurar com
@@ -199,16 +209,25 @@ export default function ReacaoPanelContent({
       return;
     }
     setAviso(null);
+    // Resolve o mod. pela classe DONA da magia (multiclasse), não pela
+    // classe ativa — ver PENDENCIAS.md "Multiclasse — acerto/CD de
+    // magia...".
+    const { mod: modAcertoReal, explicacao: explicacaoReal } = modAcertoConjuracaoPorClasse(
+      resumosPorClasse,
+      classeDonaDaMagia,
+      modAcertoConjuracao,
+      explicacaoAcertoConjuracao,
+    );
     const resultado = decidirConjuracao(
       m,
       m.circulo === 0 ? 0 : circuloUsado,
       nivel,
-      modAcertoConjuracao,
+      modAcertoReal,
       colheitaMacabraDisponivel,
       m.circulo > 0,
       truqueVinculadoAgonizante,
       modCarisma,
-      explicacaoAcertoConjuracao,
+      explicacaoReal,
       evocacaoPotencializadaAtiva,
       modIntAtual,
     );
@@ -522,7 +541,7 @@ export default function ReacaoPanelContent({
                 key={`${m.id}-${classe ?? 'x'}`}
                 className={styles.spellMiniRow}
                 style={bloqueada ? { opacity: semEspaco ? 0.45 : 0.5, pointerEvents: 'none' } : undefined}
-                onClick={() => conjurarMagia(m)}
+                onClick={() => conjurarMagia(m, classe)}
               >
                 <span>
                   <MagiaComDescricao magia={m} /> {iconesMagia(m)}

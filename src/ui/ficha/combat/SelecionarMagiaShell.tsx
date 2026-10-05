@@ -46,8 +46,8 @@ interface SelecionarMagiaShellProps {
   magiasFixasClasseAtuais: MagiaFixaDeClasse[];
   magiasFixasClasseGastas: Record<string, number>;
   onFechar: () => void;
-  onEscolherTruque: (m: Magia) => void;
-  onEscolherMagia: (m: Magia, circulosDisponiveis: number[]) => void;
+  onEscolherTruque: (m: Magia, classe: string | null) => void;
+  onEscolherMagia: (m: Magia, circulosDisponiveis: number[], classe: string | null) => void;
   /** Quais pills de info aparecem em cada linha de magia — preferência
    * do aparelho (ver `core/preferenciasPillsMagia.ts`). O pill de
    * Círculo fica sempre fora aqui, mesmo que a preferência esteja
@@ -110,7 +110,7 @@ export default function SelecionarMagiaShell({
                     key={`${m.id}-${classe ?? 'x'}`}
                     className="check-row"
                     style={disponivel ? undefined : { opacity: 0.45, pointerEvents: 'none' }}
-                    onClick={() => (truque ? onEscolherTruque(m) : onEscolherMagia(m, circulosDisponiveis))}
+                    onClick={() => (truque ? onEscolherTruque(m, classe) : onEscolherMagia(m, circulosDisponiveis, classe))}
                   >
                     <div className={`check-label ${localStyles.checkLabelCol}`}>
                       <div>

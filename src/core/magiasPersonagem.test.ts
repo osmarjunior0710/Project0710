@@ -4,6 +4,7 @@ import {
   magiasDisponiveisParaPreparar,
   poolDescobertasMagicas,
   cdConjuracao,
+  modAcertoConjuracaoPorClasse,
   modAcertoConjuracao,
   resumoConjuracao,
   explicarModAcertoConjuracao,
@@ -404,6 +405,25 @@ describe('cdConjuracao', () => {
 
   it('mod negativo/zero: CD ainda soma normal (sem mínimo especial)', () => {
     expect(cdConjuracao(0)).toBe(8);
+  });
+});
+
+describe('modAcertoConjuracaoPorClasse (multiclasse — acerto/CD pela classe dona da magia)', () => {
+  const resumosPorClasse = [
+    { classeNome: 'Mago', resumo: { atributoNome: 'Inteligência', atributo: 'INT', modAtributo: 5, cd: 19, modAtaque: 11 } as const, explicacaoAcerto: null },
+    { classeNome: 'Bardo', resumo: { atributoNome: 'Carisma', atributo: 'CAR', modAtributo: 1, cd: 13, modAtaque: 5 } as const, explicacaoAcerto: null },
+  ];
+
+  it('classe encontrada: usa o mod. dessa classe, não o fallback', () => {
+    expect(modAcertoConjuracaoPorClasse(resumosPorClasse, 'Bardo', 11, null).mod).toBe(5);
+  });
+
+  it('classe não encontrada (ex.: personagem só tem 1 classe conjuradora): cai no fallback', () => {
+    expect(modAcertoConjuracaoPorClasse(resumosPorClasse, 'Bruxo', 11, null).mod).toBe(11);
+  });
+
+  it('classeDonaDaMagia null (magia de espécie/talento, sem dono ambíguo): cai no fallback', () => {
+    expect(modAcertoConjuracaoPorClasse(resumosPorClasse, null, 11, null).mod).toBe(11);
   });
 });
 

@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1741
+
+Correção de multiclasse: conjurar uma magia/truque agora usa o
+modificador de acerto e a CD da classe que realmente concede aquela
+magia, não mais sempre o da classe ativa (pill). Só afeta personagem
+com mais de 1 classe conjuradora e atributos de conjuração diferentes
+entre elas (ex.: Mago + Bardo) — personagem de 1 classe só não muda em
+nada.
+
 ## v202610_1436
 
 Fechamento do foco Paladino (por agora): removido o atalho temporário

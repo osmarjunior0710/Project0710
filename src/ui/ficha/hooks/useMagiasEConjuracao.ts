@@ -353,9 +353,17 @@ export function useMagiasEConjuracao(input: {
   const ritualRapidoGasto = magiasGratisGastas.includes(CHAVE_RITUAL_RAPIDO);
   const nomesAcoesBonusExtras = acoesConvertidasEmBonus(talentosEfetivos);
   const acoesGenericasBonus = acoesBase.filter((a) => nomesAcoesBonusExtras.includes(a.nome));
-  // `null` = lista fixa de 1 classe só (sem ambiguidade de
-  // multiclasse pra marcar) — ver `MagiaComClasseOpcional`.
+  // `null` = lista fixa que não é marcada de nenhuma classe (magia de
+  // espécie/talento, nunca ligada a 1 classe específica) — ver
+  // `MagiaComClasseOpcional`. `comClasse` é pras listas fixas que SÃO
+  // de 1 classe só, sem ambiguidade de multiclasse (Descobertas
+  // Mágicas/Livro das Sombras/Pacto do Ínfero/Juramento/Maestria/
+  // Assinatura) — precisa da classe de verdade (não `null`) pra
+  // `modAcertoConjuracaoPorClasse` achar o modificador certo na hora
+  // de conjurar, ver PENDENCIAS.md "Multiclasse — acerto/CD de
+  // magia...".
   const semClasse = (m: Magia): MagiaComClasseOpcional => ({ magia: m, classe: null });
+  const comClasse = (nomeClasse: string) => (m: Magia): MagiaComClasseOpcional => ({ magia: m, classe: nomeClasse });
   // Maestria de Magias/Assinatura Mágica também ficam "sempre
   // preparadas" (fora do limite normal, mesmo espírito de Descobertas
   // Mágicas/Livro das Sombras acima) — precisam entrar aqui pra
@@ -367,10 +375,10 @@ export function useMagiasEConjuracao(input: {
   const magiasAssinaturaConjuraveis = magiasAssinaturaDoLivro.filter((m) => !magiasPreparadasAtuais.some((mc) => mc.nome === m.nome));
   const magiasConjuraveis: MagiaComClasseOpcional[] = [
     ...preparadasComClasse,
-    ...magiasDescobertasMagicas.map(semClasse),
-    ...livroDasSombras.map(semClasse),
-    ...magiasPactoDoInferoPreparadas.map(semClasse),
-    ...magiasJuramentoDaDevocaoPreparadas.map(semClasse),
+    ...magiasDescobertasMagicas.map(comClasse('Bardo')),
+    ...livroDasSombras.map(comClasse('Bruxo')),
+    ...magiasPactoDoInferoPreparadas.map(comClasse('Bruxo')),
+    ...magiasJuramentoDaDevocaoPreparadas.map(comClasse('Paladino')),
     // Com pill de classe (diferente do `semClasse` acima) — aqui a
     // classe concedente é sempre conhecida e sem ambiguidade
     // (`paladinoObj`), então mostra igual as magias preparadas normais.
@@ -378,8 +386,8 @@ export function useMagiasEConjuracao(input: {
     ...magiasEspeciePreparadasConjuraveis.map(semClasse),
     ...magiasTalentoOrigemPreparadas.map(semClasse),
     ...magiasTalentoGeralPreparadas.map(semClasse),
-    ...magiasMaestriaConjuraveis.map(semClasse),
-    ...magiasAssinaturaConjuraveis.map(semClasse),
+    ...magiasMaestriaConjuraveis.map(comClasse('Mago')),
+    ...magiasAssinaturaConjuraveis.map(comClasse('Mago')),
   ];
   // Roteia cada magia conjurável pro painel certo do Combate (Ação/
   // Ação Bônus/Reação), pelo próprio Tempo de Conjuração da magia —

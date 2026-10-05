@@ -596,3 +596,38 @@ export function resumoConjuracao(selecao: WizardSelection, classe: Classe | null
 export function cdConjuracao(modAcerto: number): number {
   return 8 + modAcerto;
 }
+
+/** 1 entrada de `resumosPorClasse` (`FichaShell.tsx`) — resumo de
+ * conjuração JÁ calculado pra 1 classe conjuradora do personagem. */
+export interface ResumoConjuracaoPorClasse {
+  classeNome: string;
+  resumo: ResumoConjuracao;
+  explicacaoAcerto: ExplicacaoCalculo | null;
+}
+
+/** Resolve o mod. de acerto de conjuração pela classe DONA da magia
+ * sendo conjurada, não pela classe ATIVA (pill) — bug real em
+ * personagem multiclasse quando as 2 classes usam atributos
+ * diferentes (ex.: Paladino/Carisma + Mago/Inteligência), ver
+ * `PENDENCIAS.md` "Multiclasse — acerto/CD de magia...". A CD
+ * (`cdConjuracao`) é sempre derivada do mesmo mod., não precisa de
+ * função própria.
+ *
+ * `classeDonaDaMagia: null` (lista sem dono ambíguo possível de
+ * marcar — magia de espécie/talento, ver `MagiaComClasseOpcional`) ou
+ * classe não encontrada em `resumosPorClasse` (personagem só tem 1
+ * classe conjuradora, ou a magia veio de uma classe sem conjuração
+ * mapeada) cai no `modFallback`/`explicacaoFallback` — mesmo
+ * comportamento de antes desta função existir (classe ativa). */
+export function modAcertoConjuracaoPorClasse(
+  resumosPorClasse: ResumoConjuracaoPorClasse[],
+  classeDonaDaMagia: string | null,
+  modFallback: number | null,
+  explicacaoFallback: ExplicacaoCalculo | null,
+): { mod: number | null; explicacao: ExplicacaoCalculo | null } {
+  if (classeDonaDaMagia) {
+    const achado = resumosPorClasse.find((r) => r.classeNome === classeDonaDaMagia);
+    if (achado) return { mod: achado.resumo.modAtaque, explicacao: achado.explicacaoAcerto };
+  }
+  return { mod: modFallback, explicacao: explicacaoFallback };
+}

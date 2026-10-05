@@ -19,7 +19,7 @@ import {
 import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { decidirConjuracao } from '../../../core/conjurarMagia';
-import { cdConjuracao, type ResumoConjuracao } from '../../../core/magiasPersonagem';
+import { cdConjuracao, modAcertoConjuracaoPorClasse, type ResumoConjuracao } from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import { circuloGratisMagiaFixaDeClasse, type MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
@@ -426,7 +426,7 @@ export default function MagiasTab({
   onColheitaMacabraDisponivel,
 }: MagiasTabProps) {
   const { rolarD20, rolarDados } = useRoll();
-  const [telaCirculo, setTelaCirculo] = useState<Magia | null>(null);
+  const [telaCirculo, setTelaCirculo] = useState<{ magia: Magia; classeDonaDaMagia: string | null } | null>(null);
   const [telaCopiarMagia, setTelaCopiarMagia] = useState(false);
   const [armaDePactoEscolhida, setArmaDePactoEscolhida] = useState('');
   // `danoRolado`/`upcastNaoAutomatico` — ver o mesmo padrão em
@@ -502,23 +502,37 @@ export default function MagiasTab({
    * gasto (não pra truque nem magia concedida de graça por Invocação
    * Mística) — controla se essa conjuração pode disparar a Colheita
    * Macabra (Necromante), ver `core/conjurarMagia.ts`. */
-  function processarMagiaAoUsar(m: Magia, circuloUsado: number, gastouEspacoDeVerdade: boolean) {
+  function processarMagiaAoUsar(
+    m: Magia,
+    circuloUsado: number,
+    gastouEspacoDeVerdade: boolean,
+    classeDonaDaMagia: string | null = null,
+  ) {
     // Convocar Montaria não roda a mecânica normal — vira Pet (ver
     // EscolherMontariaModal.tsx, mesmo desvio de useUsarMagiaPainel.tsx).
     if (m.nome === 'Convocar Montaria') {
       setEscolhaMontaria({ circuloUsado });
       return;
     }
+    // Resolve o mod. pela classe DONA da magia (multiclasse), não pela
+    // classe ativa — ver PENDENCIAS.md "Multiclasse — acerto/CD de
+    // magia...".
+    const { mod: modAcertoReal, explicacao: explicacaoReal } = modAcertoConjuracaoPorClasse(
+      resumosPorClasse,
+      classeDonaDaMagia,
+      modAcertoConjuracao,
+      explicacaoAcertoConjuracao,
+    );
     const resultado = decidirConjuracao(
       m,
       circuloUsado,
       nivel,
-      modAcertoConjuracao,
+      modAcertoReal,
       colheitaMacabraDisponivel,
       gastouEspacoDeVerdade,
       truqueVinculadoAgonizante,
       modCarisma,
-      explicacaoAcertoConjuracao,
+      explicacaoReal,
       evocacaoPotencializadaAtiva,
       modIntAtual,
     );
@@ -701,20 +715,22 @@ export default function MagiasTab({
     const jaGasta = item.recarga === 'descansoLongo' && magiasGratisGastas.includes(item.invocacaoId);
     if (jaGasta) return;
     onUsarMagiaGratis(item);
-    processarMagiaAoUsar(item.magia, item.magia.circulo, false);
+    // Invocações Místicas são sempre do Bruxo.
+    processarMagiaAoUsar(item.magia, item.magia.circulo, false, 'Bruxo');
   }
 
   /** Adepto de Ritual — ilimitado de verdade (RAW não tem contador), sem
    * gastar Espaço, sem popup de círculo, sem flag de "gasto". */
   function usarMagiaRitual(m: Magia) {
     if (desvantagemForcaDestreza) return;
-    processarMagiaAoUsar(m, m.circulo, false);
+    // Vem do Livro de Magias — sempre do Mago.
+    processarMagiaAoUsar(m, m.circulo, false, 'Mago');
   }
 
-  function usarMagia(m: Magia) {
+  function usarMagia(m: Magia, classeDonaDaMagia: string | null = null) {
     if (desvantagemForcaDestreza) return;
     if (m.circulo === 0) {
-      processarMagiaAoUsar(m, 0, false);
+      processarMagiaAoUsar(m, 0, false, classeDonaDaMagia);
       return;
     }
     const opcoes = opcoesGastoComPonte(
@@ -728,7 +744,7 @@ export default function MagiasTab({
         circuloGratisMagiaFixaDeClasse(m.nome, m.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas),
     );
     if (opcoes.length === 0) return;
-    setTelaCirculo(m);
+    setTelaCirculo({ magia: m, classeDonaDaMagia });
   }
 
   /** Sentido Divino/Repudiar Inimigos (Canalizar Divindade, Paladino) —
@@ -752,26 +768,27 @@ export default function MagiasTab({
   if (telaCirculo) {
     return (
       <EscolherCirculoShell
-        magia={telaCirculo}
+        magia={telaCirculo.magia}
         nivelPersonagem={nivel}
         opcoes={opcoesGastoComPonte(
-          telaCirculo.circulo,
+          telaCirculo.magia.circulo,
           classeAtivaNome,
           espacos,
           espacosGastosPorCirculo,
           ponte,
-          circuloGratisMaestria(telaCirculo.nome, maestriaDeMagiasAtuais) ??
-            circuloGratisAssinatura(telaCirculo.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas) ??
-            circuloGratisMagiaFixaDeClasse(telaCirculo.nome, telaCirculo.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas),
+          circuloGratisMaestria(telaCirculo.magia.nome, maestriaDeMagiasAtuais) ??
+            circuloGratisAssinatura(telaCirculo.magia.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas) ??
+            circuloGratisMagiaFixaDeClasse(telaCirculo.magia.nome, telaCirculo.magia.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas),
         )}
         onVoltar={() => setTelaCirculo(null)}
         onConjurar={(circulo, classeNome, gratis) => {
           const ok = gratis || onGastarSlotCirculo(circulo, classeNome);
-          const magiaConjurada = telaCirculo;
+          const magiaConjurada = telaCirculo.magia;
+          const classeDonaDaMagia = telaCirculo.classeDonaDaMagia;
           setTelaCirculo(null);
           if (!ok) return;
           if (gratis) onUsarMagiaGratisDeClasse(magiaConjurada.nome);
-          processarMagiaAoUsar(magiaConjurada, circulo, !gratis);
+          processarMagiaAoUsar(magiaConjurada, circulo, !gratis, classeDonaDaMagia);
         }}
       />
     );
@@ -1235,7 +1252,7 @@ export default function MagiasTab({
                       </div>
                       <div
                         className={`${styles.usarBtn} ${temAcao ? '' : styles.usarBtnPendencia}`}
-                        onClick={() => temAcao && usarMagia(m)}
+                        onClick={() => temAcao && usarMagia(m, classeDoItem)}
                       >
                         {temAcao ? 'Usar' : 'Usar (pendência)'}
                       </div>
@@ -1268,7 +1285,7 @@ export default function MagiasTab({
                   </div>
                   <div
                     className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                    onClick={() => temAcao && usarMagia(m)}
+                    onClick={() => temAcao && usarMagia(m, 'Bardo')}
                   >
                     {temAcao ? 'Usar' : 'Usar (pendência)'}
                   </div>
@@ -1299,7 +1316,7 @@ export default function MagiasTab({
                   </div>
                   <div
                     className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                    onClick={() => temAcao && usarMagia(m)}
+                    onClick={() => temAcao && usarMagia(m, 'Bruxo')}
                   >
                     {temAcao ? 'Usar' : 'Usar (pendência)'}
                   </div>
@@ -1330,7 +1347,7 @@ export default function MagiasTab({
                   </div>
                   <div
                     className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                    onClick={() => temAcao && usarMagia(m)}
+                    onClick={() => temAcao && usarMagia(m, 'Paladino')}
                   >
                     {temAcao ? 'Usar' : 'Usar (pendência)'}
                   </div>
@@ -1372,7 +1389,7 @@ export default function MagiasTab({
                   </div>
                   <div
                     className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                    onClick={() => temAcao && usarMagia(m)}
+                    onClick={() => temAcao && usarMagia(m, magiasFixasClasseNomeConcedente)}
                   >
                     {temAcao ? 'Usar' : 'Usar (pendência)'}
                   </div>
@@ -1621,7 +1638,7 @@ export default function MagiasTab({
                   </div>
                   <div
                     className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                    onClick={() => temAcao && usarMagia(m)}
+                    onClick={() => temAcao && usarMagia(m, 'Bruxo')}
                   >
                     {temAcao ? 'Usar' : 'Usar (pendência)'}
                   </div>
@@ -1680,7 +1697,7 @@ export default function MagiasTab({
                       </div>
                       <div
                         className={`${styles.usarBtn} ${semEspaco ? styles.usarBtnDesabilitado : ''}`}
-                        onClick={() => usarMagia(m)}
+                        onClick={() => usarMagia(m, classeDoItem)}
                       >
                         Usar
                       </div>
@@ -1782,7 +1799,7 @@ export default function MagiasTab({
                   </div>
                   <div
                     className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : ''}`}
-                    onClick={() => temAcao && usarMagia(m)}
+                    onClick={() => temAcao && usarMagia(m, 'Mago')}
                   >
                     {temAcao ? 'Usar' : 'Usar (pendência)'}
                   </div>
@@ -1816,7 +1833,7 @@ export default function MagiasTab({
                   </div>
                   <div
                     className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : ''}`}
-                    onClick={() => temAcao && usarMagia(m)}
+                    onClick={() => temAcao && usarMagia(m, 'Mago')}
                   >
                     {temAcao ? 'Usar' : 'Usar (pendência)'}
                   </div>

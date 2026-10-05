@@ -3221,6 +3221,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onUsarMagiaGratisDeClasse={usarMagiaGratis}
             magiasPreparadasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
+            resumosPorClasse={resumosPorClasse}
             explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             explicacaoCdConjuracao={explicacaoCdConjuracao}
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}
