@@ -21,6 +21,13 @@ interface BonusPanelContentProps {
   usosCanalizarMaximo: number;
   usosCanalizarRestantes: number;
   onUsarSentidoDivino: () => void;
+  /** Resplendor Sagrado (Paladino, Juramento da Devoção, nível 20) —
+   * `disponivel` já combina ter a característica + ainda não estar
+   * ativa + ainda ter o uso (não gasto) — ver `CombatTab.tsx`. Some
+   * da lista quando qualquer uma dessas não vale; o card "ATIVA"/
+   * "Encerrar"/"Recuperar" fica no corpo da aba Combate, não aqui. */
+  resplendorSagradoDisponivel: boolean;
+  onUsarResplendorSagrado: () => void;
   /** Mãos Consagradas (Paladino) — só o status pra decidir se a linha
    * aparece; o popup em si (`MaosConsagradasModal.tsx`) é aberto/fechado
    * pelo `CombatTab.tsx`, igual o `PvManualModal`. */
@@ -204,6 +211,8 @@ export default function BonusPanelContent({
   usosCanalizarMaximo,
   usosCanalizarRestantes,
   onUsarSentidoDivino,
+  resplendorSagradoDisponivel,
+  onUsarResplendorSagrado,
   maosConsagradasMaximo,
   maosConsagradasRestantes,
   onAbrirMaosConsagradas,
@@ -591,6 +600,17 @@ export default function BonusPanelContent({
             </div>
           )}
         </>
+      )}
+      {resplendorSagradoDisponivel && (
+        <div className={styles.row} onClick={onUsarResplendorSagrado}>
+          <div className={styles.rowName}>✨ Resplendor Sagrado</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Imbui sua Aura de Proteção com poder sagrado por 10 minutos ou até encerrar. 1x por Descanso Longo (ou
+              recupere gastando 1 espaço de 5º círculo).
+            </div>
+          )}
+        </div>
       )}
       {maosConsagradasMaximo > 0 && (
         <>

@@ -88,6 +88,7 @@ import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestri
 import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, temAuraDeProtecao } from '../../core/recursosClasse';
 import { condicoesDisponiveisMaosConsagradas, custoTotalMaosConsagradas } from '../../core/maosConsagradas';
 import { bonusArmaSagrada, armaElegivelParaArmaSagrada } from '../../core/armaSagrada';
+import { danoResplendorSagrado } from '../../core/resplendorSagrado';
 import { type MagiaGratisDeInvocacao } from '../../core/invocacoesMagiaGratis';
 import { aplicarAlteracaoPv, ganharPvTemporario } from '../../core/pvTemporario';
 import { deveAplicarVigorImplacavel } from '../../core/vigorImplacavel';
@@ -468,6 +469,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [furiaGasto, setFuriaGasto] = useState(personagemSalvo.furiaGasto ?? 0);
   const [furiaAtiva, setFuriaAtiva] = useState(personagemSalvo.furiaAtiva ?? false);
   const [armaSagradaAtiva, setArmaSagradaAtiva] = useState(personagemSalvo.armaSagradaAtiva ?? false);
+  const [resplendorSagradoGasto, setResplendorSagradoGasto] = useState(personagemSalvo.resplendorSagradoGasto ?? false);
+  const [resplendorSagradoAtiva, setResplendorSagradoAtiva] = useState(personagemSalvo.resplendorSagradoAtiva ?? false);
   const [ataqueImprudenteAtivo, setAtaqueImprudenteAtivo] = useState(personagemSalvo.ataqueImprudenteAtivoTurno ?? false);
   const [golpeBrutalUsadoTurno, setGolpeBrutalUsadoTurno] = useState(personagemSalvo.golpeBrutalUsadoTurno ?? false);
   // Golpe de Escudo (Mestre em Escudos) — 1x por turno, mesmo padrão
@@ -848,6 +851,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasDePactoDoInfero: magiasPactoDoInferoDisponivel,
     magiasDoJuramentoDaDevocao: magiasJuramentoDaDevocaoDisponivel,
     armaSagrada: armaSagradaDisponivel,
+    resplendorSagrado: resplendorSagradoDisponivel,
     palavrasDeInterrupcao: palavrasDeInterrupcaoDisponivel,
     periciaInigualavel: periciaInigualavelDisponivel,
     bencaoDoTenebroso: bencaoDoTenebrosoDisponivel,
@@ -866,6 +870,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'magiasDePactoDoInfero',
     'magiasDoJuramentoDaDevocao',
     'armaSagrada',
+    'resplendorSagrado',
     'palavrasDeInterrupcao',
     'periciaInigualavel',
     'bencaoDoTenebroso',
@@ -1156,6 +1161,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // só muda quem recebe o bônus — decisão confirmada com o Osmar).
   const armaSagradaArmaElegivel = ataque ? armaElegivelParaArmaSagrada(ataque.nome, ataque.info.corpoACorpo) : false;
   const bonusArmaSagradaAtual = armaSagradaAtiva && armaSagradaArmaElegivel ? bonusArmaSagrada(carMod) : 0;
+  // Resplendor Sagrado (nível 20) — só o valor de dano informativo
+  // (mod. Carisma + Bônus de Proficiência), pro jogador aplicar
+  // manualmente no inimigo (textonly, ver core/resplendorSagrado.ts).
+  const danoResplendorSagradoAtual = danoResplendorSagrado(carMod, bonusProficienciaAtual);
   const ataqueBonus = classe
     ? ataqueBonusMaoSecundaria(
         armaEquipada?.nome ?? null,
@@ -1268,6 +1277,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     furiaGasto,
     furiaAtiva,
     armaSagradaAtiva,
+    resplendorSagradoGasto,
+    resplendorSagradoAtiva,
     maosCurativasGasto,
     revelacaoCelestialGasto,
     revelacaoCelestialFormaAtiva,
@@ -1374,6 +1385,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       furiaGasto,
       furiaAtiva,
       armaSagradaAtiva,
+      resplendorSagradoGasto,
+      resplendorSagradoAtiva,
       maosCurativasGasto,
       revelacaoCelestialGasto,
       revelacaoCelestialFormaAtiva,
@@ -1603,6 +1616,32 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return true;
   }
 
+  /** Resplendor Sagrado (Paladino, Juramento da Devoção, nível 20) —
+   * mesmo padrão de toggle de `usarArmaSagrada`, mas com 1 uso só
+   * (`resplendorSagradoGasto`, zera no Descanso Longo) em vez de um
+   * banco contado. Encerrar é de graça; ativar exige 1 uso disponível
+   * (Ação Bônus marcada por quem chama, ver `CombatTab.tsx`). */
+  function usarResplendorSagrado(): boolean {
+    if (resplendorSagradoAtiva) {
+      setResplendorSagradoAtiva(false);
+      return true;
+    }
+    if (resplendorSagradoGasto) return false;
+    setResplendorSagradoGasto(true);
+    setResplendorSagradoAtiva(true);
+    return true;
+  }
+
+  /** Recupera o uso de Resplendor Sagrado gastando 1 espaço de 5º
+   * círculo (regra real) — não reativa sozinho, só libera pra usar de
+   * novo. */
+  function recuperarResplendorSagradoComEspaco(): boolean {
+    if (!resplendorSagradoGasto) return false;
+    if (!gastarSlotCirculo(5)) return false;
+    setResplendorSagradoGasto(false);
+    return true;
+  }
+
   /** Fúria Persistente (Bárbaro nível 15+) — zera os usos gastos de
    * Fúria e marca como usada até o próximo Descanso Longo. */
   function recuperarFuriaPersistente() {
@@ -1741,6 +1780,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setFormaGrandeAtiva(false);
     setFuriaGasto(0);
     setFuriaAtiva(false);
+    setResplendorSagradoGasto(false);
+    setResplendorSagradoAtiva(false);
     setMaosCurativasGasto(false);
     setRevelacaoCelestialGasto(false);
     setRevelacaoCelestialFormaAtiva(null);
@@ -3143,6 +3184,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               bonus: bonusArmaSagradaAtual,
               nomeArma: ataque?.nome ?? '',
               onUsar: usarArmaSagrada,
+            }}
+            resplendorSagrado={{
+              disponivel: resplendorSagradoDisponivel,
+              ativa: resplendorSagradoAtiva,
+              gasto: resplendorSagradoGasto,
+              dano: danoResplendorSagradoAtual,
+              onUsar: usarResplendorSagrado,
+              onRecuperarComEspaco: recuperarResplendorSagradoComEspaco,
             }}
             revelacaoCelestial={{
               disponivel: revelacaoCelestialDisponivel,

@@ -410,6 +410,14 @@ export interface PersonagemSalvo {
    * de Canalizar Divindade além do gasto de ativação. Ver
    * `sdd/sdd-paladino-devocao.md` seção 2. */
   armaSagradaAtiva?: boolean;
+  /** `true` = já usou Resplendor Sagrado (Paladino, Juramento da
+   * Devoção, nível 20) desde o último Descanso Longo — zera lá, ou
+   * gastando 1 espaço de 5º círculo (`onRecuperarComEspaco`).
+   * Diferente de `resplendorSagradoAtiva` (o toggle "ligado agora"). */
+  resplendorSagradoGasto?: boolean;
+  /** `true` = Resplendor Sagrado ATIVA agora — mesmo padrão de
+   * `armaSagradaAtiva`/`furiaAtiva` (toggle sem contador de tempo). */
+  resplendorSagradoAtiva?: boolean;
   /** `true` = já usou a versão estendida (45m + levar até 6 criaturas)
    * de Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível
    * 14) NESTA Fúria — reseta ao ativar a Fúria de novo (1x por Fúria,

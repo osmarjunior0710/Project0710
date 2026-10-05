@@ -323,6 +323,23 @@ interface CombatTabProps {
     nomeArma: string;
     onUsar: () => boolean;
   };
+  /** Resplendor Sagrado (Paladino, Juramento da Devoção, nível 20) —
+   * toggle sem contador de tempo (mesmo padrão de Arma Sagrada), mas
+   * com 1 uso só por Descanso Longo (`gasto`) em vez de um banco
+   * contado. Ação Bônus pra ativar (card no painel de Bônus, ver
+   * `BonusPanelContent.tsx`); os 3 efeitos são `textonly` — só o
+   * `dano` (mod. Carisma + Bônus de Proficiência) aparece como texto
+   * informativo no card "ATIVA", pro jogador aplicar manualmente.
+   * `onRecuperarComEspaco` gasta 1 espaço de 5º círculo pra liberar o
+   * uso de novo antes do próximo Descanso Longo. */
+  resplendorSagrado: {
+    disponivel: boolean;
+    ativa: boolean;
+    gasto: boolean;
+    dano: number;
+    onUsar: () => boolean;
+    onRecuperarComEspaco: () => boolean;
+  };
   /** Revelação Celestial (Aasimar, nível 3+) — escolhida de novo a
    * cada uso (natureza `escolha_reutilizavel`), por isso a lista de
    * `opcoes` vem daqui, não do wizard. */
@@ -666,6 +683,7 @@ export default function CombatTab({
   temRepudiarInimigos,
   temGolpesRadiantes,
   armaSagrada,
+  resplendorSagrado,
   revelacaoCelestial: {
     disponivel: revelacaoCelestialDisponivel,
     gasto: revelacaoCelestialGasto,
@@ -1014,6 +1032,16 @@ export default function CombatTab({
    * Ação/Bônus/Reação como usada, diferente de Fúria/Sentido Divino). */
   function usarArmaSagrada() {
     if (!armaSagrada.onUsar()) return;
+    setPainelAberto(null);
+  }
+
+  /** Resplendor Sagrado (Paladino) — ativar gasta a Ação Bônus (marca
+   * 'bonus' como usada); encerrar é de graça, mesmo espírito de
+   * `usarFuria`. */
+  function usarResplendorSagrado() {
+    const ativandoAgora = !resplendorSagrado.ativa;
+    if (!resplendorSagrado.onUsar()) return;
+    if (ativandoAgora) onMarcarUsado('bonus');
     setPainelAberto(null);
   }
 
@@ -1560,6 +1588,37 @@ export default function CombatTab({
         </div>
       )}
 
+      {resplendorSagrado.disponivel && (
+        <div className="opt-card" style={{ marginBottom: 12, borderColor: resplendorSagrado.ativa ? '#d9a441' : undefined }}>
+          <div className="opt-card-name">✨ Resplendor Sagrado {resplendorSagrado.ativa ? 'ATIVA' : ''}</div>
+          {resplendorSagrado.ativa ? (
+            <>
+              <div className="opt-card-desc">
+                Inimigo que inicia o turno na sua Aura de Proteção sofre {resplendorSagrado.dano} de dano Radiante
+                (aplique manualmente). Aura emite luz solar (não simulado pelo app). Vantagem em salvaguardas
+                forçadas por Ínfero ou Morto-Vivo.
+              </div>
+              <div
+                className="btn"
+                style={{ marginTop: 8, background: 'rgba(178, 59, 59, 0.16)', borderColor: '#b23b3b' }}
+                onClick={usarResplendorSagrado}
+              >
+                Encerrar Resplendor Sagrado
+              </div>
+            </>
+          ) : (
+            <div className="opt-card-desc">
+              {resplendorSagrado.gasto ? '0 usos — recarrega no Descanso Longo.' : '1 uso disponível — ative no painel de Ação Bônus.'}
+            </div>
+          )}
+          {resplendorSagrado.gasto && !resplendorSagrado.ativa && (
+            <div className="btn" style={{ marginTop: 8 }} onClick={resplendorSagrado.onRecuperarComEspaco}>
+              🔮 Recuperar gastando Espaço de 5º Círculo
+            </div>
+          )}
+        </div>
+      )}
+
       {bencaoDoTenebrosoDisponivel && (
         <div className="opt-card" style={{ marginBottom: 12, cursor: 'pointer' }} onClick={onAplicarBencaoDoTenebroso}>
           <div className="opt-card-name">🩸 Bênção do Tenebroso</div>
@@ -1934,6 +1993,8 @@ export default function CombatTab({
           usosCanalizarMaximo={usosCanalizarMaximo}
           usosCanalizarRestantes={usosCanalizarRestantes}
           onUsarSentidoDivino={usarSentidoDivino}
+          resplendorSagradoDisponivel={resplendorSagrado.disponivel && !resplendorSagrado.ativa && !resplendorSagrado.gasto}
+          onUsarResplendorSagrado={usarResplendorSagrado}
           maosConsagradasMaximo={maosConsagradasMaximo}
           maosConsagradasRestantes={maosConsagradasRestantes}
           onAbrirMaosConsagradas={() => {

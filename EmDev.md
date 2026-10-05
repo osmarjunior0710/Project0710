@@ -436,5 +436,29 @@ na Entrega 5.
     `textonly` com o Osmar: Cobertura Parcial pros ALIADOS ao conjurar
     Destruição Divina, mesmo motivo de Aura de Devoção/Aura de
     Coragem. `core/destruicaoProtetora.ts` novo (marco de existência).
-  - [ ] Resplendor Sagrado (nível 20)
+  - [x] **Resplendor Sagrado** (nível 20, concluída) — mecânica
+    PARCIAL confirmada com o Osmar: só a ativação é real (toggle sem
+    cronômetro + 1 uso/Descanso Longo), os 3 efeitos são `textonly`.
+    `core/resplendorSagrado.ts` novo (`danoResplendorSagrado`, 2
+    testes).
+    - [x] Ação Bônus no painel de Bônus (`BonusPanelContent.tsx`,
+      linha "✨ Resplendor Sagrado") — marca Bônus usada só ao
+      ativar, encerrar é de graça (mesmo padrão de Fúria/Arma
+      Sagrada).
+    - [x] Card "ATIVA" no corpo da aba Combate mostra os 3 efeitos
+      como texto (incluindo o valor calculado do Dano Radiante, mod.
+      Carisma + Bônus de Proficiência, pro jogador aplicar
+      manualmente) + botão "Encerrar".
+    - [x] Esgotado o uso, card mostra "0 usos" + botão "🔮 Recuperar
+      gastando Espaço de 5º Círculo" (`gastarSlotCirculo(5)`,
+      reaproveitado de `EscolherCirculoShell`) — reseta junto no
+      Descanso Longo.
+    - **Testado ao vivo:** ativar gasta Bônus + marca "0 usos"; card
+      mostra dano calculado certo (Carisma +5 + Bônus Proficiência
+      +6 = 11); Recuperar gastando espaço de 5º círculo funciona
+      (volta pra "1 uso disponível", espaço de 5º círculo é
+      descontado).
+    - **Entrega 7 (Juramento da Devoção) fechada** — as 5
+      características cobertas (Magias/Arma Sagrada/Aura de Devoção/
+      Destruição Protetora/Resplendor Sagrado).
 - [ ] **Entrega 8 — Multiclasse** (ligar em `conjuradorMulticlasse.ts`)

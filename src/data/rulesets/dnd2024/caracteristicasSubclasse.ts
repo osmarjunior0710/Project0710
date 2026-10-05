@@ -291,7 +291,7 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Como uma Ação Bônus, você pode imbuir sua Aura de Proteção com poder sagrado, concedendo os benefícios abaixo por 10 minutos ou até a encerrar (nenhuma ação é necessária). Após usar esta característica, você não pode utilizá-la novamente até completar um Descanso Longo. Você também pode recuperar seu uso gastando um espaço de magia de 5º círculo (nenhuma ação é necessária). Dano Radiante. Sempre que um inimigo inicia o turno na sua aura, essa criatura sofre dano Radiante igual ao seu modificador de Carisma mais seu Bônus de Proficiência. Luz Solar. A aura é preenchida com Luz Plena que é luz solar. Vigília Consagrada. Você tem Vantagem em qualquer salvaguarda que seja forçado a realizar por um Ínfero ou um Morto-Vivo.',
     tipoAcao: 'Ação Bônus',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Paladino',

@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1350
+
+Paladino com Juramento da Devoção: "✨ Resplendor Sagrado" (nível 20)
+aparece no painel de Ação Bônus — 1x por Descanso Longo (ou recupere
+gastando 1 espaço de 5º círculo), card na aba Combate mostra o dano
+Radiante calculado e botão Encerrar. Com isso, as 5 características
+do Juramento da Devoção estão completas.
+
 ## v202610_1316
 
 Destruição Protetora (Paladino, Juramento da Devoção, nível 15)
