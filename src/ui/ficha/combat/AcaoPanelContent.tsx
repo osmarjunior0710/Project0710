@@ -6,7 +6,7 @@ import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
-import { resolverVantagem } from '../../../core/calculoPersonagem';
+import { resolverVantagem, fmtMod } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
@@ -210,6 +210,18 @@ interface AcaoPanelContentProps {
    * Paladino+Bárbaro no mesmo turno é um caso raro de multiclasse,
    * fora do escopo desta entrega. */
   temGolpesRadiantes: boolean;
+  /** Arma Sagrada (Paladino, Juramento da Devoção, nível 3) — toggle
+   * sem contador de tempo, ver `CombatTab.tsx`. `elegivel` = a arma
+   * atualmente equipada é Corpo a Corpo de verdade (não Desarmado) —
+   * só entra na linha de ATIVAÇÃO aqui (o card "ATIVA"/"Encerrar" fica
+   * no corpo do Combate, ver `CombatTab.tsx`). `bonus` já soma no
+   * acerto dentro de `rolarAtaque` quando `ativa`. */
+  armaSagradaDisponivel: boolean;
+  armaSagradaElegivel: boolean;
+  armaSagradaAtiva: boolean;
+  armaSagradaBonus: number;
+  armaSagradaTipoDano: 'normal' | 'radiante';
+  onUsarArmaSagrada: () => void;
   /** Quais pills de info aparecem em cada linha de magia — preferência
    * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
@@ -303,6 +315,12 @@ export default function AcaoPanelContent({
   golpeDeEscudoUsadoTurno,
   onUsarGolpeDeEscudo,
   temGolpesRadiantes,
+  armaSagradaDisponivel,
+  armaSagradaElegivel,
+  armaSagradaAtiva,
+  armaSagradaBonus,
+  armaSagradaTipoDano,
+  onUsarArmaSagrada,
   preferenciasPillsMagia,
   temRepudiarInimigos,
   usosCanalizarMaximo,
@@ -498,11 +516,26 @@ export default function AcaoPanelContent({
     // do `nome`/`danoTipo` DESSE ataque específico).
     const ehDanoDesarmado = nome.endsWith('Ataque Desarmado');
     const golpesRadiantesAtivo = temGolpesRadiantes && ataque.corpoACorpo;
+    // Arma Sagrada (Paladino) — `armaSagradaBonus` já vem zerado (ver
+    // `FichaShell.tsx`) quando a arma atual não é mais elegível, então
+    // basta somar sem checar de novo aqui. Tipo de dano (Normal/
+    // Radiante) é só rótulo informativo no popup — o app não calcula
+    // resistência/vulnerabilidade de inimigo (decisão confirmada com
+    // o Osmar, ver `sdd/sdd-paladino-devocao.md` seção 2).
+    const modAcertoComArmaSagrada = ataque.modAcerto + armaSagradaBonus;
+    const armaSagradaRadianteAtivo = armaSagradaBonus > 0 && armaSagradaTipoDano === 'radiante';
+    const explicacaoAcertoComArmaSagrada =
+      armaSagradaBonus > 0
+        ? {
+            linhas: [...ataque.explicacaoAcerto.linhas, { label: 'Arma Sagrada', valor: fmtMod(armaSagradaBonus) }],
+            total: { label: ataque.explicacaoAcerto.total.label, valor: fmtMod(modAcertoComArmaSagrada) },
+          }
+        : ataque.explicacaoAcerto;
     rolarD20({
       label: `Ataque — ${nome}`,
-      formula: `1d20 + ${ataque.modAcerto}`,
-      mod: ataque.modAcerto,
-      explicacaoMod: ataque.explicacaoAcerto,
+      formula: `1d20 + ${modAcertoComArmaSagrada}`,
+      mod: modAcertoComArmaSagrada,
+      explicacaoMod: explicacaoAcertoComArmaSagrada,
       vantagem,
       confirmarAcerto: {
         onAcertou: ({ critico }) => {
@@ -516,7 +549,7 @@ export default function AcaoPanelContent({
             critico,
           );
           rolarDados({
-            label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}${golpesRadiantesAtivo ? ' + Golpes Radiantes' : ''}`,
+            label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}${golpesRadiantesAtivo ? ' + Golpes Radiantes' : ''}${armaSagradaRadianteAtivo ? ' (Radiante, Arma Sagrada)' : ''}`,
             formula: dano.formula,
             quantidade: dano.quantidade,
             lados: ataque.danoLados,
@@ -611,6 +644,22 @@ export default function AcaoPanelContent({
               </>
             )}
           </div>
+        </div>
+      )}
+
+      {armaSagradaDisponivel && armaSagradaElegivel && !armaSagradaAtiva && (
+        <div
+          className={styles.row}
+          style={usosCanalizarRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+          onClick={onUsarArmaSagrada}
+        >
+          <div className={styles.rowName}>⚔️ Arma Sagrada</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Imbui {ataqueAtual?.nome ?? 'a arma equipada'} com energia positiva: +{Math.max(1, modCarisma)} no
+              acerto com ela e dano Radiante à escolha, até você encerrar. Gasta 1 uso de Canalizar Divindade.
+            </div>
+          )}
         </div>
       )}
 

@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1207
+
+Paladino com Juramento da Devoção: a partir do nível 3, "⚔️ Arma
+Sagrada" aparece no painel de Ação (com arma Corpo a Corpo equipada) —
+gasta 1 uso de Canalizar Divindade, soma seu modificador de Carisma no
+acerto enquanto ativa (card na tela de Combate, com botão Encerrar), e
+deixa escolher dano Normal ou Radiante.
+
 ## v202610_1054
 
 Paladino com Juramento da Devoção: a partir do nível 3, as magias do

@@ -403,6 +403,13 @@ export interface PersonagemSalvo {
    * até "Encerrar Fúria" ou vestir Armadura Pesada, não expira sozinha
    * por turno. */
   furiaAtiva?: boolean;
+  /** `true` = Arma Sagrada ATIVA agora (Paladino, Juramento da
+   * Devoção, nível 3) — mesmo padrão de `furiaAtiva`: toggle sem
+   * contador de tempo (ver `DECISOES-COMBATE.md` "Toggle de
+   * habilidade com duração real"), ativar/encerrar não mexe no banco
+   * de Canalizar Divindade além do gasto de ativação. Ver
+   * `sdd/sdd-paladino-devocao.md` seção 2. */
+  armaSagradaAtiva?: boolean;
   /** `true` = já usou a versão estendida (45m + levar até 6 criaturas)
    * de Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível
    * 14) NESTA Fúria — reseta ao ativar a Fúria de novo (1x por Fúria,

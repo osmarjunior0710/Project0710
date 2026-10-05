@@ -261,7 +261,7 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Ao executar a ação Atacar, você pode gastar um uso de seu Canalizar Divindade para imbuir uma arma Corpo a Corpo que você está empunhando com energia positiva. Por 10 minutos ou até usar essa característica novamente, você adiciona seu modificador de Carisma às jogadas de ataque que realizar com essa arma (bônus mínimo de +1) e, cada vez que atingir com ela, você causa o tipo de dano normal da arma ou dano Radiante. Além disso, a arma também emite Luz Plena em um raio de 6 metros e Meia-luz por mais 6 metros. Você pode encerrar este efeito mais cedo (nenhuma ação é necessária). Este efeito também encerra se você não estiver carregando a arma.',
     tipoAcao: 'Grátis',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Paladino',

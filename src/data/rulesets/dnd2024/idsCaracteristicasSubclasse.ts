@@ -41,6 +41,7 @@ export const ID_CARACTERISTICA_SUBCLASSE = {
   sobrecarga: 'Sobrecarga',
   // Paladino — Juramento da Devoção
   magiasDoJuramentoDaDevocao: 'Magias do Juramento da Devoção',
+  armaSagrada: 'Arma Sagrada',
 } as const;
 
 export type IdCaracteristicaSubclasse = keyof typeof ID_CARACTERISTICA_SUBCLASSE;

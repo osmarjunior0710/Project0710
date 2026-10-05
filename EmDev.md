@@ -387,7 +387,42 @@ na Entrega 5.
     Combate (Escudo da Fé no painel de Ação Bônus, Proteção Contra o
     Bem e o Mal no painel de Ação — cada uma no painel certo pelo
     próprio Tempo de Conjuração).
-  - [ ] Arma Sagrada (nível 3)
+  - [x] **Arma Sagrada** (nível 3, concluída) — a arma elegível é
+    sempre a atualmente equipada pro "Atacar" (o app só rastreia 1
+    por vez) — sem seletor de arma novo. `core/armaSagrada.ts` novo
+    (`bonusArmaSagrada`/`armaElegivelParaArmaSagrada`, 5 testes).
+    - [x] Linha "⚔️ Arma Sagrada" no painel de Ação (só quando a arma
+      atual é Corpo a Corpo de verdade, não Desarmado) — gasta 1 uso
+      de Canalizar Divindade, mesmo banco de Sentido Divino/Repudiar
+      Inimigos.
+    - [x] Toggle sem cronômetro (padrão novo em `DECISOES-COMBATE.md`):
+      card "⚔️ Arma Sagrada ATIVA — [arma]" no corpo da aba Combate,
+      com botão "Encerrar". `armaSagradaAtiva` persistido (mesmo
+      padrão de `furiaAtiva`).
+    - [x] **Ajuste técnico na UI combinada (chapéu 4):** a escolha
+      Normal/Radiante é "a cada acerto" na regra, mas o popup de dano
+      já usa o único slot de botão extra pra Golpe Brutal/Esmagador/
+      Talhador — virou um toggle no próprio card "ATIVA" (o jogador
+      troca a qualquer momento entre ataques, efeito prático igual).
+      Tipo de dano é só rótulo informativo no popup (confirmado com o
+      Osmar: o app não calcula resistência/vulnerabilidade de
+      inimigo).
+    - [x] Bônus some automaticamente se o jogador trocar pra uma arma
+      não elegível (à distância) com o toggle ainda ativo — não
+      desliga sozinho, só o bônus que some até voltar pra arma Corpo
+      a Corpo (simplificação confirmada com o Osmar).
+    - [x] **Achado corrigindo o personagem de teste:** o pacote de
+      equipamento inicial do Paladino sorteado pelo gerador de teste
+      caiu no "B" (só dinheiro, sem item nenhum) — sem arma pra testar
+      Arma Sagrada. `personagemTestePaladinoDevocao.ts` agora força o
+      pacote A e equipa a Espada Longa na Mão Principal explicitamente
+      (a arma de 1 mão não auto-equipava sozinha, diferente de
+      armadura/escudo).
+    - **Testado ao vivo:** ativar gasta 1 uso de Canalizar Divindade
+      (3/3→2/3), card aparece com toggle Normal/Radiante + Encerrar,
+      "🗡 Atacar" mostra "Espada Longa" com `1d20 + 14` (9 base de
+      Espada Longa + 5 de Arma Sagrada, Carisma 20) — matemática
+      bate.
   - [ ] Aura de Devoção (nível 7)
   - [ ] Destruição Protetora (nível 15)
   - [ ] Resplendor Sagrado (nível 20)

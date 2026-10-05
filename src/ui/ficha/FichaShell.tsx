@@ -87,6 +87,7 @@ import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueEx
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
 import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, temAuraDeProtecao } from '../../core/recursosClasse';
 import { condicoesDisponiveisMaosConsagradas, custoTotalMaosConsagradas } from '../../core/maosConsagradas';
+import { bonusArmaSagrada, armaElegivelParaArmaSagrada } from '../../core/armaSagrada';
 import { type MagiaGratisDeInvocacao } from '../../core/invocacoesMagiaGratis';
 import { aplicarAlteracaoPv, ganharPvTemporario } from '../../core/pvTemporario';
 import { deveAplicarVigorImplacavel } from '../../core/vigorImplacavel';
@@ -466,6 +467,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [formaGrandeAtiva, setFormaGrandeAtiva] = useState(personagemSalvo.formaGrandeAtiva ?? false);
   const [furiaGasto, setFuriaGasto] = useState(personagemSalvo.furiaGasto ?? 0);
   const [furiaAtiva, setFuriaAtiva] = useState(personagemSalvo.furiaAtiva ?? false);
+  const [armaSagradaAtiva, setArmaSagradaAtiva] = useState(personagemSalvo.armaSagradaAtiva ?? false);
   const [ataqueImprudenteAtivo, setAtaqueImprudenteAtivo] = useState(personagemSalvo.ataqueImprudenteAtivoTurno ?? false);
   const [golpeBrutalUsadoTurno, setGolpeBrutalUsadoTurno] = useState(personagemSalvo.golpeBrutalUsadoTurno ?? false);
   // Golpe de Escudo (Mestre em Escudos) — 1x por turno, mesmo padrão
@@ -845,6 +847,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     mestreDaMorte: mestreDaMorteDisponivel,
     magiasDePactoDoInfero: magiasPactoDoInferoDisponivel,
     magiasDoJuramentoDaDevocao: magiasJuramentoDaDevocaoDisponivel,
+    armaSagrada: armaSagradaDisponivel,
     palavrasDeInterrupcao: palavrasDeInterrupcaoDisponivel,
     periciaInigualavel: periciaInigualavelDisponivel,
     bencaoDoTenebroso: bencaoDoTenebrosoDisponivel,
@@ -862,6 +865,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'mestreDaMorte',
     'magiasDePactoDoInfero',
     'magiasDoJuramentoDaDevocao',
+    'armaSagrada',
     'palavrasDeInterrupcao',
     'periciaInigualavel',
     'bencaoDoTenebroso',
@@ -1144,6 +1148,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     numAtaquesBase,
     1 + ataqueExtraDoPactoDaLamina(invocacoesMisticasAtuais, armaEquipada?.armaDePacto === true),
   );
+  // Arma Sagrada (Paladino, Juramento da Devoção, nível 3) — a arma
+  // elegível é sempre a atualmente equipada pro "Atacar" (o app só
+  // rastreia 1 por vez, ver `core/armaSagrada.ts`). O bônus só entra
+  // na rolagem quando a arma atual segue elegível NO MOMENTO do
+  // ataque (trocar de arma com o toggle ativo não desliga sozinho,
+  // só muda quem recebe o bônus — decisão confirmada com o Osmar).
+  const armaSagradaArmaElegivel = ataque ? armaElegivelParaArmaSagrada(ataque.nome, ataque.info.corpoACorpo) : false;
+  const bonusArmaSagradaAtual = armaSagradaAtiva && armaSagradaArmaElegivel ? bonusArmaSagrada(carMod) : 0;
   const ataqueBonus = classe
     ? ataqueBonusMaoSecundaria(
         armaEquipada?.nome ?? null,
@@ -1255,6 +1267,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     formaGrandeAtiva,
     furiaGasto,
     furiaAtiva,
+    armaSagradaAtiva,
     maosCurativasGasto,
     revelacaoCelestialGasto,
     revelacaoCelestialFormaAtiva,
@@ -1360,6 +1373,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       formaGrandeAtiva,
       furiaGasto,
       furiaAtiva,
+      armaSagradaAtiva,
       maosCurativasGasto,
       revelacaoCelestialGasto,
       revelacaoCelestialFormaAtiva,
@@ -1570,6 +1584,22 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // Percorrer a Árvore (nível 14) — a versão estendida (45m) é 1x por
     // FÚRIA: toda ativação nova libera o uso de novo.
     if (percorrerArvoreDesbloqueada) setPercorrerArvoreEstendidaUsada(false);
+    return true;
+  }
+
+  /** Arma Sagrada (Paladino, Juramento da Devoção) — mesmo padrão de
+   * `usarFuria`: ativar gasta 1 uso de Canalizar Divindade (grátis
+   * dentro da ação Atacar, não marca Ação/Bônus/Reação como usada),
+   * encerrar é de graça. Ativar exige a arma atual elegível (ver
+   * `armaSagradaArmaElegivel`) — encerrar sempre funciona, mesmo que
+   * o jogador tenha trocado de arma depois. */
+  function usarArmaSagrada(): boolean {
+    if (armaSagradaAtiva) {
+      setArmaSagradaAtiva(false);
+      return true;
+    }
+    if (!armaSagradaArmaElegivel || !usarUsoCanalizarDivindade()) return false;
+    setArmaSagradaAtiva(true);
     return true;
   }
 
@@ -3106,6 +3136,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             }}
             temRepudiarInimigos={temRepudiarInimigos}
             temGolpesRadiantes={temGolpesRadiantes}
+            armaSagrada={{
+              disponivel: armaSagradaDisponivel,
+              elegivel: armaSagradaArmaElegivel,
+              ativa: armaSagradaAtiva,
+              bonus: bonusArmaSagradaAtual,
+              nomeArma: ataque?.nome ?? '',
+              onUsar: usarArmaSagrada,
+            }}
             revelacaoCelestial={{
               disponivel: revelacaoCelestialDisponivel,
               gasto: revelacaoCelestialGasto,
