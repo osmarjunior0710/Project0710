@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0902
+
+Monge agora pode ser criado de verdade pelo wizard (antes só existia no
+banco de dados). Defesa sem Armadura calcula certo (10 + Destreza +
+Sabedoria, perde o bônus de Sabedoria se usar Escudo ou armadura). O
+Ataque Desarmado e os ataques com arma de Monge (ex: Adaga) já usam o
+Dado de Artes Marciais no lugar do dado normal (nunca os dois somados)
+e permitem rolar com Destreza em vez de Força, se for maior.
+
 ## v202610_0737
 
 Começo da 8ª classe (Monge) — só dado no banco por enquanto, nada

@@ -10,6 +10,8 @@ import { estilosDeLuta } from '../data/rulesets/dnd2024/estilosDeLuta';
 import { bonusProficiencia, efeitoMecanicoDoTalento, fmtMod } from './calculoPersonagem';
 import { identificarEquipamento } from './equipamento';
 import { classeProficienteComArma } from './proficienciaArma';
+import { ladosDadoArtesMarciais } from './recursosClasse';
+import { ehArmaDeMonge } from './monge';
 import type { AtaqueInfo } from '../data/exampleCombat';
 
 /** Efeito mecânico (Fase 4) do Estilo de Luta escolhido pelo
@@ -43,6 +45,15 @@ function parseDano(dano: string): { quantidade: number; lados: number; tipo: str
  * `talentosAtuais` — Valentão de Taverna troca o "1 fixo" por um dado
  * de verdade (`dado-ataque-desarmado`, ver `talentos.ts`); sem esse
  * talento, o dano continua o "1d1" padrão (na prática, sempre 1).
+ *
+ * `desMod` — Monge (Artes Marciais, nível 1): "Ataques com Destreza" —
+ * pode usar Destreza em vez de Força (o MAIOR dos dois, nunca os dois
+ * juntos) no acerto E no dano. Só se aplica quando a classe realmente
+ * tem Dado de Artes Marciais (`ladosDadoArtesMarciais > 0`) — pra
+ * qualquer outra classe, `desMod` é ignorado mesmo se vier preenchido.
+ * O próprio Dado de Artes Marciais SUBSTITUI o dado de dano (nunca soma)
+ * só quando for maior que o que já estava valendo (baseline 1, ou o
+ * dado do talento Valentão de Taverna, se o personagem tiver os dois).
  */
 export function ataqueDesarmado(
   classe: Classe,
@@ -50,31 +61,37 @@ export function ataqueDesarmado(
   forMod: number,
   talentosAtuais?: string[],
   bonusDanoSeForca = 0,
+  desMod?: number,
 ): AtaqueResolvido {
   const prof = bonusProficiencia(classe, nivel);
   const dadoTalento = efeitoMecanicoDoTalento(talentosAtuais, 'dado-ataque-desarmado');
-  const danoQuantidade = dadoTalento?.quantidade ?? 1;
-  const danoLados = dadoTalento?.lados ?? 1;
+  const baseQuantidade = dadoTalento?.quantidade ?? 1;
+  const baseLados = dadoTalento?.lados ?? 1;
+  const ladosArtes = ladosDadoArtesMarciais(classe, nivel);
+  const usaArtesMarciais = ladosArtes > baseLados;
+  const danoQuantidade = usaArtesMarciais ? 1 : baseQuantidade;
+  const danoLados = usaArtesMarciais ? ladosArtes : baseLados;
+  const usaDestreza = ladosArtes > 0 && desMod !== undefined && desMod > forMod;
+  const atribMod = usaDestreza ? desMod : forMod;
   return {
     nome: 'Ataque Desarmado',
     descricao: 'Soco, chute ou golpe corpo a corpo sem arma. Dano Contundente.',
-    // Ataque Desarmado sempre usa Força (Apêndice C) — `bonusDanoSeForca`
-    // (Dano da Fúria do Bárbaro, ver sdd/sdd-barbaro-furia.md) soma
-    // sempre que informado, sem precisar checar atributo.
     info: {
-      modAcerto: forMod + prof,
+      modAcerto: atribMod + prof,
       explicacaoAcerto: {
         linhas: [
-          { label: 'mod. FOR', valor: fmtMod(forMod) },
+          { label: usaDestreza ? 'mod. DES (Ataques com Destreza)' : 'mod. FOR', valor: fmtMod(atribMod) },
           { label: 'Bônus de Proficiência', valor: fmtMod(prof) },
         ],
-        total: { label: 'Ataque Desarmado', valor: fmtMod(forMod + prof) },
+        total: { label: 'Ataque Desarmado', valor: fmtMod(atribMod + prof) },
       },
       danoQuantidade,
       danoLados,
-      danoMod: forMod + bonusDanoSeForca,
+      // Dano da Fúria do Bárbaro (`bonusDanoSeForca`) só soma quando o
+      // ataque usa Força de verdade (mesma regra de `ataqueComArma`).
+      danoMod: atribMod + (!usaDestreza ? bonusDanoSeForca : 0),
       danoTipo: 'Contundente',
-      usouForca: true,
+      usouForca: !usaDestreza,
       corpoACorpo: true,
     },
   };
@@ -131,12 +148,25 @@ export function ataqueComArma(
 ): AtaqueResolvido {
   const acuidade = arma.propriedades.includes('Acuidade');
   const distancia = arma.categoria.includes('à Distância');
-  const atribMod = atribForcada ?? (acuidade ? Math.max(forMod, desMod) : distancia ? desMod : forMod);
-  const usouForca = !atribForcada && !distancia && (!acuidade || forMod >= desMod);
+  // Monge (Artes Marciais, nível 1) — "Ataques com Destreza": arma de
+  // Monge (ver core/monge.ts) permite Destreza igual Acuidade, mesmo
+  // sem ter a propriedade. `ladosArtes` também decide o Dado de Artes
+  // Marciais abaixo — calculado uma vez só.
+  const armaDeMonge = ehArmaDeMonge(arma);
+  const ladosArtes = armaDeMonge ? ladosDadoArtesMarciais(classe, nivel) : 0;
+  const permiteDestreza = acuidade || ladosArtes > 0;
+  const atribMod = atribForcada ?? (permiteDestreza ? Math.max(forMod, desMod) : distancia ? desMod : forMod);
+  const usouForca = !atribForcada && !distancia && (!permiteDestreza || forMod >= desMod);
   const prof = classeProficienteComArma(classe, arma, talentosAtuais, classesExtrasNomes) ? bonusProficiencia(classe, nivel) : 0;
   const dadoVersatil = identificarEquipamento(arma.nome).dadoVersatil;
   const usaVersatil = duasMaosAtivo && dadoVersatil;
-  const { quantidade, lados, tipo } = usaVersatil ? parseDano(`${dadoVersatil} ${arma.dano.replace(/^\d+d\d+\s*/, '')}`) : parseDano(arma.dano);
+  const danoArma = usaVersatil ? parseDano(`${dadoVersatil} ${arma.dano.replace(/^\d+d\d+\s*/, '')}`) : parseDano(arma.dano);
+  // Dado de Artes Marciais SUBSTITUI o dado da arma (nunca soma), só
+  // quando for maior — igual Ataque Desarmado (`ataqueDesarmado` acima).
+  const usaArtesMarciais = ladosArtes > danoArma.lados;
+  const quantidade = usaArtesMarciais ? 1 : danoArma.quantidade;
+  const lados = usaArtesMarciais ? ladosArtes : danoArma.lados;
+  const tipo = danoArma.tipo;
   const danoMod = semModAtributoNoDano && atribMod > 0 ? 0 : atribMod;
   const descPropriedades = arma.propriedades ? ` · ${arma.propriedades}` : '';
 
@@ -159,7 +189,14 @@ export function ataqueComArma(
   // só existe pro Pacto da Lâmina hoje (ver doc da função), sempre
   // Carisma — se ganhar outro chamador no futuro, precisa virar
   // parâmetro em vez de fixo.
-  const rotuloAtributo = atribForcada !== undefined ? 'mod. CAR (Pacto da Lâmina)' : acuidade ? `mod. ${usouForca ? 'FOR' : 'DES'} (Acuidade)` : `mod. ${usouForca ? 'FOR' : 'DES'}`;
+  const rotuloAtributo =
+    atribForcada !== undefined
+      ? 'mod. CAR (Pacto da Lâmina)'
+      : acuidade
+        ? `mod. ${usouForca ? 'FOR' : 'DES'} (Acuidade)`
+        : ladosArtes > 0
+          ? `mod. ${usouForca ? 'FOR' : 'DES'} (Ataques com Destreza)`
+          : `mod. ${usouForca ? 'FOR' : 'DES'}`;
 
   return {
     nome: arma.nome,
@@ -218,7 +255,7 @@ export function ataqueAtual(
         undefined,
         bonusDanoSeForca,
       )
-    : ataqueDesarmado(classe, nivel, forMod, talentosAtuais, bonusDanoSeForca);
+    : ataqueDesarmado(classe, nivel, forMod, talentosAtuais, bonusDanoSeForca, desMod);
 }
 
 /**

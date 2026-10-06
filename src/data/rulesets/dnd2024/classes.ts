@@ -635,9 +635,8 @@ export const classes: Classe[] = [
       { nivel: 19, bonusProficiencia: '+6', caracteristicas: ['Dádiva Épica'] },
       { nivel: 20, bonusProficiencia: '+6', caracteristicas: ['Corpo e Mente'] },
     ],
-    // Entrega 1 (foco Monge, ver EmDev.md) — dado no banco, ainda não
-    // habilitado no wizard (Entrega 2).
-    disponivel: false,
+    // Entrega 2 (foco Monge, ver EmDev.md) — habilitada no wizard.
+    disponivel: true,
     fonte: FONTE,
   },
 ];

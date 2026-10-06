@@ -49,10 +49,26 @@ tratamento do Bruxo/Mestre Místico) — não usar a célula como está.
       "(em breve)" no wizard, nenhum personagem de outra classe quebrou.
       `npx tsc -b`, `npm test -- --run` (862/862), `npm run build`
       verdes.
-- [ ] **Entrega 2 — habilitar Monge na criação (wizard).** Defesa sem
-      Armadura valendo (SAB, perde com Escudo), Artes Marciais valendo
-      no dano do Ataque Desarmado/armas de Monge (maior entre o dado
-      da arma e o de Artes Marciais, nunca soma).
+- [x] **Entrega 2 — habilitar Monge na criação (wizard).** `disponivel:
+      true` em `classes.ts`. Nova `core/monge.ts` (`ehArmaDeMonge` —
+      Armas Simples Corpo a Corpo OU Marciais Corpo a Corpo com
+      propriedade Leve, distinto da proficiência ampla do Monge, que
+      cobre toda arma Simples inclusive à distância), testado (4
+      casos). `core/ataque.ts` generalizado: `ataqueDesarmado` e
+      `ataqueComArma` agora usam o Dado de Artes Marciais no lugar do
+      dado normal (nunca somam — pega o maior) e permitem rolar com
+      Destreza em vez de Força quando ela for maior (mesmo padrão já
+      usado por Acuidade). Banner de classes prontas do wizard
+      (`ClasseStep.tsx`) corrigido de quebra — estava sem Paladino e
+      sem Monge. Testado ao vivo via Playwright em 390px: personagem
+      Monge criado do zero pelo wizard (perícias, ferramenta — o
+      picker juntou Ferramentas de Artesão + Instrumento Musical num
+      só grupo, como esperado —, atributos, idiomas), CA calculada
+      certo (14 = 10+DES+SAB) tanto no resumo do wizard quanto na
+      Ficha salva, Ataque Desarmado no Combate rolando `1d20+4` (mod.
+      Destreza +2 + Bônus de Proficiência +2 — confirmado na própria
+      tela de detalhe do app). `npx tsc -b`, `npm test -- --run`
+      (872/872), `npm run build` verdes.
 - [ ] **Entrega 3 — Pontos de Foco + as 3 técnicas base** (Defesa
       Paciente/Passo do Vento/Torrente de Golpes) — cada uma com
       escolha "de graça" vs "gastar 1 Foco", painel de Ação Bônus.

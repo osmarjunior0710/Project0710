@@ -9,6 +9,9 @@ const guerreiro = classes.find((c) => c.nome === 'Guerreiro')!;
 const barbaro = classes.find((c) => c.nome === 'Bárbaro')!;
 const machadoGrande = armas.find((a) => a.nome === 'Machado Grande')!;
 const arcoLongo = armas.find((a) => a.nome === 'Arco Longo')!;
+const monge = classes.find((c) => c.nome === 'Monge')!;
+const adaga = armas.find((a) => a.nome === 'Adaga')!;
+const espadaLonga = armas.find((a) => a.nome === 'Espada Longa')!;
 
 describe('ataqueComArma — atribForcada (Pacto da Lâmina)', () => {
   it('sem atribForcada: usa Força/Destreza/Acuidade normalmente', () => {
@@ -181,5 +184,52 @@ describe('ataqueBonusMaoSecundaria — Especialista Ambidestro (mao-secundaria-s
       'especialista-ambidestro',
     ]);
     expect(r).toBeNull();
+  });
+});
+
+describe('Monge — Artes Marciais (Ataques com Destreza + Dado de Artes Marciais)', () => {
+  it('Ataque Desarmado, Destreza maior que Força: usa Destreza no acerto/dano e o Dado de Artes Marciais (1d6 no nível 1)', () => {
+    const r = ataqueDesarmado(monge, 1, 1, [], 0, 3);
+    expect(r.info.modAcerto).toBe(3 + 2); // DES 3 + prof +2
+    expect(r.info.danoQuantidade).toBe(1);
+    expect(r.info.danoLados).toBe(6);
+    expect(r.info.danoMod).toBe(3);
+    expect(r.info.usouForca).toBe(false);
+  });
+
+  it('Ataque Desarmado, Força maior que Destreza: continua usando Força (Destreza é opção, não obrigação)', () => {
+    const r = ataqueDesarmado(monge, 1, 3, [], 0, 1);
+    expect(r.info.modAcerto).toBe(3 + 2);
+    expect(r.info.danoLados).toBe(6); // Dado de Artes Marciais vale igual, independente do atributo
+    expect(r.info.usouForca).toBe(true);
+  });
+
+  it('borda: outra classe (Guerreiro) com desMod maior que forMod NUNCA usa Destreza no Ataque Desarmado', () => {
+    const r = ataqueDesarmado(guerreiro, 1, 1, [], 0, 3);
+    expect(r.info.modAcerto).toBe(1 + 2); // só Força + prof, Destreza ignorada
+    expect(r.info.danoLados).toBe(1); // sem Dado de Artes Marciais nem talento, continua "1" fixo
+    expect(r.info.usouForca).toBe(true);
+  });
+
+  it('arma de Monge (Adaga, Simples Corpo a Corpo, 1d4) nível 1: Dado de Artes Marciais (1d6) SUBSTITUI por ser maior, permite Destreza', () => {
+    const r = ataqueComArma(adaga, monge, 1, 1, 3, false, false, null, false);
+    expect(r.info.danoQuantidade).toBe(1);
+    expect(r.info.danoLados).toBe(6); // 1d6 > 1d4 da Adaga
+    expect(r.info.modAcerto).toBe(3 + 2); // Destreza (maior) + prof
+    expect(r.info.usouForca).toBe(false);
+  });
+
+  it('arma que NÃO é de Monge (Espada Longa, Marcial sem Leve): Dado de Artes Marciais não se aplica, Destreza não é permitida', () => {
+    const r = ataqueComArma(espadaLonga, monge, 1, 1, 3, false, false, null, false);
+    expect(r.info.danoLados).toBe(8); // 1d8 normal da Espada Longa, sem substituição
+    // Monge não é proficiente com Marcial sem Leve — sem Bônus de
+    // Proficiência, só a Força (corpo a corpo padrão, Destreza ignorada).
+    expect(r.info.modAcerto).toBe(1);
+    expect(r.info.usouForca).toBe(true);
+  });
+
+  it('Monge nível 5+ (Dado de Artes Marciais sobe pra 1d8): Ataque Desarmado reflete o novo dado', () => {
+    const r = ataqueDesarmado(monge, 5, 3, [], 0, 1);
+    expect(r.info.danoLados).toBe(8);
   });
 });
