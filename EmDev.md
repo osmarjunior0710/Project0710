@@ -115,6 +115,25 @@ tratamento do Bruxo/Mestre Místico) — não usar a célula como está.
       nível 20), "Sim" restaura Pontos de Foco pra 20/20 e dispara a
       rolagem de cura "Metabolismo Incomum (cura) — 1d12 + 20". `npx
       tsc -b`, `npm test -- --run` (876/876), `npm run build` verdes.
+- [x] **Entrega 3c — UX das 3 técnicas revista** (achado durante
+      review do Osmar, 2026-10): Defesa Paciente/Passo do Vento/
+      Torrente de Golpes viravam uma sub-tela DENTRO do painel de Ação
+      Bônus — Osmar queria um popup central (mesmo padrão de
+      `MaosConsagradasModal.tsx`), e a Torrente especificamente tinha
+      vaivém ruim (escolher → fechava → reabrir pra atacar → fechava →
+      reabrir de novo pro 2º ataque). Criado `TecnicaMongeModal.tsx`
+      (popup reaproveitando `TrocarArmaMaestria.module.css`, z-index
+      120 — acima do painel de Ação Bônus, 110/111, que fecha ao abrir
+      o popup). Escolher a Torrente já dispara o Ataque 1 na hora; o
+      2º ataque (se gastou Foco) vira um card fixo no corpo do
+      Combate, fora de qualquer painel — `abrirPainel` (`CombatTab.tsx`)
+      voltou a só ter a exceção do Ataque Extra (a exceção da Torrente
+      não é mais necessária, o botão dela não mora mais lá dentro).
+      Testado ao vivo via Playwright: popup aparece centralizado,
+      "Gastar 1 Foco" dispara o Ataque 1 sozinho (Foco 20→19, popup de
+      rolagem "1d20+13" abre na hora), card "ataque 2/2" aparece na
+      tela principal sem abrir painel nenhum. `npx tsc -b`, `npm test
+      -- --run` (876/876), `npm run build` verdes.
 - [ ] **Entrega 4 — Defletir Ataques + Queda Lenta + Golpe
       Atordoante.** Defletir Ataques é um padrão NOVO (reduzir dano
       recebido reativamente, nunca existiu no app — ver SDD seção 7).

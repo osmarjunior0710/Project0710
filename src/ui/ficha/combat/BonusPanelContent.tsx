@@ -8,6 +8,7 @@ import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional, ResumoCon
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
+import type { TipoTecnicaMonge } from './TecnicaMongeModal';
 import TickPips from '../../components/TickPips';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
@@ -95,20 +96,18 @@ interface BonusPanelContentProps {
   onUsarFuria: () => void;
   /** Pontos de Foco (Monge) e as 3 técnicas — ver sdd/sdd-monge.md
    * seção 4. `pontosDeFocoMaximo === 0` = personagem sem a
-   * característica (classe não é Monge, ou nível 1). Cada técnica tem
-   * 2 opções (de graça / gastar 1 Foco) — mostradas como mini-lista ao
-   * tocar na linha, mesmo padrão de "Revelação Celestial" abaixo. */
+   * característica (classe não é Monge, ou nível 1). Tocar na linha
+   * fecha este painel e abre `TecnicaMongeModal` (popup central —
+   * pedido do Osmar, 2026-10), que já dispara o Ataque 1 no caso da
+   * Torrente de Golpes. O botão de atacar (e o 2º ataque, se com Foco)
+   * vive no corpo principal do Combate, não aqui — ver `CombatTab.tsx`. */
   pontosDeFocoMaximo: number;
-  pontosDeFocoRestantes: number;
-  onUsarDefesaPaciente: (comFoco: boolean) => void;
-  onUsarPassoDoVento: (comFoco: boolean) => void;
-  onAtivarTorrenteDeGolpes: (comFoco: boolean) => void;
-  /** `0` = Torrente ainda não foi ativada neste turno (mostra a linha
-   * de escolha); `> 0` = já ativada, mostra o botão de Atacar com
-   * contador "(ataque X/Y)", mesmo padrão do Ataque Extra. */
+  onAbrirTecnicaMonge: (tipo: TipoTecnicaMonge) => void;
+  /** `> 0` = Torrente já ativada neste turno (ainda com ataque
+   * pendente) — esconde a linha de escolha, pro jogador não reabrir a
+   * técnica enquanto um ataque dela ainda não foi rolado. */
   numAtaquesTorrente: number;
   ataquesTorrenteFeitos: number;
-  onAtacarTorrente: () => void;
   /** Percorrer a Árvore (Bárbaro, Trilha da Árvore do Mundo, nível 14)
    * — `disponivel` = Fúria ativa + nível 14+. 2 cards (pedido do
    * Osmar, 2026-09): a versão BASE (18m) é um Ação Bônus normal, pode
@@ -270,13 +269,9 @@ export default function BonusPanelContent({
   furiaAtiva,
   onUsarFuria,
   pontosDeFocoMaximo,
-  pontosDeFocoRestantes,
-  onUsarDefesaPaciente,
-  onUsarPassoDoVento,
-  onAtivarTorrenteDeGolpes,
+  onAbrirTecnicaMonge,
   numAtaquesTorrente,
   ataquesTorrenteFeitos,
-  onAtacarTorrente,
   percorrerArvoreDisponivel,
   percorrerArvoreEstendidaDisponivel,
   onUsarPercorrerArvore,
@@ -332,9 +327,6 @@ export default function BonusPanelContent({
   preferenciasPillsMagia,
 }: BonusPanelContentProps) {
   const [escolhendoFormaRevelacao, setEscolhendoFormaRevelacao] = useState(false);
-  const [escolhendoTecnica, setEscolhendoTecnica] = useState<'defesa-paciente' | 'passo-do-vento' | 'torrente' | null>(
-    null,
-  );
   const [escolhendoMestreDaMorte, setEscolhendoMestreDaMorte] = useState(false);
   const [petsSelecionados, setPetsSelecionados] = useState<string[]>([]);
   const { picker, abrirLista } = useUsarMagiaPainel({
@@ -456,59 +448,6 @@ export default function BonusPanelContent({
           onClick={confirmarMestreDaMorte}
         >
           Confirmar ✓
-        </div>
-      </>
-    );
-  }
-
-  if (escolhendoTecnica) {
-    const semFoco = pontosDeFocoRestantes <= 0;
-    const info = {
-      'defesa-paciente': {
-        titulo: 'Defesa Paciente',
-        graca: 'Esquivar (Ação Bônus)',
-        foco: 'Esquivar + Desengajar (Ação Bônus)',
-        onEscolher: onUsarDefesaPaciente,
-      },
-      'passo-do-vento': {
-        titulo: 'Passo do Vento',
-        graca: 'Correr ou Desengajar (Ação Bônus)',
-        foco: 'Correr ou Desengajar (Ação Bônus) + salto dobrado de distância',
-        onEscolher: onUsarPassoDoVento,
-      },
-      torrente: {
-        titulo: 'Torrente de Golpes',
-        graca: '1 Ataque Desarmado extra (Ação Bônus)',
-        foco: '2 Ataques Desarmados extras (Ação Bônus)',
-        onEscolher: onAtivarTorrenteDeGolpes,
-      },
-    }[escolhendoTecnica];
-    return (
-      <>
-        <div className="section-title">{info.titulo}</div>
-        <div
-          className="opt-card"
-          onClick={() => {
-            info.onEscolher(false);
-            setEscolhendoTecnica(null);
-          }}
-        >
-          <div className="opt-card-name">De graça</div>
-          <div className="opt-card-desc">{info.graca}</div>
-        </div>
-        <div
-          className="opt-card"
-          style={semFoco ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-          onClick={() => {
-            info.onEscolher(true);
-            setEscolhendoTecnica(null);
-          }}
-        >
-          <div className="opt-card-name">Gastar 1 Ponto de Foco ({pontosDeFocoRestantes}/{pontosDeFocoMaximo})</div>
-          <div className="opt-card-desc">{info.foco}</div>
-        </div>
-        <div className={styles.row} onClick={() => setEscolhendoTecnica(null)}>
-          <div className={styles.rowName}>← Voltar</div>
         </div>
       </>
     );
@@ -892,13 +831,13 @@ export default function BonusPanelContent({
       )}
       {pontosDeFocoMaximo > 0 && (
         <>
-          <div className={styles.row} onClick={() => setEscolhendoTecnica('defesa-paciente')}>
+          <div className={styles.row} onClick={() => onAbrirTecnicaMonge('defesa-paciente')}>
             <div className={styles.rowName}>🥋 Defesa Paciente</div>
             {detalhesAtivo && (
               <div className={styles.rowDesc}>Esquivar como Ação Bônus — de graça, ou gastando 1 Ponto de Foco pra somar Desengajar.</div>
             )}
           </div>
-          <div className={styles.row} onClick={() => setEscolhendoTecnica('passo-do-vento')}>
+          <div className={styles.row} onClick={() => onAbrirTecnicaMonge('passo-do-vento')}>
             <div className={styles.rowName}>💨 Passo do Vento</div>
             {detalhesAtivo && (
               <div className={styles.rowDesc}>
@@ -907,15 +846,8 @@ export default function BonusPanelContent({
               </div>
             )}
           </div>
-          {numAtaquesTorrente > 0 && ataquesTorrenteFeitos < numAtaquesTorrente ? (
-            <div className={styles.row} onClick={onAtacarTorrente}>
-              <div className={styles.rowName}>
-                🗡 Atacar — Ataque Desarmado (Torrente de Golpes) (ataque {ataquesTorrenteFeitos + 1}/{numAtaquesTorrente})
-              </div>
-              {detalhesAtivo && <div className={styles.rowDesc}>Toque de novo depois de rolar o dano, até usar os {numAtaquesTorrente} ataques.</div>}
-            </div>
-          ) : (
-            <div className={styles.row} onClick={() => setEscolhendoTecnica('torrente')}>
+          {!(numAtaquesTorrente > 0 && ataquesTorrenteFeitos < numAtaquesTorrente) && (
+            <div className={styles.row} onClick={() => onAbrirTecnicaMonge('torrente')}>
               <div className={styles.rowName}>👊 Torrente de Golpes</div>
               {detalhesAtivo && (
                 <div className={styles.rowDesc}>

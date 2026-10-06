@@ -31,6 +31,7 @@ import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import SidePanel from '../combat/SidePanel';
 import PvManualModal from '../combat/PvManualModal';
 import MaosConsagradasModal from '../combat/MaosConsagradasModal';
+import TecnicaMongeModal, { type TipoTecnicaMonge } from '../combat/TecnicaMongeModal';
 import RecursosDeClasse from '../combat/RecursosDeClasse';
 import type { RecursoVisivel } from '../../../core/recursosVisiveis';
 import AcaoPanelContent from '../combat/AcaoPanelContent';
@@ -804,6 +805,9 @@ export default function CombatTab({
 }: CombatTabProps) {
   const [pvManualAberto, setPvManualAberto] = useState(false);
   const [maosConsagradasAberto, setMaosConsagradasAberto] = useState(false);
+  // Popup de escolha das 3 técnicas do Monge (ver TecnicaMongeModal.tsx
+  // — pedido do Osmar, 2026-10: popup central, não sub-tela do painel).
+  const [tecnicaMongeAberta, setTecnicaMongeAberta] = useState<TipoTecnicaMonge | null>(null);
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -930,15 +934,15 @@ export default function CombatTab({
    * corrige de quebra o mesmo gap que já existia pro 2º+ ataque do
    * Ataque Extra). */
   function abrirPainel(categoria: RecursoTurno) {
+    // `onMarcarUsado` já marca a categoria "usada" no 1º ataque de uma
+    // sequência de vários (Ataque Extra) — "usada" não quer dizer "não
+    // sobra mais nada dentro dela". A Torrente de Golpes NÃO precisa
+    // dessa exceção (diferente de versões anteriores desta função):
+    // o botão de atacar dela mora fora do painel de Ação Bônus agora
+    // (card fixo no corpo do Combate, ver `ataquesTorrenteFeitos`
+    // abaixo) — pedido do Osmar, 2026-10.
     const temAtaqueExtraPendente = categoria === 'acao' && ataquesFeitos > 0 && ataquesFeitos < numAtaques;
-    // Diferente do Ataque Extra (1º ataque rola no painel JÁ aberto,
-    // "usada" só passa a valer DEPOIS dele — daí o `ataquesFeitos > 0`
-    // acima), escolher a técnica do Torrente FECHA o painel antes de
-    // rolar qualquer ataque (mesma tela de escolha de graça/Foco que
-    // todas as outras usam) — então até o 1º ataque da Torrente
-    // precisa reabrir, não só o 2º em diante.
-    const temTorrentePendente = categoria === 'bonus' && ataquesTorrenteFeitos < numAtaquesTorrente && numAtaquesTorrente > 0;
-    if (turnState[categoria] === 'usada' && !temAtaqueExtraPendente && !temTorrentePendente) return;
+    if (turnState[categoria] === 'usada' && !temAtaqueExtraPendente) return;
     setFeedback(null);
     setGolpeBrutalEfeitoPendente(false);
     setPainelAberto(categoria);
@@ -1287,7 +1291,6 @@ export default function CombatTab({
   function usarDefesaPaciente(comFoco: boolean) {
     if (comFoco && !onUsarPontoDeFoco()) return;
     onMarcarUsado('bonus');
-    setPainelAberto(null);
     setFeedback(
       comFoco
         ? '🥋 Defesa Paciente — Esquivar + Desengajar (Ação Bônus). Gastou 1 Ponto de Foco.'
@@ -1298,7 +1301,6 @@ export default function CombatTab({
   function usarPassoDoVento(comFoco: boolean) {
     if (comFoco && !onUsarPontoDeFoco()) return;
     onMarcarUsado('bonus');
-    setPainelAberto(null);
     setFeedback(
       comFoco
         ? '💨 Passo do Vento — Correr ou Desengajar (Ação Bônus) + salto dobrado de distância até o fim do turno. Gastou 1 Ponto de Foco.'
@@ -1306,20 +1308,31 @@ export default function CombatTab({
     );
   }
 
-  /** Ativa a técnica (escolhe quantos ataques) — rolar cada Ataque
-   * Desarmado é `rolarAtaqueTorrente` abaixo, mesmo padrão de "toque em
-   * Atacar quantas vezes a regra permitir" do Ataque Extra. */
+  /** Ativa a técnica (escolhe quantos ataques) e já dispara o Ataque 1
+   * na hora — pedido do Osmar (2026-10): o jogador que escolheu
+   * Torrente vai bater, não tem outra decisão no meio. O 2º ataque (se
+   * gastou Foco) aparece como card fixo no corpo do Combate (ver
+   * `ataquesTorrenteFeitos` abaixo), sem precisar abrir painel nenhum —
+   * `rolarAtaqueTorrente` cuida de cada rolagem individual. */
   function ativarTorrenteDeGolpes(comFoco: boolean) {
     if (comFoco && !onUsarPontoDeFoco()) return;
     setNumAtaquesTorrente(comFoco ? 2 : 1);
     setAtaquesTorrenteFeitos(0);
     onMarcarUsado('bonus');
+    rolarAtaqueTorrente();
+  }
+
+  /** Popup de escolha das 3 técnicas (`TecnicaMongeModal.tsx`) — abrir
+   * fecha o painel de Ação Bônus (mesmo padrão de `onAbrirMaosConsagradas`). */
+  function abrirTecnicaMonge(tipo: TipoTecnicaMonge) {
     setPainelAberto(null);
-    setFeedback(
-      comFoco
-        ? '👊 Torrente de Golpes — 2 Ataques Desarmados (Ação Bônus). Gastou 1 Ponto de Foco.'
-        : '👊 Torrente de Golpes — 1 Ataque Desarmado (Ação Bônus), de graça.',
-    );
+    setTecnicaMongeAberta(tipo);
+  }
+
+  function escolherTecnicaMonge(comFoco: boolean) {
+    if (tecnicaMongeAberta === 'defesa-paciente') usarDefesaPaciente(comFoco);
+    else if (tecnicaMongeAberta === 'passo-do-vento') usarPassoDoVento(comFoco);
+    else if (tecnicaMongeAberta === 'torrente') ativarTorrenteDeGolpes(comFoco);
   }
 
   function rolarAtaqueTorrente() {
@@ -1676,6 +1689,17 @@ export default function CombatTab({
         </div>
       )}
 
+      {numAtaquesTorrente > 0 && ataquesTorrenteFeitos < numAtaquesTorrente && ataqueTorrente && (
+        <div className="box" style={{ padding: 12, marginBottom: 12, cursor: 'pointer' }} onClick={rolarAtaqueTorrente}>
+          <div style={{ fontSize: 13 }}>
+            🗡 Atacar — {ataqueTorrente.nome} (Torrente de Golpes) (ataque {ataquesTorrenteFeitos + 1}/{numAtaquesTorrente})
+          </div>
+          <div className="label" style={{ marginTop: 2 }}>
+            Toque pra rolar o acerto e o dano deste ataque.
+          </div>
+        </div>
+      )}
+
       <div className={`box-solid ${styles.hpLive}`}>
         <div className={styles.hpHeader}>
           <div className="label">
@@ -1997,13 +2021,12 @@ export default function CombatTab({
       <div className={styles.splitBtns}>
         {(['acao', 'bonus'] as RecursoTurno[]).map((categoria) => {
           const temAtaqueExtraPendente = categoria === 'acao' && ataquesFeitos > 0 && ataquesFeitos < numAtaques;
-          const temTorrentePendente = categoria === 'bonus' && ataquesTorrenteFeitos < numAtaquesTorrente && numAtaquesTorrente > 0;
           // "usada" de verdade pro visual/CSS: categoria marcada E sem
-          // ataque pendente de Ataque Extra/Torrente de Golpes (ver
-          // `abrirPainel` — mesma condição, nunca deixar os 2 lugares
-          // divergirem: card com `pointer-events: none` bloquearia o
-          // clique mesmo com o JS já liberando).
-          const usadaDeVerdade = turnState[categoria] === 'usada' && !temAtaqueExtraPendente && !temTorrentePendente;
+          // ataque pendente de Ataque Extra (ver `abrirPainel` — mesma
+          // condição, nunca deixar os 2 lugares divergirem: card com
+          // `pointer-events: none` bloquearia o clique mesmo com o JS
+          // já liberando).
+          const usadaDeVerdade = turnState[categoria] === 'usada' && !temAtaqueExtraPendente;
           return (
             <div
               key={categoria}
@@ -2068,6 +2091,15 @@ export default function CombatTab({
           condicoesDisponiveis={condicoesMaosConsagradas}
           onConfirmar={confirmarMaosConsagradas}
           onFechar={() => setMaosConsagradasAberto(false)}
+        />
+      )}
+      {tecnicaMongeAberta && (
+        <TecnicaMongeModal
+          tipo={tecnicaMongeAberta}
+          pontosDeFocoMaximo={pontosDeFocoMaximo}
+          pontosDeFocoRestantes={pontosDeFocoRestantes}
+          onEscolher={escolherTecnicaMonge}
+          onFechar={() => setTecnicaMongeAberta(null)}
         />
       )}
 
@@ -2222,13 +2254,9 @@ export default function CombatTab({
           furiaAtiva={furiaAtiva}
           onUsarFuria={usarFuria}
           pontosDeFocoMaximo={pontosDeFocoMaximo}
-          pontosDeFocoRestantes={pontosDeFocoRestantes}
-          onUsarDefesaPaciente={usarDefesaPaciente}
-          onUsarPassoDoVento={usarPassoDoVento}
-          onAtivarTorrenteDeGolpes={ativarTorrenteDeGolpes}
+          onAbrirTecnicaMonge={abrirTecnicaMonge}
           numAtaquesTorrente={numAtaquesTorrente}
           ataquesTorrenteFeitos={ataquesTorrenteFeitos}
-          onAtacarTorrente={rolarAtaqueTorrente}
           percorrerArvoreDisponivel={percorrerArvoreDisponivel}
           percorrerArvoreEstendidaDisponivel={percorrerArvoreEstendidaDisponivel}
           onUsarPercorrerArvore={usarPercorrerArvore}

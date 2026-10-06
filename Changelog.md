@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1715
+
+Reformulada a interação das 3 técnicas do Monge (Defesa Paciente,
+Passo do Vento, Torrente de Golpes) — agora abrem um popup central
+("de graça" ou "gastar 1 Ponto de Foco") em vez de uma tela dentro do
+painel de Ação Bônus. Escolher Torrente de Golpes já dispara o 1º
+Ataque Desarmado na hora; se gastou Foco, um card fixo na tela
+("Atacar — ataque 2/2") deixa rolar o 2º ataque com 1 toque, sem
+precisar abrir o painel de novo.
+
 ## v202610_1544
 
 Ajuste visual: as bolinhas de Pontos de Foco do Monge agora ficam

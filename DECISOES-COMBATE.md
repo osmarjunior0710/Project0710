@@ -847,3 +847,29 @@ reconheça essa exceção ("categoria usada E tem [contador de uso] <
 [contador máximo]") tanto na função quanto no className/label do card
 fixo — os 2 lugares têm que concordar, senão o card mostra "ativo" mas
 o clique não abre nada (ou vice-versa).
+
+**Escolha "de graça vs. gastar recurso" que decide uma técnica
+inteira é popup central, nunca sub-tela dentro do painel lateral — e
+a sequência de ações que ela libera mora FORA de qualquer painel**
+(pedido do Osmar, 2026-10, revisão das 3 técnicas do Monge): o padrão
+certo é `TecnicaMongeModal.tsx` — um popup (mesma família CSS de
+`MaosConsagradasModal.tsx`, `TrocarArmaMaestria.module.css`) que abre
+no lugar do painel de Ação/Ação Bônus (fecha o painel, abre o popup —
+mesmo padrão de `onAbrirMaosConsagradas`). Se a escolha libera uma
+AÇÃO que o jogador vai querer fazer na sequência (ex.: atacar), o
+popup já dispara essa ação na hora de escolher — não fecha esperando o
+jogador reabrir o painel lateral pra continuar. Se a ação pode se
+repetir (2º ataque, etc.), o botão de repetir vive como card FIXO no
+corpo da aba Combate (fora de qualquer painel lateral), igual
+`periciaInigualavelPendente`/Metabolismo Incomum — nunca dentro do
+painel de Ação Bônus, que o jogador já fechou ao escolher.
+
+**Z-index de popup que abre JUNTO com o fechamento de um painel
+lateral precisa ficar ACIMA do painel (110/111), não no 55 padrão de
+`.overlay`** — achado corrigindo o popup acima: `TecnicaMongeModal`
+abre na mesma hora em que `painelAberto` vira `null`, e durante a
+transição de fechamento o painel ainda está renderizado por cima (CSS
+`z-index: 110/111`, ver `SidePanel.module.css`) — um popup com o
+z-index padrão (55) fica escondido atrás dele. Passe `zIndex` inline
+maior que 111 (ex.: 120, abaixo do RollOverlay, 135) pra qualquer
+popup que nasça desse jeito.
