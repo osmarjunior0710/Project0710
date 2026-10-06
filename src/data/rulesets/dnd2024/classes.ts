@@ -576,4 +576,68 @@ export const classes: Classe[] = [
     disponivel: true,
     fonte: FONTE,
   },
+  {
+    id: 'monge',
+    nome: 'Monge',
+    atributoPrimario: 'Destreza e Sabedoria',
+    dadoDeVida: 'd8',
+    salvaguardas: ['FOR', 'DES'],
+    nivelSubclasse: 3,
+    recursos: [
+      {
+        // Nº de LADOS do dado (6/8/10/12), não o valor rolado — mesmo
+        // padrão de "número puro lido da planilha" de todo outro
+        // recurso. Ver core/dadoArtesMarciais.ts.
+        nome: 'Bônus de Artes Marciais (nº de lados do dado)',
+        recuperaEm: null,
+        valorPorNivel: {
+          1: 6, 2: 6, 3: 6, 4: 6, 5: 8, 6: 8, 7: 8, 8: 8, 9: 8, 10: 8,
+          11: 10, 12: 10, 13: 10, 14: 10, 15: 10, 16: 10, 17: 12, 18: 12, 19: 12, 20: 12,
+        },
+      },
+      {
+        nome: 'Pontos de Foco',
+        recuperaEm: 'Descanso Curto ou Longo',
+        valorPorNivel: {
+          1: 0, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10,
+          11: 11, 12: 12, 13: 13, 14: 14, 15: 15, 16: 16, 17: 17, 18: 18, 19: 19, 20: 20,
+        },
+      },
+      {
+        // Bônus de Deslocamento em metros, sem armadura/escudo.
+        nome: 'Movimento sem Armadura (bônus em metros)',
+        recuperaEm: null,
+        valorPorNivel: {
+          1: 0, 2: 3, 3: 3, 4: 3, 5: 3, 6: 4.5, 7: 4.5, 8: 4.5, 9: 4.5, 10: 6,
+          11: 6, 12: 6, 13: 6, 14: 7.5, 15: 7.5, 16: 7.5, 17: 7.5, 18: 9, 19: 9, 20: 9,
+        },
+      },
+    ],
+    progressao: [
+      { nivel: 1, bonusProficiencia: '+2', caracteristicas: ['Artes Marciais', 'Defesa sem Armadura'] },
+      { nivel: 2, bonusProficiencia: '+2', caracteristicas: ['Foco do Monge', 'Movimento sem Armadura', 'Metabolismo Incomum'] },
+      { nivel: 3, bonusProficiencia: '+2', caracteristicas: ['Defletir Ataques', 'Subclasse de Monge'] },
+      { nivel: 4, bonusProficiencia: '+2', caracteristicas: ['Aumento no Valor de Atributo', 'Queda Lenta'] },
+      { nivel: 5, bonusProficiencia: '+3', caracteristicas: ['Ataque Extra', 'Golpe Atordoante'] },
+      { nivel: 6, bonusProficiencia: '+3', caracteristicas: ['Golpes Potencializados', 'Característica de Subclasse'] },
+      { nivel: 7, bonusProficiencia: '+3', caracteristicas: ['Evasão'] },
+      { nivel: 8, bonusProficiencia: '+3', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 9, bonusProficiencia: '+4', caracteristicas: ['Movimento Acrobático'] },
+      { nivel: 10, bonusProficiencia: '+4', caracteristicas: ['Restauro Pessoal', 'Foco Aprimorado'] },
+      { nivel: 11, bonusProficiencia: '+4', caracteristicas: ['Característica de Subclasse'] },
+      { nivel: 12, bonusProficiencia: '+4', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 13, bonusProficiencia: '+5', caracteristicas: ['Defletir Energia'] },
+      { nivel: 14, bonusProficiencia: '+5', caracteristicas: ['Sobrevivente Disciplinado'] },
+      { nivel: 15, bonusProficiencia: '+5', caracteristicas: ['Foco Perfeito'] },
+      { nivel: 16, bonusProficiencia: '+5', caracteristicas: ['Aumento no Valor de Atributo'] },
+      { nivel: 17, bonusProficiencia: '+6', caracteristicas: ['Característica de Subclasse'] },
+      { nivel: 18, bonusProficiencia: '+6', caracteristicas: ['Defesa Superior'] },
+      { nivel: 19, bonusProficiencia: '+6', caracteristicas: ['Dádiva Épica'] },
+      { nivel: 20, bonusProficiencia: '+6', caracteristicas: ['Corpo e Mente'] },
+    ],
+    // Entrega 1 (foco Monge, ver EmDev.md) — dado no banco, ainda não
+    // habilitado no wizard (Entrega 2).
+    disponivel: false,
+    fonte: FONTE,
+  },
 ];

@@ -16,7 +16,7 @@ import { idiomas } from '../data/rulesets/dnd2024/idiomas';
 import { subclasses } from '../data/rulesets/dnd2024/subclasses';
 import { estilosDeLuta } from '../data/rulesets/dnd2024/estilosDeLuta';
 import { proficienciasIniciaisClasse } from '../data/rulesets/dnd2024/classesProficienciasIniciais';
-import { gruposFerramenta } from '../data/rulesets/dnd2024/ferramentas';
+import { gruposFerramenta, opcoesDosGrupos } from '../data/rulesets/dnd2024/ferramentas';
 import { pericias } from '../data/rulesets/dnd2024/pericias';
 import { magiasDaClasse } from '../data/rulesets/dnd2024/magias';
 import { invocacoesMisticas } from '../data/rulesets/dnd2024/invocacoesMisticas';
@@ -92,7 +92,7 @@ function gerarSelecaoNivel1(classe: Classe, origemNome: string, especieNome: str
       proficiencias.periciasEscolha.quantidade,
     );
     if (proficiencias.ferramentasEscolha) {
-      const opcoesFerramenta = gruposFerramenta[proficiencias.ferramentasEscolha.grupo] ?? [];
+      const opcoesFerramenta = opcoesDosGrupos(proficiencias.ferramentasEscolha.grupo);
       selection.ferramentasClasseEscolhidas = embaralhar(opcoesFerramenta)
         .slice(0, proficiencias.ferramentasEscolha.quantidade)
         .map((f) => f.nome);

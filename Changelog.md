@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0737
+
+Começo da 8ª classe (Monge) — só dado no banco por enquanto, nada
+visível na tela ainda (continua "(em breve)" no wizard). De quebra,
+a fórmula de CA sem armadura do Bárbaro/criação de personagem (resumo
+do wizard, antes da Mochila existir) ficou mais precisa.
+
 ## v202610_0037
 
 Em tela larga (tablet/desktop), o app agora vira um "cartão" de

@@ -1,5 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { valorRecursoClasse, quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeMaosConsagradas, temAuraDeProtecao } from './recursosClasse';
+import {
+  valorRecursoClasse,
+  quantidadeRecuperarFolego,
+  quantidadeFuria,
+  bonusDanoFuria,
+  quantidadeMaosConsagradas,
+  temAuraDeProtecao,
+  ladosDadoArtesMarciais,
+  quantidadePontosDeFoco,
+  bonusMovimentoSemArmadura,
+} from './recursosClasse';
 import { classes } from '../data/rulesets/dnd2024/classes';
 
 function classe(nome: string) {
@@ -81,5 +91,43 @@ describe('temAuraDeProtecao', () => {
 
   it('borda: outra classe no nível 6: inativa', () => {
     expect(temAuraDeProtecao(classe('Guerreiro'), 6)).toBe(false);
+  });
+});
+
+describe('ladosDadoArtesMarciais', () => {
+  it('Monge: 1d6 no nível 1, escala até 1d12 no nível 17-20', () => {
+    expect(ladosDadoArtesMarciais(classe('Monge'), 1)).toBe(6);
+    expect(ladosDadoArtesMarciais(classe('Monge'), 5)).toBe(8);
+    expect(ladosDadoArtesMarciais(classe('Monge'), 11)).toBe(10);
+    expect(ladosDadoArtesMarciais(classe('Monge'), 20)).toBe(12);
+  });
+
+  it('borda: classe sem Dado de Artes Marciais devolve 0', () => {
+    expect(ladosDadoArtesMarciais(classe('Guerreiro'), 5)).toBe(0);
+  });
+});
+
+describe('quantidadePontosDeFoco', () => {
+  it('Monge: 0 no nível 1 (ainda não tem Foco do Monge), cresce 1:1 com o nível a partir do 2', () => {
+    expect(quantidadePontosDeFoco(classe('Monge'), 1)).toBe(0);
+    expect(quantidadePontosDeFoco(classe('Monge'), 2)).toBe(2);
+    expect(quantidadePontosDeFoco(classe('Monge'), 20)).toBe(20);
+  });
+
+  it('borda: classe sem Pontos de Foco devolve 0', () => {
+    expect(quantidadePontosDeFoco(classe('Guerreiro'), 10)).toBe(0);
+  });
+});
+
+describe('bonusMovimentoSemArmadura', () => {
+  it('Monge: 0 no nível 1, +3m no 2, escala até +9m no 18-20', () => {
+    expect(bonusMovimentoSemArmadura(classe('Monge'), 1)).toBe(0);
+    expect(bonusMovimentoSemArmadura(classe('Monge'), 2)).toBe(3);
+    expect(bonusMovimentoSemArmadura(classe('Monge'), 6)).toBe(4.5);
+    expect(bonusMovimentoSemArmadura(classe('Monge'), 20)).toBe(9);
+  });
+
+  it('borda: classe sem esse recurso devolve 0', () => {
+    expect(bonusMovimentoSemArmadura(classe('Guerreiro'), 10)).toBe(0);
   });
 });

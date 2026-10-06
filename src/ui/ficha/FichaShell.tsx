@@ -695,6 +695,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   const desValor = valorFinalAtributo(selecao, 'DES') ?? 10;
   const conValorFinal = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'CON') ?? 10, 'CON', temCampeaoPrimitivo);
+  // Só usado pela Defesa sem Armadura do Monge (10+DES+SAB) — ver
+  // `DEFESA_SEM_ARMADURA_POR_CLASSE` em `core/calculoPersonagem.ts`.
+  const sabValorParaCA = valorFinalAtributo(selecao, 'SAB') ?? 10;
   // Talentos que entram no cálculo (Fase 4): os escolhidos em Level
   // Up (`talentosGeraisAtuais`) MAIS o Talento de Origem, ganho fixo
   // na criação (ex: Alerta) — nunca passa pelo picker de Level Up,
@@ -706,7 +709,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ...(origemPersonagem ? [origemPersonagem.talentoOrigemId] : []),
     ...(selecao.talentoEspecieEscolhido ? [selecao.talentoEspecieEscolhido] : []),
   ];
-  const ca = calcularCAEquipado(itensMochila, desValor, conValorFinal, personagem.estiloDeLuta, talentosEfetivos, classeOriginal, classesMulticlassadasNomes);
+  const ca = calcularCAEquipado(
+    itensMochila,
+    desValor,
+    conValorFinal,
+    personagem.estiloDeLuta,
+    talentosEfetivos,
+    classeOriginal,
+    classesMulticlassadasNomes,
+    sabValorParaCA,
+  );
   // Penalidade de proficiência de Armadura (SDD "Penalidades por Falta
   // de Proficiência") — Desvantagem em D20 de Força/Destreza sempre
   // que a armadura equipada (Leve/Média/Pesada) não tiver treinamento;
@@ -785,7 +797,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const capacidadeMaxima = calcularCapacidadeMaxima(selecao, formaGrandeAtiva, temCampeaoPrimitivo, bonusMochilas);
   const explicacaoCapacidadeMaxima = explicarCapacidadeMaxima(selecao, formaGrandeAtiva, temCampeaoPrimitivo, bonusMochilas);
   const explicacaoPv = explicarPvMaximo(selecao, personagem.pvMax);
-  const explicacaoCa = explicarCAEquipado(itensMochila, desValor, conValorFinal, personagem.estiloDeLuta, talentosEfetivos, classeOriginal, classesMulticlassadasNomes);
+  const explicacaoCa = explicarCAEquipado(
+    itensMochila,
+    desValor,
+    conValorFinal,
+    personagem.estiloDeLuta,
+    talentosEfetivos,
+    classeOriginal,
+    classesMulticlassadasNomes,
+    sabValorParaCA,
+  );
   const explicacaoIniciativa = explicarIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);
   const explicacaoPercepcaoPassiva = explicarPercepcaoPassiva(selecao, nivelTotalAtual);
   const estiloDeLuta = estilosDeLuta.find((e) => e.nome === personagem.estiloDeLuta) ?? null;

@@ -169,18 +169,21 @@ function caPelaArmadura(classeArmadura: string, desMod: number, tetoDesOverride?
 }
 
 /**
- * CA nível 1. Exceções de classe (Bárbaro/Monge, ver DECISOES-DESIGN.md
- * "Cálculo de CA") entram aqui como lookup por classeId, checado ANTES
- * da fórmula padrão — nenhuma das duas está importada ainda, então não
- * há entrada no lookup por enquanto.
+ * CA nível 1 (resumo do wizard, antes da Mochila existir). Exceções de
+ * classe (Bárbaro/Monge, ver `DEFESA_SEM_ARMADURA_POR_CLASSE` acima)
+ * entram aqui igual já entram em `calcularCAEquipado` — sem armadura
+ * nem escudo nessa etapa do wizard (ainda não dá pra equipar Escudo
+ * aqui), então o caso "perde com Escudo" nunca se aplica nesta função.
  */
 export function calcularCA(selection: WizardSelection): number | null {
   const desValor = valorFinalAtributo(selection, 'DES');
   if (desValor === null) return null;
   const desMod = modificador(desValor);
   const armadura = armaduraEquipadaInicial(selection);
-  if (!armadura) return 10 + desMod;
-  return caPelaArmadura(armadura.classeArmadura, desMod);
+  if (armadura) return caPelaArmadura(armadura.classeArmadura, desMod);
+  const defesaInfo = defesaSemArmaduraDaClasse(classeDaSelecao(selection));
+  const bonusSemArmadura = defesaInfo ? modificador(valorFinalAtributo(selection, defesaInfo.atributo) ?? 10) : 0;
+  return 10 + desMod + bonusSemArmadura;
 }
 
 /** Bônus de CA de um Escudo, a partir do texto da coluna "Classe de
@@ -230,13 +233,32 @@ function proficienteComEscudo(
   return classeProficienteComArmadura(classe, 'Escudos', talentosAtuais, classesExtrasNomes);
 }
 
-/** `true` = a classe tem "Defesa sem Armadura" (Bárbaro nível 1 —
- * sem armadura, CA base soma mod. Constituição além de Destreza).
- * Checado pela progressão em vez do nível atual porque, quando
- * presente, essa característica sempre é de nível 1 — nunca falta
- * checar "desbloqueou ainda?" pra quem já existe como personagem. */
+/** Defesa sem Armadura — 2º atributo somado além de Destreza, e se o
+ * bônus continua valendo empunhando Escudo (DECISOES-DADOS.md "Cálculo
+ * de CA — Bárbaro e Monge têm regra própria", único par de exceções do
+ * núcleo). Nunca comparar `classe.nome` espalhado pelo resto do
+ * código — só este lookup. */
+const DEFESA_SEM_ARMADURA_POR_CLASSE: Record<string, { atributo: Atributo; perdeComEscudo: boolean }> = {
+  Bárbaro: { atributo: 'CON', perdeComEscudo: false },
+  Monge: { atributo: 'SAB', perdeComEscudo: true },
+};
+
+/** `true` = a classe tem "Defesa sem Armadura" própria (Bárbaro/Monge
+ * nível 1 — sem armadura, CA base soma um 2º atributo além de
+ * Destreza). Checado pela progressão em vez do nível atual porque,
+ * quando presente, essa característica sempre é de nível 1 — nunca
+ * falta checar "desbloqueou ainda?" pra quem já existe como
+ * personagem. */
 function temDefesaSemArmadura(classe: Classe | null | undefined): boolean {
   return classe?.progressao.some((p) => p.caracteristicas.includes(ID_CARACTERISTICA_CLASSE.defesaSemArmadura)) ?? false;
+}
+
+/** Entrada de `DEFESA_SEM_ARMADURA_POR_CLASSE` pra essa classe, só se
+ * ela realmente tiver a característica (`temDefesaSemArmadura`) — evita
+ * repetir as duas checagens em todo call site. */
+function defesaSemArmaduraDaClasse(classe: Classe | null | undefined) {
+  if (!temDefesaSemArmadura(classe)) return null;
+  return (classe && DEFESA_SEM_ARMADURA_POR_CLASSE[classe.nome]) ?? null;
 }
 
 export function calcularCAEquipado(
@@ -247,16 +269,24 @@ export function calcularCAEquipado(
   talentosAtuais?: string[],
   classe?: Classe | null,
   classesExtrasNomes?: string[],
+  /** Só precisa vir preenchido pra classe com Defesa sem Armadura
+   * baseada em Sabedoria (Monge) — ver `DEFESA_SEM_ARMADURA_POR_CLASSE`. */
+  sabValor?: number,
 ): number {
   const desMod = modificador(desValor);
   const { armadura, escudo } = resumoEquipado(itensMochila);
   const armaduraCatalogo = armadura ? armaduras.find((a) => a.nome === armadura.nome) : undefined;
   const { defensivoBonus, tetoDesOverride } = bonusCaFase4(armaduraCatalogo, desValor, estiloDeLutaEscolhido, talentosAtuais);
-  const bonusConSemArmadura = !armaduraCatalogo && temDefesaSemArmadura(classe) ? modificador(conValor) : 0;
+  const escudoCatalogo = escudo ? armaduras.find((a) => a.nome === escudo.nome) : undefined;
+  const defesaInfo = defesaSemArmaduraDaClasse(classe);
+  // Monge perde o bônus com Escudo equipado (mesmo sem proficiência
+  // nele) — Bárbaro mantém (DECISOES-DADOS.md "Cálculo de CA").
+  const semArmaduraAtiva = !armaduraCatalogo && defesaInfo !== null && !(escudoCatalogo && defesaInfo.perdeComEscudo);
+  const valorSegundoAtributo = defesaInfo?.atributo === 'SAB' ? (sabValor ?? 10) : conValor;
+  const bonusSemArmadura = semArmaduraAtiva ? modificador(valorSegundoAtributo) : 0;
   const base = armaduraCatalogo
     ? caPelaArmadura(armaduraCatalogo.classeArmadura, desMod, tetoDesOverride)
-    : 10 + desMod + bonusConSemArmadura;
-  const escudoCatalogo = escudo ? armaduras.find((a) => a.nome === escudo.nome) : undefined;
+    : 10 + desMod + bonusSemArmadura;
   const bonus =
     escudoCatalogo && proficienteComEscudo(classe, talentosAtuais, classesExtrasNomes) ? bonusEscudo(escudoCatalogo.classeArmadura) : 0;
   return base + bonus + defensivoBonus;
@@ -271,6 +301,7 @@ export function explicarCAEquipado(
   talentosAtuais?: string[],
   classe?: Classe | null,
   classesExtrasNomes?: string[],
+  sabValor?: number,
 ): ExplicacaoCalculo {
   const desMod = modificador(desValor);
   const { armadura, escudo } = resumoEquipado(itensMochila);
@@ -279,17 +310,26 @@ export function explicarCAEquipado(
   const escudoProficiente = proficienteComEscudo(classe, talentosAtuais, classesExtrasNomes);
   const bonus = escudoCatalogo && escudoProficiente ? bonusEscudo(escudoCatalogo.classeArmadura) : 0;
   const { defensivoBonus, tetoDesOverride } = bonusCaFase4(armaduraCatalogo, desValor, estiloDeLutaEscolhido, talentosAtuais);
+  const defesaInfo = defesaSemArmaduraDaClasse(classe);
+  const semArmaduraAtiva = defesaInfo !== null && !(escudoCatalogo && defesaInfo.perdeComEscudo);
+  const nomeAtributo = defesaInfo?.atributo === 'SAB' ? 'Sabedoria' : 'Constituição';
+  const valorSegundoAtributo = defesaInfo?.atributo === 'SAB' ? (sabValor ?? 10) : conValor;
 
   const linhas: LinhaExplicacao[] = [];
   let base: number;
   if (!armaduraCatalogo) {
     linhas.push({ label: 'Sem armadura (base)', valor: '10' });
     linhas.push({ label: 'mod. Destreza', valor: fmtMod(desMod) });
-    const bonusConSemArmadura = temDefesaSemArmadura(classe) ? modificador(conValor) : 0;
-    if (bonusConSemArmadura !== 0 || temDefesaSemArmadura(classe)) {
-      linhas.push({ label: 'mod. Constituição (Defesa sem Armadura)', valor: fmtMod(bonusConSemArmadura) });
+    const bonusSemArmadura = semArmaduraAtiva ? modificador(valorSegundoAtributo) : 0;
+    if (defesaInfo !== null) {
+      linhas.push({
+        label: semArmaduraAtiva
+          ? `mod. ${nomeAtributo} (Defesa sem Armadura)`
+          : `Defesa sem Armadura perdida (Escudo equipado)`,
+        valor: semArmaduraAtiva ? fmtMod(bonusSemArmadura) : '+0',
+      });
     }
-    base = 10 + desMod + bonusConSemArmadura;
+    base = 10 + desMod + bonusSemArmadura;
   } else {
     const ca = caPelaArmadura(armaduraCatalogo.classeArmadura, desMod, tetoDesOverride);
     const teto = armaduraCatalogo.classeArmadura.match(/máx\.?\s*(\d+)/i);

@@ -46,6 +46,29 @@ export function quantidadeMaosConsagradas(classe: Classe, nivel: number): number
   return classe.id === 'paladino' ? 5 * nivel : 0;
 }
 
+/** Nº de LADOS do Dado de Artes Marciais (Monge) no nível atual —
+ * 6/8/10/12, nunca o valor rolado. SUBSTITUI o dado de dano do Ataque
+ * Desarmado/armas de Monge (usa o MAIOR entre os dois), nunca soma —
+ * diferente do Dano da Fúria do Bárbaro, que é bônus adicional. Ver
+ * `sdd/sdd-monge.md` seção 1. */
+export function ladosDadoArtesMarciais(classe: Classe, nivel: number): number {
+  return valorRecursoClasse(classe, 'Bônus de Artes Marciais', nivel);
+}
+
+/** Nº de Pontos de Foco (Monge) no nível atual — recarrega no Descanso
+ * Curto E no Longo (igual Magia de Pacto do Bruxo, diferente de Fúria/
+ * Canalizar Divindade que só recarregam parcial no Curto). */
+export function quantidadePontosDeFoco(classe: Classe, nivel: number): number {
+  return valorRecursoClasse(classe, 'Pontos de Foco', nivel);
+}
+
+/** Bônus de Deslocamento (em metros) de Movimento sem Armadura (Monge)
+ * no nível atual — só vale sem armadura/escudo equipado, ver
+ * `sdd/sdd-monge.md` (mesma condição da Defesa sem Armadura). */
+export function bonusMovimentoSemArmadura(classe: Classe, nivel: number): number {
+  return valorRecursoClasse(classe, 'Movimento sem Armadura', nivel);
+}
+
 /** Aura de Proteção (Paladino, nível 6) está ativa — passiva, sempre
  * ligada, sem "ativar" nada (livro Cap. 3: "você irradia uma aura...").
  * Simplificação conhecida: a regra desliga a aura se o Paladino tiver a

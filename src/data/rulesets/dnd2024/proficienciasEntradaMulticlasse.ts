@@ -65,4 +65,14 @@ export const proficienciasEntradaMulticlasse: ProficienciaEntradaMulticlasse[] =
     ferramentaAEscolha: null,
     fonte: 'Livro do Jogador (D&D 5e 2024)',
   },
+  {
+    // "Apenas o Dado de Ponto de Vida" (aba Multiclasse da planilha) —
+    // nenhuma proficiência de arma/armadura/perícia/ferramenta extra.
+    classe: 'Monge',
+    proficienciaArmas: '',
+    treinamentoArmadura: '',
+    periciaAEscolha: null,
+    ferramentaAEscolha: null,
+    fonte: 'Livro do Jogador (D&D 5e 2024)',
+  },
 ];

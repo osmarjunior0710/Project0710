@@ -26,6 +26,8 @@ const bardo = classes.find((c) => c.nome === 'Bardo');
 if (!bardo) throw new Error('Fixture "Bardo" não encontrada em data/rulesets/dnd2024/classes.ts');
 const barbaro = classes.find((c) => c.nome === 'Bárbaro');
 if (!barbaro) throw new Error('Fixture "Bárbaro" não encontrada em data/rulesets/dnd2024/classes.ts');
+const monge = classes.find((c) => c.nome === 'Monge');
+if (!monge) throw new Error('Fixture "Monge" não encontrada em data/rulesets/dnd2024/classes.ts');
 
 describe('bonusProficiencia', () => {
   it('nível 1 é sempre +2 (regra oficial pra qualquer classe)', () => {
@@ -100,6 +102,11 @@ describe('calcularCA (criação, resumo do wizard)', () => {
   it('sem armadura escolhida no equipamento inicial: 10 + mod. Destreza', () => {
     expect(calcularCA(selecaoGuerreiro())).toBe(12); // DES 14 -> mod +2
   });
+
+  it('Monge (Defesa sem Armadura): soma mod. Sabedoria mesmo nesta etapa (antes da Mochila existir)', () => {
+    const selecao = selecaoGuerreiro({ classe: 'Monge', atributos: { FOR: 10, DES: 14, CON: 12, INT: 10, SAB: 16, CAR: 8 } });
+    expect(calcularCA(selecao)).toBe(10 + 2 + 3); // DES 14 -> +2, SAB 16 -> +3
+  });
 });
 
 describe('calcularCAEquipado (Ficha, pós-criação)', () => {
@@ -172,6 +179,26 @@ describe('calcularCAEquipado (Ficha, pós-criação)', () => {
 
   it('Guerreiro (sem Defesa sem Armadura) sem armadura: mod. Constituição NÃO soma', () => {
     expect(calcularCAEquipado([], 14, 16, null, [], guerreiro)).toBe(12); // só 10 + mod. Destreza
+  });
+
+  it('Monge (Defesa sem Armadura) sem armadura/escudo: 10 + mod. Destreza + mod. Sabedoria', () => {
+    expect(calcularCAEquipado([], 14, 10, null, [], monge, [], 16)).toBe(10 + 2 + 3); // DES 14 -> +2, SAB 16 -> +3
+  });
+
+  it('Monge (Defesa sem Armadura) COM Escudo equipado: perde o bônus (volta a 10 + Destreza só)', () => {
+    const itens = [itemEquipado('Escudo', 'escudo')];
+    // Monge não é proficiente com Escudo, então nem o +2 do Escudo soma
+    // — fica só 10 + mod. Destreza, mesmo o personagem tendo SAB 16.
+    expect(calcularCAEquipado(itens, 14, 10, null, [], monge, [], 16)).toBe(10 + 2);
+  });
+
+  it('Monge (Defesa sem Armadura) COM armadura equipada: mod. Sabedoria não soma (só sem armadura)', () => {
+    const itens = [itemEquipado('Couro Batido', 'armadura')];
+    expect(calcularCAEquipado(itens, 14, 10, null, [], monge, [], 16)).toBe(12 + 2); // igual a qualquer outra classe
+  });
+
+  it('Monge sem `sabValor` passado: cai pro padrão (mod. +0), nunca quebra', () => {
+    expect(calcularCAEquipado([], 14, 10, null, [], monge)).toBe(10 + 2 + 0);
   });
 });
 

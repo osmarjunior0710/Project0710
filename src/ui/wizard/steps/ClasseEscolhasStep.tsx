@@ -6,7 +6,7 @@ import { caracteristicasClasse } from '../../../data/rulesets/dnd2024/caracteris
 import { estilosDeLuta } from '../../../data/rulesets/dnd2024/estilosDeLuta';
 import { proficienciasIniciaisClasse } from '../../../data/rulesets/dnd2024/classesProficienciasIniciais';
 import { proficienciasArmaArmaduraClasse } from '../../../data/rulesets/dnd2024/proficienciasArmaArmaduraClasse';
-import { gruposFerramenta } from '../../../data/rulesets/dnd2024/ferramentas';
+import { opcoesDosGrupos } from '../../../data/rulesets/dnd2024/ferramentas';
 import { magiasDaClasse } from '../../../data/rulesets/dnd2024/magias';
 import {
   invocacoesElegiveisAteNivel,
@@ -52,9 +52,7 @@ export default function ClasseEscolhasStep({ selection, update }: StepProps) {
   const armasMaestria = qtdMaestria > 0 ? armasParaMaestria(classe) : [];
   const temEstiloDeLuta = temEstiloDeLutaTrocavel(classe, 1);
   const maxPericias = proficiencias?.periciasEscolha.quantidade ?? 0;
-  const opcoesFerramenta = proficiencias?.ferramentasEscolha
-    ? (gruposFerramenta[proficiencias.ferramentasEscolha.grupo] ?? [])
-    : [];
+  const opcoesFerramenta = proficiencias?.ferramentasEscolha ? opcoesDosGrupos(proficiencias.ferramentasEscolha.grupo) : [];
   const maxFerramentas = proficiencias?.ferramentasEscolha?.quantidade ?? 0;
 
   // Truques/Magias Preparadas — só existem pra classes conjuradoras

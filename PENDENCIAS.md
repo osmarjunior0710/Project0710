@@ -1568,3 +1568,18 @@ voltar a esse foco.
 - Banner da subclasse Juramento da Glória ainda falta (Devoção/
   Anciões/Vingança já foram importados) — cai no fallback 🖼 até
   chegar.
+
+## Bárbaro e Paladino faltam em `proficienciasEntradaMulticlasse.ts`
+
+**Achado** (foco Monge, 2026-10, ao adicionar Monge nesse mesmo
+arquivo): `proficienciasEntradaMulticlasse.ts` (pacote REDUZIDO de
+proficiência ganho ao multiclassar PRA uma classe, usado por
+`classeProficienteComArma`/`classeProficienteComArmadura` quando ela
+não é a primeira do personagem) só tem Guerreiro/Bardo/Bruxo/Mago/
+Monge — falta Bárbaro e Paladino, mesmo as duas já implementadas e
+jogáveis. Hoje, multiclassar PRA Bárbaro ou Paladino (vindo de outra
+classe) não concede proficiência de arma/armadura NENHUMA pela entrada
+nova (só a da classe original continua valendo) — bug real, silencioso,
+nunca testado ao vivo. Dado já existe em `multiclasse.ts`
+(`proficienciasMulticlasse`, texto livre) — só falta estruturar nos 2
+campos (`proficienciaArmas`/`treinamentoArmadura`) igual as outras 5.

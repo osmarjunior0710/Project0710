@@ -33,8 +33,12 @@ export interface ProficienciasIniciaisClasse {
   periciasEscolha: { quantidade: number; opcoes: string[] };
   /** Só classes com proficiência de ferramenta na criação (ex.: Bardo
    * escolhe 3 Instrumentos Musicais) — Guerreiro não tem, por isso é
-   * opcional. `grupo` referencia `gruposFerramenta` (ferramentas.ts). */
-  ferramentasEscolha?: { quantidade: number; grupo: string };
+   * opcional. `grupo` referencia `gruposFerramenta` (ferramentas.ts) —
+   * array quando a escolha pode vir de MAIS DE 1 grupo ao mesmo tempo
+   * (ex.: Monge, "Ferramentas de Artesão OU Instrumento Musical" —
+   * as opções das 2 listas entram juntas, não é 1 grupo OU outro
+   * escolhido antes). */
+  ferramentasEscolha?: { quantidade: number; grupo: string | string[] };
   equipamentoInicial: OpcaoEquipamentoClasse[];
   fonte: string;
 }
@@ -234,5 +238,37 @@ export const proficienciasIniciaisClasse: Record<string, ProficienciasIniciaisCl
       },
     ],
     fonte: 'Livro do Jogador (D&D 5e 2024), Cap. 3, pág. 167',
+  },
+  monge: {
+    classeId: 'monge',
+    periciasEscolha: {
+      quantidade: 2,
+      opcoes: ['Acrobacia', 'Atletismo', 'Furtividade', 'História', 'Intuição', 'Religião'],
+    },
+    // "Escolha um tipo de Ferramentas de Artesão ou Instrumento
+    // Musical" — as 2 listas somadas numa escolha só (ver
+    // `opcoesDosGrupos`, `ferramentas.ts`).
+    ferramentasEscolha: { quantidade: 1, grupo: ['Ferramentas de Artesão', 'Instrumento Musical'] },
+    equipamentoInicial: [
+      {
+        rotulo: 'A',
+        itens: [
+          { nome: 'Lança', quantidade: 1, unidade: null },
+          { nome: 'Adaga', quantidade: 5, unidade: null },
+          // Placeholder — vira o nome real escolhido (Ferramentas de
+          // Artesão OU Instrumento Musical) em `mochila.ts`
+          // (`PLACEHOLDERS_FERRAMENTA`, já reconhece os 2 nomes).
+          { nome: 'Instrumento Musical', quantidade: 1, unidade: null },
+          { nome: 'Kit de Aventureiro', quantidade: 1, unidade: null },
+        ],
+        ouro: 11,
+      },
+      {
+        rotulo: 'B',
+        itens: [],
+        ouro: 50,
+      },
+    ],
+    fonte: 'Livro do Jogador (D&D 5e 2024), Cap. 3, pág. 159',
   },
 };

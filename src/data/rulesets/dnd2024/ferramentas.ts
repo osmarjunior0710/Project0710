@@ -15,6 +15,15 @@ export interface OpcaoFerramenta {
   atributo: string | null;
 }
 
+/** Opções de ferramenta de 1 ou mais grupos juntos (ex.: Monge —
+ * "Ferramentas de Artesão OU Instrumento Musical", as 2 listas somadas
+ * numa escolha só) — ver `classesProficienciasIniciais.ts`
+ * `ferramentasEscolha.grupo`. */
+export function opcoesDosGrupos(grupo: string | string[]): OpcaoFerramenta[] {
+  const grupos = Array.isArray(grupo) ? grupo : [grupo];
+  return grupos.flatMap((g) => gruposFerramenta[g] ?? []);
+}
+
 export const gruposFerramenta: Record<string, OpcaoFerramenta[]> = {
   "Instrumento Musical": [
     { nome: "Alaúde", preco: "35 PO", peso: "1 kg", descricao: "Tocar uma música conhecida (CD 10) ou improvisar uma música (CD 15)", atributo: "Carisma" },
