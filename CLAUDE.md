@@ -368,6 +368,23 @@ característica nova com interação ativa em Combat/UI especificamente, a
 proposta apresentada já deve dizer onde ela fica na tela e como o
 jogador ativa — não construa isso e ajuste depois.
 
+**Texto completo da fonte vem PRIMEIRO, antes de qualquer resumo seu**
+(pedido do Osmar, 2026-10, depois de uma proposta de Metabolismo
+Incomum que resumiu a característica errado por não ter mostrado o
+texto bruto antes): sempre que a entrega envolver uma característica/
+regra de D&D (não só decisão de UI/arquitetura pura), a PRIMEIRA coisa
+da mensagem de proposta é o texto completo da "Descrição Completa" da
+planilha (e do trecho relevante do PDF, se a planilha não cobrir tudo)
+— sem resumir, sem parafrasear, sem cortar. Só depois do texto bruto
+vem a sua proposta de mecânica/UI em cima dele. Isso não é só pra lista
+exaustiva de características da seção 6.1.1 — vale pra QUALQUER
+proposta de entrega que toque em regra, mesmo uma característica já
+conhecida/discutida antes na conversa. Motivo: sem o texto na íntegra,
+o Osmar não consegue avaliar se o seu resumo capturou tudo (ele não
+tem a planilha/livro aberto toda hora enquanto revisa), e você mesmo
+corre o risco de montar a proposta a partir de memória da conversa em
+vez de reler a fonte de verdade.
+
 **Durante o foco:** um achado que dá pra resolver dentro do MESMO foco,
 só não nessa entrega, vira **item novo dentro do próprio `EmDev.md`**
 (quebrando mais se for grande) — nunca vai direto pro `PENDENCIAS.md`
