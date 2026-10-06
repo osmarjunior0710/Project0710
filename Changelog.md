@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0037
+
+Em tela larga (tablet/desktop), o app agora vira um "cartão" de
+largura de celular (430px) centralizado, com fundo escuro nas
+laterais, em vez de esticar o layout inteiro com espaço em branco e
+texto pequeno. Celular continua idêntico a antes (nada muda em larguras
+≤430px).
+
 ## v202610_0013
 
 Descanso Longo: quando o personagem tem 2+ classes com pergunta

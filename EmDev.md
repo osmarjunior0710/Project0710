@@ -15,8 +15,9 @@
 
 ---
 
-*(vazio — sem foco em andamento agora. "Multiclasse — acertos deixados
-pra trás" fechado em 2026-10, as 3 entregas (acerto/CD por classe
-dona, combos de Paladino validados ao vivo, pergunta de Descanso Longo
-do Paladino não some mais) — ver `aprendizados/sistemas/multiclasse.md`
-pro histórico completo.)*
+*(vazio — sem foco em andamento agora. "App não escala pra tablet/
+desktop" fechado em 2026-10: largura máxima 430px centralizada,
+`transform`+`overflow:hidden` no `#root` resolveram TODOS os 19
+arquivos com `position: fixed` de uma vez (sem precisar editar nenhum
+deles) — ver `DECISOES-DESIGN.md` "Tablet/desktop — largura máxima
+centralizada" pro histórico completo.)*

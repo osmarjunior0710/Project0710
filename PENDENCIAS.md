@@ -1000,33 +1000,6 @@ própria).
 Pacto):** o Painel de Reação — ver "Painel de Reação ainda usa a
 lista plana antiga" logo abaixo, é a mesma pendência.
 
-## App inteiro não escala pra tablet/desktop — só os ícones de Classe foram corrigidos
-
-**O que é:** o Osmar reportou que em telas largas ("quando vai pra web")
-os ícones de classe ficavam minúsculos, porque `#root` não tem
-`max-width` nenhum — o card estica pra ocupar a largura toda da tela,
-mas o ícone continuava com um tamanho fixo em pixel. Corrigido só pro
-ícone (`.opt-card-img` e `.opt-card-img-banner` agora usam
-`clamp()` com base em `vw`, então crescem de verdade em telas maiores
-— testado em 390px/768px/1440px).
-
-**Por que foi adiado (o resto):** o app inteiro (fonte, espaçamento,
-padding dos cards, todo o resto dos componentes) ainda usa só `px`
-fixo, sem nenhum `clamp()`/`vw`/media query — funciona bem no celular
-(que é o alvo principal, regra 5 do `CLAUDE.md`), mas em tablet/desktop
-o layout todo (não só o ícone) fica com muito espaço em branco e texto
-proporcionalmente pequeno. Consertar isso passa por decidir um sistema
-de escala responsiva pro projeto inteiro (breakpoints? clamp() em
-tudo? largura máxima de conteúdo centralizada?) — não é uma correção
-pontual, é uma decisão de design que vale a pena tomar de propósito,
-não corrigir tela por tela conforme reclamação aparecer.
-
-**O que falta pra resolver:** o Osmar decidir a abordagem (perguntar
-antes de implementar, regra 6 do `CLAUDE.md`) e aplicar de forma
-sistemática — provavelmente melhor de fazer depois que o fluxo
-wizard→ficha estiver fechado (prioridade atual registrada em
-`DECISOES-DESIGN.md`), já que mexe em CSS espalhado pelo app inteiro.
-
 ## Idioma extra de Classe (Druida/Ladino) — mecanismo pronto, mas não testável ainda
 
 **O que é:** mecanismo implementado (ver `DECISOES-DADOS.md` "Idioma

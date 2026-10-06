@@ -831,3 +831,46 @@ personagem/subir XP/repetir wizard toda vez.
 personagem de teste dedicado junto com o resto da limpeza de
 fechamento — ele não é permanente como os 3 protótipos genéricos, é
 descartável, específico daquele foco.
+
+## Tablet/desktop — largura máxima centralizada, não `clamp()`/`vw` nem breakpoints
+
+**Decisão (2026-10):** em vez de fazer o app inteiro escalar
+proporcionalmente em telas largas, `#root` trava numa largura máxima
+de **430px**, sempre centralizado (`margin: 0 auto`) — o app vira um
+"cartão" de tamanho celular em qualquer tela, com fundo sólido neutro
+(`--bg-lateral`, sem textura) preenchendo o espaço vazio das laterais.
+Zero mudança pra quem já usa em largura ≤430px (o alvo principal,
+regra 5 do `CLAUDE.md`). Rejeitado `clamp()`/`vw` espalhado (diff
+gigante, mais risco de regressão visual) e breakpoints com layout
+diferente por tamanho (é desenhar uma tela nova pra tablet/desktop, não
+"esticar depois" — muito mais trabalho do que o problema pedia).
+
+**Risco técnico real, achado ANTES de codar (por isso vale registrar):**
+`position: fixed` (RollOverlay, DescansoOverlay, drawers do Combate,
+modais, menu do avatar — qualquer overlay de tela cheia) se posiciona
+relativo à TELA INTEIRA por padrão, não ao `#root`. Só limitar a
+largura do `#root` deixaria esses overlays esticando full-screen
+enquanto o conteúdo fica num cartão estreito no meio — quebrado.
+
+**Fix (2 propriedades CSS só, zero edição arquivo por arquivo):**
+1. `transform` em `#root` (qualquer valor ≠ `none`, aqui
+   `translateZ(0)`) — pela spec de CSS, isso faz `#root` virar o
+   "containing block" de TODO `position: fixed` descendente
+   automaticamente. Resolve o posicionamento (`left`/`right`/`inset`
+   passam a ser relativos a `#root`, não ao viewport).
+2. `overflow: hidden` em `#root` — sem isso, um painel FECHADO (que só
+   se desloca ~105% da PRÓPRIA largura via `transform: translateX(...)`,
+   não da tela inteira — ver `SidePanel.module.css`) fica visível
+   flutuando na margem lateral agora larga, porque antes bastava
+   deslocar 105% pra sair da tela toda; agora a margem "pega" ele. Com
+   `overflow: hidden`, qualquer `position: fixed` que vaze pra fora dos
+   430px é cortado, igual já valeria pra `position: absolute`.
+
+**Lição de processo:** os 2 bugs acima (overlay esticando full-screen,
+painel fechado vazando na margem) só foram achados **testando ao vivo
+em 1440px cada tipo de overlay** depois da 1ª mudança — não dava pra
+prever só lendo o CSS. Qualquer mudança parecida (que mexe em `#root`/
+containing block) precisa desse mesmo teste: abrir pelo menos 1
+instância de cada padrão de overlay (fixed inset:0, fixed left/right
+com transform, fixed bottom) em tela larga antes de considerar
+resolvido.
