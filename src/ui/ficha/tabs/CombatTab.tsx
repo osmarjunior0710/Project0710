@@ -446,6 +446,23 @@ interface CombatTabProps {
   /** Pontos de Foco (Monge) — gasto pelas 3 técnicas do painel de Ação
    * Bônus. Ver sdd/sdd-monge.md seção 3. */
   pontosDeFoco: RecursoContado;
+  /** Metabolismo Incomum (Monge nível 2, ver sdd/sdd-monge.md seção 8)
+   * — `false` quando não é Monge nível 2+, ou já usado desde o último
+   * Descanso Longo. Oferecido como pergunta Sim/Não ao rolar
+   * Iniciativa (nunca automático — é opcional). */
+  metabolismoIncomumDisponivel: boolean;
+  /** Dado de Artes Marciais do Monge (6/8/10/12) — usado na rolagem de
+   * cura de Metabolismo Incomum. `0` se `metabolismoIncomumDisponivel`
+   * for `false`. */
+  ladosArtesMarciaisMonge: number;
+  /** Nível de Monge (não o nível total do personagem) — soma na
+   * rolagem de cura de Metabolismo Incomum. */
+  nivelMonge: number;
+  /** Zera Pontos de Foco gastos + marca a característica como usada
+   * até o próximo Descanso Longo. A ROLAGEM de cura (dado de Artes
+   * Marciais + nível de Monge) acontece aqui no CombatTab — ver
+   * `confirmarMetabolismoIncomum`. */
+  onConfirmarMetabolismoIncomum: () => void;
   /** Inspiração de Bardo / Perícia Inigualável — mesmo banco de usos. */
   inspiracao: RecursoContado & {
     tamanhoDado: number;
@@ -749,6 +766,10 @@ export default function CombatTab({
   ataqueBonus,
   ataqueTorrente,
   pontosDeFoco: { maximo: pontosDeFocoMaximo, restantes: pontosDeFocoRestantes, onUsar: onUsarPontoDeFoco },
+  metabolismoIncomumDisponivel,
+  ladosArtesMarciaisMonge,
+  nivelMonge,
+  onConfirmarMetabolismoIncomum,
   inspiracao: {
     maximo: usosInspiracaoMaximo,
     restantes: usosInspiracaoRestantes,
@@ -822,6 +843,11 @@ export default function CombatTab({
   const [ataquesTorrenteFeitos, setAtaquesTorrenteFeitos] = useState(0);
   const [piscando, setPiscando] = useState(false);
   const [iniciativaValor, setIniciativaValor] = useState<number | null>(null);
+  // Metabolismo Incomum (Monge) — pergunta Sim/Não disparada pela
+  // rolagem de Iniciativa (ver `alternarIniciativa`), não um recurso
+  // permanente na tela — por isso fica como estado local transitório,
+  // igual `periciaInigualavelPendente`.
+  const [metabolismoIncomumPendente, setMetabolismoIncomumPendente] = useState(false);
   const [periciaInigualavelPendente, setPericiaInigualavelPendente] = useState(false);
   // `null` = popup fechado; `number` = aberto com esse total já rolado
   // (mesmo padrão de `telaSalvaguarda.danoRolado`).
@@ -872,6 +898,7 @@ export default function CombatTab({
       onResultado: (total) => setIniciativaValor(total),
     });
     onRolarIniciativa?.();
+    if (metabolismoIncomumDisponivel) setMetabolismoIncomumPendente(true);
   }
 
   /** "Fim do Turno" = uma piscada de olho (pedido do Osmar) — 2 planos
@@ -1443,6 +1470,28 @@ export default function CombatTab({
     setPericiaInigualavelPendente(false);
   }
 
+  /** Metabolismo Incomum (Monge nível 2) — "Sim" zera os Pontos de
+   * Foco gastos (estado em `FichaShell.tsx`, via `onConfirmarMetabolismoIncomum`)
+   * e rola a cura (dado de Artes Marciais + nível de Monge), aplicando
+   * direto no PV — mesmo padrão de `usarRecuperarFolego` acima. "Não"
+   * só fecha a pergunta, sem marcar como usada (pode perguntar de novo
+   * na próxima Iniciativa, já que o app não segue tempo real entre
+   * combates). */
+  function confirmarMetabolismoIncomum(usar: boolean) {
+    setMetabolismoIncomumPendente(false);
+    if (!usar) return;
+    onConfirmarMetabolismoIncomum();
+    rolarDados({
+      label: 'Metabolismo Incomum (cura)',
+      formula: `1d${ladosArtesMarciaisMonge} + ${nivelMonge}`,
+      quantidade: 1,
+      lados: ladosArtesMarciaisMonge,
+      mod: nivelMonge,
+      onResultado: (total) => onAlterarPv(total),
+    });
+    setFeedback('🔄 Metabolismo Incomum — Pontos de Foco restaurados; cura aplicada ao seu PV automaticamente.');
+  }
+
   /** Bookkeeping do turno pro ataque principal — Fluxo Acerto/Erro
    * sempre (retrofit 2026-09, ver `DECISOES-COMBATE.md`), o popup de
    * dano já resolve tudo sozinho, sem os botões antigos de dano (ver
@@ -1604,6 +1653,28 @@ export default function CombatTab({
           <div className={styles.sbState}>restaura os 3 botões</div>
         </div>
       </div>
+
+      {metabolismoIncomumPendente && (
+        <div className="box" style={{ padding: 12, marginBottom: 12 }}>
+          <div style={{ fontSize: 13 }}>🔄 Metabolismo Incomum — recuperar todos os Pontos de Foco gastos e curar PV?</div>
+          <div className="label" style={{ marginTop: 2 }}>
+            Rola 1d{ladosArtesMarciaisMonge} + seu nível de Monge ({nivelMonge}) de cura. Só pode usar de novo no
+            próximo Descanso Longo.
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <div className="btn" style={{ flex: 1, padding: '8px 0', textAlign: 'center' }} onClick={() => confirmarMetabolismoIncomum(false)}>
+              Não
+            </div>
+            <div
+              className="btn btn-primary"
+              style={{ flex: 1, padding: '8px 0', textAlign: 'center' }}
+              onClick={() => confirmarMetabolismoIncomum(true)}
+            >
+              Sim
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className={`box-solid ${styles.hpLive}`}>
         <div className={styles.hpHeader}>

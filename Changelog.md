@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1503
+
+Monge ganhou Metabolismo Incomum (nível 2): ao rolar Iniciativa, se
+ainda não tiver usado desde o último Descanso Longo, pergunta se quer
+recuperar todos os Pontos de Foco gastos e curar PV (dado de Artes
+Marciais + nível de Monge). Só pergunta de novo depois de descansar.
+
 ## v202610_0947
 
 Monge agora tem Pontos de Foco (mostrado como bolinhas, em 2 linhas de

@@ -85,7 +85,7 @@ import { explicarCdRaizesDevastadoras } from '../../core/raizesDevastadoras';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
-import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, quantidadePontosDeFoco, temAuraDeProtecao } from '../../core/recursosClasse';
+import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, quantidadePontosDeFoco, ladosDadoArtesMarciais, temAuraDeProtecao } from '../../core/recursosClasse';
 import { condicoesDisponiveisMaosConsagradas, custoTotalMaosConsagradas } from '../../core/maosConsagradas';
 import { bonusArmaSagrada, armaElegivelParaArmaSagrada } from '../../core/armaSagrada';
 import { danoResplendorSagrado } from '../../core/resplendorSagrado';
@@ -526,6 +526,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [inspiracaoHeroicaAtiva, setInspiracaoHeroicaAtiva] = useState(personagemSalvo.inspiracaoHeroicaAtiva ?? false);
   // Monge — Pontos de Foco (ver sdd/sdd-monge.md seção 3).
   const [pontosDeFocoGasto, setPontosDeFocoGasto] = useState(personagemSalvo.pontosDeFocoGasto ?? 0);
+  // Monge — Metabolismo Incomum (nível 2, ver sdd/sdd-monge.md seção
+  // 8) — 1x por Descanso Longo, oferecido ao rolar Iniciativa.
+  const [metabolismoIncomumUsado, setMetabolismoIncomumUsado] = useState(
+    personagemSalvo.metabolismoIncomumUsado ?? false,
+  );
   const [indomavelGasto, setIndomavelGasto] = useState(personagemSalvo.indomavelGasto ?? 0);
   const [pontosDeSorteGasto, setPontosDeSorteGasto] = useState(personagemSalvo.pontosDeSorteGasto ?? 0);
   const [sorteDoTenebrosoGasto, setSorteDoTenebrosoGasto] = useState(personagemSalvo.sorteDoTenebrosoGasto ?? 0);
@@ -862,6 +867,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (pontosDeFocoRestantes <= 0) return false;
     setPontosDeFocoGasto((v) => v + 1);
     return true;
+  }
+  // Metabolismo Incomum (Monge nível 2, ver sdd/sdd-monge.md seção 8)
+  // — oferecido ao rolar Iniciativa, mesmo quando não há Foco gasto
+  // (a característica também cura PV: "jogue seu dado de Artes
+  // Marciais e recupere PV igual ao seu nível de Monge mais o valor
+  // jogado" — planilha "Características de Classe", Monge nível 2).
+  const metabolismoIncomumDisponivel = classeMonge !== null && mongeEntry !== undefined && mongeEntry.nivel >= 2 && !metabolismoIncomumUsado;
+  const ladosArtesMarciaisMonge = classeMonge && mongeEntry ? ladosDadoArtesMarciais(classeMonge, mongeEntry.nivel) : 0;
+  function confirmarMetabolismoIncomum() {
+    setPontosDeFocoGasto(0);
+    setMetabolismoIncomumUsado(true);
   }
   const armaduraPesadaEquipada = armaduraEquipadaCatalogo?.categoria.startsWith('Armadura Pesada') ?? false;
   const temVigorImplacavel = selecao.especie === 'Orc';
@@ -1358,6 +1374,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     falarComAnimaisGnomoGasto,
     inspiracaoHeroicaAtiva,
     pontosDeFocoGasto,
+    metabolismoIncomumUsado,
     indomavelGasto,
     pontosDeSorteGasto,
     sorteDoTenebrosoGasto,
@@ -1467,6 +1484,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       falarComAnimaisGnomoGasto,
       inspiracaoHeroicaAtiva,
       pontosDeFocoGasto,
+      metabolismoIncomumUsado,
       indomavelGasto,
       pontosDeSorteGasto,
       sorteDoTenebrosoGasto,
@@ -1901,6 +1919,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
     // Monge.
     setPontosDeFocoGasto(0);
+    setMetabolismoIncomumUsado(false);
 
     // Paladino.
     setCanalizarDivindadeGasto(0);
@@ -3384,6 +3403,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             ataqueBonus={ataqueBonus}
             ataqueTorrente={ataqueTorrente}
             pontosDeFoco={{ maximo: pontosDeFocoMaximo, restantes: pontosDeFocoRestantes, onUsar: gastarPontoDeFoco }}
+            metabolismoIncomumDisponivel={metabolismoIncomumDisponivel}
+            ladosArtesMarciaisMonge={ladosArtesMarciaisMonge}
+            nivelMonge={mongeEntry?.nivel ?? 0}
+            onConfirmarMetabolismoIncomum={confirmarMetabolismoIncomum}
             inspiracao={{
               maximo: usosInspiracaoMax,
               restantes: usosInspiracaoRestantes,

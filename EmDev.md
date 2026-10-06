@@ -98,10 +98,23 @@ tratamento do Bruxo/Mestre Místico) — não usar a célula como está.
       contador "ataque 1/2" → "2/2"), Foco descontando certo (20→19).
       `npx tsc -b`, `npm test -- --run` (876/876), `npm run build`
       verdes.
-- [ ] **Entrega 3b — Metabolismo Incomum** (nível 2, gatilho em Rolar
-      Iniciativa — hook `aoRolarIniciativa` já existe, usado hoje só
-      pelo Bardo). Adiado da Entrega 3 original pra focar só em Foco +
-      as 3 técnicas primeiro.
+- [x] **Entrega 3b — Metabolismo Incomum** (nível 2). Texto real
+      conferido na planilha ("Características de Classe") — tem 2
+      efeitos juntos, não só recuperar Foco: restaura todos os Pontos
+      de Foco gastos E cura PV (dado de Artes Marciais + nível de
+      Monge). Pergunta Sim/Não ao rolar Iniciativa (mesmo padrão visual
+      de "Perícia Inigualável"), só aparece se Monge nível 2+ e ainda
+      não usado desde o último Descanso Longo — não exige ter Foco
+      gasto (a cura sozinha já vale a pergunta). "Não" não gasta o
+      uso — pode perguntar de novo na próxima Iniciativa antes do
+      próximo Descanso Longo. `metabolismoIncomumUsado` persistido,
+      resetado só no Descanso Longo (não no Curto). Mesma correção de
+      multiclasse das entregas anteriores: olha a entrada de Monge em
+      `classesAtual` direto, não a classe "ativa". Testado ao vivo via
+      Playwright: pergunta aparece com o texto/fórmula certos (1d12 +
+      nível 20), "Sim" restaura Pontos de Foco pra 20/20 e dispara a
+      rolagem de cura "Metabolismo Incomum (cura) — 1d12 + 20". `npx
+      tsc -b`, `npm test -- --run` (876/876), `npm run build` verdes.
 - [ ] **Entrega 4 — Defletir Ataques + Queda Lenta + Golpe
       Atordoante.** Defletir Ataques é um padrão NOVO (reduzir dano
       recebido reativamente, nunca existiu no app — ver SDD seção 7).

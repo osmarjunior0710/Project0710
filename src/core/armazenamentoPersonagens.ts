@@ -462,6 +462,10 @@ export interface PersonagemSalvo {
    * tudo no Descanso Curto E no Longo (igual Magia de Pacto do Bruxo,
    * ver sdd/sdd-monge.md seção 3). */
   pontosDeFocoGasto?: number;
+  /** `true` = já usou Metabolismo Incomum (Monge, nível 2) desde o
+   * último Descanso Longo — só ele reseta (ver sdd/sdd-monge.md
+   * seção 8). */
+  metabolismoIncomumUsado?: boolean;
   /** [Ferramenta de teste] Snapshot completo do personagem capturado na
    * 1ª vez que ele alcança cada nível (1 a 20) — pedido do Osmar
    * (2026-09): "ir até o nível 20 pra testar, voltar e arrumar" sem
