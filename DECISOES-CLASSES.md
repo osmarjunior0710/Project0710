@@ -213,6 +213,20 @@ prepared":
   Descanso Longo — Clérigo, Druida, Mago (Mago tem camada extra: só
   prepara o que está no grimório físico — fora de escopo por ora).
 
+**Fila de perguntas do Descanso Longo — sempre por classe em ordem
+alfabética** (pedido do Osmar, 2026-10): quando 2+ classes (Padrão B/C,
+ou qualquer outra pergunta Sim/Não futura do Descanso Longo, ex.:
+Maestria de Magias do Mago) têm pergunta própria ao mesmo tempo, elas
+NUNCA aparecem juntas na tela — encadeiam, uma de cada vez, montadas
+numa fila (`PerguntaDescansoLongo[]`, `FichaShell.tsx`) ordenada por
+`classe.localeCompare` antes de mostrar a 1ª. Toda classe nova com
+pergunta própria de Descanso Longo só precisa empurrar sua entrada
+nessa fila (`aoFadeInCompleto`) com o nome da própria classe — a ordem
+de exibição se resolve sozinha, nunca hardcoded tipo "Mago primeiro,
+depois Paladino". Se uma classe tiver 2+ perguntas (Mago: redefinir +
+Maestria), elas ficam juntas (mesma `classe`), na ordem que foram
+empurradas na fila — `sort` é estável, não reordena entre si.
+
 **O que generaliza pras 8, sem exceção:** truque nunca gasta espaço de
 magia; espaço de magia é sempre banco por círculo, recuperando no
 Descanso Longo — **exceto Bruxo**, que recupera no Curto também;

@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0013
+
+Descanso Longo: quando o personagem tem 2+ classes com pergunta
+própria (hoje: Mago "redefinir magias preparadas"/"trocar Maestria de
+Magias", Paladino "trocar 1 magia"), elas aparecem em ordem alfabética
+de classe, uma de cada vez — nunca mais junta ou pula nenhuma.
+Personagem de 1 classe só não muda em nada.
+
 ## v202610_1950
 
 Fecha o foco Multiclasse: conferido ao vivo que o Paladino combina

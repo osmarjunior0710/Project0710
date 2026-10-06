@@ -161,6 +161,28 @@ import XpShell from './XpShell';
 
 type TabName = 'atributos' | 'perfil' | 'mochila' | 'magias' | 'combat' | 'pets';
 
+/** 1 pergunta Sim/Não possível no Descanso Longo — cada classe nova
+ * que ganhar uma entra aqui com seu próprio `tipo` (ver
+ * `aoFadeInCompleto`, onde a fila é montada e ordenada por `classe`). */
+type TipoPerguntaDescansoLongo = 'mago-redefinir' | 'mago-maestria' | 'trocarUma';
+interface PerguntaDescansoLongo {
+  tipo: TipoPerguntaDescansoLongo;
+  /** Nome da classe dona desta pergunta — é só por isto que a fila é
+   * ordenada (`localeCompare`, alfabético), pedido do Osmar (2026-10).
+   * Pra `'trocarUma'`, a classe real (Paladino hoje, mas poderia ser
+   * outra com Padrão B de troca amanhã). */
+  classe: string;
+}
+
+/** Qual fase do `DescansoOverlay`/`FichaShell` mostra esta pergunta —
+ * `'mago-redefinir'` e `'trocarUma'` usam a MESMA pergunta na tela
+ * ("Quer alterar suas magias preparadas?"), só a tela de escolha que
+ * abre no "Sim" é diferente (ver `descansoEmAndamento.filaPerguntas`
+ * no render de `'escolhendoMagias'`). */
+function faseDaPerguntaDescansoLongo(tipo: TipoPerguntaDescansoLongo): FaseDescanso {
+  return tipo === 'mago-maestria' ? 'perguntaMaestriaTroca' : 'perguntaRedefinir';
+}
+
 /** `img` = arte própria (webp) em vez de emoji — nesse caso a aba não mostra
  * o texto do `label` embaixo, só o ícone (pedido do Osmar, 2026-09: as artes
  * já são reconhecíveis sozinhas, o texto ficava redundante). `label` continua
@@ -297,9 +319,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   /** Classe do personagem com Padrão B de troca (Paladino — 1 magia por
    * Descanso Longo, `DECISOES-CLASSES.md` "Casters") — `undefined` se
-   * nenhuma. Com Mago (Padrão C) na mesma ficha, as 2 perguntas
-   * encadeiam no Descanso Longo (Mago primeiro) — ver
-   * `aoFadeInCompleto`/`descansoEmAndamento.trocaUmaPendente`. */
+   * nenhuma. Com outras classes de pergunta própria (Mago) na mesma
+   * ficha, as perguntas encadeiam em ordem alfabética de classe — ver
+   * `aoFadeInCompleto`/`descansoEmAndamento.filaPerguntas`. */
   const classeComTrocaDeUmaMagia = classesAtual.find((c) =>
     trocaUmaMagiaPorDescanso(catalogoClasses.find((cc) => cc.nome === c.classe) ?? null),
   );
@@ -640,22 +662,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [descansoEmAndamento, setDescansoEmAndamento] = useState<{
     tipo: TipoDescanso;
     fase: FaseDescanso | 'escolhendoMagias' | 'recuperandoEspacos' | 'trocandoMaestria';
-    /** Descanso Longo — `true` quando ainda falta perguntar sobre a
-     * troca de Maestria de Magias DEPOIS da pergunta de redefinir
-     * Magias Preparadas (as 2 perguntas encadeiam, nunca ao mesmo
-     * tempo na tela). */
-    maestriaTrocaPendente?: boolean;
-    /** Descanso Longo — `true` quando o personagem tem Mago (Padrão C,
-     * redefinição livre) E Paladino/outra classe de Padrão B (troca de
-     * 1) ao mesmo tempo: a pergunta do Mago vem primeiro; isso marca
-     * que a do Paladino ainda falta perguntar depois (nunca as 2 juntas
-     * na tela) — ver `aoFadeInCompleto`/`aoResponderRedefinir`. */
-    trocaUmaPendente?: boolean;
-    /** Qual pergunta de redefinição está na tela AGORA, quando a fase é
-     * `'perguntaRedefinir'`/`'escolhendoMagias'` — só precisa existir
-     * quando as 2 classes (Mago + Paladino) estão presentes, pra saber
-     * qual tela de escolha abrir no "Sim". */
-    redefinicaoAtual?: 'mago' | 'paladino';
+    /** Descanso Longo — fila de perguntas Sim/Não ainda não feitas,
+     * ordenada por classe em ORDEM ALFABÉTICA (pedido do Osmar,
+     * 2026-10) — a 1ª da fila é a que está na tela agora; nunca 2 ao
+     * mesmo tempo. Cresce automaticamente conforme uma classe nova
+     * ganhar pergunta própria de Descanso Longo — não precisa mexer
+     * aqui, só em `aoFadeInCompleto` (onde a fila é montada). Ver
+     * `PerguntaDescansoLongo`/`avancarFilaDescansoLongo`. */
+    filaPerguntas?: PerguntaDescansoLongo[];
   } | null>(null);
   const [levelUpHpModo, setLevelUpHpModo] = useState<'media' | 'rolar' | 'manual' | null>(
     personagemSalvo.levelUpHpModo ?? null,
@@ -1767,54 +1781,80 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     recuperarInspiracaoAoRolarIniciativa();
   }
 
+  /** Resets do Descanso Longo — agrupados por quem CONCEDE o recurso
+   * (Geral → Espécie → Talento Geral → classes em ordem alfabética),
+   * pedido do Osmar (2026-10) pra mapear tudo e deixar fácil achar o
+   * bloco de uma classe específica. Reorganização de leitura — mesmos
+   * `setState`, mesma ordem de EFEITO (todos síncronos/instantâneos,
+   * nenhum depende da ordem de chamada dos outros). A ordem das
+   * PERGUNTAS visíveis (Sim/Não na tela) é outra coisa, não tem
+   * relação com esta função — ver `aoFadeInCompleto`. */
   function descansoLongo() {
+    // Geral (não depende de classe/espécie específica).
     setPvAtual(personagem.pvMax);
     setDadosDeVidaGastos({});
+    setEspacosGastosPorClasseECirculo({});
+    setMagiasFixasClasseGastas({});
+    setMaestriaArmaTrocaDisponivel(true);
+    setMaestriaArmaTalentoTrocaDisponivel(true);
+    setMagiasGratisGastas([]);
+
+    // Espécie.
     // Eficiente (Humano) — "começa cada dia com Inspiração Heroica";
     // como o app não segue tempo real, a aproximação (ver SDD) é
     // conceder de novo a cada Descanso Longo. Nunca desliga sozinho
     // aqui — só o jogador desliga (manual ou usando o reroll).
     if (selecao.especie === 'Humano') setInspiracaoHeroicaAtiva(true);
-    setEspacosGastosPorClasseECirculo({});
-    setFolegoGasto(0);
-    setCanalizarDivindadeGasto(0);
-    setMaosConsagradasGasto(0);
-    setVigorImplacavelGasto(false);
+    setVigorImplacavelGasto(false); // Orc
+    setConhecimentoDePedrasGasto(0); // Anão
+    setPicoDeAdrenalinaGasto(0); // Orc
+    setAtaqueDeSoproGasto(0); // Draconato
+    setVooDraconicoGasto(false); // Draconato
+    setAncestralidadeGiganteGasto(0); // Goliath
+    setFormaGrandeGasto(false); // Goliath
+    setFormaGrandeAtiva(false); // Goliath
+    setMaosCurativasGasto(false); // Aasimar
+    setRevelacaoCelestialGasto(false); // Aasimar
+    setRevelacaoCelestialFormaAtiva(null); // Aasimar
+    setFalarComAnimaisGnomoGasto(0); // Gnomo
+
+    // Talento Geral.
+    setPontosDeSorteGasto(0); // Sortudo
+
+    // Bárbaro.
     setFuriaImplacavelUsos(0);
     setFuriaPersistenteUsada(false);
-    setConhecimentoDePedrasGasto(0);
-    setPicoDeAdrenalinaGasto(0);
-    setAtaqueDeSoproGasto(0);
-    setVooDraconicoGasto(false);
-    setAncestralidadeGiganteGasto(0);
-    setFormaGrandeGasto(false);
-    setFormaGrandeAtiva(false);
     setFuriaGasto(0);
     setFuriaAtiva(false);
-    setResplendorSagradoGasto(false);
-    setResplendorSagradoAtiva(false);
-    setMaosCurativasGasto(false);
-    setRevelacaoCelestialGasto(false);
-    setRevelacaoCelestialFormaAtiva(null);
-    setFalarComAnimaisGnomoGasto(0);
-    setIndomavelGasto(0);
-    setPontosDeSorteGasto(0);
-    setSorteDoTenebrosoGasto(0);
-    setSurtoGasto(0);
+
+    // Bardo.
     setInspiracaoGasto(0);
+
+    // Bruxo.
+    setSorteDoTenebrosoGasto(0); // Patrono Ínfero
     setLivroDasSombrasGasto(false);
-    setMemorizarMagiaGasta(false);
     setAstuciaMagicaGasta(false);
     setContatarPatronoGasto(false);
-    setMagiasFixasClasseGastas({});
-    setResistenciaInferaGasto(false);
-    setMaestriaArmaTrocaDisponivel(true);
-    setMaestriaArmaTalentoTrocaDisponivel(true);
-    setLancarNoInfernoGasto(false);
+    setResistenciaInferaGasto(false); // Patrono Ínfero
+    setLancarNoInfernoGasto(false); // Patrono Ínfero
     setArcanaMisticaGastos([]);
-    setMagiasGratisGastas([]);
+
+    // Guerreiro.
+    setFolegoGasto(0);
+    setIndomavelGasto(0);
+    setSurtoGasto(0);
+
+    // Mago.
+    setMemorizarMagiaGasta(false);
     setAssinaturaMagicaGastas([]);
-    setSobrecargaUsosDesdeDescanso(0);
+    setSobrecargaUsosDesdeDescanso(0); // Evocador
+
+    // Paladino.
+    setCanalizarDivindadeGasto(0);
+    setMaosConsagradasGasto(0);
+    setResplendorSagradoGasto(false); // Juramento da Devoção
+    setResplendorSagradoAtiva(false); // Juramento da Devoção
+
     fimDoTurno();
   }
 
@@ -1846,16 +1886,32 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         return proximo;
       });
     }
-    if (fonteDeInspiracao) setInspiracaoGasto(0);
-    setFolegoGasto((v) => Math.max(0, v - 1));
-    setCanalizarDivindadeGasto((v) => Math.max(0, v - 1));
-    setLivroDasSombrasGasto(false);
-    setMemorizarMagiaGasta(false);
-    setResistenciaInferaGasto(false);
-    setPicoDeAdrenalinaGasto(0);
+    // Resto do Descanso Curto — mesmo agrupamento por classe (ordem
+    // alfabética) do Descanso Longo, ver comentário em `descansoLongo`.
+
+    // Espécie.
+    setPicoDeAdrenalinaGasto(0); // Orc
+
+    // Bárbaro.
     setFuriaGasto((v) => Math.max(0, v - 1));
     setFuriaImplacavelUsos(0);
+
+    // Bardo.
+    if (fonteDeInspiracao) setInspiracaoGasto(0);
+
+    // Bruxo.
+    setLivroDasSombrasGasto(false);
+    setResistenciaInferaGasto(false); // Patrono Ínfero
+
+    // Guerreiro.
+    setFolegoGasto((v) => Math.max(0, v - 1));
+
+    // Mago.
+    setMemorizarMagiaGasta(false);
     setAssinaturaMagicaGastas([]);
+
+    // Paladino.
+    setCanalizarDivindadeGasto((v) => Math.max(0, v - 1));
   }
 
   /** Toca em "Descanso Curto"/"Descanso Longo" (aba Atributos) — só
@@ -1884,70 +1940,58 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       return;
     }
     descansoLongo();
+    // Monta a fila de perguntas aplicáveis e ordena por classe alfabética
+    // (pedido do Osmar, 2026-10) — Mago antes de Paladino, por exemplo,
+    // e as 2 perguntas do Mago (redefinir + Maestria) ficam juntas, uma
+    // depois da outra, antes de qualquer pergunta de outra classe.
+    const perguntas: PerguntaDescansoLongo[] = [];
     // Só pergunta se sobra alguma Magia Preparada pra redefinir — sem
     // isso, um Mago nível 1 (0 Magias Preparadas ainda escolhidas)
     // veria uma pergunta sem sentido.
-    const perguntaRedefinirMago = usaRedefPorDescanso && magiasPreparadasAtuais.length > 0;
+    if (usaRedefPorDescanso && magiasPreparadasAtuais.length > 0) {
+      perguntas.push({ tipo: 'mago-redefinir', classe: 'Mago' });
+    }
+    if (Object.keys(maestriaDeMagiasAtuais).length > 0) {
+      perguntas.push({ tipo: 'mago-maestria', classe: 'Mago' });
+    }
     // Paladino (Padrão B): mesma pergunta ("quer alterar suas magias
     // preparadas?"), mas a tela que abre troca só 1 — ver
     // `aoConfirmarRedefinicao`/render de `escolhendoMagias`. Checada
-    // INDEPENDENTE da de Mago (antes, `!perguntaRedefinirMago` fazia a
-    // pergunta do Paladino sumir de vez quando as 2 classes estavam na
+    // INDEPENDENTE da do Mago (antes, um `!perguntaRedefinirMago` fazia
+    // a pergunta do Paladino sumir de vez quando as 2 classes estavam na
     // mesma ficha — ver PENDENCIAS.md/EmDev.md, foco Multiclasse
-    // Entrega 3) — as 2 encadeiam, Mago primeiro, igual já acontecia
-    // com a pergunta de Maestria de Magias.
-    const perguntaTrocarUmaPaladino =
-      classeComTrocaDeUmaMagia !== undefined &&
-      magiasPreparadasAtuais.some((m) => m.classe === classeComTrocaDeUmaMagia.classe);
-    const maestriaTrocaDisponivel = Object.keys(maestriaDeMagiasAtuais).length > 0;
-    let fase: FaseDescanso | 'escolhendoMagias' | 'recuperandoEspacos' | 'trocandoMaestria';
-    let redefinicaoAtual: 'mago' | 'paladino' | undefined;
-    if (perguntaRedefinirMago) {
-      fase = 'perguntaRedefinir';
-      redefinicaoAtual = 'mago';
-    } else if (perguntaTrocarUmaPaladino) {
-      fase = 'perguntaRedefinir';
-      redefinicaoAtual = 'paladino';
-    } else if (maestriaTrocaDisponivel) {
-      fase = 'perguntaMaestriaTroca';
-    } else {
-      fase = 'saindo';
+    // Entrega 3).
+    if (classeComTrocaDeUmaMagia !== undefined && magiasPreparadasAtuais.some((m) => m.classe === classeComTrocaDeUmaMagia.classe)) {
+      perguntas.push({ tipo: 'trocarUma', classe: classeComTrocaDeUmaMagia.classe });
     }
+    perguntas.sort((a, b) => a.classe.localeCompare(b.classe, 'pt-BR'));
     setDescansoEmAndamento((prev) =>
       prev
         ? {
             ...prev,
-            fase,
-            redefinicaoAtual,
-            // Só fica pendente quando o Mago foi perguntado AGORA e o
-            // Paladino ainda vem depois (as 2 presentes ao mesmo tempo).
-            trocaUmaPendente: redefinicaoAtual === 'mago' ? perguntaTrocarUmaPaladino : undefined,
-            maestriaTrocaPendente: fase === 'perguntaRedefinir' ? maestriaTrocaDisponivel : undefined,
+            fase: perguntas.length > 0 ? faseDaPerguntaDescansoLongo(perguntas[0].tipo) : 'saindo',
+            filaPerguntas: perguntas,
           }
         : prev,
     );
   }
 
-  /** Próxima fase depois que a pergunta de redefinição ATUAL (Mago ou
-   * Paladino) foi respondida (sim confirmado, ou não/cancelado) — se o
-   * Mago acabou de ser perguntado e o Paladino ainda está pendente
-   * (`trocaUmaPendente`), encadeia pra pergunta dele antes de ir pra
-   * Maestria/fade-out (nunca as 2 perguntas de redefinição juntas na
-   * tela, ver `aoFadeInCompleto`). */
-  function proximaFaseAposRedefinir(prev: NonNullable<typeof descansoEmAndamento>): Partial<NonNullable<typeof descansoEmAndamento>> {
-    if (prev.trocaUmaPendente) {
-      return { fase: 'perguntaRedefinir', redefinicaoAtual: 'paladino', trocaUmaPendente: false };
-    }
-    return { fase: prev.maestriaTrocaPendente ? 'perguntaMaestriaTroca' : 'saindo' };
+  /** Avança a fila de perguntas do Descanso Longo depois que a pergunta
+   * ATUAL (1ª da fila) foi respondida (confirmada, ou não/cancelada) —
+   * tira ela da fila e mostra a próxima (se houver), senão já manda pro
+   * fade-out. */
+  function avancarFilaDescansoLongo(prev: NonNullable<typeof descansoEmAndamento>): Partial<NonNullable<typeof descansoEmAndamento>> {
+    const resto = (prev.filaPerguntas ?? []).slice(1);
+    if (resto.length === 0) return { fase: 'saindo', filaPerguntas: [] };
+    return { fase: faseDaPerguntaDescansoLongo(resto[0].tipo), filaPerguntas: resto };
   }
 
   /** Resposta ao prompt "quer alterar suas magias preparadas?" —
-   * `sim` abre a tela de escolha (Mago: livre; Paladino: troca só 1,
-   * ver `descansoEmAndamento.redefinicaoAtual`); `não` encadeia a
-   * próxima pergunta pendente (Paladino, depois Maestria de Magias),
-   * senão já manda pro fade-out. */
+   * `sim` abre a tela de escolha (Mago: livre; Paladino: troca só 1 —
+   * ver `descansoEmAndamento.filaPerguntas[0].tipo`); `não` avança a
+   * fila pra próxima pergunta pendente, senão já manda pro fade-out. */
   function aoResponderRedefinir(sim: boolean) {
-    setDescansoEmAndamento((prev) => (prev ? { ...prev, ...(sim ? { fase: 'escolhendoMagias' } : proximaFaseAposRedefinir(prev)) } : prev));
+    setDescansoEmAndamento((prev) => (prev ? { ...prev, ...(sim ? { fase: 'escolhendoMagias' } : avancarFilaDescansoLongo(prev)) } : prev));
   }
 
   function aoConfirmarRedefinicao(novaLista: string[], classeNome = 'Mago') {
@@ -1956,19 +2000,19 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // `usaRedefPorDescanso` já checa isso por classesAtual, não pela
     // classe ativa). Paladino (troca de 1) passa a própria classe.
     setMagiasPreparadasAtuais(marcarClasseDasEscolhas(novaLista, magiasPreparadasAtuais, classeNome));
-    setDescansoEmAndamento((prev) => (prev ? { ...prev, ...proximaFaseAposRedefinir(prev) } : prev));
+    setDescansoEmAndamento((prev) => (prev ? { ...prev, ...avancarFilaDescansoLongo(prev) } : prev));
   }
 
   /** Resposta ao prompt "quer trocar 1 magia de Maestria?" — `sim` abre
-   * a tela de troca (`MaestriaDeMagiasTrocaShell`); `não` já manda pro
-   * fade-out (é a última pergunta possível do Descanso Longo). */
+   * a tela de troca (`MaestriaDeMagiasTrocaShell`); `não` avança a fila
+   * (pode ter mais pergunta de outra classe depois, ver `aoFadeInCompleto`). */
   function aoResponderMaestriaTroca(sim: boolean) {
-    setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: sim ? 'trocandoMaestria' : 'saindo' } : prev));
+    setDescansoEmAndamento((prev) => (prev ? { ...prev, ...(sim ? { fase: 'trocandoMaestria' } : avancarFilaDescansoLongo(prev)) } : prev));
   }
 
   function aoConfirmarMaestriaTroca(escolha: Record<number, string>) {
     setMaestriaDeMagiasAtuais(escolha);
-    setDescansoEmAndamento((prev) => (prev ? { ...prev, fase: 'saindo' } : prev));
+    setDescansoEmAndamento((prev) => (prev ? { ...prev, ...avancarFilaDescansoLongo(prev) } : prev));
   }
 
   /** Resposta ao prompt "quer usar Recuperação Arcana?" — `sim` abre a
@@ -2698,7 +2742,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   if (
     descansoEmAndamento?.fase === 'escolhendoMagias' &&
-    descansoEmAndamento.redefinicaoAtual === 'paladino' &&
+    descansoEmAndamento.filaPerguntas?.[0]?.tipo === 'trocarUma' &&
     classeComTrocaDeUmaMagia &&
     classeObjTrocaDeUmaMagia
   ) {
