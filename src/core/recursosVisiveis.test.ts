@@ -13,7 +13,16 @@ function entrada(classes: EntradaRecursosVisiveis['classes'], gastos: Partial<En
     classes,
     catalogo,
     selecao: selecaoCar20(),
-    gastos: { furia: 0, folego: 0, canalizarDivindade: 0, inspiracao: 0, maosConsagradas: 0, espacosPorClasseECirculo: {}, ...gastos },
+    gastos: {
+      furia: 0,
+      folego: 0,
+      canalizarDivindade: 0,
+      inspiracao: 0,
+      maosConsagradas: 0,
+      pontosDeFoco: 0,
+      espacosPorClasseECirculo: {},
+      ...gastos,
+    },
   };
 }
 
@@ -126,5 +135,36 @@ describe('Mãos Consagradas (Paladino)', () => {
   it('descrição diz que só recarrega no Descanso Longo', () => {
     const r = montarRecursosVisiveis(entrada([{ classe: 'Paladino', nivel: 5, subclasse: null }]));
     expect(r.find((x) => x.id === 'maos-consagradas')?.descricao.join(' ')).toContain('só no Descanso Longo');
+  });
+});
+
+describe('Pontos de Foco (Monge)', () => {
+  it('nível 1: nenhuma linha (só existe a partir do nível 2)', () => {
+    const r = montarRecursosVisiveis(entrada([{ classe: 'Monge', nivel: 1, subclasse: null }]));
+    expect(r.find((x) => x.id === 'pontos-de-foco')).toBeUndefined();
+  });
+
+  it('nível 2: 2 Pontos de Foco, exibidos como pips em bloco (não barra), quebrando a cada 10', () => {
+    const r = montarRecursosVisiveis(entrada([{ classe: 'Monge', nivel: 2, subclasse: null }]));
+    expect(r.find((x) => x.id === 'pontos-de-foco')).toMatchObject({
+      maximo: 2,
+      restantes: 2,
+      exibicao: 'pips-bloco',
+      quebrarACada: 10,
+    });
+  });
+
+  it('gasto desconta e nunca fica negativo', () => {
+    const r = montarRecursosVisiveis(entrada([{ classe: 'Monge', nivel: 20, subclasse: null }], { pontosDeFoco: 15 }));
+    expect(r.find((x) => x.id === 'pontos-de-foco')).toMatchObject({ maximo: 20, restantes: 5 });
+    const r2 = montarRecursosVisiveis(entrada([{ classe: 'Monge', nivel: 20, subclasse: null }], { pontosDeFoco: 999 }));
+    expect(r2.find((x) => x.id === 'pontos-de-foco')?.restantes).toBe(0);
+  });
+
+  it('descrição diz que recarrega no Descanso Curto E Longo', () => {
+    const r = montarRecursosVisiveis(entrada([{ classe: 'Monge', nivel: 2, subclasse: null }]));
+    const texto = r.find((x) => x.id === 'pontos-de-foco')?.descricao.join(' ') ?? '';
+    expect(texto).toContain('Descanso Curto');
+    expect(texto).toContain('Descanso Longo');
   });
 });

@@ -2,6 +2,7 @@ import type { RecursoVisivel } from '../../../core/recursosVisiveis';
 import BarraRecurso from '../../components/BarraRecurso';
 import ContadorUsos from '../../components/ContadorUsos';
 import InfoTexto from '../../components/InfoTexto';
+import TickPips from '../../components/TickPips';
 
 interface RecursosDeClasseProps {
   recursos: RecursoVisivel[];
@@ -29,6 +30,22 @@ export default function RecursosDeClasse({ recursos }: RecursosDeClasseProps) {
               {r.nome} <InfoTexto titulo={r.nome} paragrafos={r.descricao} />
             </span>
             <BarraRecurso valor={r.restantes} maximo={r.maximo} cor={r.cor?.hex ?? 'var(--accent)'} rotulo={`${r.restantes}/${r.maximo} PV`} />
+          </div>
+        ) : r.exibicao === 'pips-bloco' ? (
+          <div
+            key={r.id}
+            style={{
+              padding: 'var(--space-2) 0',
+              borderTop: i === 0 ? 'none' : '1px dashed var(--line-soft)',
+            }}
+          >
+            <span style={{ fontSize: 13, display: 'block', marginBottom: 4 }}>
+              {r.nome} <InfoTexto titulo={r.nome} paragrafos={r.descricao} />{' '}
+              <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>
+                {r.restantes}/{r.maximo}
+              </span>
+            </span>
+            <TickPips total={r.maximo} usados={r.maximo - r.restantes} cor={r.cor} quebrarACada={r.quebrarACada} />
           </div>
         ) : (
           <div

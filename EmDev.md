@@ -69,20 +69,47 @@ tratamento do Bruxo/Mestre Místico) — não usar a célula como está.
       Destreza +2 + Bônus de Proficiência +2 — confirmado na própria
       tela de detalhe do app). `npx tsc -b`, `npm test -- --run`
       (872/872), `npm run build` verdes.
-- [ ] **Entrega 3 — Pontos de Foco + as 3 técnicas base** (Defesa
+- [x] **Entrega 3 — Pontos de Foco + as 3 técnicas base** (Defesa
       Paciente/Passo do Vento/Torrente de Golpes) — cada uma com
       escolha "de graça" vs "gastar 1 Foco", painel de Ação Bônus.
-      Pontos de Foco em `recursosVisiveis.ts` + resets de Descanso
-      Curto E Longo.
+      Pontos de Foco exibido como pips (pedido do Osmar: 20 pips em 2
+      linhas de 10 — `TickPips.tsx` ganhou prop `quebrarACada`,
+      `RecursoVisivel` ganhou `exibicao: 'pips-bloco'`). Resets de
+      Descanso Curto E Longo (`pontosDeFocoGasto`, grupo "Monge" em
+      ordem alfabética). Torrente de Golpes reaproveita `ataqueDesarmado`
+      forçado (nunca a arma equipada) + o mesmo padrão de contador
+      "(ataque X/Y)" do Ataque Extra. Achado corrigido de quebra:
+      `pontosDeFocoMaximo`/`ataqueTorrente` em `FichaShell.tsx` tinham
+      que olhar a entrada de Monge em `classesAtual` DIRETO (não
+      `classe`/`personagem.nivel`, que seguem a classe conjuradora
+      "ativa") — senão a técnica inteira sumia numa multiclasse onde o
+      Monge não é a classe conjuradora em foco. Achado corrigido de
+      quebra #2: `abrirPainel` (`CombatTab.tsx`) bloqueava reabrir o
+      card de Ação/Ação Bônus assim que `onMarcarUsado` marcava a
+      categoria "usada" no 1º ataque de uma sequência — quebrava o 2º+
+      ataque do Ataque Extra (bug pré-existente, não só do Monge) E o
+      Torrente de Golpes inteiro; corrigido com uma exceção que
+      reconhece ataque pendente de qualquer um dos dois. `Char
+      Multiclasse` (`personagemTesteMulticlasse.ts`) ganhou o Monge na
+      lista (estava esquecido desde a Entrega 1/2). Testado ao vivo via
+      Playwright em 390px: Pontos de Foco 20/20 em 2 linhas de 10
+      confirmadas visualmente; Torrente de Golpes com Foco liberando 2
+      Ataques Desarmados de verdade (reabrindo o painel pro 2º ataque,
+      contador "ataque 1/2" → "2/2"), Foco descontando certo (20→19).
+      `npx tsc -b`, `npm test -- --run` (876/876), `npm run build`
+      verdes.
+- [ ] **Entrega 3b — Metabolismo Incomum** (nível 2, gatilho em Rolar
+      Iniciativa — hook `aoRolarIniciativa` já existe, usado hoje só
+      pelo Bardo). Adiado da Entrega 3 original pra focar só em Foco +
+      as 3 técnicas primeiro.
 - [ ] **Entrega 4 — Defletir Ataques + Queda Lenta + Golpe
       Atordoante.** Defletir Ataques é um padrão NOVO (reduzir dano
       recebido reativamente, nunca existiu no app — ver SDD seção 7).
 - [ ] **Entrega 5 — resto dos níveis 6-20** (Evasão, Movimento
       Acrobático, Foco Aprimorado, Restauro Pessoal, Defletir Energia,
       Sobrevivente Disciplinado, Foco Perfeito, Defesa Superior,
-      Dádiva Épica, Corpo e Mente). Metabolismo Incomum (nível 2) já
-      entrou na Entrega 3 — Foco Perfeito (nível 15) reaproveita o
-      mesmo gatilho de Rolar Iniciativa.
+      Dádiva Épica, Corpo e Mente). Foco Perfeito (nível 15) reaproveita
+      o mesmo gatilho de Rolar Iniciativa da Entrega 3b.
 - [ ] **Entrega 6 — personagem de teste + revisão final**, sem
       subclasse ainda (subclasses viram foco(s) separado(s) depois).
 

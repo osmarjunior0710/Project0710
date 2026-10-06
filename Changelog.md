@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0947
+
+Monge agora tem Pontos de Foco (mostrado como bolinhas, em 2 linhas de
+10) e as 3 técnicas de Ação Bônus: Defesa Paciente, Passo do Vento e
+Torrente de Golpes — cada uma com uma versão de graça e uma versão
+melhorada gastando 1 Ponto de Foco. Torrente de Golpes libera 1 ou 2
+Ataques Desarmados extras na Ação Bônus (de quebra, corrige um defeito
+antigo que impedia tocar "Ação"/"Bônus" de novo pra fazer o 2º ataque
+de Ataque Extra em qualquer classe que já tivesse essa característica).
+
 ## v202610_0902
 
 Monge agora pode ser criado de verdade pelo wizard (antes só existia no

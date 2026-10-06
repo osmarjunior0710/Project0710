@@ -77,7 +77,7 @@ import {
   resumoEquipado,
   type SlotEquipamento,
 } from '../../core/equipamento';
-import { ataqueAtual, ataqueBonusMaoSecundaria } from '../../core/ataque';
+import { ataqueAtual, ataqueBonusMaoSecundaria, ataqueDesarmado } from '../../core/ataque';
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
 import { explicarCdRamosDaArvore } from '../../core/ramosDaArvore';
@@ -85,7 +85,7 @@ import { explicarCdRaizesDevastadoras } from '../../core/raizesDevastadoras';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
-import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, temAuraDeProtecao } from '../../core/recursosClasse';
+import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, quantidadePontosDeFoco, temAuraDeProtecao } from '../../core/recursosClasse';
 import { condicoesDisponiveisMaosConsagradas, custoTotalMaosConsagradas } from '../../core/maosConsagradas';
 import { bonusArmaSagrada, armaElegivelParaArmaSagrada } from '../../core/armaSagrada';
 import { danoResplendorSagrado } from '../../core/resplendorSagrado';
@@ -524,6 +524,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     personagemSalvo.falarComAnimaisGnomoGasto ?? 0,
   );
   const [inspiracaoHeroicaAtiva, setInspiracaoHeroicaAtiva] = useState(personagemSalvo.inspiracaoHeroicaAtiva ?? false);
+  // Monge — Pontos de Foco (ver sdd/sdd-monge.md seção 3).
+  const [pontosDeFocoGasto, setPontosDeFocoGasto] = useState(personagemSalvo.pontosDeFocoGasto ?? 0);
   const [indomavelGasto, setIndomavelGasto] = useState(personagemSalvo.indomavelGasto ?? 0);
   const [pontosDeSorteGasto, setPontosDeSorteGasto] = useState(personagemSalvo.pontosDeSorteGasto ?? 0);
   const [sorteDoTenebrosoGasto, setSorteDoTenebrosoGasto] = useState(personagemSalvo.sorteDoTenebrosoGasto ?? 0);
@@ -846,6 +848,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const furiaDisponivel = furiaMaximo > 0;
   const furiaRestantes = Math.max(0, furiaMaximo - furiaGasto);
   const furiaBonusDano = classe ? bonusDanoFuria(classe, personagem.nivel) : 0;
+  // Pontos de Foco (Monge) — ver sdd/sdd-monge.md seção 3. Olha a
+  // entrada de Monge em `classesAtual` DIRETO (não `classe`/
+  // `personagem.nivel`, que seguem a classe conjuradora "ativa" — ver
+  // comentário de `classeAtivaNome` acima): numa multiclasse onde o
+  // Monge não é a classe conjuradora em foco, `classe` seria outra
+  // classe (ex. Mago) e esconderia a técnica inteira por engano.
+  const mongeEntry = classesAtual.find((c) => c.classe === 'Monge');
+  const classeMonge = mongeEntry ? (catalogoClasses.find((c) => c.nome === 'Monge') ?? null) : null;
+  const pontosDeFocoMaximo = classeMonge && mongeEntry ? quantidadePontosDeFoco(classeMonge, mongeEntry.nivel) : 0;
+  const pontosDeFocoRestantes = Math.max(0, pontosDeFocoMaximo - pontosDeFocoGasto);
+  function gastarPontoDeFoco(): boolean {
+    if (pontosDeFocoRestantes <= 0) return false;
+    setPontosDeFocoGasto((v) => v + 1);
+    return true;
+  }
   const armaduraPesadaEquipada = armaduraEquipadaCatalogo?.categoria.startsWith('Armadura Pesada') ?? false;
   const temVigorImplacavel = selecao.especie === 'Orc';
   const usosConhecimentoDePedrasMaximo = selecao.especie === 'Anão' && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
@@ -1073,6 +1090,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       canalizarDivindade: canalizarDivindadeGasto,
       inspiracao: inspiracaoGasto,
       maosConsagradas: maosConsagradasGasto,
+      pontosDeFoco: pontosDeFocoGasto,
       espacosPorClasseECirculo: espacosGastosPorClasseECirculo,
     },
   });
@@ -1224,6 +1242,15 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         furiaAtiva ? furiaBonusDano : 0,
       )
     : null;
+  // Torrente de Golpes (Monge, Ação Bônus) — sempre Ataque Desarmado,
+  // nunca a arma equipada (regra real: a técnica É esse ataque). Usa
+  // `classeMonge`/`mongeEntry.nivel` (não `classe`/`personagem.nivel`)
+  // pelo mesmo motivo de `pontosDeFocoMaximo` acima. Ver
+  // sdd/sdd-monge.md seção 5.
+  const ataqueTorrente =
+    classeMonge && mongeEntry
+      ? ataqueDesarmado(classeMonge, mongeEntry.nivel, forMod, talentosEfetivos, furiaAtiva ? furiaBonusDano : 0, desMod)
+      : null;
 
   // Esmagador/Talhador — só oferece quando o ataque PRINCIPAL causa o
   // tipo de dano certo (Mão Secundária fica de fora, mesmo escopo do
@@ -1330,6 +1357,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     revelacaoCelestialFormaAtiva,
     falarComAnimaisGnomoGasto,
     inspiracaoHeroicaAtiva,
+    pontosDeFocoGasto,
     indomavelGasto,
     pontosDeSorteGasto,
     sorteDoTenebrosoGasto,
@@ -1438,6 +1466,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       revelacaoCelestialFormaAtiva,
       falarComAnimaisGnomoGasto,
       inspiracaoHeroicaAtiva,
+      pontosDeFocoGasto,
       indomavelGasto,
       pontosDeSorteGasto,
       sorteDoTenebrosoGasto,
@@ -1870,6 +1899,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setAssinaturaMagicaGastas([]);
     setSobrecargaUsosDesdeDescanso(0); // Evocador
 
+    // Monge.
+    setPontosDeFocoGasto(0);
+
     // Paladino.
     setCanalizarDivindadeGasto(0);
     setMaosConsagradasGasto(0);
@@ -1930,6 +1962,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // Mago.
     setMemorizarMagiaGasta(false);
     setAssinaturaMagicaGastas([]);
+
+    // Monge.
+    setPontosDeFocoGasto(0);
 
     // Paladino.
     setCanalizarDivindadeGasto((v) => Math.max(0, v - 1));
@@ -3347,6 +3382,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             ajusteTatico={ajusteTatico}
             ataqueAtual={ataque}
             ataqueBonus={ataqueBonus}
+            ataqueTorrente={ataqueTorrente}
+            pontosDeFoco={{ maximo: pontosDeFocoMaximo, restantes: pontosDeFocoRestantes, onUsar: gastarPontoDeFoco }}
             inspiracao={{
               maximo: usosInspiracaoMax,
               restantes: usosInspiracaoRestantes,

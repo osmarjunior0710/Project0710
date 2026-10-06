@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import type { CorClasse } from '../../core/corRecursoClasse';
 import styles from './TickPips.module.css';
 
@@ -20,6 +21,11 @@ interface TickPipsProps {
    * compartilhado. `null`/omitido = cor padrão do app (azul). Ignorado
    * se `variante="especial"`. */
   cor?: CorClasse | null;
+  /** Força quebra de linha a cada N pips (ex: 10) — em vez de depender
+   * da largura do container pra decidir quando quebrar. Pensado pra
+   * recursos com muitos usos (ex: Pontos de Foco do Monge, até 20 —
+   * pedido do Osmar: sempre 2 linhas de 10, nunca uma linha só). */
+  quebrarACada?: number;
 }
 
 /** Ticks/pips padronizados pra qualquer recurso "N usos, alguns já
@@ -29,20 +35,23 @@ interface TickPipsProps {
  * da classe via `cor`); cinza = já gasto. Sempre esvazia do ÚLTIMO pro
  * primeiro (índice mais alto fica cinza primeiro), nunca do primeiro
  * pro último — ver DECISOES-DESIGN.md. */
-export default function TickPips({ total, usados, tamanho = 'sm', variante = 'padrao', cor }: TickPipsProps) {
+export default function TickPips({ total, usados, tamanho = 'sm', variante = 'padrao', cor, quebrarACada }: TickPipsProps) {
   const corPip = variante !== 'especial' ? cor : null;
   return (
     <div className={styles.row}>
       {Array.from({ length: total }).map((_, i) => {
         const gasto = i >= total - usados;
+        const quebraAntes = quebrarACada && i > 0 && i % quebrarACada === 0;
         return (
-          <div
-            key={i}
-            className={`${styles.pip} ${styles[tamanho]} ${
-              gasto ? styles.pipUsado : variante === 'especial' ? styles.pipEspecial : ''
-            }`}
-            style={!gasto && corPip ? { background: corPip.hex } : undefined}
-          />
+          <Fragment key={i}>
+            {quebraAntes && <div style={{ flexBasis: '100%', height: 0 }} />}
+            <div
+              className={`${styles.pip} ${styles[tamanho]} ${
+                gasto ? styles.pipUsado : variante === 'especial' ? styles.pipEspecial : ''
+              }`}
+              style={!gasto && corPip ? { background: corPip.hex } : undefined}
+            />
+          </Fragment>
         );
       })}
     </div>

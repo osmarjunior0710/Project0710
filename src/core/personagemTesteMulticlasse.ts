@@ -53,6 +53,7 @@ const CLASSES_DO_CHAR_MULTICLASSE: { classe: string; subclasse: string | null }[
   { classe: 'Bruxo', subclasse: 'Patrono Ínfero' },
   { classe: 'Guerreiro', subclasse: null },
   { classe: 'Mago', subclasse: 'Evocador' },
+  { classe: 'Monge', subclasse: null },
   { classe: 'Paladino', subclasse: 'Juramento da Devoção' },
 ];
 

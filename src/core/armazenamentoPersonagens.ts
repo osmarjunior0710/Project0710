@@ -458,6 +458,10 @@ export interface PersonagemSalvo {
    * Descanso Longo (traço Eficiente). Gasto = usar o reroll no
    * RollOverlay, que zera pra `false`. */
   inspiracaoHeroicaAtiva?: boolean;
+  /** Pontos de Foco (Monge) gastos desde o último Descanso — recupera
+   * tudo no Descanso Curto E no Longo (igual Magia de Pacto do Bruxo,
+   * ver sdd/sdd-monge.md seção 3). */
+  pontosDeFocoGasto?: number;
   /** [Ferramenta de teste] Snapshot completo do personagem capturado na
    * 1ª vez que ele alcança cada nível (1 a 20) — pedido do Osmar
    * (2026-09): "ir até o nível 20 pra testar, voltar e arrumar" sem

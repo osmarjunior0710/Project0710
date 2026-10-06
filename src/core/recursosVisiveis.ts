@@ -14,7 +14,7 @@ import { dadoInspiracao, usosInspiracaoMaximo } from './inspiracaoBardo';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
 import type { PersonagemClasse } from './multiclasse';
 import type { WizardSelection } from './personagem';
-import { quantidadeCanalizarDivindade, quantidadeFuria, quantidadeMaosConsagradas, quantidadeRecuperarFolego } from './recursosClasse';
+import { quantidadeCanalizarDivindade, quantidadeFuria, quantidadeMaosConsagradas, quantidadePontosDeFoco, quantidadeRecuperarFolego } from './recursosClasse';
 
 export interface RecursoVisivel {
   /** Estável, pra key de lista e testes. */
@@ -26,11 +26,17 @@ export interface RecursoVisivel {
   descricao: string[];
   /** Cor dos pips (por classe, ver `corRecursoClasse.ts`); `null` = azul padrão. */
   cor: CorClasse | null;
-  /** `'pips'` (padrão, omitido) = bolinhas de 1 em 1 — só funciona pra
-   * poucos usos. `'barra'` = barra de progresso colorida com o número
-   * dentro, pra reserva de PONTOS que pode chegar em dezenas/centenas
-   * (ex: Mãos Consagradas, 5×nível). */
-  exibicao?: 'pips' | 'barra';
+  /** `'pips'` (padrão, omitido) = bolinhas de 1 em 1, ao lado do nome —
+   * só funciona pra poucos usos. `'barra'` = barra de progresso
+   * colorida com o número dentro, pra reserva de PONTOS que pode
+   * chegar em dezenas/centenas (ex: Mãos Consagradas, 5×nível).
+   * `'pips-bloco'` = pips embaixo do nome (linha própria, não ao
+   * lado), quebrando a cada `quebrarACada` — pra recurso com bastante
+   * uso mas que o Osmar prefere continuar vendo como pips, não barra
+   * (ex: Pontos de Foco do Monge, até 20, em 2 linhas de 10). */
+  exibicao?: 'pips' | 'barra' | 'pips-bloco';
+  /** Só com `exibicao: 'pips-bloco'` — ver `TickPips.tsx`. */
+  quebrarACada?: number;
 }
 
 export interface EntradaRecursosVisiveis {
@@ -46,6 +52,8 @@ export interface EntradaRecursosVisiveis {
     /** Em PONTOS de PV gastos da reserva, não em "usos" — Mãos Consagradas
      * é a única cujo gasto é uma quantidade variável escolhida pelo jogador. */
     maosConsagradas: number;
+    /** Pontos de Foco (Monge) — ver sdd/sdd-monge.md seção 3. */
+    pontosDeFoco: number;
     /** `espacosGastosPorClasseECirculo` — a chave do pool de Pacto é o nome da classe. */
     espacosPorClasseECirculo: Record<string, Record<number, number>>;
   };
@@ -125,6 +133,25 @@ export function montarRecursosVisiveis(e: EntradaRecursosVisiveis): RecursoVisiv
           descricao: [
             `Ação Bônus: você recupera Pontos de Vida iguais a 1d10 + seu nível de Guerreiro (${c.nivel}).`,
             `Recarrega: ${recuperaEm(classe, 'Recuperar Fôlego (usos)')}.`,
+          ],
+        });
+      }
+    }
+
+    if (classe.nome === 'Monge') {
+      const maximo = quantidadePontosDeFoco(classe, c.nivel);
+      if (maximo > 0) {
+        lista.push({
+          id: 'pontos-de-foco',
+          nome: 'Pontos de Foco',
+          maximo,
+          restantes: Math.max(0, maximo - e.gastos.pontosDeFoco),
+          cor: corDoRecursoDaClasse(classe.nome),
+          exibicao: 'pips-bloco',
+          quebrarACada: 10,
+          descricao: [
+            'Gasto nas 3 técnicas do painel de Ação Bônus (Defesa Paciente, Passo do Vento, Torrente de Golpes) pra melhorar o efeito — cada uma também tem uma versão de graça, sem gastar nada.',
+            'Recarrega: todos os usos no Descanso Curto E no Descanso Longo.',
           ],
         });
       }

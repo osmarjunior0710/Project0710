@@ -440,6 +440,12 @@ interface CombatTabProps {
   ajusteTatico: CaracteristicaNivel | null;
   ataqueAtual: AtaqueResolvido | null;
   ataqueBonus: AtaqueResolvido | null;
+  /** Torrente de Golpes (Monge) — sempre Ataque Desarmado, `null` =
+   * personagem sem Pontos de Foco (não é Monge nível 2+). */
+  ataqueTorrente: AtaqueResolvido | null;
+  /** Pontos de Foco (Monge) — gasto pelas 3 técnicas do painel de Ação
+   * Bônus. Ver sdd/sdd-monge.md seção 3. */
+  pontosDeFoco: RecursoContado;
   /** Inspiração de Bardo / Perícia Inigualável — mesmo banco de usos. */
   inspiracao: RecursoContado & {
     tamanhoDado: number;
@@ -741,6 +747,8 @@ export default function CombatTab({
   ajusteTatico,
   ataqueAtual,
   ataqueBonus,
+  ataqueTorrente,
+  pontosDeFoco: { maximo: pontosDeFocoMaximo, restantes: pontosDeFocoRestantes, onUsar: onUsarPontoDeFoco },
   inspiracao: {
     maximo: usosInspiracaoMaximo,
     restantes: usosInspiracaoRestantes,
@@ -807,6 +815,11 @@ export default function CombatTab({
   // `escolhaSobrecarga` acima. `null` = fechado.
   const [escolhaMontaria, setEscolhaMontaria] = useState<{ circuloUsado: number } | null>(null);
   const [ataquesFeitos, setAtaquesFeitos] = useState(0);
+  // Torrente de Golpes (Monge) — mesmo padrão de `numAtaques`/`ataquesFeitos`
+  // do Ataque Extra, só que escopado à Ação Bônus: 0 = técnica ainda não
+  // ativada nesse turno. Ver `sdd/sdd-monge.md` seção 5.
+  const [numAtaquesTorrente, setNumAtaquesTorrente] = useState(0);
+  const [ataquesTorrenteFeitos, setAtaquesTorrenteFeitos] = useState(0);
   const [piscando, setPiscando] = useState(false);
   const [iniciativaValor, setIniciativaValor] = useState<number | null>(null);
   const [periciaInigualavelPendente, setPericiaInigualavelPendente] = useState(false);
@@ -873,13 +886,32 @@ export default function CombatTab({
       onFimDoTurno();
       setFeedback(null);
       setAtaquesFeitos(0);
+      setNumAtaquesTorrente(0);
+      setAtaquesTorrenteFeitos(0);
       setGolpeBrutalEfeitoPendente(false);
     }, DURACAO_PISCADA_MS / 2);
     setTimeout(() => setPiscando(false), DURACAO_PISCADA_MS);
   }
 
+  /** `onMarcarUsado` já marca a categoria como "usada" no 1º ataque de
+   * uma sequência de vários (Ataque Extra na Ação, Torrente de Golpes
+   * na Ação Bônus) — "usada" não quer dizer "não sobra mais nada
+   * dentro dela", só "já comprometeu a categoria neste turno". Por
+   * isso o card continua reabrindo enquanto sobrar ataque pendente
+   * dessas sequências (achado reaproveitando o mesmo padrão pro
+   * Torrente de Golpes do Monge, ver sdd/sdd-monge.md seção 5 —
+   * corrige de quebra o mesmo gap que já existia pro 2º+ ataque do
+   * Ataque Extra). */
   function abrirPainel(categoria: RecursoTurno) {
-    if (turnState[categoria] === 'usada') return;
+    const temAtaqueExtraPendente = categoria === 'acao' && ataquesFeitos > 0 && ataquesFeitos < numAtaques;
+    // Diferente do Ataque Extra (1º ataque rola no painel JÁ aberto,
+    // "usada" só passa a valer DEPOIS dele — daí o `ataquesFeitos > 0`
+    // acima), escolher a técnica do Torrente FECHA o painel antes de
+    // rolar qualquer ataque (mesma tela de escolha de graça/Foco que
+    // todas as outras usam) — então até o 1º ataque da Torrente
+    // precisa reabrir, não só o 2º em diante.
+    const temTorrentePendente = categoria === 'bonus' && ataquesTorrenteFeitos < numAtaquesTorrente && numAtaquesTorrente > 0;
+    if (turnState[categoria] === 'usada' && !temAtaqueExtraPendente && !temTorrentePendente) return;
     setFeedback(null);
     setGolpeBrutalEfeitoPendente(false);
     setPainelAberto(categoria);
@@ -1218,6 +1250,82 @@ export default function CombatTab({
     onMarcarUsado('bonus');
     setPainelAberto(null);
     setFeedback(`🗡 ${ataqueBonus.nome} (Mão Secundária) — ${ataqueBonus.descricao}`);
+  }
+
+  /** As 3 técnicas do Monge (Ação Bônus, ver sdd/sdd-monge.md seção 4)
+   * — cada uma tem uma versão "de graça" e uma "gastando 1 Ponto de
+   * Foco" (`comFoco`). Defesa Paciente/Passo do Vento só geram texto
+   * informativo (mesmo tratamento de Desengajar/Correr/Esquivar
+   * genéricos — sem motor de "efeito ativo" pra essas 2 ainda). */
+  function usarDefesaPaciente(comFoco: boolean) {
+    if (comFoco && !onUsarPontoDeFoco()) return;
+    onMarcarUsado('bonus');
+    setPainelAberto(null);
+    setFeedback(
+      comFoco
+        ? '🥋 Defesa Paciente — Esquivar + Desengajar (Ação Bônus). Gastou 1 Ponto de Foco.'
+        : '🥋 Defesa Paciente — Esquivar (Ação Bônus), de graça.',
+    );
+  }
+
+  function usarPassoDoVento(comFoco: boolean) {
+    if (comFoco && !onUsarPontoDeFoco()) return;
+    onMarcarUsado('bonus');
+    setPainelAberto(null);
+    setFeedback(
+      comFoco
+        ? '💨 Passo do Vento — Correr ou Desengajar (Ação Bônus) + salto dobrado de distância até o fim do turno. Gastou 1 Ponto de Foco.'
+        : '💨 Passo do Vento — Correr ou Desengajar (Ação Bônus), de graça.',
+    );
+  }
+
+  /** Ativa a técnica (escolhe quantos ataques) — rolar cada Ataque
+   * Desarmado é `rolarAtaqueTorrente` abaixo, mesmo padrão de "toque em
+   * Atacar quantas vezes a regra permitir" do Ataque Extra. */
+  function ativarTorrenteDeGolpes(comFoco: boolean) {
+    if (comFoco && !onUsarPontoDeFoco()) return;
+    setNumAtaquesTorrente(comFoco ? 2 : 1);
+    setAtaquesTorrenteFeitos(0);
+    onMarcarUsado('bonus');
+    setPainelAberto(null);
+    setFeedback(
+      comFoco
+        ? '👊 Torrente de Golpes — 2 Ataques Desarmados (Ação Bônus). Gastou 1 Ponto de Foco.'
+        : '👊 Torrente de Golpes — 1 Ataque Desarmado (Ação Bônus), de graça.',
+    );
+  }
+
+  function rolarAtaqueTorrente() {
+    if (!ataqueTorrente) return;
+    rolarD20({
+      label: `Ataque — ${ataqueTorrente.nome} (Torrente de Golpes)`,
+      formula: `1d20 + ${ataqueTorrente.info.modAcerto}`,
+      mod: ataqueTorrente.info.modAcerto,
+      explicacaoMod: ataqueTorrente.info.explicacaoAcerto,
+      vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
+      confirmarAcerto: {
+        onAcertou: ({ critico }) => {
+          const dano = danoComCritico(
+            { quantidade: ataqueTorrente.info.danoQuantidade, lados: ataqueTorrente.info.danoLados, mod: ataqueTorrente.info.danoMod },
+            critico,
+          );
+          rolarDados({
+            label: `Dano — ${ataqueTorrente.nome} (Torrente de Golpes)${critico ? ' (Crítico)' : ''}`,
+            formula: dano.formula,
+            quantidade: dano.quantidade,
+            lados: ataqueTorrente.info.danoLados,
+            mod: ataqueTorrente.info.danoMod,
+            rerollSe1: danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
+            rerollEscolhido: perfuradorDisponivel && ataqueTorrente.info.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
+            confirmarFechamento: {},
+          });
+        },
+        onErrou: () => {},
+      },
+    });
+    setAtaquesTorrenteFeitos((v) => v + 1);
+    setPainelAberto(null);
+    setFeedback(`🗡 ${ataqueTorrente.nome} (Torrente de Golpes) — ${ataqueTorrente.descricao}`);
   }
 
   function usarCortarAtaque() {
@@ -1816,19 +1924,29 @@ export default function CombatTab({
       )}
 
       <div className={styles.splitBtns}>
-        {(['acao', 'bonus'] as RecursoTurno[]).map((categoria) => (
-          <div
-            key={categoria}
-            className={`${styles.splitBtn} ${styles[`splitBtn${categoria === 'acao' ? 'Acao' : 'Bonus'}`]} ${
-              turnState[categoria] === 'usada' ? styles.splitBtnUsada : ''
-            }`}
-            onClick={() => abrirPainel(categoria)}
-          >
-            <div className={styles.sbIcon}>{LABELS[categoria].icone}</div>
-            <div className={styles.sbLabel}>{LABELS[categoria].nome}</div>
-            <div className={styles.sbState}>{turnState[categoria] === 'usada' ? 'usada' : 'ativo'}</div>
-          </div>
-        ))}
+        {(['acao', 'bonus'] as RecursoTurno[]).map((categoria) => {
+          const temAtaqueExtraPendente = categoria === 'acao' && ataquesFeitos > 0 && ataquesFeitos < numAtaques;
+          const temTorrentePendente = categoria === 'bonus' && ataquesTorrenteFeitos < numAtaquesTorrente && numAtaquesTorrente > 0;
+          // "usada" de verdade pro visual/CSS: categoria marcada E sem
+          // ataque pendente de Ataque Extra/Torrente de Golpes (ver
+          // `abrirPainel` — mesma condição, nunca deixar os 2 lugares
+          // divergirem: card com `pointer-events: none` bloquearia o
+          // clique mesmo com o JS já liberando).
+          const usadaDeVerdade = turnState[categoria] === 'usada' && !temAtaqueExtraPendente && !temTorrentePendente;
+          return (
+            <div
+              key={categoria}
+              className={`${styles.splitBtn} ${styles[`splitBtn${categoria === 'acao' ? 'Acao' : 'Bonus'}`]} ${
+                usadaDeVerdade ? styles.splitBtnUsada : ''
+              }`}
+              onClick={() => abrirPainel(categoria)}
+            >
+              <div className={styles.sbIcon}>{LABELS[categoria].icone}</div>
+              <div className={styles.sbLabel}>{LABELS[categoria].nome}</div>
+              <div className={styles.sbState}>{usadaDeVerdade ? 'usada' : 'ativo'}</div>
+            </div>
+          );
+        })}
       </div>
       <div
         className={`${styles.splitBtnSmall} ${styles.splitBtnReacao} ${turnState.reacao === 'usada' ? styles.splitBtnUsada : ''}`}
@@ -2032,6 +2150,14 @@ export default function CombatTab({
           furiaRestantes={furiaRestantes}
           furiaAtiva={furiaAtiva}
           onUsarFuria={usarFuria}
+          pontosDeFocoMaximo={pontosDeFocoMaximo}
+          pontosDeFocoRestantes={pontosDeFocoRestantes}
+          onUsarDefesaPaciente={usarDefesaPaciente}
+          onUsarPassoDoVento={usarPassoDoVento}
+          onAtivarTorrenteDeGolpes={ativarTorrenteDeGolpes}
+          numAtaquesTorrente={numAtaquesTorrente}
+          ataquesTorrenteFeitos={ataquesTorrenteFeitos}
+          onAtacarTorrente={rolarAtaqueTorrente}
           percorrerArvoreDisponivel={percorrerArvoreDisponivel}
           percorrerArvoreEstendidaDisponivel={percorrerArvoreEstendidaDisponivel}
           onUsarPercorrerArvore={usarPercorrerArvore}

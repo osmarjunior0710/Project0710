@@ -830,3 +830,20 @@ popup novo que sirva de "hub" pra abrir outros popups por cima
 (cartões que levam a outro modal) deve usar o z-index BASE, nunca um
 mais alto — e vir primeiro no JSX entre os popups que podem empilhar
 sobre ele.
+
+**"Usada" não é "nada mais sobra dentro dela" — toda sequência de
+vários ataques/usos dentro de UMA categoria de turno (Ação ou Ação
+Bônus) precisa de exceção em `abrirPainel` (`CombatTab.tsx`):**
+corrigido no foco Monge (Torrente de Golpes, Entrega 3), mas o mesmo
+bug já existia pro Ataque Extra (2+ ataques na Ação) desde antes —
+`onMarcarUsado(categoria)` já marca a categoria "usada" no 1º
+ataque/uso da sequência (regra real: é 1 Ação/Ação Bônus só, mesmo com
+vários golpes dentro dela), mas o card fixo (`splitBtn`) tinha
+`pointer-events: none` nessa hora — bloqueando o jogador de reabrir o
+painel pros ataques seguintes. Toda sequência assim (Ataque Extra,
+Torrente de Golpes — qualquer característica futura com "pode repetir
+N vezes dentro da mesma Ação/Ação Bônus") precisa que `abrirPainel`
+reconheça essa exceção ("categoria usada E tem [contador de uso] <
+[contador máximo]") tanto na função quanto no className/label do card
+fixo — os 2 lugares têm que concordar, senão o card mostra "ativo" mas
+o clique não abre nada (ou vice-versa).
