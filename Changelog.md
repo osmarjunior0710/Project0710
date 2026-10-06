@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1544
+
+Ajuste visual: as bolinhas de Pontos de Foco do Monge agora ficam
+alinhadas à direita da tela, igual os outros recursos com contador
+(Fúria, Inspiração de Bardo, etc.) — antes ficavam coladas à esquerda.
+
 ## v202610_1503
 
 Monge ganhou Metabolismo Incomum (nível 2): ao rolar Iniciativa, se

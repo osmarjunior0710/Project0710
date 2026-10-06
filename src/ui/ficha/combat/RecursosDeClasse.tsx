@@ -39,13 +39,25 @@ export default function RecursosDeClasse({ recursos }: RecursosDeClasseProps) {
               borderTop: i === 0 ? 'none' : '1px dashed var(--line-soft)',
             }}
           >
-            <span style={{ fontSize: 13, display: 'block', marginBottom: 4 }}>
-              {r.nome} <InfoTexto titulo={r.nome} paragrafos={r.descricao} />{' '}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 'var(--space-3)',
+                marginBottom: 4,
+              }}
+            >
+              <span style={{ fontSize: 13 }}>
+                {r.nome} <InfoTexto titulo={r.nome} paragrafos={r.descricao} />
+              </span>
               <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>
                 {r.restantes}/{r.maximo}
               </span>
-            </span>
-            <TickPips total={r.maximo} usados={r.maximo - r.restantes} cor={r.cor} quebrarACada={r.quebrarACada} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <TickPips total={r.maximo} usados={r.maximo - r.restantes} cor={r.cor} quebrarACada={r.quebrarACada} />
+            </div>
           </div>
         ) : (
           <div

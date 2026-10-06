@@ -37,8 +37,19 @@ interface TickPipsProps {
  * pro último — ver DECISOES-DESIGN.md. */
 export default function TickPips({ total, usados, tamanho = 'sm', variante = 'padrao', cor, quebrarACada }: TickPipsProps) {
   const corPip = variante !== 'especial' ? cor : null;
+  // Com `quebrarACada`, o container vira flex-wrap de VERDADE (não só
+  // "larga o suficiente que nunca quebra") — sem largura própria, um
+  // flex item com várias linhas internas ocupa a largura MÁXIMA
+  // disponível do pai (até caber todos os pips numa linha só), então
+  // `justify-content: flex-end` no pai (ver `RecursosDeClasse.tsx`)
+  // não tem o que empurrar. Fixar a largura em pixels pro tamanho
+  // exato de uma linha (`quebrarACada` pips) resolve — cada linha
+  // interna já fica alinhada à direita dentro desse bloco.
+  const pipPx = tamanho === 'lg' ? 22 : 16;
+  const gapPx = 4; // var(--space-1)
+  const largura = quebrarACada ? quebrarACada * pipPx + (quebrarACada - 1) * gapPx : undefined;
   return (
-    <div className={styles.row}>
+    <div className={styles.row} style={largura ? { width: largura } : undefined}>
       {Array.from({ length: total }).map((_, i) => {
         const gasto = i >= total - usados;
         const quebraAntes = quebrarACada && i > 0 && i % quebrarACada === 0;
