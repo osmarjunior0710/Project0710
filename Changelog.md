@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0048
+
+Corrige o botão flutuante de dado 3D (🎲) aparecendo por cima do
+painel de Ação/Ação Bônus/Reação quando ele está aberto, cobrindo a
+última linha do conteúdo. Agora o botão fica escondido atrás do
+painel enquanto ele está aberto, igual o botão de Descanso.
+
 ## v202610_2237
 
 Corrige a Torrente de Golpes do Monge: o 2º ataque (quando gasta

@@ -148,6 +148,17 @@ tratamento do Bruxo/Mestre Místico) — não usar a célula como está.
       rola dano → card só aparece DEPOIS de fechar o popup de dano,
       nunca antes). `npx tsc -b`, `npm test -- --run` (876/876), `npm
       run build` verdes.
+
+**Achado fora do escopo do Monge, corrigido de passagem** (Osmar
+notou testando a Torrente de Golpes): o FAB de Dado 3D (🎲) flutuava
+por CIMA de qualquer painel de Ação/Ação Bônus/Reação aberto (z-index
+130/131/132, acima do painel, 110/111) — cobria a última linha do
+conteúdo. Baixado pra 94/95/96 (abaixo do painel, igual o FAB de
+Descanso já fazia) — `Dice3dFab.module.css`. O canvas da física do
+dado em si (`Dice3dCanvasHost`, z-index 120) NÃO mudou — esse precisa
+continuar acima do painel pra o dado caindo aparecer por cima de um
+painel aberto, só o botão/menu/histórico ocioso é que não devia.
+
 - [ ] **Entrega 4 — Defletir Ataques + Queda Lenta + Golpe
       Atordoante.** Defletir Ataques é um padrão NOVO (reduzir dano
       recebido reativamente, nunca existiu no app — ver SDD seção 7).

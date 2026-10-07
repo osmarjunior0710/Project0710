@@ -18,7 +18,13 @@
   font-size: 26px;
   box-shadow: var(--elevation-3);
   cursor: pointer;
-  z-index: 131;
+  /* Abaixo do painel de Ação/Ação Bônus/Reação (`SidePanel.module.css`,
+     z-index 110/111) — sem isso, o FAB flutuava por CIMA do painel
+     aberto, cobrindo a última linha do conteúdo (achado pelo Osmar,
+     2026-10). Com o painel aberto, o próprio fundo dele cobre o FAB;
+     fechando o painel, o FAB volta a aparecer por cima do resto da
+     tela normal (z-index bem acima do conteúdo comum). */
+  z-index: 95;
 }
 
 .fab:active {
@@ -41,7 +47,7 @@
   position: fixed;
   right: var(--space-4);
   bottom: calc(54px + env(safe-area-inset-bottom, 0px) + var(--space-3) + 56px + var(--space-2));
-  z-index: 130;
+  z-index: 94;
   display: flex;
   flex-direction: column-reverse;
   align-items: flex-end;
@@ -98,7 +104,7 @@
   top: var(--space-6);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 130;
+  z-index: 94;
   color: #fff;
   background: rgba(0, 0, 0, 0.65);
   font-size: 14px;
@@ -116,7 +122,7 @@
   left: var(--space-4);
   top: 50%;
   transform: translateY(-50%);
-  z-index: 132;
+  z-index: 96;
   background: #fff;
   border-radius: var(--shape-md);
   box-shadow: var(--elevation-3);
