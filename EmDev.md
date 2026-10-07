@@ -177,14 +177,33 @@ dado em si (`Dice3dCanvasHost`, z-index 120) NÃO mudou — esse precisa
 continuar acima do painel pra o dado caindo aparecer por cima de um
 painel aberto, só o botão/menu/histórico ocioso é que não devia.
 
-- [ ] **Entrega 4 — Defletir Ataques + Queda Lenta + Golpe
-      Atordoante.** Defletir Ataques é um padrão NOVO (reduzir dano
-      recebido reativamente, nunca existiu no app — ver SDD seção 7).
+- [x] **Entrega 4a — Queda Lenta** (nível 4, painel de Reação). Sem
+      rolagem — valor fixo (5 × nível de Monge), só avisa o jogador via
+      `onEscolher`/feedback, mesmo padrão de "a ficha nunca calcula
+      dano recebido sozinha" (jogador desconta manual nos botões
+      −5/−1/Manual já existentes). Nova linha em
+      `ReacaoPanelContent.tsx`, gated por `nivelMonge >= 4` (prop já
+      existia, reaproveitada do Metabolismo Incomum). Testado ao vivo
+      via Playwright: linha aparece a partir do nível 4, toque mostra
+      "Reduza o dano da queda em 100 (5 × seu nível de Monge)" pro
+      personagem de teste nível 20, Reação marcada "usada" depois.
+      `npx tsc -b`, `npm test -- --run` (876/876), `npm run build`
+      verdes.
+- [ ] **Entrega 4b — Golpe Atordoante** (nível 5). Reaproveita o modal
+      de "efeito bônus pós-acerto" já existente (ver SDD seção 6) —
+      depois de acertar com arma de Monge/Desarmado, oferece gastar 1
+      Foco; mostra CD/resultado como texto informativo (sem rastrear
+      condição em inimigo).
+- [ ] **Entrega 4c — Defletir Ataques + Defletir Energia** (níveis 3 e
+      13). Padrão NOVO (reduzir dano recebido reativamente, nunca
+      existiu no app — ver SDD seção 7). Defletir Energia é só remover
+      a restrição de tipo de dano da mesma função, não uma
+      característica separada.
 - [ ] **Entrega 5 — resto dos níveis 6-20** (Evasão, Movimento
-      Acrobático, Foco Aprimorado, Restauro Pessoal, Defletir Energia,
-      Sobrevivente Disciplinado, Foco Perfeito, Defesa Superior,
-      Dádiva Épica, Corpo e Mente). Foco Perfeito (nível 15) reaproveita
-      o mesmo gatilho de Rolar Iniciativa da Entrega 3b.
+      Acrobático, Foco Aprimorado, Restauro Pessoal, Sobrevivente
+      Disciplinado, Foco Perfeito, Defesa Superior, Dádiva Épica, Corpo
+      e Mente). Foco Perfeito (nível 15) reaproveita o mesmo gatilho de
+      Rolar Iniciativa da Entrega 3b.
 - [ ] **Entrega 6 — personagem de teste + revisão final**, sem
       subclasse ainda (subclasses viram foco(s) separado(s) depois).
 

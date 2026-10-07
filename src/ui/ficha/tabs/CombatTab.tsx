@@ -2387,6 +2387,7 @@ export default function CombatTab({
           ramosDaArvoreDisponivel={ramosDaArvoreDisponivel}
           onAbrirRamosDaArvore={abrirRamosDaArvore}
           preferenciasPillsMagia={preferenciasPillsMagia}
+          nivelMonge={nivelMonge}
         />
       </SidePanel>
       {lancarNoInfernoDano !== null && (

@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1102
+
+Monge (nível 4+) ganha Queda Lenta no painel de Reação: toque nela
+quando estiver caindo e ela te avisa quanto reduzir do dano da queda
+(5 × seu nível de Monge), pra você descontar manualmente igual já faz
+com qualquer outro dano recebido.
+
 ## v202610_0925
 
 Corrige a Torrente de Golpes (Monge) com Ponto de Foco: antes, depois
