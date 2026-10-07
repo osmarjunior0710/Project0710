@@ -178,17 +178,30 @@ continuar acima do painel pra o dado caindo aparecer por cima de um
 painel aberto, só o botão/menu/histórico ocioso é que não devia.
 
 - [x] **Entrega 4a — Queda Lenta** (nível 4, painel de Reação). Sem
-      rolagem — valor fixo (5 × nível de Monge), só avisa o jogador via
-      `onEscolher`/feedback, mesmo padrão de "a ficha nunca calcula
-      dano recebido sozinha" (jogador desconta manual nos botões
-      −5/−1/Manual já existentes). Nova linha em
+      rolagem — valor fixo (5 × nível de Monge), nova linha em
       `ReacaoPanelContent.tsx`, gated por `nivelMonge >= 4` (prop já
-      existia, reaproveitada do Metabolismo Incomum). Testado ao vivo
-      via Playwright: linha aparece a partir do nível 4, toque mostra
+      existia, reaproveitada do Metabolismo Incomum). Jogador desconta
+      manual nos botões −5/−1/Manual já existentes (mesmo padrão de "a
+      ficha nunca calcula dano recebido sozinha"). Testado ao vivo via
+      Playwright: linha aparece a partir do nível 4, toque mostra
       "Reduza o dano da queda em 100 (5 × seu nível de Monge)" pro
       personagem de teste nível 20, Reação marcada "usada" depois.
       `npx tsc -b`, `npm test -- --run` (876/876), `npm run build`
       verdes.
+- [x] **Entrega 4a.1 — Queda Lenta vira popup** (Osmar testou: deixar
+      só como `feedback` no corpo da aba Combate é fácil de não notar,
+      mesmo problema já visto na Torrente de Golpes/3 técnicas antes
+      de virarem popup). Criado `AvisoModal.tsx` — popup genérico
+      reaproveitável pra qualquer resultado informativo SEM rolagem
+      nem escolha (card central, mesmo CSS de `TrocarArmaMaestria`,
+      z-index 120 acima do SidePanel). `ReacaoPanelContent` ganhou
+      `onAbrirAvisoReacao` (CombatTab implementa: marca Reação usada +
+      fecha painel + abre o popup) — Queda Lenta usa esse caminho em
+      vez de `onEscolher`. Golpe Atordoante (Entrega 4b) deve
+      reaproveitar o mesmo `AvisoModal` quando fizer sentido. Testado
+      ao vivo via Playwright: popup abre centralizado ao tocar Queda
+      Lenta, "Ok" fecha e Reação continua marcada "usada". `npx tsc
+      -b`, `npm test -- --run` (876/876), `npm run build` verdes.
 - [ ] **Entrega 4b — Golpe Atordoante** (nível 5). Reaproveita o modal
       de "efeito bônus pós-acerto" já existente (ver SDD seção 6) —
       depois de acertar com arma de Monge/Desarmado, oferece gastar 1

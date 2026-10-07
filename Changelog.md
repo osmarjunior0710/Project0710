@@ -5,6 +5,11 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1218
+
+Queda Lenta (Monge) agora abre um popup central com o valor da redução
+de dano, em vez de só um texto no meio da tela fácil de não notar.
+
 ## v202610_1102
 
 Monge (nível 4+) ganha Queda Lenta no painel de Reação: toque nela

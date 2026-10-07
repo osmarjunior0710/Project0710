@@ -138,6 +138,11 @@ interface ReacaoPanelContentProps {
    * (sem rolagem, ver `DND-Regras.md`/planilha). `0` quando não é
    * Monge. */
   nivelMonge: number;
+  /** Resultado informativo SEM rolagem (ex.: Queda Lenta) — abre
+   * `AvisoModal.tsx` em vez de só deixar como `feedback` no corpo da
+   * aba (fácil de não notar, ver `AvisoModal.tsx`). Também marca a
+   * Reação como usada e fecha o painel, igual `onEscolher`. */
+  onAbrirAvisoReacao: (titulo: string, texto: string) => void;
 }
 
 export default function ReacaoPanelContent({
@@ -189,6 +194,7 @@ export default function ReacaoPanelContent({
   onAbrirRamosDaArvore,
   preferenciasPillsMagia,
   nivelMonge,
+  onAbrirAvisoReacao,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
@@ -386,9 +392,10 @@ export default function ReacaoPanelContent({
    * valor fixo (5 × nível de Monge); só avisa o jogador, que desconta
    * manualmente do dano de queda nos botões −5/−1/Manual já
    * existentes (mesmo padrão de "a ficha nunca calcula dano recebido
-   * sozinha"). */
+   * sozinha"). Abre popup (`AvisoModal.tsx`) em vez de só feedback no
+   * corpo da aba — pedido do Osmar, 2026-10. */
   function usarQuedaLenta() {
-    onEscolher('🍃 Queda Lenta', `Reduza o dano da queda em ${nivelMonge * 5} (5 × seu nível de Monge).`);
+    onAbrirAvisoReacao('🍃 Queda Lenta', `Reduza o dano da queda em ${nivelMonge * 5} (5 × seu nível de Monge).`);
   }
 
   function usarPalavrasDeInterrupcao() {

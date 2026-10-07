@@ -32,6 +32,7 @@ import SidePanel from '../combat/SidePanel';
 import PvManualModal from '../combat/PvManualModal';
 import MaosConsagradasModal from '../combat/MaosConsagradasModal';
 import TecnicaMongeModal, { type TipoTecnicaMonge } from '../combat/TecnicaMongeModal';
+import AvisoModal from '../combat/AvisoModal';
 import RecursosDeClasse from '../combat/RecursosDeClasse';
 import type { RecursoVisivel } from '../../../core/recursosVisiveis';
 import AcaoPanelContent from '../combat/AcaoPanelContent';
@@ -808,6 +809,9 @@ export default function CombatTab({
   // Popup de escolha das 3 técnicas do Monge (ver TecnicaMongeModal.tsx
   // — pedido do Osmar, 2026-10: popup central, não sub-tela do painel).
   const [tecnicaMongeAberta, setTecnicaMongeAberta] = useState<TipoTecnicaMonge | null>(null);
+  /** Popup de resultado informativo sem rolagem (ex.: Queda Lenta) —
+   * `AvisoModal.tsx`, pedido do Osmar (2026-10). */
+  const [avisoReacao, setAvisoReacao] = useState<{ titulo: string; texto: string } | null>(null);
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -956,6 +960,17 @@ export default function CombatTab({
     onMarcarUsado(categoria);
     setPainelAberto(null);
     setFeedback(`${nome} — ${desc}`);
+  }
+
+  /** Mesmo efeito de `escolherNoPainel('reacao', ...)` (marca usada +
+   * fecha painel), mas abre `AvisoModal.tsx` em vez de só deixar como
+   * `feedback` no corpo da aba — pra resultado informativo sem
+   * rolagem que é fácil de não notar ali embaixo (Queda Lenta, pedido
+   * do Osmar 2026-10). */
+  function abrirAvisoReacao(titulo: string, texto: string) {
+    onMarcarUsado('reacao');
+    setPainelAberto(null);
+    setAvisoReacao({ titulo, texto });
   }
 
   // Fluxo Acerto/Erro estendido pra Salvaguarda do Alvo (2026-09, ver
@@ -2105,6 +2120,7 @@ export default function CombatTab({
           onFechar={() => setTecnicaMongeAberta(null)}
         />
       )}
+      {avisoReacao && <AvisoModal titulo={avisoReacao.titulo} texto={avisoReacao.texto} onFechar={() => setAvisoReacao(null)} />}
 
       <SidePanel
         open={painelAberto === 'acao'}
@@ -2388,6 +2404,7 @@ export default function CombatTab({
           onAbrirRamosDaArvore={abrirRamosDaArvore}
           preferenciasPillsMagia={preferenciasPillsMagia}
           nivelMonge={nivelMonge}
+          onAbrirAvisoReacao={abrirAvisoReacao}
         />
       </SidePanel>
       {lancarNoInfernoDano !== null && (
