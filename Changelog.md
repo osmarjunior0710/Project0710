@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0925
+
+Corrige a Torrente de Golpes (Monge) com Ponto de Foco: antes, depois
+do 1º ataque (acertar/errar), o 2º ataque virava um card parado no
+meio da tela esperando você tocar nele — fácil de não notar. Agora os
+2 ataques disparam em sequência sozinhos, sem nenhum toque no meio:
+acerto → dano → ataque 2 já abre na hora.
+
 ## v202610_0048
 
 Corrige o botão flutuante de dado 3D (🎲) aparecendo por cima do

@@ -148,6 +148,24 @@ tratamento do Bruxo/Mestre Místico) — não usar a célula como está.
       rola dano → card só aparece DEPOIS de fechar o popup de dano,
       nunca antes). `npx tsc -b`, `npm test -- --run` (876/876), `npm
       run build` verdes.
+- [x] **Entrega 3e — Torrente vira ataque contínuo de verdade, sem 2º
+      input** (Osmar testou de novo: o card "ataque 2/2" da 3d
+      tecnicamente aparecia, mas só depois de perceber que era um card
+      passivo no corpo da tela — não um popup — ele achou que "não
+      tinha segundo ataque". Esclarecido o pedido original: Torrente é
+      vários socos em sequência, nunca deveria ter um 2º input
+      perguntando se ataca de novo). Reescrito `rolarAtaqueTorrente`
+      pra receber `(numero, total)` por parâmetro (não state, que
+      ainda não atualizou na hora que o 1º ataque dispara) e, ao
+      resolver cada ataque (`onErrou` ou `confirmarFechamento.aoTocar`
+      do dano), chamar a si mesma pro próximo ataque automaticamente
+      se ainda sobrar algum — removido o card "toque pra rolar" do
+      corpo do Combate, não existe mais nenhum toque no meio da
+      sequência. Testado ao vivo via Playwright os 2 caminhos: errar
+      (2º ataque abre sozinho assim que "Errei" é tocado) e acertar
+      (2º ataque abre sozinho assim que o popup de dano é fechado com
+      "OK") — nenhum dos dois precisa de clique extra. `npx tsc -b`,
+      `npm test -- --run` (876/876), `npm run build` verdes.
 
 **Achado fora do escopo do Monge, corrigido de passagem** (Osmar
 notou testando a Torrente de Golpes): o FAB de Dado 3D (🎲) flutuava

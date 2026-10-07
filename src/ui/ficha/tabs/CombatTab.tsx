@@ -1310,16 +1310,16 @@ export default function CombatTab({
 
   /** Ativa a técnica (escolhe quantos ataques) e já dispara o Ataque 1
    * na hora — pedido do Osmar (2026-10): o jogador que escolheu
-   * Torrente vai bater, não tem outra decisão no meio. O 2º ataque (se
-   * gastou Foco) aparece como card fixo no corpo do Combate (ver
-   * `ataquesTorrenteFeitos` abaixo), sem precisar abrir painel nenhum —
-   * `rolarAtaqueTorrente` cuida de cada rolagem individual. */
+   * Torrente vai bater, não tem outra decisão no meio. Os ataques
+   * seguintes (se gastou Foco) disparam sozinhos também — é um ataque
+   * contínuo (vários socos em sequência), nunca um 2º input pra
+   * decidir se ataca de novo — ver `rolarAtaqueTorrente`. */
   function ativarTorrenteDeGolpes(comFoco: boolean) {
     if (comFoco && !onUsarPontoDeFoco()) return;
     setNumAtaquesTorrente(comFoco ? 2 : 1);
     setAtaquesTorrenteFeitos(0);
     onMarcarUsado('bonus');
-    rolarAtaqueTorrente();
+    rolarAtaqueTorrente(1, comFoco ? 2 : 1);
   }
 
   /** Popup de escolha das 3 técnicas (`TecnicaMongeModal.tsx`) — abrir
@@ -1335,18 +1335,19 @@ export default function CombatTab({
     else if (tecnicaMongeAberta === 'torrente') ativarTorrenteDeGolpes(comFoco);
   }
 
-  /** O contador só avança DEPOIS do ataque estar 100% resolvido —
-   * errou (confirmado no botão "Errou") ou acertou-e-fechou o popup de
-   * dano (`confirmarFechamento.aoTocar`) — nunca na hora de rolar o
-   * d20 (pedido do Osmar, 2026-10): antes disso o card do 2º ataque já
-   * "existia" tecnicamente mas ficava escondido atrás do popup de
-   * rolagem do 1º, parecendo que não tinha 2º ataque nenhum. */
-  function rolarAtaqueTorrente() {
+  /** Ataque contínuo (vários socos em sequência) — cada ataque dispara
+   * o próximo sozinho assim que o anterior termina de resolver (errou,
+   * ou acertou-e-fechou o popup de dano), sem nenhum 2º input do
+   * jogador no meio decidindo se ataca de novo (pedido do Osmar,
+   * 2026-10). `numero`/`total` vêm por parâmetro (não do state
+   * `numAtaquesTorrente`) porque o 1º ataque dispara na mesma chamada
+   * que ativa a técnica, antes do state atualizar. */
+  function rolarAtaqueTorrente(numero: number, total: number) {
     if (!ataqueTorrente) return;
     setPainelAberto(null);
     setFeedback(`🗡 ${ataqueTorrente.nome} (Torrente de Golpes) — ${ataqueTorrente.descricao}`);
     rolarD20({
-      label: `Ataque — ${ataqueTorrente.nome} (Torrente de Golpes)`,
+      label: `Ataque — ${ataqueTorrente.nome} (Torrente de Golpes) (${numero}/${total})`,
       formula: `1d20 + ${ataqueTorrente.info.modAcerto}`,
       mod: ataqueTorrente.info.modAcerto,
       explicacaoMod: ataqueTorrente.info.explicacaoAcerto,
@@ -1358,17 +1359,25 @@ export default function CombatTab({
             critico,
           );
           rolarDados({
-            label: `Dano — ${ataqueTorrente.nome} (Torrente de Golpes)${critico ? ' (Crítico)' : ''}`,
+            label: `Dano — ${ataqueTorrente.nome} (Torrente de Golpes)${critico ? ' (Crítico)' : ''} (${numero}/${total})`,
             formula: dano.formula,
             quantidade: dano.quantidade,
             lados: ataqueTorrente.info.danoLados,
             mod: ataqueTorrente.info.danoMod,
             rerollSe1: danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
             rerollEscolhido: perfuradorDisponivel && ataqueTorrente.info.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
-            confirmarFechamento: { aoTocar: () => setAtaquesTorrenteFeitos((v) => v + 1) },
+            confirmarFechamento: {
+              aoTocar: () => {
+                setAtaquesTorrenteFeitos(numero);
+                if (numero < total) rolarAtaqueTorrente(numero + 1, total);
+              },
+            },
           });
         },
-        onErrou: () => setAtaquesTorrenteFeitos((v) => v + 1),
+        onErrou: () => {
+          setAtaquesTorrenteFeitos(numero);
+          if (numero < total) rolarAtaqueTorrente(numero + 1, total);
+        },
       },
     });
   }
@@ -1690,17 +1699,6 @@ export default function CombatTab({
             >
               Sim
             </div>
-          </div>
-        </div>
-      )}
-
-      {numAtaquesTorrente > 0 && ataquesTorrenteFeitos < numAtaquesTorrente && ataqueTorrente && (
-        <div className="box" style={{ padding: 12, marginBottom: 12, cursor: 'pointer' }} onClick={rolarAtaqueTorrente}>
-          <div style={{ fontSize: 13 }}>
-            🗡 Atacar — {ataqueTorrente.nome} (Torrente de Golpes) (ataque {ataquesTorrenteFeitos + 1}/{numAtaquesTorrente})
-          </div>
-          <div className="label" style={{ marginTop: 2 }}>
-            Toque pra rolar o acerto e o dano deste ataque.
           </div>
         </div>
       )}
