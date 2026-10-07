@@ -134,6 +134,20 @@ tratamento do Bruxo/Mestre Místico) — não usar a célula como está.
       rolagem "1d20+13" abre na hora), card "ataque 2/2" aparece na
       tela principal sem abrir painel nenhum. `npx tsc -b`, `npm test
       -- --run` (876/876), `npm run build` verdes.
+- [x] **Entrega 3d — bug do 2º ataque da Torrente corrigido** (Osmar
+      testou e o 2º ataque simplesmente não aparecia). Causa: o
+      contador `ataquesTorrenteFeitos` avançava LOGO ao disparar a
+      rolagem do 1º ataque (`rolarD20` só ABRE o popup, não espera o
+      resultado) — o card do 2º ataque "existia" tecnicamente desde o
+      início, escondido atrás do popup do 1º. Corrigido movendo o
+      avanço do contador pra dentro de `onErrou` (errou → aparece na
+      hora) e `confirmarFechamento.aoTocar` do popup de dano (acertou →
+      só aparece depois de fechar o dano) — mesmo padrão descrito pelo
+      Osmar. Testado ao vivo via Playwright os 2 caminhos: errar (clica
+      "Errei" → card "ataque 2/2" aparece) e acertar (clica "Acertei" →
+      rola dano → card só aparece DEPOIS de fechar o popup de dano,
+      nunca antes). `npx tsc -b`, `npm test -- --run` (876/876), `npm
+      run build` verdes.
 - [ ] **Entrega 4 — Defletir Ataques + Queda Lenta + Golpe
       Atordoante.** Defletir Ataques é um padrão NOVO (reduzir dano
       recebido reativamente, nunca existiu no app — ver SDD seção 7).

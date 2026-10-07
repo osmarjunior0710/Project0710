@@ -1335,8 +1335,16 @@ export default function CombatTab({
     else if (tecnicaMongeAberta === 'torrente') ativarTorrenteDeGolpes(comFoco);
   }
 
+  /** O contador só avança DEPOIS do ataque estar 100% resolvido —
+   * errou (confirmado no botão "Errou") ou acertou-e-fechou o popup de
+   * dano (`confirmarFechamento.aoTocar`) — nunca na hora de rolar o
+   * d20 (pedido do Osmar, 2026-10): antes disso o card do 2º ataque já
+   * "existia" tecnicamente mas ficava escondido atrás do popup de
+   * rolagem do 1º, parecendo que não tinha 2º ataque nenhum. */
   function rolarAtaqueTorrente() {
     if (!ataqueTorrente) return;
+    setPainelAberto(null);
+    setFeedback(`🗡 ${ataqueTorrente.nome} (Torrente de Golpes) — ${ataqueTorrente.descricao}`);
     rolarD20({
       label: `Ataque — ${ataqueTorrente.nome} (Torrente de Golpes)`,
       formula: `1d20 + ${ataqueTorrente.info.modAcerto}`,
@@ -1357,15 +1365,12 @@ export default function CombatTab({
             mod: ataqueTorrente.info.danoMod,
             rerollSe1: danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
             rerollEscolhido: perfuradorDisponivel && ataqueTorrente.info.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
-            confirmarFechamento: {},
+            confirmarFechamento: { aoTocar: () => setAtaquesTorrenteFeitos((v) => v + 1) },
           });
         },
-        onErrou: () => {},
+        onErrou: () => setAtaquesTorrenteFeitos((v) => v + 1),
       },
     });
-    setAtaquesTorrenteFeitos((v) => v + 1);
-    setPainelAberto(null);
-    setFeedback(`🗡 ${ataqueTorrente.nome} (Torrente de Golpes) — ${ataqueTorrente.descricao}`);
   }
 
   function usarCortarAtaque() {

@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2237
+
+Corrige a Torrente de Golpes do Monge: o 2º ataque (quando gasta
+Foco) não aparecia depois do 1º. Agora, se o 1º ataque errar, o botão
+do 2º aparece assim que você confirma "Errei"; se acertar, aparece
+depois de fechar o popup de dano — nos dois casos sem precisar abrir
+painel nenhum.
+
 ## v202610_1715
 
 Reformulada a interação das 3 técnicas do Monge (Defesa Paciente,
