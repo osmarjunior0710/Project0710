@@ -202,11 +202,7 @@ painel aberto, só o botão/menu/histórico ocioso é que não devia.
       ao vivo via Playwright: popup abre centralizado ao tocar Queda
       Lenta, "Ok" fecha e Reação continua marcada "usada". `npx tsc
       -b`, `npm test -- --run` (876/876), `npm run build` verdes.
-- [ ] **Entrega 4b — Golpe Atordoante** (nível 5). Reaproveita o modal
-      de "efeito bônus pós-acerto" já existente (ver SDD seção 6) —
-      depois de acertar com arma de Monge/Desarmado, oferece gastar 1
-      Foco; mostra CD/resultado como texto informativo (sem rastrear
-      condição em inimigo).
+- [x] **Entrega 4b — Golpe Atordoante** (nível 5). Botão "💫 Golpe Atordoante" no popup de dano de um acerto com arma de Monge/Desarmado (principal e Torrente de Golpes; array de botões já suportado pelo `confirmarFechamento`). Gasta 1 Foco, 1x por turno (`golpeAtordoanteUsadoTurno`, reseta no Fim do Turno), e abre o `SalvaguardaDoAlvoModal` existente (CD 8+SAB+prof, Falha/Sucesso em texto). `core/golpeAtordoante.ts` + testes; `AtaqueInfo.armaDeMonge`. Fora do escopo: Ataque da Mão Secundária. Validado ao vivo (390px): botão aparece, popup certo, 2º acerto no mesmo turno só mostra OK. tsc/883 testes verdes.
 - [ ] **Entrega 4c — Defletir Ataques + Defletir Energia** (níveis 3 e
       13). Padrão NOVO (reduzir dano recebido reativamente, nunca
       existiu no app — ver SDD seção 7). Defletir Energia é só remover

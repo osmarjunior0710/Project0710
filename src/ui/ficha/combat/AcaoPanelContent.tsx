@@ -208,6 +208,11 @@ interface AcaoPanelContentProps {
   temGolpeDeEscudo: boolean;
   golpeDeEscudoUsadoTurno: boolean;
   onUsarGolpeDeEscudo: () => void;
+  /** Golpe Atordoante (Monge nível 5) — `podeGolpeAtordoante(ataque)` diz
+   * se o botão aparece no popup de dano desse acerto; `onGolpeAtordoante`
+   * gasta o Foco e abre o popup de salvaguarda do alvo (`CombatTab.tsx`). */
+  podeGolpeAtordoante: (ataque: AtaqueInfo) => boolean;
+  onGolpeAtordoante: () => void;
   /** Golpes Radiantes (Paladino nível 11) — sempre ativa, sem toggle:
    * soma 1d8 Radiante automático no dano de qualquer ataque Corpo a
    * Corpo/Desarmado que acertar (`rolarAtaque`, via `ataque.corpoACorpo`).
@@ -319,6 +324,8 @@ export default function AcaoPanelContent({
   temGolpeDeEscudo,
   golpeDeEscudoUsadoTurno,
   onUsarGolpeDeEscudo,
+  podeGolpeAtordoante,
+  onGolpeAtordoante,
   temGolpesRadiantes,
   armaSagradaDisponivel,
   armaSagradaElegivel,
@@ -500,6 +507,17 @@ export default function AcaoPanelContent({
     return {};
   }
 
+  /** Acrescenta o botão "💫 Golpe Atordoante" ao lado do(s) botão(ões) de
+   * fechamento do popup de dano, quando o acerto é elegível. */
+  function comGolpeAtordoante(
+    ataque: AtaqueInfo,
+    base: { rotulo?: string; aoTocar?: () => void } | { rotulo: string; aoTocar?: () => void }[],
+  ) {
+    if (!podeGolpeAtordoante(ataque)) return base;
+    const botoes = Array.isArray(base) ? base : [{ rotulo: base.rotulo ?? 'OK', aoTocar: base.aoTocar }];
+    return [...botoes, { rotulo: '💫 Golpe Atordoante', aoTocar: onGolpeAtordoante }];
+  }
+
   /** `imprudente` — Ataque Imprudente (Bárbaro) já decidido pra esse
    * ataque (e o turno inteiro, ver `escolherAtaque`); só vira Vantagem
    * de verdade quando o ataque específico usa Força
@@ -567,8 +585,10 @@ export default function AcaoPanelContent({
             gruposExtras: dano.gruposExtras,
             rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
             rerollEscolhido: perfuradorDisponivel && ataque.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
-            confirmarFechamento:
+            confirmarFechamento: comGolpeAtordoante(
+              ataque,
               armaSagradaBonus > 0 ? [{ rotulo: 'Normal' }, { rotulo: '☀️ Radiante' }] : confirmarFechamentoDoAtaque(talento),
+            ),
           });
         },
         onErrou: () => {},

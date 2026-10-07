@@ -80,6 +80,7 @@ import {
 import { ataqueAtual, ataqueBonusMaoSecundaria, ataqueDesarmado } from '../../core/ataque';
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
+import { explicarCdGolpeAtordoante } from '../../core/golpeAtordoante';
 import { explicarCdRamosDaArvore } from '../../core/ramosDaArvore';
 import { explicarCdRaizesDevastadoras } from '../../core/raizesDevastadoras';
 import { alternarSintonizacao } from '../../core/sintonizacao';
@@ -498,6 +499,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Golpe de Escudo (Mestre em Escudos) — 1x por turno, mesmo padrão
   // de `golpeBrutalUsadoTurno`.
   const [golpeDeEscudoUsadoTurno, setGolpeDeEscudoUsadoTurno] = useState(personagemSalvo.golpeDeEscudoUsadoTurno ?? false);
+  // Golpe Atordoante (Monge nível 5) — 1x por turno, mesmo padrão.
+  const [golpeAtordoanteUsadoTurno, setGolpeAtordoanteUsadoTurno] = useState(
+    personagemSalvo.golpeAtordoanteUsadoTurno ?? false,
+  );
   // Força Revigorante (Vitalidade da Árvore, Bárbaro nível 3+) — regra
   // real é "no início de cada um dos seus turnos", modelada como 1x
   // por turno (mesmo padrão de `golpeDeEscudoUsadoTurno`) em vez do
@@ -1345,6 +1350,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     golpeBrutalUsadoTurno,
     cortarProntoTurno: cortarPronto,
     golpeDeEscudoUsadoTurno,
+    golpeAtordoanteUsadoTurno,
     forcaRevigoranteUsadaTurno,
     esmagadorUsadoTurno,
     talhadorUsadoTurno,
@@ -1459,6 +1465,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       golpeBrutalUsadoTurno,
       cortarPronto,
       golpeDeEscudoUsadoTurno,
+      golpeAtordoanteUsadoTurno,
       forcaRevigoranteUsadaTurno,
       esmagadorUsadoTurno,
       talhadorUsadoTurno,
@@ -1778,6 +1785,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setGolpeBrutalUsadoTurno(false);
     setCortarPronto(false);
     setGolpeDeEscudoUsadoTurno(false);
+    setGolpeAtordoanteUsadoTurno(false);
     setForcaRevigoranteUsadaTurno(false);
     setEsmagadorUsadoTurno(false);
     setTalhadorUsadoTurno(false);
@@ -3414,6 +3422,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             metabolismoIncomumDisponivel={metabolismoIncomumDisponivel}
             ladosArtesMarciaisMonge={ladosArtesMarciaisMonge}
             nivelMonge={mongeEntry?.nivel ?? 0}
+            golpeAtordoante={{
+              explicacaoCd: explicarCdGolpeAtordoante(
+                atributos.find((a) => a.atributo === 'SAB')?.mod ?? 0,
+                bonusProficienciaAtual,
+              ),
+              usadoTurno: golpeAtordoanteUsadoTurno,
+              onUsar: () => setGolpeAtordoanteUsadoTurno(true),
+            }}
             onConfirmarMetabolismoIncomum={confirmarMetabolismoIncomum}
             inspiracao={{
               maximo: usosInspiracaoMax,

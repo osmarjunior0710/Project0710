@@ -6,6 +6,7 @@ import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
+import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import {
@@ -18,7 +19,7 @@ import {
 import SobrecargaEscolha from '../combat/SobrecargaEscolha';
 import EscolherMontariaModal from '../combat/EscolherMontariaModal';
 import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional, ResumoConjuracaoPorClasse } from '../../../core/magiasPersonagem';
-import type { AcaoBase } from '../../../data/exampleCombat';
+import type { AcaoBase, AtaqueInfo } from '../../../data/exampleCombat';
 import type { AjustesPet, Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
@@ -460,6 +461,14 @@ interface CombatTabProps {
   /** Nível de Monge (não o nível total do personagem) — soma na
    * rolagem de cura de Metabolismo Incomum. */
   nivelMonge: number;
+  /** Golpe Atordoante (Monge nível 5) — CD (8+SAB+prof) e controle de
+   * 1x por turno. Aparece como botão no popup de dano de um acerto com
+   * arma de Monge/Desarmado e abre `SalvaguardaDoAlvoModal`. */
+  golpeAtordoante: {
+    explicacaoCd: ExplicacaoCalculo;
+    usadoTurno: boolean;
+    onUsar: () => void;
+  };
   /** Zera Pontos de Foco gastos + marca a característica como usada
    * até o próximo Descanso Longo. A ROLAGEM de cura (dado de Artes
    * Marciais + nível de Monge) acontece aqui no CombatTab — ver
@@ -771,6 +780,7 @@ export default function CombatTab({
   metabolismoIncomumDisponivel,
   ladosArtesMarciaisMonge,
   nivelMonge,
+  golpeAtordoante,
   onConfirmarMetabolismoIncomum,
   inspiracao: {
     maximo: usosInspiracaoMaximo,
@@ -862,6 +872,8 @@ export default function CombatTab({
   const [lancarNoInfernoDano, setLancarNoInfernoDano] = useState<number | null>(null);
   const [ataqueDeSoproDano, setAtaqueDeSoproDano] = useState<number | null>(null);
   const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
+  // `aoFechar` = o que continua depois do Ok (ex.: próximo ataque da Torrente).
+  const [golpeAtordoanteAberto, setGolpeAtordoanteAberto] = useState<{ aoFechar?: () => void } | null>(null);
   const [ramosDaArvoreAberto, setRamosDaArvoreAberto] = useState(false);
   const [repudiarInimigosAberto, setRepudiarInimigosAberto] = useState(false);
   // Esmagador/Talhador — qual popup de "Ativar efeito" está aberto
@@ -1381,12 +1393,18 @@ export default function CombatTab({
             mod: ataqueTorrente.info.danoMod,
             rerollSe1: danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
             rerollEscolhido: perfuradorDisponivel && ataqueTorrente.info.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
-            confirmarFechamento: {
-              aoTocar: () => {
+            confirmarFechamento: (() => {
+              const continuar = () => {
                 setAtaquesTorrenteFeitos(numero);
                 if (numero < total) rolarAtaqueTorrente(numero + 1, total);
-              },
-            },
+              };
+              return golpeAtordoanteParaAtaque(ataqueTorrente.info)
+                ? [
+                    { rotulo: 'OK', aoTocar: continuar },
+                    { rotulo: '💫 Golpe Atordoante', aoTocar: () => abrirGolpeAtordoante(continuar) },
+                  ]
+                : { aoTocar: continuar };
+            })(),
           });
         },
         onErrou: () => {
@@ -1472,6 +1490,23 @@ export default function CombatTab({
    * `abrirAtaqueDeSopro`/`abrirLancarNoInferno`: marca o uso (1x/turno)
    * e abre o popup padrão de "salvaguarda do alvo" junto, na mesma
    * ação de tocar a linha no painel de Ação. */
+  /** Golpe Atordoante (Monge nível 5) — vale só em ataque com arma de
+   * Monge/Desarmado (`AtaqueInfo.armaDeMonge`), com Foco, 1x por turno. */
+  function golpeAtordoanteParaAtaque(ataque: AtaqueInfo): boolean {
+    return golpeAtordoanteDisponivel({
+      nivelMonge,
+      pontosDeFocoRestantes,
+      usadoTurno: golpeAtordoante.usadoTurno,
+      armaDeMongeOuDesarmado: ataque.armaDeMonge === true,
+    });
+  }
+
+  function abrirGolpeAtordoante(aoFechar?: () => void) {
+    if (!onUsarPontoDeFoco()) return;
+    golpeAtordoante.onUsar();
+    setGolpeAtordoanteAberto({ aoFechar });
+  }
+
   function abrirGolpeDeEscudo() {
     onUsarGolpeDeEscudo();
     setGolpeDeEscudoAberto(true);
@@ -2195,6 +2230,8 @@ export default function CombatTab({
           temGolpeDeEscudo={golpeDeEscudoDisponivel}
           golpeDeEscudoUsadoTurno={golpeDeEscudoUsadoTurno}
           onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
+          podeGolpeAtordoante={golpeAtordoanteParaAtaque}
+          onGolpeAtordoante={() => abrirGolpeAtordoante()}
           temGolpesRadiantes={temGolpesRadiantes}
           armaSagradaDisponivel={armaSagrada.disponivel}
           armaSagradaElegivel={armaSagrada.elegivel}
@@ -2452,6 +2489,21 @@ export default function CombatTab({
           }
           semAcaoTexto={telaSalvaguarda.danoRolado === null ? 'Veja a descrição da magia (ⓘ) pro efeito.' : null}
           onFechar={() => setTelaSalvaguarda(null)}
+        />
+      )}
+      {golpeAtordoanteAberto && (
+        <SalvaguardaDoAlvoModal
+          titulo="💫 Golpe Atordoante"
+          atributo="Constituição"
+          cd={Number(golpeAtordoante.explicacaoCd.total.valor)}
+          explicacaoCd={golpeAtordoante.explicacaoCd}
+          textoSucesso="Deslocamento do alvo pela metade até o início do seu próximo turno, e a próxima jogada de ataque contra ele tem Vantagem"
+          textoFalha="alvo fica Atordoado até o início do seu próximo turno"
+          onFechar={() => {
+            const depois = golpeAtordoanteAberto.aoFechar;
+            setGolpeAtordoanteAberto(null);
+            depois?.();
+          }}
         />
       )}
       {golpeDeEscudoAberto && (

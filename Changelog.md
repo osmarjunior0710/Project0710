@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1606
+
+Monge nível 5: Golpe Atordoante. Ao acertar um ataque com arma de Monge ou Desarmado (inclusive na Torrente de Golpes), o popup de dano ganha o botão "💫 Golpe Atordoante" — gasta 1 Ponto de Foco (1x por turno) e mostra a CD, o que acontece na falha (Atordoado) e no sucesso (Deslocamento pela metade + Vantagem no próximo ataque).
+
 ## v202610_1531
 
 Aba Combate mais compacta e padronizada: sem contadores numéricos ao lado dos pips, paddings menores nos botões de PV/Iniciativa/Fim do Turno/Ação/Bônus/Reação, linha cheia cinza entre áreas e tracejada dentro do grupo. Painéis de Ação, Bônus e Reação agora são agrupados por classe (selo + recursos com pips na cor da classe + habilidades), com Ataque de Oportunidade primeiro na Reação. Corrige Fúria/Recuperar Fôlego sumindo da lista de Ação Bônus em personagem multiclasse e Pontos de Foco do Monge faltando.

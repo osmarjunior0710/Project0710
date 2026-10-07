@@ -336,6 +336,9 @@ export interface PersonagemSalvo {
   /** Golpe de Escudo (Mestre em Escudos) — 1x por turno, reseta no Fim
    * do Turno. */
   golpeDeEscudoUsadoTurno?: boolean;
+  /** Golpe Atordoante (Monge nível 5) — 1x por turno, reseta no Fim do
+   * Turno (mesmo padrão de `golpeDeEscudoUsadoTurno`). */
+  golpeAtordoanteUsadoTurno?: boolean;
   /** Força Revigorante (Vitalidade da Árvore, Bárbaro Trilha da Árvore
    * do Mundo, nível 3+) — 1x por turno, reseta no Fim do Turno (mesmo
    * padrão de `golpeDeEscudoUsadoTurno`). */

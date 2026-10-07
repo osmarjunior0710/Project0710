@@ -93,6 +93,7 @@ export function ataqueDesarmado(
       danoTipo: 'Contundente',
       usouForca: !usaDestreza,
       corpoACorpo: true,
+      armaDeMonge: true,
     },
   };
 }
@@ -217,6 +218,7 @@ export function ataqueComArma(
       danoTipo: tipo,
       usouForca,
       corpoACorpo: !distancia,
+      armaDeMonge,
     },
   };
 }
