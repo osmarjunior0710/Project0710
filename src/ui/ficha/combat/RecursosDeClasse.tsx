@@ -16,46 +16,45 @@ interface RecursosDeClasseProps {
 export default function RecursosDeClasse({ recursos }: RecursosDeClasseProps) {
   if (recursos.length === 0) return null;
   return (
-    <div className="box" style={{ padding: 'var(--space-2) var(--space-3)', marginBottom: 'var(--space-3)' }}>
+    <div className="box" style={{ padding: '4px', marginBottom: 'var(--space-3)', border: 'none' }}>
       {recursos.map((r, i) =>
         r.exibicao === 'barra' ? (
           <div
             key={r.id}
             style={{
-              padding: 'var(--space-2) 0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-3)',
+              padding: '4px 0',
               borderTop: i === 0 ? 'none' : '1px dashed var(--line-soft)',
             }}
           >
-            <span style={{ fontSize: 13, display: 'block', marginBottom: 4 }}>
+            <span style={{ fontSize: 13, flexShrink: 0 }}>
               {r.nome} <InfoTexto titulo={r.nome} paragrafos={r.descricao} />
             </span>
-            <BarraRecurso valor={r.restantes} maximo={r.maximo} cor={r.cor?.hex ?? 'var(--accent)'} rotulo={`${r.restantes}/${r.maximo} PV`} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <BarraRecurso valor={r.restantes} maximo={r.maximo} cor={r.cor?.hex ?? 'var(--accent)'} rotulo={`${r.restantes}/${r.maximo} PV`} altura={24} />
+            </div>
           </div>
         ) : r.exibicao === 'pips-bloco' ? (
           <div
             key={r.id}
             style={{
-              padding: 'var(--space-2) 0',
+              padding: '4px 0',
               borderTop: i === 0 ? 'none' : '1px dashed var(--line-soft)',
             }}
           >
             <div
               style={{
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: 'flex-start',
                 justifyContent: 'space-between',
                 gap: 'var(--space-3)',
-                marginBottom: 4,
               }}
             >
-              <span style={{ fontSize: 13 }}>
+              <span style={{ fontSize: 13, lineHeight: '16px' }}>
                 {r.nome} <InfoTexto titulo={r.nome} paragrafos={r.descricao} />
               </span>
-              <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>
-                {r.restantes}/{r.maximo}
-              </span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <TickPips total={r.maximo} usados={r.maximo - r.restantes} cor={r.cor} quebrarACada={r.quebrarACada} />
             </div>
           </div>
@@ -67,7 +66,7 @@ export default function RecursosDeClasse({ recursos }: RecursosDeClasseProps) {
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 'var(--space-3)',
-              minHeight: 36,
+              padding: '4px 0',
               borderTop: i === 0 ? 'none' : '1px dashed var(--line-soft)',
             }}
           >

@@ -12,7 +12,9 @@ import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
+import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import styles from './PanelRows.module.css';
+import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
 
 interface AcaoPanelContentProps {
   /** `SidePanel.open` do drawer — ver comentário em
@@ -633,213 +635,228 @@ export default function AcaoPanelContent({
     );
   }
 
-  return (
-    <>
-      {ataqueAtual && (
-        <div className={styles.row} onClick={tocarAtacar}>
-          <div className={styles.rowName}>
-            🗡 Atacar — {ataqueAtual.nome}{' '}
-            {numAtaques > 1 ? `(ataque ${Math.min(ataquesFeitos + 1, numAtaques)}/${numAtaques})` : ''}
-            {ataqueImprudenteAtivo && ataquesFeitos > 0 ? ' · 😤 Imprudente' : ''}
-          </div>
-          <div className={styles.rowDesc}>
-            {ataqueAtual.descricao}
-            {detalhesAtivo && (
+  const blocos: BlocoPainel[] = [
+    { grupo: 'topo', no: (
+      ataqueAtual && (
+              <div className={styles.row} onClick={tocarAtacar}>
+                <div className={styles.rowName}>
+                  🗡 Atacar — {ataqueAtual.nome}{' '}
+                  {numAtaques > 1 ? `(ataque ${Math.min(ataquesFeitos + 1, numAtaques)}/${numAtaques})` : ''}
+                  {ataqueImprudenteAtivo && ataquesFeitos > 0 ? ' · 😤 Imprudente' : ''}
+                </div>
+                <div className={styles.rowDesc}>
+                  {ataqueAtual.descricao}
+                  {detalhesAtivo && (
+                    <>
+                      {' '}
+                      {numAtaques > 1
+                        ? `Ataque Extra: você tem direito a ${numAtaques} ataques nesse turno — toque de novo depois de rolar o dano.`
+                        : 'Equipe uma arma na Mochila pra trocar; sem nada na Mão Principal, é Ataque Desarmado.'}
+                    </>
+                  )}
+                </div>
+              </div>
+            )
+    ) },
+    { grupo: 'Paladino', no: (
+      armaSagradaDisponivel && armaSagradaElegivel && !armaSagradaAtiva && (
+              <div
+                className={styles.row}
+                style={usosCanalizarRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                onClick={onUsarArmaSagrada}
+              >
+                <div className={styles.rowName}>⚔️ Arma Sagrada</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    Imbui {ataqueAtual?.nome ?? 'a arma equipada'} com energia positiva: +{Math.max(1, modCarisma)} no
+                    acerto com ela e dano Radiante à escolha, até você encerrar. Gasta 1 uso de Canalizar Divindade.
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Bárbaro', no: (
+      ataqueAtual && temGolpeBrutal && ataqueImprudenteAtivo && !golpeBrutalUsadoTurno && (
+              <div className={styles.row} onClick={usarGolpeBrutal}>
+                <div className={styles.rowName}>🔨 Golpe Brutal — {ataqueAtual.nome}</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    Renuncia à Vantagem do Ataque Imprudente NESSE ataque. Se acertar, +{golpeBrutalDados}d10 de dano e você
+                    escolhe o efeito depois de rolar. 1x por turno.
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Outras', no: (
+      ataqueAtual && podeOferecerCortar && (
+              <div className={styles.row} onClick={onConfirmarCortarReduzirAZero}>
+                <div className={styles.rowName}>☠ Reduziu o alvo a 0 PV?</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    Confirma manualmente (o app não sabe o PV do inimigo) — libera "Cortar" na Ação Bônus: 1 ataque extra
+                    com a mesma arma. Acerto Crítico já libera sozinho.
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Outras', no: (
+      ataqueAtual && temGolpeDeEscudo && !golpeDeEscudoUsadoTurno && (
+              <div className={styles.row} onClick={onUsarGolpeDeEscudo}>
+                <div className={styles.rowName}>🛡 Golpe de Escudo</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    Ao acertar com essa arma: Salv. Força do alvo — falha empurra 1,5m ou derruba (Caído), à sua escolha.
+                    1x por turno.
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Guerreiro', no: (
+      surtoMax > 0 && (
+              <div
+                className={styles.row}
+                style={surtoDesabilitado ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                onClick={onUsarSurto}
+              >
+                <div className={styles.rowName}>💥 Surto de Ação</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    Ganha uma ação extra nesse turno — não gasta sua Ação normal. {surtoRestantes}/{surtoMax} usos
+                    {surtoUsadoTurno ? ' (já usado nesse turno)' : ''}.
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'topo', no: (
+      conjura && (
+              <div
+                className={styles.row}
+                style={desvantagemForcaDestreza ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                onClick={abrirLista}
+              >
+                <div className={styles.rowName}>✨ Usar Magia</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    {desvantagemForcaDestreza
+                      ? 'Bloqueado — Armadura equipada sem treinamento impede conjurar magias.'
+                      : 'Conjurar Truque ou Magia Preparada'}
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Espécie', no: (
+      maosCurativasDisponivel && (
               <>
-                {' '}
-                {numAtaques > 1
-                  ? `Ataque Extra: você tem direito a ${numAtaques} ataques nesse turno — toque de novo depois de rolar o dano.`
-                  : 'Equipe uma arma na Mochila pra trocar; sem nada na Mão Principal, é Ataque Desarmado.'}
+                <div
+                  className={styles.row}
+                  style={maosCurativasGasto ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={usarMaosCurativas}
+                >
+                  <div className={styles.rowName}>🙌 Mãos Curativas</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Ação Usar Magia — toque uma criatura, jogue {dadosMaosCurativas}d4 e ela recupera esse total em
+                      Pontos de Vida. 1x — recupera no Descanso Longo.
+                    </div>
+                  )}
+                </div>
+                {maosCurativasGasto && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    já usado — descanse pra recuperar.
+                  </div>
+                )}
               </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {armaSagradaDisponivel && armaSagradaElegivel && !armaSagradaAtiva && (
-        <div
-          className={styles.row}
-          style={usosCanalizarRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-          onClick={onUsarArmaSagrada}
-        >
-          <div className={styles.rowName}>⚔️ Arma Sagrada</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              Imbui {ataqueAtual?.nome ?? 'a arma equipada'} com energia positiva: +{Math.max(1, modCarisma)} no
-              acerto com ela e dano Radiante à escolha, até você encerrar. Gasta 1 uso de Canalizar Divindade.
+            )
+    ) },
+    { grupo: 'Espécie', no: (
+      falarComAnimaisGnomoDisponivel && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Falar com Animais (Traço de Gnomo):</span>
+                  <TickPips total={usosFalarComAnimaisGnomoMaximo} usados={usosFalarComAnimaisGnomoMaximo - usosFalarComAnimaisGnomoRestantes} />
+                </div>
+                <div
+                  className={styles.row}
+                  style={usosFalarComAnimaisGnomoRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={usarFalarComAnimaisGnomo}
+                >
+                  <div className={styles.rowName}>🐾 Falar com Animais (Traço de Gnomo)</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Grátis (sem gastar Espaço de Magia) — compreende e conversa com Feras por 10 minutos. Gasta 1 uso,
+                      todos voltam no Descanso Longo.
+                    </div>
+                  )}
+                </div>
+                {usosFalarComAnimaisGnomoRestantes <= 0 && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    sem usos grátis disponíveis — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Paladino', no: (
+      temRepudiarInimigos && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Canalizar Divindade:</span>
+                  <TickPips total={usosCanalizarMaximo} usados={usosCanalizarMaximo - usosCanalizarRestantes} cor={corDoRecursoDaClasse('Paladino')} />
+                </div>
+                <div
+                  className={styles.row}
+                  style={usosCanalizarRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onUsarRepudiarInimigos}
+                >
+                  <div className={styles.rowName}>😱 Repudiar Inimigos</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Escolha até {Math.max(1, modCarisma)} criatura(s) à vista, a até 18m — cada uma faz salvaguarda de
+                      Sabedoria (CD {cdRepudiarInimigos ?? '—'}) ou fica Amedrontada por 1 minuto (ou até sofrer dano).
+                      Enquanto Amedrontada assim, só pode fazer 1 das 3: mover-se, Ação ou Ação Bônus. Aplique
+                      manualmente — o app não tem ficha dos inimigos. Gasta 1 uso de Canalizar Divindade.
+                    </div>
+                  )}
+                </div>
+                {usosCanalizarRestantes <= 0 && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    sem usos disponíveis — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Outras', no: (
+      (
+            <div
+              className={styles.row}
+              onClick={() =>
+                onEscolher('💨 Desengajar', 'Seu movimento não provoca Ataques de Oportunidade pelo resto do turno.')
+              }
+            >
+              <div className={styles.rowName}>💨 Desengajar</div>
+              {detalhesAtivo && (
+                <div className={styles.rowDesc}>Seu movimento não provoca Ataques de Oportunidade pelo resto do turno</div>
+              )}
             </div>
-          )}
-        </div>
-      )}
-
-      {ataqueAtual && temGolpeBrutal && ataqueImprudenteAtivo && !golpeBrutalUsadoTurno && (
-        <div className={styles.row} onClick={usarGolpeBrutal}>
-          <div className={styles.rowName}>🔨 Golpe Brutal — {ataqueAtual.nome}</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              Renuncia à Vantagem do Ataque Imprudente NESSE ataque. Se acertar, +{golpeBrutalDados}d10 de dano e você
-              escolhe o efeito depois de rolar. 1x por turno.
-            </div>
-          )}
-        </div>
-      )}
-
-      {ataqueAtual && podeOferecerCortar && (
-        <div className={styles.row} onClick={onConfirmarCortarReduzirAZero}>
-          <div className={styles.rowName}>☠ Reduziu o alvo a 0 PV?</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              Confirma manualmente (o app não sabe o PV do inimigo) — libera "Cortar" na Ação Bônus: 1 ataque extra
-              com a mesma arma. Acerto Crítico já libera sozinho.
-            </div>
-          )}
-        </div>
-      )}
-
-      {ataqueAtual && temGolpeDeEscudo && !golpeDeEscudoUsadoTurno && (
-        <div className={styles.row} onClick={onUsarGolpeDeEscudo}>
-          <div className={styles.rowName}>🛡 Golpe de Escudo</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              Ao acertar com essa arma: Salv. Força do alvo — falha empurra 1,5m ou derruba (Caído), à sua escolha.
-              1x por turno.
-            </div>
-          )}
-        </div>
-      )}
-
-      {surtoMax > 0 && (
-        <div
-          className={styles.row}
-          style={surtoDesabilitado ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-          onClick={onUsarSurto}
-        >
-          <div className={styles.rowName}>💥 Surto de Ação</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              Ganha uma ação extra nesse turno — não gasta sua Ação normal. {surtoRestantes}/{surtoMax} usos
-              {surtoUsadoTurno ? ' (já usado nesse turno)' : ''}.
-            </div>
-          )}
-        </div>
-      )}
-
-      {conjura && (
-        <div
-          className={styles.row}
-          style={desvantagemForcaDestreza ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-          onClick={abrirLista}
-        >
-          <div className={styles.rowName}>✨ Usar Magia</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              {desvantagemForcaDestreza
-                ? 'Bloqueado — Armadura equipada sem treinamento impede conjurar magias.'
-                : 'Conjurar Truque ou Magia Preparada'}
-            </div>
-          )}
-        </div>
-      )}
-
-      {maosCurativasDisponivel && (
-        <>
-          <div
-            className={styles.row}
-            style={maosCurativasGasto ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={usarMaosCurativas}
-          >
-            <div className={styles.rowName}>🙌 Mãos Curativas</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Ação Usar Magia — toque uma criatura, jogue {dadosMaosCurativas}d4 e ela recupera esse total em
-                Pontos de Vida. 1x — recupera no Descanso Longo.
+            )
+    ) },
+    { grupo: 'Outras', no: (
+      acoesBase.map((a) => (
+              <div key={a.nome} className={styles.row} onClick={() => onEscolher(`${a.icone} ${a.nome}`, a.desc)}>
+                <div className={styles.rowName}>
+                  {a.icone} {a.nome}
+                </div>
+                {detalhesAtivo && <div className={styles.rowDesc}>{a.desc}</div>}
               </div>
-            )}
-          </div>
-          {maosCurativasGasto && (
-            <div className="label" style={{ marginTop: 6 }}>
-              já usado — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
+            ))
+    ) },
+  ];
 
-      {falarComAnimaisGnomoDisponivel && (
-        <>
-          <div className={styles.slotCounter}>
-            <span>Falar com Animais (Traço de Gnomo):</span>
-            <TickPips total={usosFalarComAnimaisGnomoMaximo} usados={usosFalarComAnimaisGnomoMaximo - usosFalarComAnimaisGnomoRestantes} />
-          </div>
-          <div
-            className={styles.row}
-            style={usosFalarComAnimaisGnomoRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={usarFalarComAnimaisGnomo}
-          >
-            <div className={styles.rowName}>🐾 Falar com Animais (Traço de Gnomo)</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Grátis (sem gastar Espaço de Magia) — compreende e conversa com Feras por 10 minutos. Gasta 1 uso,
-                todos voltam no Descanso Longo.
-              </div>
-            )}
-          </div>
-          {usosFalarComAnimaisGnomoRestantes <= 0 && (
-            <div className="label" style={{ marginTop: 6 }}>
-              sem usos grátis disponíveis — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
-
-      {temRepudiarInimigos && (
-        <>
-          <div
-            className={styles.row}
-            style={usosCanalizarRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onUsarRepudiarInimigos}
-          >
-            <div className={styles.rowName}>😱 Repudiar Inimigos</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Escolha até {Math.max(1, modCarisma)} criatura(s) à vista, a até 18m — cada uma faz salvaguarda de
-                Sabedoria (CD {cdRepudiarInimigos ?? '—'}) ou fica Amedrontada por 1 minuto (ou até sofrer dano).
-                Enquanto Amedrontada assim, só pode fazer 1 das 3: mover-se, Ação ou Ação Bônus. Aplique
-                manualmente — o app não tem ficha dos inimigos. Gasta 1 uso de Canalizar Divindade.
-              </div>
-            )}
-          </div>
-          <div className={styles.slotCounter}>
-            <span>Canalizar Divindade:</span>
-            <TickPips total={usosCanalizarMaximo} usados={usosCanalizarMaximo - usosCanalizarRestantes} />
-          </div>
-          {usosCanalizarRestantes <= 0 && (
-            <div className="label" style={{ marginTop: 6 }}>
-              sem usos disponíveis — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
-
-      <div
-        className={styles.row}
-        onClick={() =>
-          onEscolher('💨 Desengajar', 'Seu movimento não provoca Ataques de Oportunidade pelo resto do turno.')
-        }
-      >
-        <div className={styles.rowName}>💨 Desengajar</div>
-        {detalhesAtivo && (
-          <div className={styles.rowDesc}>Seu movimento não provoca Ataques de Oportunidade pelo resto do turno</div>
-        )}
-      </div>
-
-      {acoesBase.map((a) => (
-        <div key={a.nome} className={styles.row} onClick={() => onEscolher(`${a.icone} ${a.nome}`, a.desc)}>
-          <div className={styles.rowName}>
-            {a.icone} {a.nome}
-          </div>
-          {detalhesAtivo && <div className={styles.rowDesc}>{a.desc}</div>}
-        </div>
-      ))}
-    </>
-  );
+  return <GruposDoPainel blocos={blocos} />;
 }

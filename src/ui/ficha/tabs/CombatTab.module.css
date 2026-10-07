@@ -1,5 +1,40 @@
+/* Espaçamento padrão entre cada "área" da aba Combate (pedido do Osmar,
+   2026-10): sempre 12px, igual — nenhum filho direto tem margem própria. */
+.abaCombate {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.abaCombate > *:not(.sepGrupo):not(.sepItem) {
+  margin: 0 !important;
+}
+
+/* Divisores entre áreas (pedido do Osmar, 2026-10): traço cheio cinza entre
+   GRUPOS, serrilhado entre itens do mesmo grupo — no lugar do vazio. */
+.sepGrupo,
+.sepItem {
+  height: 0;
+  margin: 4px 0;
+}
+
+.sepGrupo {
+  border-top: 1px solid var(--line);
+}
+
+.sepItem {
+  border-top: 1px dashed var(--line-soft);
+}
+
+.sepGrupo + .sepGrupo,
+.sepGrupo + .sepItem,
+.sepItem + .sepItem,
+.sepGrupo:first-child {
+  display: none;
+}
+
 .hpLive {
-  padding: var(--space-4);
+  padding: 4px;
   margin-bottom: var(--space-2);
 }
 
@@ -7,7 +42,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: var(--space-2);
+  margin-bottom: 4px;
 }
 
 .hpNum {
@@ -22,7 +57,7 @@
 
 .hpBtnSmall {
   flex: 1;
-  min-height: var(--touch-target-min);
+  padding: 4px;
   border: 1px solid var(--line);
   border-radius: var(--shape-sm);
   display: flex;
@@ -48,10 +83,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
+  padding: 4px;
   border-radius: var(--shape-md);
   cursor: pointer;
-  min-height: var(--touch-target-min);
   margin-bottom: var(--space-2);
   transition:
     opacity var(--motion-standard) var(--ease-standard),
@@ -69,11 +103,10 @@
 
 .splitBtn {
   flex: 1;
-  padding: var(--space-2);
+  padding: 4px;
   text-align: center;
   border-radius: var(--shape-md);
   cursor: pointer;
-  min-height: 58px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -129,16 +162,15 @@
 .splitBtnIniciativa {
   border: 1px solid var(--line);
   background: var(--panel2);
+  padding: 4px;
+  min-height: 0;
 }
 
 .splitBtnFimTurno {
-  border: 1px dashed var(--line);
-  background: var(--panel);
-}
-
-.splitBtnFimTurno .sbLabel,
-.splitBtnFimTurno .sbState {
-  color: var(--text-dim);
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  padding: 4px;
+  min-height: 0;
 }
 
 .feedback {

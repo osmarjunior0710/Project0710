@@ -1,0 +1,26 @@
+.grupo {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.grupo:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.titulo {
+  font-size: 12px;
+  color: var(--text-dim);
+  padding: 4px 0;
+}
+
+/* Cada bloco (habilidade + contador) é só um agrupador lógico — a última
+   linha de cada grupo não precisa do serrilhado, o traço cheio já separa. */
+.bloco {
+  display: contents;
+}
+
+.grupo > .bloco:last-child > :last-child {
+  border-bottom: none;
+}

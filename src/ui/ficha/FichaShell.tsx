@@ -817,7 +817,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const explicacaoIniciativa = explicarIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);
   const explicacaoPercepcaoPassiva = explicarPercepcaoPassiva(selecao, nivelTotalAtual);
   const estiloDeLuta = estilosDeLuta.find((e) => e.nome === personagem.estiloDeLuta) ?? null;
-  const usosFolegoMaximo = classe ? quantidadeRecuperarFolego(classe, personagem.nivel) : 0;
+  // Recuperar Fôlego/Fúria olham a entrada da PRÓPRIA classe em `classesAtual`
+  // (não `classe`/`personagem.nivel`, que seguem a classe conjuradora em foco) —
+  // senão sumiam da lista de Ação Bônus numa multiclasse (achado do Osmar).
+  const entradaGuerreiro = classesAtual.find((c) => c.classe === 'Guerreiro');
+  const classeCatalogoGuerreiro = catalogoClasses.find((c) => c.nome === 'Guerreiro');
+  const usosFolegoMaximo =
+    classeCatalogoGuerreiro && entradaGuerreiro ? quantidadeRecuperarFolego(classeCatalogoGuerreiro, entradaGuerreiro.nivel) : 0;
   const usosFolegoRestantes = Math.max(0, usosFolegoMaximo - folegoGasto);
   const usosCanalizarMaximo =
     classeCatalogoPaladino && entradaPaladino ? quantidadeCanalizarDivindade(classeCatalogoPaladino, entradaPaladino.nivel) : 0;
@@ -849,10 +855,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Fúria (Bárbaro) — ver sdd/sdd-barbaro-furia.md. `armaduraPesadaEquipada`
   // também trava a ATIVAÇÃO (regra real) e força o encerramento
   // automático ao equipar (ver `equiparItem`).
-  const furiaMaximo = classe ? quantidadeFuria(classe, personagem.nivel) : 0;
+  const entradaBarbaro = classesAtual.find((c) => c.classe === 'Bárbaro');
+  const classeCatalogoBarbaro = catalogoClasses.find((c) => c.nome === 'Bárbaro');
+  const furiaMaximo = classeCatalogoBarbaro && entradaBarbaro ? quantidadeFuria(classeCatalogoBarbaro, entradaBarbaro.nivel) : 0;
   const furiaDisponivel = furiaMaximo > 0;
   const furiaRestantes = Math.max(0, furiaMaximo - furiaGasto);
-  const furiaBonusDano = classe ? bonusDanoFuria(classe, personagem.nivel) : 0;
+  const furiaBonusDano = classeCatalogoBarbaro && entradaBarbaro ? bonusDanoFuria(classeCatalogoBarbaro, entradaBarbaro.nivel) : 0;
   // Pontos de Foco (Monge) — ver sdd/sdd-monge.md seção 3. Olha a
   // entrada de Monge em `classesAtual` DIRETO (não `classe`/
   // `personagem.nivel`, que seguem a classe conjuradora "ativa" — ver

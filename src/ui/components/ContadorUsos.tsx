@@ -15,7 +15,7 @@ interface ContadorUsosProps {
   cor?: CorClasse | null;
 }
 
-/** Pips + "restantes/total", pra colocar ao lado do NOME de qualquer
+/** Só os pips (sem o texto "restantes/total", pedido do Osmar), pra colocar ao lado do NOME de qualquer
  * recurso "o jogador tem N vezes pra usar" — nunca dentro do parágrafo
  * de descrição. Regra permanente (ver DECISOES-DESIGN.md, pedido do
  * Osmar 2026-09): a Ficha tinha vários desses contadores enterrados no
@@ -23,13 +23,9 @@ interface ContadorUsosProps {
  * difícil de ler rápido — todo contador de usos novo já nasce assim,
  * ao lado do título. */
 export default function ContadorUsos({ total, usados, tamanho = 'sm', variante = 'padrao', cor }: ContadorUsosProps) {
-  const restantes = total - usados;
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, textTransform: 'none', letterSpacing: 'normal' }}>
       <TickPips total={total} usados={usados} tamanho={tamanho} variante={variante} cor={cor} />
-      <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>
-        {restantes}/{total}
-      </span>
     </span>
   );
 }

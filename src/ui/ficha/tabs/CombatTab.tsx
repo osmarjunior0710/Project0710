@@ -1624,7 +1624,7 @@ export default function CombatTab({
       : (telaSalvaguarda?.magia.salvaguardaSucesso ?? null);
 
   return (
-    <>
+    <div className={styles.abaCombate}>
       <DescansoFab icone="↻" itens={[{ label: 'Fim do Turno', onClick: fimDoTurno }]} />
       {piscando && (
         <div
@@ -1677,7 +1677,6 @@ export default function CombatTab({
         <div className={`${styles.splitBtn} ${styles.splitBtnFimTurno}`} onClick={fimDoTurno}>
           <div className={styles.sbIcon}>↻</div>
           <div className={styles.sbLabel}>Fim do Turno</div>
-          <div className={styles.sbState}>restaura os 3 botões</div>
         </div>
       </div>
 
@@ -1703,6 +1702,7 @@ export default function CombatTab({
         </div>
       )}
 
+      <div className={styles.sepGrupo} />
       <div className={`box-solid ${styles.hpLive}`}>
         <div className={styles.hpHeader}>
           <div className="label">
@@ -1737,9 +1737,10 @@ export default function CombatTab({
         </div>
       </div>
 
+      <div className={styles.sepGrupo} />
       <RecursosDeClasse recursos={recursosDeClasse} />
 
-      {furiaDisponivel && (
+      {furiaDisponivel && (furiaAtiva || furiaPersistenteDisponivel) && (
         <div className="opt-card" style={{ marginBottom: 12, borderColor: furiaAtiva ? '#b23b3b' : undefined }}>
           <div className="opt-card-name">😡 Fúria {furiaAtiva ? 'ATIVA' : ''}</div>
           {furiaAtiva ? (
@@ -1775,11 +1776,7 @@ export default function CombatTab({
                 Encerrar Fúria
               </div>
             </>
-          ) : (
-            <div className="opt-card-desc">
-              {furiaRestantes} de {furiaMaximo} usos disponíveis — ative no painel de Ação Bônus.
-            </div>
-          )}
+          ) : null}
           {furiaPersistenteDisponivel && (
             <div className="btn" style={{ marginTop: 8 }} onClick={onRecuperarFuriaPersistente}>
               🔥 Recuperar Fúria (Fúria Persistente)
@@ -1895,6 +1892,7 @@ export default function CombatTab({
 
       {(estiloDeLuta || mestreTatico || ataquesEstudados || ajusteTatico) && (
         <>
+          <div className={styles.sepGrupo} />
           <div className="section-title">Características</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
             {estiloDeLuta && <InfoChip nome={estiloDeLuta.nome} descricao={estiloDeLuta.beneficios} />}
@@ -1907,6 +1905,7 @@ export default function CombatTab({
 
       {indomavelMaximo > 0 && (
         <>
+          <div className={styles.sepItem} />
           <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span>Indomável</span>
             <ContadorUsos total={indomavelMaximo} usados={indomavelMaximo - indomavelRestantes} />
@@ -1931,6 +1930,7 @@ export default function CombatTab({
 
       {pontosDeSorteMaximo > 0 && (
         <>
+          <div className={styles.sepItem} />
           <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span>Pontos de Sorte</span>
             <ContadorUsos total={pontosDeSorteMaximo} usados={pontosDeSorteMaximo - pontosDeSorteRestantes} />
@@ -1957,6 +1957,7 @@ export default function CombatTab({
 
       {usosFolegoMaximo > 0 && (
         <>
+          <div className={styles.sepItem} />
           <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span>Mente Tática</span>
             <ContadorUsos total={usosFolegoMaximo} usados={usosFolegoMaximo - usosFolegoRestantes} />
@@ -1980,6 +1981,7 @@ export default function CombatTab({
 
       {periciaInigualavelDisponivel && (
         <>
+          <div className={styles.sepItem} />
           <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span>Perícia Inigualável</span>
             <ContadorUsos total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} cor={corDoRecursoDaClasse('Bardo')} />
@@ -2021,6 +2023,7 @@ export default function CombatTab({
         </>
       )}
 
+      <div className={styles.sepGrupo} />
       <div className={styles.splitBtns}>
         {(['acao', 'bonus'] as RecursoTurno[]).map((categoria) => {
           const temAtaqueExtraPendente = categoria === 'acao' && ataquesFeitos > 0 && ataquesFeitos < numAtaques;
@@ -2040,7 +2043,7 @@ export default function CombatTab({
             >
               <div className={styles.sbIcon}>{LABELS[categoria].icone}</div>
               <div className={styles.sbLabel}>{LABELS[categoria].nome}</div>
-              <div className={styles.sbState}>{usadaDeVerdade ? 'usada' : 'ativo'}</div>
+              {usadaDeVerdade && <div className={styles.sbState}>usada</div>}
             </div>
           );
         })}
@@ -2051,7 +2054,7 @@ export default function CombatTab({
       >
         <div className={styles.sbIcon}>{LABELS.reacao.icone}</div>
         <div className={styles.sbLabel}>{LABELS.reacao.nome}</div>
-        <div className={styles.sbState}>{turnState.reacao === 'usada' ? 'usada' : 'ativo'}</div>
+        {turnState.reacao === 'usada' && <div className={styles.sbState}>usada</div>}
       </div>
 
       {feedback && <div className={styles.feedback}>{feedback}</div>}
@@ -2257,6 +2260,7 @@ export default function CombatTab({
           furiaAtiva={furiaAtiva}
           onUsarFuria={usarFuria}
           pontosDeFocoMaximo={pontosDeFocoMaximo}
+          pontosDeFocoRestantes={pontosDeFocoRestantes}
           onAbrirTecnicaMonge={abrirTecnicaMonge}
           numAtaquesTorrente={numAtaquesTorrente}
           ataquesTorrenteFeitos={ataquesTorrenteFeitos}
@@ -2529,6 +2533,6 @@ export default function CombatTab({
           }}
         />
       )}
-    </>
+    </div>
   );
 }
