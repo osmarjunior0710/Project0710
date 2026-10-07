@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { EstiloDeLuta } from '../../../data/rulesets/dnd2024/estilosDeLuta';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
@@ -873,6 +873,13 @@ export default function CombatTab({
   const [ataqueDeSoproDano, setAtaqueDeSoproDano] = useState<number | null>(null);
   const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
   // `aoFechar` = o que continua depois do Ok (ex.: próximo ataque da Torrente).
+  // Marca que não fica velha: o 2º ataque da Torrente é disparado de dentro
+  // do callback do 1º (closure antiga, `golpeAtordoante.usadoTurno` ainda
+  // `false`) — sem isso o botão reaparecia no 2º acerto do mesmo turno.
+  const golpeAtordoanteUsadoRef = useRef(golpeAtordoante.usadoTurno);
+  useEffect(() => {
+    golpeAtordoanteUsadoRef.current = golpeAtordoante.usadoTurno;
+  }, [golpeAtordoante.usadoTurno]);
   const [golpeAtordoanteAberto, setGolpeAtordoanteAberto] = useState<{ aoFechar?: () => void } | null>(null);
   const [ramosDaArvoreAberto, setRamosDaArvoreAberto] = useState(false);
   const [repudiarInimigosAberto, setRepudiarInimigosAberto] = useState(false);
@@ -1496,13 +1503,14 @@ export default function CombatTab({
     return golpeAtordoanteDisponivel({
       nivelMonge,
       pontosDeFocoRestantes,
-      usadoTurno: golpeAtordoante.usadoTurno,
+      usadoTurno: golpeAtordoante.usadoTurno || golpeAtordoanteUsadoRef.current,
       armaDeMongeOuDesarmado: ataque.armaDeMonge === true,
     });
   }
 
   function abrirGolpeAtordoante(aoFechar?: () => void) {
     if (!onUsarPontoDeFoco()) return;
+    golpeAtordoanteUsadoRef.current = true;
     golpeAtordoante.onUsar();
     setGolpeAtordoanteAberto({ aoFechar });
   }

@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1809
+
+Corrige o Golpe Atordoante na Torrente de Golpes com Foco: o botão reaparecia no 2º ataque do mesmo turno e dava pra usar 2 vezes. Agora é 1x por turno de verdade.
+
 ## v202610_1606
 
 Monge nível 5: Golpe Atordoante. Ao acertar um ataque com arma de Monge ou Desarmado (inclusive na Torrente de Golpes), o popup de dano ganha o botão "💫 Golpe Atordoante" — gasta 1 Ponto de Foco (1x por turno) e mostra a CD, o que acontece na falha (Atordoado) e no sucesso (Deslocamento pela metade + Vantagem no próximo ataque).
