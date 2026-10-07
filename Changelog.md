@@ -5,6 +5,22 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1531
+
+Aba Combate mais compacta e padronizada: sem contadores numéricos ao lado dos pips, paddings menores nos botões de PV/Iniciativa/Fim do Turno/Ação/Bônus/Reação, linha cheia cinza entre áreas e tracejada dentro do grupo. Painéis de Ação, Bônus e Reação agora são agrupados por classe (selo + recursos com pips na cor da classe + habilidades), com Ataque de Oportunidade primeiro na Reação. Corrige Fúria/Recuperar Fôlego sumindo da lista de Ação Bônus em personagem multiclasse e Pontos de Foco do Monge faltando.
+
+## v202610_1218
+
+Queda Lenta (Monge) agora abre um popup central com o valor da redução
+de dano, em vez de só um texto no meio da tela fácil de não notar.
+
+## v202610_1102
+
+Monge (nível 4+) ganha Queda Lenta no painel de Reação: toque nela
+quando estiver caindo e ela te avisa quanto reduzir do dano da queda
+(5 × seu nível de Monge), pra você descontar manualmente igual já faz
+com qualquer outro dano recebido.
+
 ## v202610_0925
 
 Corrige a Torrente de Golpes (Monge) com Ponto de Foco: antes, depois

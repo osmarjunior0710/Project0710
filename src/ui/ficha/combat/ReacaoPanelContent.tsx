@@ -134,6 +134,16 @@ interface ReacaoPanelContentProps {
   /** Quais pills de info aparecem em cada linha de magia — preferência
    * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
+  /** Nível de Monge (não o nível total do personagem) — Queda Lenta só
+   * aparece a partir do nível 4, e a redução de dano é 5× esse valor
+   * (sem rolagem, ver `DND-Regras.md`/planilha). `0` quando não é
+   * Monge. */
+  nivelMonge: number;
+  /** Resultado informativo SEM rolagem (ex.: Queda Lenta) — abre
+   * `AvisoModal.tsx` em vez de só deixar como `feedback` no corpo da
+   * aba (fácil de não notar, ver `AvisoModal.tsx`). Também marca a
+   * Reação como usada e fecha o painel, igual `onEscolher`. */
+  onAbrirAvisoReacao: (titulo: string, texto: string) => void;
 }
 
 export default function ReacaoPanelContent({
@@ -184,6 +194,8 @@ export default function ReacaoPanelContent({
   ramosDaArvoreDisponivel,
   onAbrirRamosDaArvore,
   preferenciasPillsMagia,
+  nivelMonge,
+  onAbrirAvisoReacao,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
@@ -377,6 +389,16 @@ export default function ReacaoPanelContent({
     onEscolher('⚡ Trovão da Tempestade', 'Causa esse dano Trovejante à criatura que te acertou (até 18m).');
   }
 
+  /** Queda Lenta (Monge nível 4) — sem rolagem, a redução já é um
+   * valor fixo (5 × nível de Monge); só avisa o jogador, que desconta
+   * manualmente do dano de queda nos botões −5/−1/Manual já
+   * existentes (mesmo padrão de "a ficha nunca calcula dano recebido
+   * sozinha"). Abre popup (`AvisoModal.tsx`) em vez de só feedback no
+   * corpo da aba — pedido do Osmar, 2026-10. */
+  function usarQuedaLenta() {
+    onAbrirAvisoReacao('🍃 Queda Lenta', `Reduza o dano da queda em ${nivelMonge * 5} (5 × seu nível de Monge).`);
+  }
+
   function usarPalavrasDeInterrupcao() {
     if (!onUsarInspiracao()) return;
     rolarDados({
@@ -438,7 +460,7 @@ export default function ReacaoPanelContent({
               <div className={styles.slotCounter}>
                 <span>Inspiração de Bardo (d{tamanhoDadoInspiracao}):</span>
                 <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} cor={corDoRecursoDaClasse('Bardo')} />
-              </div>
+==              </div>
             )
     ) },
     { grupo: 'Bardo', no: (
@@ -484,6 +506,18 @@ export default function ReacaoPanelContent({
                 )}
               </div>
             )
+    ) },
+    { grupo: 'Monge', no: (
+      nivelMonge >= 4 && (
+        <div className={styles.row} onClick={usarQuedaLenta}>
+          <div className={styles.rowName}>🍃 Queda Lenta</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Você está caindo — reduz o dano recebido da queda em {nivelMonge * 5} (5 × seu nível de Monge).
+            </div>
+          )}
+        </div>
+      )
     ) },
     { grupo: 'Espécie', no: (
       resistenciaDaPedraDisponivel && (
