@@ -7,6 +7,7 @@ import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
+import { formulaRedirecionarDefletir, formulaReducaoDefletirAtaques } from '../../../core/defletirAtaques';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import {
@@ -461,6 +462,8 @@ interface CombatTabProps {
   /** Nível de Monge (não o nível total do personagem) — soma na
    * rolagem de cura de Metabolismo Incomum. */
   nivelMonge: number;
+  /** Mod. de Destreza — Defletir Ataques (Monge nível 3). */
+  desModMonge: number;
   /** Golpe Atordoante (Monge nível 5) — CD (8+SAB+prof) e controle de
    * 1x por turno. Aparece como botão no popup de dano de um acerto com
    * arma de Monge/Desarmado e abre `SalvaguardaDoAlvoModal`. */
@@ -780,6 +783,7 @@ export default function CombatTab({
   metabolismoIncomumDisponivel,
   ladosArtesMarciaisMonge,
   nivelMonge,
+  desModMonge,
   golpeAtordoante,
   onConfirmarMetabolismoIncomum,
   inspiracao: {
@@ -821,6 +825,7 @@ export default function CombatTab({
   const [tecnicaMongeAberta, setTecnicaMongeAberta] = useState<TipoTecnicaMonge | null>(null);
   /** Popup de resultado informativo sem rolagem (ex.: Queda Lenta) —
    * `AvisoModal.tsx`, pedido do Osmar (2026-10). */
+  const [redirecionamentoDefletir, setRedirecionamentoDefletir] = useState<{ dano: number } | null>(null);
   const [avisoReacao, setAvisoReacao] = useState<{ titulo: string; texto: string } | null>(null);
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
@@ -986,6 +991,45 @@ export default function CombatTab({
    * `feedback` no corpo da aba — pra resultado informativo sem
    * rolagem que é fácil de não notar ali embaixo (Queda Lenta, pedido
    * do Osmar 2026-10). */
+  /** Defletir Ataques (Monge nível 3, ver sdd/sdd-monge.md seção 7) —
+   * Reação: rola a REDUÇÃO (1d10+DES+nível de Monge); o jogador desconta
+   * do dano pelos botões de PV. Se zerar o dano, o popup do dado oferece
+   * redirecionar (1 Foco): rola 2 dados de Artes Marciais+DES e abre o
+   * popup de salvaguarda do alvo. */
+  function usarDefletirAtaques() {
+    onMarcarUsado('reacao');
+    setPainelAberto(null);
+    const reducao = formulaReducaoDefletirAtaques(desModMonge, nivelMonge);
+    rolarDados({
+      label: 'Defletir Ataques — redução de dano',
+      formula: reducao.formula,
+      quantidade: 1,
+      lados: 10,
+      mod: reducao.mod,
+      confirmarFechamento:
+        pontosDeFocoRestantes >= 1
+          ? [{ rotulo: 'OK' }, { rotulo: '🛡 Zerou o dano — redirecionar (1 Foco)', aoTocar: redirecionarDefletir }]
+          : { },
+    });
+  }
+
+  function redirecionarDefletir() {
+    if (!onUsarPontoDeFoco()) return;
+    const d = formulaRedirecionarDefletir(ladosArtesMarciaisMonge, desModMonge);
+    let totalRolado = 0;
+    rolarDados({
+      label: 'Defletir Ataques — dano redirecionado',
+      formula: d.formula,
+      quantidade: 2,
+      lados: ladosArtesMarciaisMonge,
+      mod: d.mod,
+      onResultado: (total) => {
+        totalRolado = total;
+      },
+      confirmarFechamento: { aoTocar: () => setRedirecionamentoDefletir({ dano: totalRolado }) },
+    });
+  }
+
   function abrirAvisoReacao(titulo: string, texto: string) {
     onMarcarUsado('reacao');
     setPainelAberto(null);
@@ -2454,6 +2498,7 @@ export default function CombatTab({
           preferenciasPillsMagia={preferenciasPillsMagia}
           nivelMonge={nivelMonge}
           onAbrirAvisoReacao={abrirAvisoReacao}
+          onDefletirAtaques={usarDefletirAtaques}
         />
       </SidePanel>
       {lancarNoInfernoDano !== null && (
@@ -2497,6 +2542,17 @@ export default function CombatTab({
           }
           semAcaoTexto={telaSalvaguarda.danoRolado === null ? 'Veja a descrição da magia (ⓘ) pro efeito.' : null}
           onFechar={() => setTelaSalvaguarda(null)}
+        />
+      )}
+      {redirecionamentoDefletir && (
+        <SalvaguardaDoAlvoModal
+          titulo="🛡 Defletir Ataques — redirecionar"
+          atributo="Destreza"
+          cd={Number(golpeAtordoante.explicacaoCd.total.valor)}
+          explicacaoCd={golpeAtordoante.explicacaoCd}
+          textoSucesso="nada acontece"
+          textoFalha={`${redirecionamentoDefletir.dano} de dano, do mesmo tipo causado pelo ataque (alvo: criatura a até 1,5m se o ataque foi corpo a corpo, ou a até 18m se à distância e sem Cobertura Total)`}
+          onFechar={() => setRedirecionamentoDefletir(null)}
         />
       )}
       {golpeAtordoanteAberto && (

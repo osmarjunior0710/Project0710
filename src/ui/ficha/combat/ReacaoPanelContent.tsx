@@ -144,6 +144,8 @@ interface ReacaoPanelContentProps {
    * aba (fácil de não notar, ver `AvisoModal.tsx`). Também marca a
    * Reação como usada e fecha o painel, igual `onEscolher`. */
   onAbrirAvisoReacao: (titulo: string, texto: string) => void;
+  /** Defletir Ataques (Monge nível 3) — ver `usarDefletirAtaques` em `CombatTab.tsx`. */
+  onDefletirAtaques: () => void;
 }
 
 export default function ReacaoPanelContent({
@@ -196,6 +198,7 @@ export default function ReacaoPanelContent({
   preferenciasPillsMagia,
   nivelMonge,
   onAbrirAvisoReacao,
+  onDefletirAtaques,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
@@ -506,6 +509,20 @@ export default function ReacaoPanelContent({
                 )}
               </div>
             )
+    ) },
+    { grupo: 'Monge', no: (
+      nivelMonge >= 3 && (
+        <div className={styles.row} onClick={onDefletirAtaques}>
+          <div className={styles.rowName}>🛡 Defletir Ataques</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Você foi atingido por um ataque — reduz o dano total em 1d10 + mod. Destreza + nível de Monge. Só contra dano{' '}
+              {nivelMonge >= 13 ? 'de qualquer tipo (Defletir Energia)' : 'Contundente, Cortante ou Perfurante'}. Se o dano zerar, dá pra gastar 1
+              Ponto de Foco pra redirecionar o golpe.
+            </div>
+          )}
+        </div>
+      )
     ) },
     { grupo: 'Monge', no: (
       nivelMonge >= 4 && (

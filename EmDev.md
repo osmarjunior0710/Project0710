@@ -203,11 +203,7 @@ painel aberto, só o botão/menu/histórico ocioso é que não devia.
       Lenta, "Ok" fecha e Reação continua marcada "usada". `npx tsc
       -b`, `npm test -- --run` (876/876), `npm run build` verdes.
 - [x] **Entrega 4b — Golpe Atordoante** (nível 5). Botão "💫 Golpe Atordoante" no popup de dano de um acerto com arma de Monge/Desarmado (principal e Torrente de Golpes; array de botões já suportado pelo `confirmarFechamento`). Gasta 1 Foco, 1x por turno (`golpeAtordoanteUsadoTurno`, reseta no Fim do Turno), e abre o `SalvaguardaDoAlvoModal` existente (CD 8+SAB+prof, Falha/Sucesso em texto). `core/golpeAtordoante.ts` + testes; `AtaqueInfo.armaDeMonge`. Fora do escopo: Ataque da Mão Secundária. Validado ao vivo (390px): botão aparece, popup certo, 2º acerto no mesmo turno só mostra OK. tsc/883 testes verdes.
-- [ ] **Entrega 4c — Defletir Ataques + Defletir Energia** (níveis 3 e
-      13). Padrão NOVO (reduzir dano recebido reativamente, nunca
-      existiu no app — ver SDD seção 7). Defletir Energia é só remover
-      a restrição de tipo de dano da mesma função, não uma
-      característica separada.
+- [x] **Entrega 4c — Defletir Ataques + Defletir Energia** (níveis 3 e 13). Linha "🛡 Defletir Ataques" no grupo Monge da Reação (nível 3+); descrição troca pra "qualquer tipo de dano" no nível 13. Rola 1d10+DES+nível de Monge (redução, jogador desconta no PV); popup do dado oferece "redirecionar (1 Foco)" → rola 2×dado de Artes Marciais+DES e abre `SalvaguardaDoAlvoModal` (CD de Foco 8+SAB+prof, DES). `core/defletirAtaques.ts` + testes. Tipo de dano do ataque inimigo não é checado (app não sabe). Validado ao vivo 390px. tsc/887 testes verdes.
 - [ ] **Entrega 5 — resto dos níveis 6-20** (Evasão, Movimento
       Acrobático, Foco Aprimorado, Restauro Pessoal, Sobrevivente
       Disciplinado, Foco Perfeito, Defesa Superior, Dádiva Épica, Corpo

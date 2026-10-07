@@ -3422,6 +3422,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             metabolismoIncomumDisponivel={metabolismoIncomumDisponivel}
             ladosArtesMarciaisMonge={ladosArtesMarciaisMonge}
             nivelMonge={mongeEntry?.nivel ?? 0}
+            desModMonge={desMod}
             golpeAtordoante={{
               explicacaoCd: explicarCdGolpeAtordoante(
                 atributos.find((a) => a.atributo === 'SAB')?.mod ?? 0,
