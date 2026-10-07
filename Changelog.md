@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1827
+
+Monge nível 3: Defletir Ataques na aba Reação. Rola a redução de dano (1d10 + Destreza + nível de Monge); se você zerar o dano, o popup oferece redirecionar o golpe (1 Ponto de Foco), que rola o dano e mostra o popup de salvaguarda de Destreza do alvo. No nível 13 (Defletir Energia) a descrição passa a valer pra qualquer tipo de dano.
+
 ## v202610_1809
 
 Corrige o Golpe Atordoante na Torrente de Golpes com Foco: o botão reaparecia no 2º ataque do mesmo turno e dava pra usar 2 vezes. Agora é 1x por turno de verdade.
