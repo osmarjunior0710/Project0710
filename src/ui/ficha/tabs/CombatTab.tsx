@@ -1006,7 +1006,7 @@ export default function CombatTab({
     setPainelAberto(null);
     const reducao = formulaReducaoDefletirAtaques(desModMonge, nivelMonge);
     rolarDados({
-      label: 'Defletir Ataques — redução de dano',
+      label: 'Defletir Ataques — redução',
       formula: reducao.formula,
       quantidade: 1,
       lados: 10,
@@ -1023,7 +1023,7 @@ export default function CombatTab({
     const d = formulaRedirecionarDefletir(ladosArtesMarciaisMonge, desModMonge);
     let totalRolado = 0;
     rolarDados({
-      label: 'Defletir Ataques — dano redirecionado',
+      label: 'Defletir — dano redirecionado',
       formula: d.formula,
       quantidade: 2,
       lados: ladosArtesMarciaisMonge,
@@ -1376,7 +1376,7 @@ export default function CombatTab({
     onMarcarUsado('bonus');
     if (comFoco && temFocoAprimorado(nivelMonge)) {
       rolarDados({
-        label: 'Defesa Paciente — PV Temporários (Foco Aprimorado)',
+        label: 'Defesa Paciente — PV Temporários',
         formula: `2d${ladosArtesMarciaisMonge}`,
         quantidade: 2,
         lados: ladosArtesMarciaisMonge,

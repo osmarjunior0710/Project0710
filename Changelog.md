@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0755
+
+Popup de rolagem de dado não ocupa mais a tela inteira no celular: o card tem largura máxima e margem nas laterais, e os títulos das rolagens do Monge (Defesa Paciente, Defletir Ataques) ficaram mais curtos.
+
 ## v202610_0743
 
 Monge nível 10: Foco Aprimorado. Defesa Paciente gastando Foco rola 2 dados de Artes Marciais e já aplica como PV Temporários; Passo do Vento mostra que dá pra levar 1 criatura voluntária junto; Torrente de Golpes gastando Foco passa a dar 3 Ataques Desarmados em vez de 2. Os textos do popup de escolha também mudam.

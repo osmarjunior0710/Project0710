@@ -39,6 +39,9 @@
   padding-top: var(--space-6);
   text-align: center;
   min-width: 260px;
+  /* Título comprido (ex.: rótulo de característica) esticava o card até as
+     bordas da tela no celular — limita e deixa o texto quebrar. */
+  max-width: min(340px, calc(100vw - 32px));
   box-shadow: var(--elevation-3);
 }
 
