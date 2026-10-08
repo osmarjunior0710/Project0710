@@ -9,6 +9,7 @@ import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { golpesPotencializadosAtivo, TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
 import { ataquesTorrenteComFoco, temFocoAprimorado } from '../../../core/focoAprimorado';
 import { pontosDeFocoRecuperadosFocoPerfeito } from '../../../core/focoPerfeito';
+import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior } from '../../../core/defesaSuperior';
 import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
 import { formulaRedirecionarDefletir, formulaReducaoDefletirAtaques } from '../../../core/defletirAtaques';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
@@ -322,6 +323,12 @@ interface CombatTabProps {
    * `elegivel` (jogador pode ter trocado de arma). `bonus` já vem
    * zerado quando a arma atual não é mais elegível (ver
    * `FichaShell.tsx`). */
+  /** Defesa Superior (Monge nível 18) — card com Ativar (3 Foco)/Encerrar. */
+  defesaSuperior: {
+    disponivel: boolean;
+    ativa: boolean;
+    onAlternar: () => boolean;
+  };
   armaSagrada: {
     disponivel: boolean;
     elegivel: boolean;
@@ -733,6 +740,7 @@ export default function CombatTab({
   },
   temRepudiarInimigos,
   temGolpesRadiantes,
+  defesaSuperior,
   armaSagrada,
   resplendorSagrado,
   revelacaoCelestial: {
@@ -1919,6 +1927,31 @@ export default function CombatTab({
               🔥 Recuperar Fúria (Fúria Persistente)
             </div>
           )}
+        </div>
+      )}
+
+      {defesaSuperior.disponivel && (
+        <div className="opt-card" style={{ marginBottom: 12, borderColor: defesaSuperior.ativa ? '#4a5fd9' : undefined }}>
+          <div className="opt-card-name">🛡 Defesa Superior {defesaSuperior.ativa ? 'ATIVA' : ''}</div>
+          <div className="opt-card-desc">
+            {defesaSuperior.ativa
+              ? 'Resistência a todos os tipos de dano, exceto Energético. Dura 1 minuto ou até você ficar Incapacitado — toque abaixo pra encerrar.'
+              : `No início do seu turno, gaste ${CUSTO_FOCO_DEFESA_SUPERIOR} Pontos de Foco: Resistência a todos os tipos de dano, exceto Energético, por 1 minuto ou até ficar Incapacitado.`}
+          </div>
+          <div
+            className="btn"
+            style={{
+              marginTop: 8,
+              ...(defesaSuperior.ativa
+                ? { background: 'rgba(178, 59, 59, 0.16)', borderColor: '#b23b3b' }
+                : podeAtivarDefesaSuperior(nivelMonge, pontosDeFocoRestantes)
+                  ? {}
+                  : { opacity: 0.5, pointerEvents: 'none' as const }),
+            }}
+            onClick={() => defesaSuperior.onAlternar()}
+          >
+            {defesaSuperior.ativa ? 'Encerrar Defesa Superior' : `Ativar (gasta ${CUSTO_FOCO_DEFESA_SUPERIOR} Pontos de Foco)`}
+          </div>
         </div>
       )}
 

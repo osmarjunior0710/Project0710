@@ -81,6 +81,7 @@ import { ataqueAtual, ataqueBonusMaoSecundaria, ataqueDesarmado } from '../../co
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
 import { temEvasao } from '../../core/evasao';
+import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior, temDefesaSuperior } from '../../core/defesaSuperior';
 import { podeRerolarSalvaguardaComFoco, temSobreviventeDisciplinado } from '../../core/sobreviventeDisciplinado';
 import { explicarCdGolpeAtordoante } from '../../core/golpeAtordoante';
 import { explicarCdRamosDaArvore } from '../../core/ramosDaArvore';
@@ -495,6 +496,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [furiaGasto, setFuriaGasto] = useState(personagemSalvo.furiaGasto ?? 0);
   const [furiaAtiva, setFuriaAtiva] = useState(personagemSalvo.furiaAtiva ?? false);
   const [armaSagradaAtiva, setArmaSagradaAtiva] = useState(personagemSalvo.armaSagradaAtiva ?? false);
+  const [defesaSuperiorAtiva, setDefesaSuperiorAtiva] = useState(personagemSalvo.defesaSuperiorAtiva ?? false);
   const [resplendorSagradoGasto, setResplendorSagradoGasto] = useState(personagemSalvo.resplendorSagradoGasto ?? false);
   const [resplendorSagradoAtiva, setResplendorSagradoAtiva] = useState(personagemSalvo.resplendorSagradoAtiva ?? false);
   const [ataqueImprudenteAtivo, setAtaqueImprudenteAtivo] = useState(personagemSalvo.ataqueImprudenteAtivoTurno ?? false);
@@ -1384,6 +1386,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     furiaGasto,
     furiaAtiva,
     armaSagradaAtiva,
+    defesaSuperiorAtiva,
     resplendorSagradoGasto,
     resplendorSagradoAtiva,
     maosCurativasGasto,
@@ -1495,6 +1498,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       furiaGasto,
       furiaAtiva,
       armaSagradaAtiva,
+      defesaSuperiorAtiva,
       resplendorSagradoGasto,
       resplendorSagradoAtiva,
       maosCurativasGasto,
@@ -1718,6 +1722,19 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * encerrar é de graça. Ativar exige a arma atual elegível (ver
    * `armaSagradaArmaElegivel`) — encerrar sempre funciona, mesmo que
    * o jogador tenha trocado de arma depois. */
+  /** Defesa Superior (Monge nível 18) — ativar gasta 3 Pontos de Foco;
+   * encerrar é de graça (1 minuto ou Incapacitado, o app não conta tempo). */
+  function usarDefesaSuperior(): boolean {
+    if (defesaSuperiorAtiva) {
+      setDefesaSuperiorAtiva(false);
+      return true;
+    }
+    if (!podeAtivarDefesaSuperior(mongeEntry?.nivel ?? 0, pontosDeFocoRestantes)) return false;
+    setPontosDeFocoGasto((v) => v + CUSTO_FOCO_DEFESA_SUPERIOR);
+    setDefesaSuperiorAtiva(true);
+    return true;
+  }
+
   function usarArmaSagrada(): boolean {
     if (armaSagradaAtiva) {
       setArmaSagradaAtiva(false);
@@ -3367,6 +3384,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             }}
             temRepudiarInimigos={temRepudiarInimigos}
             temGolpesRadiantes={temGolpesRadiantes}
+            defesaSuperior={{
+              disponivel: temDefesaSuperior(mongeEntry?.nivel ?? 0),
+              ativa: defesaSuperiorAtiva,
+              onAlternar: usarDefesaSuperior,
+            }}
             armaSagrada={{
               disponivel: armaSagradaDisponivel,
               elegivel: armaSagradaArmaElegivel,

@@ -413,6 +413,9 @@ export interface PersonagemSalvo {
    * de Canalizar Divindade além do gasto de ativação. Ver
    * `sdd/sdd-paladino-devocao.md` seção 2. */
   armaSagradaAtiva?: boolean;
+  /** `true` = Defesa Superior ATIVA agora (Monge nível 18, gastou 3 Pontos de
+   * Foco) — toggle sem contador de tempo (mesmo padrão de `armaSagradaAtiva`). */
+  defesaSuperiorAtiva?: boolean;
   /** `true` = já usou Resplendor Sagrado (Paladino, Juramento da
    * Devoção, nível 20) desde o último Descanso Longo — zera lá, ou
    * gastando 1 espaço de 5º círculo (`onRecuperarComEspaco`).

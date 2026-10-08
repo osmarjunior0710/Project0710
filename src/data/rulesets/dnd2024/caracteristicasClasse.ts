@@ -966,7 +966,7 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'No início do seu turno, você pode gastar 3 Pontos de Foco para se fortalecer contra danos por 1 minuto ou até ter a condição Incapacitado. Durante esse período, você tem Resistência a todos os tipos de dano, exceto Energético.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Monge',

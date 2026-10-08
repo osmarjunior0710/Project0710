@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1720
+
+Monge nível 18: Defesa Superior. Na aba Combate aparece o cartão "🛡 Defesa Superior": "Ativar (gasta 3 Pontos de Foco)" liga a Resistência a todos os tipos de dano exceto Energético (o cartão passa a mostrar ATIVA, com botão pra encerrar). O botão fica desabilitado com menos de 3 Pontos de Foco.
+
 ## v202610_1718
 
 Foco Perfeito (Monge nível 15) agora entra sempre que você rola Iniciativa, sem esperar a resposta da pergunta do Metabolismo Incomum. Se você usar o Metabolismo depois, ele restaura o resto do Foco e cura por cima, como antes.
