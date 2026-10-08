@@ -313,6 +313,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return classeCatalogo ? caracteristicaDesbloqueada(classeCatalogo, ID_CARACTERISTICA_CLASSE.campeaoPrimitivo, c.nivel) !== null : false;
   });
 
+  /** Corpo e Mente (Monge nível 20) — mesma lógica: checa todas as classes. */
+  const temCorpoEMente = classesAtual.some((c) => {
+    const classeCatalogo = catalogoClasses.find((cc) => cc.nome === c.classe);
+    return classeCatalogo ? caracteristicaDesbloqueada(classeCatalogo, ID_CARACTERISTICA_CLASSE.corpoEMente, c.nivel) !== null : false;
+  });
+  const capstonesAtributo = { campeaoPrimitivo: temCampeaoPrimitivo, corpoEMente: temCorpoEMente };
+
   /** Recuperação Arcana (Mago nível 1) — mesma lógica de
    * `temCampeaoPrimitivo`: checa TODAS as classes (Mago pode não ser a
    * ativa numa Multiclasse) e guarda a classe/nível pra ler o pool de
@@ -710,11 +717,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const pesoAtivo = houseRules.pesoMochila;
   const { preferencias: preferenciasPillsMagia, alternar: alternarPillMagia } = usePreferenciasPillsMagia();
 
-  const desValor = valorFinalAtributo(selecao, 'DES') ?? 10;
+  const desValor = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'DES') ?? 10, 'DES', capstonesAtributo);
   const conValorFinal = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'CON') ?? 10, 'CON', temCampeaoPrimitivo);
   // Só usado pela Defesa sem Armadura do Monge (10+DES+SAB) — ver
   // `DEFESA_SEM_ARMADURA_POR_CLASSE` em `core/calculoPersonagem.ts`.
-  const sabValorParaCA = valorFinalAtributo(selecao, 'SAB') ?? 10;
+  const sabValorParaCA = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'SAB') ?? 10, 'SAB', capstonesAtributo);
   // Talentos que entram no cálculo (Fase 4): os escolhidos em Level
   // Up (`talentosGeraisAtuais`) MAIS o Talento de Origem, ganho fixo
   // na criação (ex: Alerta) — nunca passa pelo picker de Level Up,
@@ -751,11 +758,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // mesmo treinado, diferente de `desvantagemForcaDestreza` acima.
   const desvantagemFurtividadeArmadura =
     armaduraEquipadaCatalogo?.furtividade === 'Desvantagem' ? armaduraEquipadaCatalogo.nome : null;
-  const iniciativa = calcularIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);
-  const percepcaoPassiva = calcularPercepcaoPassiva(selecao, nivelTotalAtual);
-  const atributos = calcularAtributosFinais(selecao, temCampeaoPrimitivo);
+  const iniciativa = calcularIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos, capstonesAtributo);
+  const percepcaoPassiva = calcularPercepcaoPassiva(selecao, nivelTotalAtual, capstonesAtributo);
+  const atributos = calcularAtributosFinais(selecao, capstonesAtributo);
   const atributosFinaisAtuais = Object.fromEntries(
-    atributosOrdem.map((a) => [a, aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, a) ?? 10, a, temCampeaoPrimitivo)]),
+    atributosOrdem.map((a) => [a, aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, a) ?? 10, a, capstonesAtributo)]),
   ) as Record<Atributo, number>;
   const forMod = atributos.find((a) => a.atributo === 'FOR')?.mod ?? 0;
   const desMod = atributos.find((a) => a.atributo === 'DES')?.mod ?? 0;
@@ -789,7 +796,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ],
     nivelTotalAtual,
     { ativa: temConhecimentoPrimordial && furiaAtiva, mod: forMod, pericias: PERICIAS_CONHECIMENTO_PRIMORDIAL },
-    temCampeaoPrimitivo,
+    capstonesAtributo,
   );
   // Canalizar Divindade/Mãos Consagradas/Aura de Proteção (Paladino) —
   // leem o nível DA classe Paladino em `classesAtual` (não da classe
@@ -805,7 +812,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     classeOriginal,
     nivelTotalAtual,
     atributosResilienteEscolhidos(talentosEfetivos, escolhaAtributoTalentoGeral),
-    temCampeaoPrimitivo,
+    capstonesAtributo,
     bonusAuraProtecao,
     temSobreviventeDisciplinado(classesAtual.find((c) => c.classe === 'Monge')?.nivel ?? 0),
   );

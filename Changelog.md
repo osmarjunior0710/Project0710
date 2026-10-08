@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1723
+
+Monge nível 20: Corpo e Mente. Destreza e Sabedoria sobem +4 (máximo 25) automaticamente, e tudo que depende delas acompanha: modificadores, CA (Defesa sem Armadura do Monge), Iniciativa, Percepção Passiva, salvaguardas e perícias. O ⓘ do atributo mostra a linha "Corpo e Mente".
+
 ## v202610_1720
 
 Monge nível 18: Defesa Superior. Na aba Combate aparece o cartão "🛡 Defesa Superior": "Ativar (gasta 3 Pontos de Foco)" liga a Resistência a todos os tipos de dano exceto Energético (o cartão passa a mostrar ATIVA, com botão pra encerrar). O botão fica desabilitado com menos de 3 Pontos de Foco.

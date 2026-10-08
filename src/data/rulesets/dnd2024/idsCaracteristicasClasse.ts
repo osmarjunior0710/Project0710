@@ -79,6 +79,8 @@ export const ID_CARACTERISTICA_CLASSE = {
   /** Bárbaro nível 20 — Força e Constituição sobem +4, até no máximo
    * 25. Ver `core/campeaoPrimitivo.ts`. */
   campeaoPrimitivo: 'Campeão Primitivo',
+  /** Monge nível 20 — Destreza e Sabedoria +4 (máx. 25), ver `core/campeaoPrimitivo.ts`. */
+  corpoEMente: 'Corpo e Mente',
 } as const;
 
 export type IdCaracteristicaClasse = keyof typeof ID_CARACTERISTICA_CLASSE;

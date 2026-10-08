@@ -984,6 +984,6 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Você auto aperfeiçoou seu corpo e mente a novos patamares. Seus valores de Destreza e Sabedoria aumentam em 4, até no máximo 25.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
 ];
