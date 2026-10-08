@@ -32,7 +32,7 @@ introdução do Paladino colada — cortada na importação.
 - [x] **Entrega 3 — Sintonia Elemental (nível 3)** (feito: `core/sintoniaElemental.ts` + testes, `sintoniaElementalAtiva` persistido, card igual ao da Defesa Superior com Extensão e Natação/Voo do nível 11 como texto; Passo dos Elementos ficou como texto, ainda `placeholder-textonly` no dado) — cartão Ativar (1 Foco)
       / Encerrar na aba Combate (padrão Defesa Superior), Extensão e Passo
       dos Elementos (nível 11) como texto.
-- [ ] **Entrega 4 — Ataques Elementais (nível 3)** — tipos de dano
+- [x] **Entrega 4 — Ataques Elementais (nível 3)** (feito: opção B — botão "🌪 Elemental" no popup de dano do Ataque Desarmado/Torrente com Sintonia ativa → `ElementoSintoniaModal` (5 elementos) → `SalvaguardaDoAlvoModal` de Força, empurrão opcional; `core/ataquesElementais.ts` + testes; testado ao vivo incluindo o encadeamento na Torrente 1/3→2/3) — tipos de dano
       elementais no popup do Ataque Desarmado (+ Torrente) e empurrão com
       salvaguarda de Força. Decisão de UI da lista de tipos em aberto (SDD
       seção 2).

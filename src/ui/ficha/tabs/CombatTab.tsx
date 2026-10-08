@@ -6,6 +6,8 @@ import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
+import { TEXTO_EMPURRAO_ELEMENTAL } from '../../../core/ataquesElementais';
+import ElementoSintoniaModal from '../combat/ElementoSintoniaModal';
 import { golpesPotencializadosAtivo, TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
 import { ataquesTorrenteComFoco, temFocoAprimorado } from '../../../core/focoAprimorado';
 import { pontosDeFocoRecuperadosFocoPerfeito } from '../../../core/focoPerfeito';
@@ -910,6 +912,11 @@ export default function CombatTab({
   useEffect(() => {
     golpeAtordoanteUsadoRef.current = golpeAtordoante.usadoTurno;
   }, [golpeAtordoante.usadoTurno]);
+  // Ataques Elementais (Sintonia Elemental): `elementoPendente` = escolhendo o elemento;
+  // `empurraoElemental` = popup de salvaguarda de Força do alvo. `aoFechar` = o que
+  // continua depois (ex.: próximo ataque da Torrente de Golpes).
+  const [elementoPendente, setElementoPendente] = useState<{ aoFechar?: () => void } | null>(null);
+  const [empurraoElemental, setEmpurraoElemental] = useState<{ elemento: string; aoFechar?: () => void } | null>(null);
   const [golpeAtordoanteAberto, setGolpeAtordoanteAberto] = useState<{ aoFechar?: () => void } | null>(null);
   const [ramosDaArvoreAberto, setRamosDaArvoreAberto] = useState(false);
   const [repudiarInimigosAberto, setRepudiarInimigosAberto] = useState(false);
@@ -1499,11 +1506,13 @@ export default function CombatTab({
               };
               const potencializados = golpesPotencializadosAtivo(nivelMonge);
               const atordoa = golpeAtordoanteParaAtaque(ataqueTorrente.info);
-              if (!potencializados && !atordoa) return { aoTocar: continuar };
+              const elemental = sintoniaElemental.ativa;
+              if (!potencializados && !atordoa && !elemental) return { aoTocar: continuar };
               return [
                 ...(potencializados
                   ? TIPOS_DANO_GOLPES_POTENCIALIZADOS.map((rotulo) => ({ rotulo, aoTocar: continuar }))
                   : [{ rotulo: 'OK', aoTocar: continuar }]),
+                ...(elemental ? [{ rotulo: '🌪 Elemental', aoTocar: () => abrirElemental(continuar) }] : []),
                 ...(atordoa ? [{ rotulo: '💫 Golpe Atordoante', aoTocar: () => abrirGolpeAtordoante(continuar) }] : []),
               ];
             })(),
@@ -1601,6 +1610,10 @@ export default function CombatTab({
       usadoTurno: golpeAtordoante.usadoTurno || golpeAtordoanteUsadoRef.current,
       armaDeMongeOuDesarmado: ataque.armaDeMonge === true,
     });
+  }
+
+  function abrirElemental(aoFechar?: () => void) {
+    setElementoPendente({ aoFechar });
   }
 
   function abrirGolpeAtordoante(aoFechar?: () => void) {
@@ -2397,6 +2410,8 @@ export default function CombatTab({
           onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
           podeGolpeAtordoante={golpeAtordoanteParaAtaque}
           golpesPotencializados={golpesPotencializadosAtivo(nivelMonge)}
+          sintoniaElementalAtiva={sintoniaElemental.ativa}
+          onElemental={() => abrirElemental()}
           onGolpeAtordoante={() => abrirGolpeAtordoante()}
           temGolpesRadiantes={temGolpesRadiantes}
           armaSagradaDisponivel={armaSagrada.disponivel}
@@ -2667,6 +2682,36 @@ export default function CombatTab({
           textoSucesso="nada acontece"
           textoFalha={`${redirecionamentoDefletir.dano} de dano, do mesmo tipo causado pelo ataque (alvo: criatura a até 1,5m se o ataque foi corpo a corpo, ou a até 18m se à distância e sem Cobertura Total)`}
           onFechar={() => setRedirecionamentoDefletir(null)}
+        />
+      )}
+      {elementoPendente && (
+        <ElementoSintoniaModal
+          onEscolher={(elemento) => {
+            const depois = elementoPendente.aoFechar;
+            setElementoPendente(null);
+            setEmpurraoElemental({ elemento, aoFechar: depois });
+          }}
+          onFechar={() => {
+            const depois = elementoPendente.aoFechar;
+            setElementoPendente(null);
+            depois?.();
+          }}
+        />
+      )}
+      {empurraoElemental && (
+        <SalvaguardaDoAlvoModal
+          titulo={`🌪 Ataques Elementais — ${empurraoElemental.elemento}`}
+          atributo="Força"
+          cd={Number(golpeAtordoante.explicacaoCd.total.valor)}
+          explicacaoCd={golpeAtordoante.explicacaoCd}
+          textoSucesso="nada acontece (o dano já é do elemento escolhido)"
+          textoFalha={TEXTO_EMPURRAO_ELEMENTAL}
+          semAcaoTexto="O empurrão é opcional — feche se não quiser empurrar."
+          onFechar={() => {
+            const depois = empurraoElemental.aoFechar;
+            setEmpurraoElemental(null);
+            depois?.();
+          }}
         />
       )}
       {golpeAtordoanteAberto && (
