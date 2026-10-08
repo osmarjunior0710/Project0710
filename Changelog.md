@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1859
+
+Caixas de escolha dentro dos popups (elementos da Sintonia, Defesa Paciente/Passo do Vento/Torrente, efeitos de golpe, etc.) agora têm linha contínua em vez de tracejada — mesma regra do resto do app: contínua = toca, tracejada = só informativa.
+
 ## v202610_1831
 
 Monge (Combatente dos Elementos): Ataques Elementais. Com a Sintonia Elemental ativa, o popup de dano do Ataque Desarmado (inclusive na Torrente de Golpes) ganha o botão "🌪 Elemental": abre a escolha de Ácido, Elétrico, Gélido, Ígneo ou Trovejante e depois o popup de salvaguarda de Força do alvo (CD, "mover até 3 m pra perto ou pra longe"), que é opcional. Na Torrente, o próximo ataque da sequência continua depois de fechar.

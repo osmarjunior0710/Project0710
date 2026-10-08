@@ -82,3 +82,11 @@
   align-items: center;
   justify-content: center;
 }
+
+/* Caixa de SELEÇÃO dentro de um modal (opção que o jogador toca) tem borda
+   contínua — regra do projeto: contínua = interativo, tracejada = só
+   informativo (DECISOES-DESIGN.md "Borda azul = interativo, cinza =
+   passivo"). `.opt-card` global nasce tracejado (cartão de listagem). */
+.card :global(.opt-card) {
+  border-style: solid;
+}
