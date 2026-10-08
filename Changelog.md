@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1905
+
+Monge (Combatente dos Elementos) nível 6: Explosão Elemental. No painel de Ação, grupo Monge, a nova linha "💥 Explosão Elemental" gasta 2 Pontos de Foco e a Ação: escolha Ácido, Elétrico, Gélido, Ígneo ou Trovejante, o app rola 3 dados de Artes Marciais e abre o popup de salvaguarda de Destreza do alvo (falha: dano total; sucesso: metade).
+
 ## v202610_1859
 
 Caixas de escolha dentro dos popups (elementos da Sintonia, Defesa Paciente/Passo do Vento/Torrente, efeitos de golpe, etc.) agora têm linha contínua em vez de tracejada — mesma regra do resto do app: contínua = toca, tracejada = só informativa.

@@ -14,6 +14,7 @@ import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
 import { TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
 import { podeAtaqueElemental } from '../../../core/ataquesElementais';
+import { CUSTO_FOCO_EXPLOSAO_ELEMENTAL } from '../../../core/explosaoElemental';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import styles from './PanelRows.module.css';
 import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
@@ -221,6 +222,13 @@ interface AcaoPanelContentProps {
    * dano do Ataque Desarmado ganha o botão "🌪 Elemental" (`onElemental`). */
   sintoniaElementalAtiva: boolean;
   onElemental: () => void;
+  /** Explosão Elemental (Monge/Elementos nível 6) — linha no grupo Monge; tocar abre a
+   * escolha de elemento em `CombatTab.tsx` (gasta 2 Foco + a Ação). */
+  explosaoElementalDisponivel: boolean;
+  onExplosaoElemental: () => void;
+  /** Pontos de Foco (Monge) — contador no grupo Monge e trava da Explosão Elemental. */
+  pontosDeFocoMaximo: number;
+  pontosDeFocoRestantes: number;
   onGolpeAtordoante: () => void;
   /** Golpes Radiantes (Paladino nível 11) — sempre ativa, sem toggle:
    * soma 1d8 Radiante automático no dano de qualquer ataque Corpo a
@@ -337,6 +345,10 @@ export default function AcaoPanelContent({
   golpesPotencializados,
   sintoniaElementalAtiva,
   onElemental,
+  explosaoElementalDisponivel,
+  onExplosaoElemental,
+  pontosDeFocoMaximo,
+  pontosDeFocoRestantes,
   onGolpeAtordoante,
   temGolpesRadiantes,
   armaSagradaDisponivel,
@@ -906,6 +918,29 @@ export default function AcaoPanelContent({
                 <div className={styles.rowDesc}>Seu movimento não provoca Ataques de Oportunidade pelo resto do turno</div>
               )}
             </div>
+            )
+    ) },
+    { grupo: 'Monge', no: (
+      explosaoElementalDisponivel && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Pontos de Foco:</span>
+                  <TickPips total={pontosDeFocoMaximo} usados={pontosDeFocoMaximo - pontosDeFocoRestantes} cor={corDoRecursoDaClasse('Monge')} quebrarACada={10} />
+                </div>
+                <div
+                  className={styles.row}
+                  style={pontosDeFocoRestantes < CUSTO_FOCO_EXPLOSAO_ELEMENTAL ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onExplosaoElemental}
+                >
+                  <div className={styles.rowName}>💥 Explosão Elemental</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Gasta {CUSTO_FOCO_EXPLOSAO_ELEMENTAL} Pontos de Foco: Esfera de 6m de raio a até 36m. Salvaguarda de Destreza — falha: 3 dados
+                      de Artes Marciais do tipo escolhido; sucesso: metade.
+                    </div>
+                  )}
+                </div>
+              </>
             )
     ) },
     { grupo: 'Outras', no: (

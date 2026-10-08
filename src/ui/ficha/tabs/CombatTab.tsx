@@ -7,6 +7,13 @@ import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { TEXTO_EMPURRAO_ELEMENTAL } from '../../../core/ataquesElementais';
+import {
+  CUSTO_FOCO_EXPLOSAO_ELEMENTAL,
+  formulaDanoExplosaoElemental,
+  metadeDoDanoDaExplosao,
+  podeUsarExplosaoElemental,
+  temExplosaoElemental,
+} from '../../../core/explosaoElemental';
 import ElementoSintoniaModal from '../combat/ElementoSintoniaModal';
 import { golpesPotencializadosAtivo, TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
 import { ataquesTorrenteComFoco, temFocoAprimorado } from '../../../core/focoAprimorado';
@@ -915,6 +922,10 @@ export default function CombatTab({
   // Ataques Elementais (Sintonia Elemental): `elementoPendente` = escolhendo o elemento;
   // `empurraoElemental` = popup de salvaguarda de Força do alvo. `aoFechar` = o que
   // continua depois (ex.: próximo ataque da Torrente de Golpes).
+  // Explosão Elemental (nível 6): `explosaoEscolhendo` = escolhendo o elemento; `explosaoResultado` =
+  // popup de salvaguarda de Destreza com o dano já rolado.
+  const [explosaoEscolhendo, setExplosaoEscolhendo] = useState(false);
+  const [explosaoResultado, setExplosaoResultado] = useState<{ elemento: string; dano: number } | null>(null);
   const [elementoPendente, setElementoPendente] = useState<{ aoFechar?: () => void } | null>(null);
   const [empurraoElemental, setEmpurraoElemental] = useState<{ elemento: string; aoFechar?: () => void } | null>(null);
   const [golpeAtordoanteAberto, setGolpeAtordoanteAberto] = useState<{ aoFechar?: () => void } | null>(null);
@@ -1609,6 +1620,35 @@ export default function CombatTab({
       pontosDeFocoRestantes,
       usadoTurno: golpeAtordoante.usadoTurno || golpeAtordoanteUsadoRef.current,
       armaDeMongeOuDesarmado: ataque.armaDeMonge === true,
+    });
+  }
+
+  /** Explosão Elemental (Monge/Elementos nível 6): ação Usar Magia, 2 Foco. Tocar na linha do
+   * painel de Ação abre a escolha do elemento; escolher gasta o Foco e a Ação, rola 3 dados de
+   * Artes Marciais e, ao fechar o dado, abre a salvaguarda de Destreza do alvo (metade no sucesso). */
+  function abrirExplosaoElemental() {
+    if (!podeUsarExplosaoElemental(nivelMonge, SUBCLASSE_ELEMENTOS, pontosDeFocoRestantes)) return;
+    setPainelAberto(null);
+    setExplosaoEscolhendo(true);
+  }
+
+  function usarExplosaoElemental(elemento: string) {
+    setExplosaoEscolhendo(false);
+    for (let i = 0; i < CUSTO_FOCO_EXPLOSAO_ELEMENTAL; i++) {
+      if (!onUsarPontoDeFoco()) return;
+    }
+    onMarcarUsado('acao');
+    let totalRolado = 0;
+    rolarDados({
+      label: `Explosão Elemental — ${elemento}`,
+      formula: formulaDanoExplosaoElemental(ladosArtesMarciaisMonge),
+      quantidade: 3,
+      lados: ladosArtesMarciaisMonge,
+      mod: 0,
+      onResultado: (total) => {
+        totalRolado = total;
+      },
+      confirmarFechamento: { aoTocar: () => setExplosaoResultado({ elemento, dano: totalRolado }) },
     });
   }
 
@@ -2412,6 +2452,10 @@ export default function CombatTab({
           golpesPotencializados={golpesPotencializadosAtivo(nivelMonge)}
           sintoniaElementalAtiva={sintoniaElemental.ativa}
           onElemental={() => abrirElemental()}
+          explosaoElementalDisponivel={temExplosaoElemental(nivelMonge, SUBCLASSE_ELEMENTOS)}
+          onExplosaoElemental={abrirExplosaoElemental}
+          pontosDeFocoMaximo={pontosDeFocoMaximo}
+          pontosDeFocoRestantes={pontosDeFocoRestantes}
           onGolpeAtordoante={() => abrirGolpeAtordoante()}
           temGolpesRadiantes={temGolpesRadiantes}
           armaSagradaDisponivel={armaSagrada.disponivel}
@@ -2682,6 +2726,26 @@ export default function CombatTab({
           textoSucesso="nada acontece"
           textoFalha={`${redirecionamentoDefletir.dano} de dano, do mesmo tipo causado pelo ataque (alvo: criatura a até 1,5m se o ataque foi corpo a corpo, ou a até 18m se à distância e sem Cobertura Total)`}
           onFechar={() => setRedirecionamentoDefletir(null)}
+        />
+      )}
+      {explosaoEscolhendo && (
+        <ElementoSintoniaModal
+          titulo="💥 Explosão Elemental — escolha o tipo de dano"
+          descricao={`Gasta ${CUSTO_FOCO_EXPLOSAO_ELEMENTAL} Pontos de Foco e a sua Ação. Esfera de 6m de raio a até 36m de você.`}
+          onEscolher={usarExplosaoElemental}
+          onFechar={() => setExplosaoEscolhendo(false)}
+        />
+      )}
+      {explosaoResultado && (
+        <SalvaguardaDoAlvoModal
+          titulo={`💥 Explosão Elemental — ${explosaoResultado.elemento}`}
+          atributo="Destreza"
+          cd={Number(golpeAtordoante.explicacaoCd.total.valor)}
+          explicacaoCd={golpeAtordoante.explicacaoCd}
+          textoSucesso={`${metadeDoDanoDaExplosao(explosaoResultado.dano)} de dano ${explosaoResultado.elemento} (metade)`}
+          textoFalha={`${explosaoResultado.dano} de dano ${explosaoResultado.elemento}`}
+          aviso="Cada criatura na Esfera de 6m de raio faz a salvaguarda."
+          onFechar={() => setExplosaoResultado(null)}
         />
       )}
       {elementoPendente && (

@@ -511,7 +511,7 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Como uma ação Usar Magia, você pode gastar 2 Pontos de Foco para fazer com que energia elemental exploda em uma Esfera de 6 metros de raio centrada em um ponto a até 36 metros de você. Escolha um tipo de dano: Ácido, Elétrico, Gélido, Ígneo ou Trovejante. Cada criatura na Esfera deve realizar uma salvaguarda de Destreza. Se falhar, uma criatura sofre dano do tipo escolhido igual a três jogadas de seus dados de Artes Marciais. Em caso de sucesso, uma criatura sofre metade do dano.',
     tipoAcao: 'Ação',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Monge',
