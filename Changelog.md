@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1718
+
+Foco Perfeito (Monge nível 15) agora entra sempre que você rola Iniciativa, sem esperar a resposta da pergunta do Metabolismo Incomum. Se você usar o Metabolismo depois, ele restaura o resto do Foco e cura por cima, como antes.
+
 ## v202610_1601
 
 Monge nível 15: Foco Perfeito. Ao rolar Iniciativa sem usar o Metabolismo Incomum, os Pontos de Foco voltam a 4 se você tiver 3 ou menos (automático, com aviso na tela). Quando o Metabolismo Incomum está disponível, o Foco Perfeito entra ao responder "Não" na pergunta dele.

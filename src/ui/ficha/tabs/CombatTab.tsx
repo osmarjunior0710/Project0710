@@ -939,13 +939,14 @@ export default function CombatTab({
       onResultado: (total) => setIniciativaValor(total),
     });
     onRolarIniciativa?.();
+    aplicarFocoPerfeito();
     if (metabolismoIncomumDisponivel) setMetabolismoIncomumPendente(true);
-    else aplicarFocoPerfeito();
   }
 
-  /** Foco Perfeito (Monge nível 15) — automático ao jogar Iniciativa sem usar
-   * Metabolismo Incomum: se não houver pergunta do Metabolismo, aplica na
-   * hora; se houver, aplica quando o jogador responde "Não". */
+  /** Foco Perfeito (Monge nível 15) — automático em TODA Iniciativa. A regra
+   * diz "sem usar Metabolismo Incomum", mas o Metabolismo restaura todos os
+   * Pontos de Foco, então aplicar o Foco Perfeito antes e depois deixar o
+   * jogador usar o Metabolismo por cima dá o mesmo resultado final. */
   function aplicarFocoPerfeito() {
     const qtd = pontosDeFocoRecuperadosFocoPerfeito(nivelMonge, pontosDeFocoRestantes);
     if (qtd <= 0) return;
@@ -1642,10 +1643,7 @@ export default function CombatTab({
    * combates). */
   function confirmarMetabolismoIncomum(usar: boolean) {
     setMetabolismoIncomumPendente(false);
-    if (!usar) {
-      aplicarFocoPerfeito();
-      return;
-    }
+    if (!usar) return;
     onConfirmarMetabolismoIncomum();
     rolarDados({
       label: 'Metabolismo Incomum (cura)',
