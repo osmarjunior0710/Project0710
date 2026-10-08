@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
-import styles from './InfoValor.module.css';
+import { useState } from "react";
+import { createPortal } from "react-dom";
+import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
+import styles from "./InfoValor.module.css";
 
 interface InfoTextoProps {
   titulo: string;
@@ -26,33 +27,43 @@ export default function InfoTexto({ titulo, paragrafos }: InfoTextoProps) {
       >
         ⓘ
       </span>
-      {aberto && (
-        <div
-          className={styles.overlay}
-          onClick={(e) => {
-            e.stopPropagation();
-            setAberto(false);
-          }}
-        >
-          <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.title}>{titulo}</div>
-            {paragrafos.map((p, i) => (
-              <p key={i} style={{ fontSize: 13, lineHeight: 1.5, margin: '0 0 10px', textTransform: 'none' }}>
-                {p}
-              </p>
-            ))}
-            <div
-              className={styles.close}
-              onClick={(e) => {
-                e.stopPropagation();
-                setAberto(false);
-              }}
-            >
-              fechar
+      {aberto &&
+        createPortal(
+          <div
+            className={styles.overlay}
+            onClick={(e) => {
+              e.stopPropagation();
+              setAberto(false);
+            }}
+          >
+            <div className={styles.card} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.title}>{titulo}</div>
+              {paragrafos.map((p, i) => (
+                <p
+                  key={i}
+                  style={{
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                    margin: "0 0 10px",
+                    textTransform: "none",
+                  }}
+                >
+                  {p}
+                </p>
+              ))}
+              <div
+                className={styles.close}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setAberto(false);
+                }}
+              >
+                fechar
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

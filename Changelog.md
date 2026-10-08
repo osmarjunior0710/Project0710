@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1817
+
+Corrige os popups do ⓘ (descrição de magia e quebra de valores/regras) que ficavam presos dentro do painel lateral de Ação/Bônus/Reação, na largura do painel e com o fundo escuro cortado. Agora abrem por cima de tudo, centralizados na tela inteira.
+
 ## v202610_1812
 
 Monge — Combatente dos Elementos, Manipular Elementos (nível 3): o Monge dessa subclasse passa a conhecer o truque Elementalismo. Aparece na aba Magias (seção "Magias de Subclasse") e na aba Combate (Ação → Usar Magia → Truques, com o selo Monge), e a aba Magias aparece mesmo num Monge sem outra classe conjuradora.

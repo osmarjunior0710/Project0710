@@ -27,7 +27,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 55;
+  /* Renderizado num portal no body (fora de qualquer painel com transform,
+     que prendia o position:fixed dentro dele) — precisa ficar acima do
+     SidePanel (110/111), abaixo do popup de rolagem (135). */
+  z-index: 125;
   padding: var(--space-5);
   overscroll-behavior: contain;
   touch-action: none;
