@@ -6,6 +6,8 @@ interface TecnicaMongeModalProps {
   tipo: TipoTecnicaMonge;
   pontosDeFocoMaximo: number;
   pontosDeFocoRestantes: number;
+  /** Foco Aprimorado (Monge nível 10) — muda o texto de cada opção com Foco. */
+  focoAprimorado: boolean;
   onEscolher: (comFoco: boolean) => void;
   onFechar: () => void;
 }
@@ -42,10 +44,16 @@ export default function TecnicaMongeModal({
   tipo,
   pontosDeFocoMaximo,
   pontosDeFocoRestantes,
+  focoAprimorado,
   onEscolher,
   onFechar,
 }: TecnicaMongeModalProps) {
-  const info = INFO[tipo];
+  const info = { ...INFO[tipo] };
+  if (focoAprimorado) {
+    if (tipo === 'defesa-paciente') info.foco += ' + PV Temporários (2 dados de Artes Marciais)';
+    if (tipo === 'passo-do-vento') info.foco += ' + leva 1 criatura voluntária (Grande ou menor, a até 1,5m) junto';
+    if (tipo === 'torrente') info.foco = '3 Ataques Desarmados extras (Ação Bônus)';
+  }
   const semFoco = pontosDeFocoRestantes <= 0;
 
   function escolher(comFoco: boolean) {

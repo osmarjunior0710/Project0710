@@ -7,6 +7,7 @@ import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { golpesPotencializadosAtivo, TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
+import { ataquesTorrenteComFoco, temFocoAprimorado } from '../../../core/focoAprimorado';
 import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
 import { formulaRedirecionarDefletir, formulaReducaoDefletirAtaques } from '../../../core/defletirAtaques';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
@@ -465,6 +466,8 @@ interface CombatTabProps {
   nivelMonge: number;
   /** Mod. de Destreza — Defletir Ataques (Monge nível 3). */
   desModMonge: number;
+  /** Foco Aprimorado (Defesa Paciente) — soma PV Temporário (não acumula, fica o maior). */
+  onGanharPvTemporario: (valor: number) => void;
   /** Golpe Atordoante (Monge nível 5) — CD (8+SAB+prof) e controle de
    * 1x por turno. Aparece como botão no popup de dano de um acerto com
    * arma de Monge/Desarmado e abre `SalvaguardaDoAlvoModal`. */
@@ -785,6 +788,7 @@ export default function CombatTab({
   ladosArtesMarciaisMonge,
   nivelMonge,
   desModMonge,
+  onGanharPvTemporario,
   golpeAtordoante,
   onConfirmarMetabolismoIncomum,
   inspiracao: {
@@ -1370,9 +1374,19 @@ export default function CombatTab({
   function usarDefesaPaciente(comFoco: boolean) {
     if (comFoco && !onUsarPontoDeFoco()) return;
     onMarcarUsado('bonus');
+    if (comFoco && temFocoAprimorado(nivelMonge)) {
+      rolarDados({
+        label: 'Defesa Paciente — PV Temporários (Foco Aprimorado)',
+        formula: `2d${ladosArtesMarciaisMonge}`,
+        quantidade: 2,
+        lados: ladosArtesMarciaisMonge,
+        mod: 0,
+        onResultado: (total) => onGanharPvTemporario(total),
+      });
+    }
     setFeedback(
       comFoco
-        ? '🥋 Defesa Paciente — Esquivar + Desengajar (Ação Bônus). Gastou 1 Ponto de Foco.'
+        ? `🥋 Defesa Paciente — Esquivar + Desengajar (Ação Bônus). Gastou 1 Ponto de Foco.${temFocoAprimorado(nivelMonge) ? ' PV Temporários já aplicados.' : ''}`
         : '🥋 Defesa Paciente — Esquivar (Ação Bônus), de graça.',
     );
   }
@@ -1382,7 +1396,7 @@ export default function CombatTab({
     onMarcarUsado('bonus');
     setFeedback(
       comFoco
-        ? '💨 Passo do Vento — Correr ou Desengajar (Ação Bônus) + salto dobrado de distância até o fim do turno. Gastou 1 Ponto de Foco.'
+        ? `💨 Passo do Vento — Correr ou Desengajar (Ação Bônus) + salto dobrado de distância até o fim do turno. Gastou 1 Ponto de Foco.${temFocoAprimorado(nivelMonge) ? ' Pode levar 1 criatura voluntária (Grande ou menor, a até 1,5m) com você até o fim do turno, sem provocar Ataques de Oportunidade.' : ''}`
         : '💨 Passo do Vento — Correr ou Desengajar (Ação Bônus), de graça.',
     );
   }
@@ -1395,10 +1409,11 @@ export default function CombatTab({
    * decidir se ataca de novo — ver `rolarAtaqueTorrente`. */
   function ativarTorrenteDeGolpes(comFoco: boolean) {
     if (comFoco && !onUsarPontoDeFoco()) return;
-    setNumAtaquesTorrente(comFoco ? 2 : 1);
+    const total = comFoco ? ataquesTorrenteComFoco(nivelMonge) : 1;
+    setNumAtaquesTorrente(total);
     setAtaquesTorrenteFeitos(0);
     onMarcarUsado('bonus');
-    rolarAtaqueTorrente(1, comFoco ? 2 : 1);
+    rolarAtaqueTorrente(1, total);
   }
 
   /** Popup de escolha das 3 técnicas (`TecnicaMongeModal.tsx`) — abrir
@@ -2210,6 +2225,7 @@ export default function CombatTab({
           tipo={tecnicaMongeAberta}
           pontosDeFocoMaximo={pontosDeFocoMaximo}
           pontosDeFocoRestantes={pontosDeFocoRestantes}
+          focoAprimorado={temFocoAprimorado(nivelMonge)}
           onEscolher={escolherTecnicaMonge}
           onFechar={() => setTecnicaMongeAberta(null)}
         />

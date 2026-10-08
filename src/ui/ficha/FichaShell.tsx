@@ -3425,6 +3425,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             ladosArtesMarciaisMonge={ladosArtesMarciaisMonge}
             nivelMonge={mongeEntry?.nivel ?? 0}
             desModMonge={desMod}
+            onGanharPvTemporario={(valor) => setPvTemporario((atual) => ganharPvTemporario(atual, valor))}
             golpeAtordoante={{
               explicacaoCd: explicarCdGolpeAtordoante(
                 atributos.find((a) => a.atributo === 'SAB')?.mod ?? 0,

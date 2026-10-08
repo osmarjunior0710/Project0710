@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0743
+
+Monge nível 10: Foco Aprimorado. Defesa Paciente gastando Foco rola 2 dados de Artes Marciais e já aplica como PV Temporários; Passo do Vento mostra que dá pra levar 1 criatura voluntária junto; Torrente de Golpes gastando Foco passa a dar 3 Ataques Desarmados em vez de 2. Os textos do popup de escolha também mudam.
+
 ## v202610_0737
 
 Monge nível 7: Evasão. Na aba Atributos, a linha da Salvaguarda de Destreza ganha o aviso "(Evasão: passou = 0 dano, falhou = metade)" — mesmo estilo do aviso de Sentido de Perigo do Bárbaro.
