@@ -501,7 +501,7 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'No início do seu turno, você pode gastar 1 Ponto de Foco para imbuir-se de energia elemental. A energia dura 10 minutos ou até você ter a condição Incapacitado. Você adquire os seguintes benefícios enquanto esta característica estiver ativa. Ataques Elementais. Ao acertar com seu Ataque Desarmado, você pode causar com ele, à sua escolha, dano Ácido, Elétrico, Gélido, Ígneo ou Trovejante, em vez de seu tipo de dano normal. Ao causar um desses tipos de dano, você também pode forçar o alvo a realizar uma salvaguarda de Força. Se ele falhar, você pode movê-lo até 3 metros em sua direção ou para longe de você, enquanto a energia elemental gira em torno dele. Extensão. Ao realizar um Ataque Desarmado, seu alcance aumenta em 3 metros à medida que a energia elemental se estende por você.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Monge',

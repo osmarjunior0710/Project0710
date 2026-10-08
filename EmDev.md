@@ -29,7 +29,7 @@ introdução do Paladino colada — cortada na importação.
       Char Multiclasse com "Combatente dos Elementos". Teste em
       `core/subclasseElementos.test.ts`.
 - [x] **Entrega 2 — Manipular Elementos (nível 3).** Campo novo `truquesConcedidos` em `CaracteristicaSubclasse` + `core/magiasSubclasse.ts` (genérico, qualquer subclasse) + testes; hook de conjuração soma o truque em `magiasConjuraveis` (Combate) e a aba Magias ganhou a seção "Magias de Subclasse"; a aba Magias aparece mesmo sem classe conjuradora. Conferido ao vivo nas 2 telas com um Monge puro. Elementalismo é só utilidade (sem rolagem), então o atributo de conjuração (SAB) não aparece em nenhum cálculo.
-- [ ] **Entrega 3 — Sintonia Elemental (nível 3)** — cartão Ativar (1 Foco)
+- [x] **Entrega 3 — Sintonia Elemental (nível 3)** (feito: `core/sintoniaElemental.ts` + testes, `sintoniaElementalAtiva` persistido, card igual ao da Defesa Superior com Extensão e Natação/Voo do nível 11 como texto; Passo dos Elementos ficou como texto, ainda `placeholder-textonly` no dado) — cartão Ativar (1 Foco)
       / Encerrar na aba Combate (padrão Defesa Superior), Extensão e Passo
       dos Elementos (nível 11) como texto.
 - [ ] **Entrega 4 — Ataques Elementais (nível 3)** — tipos de dano

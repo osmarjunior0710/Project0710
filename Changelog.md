@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1820
+
+Monge (Combatente dos Elementos) nível 3: Sintonia Elemental. Na aba Combate aparece o cartão "🌪 Sintonia Elemental": "Ativar (gasta 1 Ponto de Foco)" liga (cartão passa a mostrar ATIVA com os benefícios: Ataques Elementais, Extensão de +3 m e, no nível 11, Natação/Voo) e "Encerrar" desliga. Os tipos de dano elementais no Ataque Desarmado chegam na próxima entrega.
+
 ## v202610_1817
 
 Corrige os popups do ⓘ (descrição de magia e quebra de valores/regras) que ficavam presos dentro do painel lateral de Ação/Bônus/Reação, na largura do painel e com o fundo escuro cortado. Agora abrem por cima de tudo, centralizados na tela inteira.

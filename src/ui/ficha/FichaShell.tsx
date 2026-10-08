@@ -81,6 +81,7 @@ import { ataqueAtual, ataqueBonusMaoSecundaria, ataqueDesarmado } from '../../co
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
 import { temEvasao } from '../../core/evasao';
+import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, temSintoniaElemental } from '../../core/sintoniaElemental';
 import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior, temDefesaSuperior } from '../../core/defesaSuperior';
 import { podeRerolarSalvaguardaComFoco, temSobreviventeDisciplinado } from '../../core/sobreviventeDisciplinado';
 import { explicarCdGolpeAtordoante } from '../../core/golpeAtordoante';
@@ -504,6 +505,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [furiaAtiva, setFuriaAtiva] = useState(personagemSalvo.furiaAtiva ?? false);
   const [armaSagradaAtiva, setArmaSagradaAtiva] = useState(personagemSalvo.armaSagradaAtiva ?? false);
   const [defesaSuperiorAtiva, setDefesaSuperiorAtiva] = useState(personagemSalvo.defesaSuperiorAtiva ?? false);
+  const [sintoniaElementalAtiva, setSintoniaElementalAtiva] = useState(personagemSalvo.sintoniaElementalAtiva ?? false);
   const [resplendorSagradoGasto, setResplendorSagradoGasto] = useState(personagemSalvo.resplendorSagradoGasto ?? false);
   const [resplendorSagradoAtiva, setResplendorSagradoAtiva] = useState(personagemSalvo.resplendorSagradoAtiva ?? false);
   const [ataqueImprudenteAtivo, setAtaqueImprudenteAtivo] = useState(personagemSalvo.ataqueImprudenteAtivoTurno ?? false);
@@ -1395,6 +1397,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     furiaAtiva,
     armaSagradaAtiva,
     defesaSuperiorAtiva,
+    sintoniaElementalAtiva,
     resplendorSagradoGasto,
     resplendorSagradoAtiva,
     maosCurativasGasto,
@@ -1507,6 +1510,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       furiaAtiva,
       armaSagradaAtiva,
       defesaSuperiorAtiva,
+      sintoniaElementalAtiva,
       resplendorSagradoGasto,
       resplendorSagradoAtiva,
       maosCurativasGasto,
@@ -1740,6 +1744,19 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (!podeAtivarDefesaSuperior(mongeEntry?.nivel ?? 0, pontosDeFocoRestantes)) return false;
     setPontosDeFocoGasto((v) => v + CUSTO_FOCO_DEFESA_SUPERIOR);
     setDefesaSuperiorAtiva(true);
+    return true;
+  }
+
+  /** Sintonia Elemental (Monge/Elementos nível 3) — ativar gasta 1 Ponto de
+   * Foco; encerrar é de graça (10 min ou Incapacitado, o app não conta tempo). */
+  function usarSintoniaElemental(): boolean {
+    if (sintoniaElementalAtiva) {
+      setSintoniaElementalAtiva(false);
+      return true;
+    }
+    if (!podeAtivarSintoniaElemental(mongeEntry?.nivel ?? 0, mongeEntry?.subclasse, pontosDeFocoRestantes)) return false;
+    setPontosDeFocoGasto((v) => v + CUSTO_FOCO_SINTONIA_ELEMENTAL);
+    setSintoniaElementalAtiva(true);
     return true;
   }
 
@@ -3393,6 +3410,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             }}
             temRepudiarInimigos={temRepudiarInimigos}
             temGolpesRadiantes={temGolpesRadiantes}
+            sintoniaElemental={{
+              disponivel: temSintoniaElemental(mongeEntry?.nivel ?? 0, mongeEntry?.subclasse),
+              ativa: sintoniaElementalAtiva,
+              onAlternar: usarSintoniaElemental,
+            }}
             defesaSuperior={{
               disponivel: temDefesaSuperior(mongeEntry?.nivel ?? 0),
               ativa: defesaSuperiorAtiva,

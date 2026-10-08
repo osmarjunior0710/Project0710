@@ -9,6 +9,7 @@ import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { golpesPotencializadosAtivo, TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
 import { ataquesTorrenteComFoco, temFocoAprimorado } from '../../../core/focoAprimorado';
 import { pontosDeFocoRecuperadosFocoPerfeito } from '../../../core/focoPerfeito';
+import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, SUBCLASSE_ELEMENTOS } from '../../../core/sintoniaElemental';
 import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior } from '../../../core/defesaSuperior';
 import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
 import { formulaRedirecionarDefletir, formulaReducaoDefletirAtaques } from '../../../core/defletirAtaques';
@@ -324,6 +325,12 @@ interface CombatTabProps {
    * zerado quando a arma atual não é mais elegível (ver
    * `FichaShell.tsx`). */
   /** Defesa Superior (Monge nível 18) — card com Ativar (3 Foco)/Encerrar. */
+  /** Sintonia Elemental (Monge/Elementos nível 3) — card com Ativar (1 Foco)/Encerrar. */
+  sintoniaElemental: {
+    disponivel: boolean;
+    ativa: boolean;
+    onAlternar: () => boolean;
+  };
   defesaSuperior: {
     disponivel: boolean;
     ativa: boolean;
@@ -740,6 +747,7 @@ export default function CombatTab({
   },
   temRepudiarInimigos,
   temGolpesRadiantes,
+  sintoniaElemental,
   defesaSuperior,
   armaSagrada,
   resplendorSagrado,
@@ -1927,6 +1935,42 @@ export default function CombatTab({
               🔥 Recuperar Fúria (Fúria Persistente)
             </div>
           )}
+        </div>
+      )}
+
+      {sintoniaElemental.disponivel && (
+        <div className="opt-card" style={{ marginBottom: 12, borderColor: sintoniaElemental.ativa ? '#d9742c' : undefined }}>
+          <div className="opt-card-name">🌪 Sintonia Elemental {sintoniaElemental.ativa ? 'ATIVA' : ''}</div>
+          <div className="opt-card-desc">
+            {sintoniaElemental.ativa ? (
+              <>
+                Dura 10 minutos ou até você ficar Incapacitado — toque abaixo pra encerrar.
+                <br />• Ataques Elementais: seu Ataque Desarmado pode causar dano Ácido, Elétrico, Gélido, Ígneo ou Trovejante.
+                <br />• Extensão: seu alcance no Ataque Desarmado aumenta em 3 metros.
+                {nivelMonge >= 11 && (
+                  <>
+                    <br />• Passo dos Elementos: Deslocamento de Natação e de Voo igual ao seu Deslocamento.
+                  </>
+                )}
+              </>
+            ) : (
+              `No início do seu turno, gaste ${CUSTO_FOCO_SINTONIA_ELEMENTAL} Ponto de Foco pra imbuir-se de energia elemental (10 minutos ou até ficar Incapacitado).`
+            )}
+          </div>
+          <div
+            className="btn"
+            style={{
+              marginTop: 8,
+              ...(sintoniaElemental.ativa
+                ? { background: 'rgba(178, 59, 59, 0.16)', borderColor: '#b23b3b' }
+                : podeAtivarSintoniaElemental(nivelMonge, SUBCLASSE_ELEMENTOS, pontosDeFocoRestantes)
+                  ? {}
+                  : { opacity: 0.5, pointerEvents: 'none' as const }),
+            }}
+            onClick={() => sintoniaElemental.onAlternar()}
+          >
+            {sintoniaElemental.ativa ? 'Encerrar Sintonia Elemental' : `Ativar (gasta ${CUSTO_FOCO_SINTONIA_ELEMENTAL} Ponto de Foco)`}
+          </div>
         </div>
       )}
 

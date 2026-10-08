@@ -416,6 +416,9 @@ export interface PersonagemSalvo {
   /** `true` = Defesa Superior ATIVA agora (Monge nível 18, gastou 3 Pontos de
    * Foco) — toggle sem contador de tempo (mesmo padrão de `armaSagradaAtiva`). */
   defesaSuperiorAtiva?: boolean;
+  /** `true` = Sintonia Elemental ATIVA agora (Monge, Combatente dos Elementos, gastou 1
+   * Ponto de Foco) — toggle sem contador de tempo (padrão de `defesaSuperiorAtiva`). */
+  sintoniaElementalAtiva?: boolean;
   /** `true` = já usou Resplendor Sagrado (Paladino, Juramento da
    * Devoção, nível 20) desde o último Descanso Longo — zera lá, ou
    * gastando 1 espaço de 5º círculo (`onRecuperarComEspaco`).
