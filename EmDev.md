@@ -28,9 +28,7 @@ introdução do Paladino colada — cortada na importação.
       nível 17 limpo), Level Up libera a subclasse (`subclasseImplementada`),
       Char Multiclasse com "Combatente dos Elementos". Teste em
       `core/subclasseElementos.test.ts`.
-- [ ] **Entrega 2 — Manipular Elementos (nível 3).** Elementalismo
-      concedido ao Monge (SAB como atributo de conjuração), nas telas Magias
-      E Combate (CLAUDE.md 6.6).
+- [x] **Entrega 2 — Manipular Elementos (nível 3).** Campo novo `truquesConcedidos` em `CaracteristicaSubclasse` + `core/magiasSubclasse.ts` (genérico, qualquer subclasse) + testes; hook de conjuração soma o truque em `magiasConjuraveis` (Combate) e a aba Magias ganhou a seção "Magias de Subclasse"; a aba Magias aparece mesmo sem classe conjuradora. Conferido ao vivo nas 2 telas com um Monge puro. Elementalismo é só utilidade (sem rolagem), então o atributo de conjuração (SAB) não aparece em nenhum cálculo.
 - [ ] **Entrega 3 — Sintonia Elemental (nível 3)** — cartão Ativar (1 Foco)
       / Encerrar na aba Combate (padrão Defesa Superior), Extensão e Passo
       dos Elementos (nível 11) como texto.

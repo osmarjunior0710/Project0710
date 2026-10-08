@@ -1032,6 +1032,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasPactoDoInferoAtuais,
     magiasJuramentoDaDevocaoAtuais,
     magiasEspecieAtuais,
+    magiasSubclasseAtuais,
     magiasTalentoOrigemAtuais,
     magiaIniciadaOrigemAtual,
     magiaIniciadaEspecieAtual,
@@ -3237,6 +3238,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             magiasPactoDoInferoAtuais={magiasPactoDoInferoAtuais}
             magiasJuramentoDaDevocaoAtuais={magiasJuramentoDaDevocaoAtuais}
             magiasEspecieAtuais={magiasEspecieAtuais}
+            magiasSubclasseAtuais={magiasSubclasseAtuais}
             magiasTalentoOrigemAtuais={magiasTalentoOrigemAtuais}
             magiasTalentoGeralAtuais={magiasTalentoGeralAtuais}
             temPactoDaLamina={invocacoesMisticasAtuais.includes('pacto-da-lamina')}

@@ -58,6 +58,9 @@ export interface CaracteristicaSubclasse {
    * jogador (diferente de "Descobertas Mágicas" do Bardo, que É uma
    * escolha). `undefined` nas outras características. */
   magiasFixasPorNivel?: Record<number, string[]>;
+  /** Truques concedidos de forma fixa por esta característica (ex.:
+   * Manipular Elementos → Elementalismo). Ver `core/magiasSubclasse.ts`. */
+  truquesConcedidos?: string[];
 }
 
 export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
@@ -487,7 +490,8 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Você conhece a magia Elementalismo. Sabedoria é seu atributo de conjuração para ela.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
+    truquesConcedidos: ['Elementalismo'],
   },
   {
     classe: 'Monge',

@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1812
+
+Monge — Combatente dos Elementos, Manipular Elementos (nível 3): o Monge dessa subclasse passa a conhecer o truque Elementalismo. Aparece na aba Magias (seção "Magias de Subclasse") e na aba Combate (Ação → Usar Magia → Truques, com o selo Monge), e a aba Magias aparece mesmo num Monge sem outra classe conjuradora.
+
 ## v202610_1743
 
 Monge — Combatente dos Elementos, 1ª entrega: a subclasse já pode ser escolhida no Level Up (nível 3) e o texto das 5 características (Manipular Elementos, Sintonia Elemental, Explosão Elemental, Passo dos Elementos, Ápice Elemental) aparece no Perfil, com [PH] enquanto a mecânica não chega. O Char Multiclasse de teste passa a usar essa subclasse.

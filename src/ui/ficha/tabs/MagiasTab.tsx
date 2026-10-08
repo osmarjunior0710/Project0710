@@ -167,6 +167,8 @@ interface MagiasTabProps {
    * acima. Vazio pra espécie sem essa sub-escolha, ou sem escolha
    * ainda feita. */
   magiasEspecieAtuais: string[];
+  /** Truques concedidos por subclasse (ex.: Elementalismo do Monge/Elementos) — `core/magiasSubclasse.ts`. */
+  magiasSubclasseAtuais: string[];
   /** Truque(s) + magia de 1º círculo do talento de Origem "Iniciado em
    * Magia" (Acólito/Guia/Sábio) — fixo desde a criação, mesmo
    * tratamento de "sempre preparada" das outras listas fixas acima.
@@ -367,6 +369,7 @@ export default function MagiasTab({
   magiasPactoDoInferoAtuais,
   magiasJuramentoDaDevocaoAtuais,
   magiasEspecieAtuais,
+  magiasSubclasseAtuais,
   magiasTalentoOrigemAtuais,
   magiasTalentoGeralAtuais,
   livroDasSombrasAtuais,
@@ -494,6 +497,7 @@ export default function MagiasTab({
   const pactoDoInfero = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
   const juramentoDaDevocao = magiasPreparadasDoPersonagem(magiasJuramentoDaDevocaoAtuais);
   const magiasEspecie = magiasPreparadasDoPersonagem(magiasEspecieAtuais);
+  const magiasSubclasse = magiasPreparadasDoPersonagem(magiasSubclasseAtuais);
   const magiasTalentoOrigem = magiasPreparadasDoPersonagem(magiasTalentoOrigemAtuais);
   const magiasTalentoGeral = magiasPreparadasDoPersonagem(magiasTalentoGeralAtuais);
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
@@ -1446,6 +1450,37 @@ export default function MagiasTab({
             Concedidas pela espécie — sempre preparadas, não contam na conta de Magias Preparadas.
           </div>
           {magiasEspecie.map((m) => {
+            const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
+            const temAcao = usarMagiaTemAcaoAutomatizada(m);
+            return (
+              <div key={m.id} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                    onClick={() => temAcao && usarMagia(m)}
+                  >
+                    {temAcao ? 'Usar' : 'Usar (pendência)'}
+                  </div>
+                </div>
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+
+      {magiasSubclasse.length > 0 && (
+        <>
+          <div className="section-title">Magias de Subclasse</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Concedidas pela subclasse — sempre disponíveis, não contam na conta de Magias Preparadas.
+          </div>
+          {magiasSubclasse.map((m) => {
             const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
