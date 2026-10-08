@@ -14,6 +14,7 @@ import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
 import { TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
 import { podeAtaqueElemental } from '../../../core/ataquesElementais';
+import type { LadosDado } from '../../roll/RollContext';
 import { CUSTO_FOCO_EXPLOSAO_ELEMENTAL } from '../../../core/explosaoElemental';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import styles from './PanelRows.module.css';
@@ -224,6 +225,10 @@ interface AcaoPanelContentProps {
   onElemental: () => void;
   /** Explosão Elemental (Monge/Elementos nível 6) — linha no grupo Monge; tocar abre a
    * escolha de elemento em `CombatTab.tsx` (gasta 2 Foco + a Ação). */
+  /** Ápice Elemental (Monge/Elementos nível 17) — Golpes Potencializados: chamado ao ACERTAR um
+   * Ataque Desarmado; devolve os lados do dado de Artes Marciais a somar no dano (1 dado extra,
+   * mesmo tipo) e já marca "usado neste turno", ou `0` se não vale. */
+  consumirApiceGolpes: () => LadosDado | 0;
   explosaoElementalDisponivel: boolean;
   onExplosaoElemental: () => void;
   /** Pontos de Foco (Monge) — contador no grupo Monge e trava da Explosão Elemental. */
@@ -345,6 +350,7 @@ export default function AcaoPanelContent({
   golpesPotencializados,
   sintoniaElementalAtiva,
   onElemental,
+  consumirApiceGolpes,
   explosaoElementalDisponivel,
   onExplosaoElemental,
   pontosDeFocoMaximo,
@@ -616,22 +622,27 @@ export default function AcaoPanelContent({
       vantagem,
       confirmarAcerto: {
         onAcertou: ({ critico }) => {
+          const ladosApice = ehDanoDesarmado ? consumirApiceGolpes() : 0;
+          const gruposExtrasBase = [
+            ...(golpesRadiantesAtivo ? [{ quantidade: 1, lados: 8 }] : []),
+            ...(ladosApice > 0 ? [{ quantidade: 1, lados: ladosApice }] : []),
+          ];
           const dano = danoComCritico(
             {
               quantidade: ataque.danoQuantidade,
               lados: ataque.danoLados,
               mod: ataque.danoMod,
-              gruposExtras: golpesRadiantesAtivo ? [{ quantidade: 1, lados: 8 }] : undefined,
+              gruposExtras: gruposExtrasBase.length > 0 ? gruposExtrasBase : undefined,
             },
             critico,
           );
           rolarDados({
-            label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}${golpesRadiantesAtivo ? ' + Golpes Radiantes' : ''}`,
+            label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}${golpesRadiantesAtivo ? ' + Golpes Radiantes' : ''}${ladosApice > 0 ? ' + Ápice Elemental' : ''}`,
             formula: dano.formula,
             quantidade: dano.quantidade,
             lados: ataque.danoLados,
             mod: ataque.danoMod,
-            gruposExtras: dano.gruposExtras,
+            gruposExtras: dano.gruposExtras as { quantidade: number; lados: LadosDado }[] | undefined,
             rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
             rerollEscolhido: perfuradorDisponivel && ataque.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
             confirmarFechamento: comGolpeAtordoante(

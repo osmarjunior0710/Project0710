@@ -7,6 +7,7 @@ import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { TEXTO_EMPURRAO_ELEMENTAL } from '../../../core/ataquesElementais';
+import { golpesPotencializadosApiceDisponivel } from '../../../core/apiceElemental';
 import {
   CUSTO_FOCO_EXPLOSAO_ELEMENTAL,
   formulaDanoExplosaoElemental,
@@ -39,7 +40,7 @@ import type { AjustesPet, Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
-import { useRoll } from '../../roll/RollContext';
+import { useRoll, type LadosDado } from '../../roll/RollContext';
 import InfoChip from '../../components/InfoChip';
 import BarraDeVida from '../../components/BarraDeVida';
 import ContadorUsos from '../../components/ContadorUsos';
@@ -335,6 +336,12 @@ interface CombatTabProps {
    * `FichaShell.tsx`). */
   /** Defesa Superior (Monge nível 18) — card com Ativar (3 Foco)/Encerrar. */
   /** Sintonia Elemental (Monge/Elementos nível 3) — card com Ativar (1 Foco)/Encerrar. */
+  /** Ápice Elemental (Monge/Elementos nível 17) — Golpes Potencializados (1x por turno). */
+  apiceElemental: {
+    disponivel: boolean;
+    golpesUsadoTurno: boolean;
+    onUsarGolpes: () => void;
+  };
   sintoniaElemental: {
     disponivel: boolean;
     ativa: boolean;
@@ -756,6 +763,7 @@ export default function CombatTab({
   },
   temRepudiarInimigos,
   temGolpesRadiantes,
+  apiceElemental,
   sintoniaElemental,
   defesaSuperior,
   armaSagrada,
@@ -1498,14 +1506,21 @@ export default function CombatTab({
       vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
       confirmarAcerto: {
         onAcertou: ({ critico }) => {
+          const ladosApice = consumirApiceGolpes();
           const dano = danoComCritico(
-            { quantidade: ataqueTorrente.info.danoQuantidade, lados: ataqueTorrente.info.danoLados, mod: ataqueTorrente.info.danoMod },
+            {
+              quantidade: ataqueTorrente.info.danoQuantidade,
+              lados: ataqueTorrente.info.danoLados,
+              mod: ataqueTorrente.info.danoMod,
+              gruposExtras: ladosApice > 0 ? [{ quantidade: 1, lados: ladosApice }] : undefined,
+            },
             critico,
           );
           rolarDados({
-            label: `Dano — ${ataqueTorrente.nome} (Torrente de Golpes)${critico ? ' (Crítico)' : ''} (${numero}/${total})`,
+            label: `Dano — ${ataqueTorrente.nome} (Torrente de Golpes)${critico ? ' (Crítico)' : ''}${ladosApice > 0 ? ' + Ápice Elemental' : ''} (${numero}/${total})`,
             formula: dano.formula,
             quantidade: dano.quantidade,
+            gruposExtras: dano.gruposExtras as { quantidade: number; lados: LadosDado }[] | undefined,
             lados: ataqueTorrente.info.danoLados,
             mod: ataqueTorrente.info.danoMod,
             rerollSe1: danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
@@ -1650,6 +1665,29 @@ export default function CombatTab({
       },
       confirmarFechamento: { aoTocar: () => setExplosaoResultado({ elemento, dano: totalRolado }) },
     });
+  }
+
+  // Marca que não fica velha (mesmo motivo de `golpeAtordoanteUsadoRef`: o 2º/3º ataque da Torrente
+  // nasce de dentro do callback do 1º, com a closure antiga).
+  const apiceGolpesUsadoRef = useRef(apiceElemental.golpesUsadoTurno);
+  useEffect(() => {
+    apiceGolpesUsadoRef.current = apiceElemental.golpesUsadoTurno;
+  }, [apiceElemental.golpesUsadoTurno]);
+
+  /** Golpes Potencializados do Ápice Elemental (nível 17): ao acertar um Ataque Desarmado com a
+   * Sintonia ativa, 1x por turno, soma 1 dado de Artes Marciais. Devolve os lados (0 = não vale)
+   * e já marca como usado. */
+  function consumirApiceGolpes(): LadosDado | 0 {
+    const vale = golpesPotencializadosApiceDisponivel({
+      nivelMonge,
+      subclasseMonge: apiceElemental.disponivel ? SUBCLASSE_ELEMENTOS : null,
+      sintoniaAtiva: sintoniaElemental.ativa,
+      usadoTurno: apiceElemental.golpesUsadoTurno || apiceGolpesUsadoRef.current,
+    });
+    if (!vale || ladosArtesMarciaisMonge <= 0) return 0;
+    apiceGolpesUsadoRef.current = true;
+    apiceElemental.onUsarGolpes();
+    return ladosArtesMarciaisMonge as LadosDado;
   }
 
   function abrirElemental(aoFechar?: () => void) {
@@ -2000,6 +2038,11 @@ export default function CombatTab({
                 Dura 10 minutos ou até você ficar Incapacitado — toque abaixo pra encerrar.
                 <br />• Ataques Elementais: seu Ataque Desarmado pode causar dano Ácido, Elétrico, Gélido, Ígneo ou Trovejante.
                 <br />• Extensão: seu alcance no Ataque Desarmado aumenta em 3 metros.
+                {apiceElemental.disponivel && (
+                  <>
+                    <br />• Ápice — Golpes Potencializados: no 1º acerto desarmado de cada turno soma 1 dado de Artes Marciais (mesmo tipo, aplicado sozinho){apiceElemental.golpesUsadoTurno ? ' — já usado neste turno' : ''}.
+                  </>
+                )}
                 {nivelMonge >= 11 && (
                   <>
                     <br />• Passo dos Elementos: Deslocamento de Natação e de Voo igual ao seu Deslocamento.
@@ -2452,6 +2495,7 @@ export default function CombatTab({
           golpesPotencializados={golpesPotencializadosAtivo(nivelMonge)}
           sintoniaElementalAtiva={sintoniaElemental.ativa}
           onElemental={() => abrirElemental()}
+          consumirApiceGolpes={consumirApiceGolpes}
           explosaoElementalDisponivel={temExplosaoElemental(nivelMonge, SUBCLASSE_ELEMENTOS)}
           onExplosaoElemental={abrirExplosaoElemental}
           pontosDeFocoMaximo={pontosDeFocoMaximo}

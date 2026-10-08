@@ -81,6 +81,7 @@ import { ataqueAtual, ataqueBonusMaoSecundaria, ataqueDesarmado } from '../../co
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
 import { temEvasao } from '../../core/evasao';
+import { temApiceElemental } from '../../core/apiceElemental';
 import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, temSintoniaElemental } from '../../core/sintoniaElemental';
 import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior, temDefesaSuperior } from '../../core/defesaSuperior';
 import { podeRerolarSalvaguardaComFoco, temSobreviventeDisciplinado } from '../../core/sobreviventeDisciplinado';
@@ -506,6 +507,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [armaSagradaAtiva, setArmaSagradaAtiva] = useState(personagemSalvo.armaSagradaAtiva ?? false);
   const [defesaSuperiorAtiva, setDefesaSuperiorAtiva] = useState(personagemSalvo.defesaSuperiorAtiva ?? false);
   const [sintoniaElementalAtiva, setSintoniaElementalAtiva] = useState(personagemSalvo.sintoniaElementalAtiva ?? false);
+  const [apiceGolpesUsadoTurno, setApiceGolpesUsadoTurno] = useState(personagemSalvo.apiceGolpesUsadoTurno ?? false);
   const [resplendorSagradoGasto, setResplendorSagradoGasto] = useState(personagemSalvo.resplendorSagradoGasto ?? false);
   const [resplendorSagradoAtiva, setResplendorSagradoAtiva] = useState(personagemSalvo.resplendorSagradoAtiva ?? false);
   const [ataqueImprudenteAtivo, setAtaqueImprudenteAtivo] = useState(personagemSalvo.ataqueImprudenteAtivoTurno ?? false);
@@ -1398,6 +1400,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     armaSagradaAtiva,
     defesaSuperiorAtiva,
     sintoniaElementalAtiva,
+    apiceGolpesUsadoTurno,
     resplendorSagradoGasto,
     resplendorSagradoAtiva,
     maosCurativasGasto,
@@ -1511,6 +1514,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       armaSagradaAtiva,
       defesaSuperiorAtiva,
       sintoniaElementalAtiva,
+      apiceGolpesUsadoTurno,
       resplendorSagradoGasto,
       resplendorSagradoAtiva,
       maosCurativasGasto,
@@ -1832,6 +1836,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setCortarPronto(false);
     setGolpeDeEscudoUsadoTurno(false);
     setGolpeAtordoanteUsadoTurno(false);
+    setApiceGolpesUsadoTurno(false);
     setForcaRevigoranteUsadaTurno(false);
     setEsmagadorUsadoTurno(false);
     setTalhadorUsadoTurno(false);
@@ -3410,6 +3415,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             }}
             temRepudiarInimigos={temRepudiarInimigos}
             temGolpesRadiantes={temGolpesRadiantes}
+            apiceElemental={{
+              disponivel: temApiceElemental(mongeEntry?.nivel ?? 0, mongeEntry?.subclasse),
+              golpesUsadoTurno: apiceGolpesUsadoTurno,
+              onUsarGolpes: () => setApiceGolpesUsadoTurno(true),
+            }}
             sintoniaElemental={{
               disponivel: temSintoniaElemental(mongeEntry?.nivel ?? 0, mongeEntry?.subclasse),
               ativa: sintoniaElementalAtiva,

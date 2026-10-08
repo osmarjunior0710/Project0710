@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1908
+
+Monge (Combatente dos Elementos) nível 17, Ápice Elemental — 1ª parte: Golpes Potencializados. Com a Sintonia Elemental ativa, o 1º acerto de Ataque Desarmado de cada turno soma 1 dado de Artes Marciais ao dano (aplicado sozinho, com "+ Ápice Elemental" no título do dano); os acertos seguintes do mesmo turno não ganham. Vale também na Torrente de Golpes. O cartão da Sintonia lista o benefício e avisa quando já foi usado no turno.
+
 ## v202610_1905
 
 Monge (Combatente dos Elementos) nível 6: Explosão Elemental. No painel de Ação, grupo Monge, a nova linha "💥 Explosão Elemental" gasta 2 Pontos de Foco e a Ação: escolha Ácido, Elétrico, Gélido, Ígneo ou Trovejante, o app rola 3 dados de Artes Marciais e abre o popup de salvaguarda de Destreza do alvo (falha: dano total; sucesso: metade).
