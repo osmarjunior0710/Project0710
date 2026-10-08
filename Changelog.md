@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1601
+
+Monge nível 15: Foco Perfeito. Ao rolar Iniciativa sem usar o Metabolismo Incomum, os Pontos de Foco voltam a 4 se você tiver 3 ou menos (automático, com aviso na tela). Quando o Metabolismo Incomum está disponível, o Foco Perfeito entra ao responder "Não" na pergunta dele.
+
 ## v202610_1432
 
 Monge nível 14: Sobrevivente Disciplinado. Todas as 6 salvaguardas passam a ter proficiência (🔵) e, ao rolar qualquer salvaguarda na aba Atributos, aparece o botão "🧘 Sobrevivente Disciplinado" no popup do dado: gasta 1 Ponto de Foco e joga o d20 de novo, ficando com o novo resultado (1x por rolagem).

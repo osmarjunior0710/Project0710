@@ -3438,6 +3438,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             ladosArtesMarciaisMonge={ladosArtesMarciaisMonge}
             nivelMonge={mongeEntry?.nivel ?? 0}
             desModMonge={desMod}
+            onRecuperarPontosDeFoco={(qtd) => setPontosDeFocoGasto((v) => Math.max(0, v - qtd))}
             onGanharPvTemporario={(valor) => setPvTemporario((atual) => ganharPvTemporario(atual, valor))}
             golpeAtordoante={{
               explicacaoCd: explicarCdGolpeAtordoante(

@@ -8,6 +8,7 @@ import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { golpesPotencializadosAtivo, TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
 import { ataquesTorrenteComFoco, temFocoAprimorado } from '../../../core/focoAprimorado';
+import { pontosDeFocoRecuperadosFocoPerfeito } from '../../../core/focoPerfeito';
 import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
 import { formulaRedirecionarDefletir, formulaReducaoDefletirAtaques } from '../../../core/defletirAtaques';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
@@ -466,6 +467,8 @@ interface CombatTabProps {
   nivelMonge: number;
   /** Mod. de Destreza — Defletir Ataques (Monge nível 3). */
   desModMonge: number;
+  /** Foco Perfeito (Monge nível 15) — devolve N Pontos de Foco gastos. */
+  onRecuperarPontosDeFoco: (quantidade: number) => void;
   /** Foco Aprimorado (Defesa Paciente) — soma PV Temporário (não acumula, fica o maior). */
   onGanharPvTemporario: (valor: number) => void;
   /** Golpe Atordoante (Monge nível 5) — CD (8+SAB+prof) e controle de
@@ -788,6 +791,7 @@ export default function CombatTab({
   ladosArtesMarciaisMonge,
   nivelMonge,
   desModMonge,
+  onRecuperarPontosDeFoco,
   onGanharPvTemporario,
   golpeAtordoante,
   onConfirmarMetabolismoIncomum,
@@ -936,6 +940,17 @@ export default function CombatTab({
     });
     onRolarIniciativa?.();
     if (metabolismoIncomumDisponivel) setMetabolismoIncomumPendente(true);
+    else aplicarFocoPerfeito();
+  }
+
+  /** Foco Perfeito (Monge nível 15) — automático ao jogar Iniciativa sem usar
+   * Metabolismo Incomum: se não houver pergunta do Metabolismo, aplica na
+   * hora; se houver, aplica quando o jogador responde "Não". */
+  function aplicarFocoPerfeito() {
+    const qtd = pontosDeFocoRecuperadosFocoPerfeito(nivelMonge, pontosDeFocoRestantes);
+    if (qtd <= 0) return;
+    onRecuperarPontosDeFoco(qtd);
+    setFeedback(`🎯 Foco Perfeito — recuperou ${qtd} Ponto${qtd === 1 ? '' : 's'} de Foco (você volta a ter 4).`);
   }
 
   /** "Fim do Turno" = uma piscada de olho (pedido do Osmar) — 2 planos
@@ -1627,7 +1642,10 @@ export default function CombatTab({
    * combates). */
   function confirmarMetabolismoIncomum(usar: boolean) {
     setMetabolismoIncomumPendente(false);
-    if (!usar) return;
+    if (!usar) {
+      aplicarFocoPerfeito();
+      return;
+    }
     onConfirmarMetabolismoIncomum();
     rolarDados({
       label: 'Metabolismo Incomum (cura)',

@@ -957,7 +957,7 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Ao jogar Iniciativa e não usar Metabolismo Incomum, você recupera Pontos de Foco gastos até ter 4, se tiver 3 ou menos.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Monge',
