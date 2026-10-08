@@ -160,6 +160,13 @@ desktop são "esticar depois", nunca o ponto de partida. Toda área
 clicável precisa ser grande o suficiente pro dedo, não pro cursor. Nunca
 esconda informação importante atrás de hover.
 
+**Tamanhos de teste padrão (2026-10):** o que importa é a largura em
+pixels CSS, não a proporção (celular moderno é ~20:9, não 16:9/4:3).
+Teste sempre em **360px** (o mais apertado, Android comum) e **412px**
+(Pixel/Galaxy grandes); 390px (iPhone) é a referência de partida. Se
+cabe bem em 360, cabe nos maiores. Nunca use só o aparelho do Osmar
+como referência.
+
 ## 5.1 Ordem de construção de UI: M3 primeiro, pele RPG depois
 
 Ao implementar qualquer componente/tela nova, siga sempre esta ordem:

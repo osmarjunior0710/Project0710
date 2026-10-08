@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0838
+
+Perfil e Level Up agora mostram o texto de todas as características do Monge (níveis 1 a 20), que antes apareciam como "Descrição detalhada ainda não importada". As que ainda não têm mecânica pronta aparecem com [PH]. Restauro Pessoal e Movimento Acrobático ficam como texto narrativo.
+
 ## v202610_0755
 
 Popup de rolagem de dado não ocupa mais a tela inteira no celular: o card tem largura máxima e margem nas laterais, e os títulos das rolagens do Monge (Defesa Paciente, Defletir Ataques) ficaram mais curtos.
