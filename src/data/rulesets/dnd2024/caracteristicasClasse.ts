@@ -948,7 +948,7 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Sua disciplina física e mental lhe concede proficiência em todas as salvaguardas. Além disso, ao realizar uma salvaguarda e falhar, você pode gastar 1 Ponto de Foco para jogar novamente, e deve usar o novo resultado.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Monge',

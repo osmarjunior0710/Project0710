@@ -508,6 +508,9 @@ export function calcularSalvaguardas(
    * `temAuraDeProtecao`) — soma nas 6 salvaguardas, mínimo +1. `0`/
    * omitido = sem bônus. */
   bonusAuraProtecao = 0,
+  /** Sobrevivente Disciplinado (Monge nível 14) — proficiência em TODAS as
+   * salvaguardas (ver `core/sobreviventeDisciplinado.ts`). */
+  proficienteEmTodas = false,
 ): SalvaguardaFinal[] {
   const bonus = classeOriginal ? bonusProficiencia(classeOriginal, nivelTotal) : 0;
   return atributosOrdem
@@ -518,7 +521,8 @@ export function calcularSalvaguardas(
       const atribMod = modificador(valor);
       const proficientePelaClasse = classeOriginal?.salvaguardas.includes(atributo) ?? false;
       const proficientePeloTalento = !proficientePelaClasse && atributosExtrasProficientes.includes(atributo);
-      const proficiente = proficientePelaClasse || proficientePeloTalento;
+      const proficientePeloMonge = proficienteEmTodas && !proficientePelaClasse && !proficientePeloTalento;
+      const proficiente = proficientePelaClasse || proficientePeloTalento || proficientePeloMonge;
       const bonusFinal = proficiente ? bonus : 0;
       return {
         atributo,
@@ -530,6 +534,7 @@ export function calcularSalvaguardas(
             { label: `mod. ${atributo}`, valor: fmtMod(atribMod) },
             ...(proficientePelaClasse ? [{ label: 'Bônus de Proficiência (proficiente)', valor: fmtMod(bonusFinal) }] : []),
             ...(proficientePeloTalento ? [{ label: 'Bônus de Proficiência (Resiliente)', valor: fmtMod(bonusFinal) }] : []),
+            ...(proficientePeloMonge ? [{ label: 'Bônus de Proficiência (Sobrevivente Disciplinado)', valor: fmtMod(bonusFinal) }] : []),
             ...(bonusAuraProtecao !== 0 ? [{ label: 'Aura de Proteção', valor: fmtMod(bonusAuraProtecao) }] : []),
           ],
           total: {

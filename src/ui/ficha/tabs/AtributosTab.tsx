@@ -354,6 +354,7 @@ export default function AtributosTab({
               mod: sv.mod,
               explicacaoMod: sv.explicacao,
               categoria: 'atributoOuSalvaguarda',
+              ehSalvaguarda: true,
               permiteForcaIndomavel: sv.atributo === 'FOR',
               vantagem: resolverVantagem(
                 temSentidoDePerigo && sv.atributo === 'DES',

@@ -81,6 +81,7 @@ import { ataqueAtual, ataqueBonusMaoSecundaria, ataqueDesarmado } from '../../co
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
 import { temEvasao } from '../../core/evasao';
+import { podeRerolarSalvaguardaComFoco, temSobreviventeDisciplinado } from '../../core/sobreviventeDisciplinado';
 import { explicarCdGolpeAtordoante } from '../../core/golpeAtordoante';
 import { explicarCdRamosDaArvore } from '../../core/ramosDaArvore';
 import { explicarCdRaizesDevastadoras } from '../../core/raizesDevastadoras';
@@ -256,6 +257,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     registrarBonusExtra,
     registrarSorte,
     registrarInspiracaoHeroica,
+    registrarSobreviventeDisciplinado,
     registrarForcaIndomavel,
     estado: rollEmAndamento,
     rolarD20,
@@ -803,6 +805,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     atributosResilienteEscolhidos(talentosEfetivos, escolhaAtributoTalentoGeral),
     temCampeaoPrimitivo,
     bonusAuraProtecao,
+    temSobreviventeDisciplinado(classesAtual.find((c) => c.classe === 'Monge')?.nivel ?? 0),
   );
   const proficienciasFerramenta = calcularProficienciasFerramenta(selecao, nivelTotalAtual, ferramentasMulticlasseAtuais);
   const bonusProficienciaAtual = classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
@@ -2432,6 +2435,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     });
     return () => registrarInspiracaoHeroica(null);
   }, [inspiracaoHeroicaAtiva, registrarInspiracaoHeroica]);
+
+  // Sobrevivente Disciplinado (Monge nível 14) — reroll de Salvaguarda
+  // gastando 1 Ponto de Foco, no modal de rolagem global.
+  useEffect(() => {
+    registrarSobreviventeDisciplinado({
+      disponivel: podeRerolarSalvaguardaComFoco(mongeEntry?.nivel ?? 0, pontosDeFocoRestantes),
+      usar: gastarPontoDeFoco,
+    });
+    return () => registrarSobreviventeDisciplinado(null);
+  }, [mongeEntry?.nivel, pontosDeFocoRestantes, registrarSobreviventeDisciplinado]);
 
   // Registra Força Indomável (Bárbaro nível 18) no modal de rolagem
   // global — aplica sozinho em teste/salvaguarda de Força (sem botão,

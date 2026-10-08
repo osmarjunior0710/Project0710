@@ -52,6 +52,8 @@ export default function RollOverlay() {
     rerollDadoEscolhido,
     inspiracaoHeroicaDisponivel,
     usarInspiracaoHeroica,
+    sobreviventeDisciplinadoDisponivel,
+    usarSobreviventeDisciplinado,
   } = useRoll();
 
   if (!estado) return null;
@@ -388,6 +390,20 @@ export default function RollOverlay() {
             >
               <span>✨ Inspiração Heroica</span>
               <span className={styles.bonusExtraBtnSub}>Rola dado novamente e fica com novo valor</span>
+            </div>
+          )}
+        {sobreviventeDisciplinadoDisponivel &&
+          estado.fase === 'concluido' &&
+          estado.tipo === 'd20' &&
+          estado.ehSalvaguarda &&
+          !estado.dado2 &&
+          !estado.sobreviventeUsado && (
+            <div
+              className={`${styles.bonusExtraBtn} ${styles.bonusExtraBtnColuna}`}
+              onClick={usarSobreviventeDisciplinado}
+            >
+              <span>🧘 Sobrevivente Disciplinado</span>
+              <span className={styles.bonusExtraBtnSub}>Falhou? Gasta 1 Ponto de Foco e joga de novo</span>
             </div>
           )}
         {estado.categoria === 'atributoOuSalvaguarda' && estado.bonusExtra && (
