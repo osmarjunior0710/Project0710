@@ -6,6 +6,7 @@ import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
+import { golpesPotencializadosAtivo, TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
 import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
 import { formulaRedirecionarDefletir, formulaReducaoDefletirAtaques } from '../../../core/defletirAtaques';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
@@ -1449,12 +1450,15 @@ export default function CombatTab({
                 setAtaquesTorrenteFeitos(numero);
                 if (numero < total) rolarAtaqueTorrente(numero + 1, total);
               };
-              return golpeAtordoanteParaAtaque(ataqueTorrente.info)
-                ? [
-                    { rotulo: 'OK', aoTocar: continuar },
-                    { rotulo: '💫 Golpe Atordoante', aoTocar: () => abrirGolpeAtordoante(continuar) },
-                  ]
-                : { aoTocar: continuar };
+              const potencializados = golpesPotencializadosAtivo(nivelMonge);
+              const atordoa = golpeAtordoanteParaAtaque(ataqueTorrente.info);
+              if (!potencializados && !atordoa) return { aoTocar: continuar };
+              return [
+                ...(potencializados
+                  ? TIPOS_DANO_GOLPES_POTENCIALIZADOS.map((rotulo) => ({ rotulo, aoTocar: continuar }))
+                  : [{ rotulo: 'OK', aoTocar: continuar }]),
+                ...(atordoa ? [{ rotulo: '💫 Golpe Atordoante', aoTocar: () => abrirGolpeAtordoante(continuar) }] : []),
+              ];
             })(),
           });
         },
@@ -2283,6 +2287,7 @@ export default function CombatTab({
           golpeDeEscudoUsadoTurno={golpeDeEscudoUsadoTurno}
           onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
           podeGolpeAtordoante={golpeAtordoanteParaAtaque}
+          golpesPotencializados={golpesPotencializadosAtivo(nivelMonge)}
           onGolpeAtordoante={() => abrirGolpeAtordoante()}
           temGolpesRadiantes={temGolpesRadiantes}
           armaSagradaDisponivel={armaSagrada.disponivel}

@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0056
+
+Monge nível 6: Golpes Potencializados. No popup de dano do Ataque Desarmado (inclusive na Torrente de Golpes) aparece o botão "⚡ Energético" pra escolher o tipo de dano; o normal (Contundente) continua como antes.
+
 ## v202610_1827
 
 Monge nível 3: Defletir Ataques na aba Reação. Rola a redução de dano (1d10 + Destreza + nível de Monge); se você zerar o dano, o popup oferece redirecionar o golpe (1 Ponto de Foco), que rola o dano e mostra o popup de salvaguarda de Destreza do alvo. No nível 13 (Defletir Energia) a descrição passa a valer pra qualquer tipo de dano.

@@ -12,6 +12,7 @@ import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
+import { TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import styles from './PanelRows.module.css';
 import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
@@ -212,6 +213,9 @@ interface AcaoPanelContentProps {
    * se o botão aparece no popup de dano desse acerto; `onGolpeAtordoante`
    * gasta o Foco e abre o popup de salvaguarda do alvo (`CombatTab.tsx`). */
   podeGolpeAtordoante: (ataque: AtaqueInfo) => boolean;
+  /** Golpes Potencializados (Monge nível 6) — Ataque Desarmado oferece
+   * escolher Energético no fechamento do popup de dano. */
+  golpesPotencializados: boolean;
   onGolpeAtordoante: () => void;
   /** Golpes Radiantes (Paladino nível 11) — sempre ativa, sem toggle:
    * soma 1d8 Radiante automático no dano de qualquer ataque Corpo a
@@ -325,6 +329,7 @@ export default function AcaoPanelContent({
   golpeDeEscudoUsadoTurno,
   onUsarGolpeDeEscudo,
   podeGolpeAtordoante,
+  golpesPotencializados,
   onGolpeAtordoante,
   temGolpesRadiantes,
   armaSagradaDisponivel,
@@ -507,6 +512,20 @@ export default function AcaoPanelContent({
     return {};
   }
 
+  /** Golpes Potencializados (Monge nível 6): no Ataque Desarmado, o popup de
+   * dano fecha escolhendo o tipo (Contundente ou Energético) — só rótulo
+   * informativo. Com botão de talento (Esmagador etc.), o Energético entra ao lado. */
+  function comGolpesPotencializados(
+    ehDesarmado: boolean,
+    base: { rotulo?: string; aoTocar?: () => void },
+  ): { rotulo?: string; aoTocar?: () => void } | { rotulo: string; aoTocar?: () => void }[] {
+    if (!golpesPotencializados || !ehDesarmado) return base;
+    // Botão de talento (Esmagador etc.) só vale pro tipo normal (Contundente);
+    // o Energético entra ao lado, sem o efeito do talento.
+    if (base.rotulo) return [{ rotulo: base.rotulo, aoTocar: base.aoTocar }, { rotulo: TIPOS_DANO_GOLPES_POTENCIALIZADOS[1] }];
+    return TIPOS_DANO_GOLPES_POTENCIALIZADOS.map((rotulo) => ({ rotulo, aoTocar: base.aoTocar }));
+  }
+
   /** Acrescenta o botão "💫 Golpe Atordoante" ao lado do(s) botão(ões) de
    * fechamento do popup de dano, quando o acerto é elegível. */
   function comGolpeAtordoante(
@@ -587,7 +606,9 @@ export default function AcaoPanelContent({
             rerollEscolhido: perfuradorDisponivel && ataque.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
             confirmarFechamento: comGolpeAtordoante(
               ataque,
-              armaSagradaBonus > 0 ? [{ rotulo: 'Normal' }, { rotulo: '☀️ Radiante' }] : confirmarFechamentoDoAtaque(talento),
+              armaSagradaBonus > 0
+                ? [{ rotulo: 'Normal' }, { rotulo: '☀️ Radiante' }]
+                : comGolpesPotencializados(ehDanoDesarmado, confirmarFechamentoDoAtaque(talento)),
             ),
           });
         },
