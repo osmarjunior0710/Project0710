@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0735
+
+Popup de dano com 3 ou mais botões (ex.: Esmagador + Energético + Golpe Atordoante) agora empilha os botões na vertical, sem quebrar o texto em 2 linhas no celular.
+
 ## v202610_0056
 
 Monge nível 6: Golpes Potencializados. No popup de dano do Ataque Desarmado (inclusive na Torrente de Golpes) aparece o botão "⚡ Energético" pra escolher o tipo de dano; o normal (Contundente) continua como antes.

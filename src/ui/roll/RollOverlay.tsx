@@ -281,7 +281,12 @@ export default function RollOverlay() {
           </div>
         )}
         {estado.fase === 'concluido' && estado.confirmarFechamento && Array.isArray(estado.confirmarFechamento) && (
-          <div className={styles.vantagemButtons}>
+          // 3+ botões (ex.: tipo de dano + Golpe Atordoante) empilham na vertical —
+          // lado a lado quebravam o rótulo em 2 linhas no celular.
+          <div
+            className={styles.vantagemButtons}
+            style={estado.confirmarFechamento.length >= 3 ? { flexDirection: 'column' } : undefined}
+          >
             {estado.confirmarFechamento.map((botao, i) => (
               <div
                 key={i}
