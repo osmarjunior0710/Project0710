@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1743
+
+Monge — Combatente dos Elementos, 1ª entrega: a subclasse já pode ser escolhida no Level Up (nível 3) e o texto das 5 características (Manipular Elementos, Sintonia Elemental, Explosão Elemental, Passo dos Elementos, Ápice Elemental) aparece no Perfil, com [PH] enquanto a mecânica não chega. O Char Multiclasse de teste passa a usar essa subclasse.
+
 ## v202610_1729
 
 Revisão final do Monge contra o livro: corrigidos os textos das técnicas. Defesa Paciente de graça agora é Desengajar (com 1 Foco: Desengajar + Esquivar); Passo do Vento de graça é Correr (com 1 Foco: Desengajar + Correr + salto dobrado). A opção "de graça" da Torrente de Golpes passou a se chamar Ataque Desarmado Adicional (Artes Marciais) — a Torrente em si só existe gastando 1 Foco.

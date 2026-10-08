@@ -15,7 +15,29 @@
 
 ---
 
-Nenhum foco em andamento agora — "Monge — classe base (nível 1-20, sem
-subclasse)" fechou (ver `aprendizados/classes/monge.md` pro histórico
-completo; pendências em `PENDENCIAS.md` "Monge"). Subclasses aguardam o
-Osmar escolher qual o jogador vai usar.
+## Foco atual: Monge — Combatente dos Elementos (subclasse)
+
+Decidido pelo Osmar (2026-10). SDD: `sdd/sdd-monge-elementos.md`. Teste
+sempre no "Char Multiclasse" (nível 20 em todas as classes — regra do
+CLAUDE.md 6.4); o Monge já entra nele com essa subclasse. Planilha
+(aba Subclasses): célula do nível 17 (Ápice Elemental) vinha com a
+introdução do Paladino colada — cortada na importação.
+
+- [x] **Entrega 1 — dado + liberar a escolha.** 5 características
+      importadas em `caracteristicasSubclasse.ts` (todas `placeholder-*`,
+      nível 17 limpo), Level Up libera a subclasse (`subclasseImplementada`),
+      Char Multiclasse com "Combatente dos Elementos". Teste em
+      `core/subclasseElementos.test.ts`.
+- [ ] **Entrega 2 — Manipular Elementos (nível 3).** Elementalismo
+      concedido ao Monge (SAB como atributo de conjuração), nas telas Magias
+      E Combate (CLAUDE.md 6.6).
+- [ ] **Entrega 3 — Sintonia Elemental (nível 3)** — cartão Ativar (1 Foco)
+      / Encerrar na aba Combate (padrão Defesa Superior), Extensão e Passo
+      dos Elementos (nível 11) como texto.
+- [ ] **Entrega 4 — Ataques Elementais (nível 3)** — tipos de dano
+      elementais no popup do Ataque Desarmado (+ Torrente) e empurrão com
+      salvaguarda de Força. Decisão de UI da lista de tipos em aberto (SDD
+      seção 2).
+- [ ] **Entrega 5 — Explosão Elemental (nível 6).**
+- [ ] **Entrega 6 — Ápice Elemental (nível 17)** em 3 partes: Golpes
+      Potencializados do Ápice, Passo Destrutivo, Resistência a Dano.
