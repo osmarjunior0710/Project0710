@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1729
+
+Revisão final do Monge contra o livro: corrigidos os textos das técnicas. Defesa Paciente de graça agora é Desengajar (com 1 Foco: Desengajar + Esquivar); Passo do Vento de graça é Correr (com 1 Foco: Desengajar + Correr + salto dobrado). A opção "de graça" da Torrente de Golpes passou a se chamar Ataque Desarmado Adicional (Artes Marciais) — a Torrente em si só existe gastando 1 Foco.
+
 ## v202610_1723
 
 Monge nível 20: Corpo e Mente. Destreza e Sabedoria sobem +4 (máximo 25) automaticamente, e tudo que depende delas acompanha: modificadores, CA (Defesa sem Armadura do Monge), Iniciativa, Percepção Passiva, salvaguardas e perícias. O ⓘ do atributo mostra a linha "Corpo e Mente".

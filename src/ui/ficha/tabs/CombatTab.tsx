@@ -1410,8 +1410,8 @@ export default function CombatTab({
     }
     setFeedback(
       comFoco
-        ? `🥋 Defesa Paciente — Esquivar + Desengajar (Ação Bônus). Gastou 1 Ponto de Foco.${temFocoAprimorado(nivelMonge) ? ' PV Temporários já aplicados.' : ''}`
-        : '🥋 Defesa Paciente — Esquivar (Ação Bônus), de graça.',
+        ? `🥋 Defesa Paciente — Desengajar + Esquivar (Ação Bônus). Gastou 1 Ponto de Foco.${temFocoAprimorado(nivelMonge) ? ' PV Temporários já aplicados.' : ''}`
+        : '🥋 Defesa Paciente — Desengajar (Ação Bônus), de graça.',
     );
   }
 
@@ -1420,8 +1420,8 @@ export default function CombatTab({
     onMarcarUsado('bonus');
     setFeedback(
       comFoco
-        ? `💨 Passo do Vento — Correr ou Desengajar (Ação Bônus) + salto dobrado de distância até o fim do turno. Gastou 1 Ponto de Foco.${temFocoAprimorado(nivelMonge) ? ' Pode levar 1 criatura voluntária (Grande ou menor, a até 1,5m) com você até o fim do turno, sem provocar Ataques de Oportunidade.' : ''}`
-        : '💨 Passo do Vento — Correr ou Desengajar (Ação Bônus), de graça.',
+        ? `💨 Passo do Vento — Desengajar + Correr (Ação Bônus) + salto dobrado de distância até o fim do turno. Gastou 1 Ponto de Foco.${temFocoAprimorado(nivelMonge) ? ' Pode levar 1 criatura voluntária (Grande ou menor, a até 1,5m) com você até o fim do turno, sem provocar Ataques de Oportunidade.' : ''}`
+        : '💨 Passo do Vento — Correr (Ação Bônus), de graça.',
     );
   }
 

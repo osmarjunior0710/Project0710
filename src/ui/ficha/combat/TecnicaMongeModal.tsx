@@ -16,19 +16,19 @@ const INFO: Record<TipoTecnicaMonge, { titulo: string; icone: string; graca: str
   'defesa-paciente': {
     titulo: 'Defesa Paciente',
     icone: '🥋',
-    graca: 'Esquivar (Ação Bônus)',
-    foco: 'Esquivar + Desengajar (Ação Bônus)',
+    graca: 'Desengajar (Ação Bônus)',
+    foco: 'Desengajar + Esquivar (Ação Bônus)',
   },
   'passo-do-vento': {
     titulo: 'Passo do Vento',
     icone: '💨',
-    graca: 'Correr ou Desengajar (Ação Bônus)',
-    foco: 'Correr ou Desengajar (Ação Bônus) + salto dobrado de distância',
+    graca: 'Correr (Ação Bônus)',
+    foco: 'Desengajar + Correr (Ação Bônus) + salto dobrado de distância',
   },
   torrente: {
     titulo: 'Torrente de Golpes',
     icone: '👊',
-    graca: '1 Ataque Desarmado extra (Ação Bônus)',
+    graca: 'Ataque Desarmado Adicional (Artes Marciais) — 1 Ataque Desarmado (Ação Bônus), sem gastar Foco',
     foco: '2 Ataques Desarmados extras (Ação Bônus)',
   },
 };

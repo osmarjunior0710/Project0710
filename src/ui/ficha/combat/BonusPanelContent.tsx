@@ -869,15 +869,15 @@ export default function BonusPanelContent({
                 <div className={styles.row} onClick={() => onAbrirTecnicaMonge('defesa-paciente')}>
                   <div className={styles.rowName}>🥋 Defesa Paciente</div>
                   {detalhesAtivo && (
-                    <div className={styles.rowDesc}>Esquivar como Ação Bônus — de graça, ou gastando 1 Ponto de Foco pra somar Desengajar.</div>
+                    <div className={styles.rowDesc}>Desengajar como Ação Bônus — de graça, ou gastando 1 Ponto de Foco pra somar Esquivar.</div>
                   )}
                 </div>
                 <div className={styles.row} onClick={() => onAbrirTecnicaMonge('passo-do-vento')}>
                   <div className={styles.rowName}>💨 Passo do Vento</div>
                   {detalhesAtivo && (
                     <div className={styles.rowDesc}>
-                      Correr ou Desengajar como Ação Bônus — de graça, ou gastando 1 Ponto de Foco pra dobrar a distância de
-                      salto até o fim do turno.
+                      Correr como Ação Bônus — de graça, ou gastando 1 Ponto de Foco pra Desengajar + Correr e dobrar a
+                      distância de salto até o fim do turno.
                     </div>
                   )}
                 </div>
@@ -886,7 +886,7 @@ export default function BonusPanelContent({
                     <div className={styles.rowName}>👊 Torrente de Golpes</div>
                     {detalhesAtivo && (
                       <div className={styles.rowDesc}>
-                        1 Ataque Desarmado extra (Ação Bônus) de graça, ou 2 gastando 1 Ponto de Foco.
+                        Ataque Desarmado Adicional (Artes Marciais, Ação Bônus) de graça, ou Torrente: 2 Ataques gastando 1 Ponto de Foco.
                       </div>
                     )}
                   </div>
