@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0737
+
+Monge nível 7: Evasão. Na aba Atributos, a linha da Salvaguarda de Destreza ganha o aviso "(Evasão: passou = 0 dano, falhou = metade)" — mesmo estilo do aviso de Sentido de Perigo do Bárbaro.
+
 ## v202610_0735
 
 Popup de dano com 3 ou mais botões (ex.: Esmagador + Energético + Golpe Atordoante) agora empilha os botões na vertical, sem quebrar o texto em 2 linhas no celular.

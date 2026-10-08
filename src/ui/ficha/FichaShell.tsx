@@ -80,6 +80,7 @@ import {
 import { ataqueAtual, ataqueBonusMaoSecundaria, ataqueDesarmado } from '../../core/ataque';
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
+import { temEvasao } from '../../core/evasao';
 import { explicarCdGolpeAtordoante } from '../../core/golpeAtordoante';
 import { explicarCdRamosDaArvore } from '../../core/ramosDaArvore';
 import { explicarCdRaizesDevastadoras } from '../../core/raizesDevastadoras';
@@ -3042,6 +3043,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             pericias={pericias}
             salvaguardas={salvaguardas}
             temSentidoDePerigo={temSentidoDePerigo}
+            temEvasao={temEvasao(mongeEntry?.nivel ?? 0)}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             desvantagemFurtividadeArmadura={desvantagemFurtividadeArmadura}
             proficienciasFerramenta={proficienciasFerramenta}
