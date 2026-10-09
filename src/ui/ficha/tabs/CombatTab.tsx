@@ -8,6 +8,7 @@ import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { TEXTO_EMPURRAO_ELEMENTAL } from '../../../core/ataquesElementais';
 import {
+  TIPOS_RESISTENCIA_APICE,
   BONUS_DESLOCAMENTO_PASSO_DESTRUTIVO_M,
   golpesPotencializadosApiceDisponivel,
   passoDestrutivoSeAplica,
@@ -348,6 +349,9 @@ interface CombatTabProps {
     /** Passo Destrutivo (2ª parte do Ápice) — ligado no turno ao usar o Passo do Vento. */
     passoDestrutivoAtivoTurno: boolean;
     onLigarPassoDestrutivo: () => void;
+    /** Resistência a Dano do Ápice (3ª parte): tipo escolhido (trocável a cada turno) e o setter. */
+    resistencia: string | null;
+    onEscolherResistencia: (tipo: string) => void;
   };
   sintoniaElemental: {
     disponivel: boolean;
@@ -2094,6 +2098,11 @@ export default function CombatTab({
                     <br />• Ápice — Golpes Potencializados: 1x por turno, num acerto desarmado, soma 1 dado de Artes Marciais (mesmo tipo; botão "➕ Ápice" no popup de dano){apiceElemental.golpesUsadoTurno ? ' — já usado neste turno' : ''}.
                   </>
                 )}
+                {apiceElemental.disponivel && apiceElemental.resistencia && (
+                  <>
+                    <br />• Ápice — Resistência a Dano: Resistência a dano {apiceElemental.resistencia}.
+                  </>
+                )}
                 {apiceElemental.disponivel && apiceElemental.passoDestrutivoAtivoTurno && (
                   <>
                     <br />• Passo Destrutivo ATIVO neste turno: Deslocamento +{BONUS_DESLOCAMENTO_PASSO_DESTRUTIVO_M} m; cada criatura que você passar a menos de 1,5 m sofre 1 dado de Artes Marciais (1x por criatura por turno).
@@ -2109,6 +2118,25 @@ export default function CombatTab({
               `No início do seu turno, gaste ${CUSTO_FOCO_SINTONIA_ELEMENTAL} Ponto de Foco pra imbuir-se de energia elemental (10 minutos ou até ficar Incapacitado).`
             )}
           </div>
+          {sintoniaElemental.ativa && apiceElemental.disponivel && (
+            <div style={{ marginTop: 8 }}>
+              <div className="label" style={{ marginBottom: 4 }}>
+                🛡 Resistência a Dano (Ápice) — {apiceElemental.resistencia ? `Resistência a ${apiceElemental.resistencia}` : 'escolha um tipo'}. Pode trocar no início de cada turno.
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {TIPOS_RESISTENCIA_APICE.map((tipo) => (
+                  <div
+                    key={tipo}
+                    className={`btn ${apiceElemental.resistencia === tipo ? 'btn-primary' : ''}`}
+                    style={{ flex: '1 1 auto', textAlign: 'center', padding: '6px 8px', borderStyle: 'solid' }}
+                    onClick={() => apiceElemental.onEscolherResistencia(tipo)}
+                  >
+                    {tipo}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {sintoniaElemental.ativa && apiceElemental.disponivel && apiceElemental.passoDestrutivoAtivoTurno && (
             <div className="btn" style={{ marginTop: 8 }} onClick={() => setPassoDestrutivoEscolhendo(true)}>
               💥 Passo Destrutivo — rolar dano (1 criatura)

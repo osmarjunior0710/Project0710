@@ -3,6 +3,7 @@ import {
   BONUS_DESLOCAMENTO_PASSO_DESTRUTIVO_M,
   golpesPotencializadosApiceDisponivel,
   passoDestrutivoSeAplica,
+  resistenciaApiceValida,
   temApiceElemental,
 } from './apiceElemental';
 
@@ -31,5 +32,15 @@ describe('Passo Destrutivo', () => {
   });
   it('o bônus de Deslocamento é 6 m', () => {
     expect(BONUS_DESLOCAMENTO_PASSO_DESTRUTIVO_M).toBe(6);
+  });
+});
+
+describe('Resistência a Dano do Ápice', () => {
+  it('aceita só os 5 tipos elementais', () => {
+    expect(resistenciaApiceValida('Gélido')).toBe('Gélido');
+    expect(resistenciaApiceValida('Necrótico')).toBe(null);
+    expect(resistenciaApiceValida('')).toBe(null);
+    expect(resistenciaApiceValida(null)).toBe(null);
+    expect(resistenciaApiceValida(undefined)).toBe(null);
   });
 });

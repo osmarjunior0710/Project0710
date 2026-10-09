@@ -521,7 +521,7 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Enquanto sua Sintonia Elemental estiver ativa, você também tem um Deslocamento de Natação e de Voo igual ao seu Deslocamento.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-textonly',
+    statusImplementacao: 'textonly',
   },
   {
     classe: 'Monge',
@@ -531,6 +531,6 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Enquanto sua Sintonia Elemental estiver ativa, você também adquire os seguintes benefícios. Golpes Potencializados. Uma vez em cada um dos seus turnos, você pode causar dano adicional a um alvo igual a uma jogada de seu dado de Artes Marciais ao atingi-lo com um Ataque Desarmado. O dano adicional é do mesmo tipo causado por esse ataque. Passo Destrutivo. Ao usar seu Passo do Vento, seu Deslocamento aumenta em 6 metros até o final do turno. Pela duração, qualquer criatura à sua escolha sofre dano igual a uma jogada de seu dado de Artes Marciais quando você entra em um espaço a até 1,5 metro dela. O tipo de dano fica à sua escolha, entre Ácido, Elétrico, Gélido, Ígneo ou Trovejante. Uma criatura pode sofrer esse dano apenas uma vez por turno. Resistência a Dano. Você adquire Resistência a um dos seguintes tipos de dano à sua escolha: Ácido, Elétrico, Gélido, Ígneo ou Trovejante. No início de cada um dos seus turnos, você pode alterar essa escolha.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
 ];

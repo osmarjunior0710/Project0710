@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1757
+
+Ápice Elemental (Monge/Elementos nível 17), Resistência a Dano: com a Sintonia Elemental ativa, o cartão mostra 5 botões (Ácido, Elétrico, Gélido, Ígneo, Trovejante) pra você escolher o tipo de Resistência, que pode ser trocado a cada turno; a escolha fica salva e aparece na lista de benefícios. Com isso o Combatente dos Elementos está completo (nível 3 ao 17).
+
 ## v202610_1753
 
 Ápice Elemental (Monge/Elementos nível 17), Passo Destrutivo: usar o Passo do Vento com a Sintonia Elemental ativa avisa o +6 m de Deslocamento e liga o Passo Destrutivo no turno. O cartão da Sintonia ganha o botão "💥 Passo Destrutivo — rolar dano (1 criatura)": escolha Ácido, Elétrico, Gélido, Ígneo ou Trovejante e o app rola 1 dado de Artes Marciais; use uma vez por criatura que você passar a menos de 1,5 m.

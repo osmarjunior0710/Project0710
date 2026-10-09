@@ -42,3 +42,14 @@ export function passoDestrutivoSeAplica(opts: {
 }): boolean {
   return temApiceElemental(opts.nivelMonge, opts.subclasseMonge) && opts.sintoniaAtiva;
 }
+
+/** Resistência a Dano (Ápice Elemental, 3ª parte) — "Você adquire Resistência a um dos seguintes
+ * tipos de dano à sua escolha: Ácido, Elétrico, Gélido, Ígneo ou Trovejante. No início de cada um
+ * dos seus turnos, você pode alterar essa escolha." Vale enquanto a Sintonia Elemental estiver
+ * ativa. O app só guarda e mostra a escolha (nunca calcula dano recebido). Devolve a escolha
+ * válida ou `null` (nada escolhido / valor inválido). [codeimplementation] */
+export const TIPOS_RESISTENCIA_APICE = ['Ácido', 'Elétrico', 'Gélido', 'Ígneo', 'Trovejante'] as const;
+
+export function resistenciaApiceValida(escolha: string | null | undefined): string | null {
+  return (TIPOS_RESISTENCIA_APICE as readonly string[]).includes(escolha ?? '') ? (escolha as string) : null;
+}

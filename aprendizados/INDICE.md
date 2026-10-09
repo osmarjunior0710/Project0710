@@ -35,6 +35,13 @@ Um arquivo por classe de D&D implementada no app.
   Torrente de Golpes, importação tardia dos textos e a revisão final
   contra o PDF que corrigiu as 3 técnicas base.
 
+- **`classes/monge-elementos.md`** — subclasse Combatente dos Elementos do Monge
+  (2026-10): 6 entregas em ordem de nível — Elementalismo concedido por
+  subclasse, Sintonia Elemental (toggle), Ataques Elementais/Explosão/Ápice
+  (3 partes) no popup de dano e nos painéis, decisão de "pode causar dano
+  adicional" = escolha do jogador, portal dos popups do ⓘ e borda contínua nos
+  modais de seleção.
+
 - **`classes/mago.md`** — Mago, características base nível 1-20
   (Entregas 1-7): Acadêmico, Guia do Level Up (`statusImplementacao`),
   Copiar Magia pro Livro, Recuperação Arcana, Adepto de Ritual,

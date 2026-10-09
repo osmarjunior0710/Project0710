@@ -425,6 +425,9 @@ export interface PersonagemSalvo {
   /** `true` = Passo Destrutivo (Ápice Elemental, nível 17) ligado NESTE turno (usou o Passo do
    * Vento com a Sintonia ativa) — reseta no Fim do Turno. */
   passoDestrutivoAtivoTurno?: boolean;
+  /** Resistência a Dano do Ápice Elemental (nível 17): o tipo escolhido (Ácido/Elétrico/Gélido/Ígneo/
+   * Trovejante) — vale com a Sintonia ativa e pode ser trocada a cada turno. `null` = ainda não escolheu. */
+  resistenciaApiceElemental?: string | null;
   /** `true` = já usou Resplendor Sagrado (Paladino, Juramento da
    * Devoção, nível 20) desde o último Descanso Longo — zera lá, ou
    * gastando 1 espaço de 5º círculo (`onRecuperarComEspaco`).

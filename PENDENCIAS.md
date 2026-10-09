@@ -1587,9 +1587,9 @@ campos (`proficienciaArmas`/`treinamentoArmadura`) igual as outras 5.
 ## Monge — classe base completa, resto pausado (2026-10)
 
 Classe base nível 1-20 pronta (ver `aprendizados/classes/monge.md`). O que ficou:
-- **As 4 subclasses** (Combatente da Mão Espalmada, da Misericórdia, das
-  Sombras, dos Elementos): aguardando o Osmar decidir qual o jogador vai
-  usar. Atenção: 2 células da planilha (aba Subclasses) com dado bugado —
+- **As outras 3 subclasses** (Combatente da Mão Espalmada, da Misericórdia e
+  das Sombras): aguardando o Osmar decidir. **Combatente dos Elementos já
+  implementada** (ver `aprendizados/classes/monge-elementos.md`). Atenção: 2 células da planilha (aba Subclasses) com dado bugado —
   Combatente das Sombras nível 3 (texto de outra legenda) e Combatente dos
   Elementos nível 17 (intro do capítulo do Paladino colada no fim).
 - **Artes Marciais — Empurrar/Imobilizar com Destreza** na CD (o Ataque
