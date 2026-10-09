@@ -58,10 +58,13 @@ ver padrão já estabelecido no foco Multiclasse).
 
 ## 4. As 3 técnicas base (Defesa Paciente / Passo do Vento / Torrente de Golpes) — cada uma tem versão GRÁTIS e versão com Foco
 
-Todas as 3 já existem "de graça" (sem gastar nada) desde o nível 2:
-Defesa Paciente e Passo do Vento já SÃO a ação Desengajar/Correr como
-Ação Bônus, sem custo. Gastar 1 Ponto de Foco melhora o efeito (soma
-Esquivar/Correr+salto dobrado/2º Ataque Desarmado). **UI: 3 itens no
+**Corrigido na revisão final (2026-10, conferido contra o PDF):**
+Defesa Paciente de graça = Desengajar (Ação Bônus); com 1 Foco =
+Desengajar + Esquivar. Passo do Vento de graça = Correr (Ação Bônus);
+com 1 Foco = Desengajar + Correr + salto dobrado. Torrente de Golpes
+SÓ existe gastando 1 Foco (2 Ataques Desarmados) — a opção "de graça"
+que o app mostra nela é o Ataque Desarmado Adicional de Artes Marciais
+(nível 1, Ação Bônus, sem Foco), reaproveitado nessa mesma tela. **UI: 3 itens no
 painel de Ação Bônus**, cada um abrindo uma escolha binária "de graça"
 vs "gastar 1 Foco" no toque — mesmo padrão de escolha dupla já usado
 em outras características com versão básica/aprimorada (ex.: magia

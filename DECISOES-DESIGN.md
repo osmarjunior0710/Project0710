@@ -807,30 +807,22 @@ proposta explícita pro Osmar antes de codar, porque isso é uma exceção
 à regra e merece decisão consciente, não só "mais um `useState` de
 flag" resolvido no meio da implementação.
 
-## Personagem de teste dedicado ao foco em andamento — botão temporário, apaga ao fechar
+## Personagem de teste = Char Multiclasse nível 20, sempre (substitui o "dedicado por foco")
 
-Ideia do Osmar (2026-09, postmortem) pra cortar retrabalho de validação
-durante um foco. Hoje a área "🧪 PROTÓTIPOS" da lista de personagens
-(`CharacterList.tsx`) já tem 3 atalhos fixos e permanentes —
-Personagem de Teste (sorteia na hora), Char de Teste Fixo (sempre o
-mesmo) e Char Multiclasse (`core/personagemTesteFixo.ts`/
-`core/personagemTesteMulticlasse.ts`) — pensados pra teste genérico,
-não pro que uma entrega específica precisa validar.
-
-**Padrão novo:** ao abrir um foco que vai exigir validar repetidamente
-um personagem num estado específico (ex.: Mago numa especialização X,
-num nível/círculo que dá acesso à magia/recurso sendo implementado),
-monte — como parte da própria entrega — um personagem de teste JÁ
-NESSE ESTADO (mesmo padrão de `core/personagemTesteFixo.ts`: função
-pura que monta o objeto pronto) e exponha um atalho próprio na mesma
-área de protótipos, só durante esse foco. Cada entrega dentro do foco
-reusa esse mesmo atalho pra validar na hora, sem precisar recriar
-personagem/subir XP/repetir wizard toda vez.
-
-**Ao fechar o foco** (seção 6 do `CLAUDE.md`): apague o atalho e o
-personagem de teste dedicado junto com o resto da limpeza de
-fechamento — ele não é permanente como os 3 protótipos genéricos, é
-descartável, específico daquele foco.
+**Decisão (2026-10, Osmar, fechando o foco Monge):** a ideia anterior de
+montar um personagem de teste dedicado a cada foco (e apagá-lo ao
+fechar) foi trocada: o "🧪 Char Multiclasse"
+(`core/personagemTesteMulticlasse.ts`, nível 20 em todas as classes
+implementadas, atributos impossíveis de propósito) é o único personagem
+de validação. Toda classe nova entra em `CLASSES_DO_CHAR_MULTICLASSE`
+logo na 1ª entrega do foco. **Por quê:** (1) força criar todas as
+funções/recursos desde o começo, sem deixar "pra depois"; (2) o Osmar
+vê cada entrega num personagem carregado, o que valida a interface no
+caso mais difícil; (3) multiclasse é testada junto, sem foco à parte;
+(4) um atalho a menos pra criar e apagar. **Como aplicar:** ao abrir um
+foco de classe, a 1ª entrega já adiciona a classe à lista; se precisar
+de um estado específico (ex.: Foco baixo), ajuste via armazenamento
+local no teste, sem criar atalho novo.
 
 ## Tablet/desktop — largura máxima centralizada, não `clamp()`/`vw` nem breakpoints
 

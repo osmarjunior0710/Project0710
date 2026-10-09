@@ -1583,3 +1583,26 @@ nova (só a da classe original continua valendo) — bug real, silencioso,
 nunca testado ao vivo. Dado já existe em `multiclasse.ts`
 (`proficienciasMulticlasse`, texto livre) — só falta estruturar nos 2
 campos (`proficienciaArmas`/`treinamentoArmadura`) igual as outras 5.
+
+## Monge — classe base completa, resto pausado (2026-10)
+
+Classe base nível 1-20 pronta (ver `aprendizados/classes/monge.md`). O que ficou:
+- **As 4 subclasses** (Combatente da Mão Espalmada, da Misericórdia, das
+  Sombras, dos Elementos): aguardando o Osmar decidir qual o jogador vai
+  usar. Atenção: 2 células da planilha (aba Subclasses) com dado bugado —
+  Combatente das Sombras nível 3 (texto de outra legenda) e Combatente dos
+  Elementos nível 17 (intro do capítulo do Paladino colada no fim).
+- **Artes Marciais — Empurrar/Imobilizar com Destreza** na CD (o Ataque
+  Desarmado só tem a opção Dano hoje, ver `core/ataque.ts`). Status `[PH]`.
+- **Movimento sem Armadura** — bônus de Deslocamento (+3 m, +4,5 m...) já
+  existe em `bonusMovimentoSemArmadura`, mas não é somado ao Deslocamento
+  mostrado. Status `[PH]`.
+- **Condições do personagem não são rastreadas** (Restauro Pessoal e Evasão
+  viraram aviso/textonly por isso; Defesa Superior não aplica a Resistência
+  nos cálculos). Se um dia o app rastrear condições, revisitar as 3.
+- **Sobrevivente Disciplinado** só liga o botão de re-rolar nas salvaguardas
+  da aba Atributos (não em Fúria Implacável/Concentração), e não aparece com
+  Vantagem/Desvantagem na rolagem (mesma regra da Inspiração Heroica).
+- **CD/ataque de magia lendo Destreza/Sabedoria** não recebem Corpo e Mente
+  (nenhuma classe implementada conjura com esses atributos — revisitar ao
+  entrar Clérigo/Druida/Guardião).

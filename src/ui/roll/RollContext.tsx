@@ -133,6 +133,11 @@ export interface RollState {
   sorteUsada?: boolean;
   /** `true` = o jogador já usou Inspiração Heroica nesta rolagem. */
   inspiracaoHeroicaUsada?: boolean;
+  /** `true` = rolagem de Salvaguarda (não teste de atributo) — habilita o
+   * reroll do Sobrevivente Disciplinado (Monge nível 14). */
+  ehSalvaguarda?: boolean;
+  /** `true` = Sobrevivente Disciplinado já usado nesta rolagem. */
+  sobreviventeUsado?: boolean;
   /** Lados do dado — só preenchido em rolagens 'dados' de 1 dado só
    * elegíveis pro reroll de "saiu 1" (ver `rerollSe1`), pra dar pra
    * rejogar o mesmo dado depois. */
@@ -295,6 +300,14 @@ export interface InspiracaoHeroicaProvider {
   usar: () => void;
 }
 
+/** Sobrevivente Disciplinado (Monge nível 14): re-rolar uma Salvaguarda
+ * gastando 1 Ponto de Foco — mesmo mecanismo de reroll da Inspiração
+ * Heroica. `usar` devolve `false` se não conseguiu gastar o Foco. */
+export interface SobreviventeDisciplinadoProvider {
+  disponivel: boolean;
+  usar: () => boolean;
+}
+
 interface RollD20Options {
   label: string;
   formula: string;
@@ -306,6 +319,8 @@ interface RollD20Options {
   /** Ver `CategoriaRolagemD20` — omitido = nenhum bônus extra
    * registrado pode se aplicar a esta rolagem. */
   categoria?: CategoriaRolagemD20;
+  /** Ver `RollState.ehSalvaguarda`. */
+  ehSalvaguarda?: boolean;
   /** Quebra do `mod` em partes nomeadas (ex.: FOR +3, Bônus de
    * Proficiência +2) — mesmo formato do popup "ⓘ" que já existe em
    * CA/perícia/iniciativa (`ExplicacaoCalculo`, `core/
@@ -434,6 +449,10 @@ interface RollContextValue {
    * nesta rolagem) — substitui o resultado e gasta a Inspiração
    * Heroica do personagem (`InspiracaoHeroicaProvider.usar`). */
   usarInspiracaoHeroica: () => void;
+  /** Sobrevivente Disciplinado (Monge nível 14) — ver `SobreviventeDisciplinadoProvider`. */
+  sobreviventeDisciplinadoDisponivel: boolean;
+  registrarSobreviventeDisciplinado: (provider: SobreviventeDisciplinadoProvider | null) => void;
+  usarSobreviventeDisciplinado: () => void;
   /** Registra o valor bruto de Força do personagem da tela atual
    * (Bárbaro nível 18+) — `null` = não tem a característica. Aplicado
    * sozinho (sem botão) em toda rolagem 'd20' com
@@ -608,6 +627,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
       mod,
       vantagem,
       categoria,
+      ehSalvaguarda,
       explicacaoMod,
       permiteForcaIndomavel,
       onResultado,
@@ -628,6 +648,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         critico: null,
         podeEscolherVantagem: false,
         categoria,
+        ehSalvaguarda,
         explicacaoMod,
         bonusExtra: null,
         motor3D: usar3D,
@@ -654,6 +675,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           critico: criticoDe(rolagem1),
           podeEscolherVantagem: true,
           categoria,
+        ehSalvaguarda,
           explicacaoMod,
           bonusExtra: null,
           sorteUsada: false,
@@ -685,6 +707,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           critico: criticoDe(usado),
           podeEscolherVantagem: false,
           categoria,
+        ehSalvaguarda,
           explicacaoMod,
           bonusExtra: null,
           sorteUsada: false,
@@ -1200,14 +1223,17 @@ export function RollProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const usarInspiracaoHeroica = useCallback(() => {
-    if (!inspiracaoHeroicaProvider?.disponivel) return;
+  /** Joga de novo o d20 concluído e fica com o novo valor — compartilhado por
+   * Inspiração Heroica e Sobrevivente Disciplinado (`marca` = flag de "já
+   * usado nesta rolagem" de cada um). */
+  const rerolarD20Atual = useCallback((provider: { disponivel: boolean; usar: () => boolean | void } | null, marca: 'inspiracaoHeroicaUsada' | 'sobreviventeUsado') => {
+    if (!provider?.disponivel) return;
     if (!estado || estado.fase !== 'concluido' || estado.tipo !== 'd20') return;
-    if (estado.dado2 || estado.inspiracaoHeroicaUsada) return;
+    if (estado.dado2 || estado[marca]) return;
     const resultadoBruto = estado.motor3D && dado3DAtivo ? estado.resultadoBrutoD20 : undefined;
-    inspiracaoHeroicaProvider.usar();
+    if (provider.usar() === false) return;
     setEstado((prev) =>
-      prev ? { ...prev, valorDado: '🎲', inspiracaoHeroicaUsada: true, fase: resultadoBruto ? 'rolando' : prev.fase } : prev,
+      prev ? { ...prev, valorDado: '🎲', [marca]: true, fase: resultadoBruto ? 'rolando' : prev.fase } : prev,
     );
 
     function concluir(novaRolagem: number, novoResultadoBruto?: DiceBoxResultado) {
@@ -1242,7 +1268,22 @@ export function RollProvider({ children }: { children: ReactNode }) {
     timeoutRef.current = setTimeout(() => {
       concluir(rolarD20Dado(modoTesteRef, indiceModoTesteRef));
     }, DURACAO_ANIMACAO_MS);
-  }, [estado, inspiracaoHeroicaProvider, dado3DAtivo]);
+  }, [estado, dado3DAtivo]);
+
+  const usarInspiracaoHeroica = useCallback(
+    () => rerolarD20Atual(inspiracaoHeroicaProvider, 'inspiracaoHeroicaUsada'),
+    [rerolarD20Atual, inspiracaoHeroicaProvider],
+  );
+
+  const [sobreviventeProvider, setSobreviventeProvider] = useState<SobreviventeDisciplinadoProvider | null>(null);
+  const registrarSobreviventeDisciplinado = useCallback(
+    (provider: SobreviventeDisciplinadoProvider | null) => setSobreviventeProvider(provider),
+    [],
+  );
+  const usarSobreviventeDisciplinado = useCallback(
+    () => rerolarD20Atual(sobreviventeProvider, 'sobreviventeUsado'),
+    [rerolarD20Atual, sobreviventeProvider],
+  );
 
   return (
     <RollContext.Provider
@@ -1264,6 +1305,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
         inspiracaoHeroicaDisponivel: inspiracaoHeroicaProvider?.disponivel ?? false,
         registrarInspiracaoHeroica,
         usarInspiracaoHeroica,
+        sobreviventeDisciplinadoDisponivel: sobreviventeProvider?.disponivel ?? false,
+        registrarSobreviventeDisciplinado,
+        usarSobreviventeDisciplinado,
         registrarForcaIndomavel,
         modoTeste,
         alternarModoTeste,

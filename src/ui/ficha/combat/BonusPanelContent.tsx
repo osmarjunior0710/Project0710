@@ -13,6 +13,7 @@ import TickPips from '../../components/TickPips';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import styles from './PanelRows.module.css';
+import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
 
 interface BonusPanelContentProps {
   usosFolegoMaximo: number;
@@ -102,6 +103,7 @@ interface BonusPanelContentProps {
    * Torrente de Golpes. O botão de atacar (e o 2º ataque, se com Foco)
    * vive no corpo principal do Combate, não aqui — ver `CombatTab.tsx`. */
   pontosDeFocoMaximo: number;
+  pontosDeFocoRestantes: number;
   onAbrirTecnicaMonge: (tipo: TipoTecnicaMonge) => void;
   /** `> 0` = Torrente já ativada neste turno (ainda com ataque
    * pendente) — esconde a linha de escolha, pro jogador não reabrir a
@@ -269,6 +271,7 @@ export default function BonusPanelContent({
   furiaAtiva,
   onUsarFuria,
   pontosDeFocoMaximo,
+  pontosDeFocoRestantes,
   onAbrirTecnicaMonge,
   numAtaquesTorrente,
   ataquesTorrenteFeitos,
@@ -484,463 +487,505 @@ export default function BonusPanelContent({
     );
   }
 
-  return (
-    <>
-      {temMagiaBonus && (
-        <div
-          className={styles.row}
-          style={desvantagemForcaDestreza ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-          onClick={abrirLista}
-        >
-          <div className={styles.rowName}>✨ Usar Magia</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              {desvantagemForcaDestreza
-                ? 'Bloqueado — Armadura equipada sem treinamento impede conjurar magias.'
-                : 'Conjurar Truque ou Magia Preparada de Ação Bônus'}
-            </div>
-          )}
-        </div>
-      )}
-      {usosInspiracaoMaximo > 0 && (
-        <>
-          <div className={styles.slotCounter}>
-            <span>Inspiração de Bardo (d{tamanhoDadoInspiracao}):</span>
-            <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} cor={corDoRecursoDaClasse('Bardo')} />
-          </div>
-          <div
-            className={styles.row}
-            style={semUsosInspiracao ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onUsarInspiracao}
-          >
-            <div className={styles.rowName}>🎵 Inspiração de Bardo</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Concede 1 dado de Inspiração (d{tamanhoDadoInspiracao}) a uma criatura que veja/ouça você a até 18m.
-                Gasta 1 uso — recupera tudo no Descanso Longo
-                {fonteDeInspiracao ? ' (e no Curto, com Fonte de Inspiração)' : ''}.
+  const blocos: BlocoPainel[] = [
+    { grupo: 'topo', no: (
+      temMagiaBonus && (
+              <div
+                className={styles.row}
+                style={desvantagemForcaDestreza ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                onClick={abrirLista}
+              >
+                <div className={styles.rowName}>✨ Usar Magia</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    {desvantagemForcaDestreza
+                      ? 'Bloqueado — Armadura equipada sem treinamento impede conjurar magias.'
+                      : 'Conjurar Truque ou Magia Preparada de Ação Bônus'}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          {fonteDeInspiracao && (
-            <div
-              className={styles.row}
-              style={recuperarDesabilitado ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-              onClick={onRecuperarInspiracaoComEspaco}
-            >
-              <div className={styles.rowName}>🔁 Fonte de Inspiração</div>
-              <div className={styles.rowDesc}>Recupera Inspiração com Espaço de Magia</div>
-              {detalhesAtivo && (
+            )
+    ) },
+    { grupo: 'Bardo', no: (
+      usosInspiracaoMaximo > 0 && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Inspiração de Bardo (d{tamanhoDadoInspiracao}):</span>
+                  <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} cor={corDoRecursoDaClasse('Bardo')} />
+                </div>
+                <div
+                  className={styles.row}
+                  style={semUsosInspiracao ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onUsarInspiracao}
+                >
+                  <div className={styles.rowName}>🎵 Inspiração de Bardo</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Concede 1 dado de Inspiração (d{tamanhoDadoInspiracao}) a uma criatura que veja/ouça você a até 18m.
+                      Gasta 1 uso — recupera tudo no Descanso Longo
+                      {fonteDeInspiracao ? ' (e no Curto, com Fonte de Inspiração)' : ''}.
+                    </div>
+                  )}
+                </div>
+                {fonteDeInspiracao && (
+                  <div
+                    className={styles.row}
+                    style={recuperarDesabilitado ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                    onClick={onRecuperarInspiracaoComEspaco}
+                  >
+                    <div className={styles.rowName}>🔁 Fonte de Inspiração</div>
+                    <div className={styles.rowDesc}>Recupera Inspiração com Espaço de Magia</div>
+                    {detalhesAtivo && (
+                      <div className={styles.rowDesc}>
+                        Sem ação necessária — gasta 1 Espaço de Magia pra recuperar 1 uso gasto de Inspiração de Bardo
+                        (Fonte de Inspiração).
+                      </div>
+                    )}
+                    {proximoCirculoParaGastar !== null && (
+                      <div className={styles.rowDesc} style={{ color: 'var(--text-faint)' }}>
+                        Espaço de magia do {proximoCirculoParaGastar}º círculo será gasto.
+                      </div>
+                    )}
+                  </div>
+                )}
+                {semUsosInspiracao && (
+                  <div className="label" style={{ marginTop: 2, marginBottom: 6 }}>
+                    sem usos de Inspiração disponíveis — descanse pra recuperar
+                    {fonteDeInspiracao && temEspacoDisponivel ? ' ou gaste um Espaço de Magia acima' : ''}.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Outras', no: (
+      ataqueBonus && (
+              <div className={styles.row} onClick={onUsarAtaqueBonus}>
+                <div className={styles.rowName}>🗡 Atacar — {ataqueBonus.nome} (Mão Secundária)</div>
                 <div className={styles.rowDesc}>
-                  Sem ação necessária — gasta 1 Espaço de Magia pra recuperar 1 uso gasto de Inspiração de Bardo
-                  (Fonte de Inspiração).
+                  {ataqueBonus.descricao}
+                  {detalhesAtivo && ' Propriedade Leve nas duas mãos: sem bônus de atributo no dano (a menos que seja negativo).'}
                 </div>
-              )}
-              {proximoCirculoParaGastar !== null && (
-                <div className={styles.rowDesc} style={{ color: 'var(--text-faint)' }}>
-                  Espaço de magia do {proximoCirculoParaGastar}º círculo será gasto.
-                </div>
-              )}
-            </div>
-          )}
-          {semUsosInspiracao && (
-            <div className="label" style={{ marginTop: 2, marginBottom: 6 }}>
-              sem usos de Inspiração disponíveis — descanse pra recuperar
-              {fonteDeInspiracao && temEspacoDisponivel ? ' ou gaste um Espaço de Magia acima' : ''}.
-            </div>
-          )}
-        </>
-      )}
-      {ataqueBonus && (
-        <div className={styles.row} onClick={onUsarAtaqueBonus}>
-          <div className={styles.rowName}>🗡 Atacar — {ataqueBonus.nome} (Mão Secundária)</div>
-          <div className={styles.rowDesc}>
-            {ataqueBonus.descricao}
-            {detalhesAtivo && ' Propriedade Leve nas duas mãos: sem bônus de atributo no dano (a menos que seja negativo).'}
-          </div>
-        </div>
-      )}
-      {cortarAtaque && (
-        <div className={styles.row} onClick={onUsarCortar}>
-          <div className={styles.rowName}>🗡 Cortar — {cortarAtaque.nome}</div>
-          <div className={styles.rowDesc}>
-            Acerto Crítico ou reduziu o alvo a 0 PV — ataque extra com a mesma arma. {cortarAtaque.descricao}
-          </div>
-        </div>
-      )}
-      {usosFolegoMaximo > 0 && (
-        <>
-          <div className={styles.slotCounter}>
-            <span>Recuperar Fôlego:</span>
-            <TickPips total={usosFolegoMaximo} usados={usosFolegoMaximo - usosFolegoRestantes} />
-          </div>
-          <div
-            className={styles.row}
-            style={semUsos ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onUsarRecuperarFolego}
-          >
-            <div className={styles.rowName}>🩹 Recuperar Fôlego</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Recupera 1d10 + seu nível de Guerreiro em Pontos de Vida. Gasta 1 uso — 1 volta no Descanso Curto,
-                todos no Descanso Longo.
               </div>
-            )}
-          </div>
-          {semUsos && (
-            <div className="label" style={{ marginTop: 6 }}>
-              sem usos disponíveis — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
-      {usosCanalizarMaximo > 0 && (
-        <>
-          <div className={styles.slotCounter}>
-            <span>Canalizar Divindade:</span>
-            <TickPips
-              total={usosCanalizarMaximo}
-              usados={usosCanalizarMaximo - usosCanalizarRestantes}
-              cor={corDoRecursoDaClasse('Paladino')}
-            />
-          </div>
-          <div
-            className={styles.row}
-            style={usosCanalizarRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onUsarSentidoDivino}
-          >
-            <div className={styles.rowName}>🙏 Sentido Divino</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Por 10 minutos (ou até ficar Incapacitado), você sabe onde estão Celestiais, Ínferos e Mortos-Vivos a
-                até 18 m e detecta lugares ou objetos consagrados/profanados. Gasta 1 uso de Canalizar Divindade — 1
-                volta no Descanso Curto, todos no Descanso Longo.
-              </div>
-            )}
-          </div>
-          {usosCanalizarRestantes <= 0 && (
-            <div className="label" style={{ marginTop: 6 }}>
-              sem usos disponíveis — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
-      {resplendorSagradoDisponivel && (
-        <div className={styles.row} onClick={onUsarResplendorSagrado}>
-          <div className={styles.rowName}>✨ Resplendor Sagrado</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              Imbui sua Aura de Proteção com poder sagrado por 10 minutos ou até encerrar. 1x por Descanso Longo (ou
-              recupere gastando 1 espaço de 5º círculo).
-            </div>
-          )}
-        </div>
-      )}
-      {maosConsagradasMaximo > 0 && (
-        <>
-          <div className={styles.slotCounter}>
-            <span>Mãos Consagradas:</span>
-            <span style={{ color: 'var(--text-faint)' }}>
-              {maosConsagradasRestantes}/{maosConsagradasMaximo} PV
-            </span>
-          </div>
-          <div
-            className={styles.row}
-            style={maosConsagradasRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onAbrirMaosConsagradas}
-          >
-            <div className={styles.rowName}>🖐️ Mãos Consagradas</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Toca uma criatura (você ou outra) e restaura PV da reserva, até o que resta. Ou gasta 5 PV pra remover
-                Envenenado. Recarrega só no Descanso Longo.
-              </div>
-            )}
-          </div>
-          {maosConsagradasRestantes <= 0 && (
-            <div className="label" style={{ marginTop: 6 }}>
-              sem PV na reserva — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
-      {usosConhecimentoDePedrasMaximo > 0 && (
-        <>
-          <div className={styles.slotCounter}>
-            <span>Conhecimento de Pedras:</span>
-            <TickPips total={usosConhecimentoDePedrasMaximo} usados={usosConhecimentoDePedrasMaximo - usosConhecimentoDePedrasRestantes} />
-          </div>
-          <div
-            className={styles.row}
-            style={usosConhecimentoDePedrasRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onUsarConhecimentoDePedras}
-          >
-            <div className={styles.rowName}>🪨 Conhecimento de Pedras</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Adquire Sismiconsciência (18m) por 10 minutos — precisa estar em/tocando pedra. Gasta 1 uso, todos
-                voltam no Descanso Longo.
-              </div>
-            )}
-          </div>
-          {usosConhecimentoDePedrasRestantes <= 0 && (
-            <div className="label" style={{ marginTop: 6 }}>
-              sem usos disponíveis — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
-      {usosPicoDeAdrenalinaMaximo > 0 && (
-        <>
-          <div className={styles.slotCounter}>
-            <span>Pico de Adrenalina:</span>
-            <TickPips total={usosPicoDeAdrenalinaMaximo} usados={usosPicoDeAdrenalinaMaximo - usosPicoDeAdrenalinaRestantes} />
-          </div>
-          <div
-            className={styles.row}
-            style={usosPicoDeAdrenalinaRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onUsarPicoDeAdrenalina}
-          >
-            <div className={styles.rowName}>⚡ Pico de Adrenalina</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Executa a ação Correr como Ação Bônus e concede PV Temporário igual ao seu Bônus de Proficiência.
-                Gasta 1 uso — todos voltam no Descanso Curto ou Longo.
-              </div>
-            )}
-          </div>
-          {usosPicoDeAdrenalinaRestantes <= 0 && (
-            <div className="label" style={{ marginTop: 6 }}>
-              sem usos disponíveis — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
-      {vooDraconicoDisponivel && (
-        <>
-          <div
-            className={styles.row}
-            style={vooDraconicoGasto ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onUsarVooDraconico}
-          >
-            <div className={styles.rowName}>🐲 Voo Dracônico</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Cria asas espectrais — Deslocamento de Voo igual ao seu Deslocamento por 10 minutos ou até retrair.
-                1x — recupera no Descanso Longo.
-              </div>
-            )}
-          </div>
-          {vooDraconicoGasto && (
-            <div className="label" style={{ marginTop: 6 }}>
-              já usado — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
-      {saltoDaNuvemDisponivel && (
-        <>
-          <div className={styles.slotCounter}>
-            <span>Salto da Nuvem:</span>
-            <TickPips total={usosSaltoDaNuvemMaximo} usados={usosSaltoDaNuvemMaximo - usosSaltoDaNuvemRestantes} />
-          </div>
-          <div
-            className={styles.row}
-            style={usosSaltoDaNuvemRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onUsarSaltoDaNuvem}
-          >
-            <div className={styles.rowName}>☁️ Salto da Nuvem</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Teleporte-se magicamente até 9m pra um espaço desocupado à sua vista. Gasta 1 uso — todos voltam no
-                Descanso Longo.
-              </div>
-            )}
-          </div>
-          {usosSaltoDaNuvemRestantes <= 0 && (
-            <div className="label" style={{ marginTop: 6 }}>
-              sem usos disponíveis — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
-      {formaGrandeDisponivel && (
-        <>
-          <div
-            className={`${styles.row} ${styles.toggleRowLine}`}
-            style={formaGrandeGasto && !formaGrandeAtiva ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onUsarFormaGrande}
-          >
-            <div>
-              <div className={styles.rowName}>🗿 Forma Grande</div>
-              {detalhesAtivo && (
+            )
+    ) },
+    { grupo: 'Outras', no: (
+      cortarAtaque && (
+              <div className={styles.row} onClick={onUsarCortar}>
+                <div className={styles.rowName}>🗡 Cortar — {cortarAtaque.nome}</div>
                 <div className={styles.rowDesc}>
-                  Tamanho vira Grande — Vantagem em testes de Força, Deslocamento +3m e +1 tamanho na Capacidade de
-                  Carga enquanto ativa. Sem tempo real no app: você mesmo liga/desliga (desligar não devolve o uso).
-                  1x — recupera (e desliga sozinha) no Descanso Longo.
+                  Acerto Crítico ou reduziu o alvo a 0 PV — ataque extra com a mesma arma. {cortarAtaque.descricao}
                 </div>
-              )}
-            </div>
-            <div className={`${styles.switchTrack} ${formaGrandeAtiva ? styles.switchOn : ''}`}>
-              <div className={styles.switchThumb} />
-            </div>
-          </div>
-          {formaGrandeGasto && !formaGrandeAtiva && (
-            <div className="label" style={{ marginTop: 6 }}>
-              já usado — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
-      {furiaDisponivel && (
-        <>
-          <div className={styles.slotCounter}>
-            <span>Fúria:</span>
-            <TickPips total={furiaMaximo} usados={furiaMaximo - furiaRestantes} cor={corDoRecursoDaClasse('Bárbaro')} />
-          </div>
-          <div
-            className={`${styles.row} ${styles.toggleRowLine}`}
-            style={furiaAtiva || furiaRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onUsarFuria}
-          >
-            <div>
-              <div className={styles.rowName}>😡 Fúria</div>
-              {detalhesAtivo && (
-                <div className={styles.rowDesc}>
-                  Resistência a dano Contundente/Cortante/Perfurante, +dano em ataques baseados em Força, Vantagem em
-                  testes/salvaguardas de Força — sem Concentração/magia. Encerra sozinha ao vestir Armadura Pesada, ou
-                  manualmente pelo card fixo do Combate.
+              </div>
+            )
+    ) },
+    { grupo: 'Guerreiro', no: (
+      usosFolegoMaximo > 0 && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Recuperar Fôlego:</span>
+                  <TickPips total={usosFolegoMaximo} usados={usosFolegoMaximo - usosFolegoRestantes} cor={corDoRecursoDaClasse('Guerreiro')} />
                 </div>
-              )}
-            </div>
-            <div className={`${styles.switchTrack} ${furiaAtiva ? styles.switchOn : ''}`}>
-              <div className={styles.switchThumb} />
-            </div>
-          </div>
-          {furiaAtiva && (
-            <div className="label" style={{ marginTop: 6 }}>
-              já ativa — encerre pelo card fixo na tela do Combate.
-            </div>
-          )}
-          {!furiaAtiva && furiaRestantes <= 0 && (
-            <div className="label" style={{ marginTop: 6 }}>
-              sem usos disponíveis ({furiaMaximo} no total) — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
-      {pontosDeFocoMaximo > 0 && (
-        <>
-          <div className={styles.row} onClick={() => onAbrirTecnicaMonge('defesa-paciente')}>
-            <div className={styles.rowName}>🥋 Defesa Paciente</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>Esquivar como Ação Bônus — de graça, ou gastando 1 Ponto de Foco pra somar Desengajar.</div>
-            )}
-          </div>
-          <div className={styles.row} onClick={() => onAbrirTecnicaMonge('passo-do-vento')}>
-            <div className={styles.rowName}>💨 Passo do Vento</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Correr ou Desengajar como Ação Bônus — de graça, ou gastando 1 Ponto de Foco pra dobrar a distância de
-                salto até o fim do turno.
-              </div>
-            )}
-          </div>
-          {!(numAtaquesTorrente > 0 && ataquesTorrenteFeitos < numAtaquesTorrente) && (
-            <div className={styles.row} onClick={() => onAbrirTecnicaMonge('torrente')}>
-              <div className={styles.rowName}>👊 Torrente de Golpes</div>
-              {detalhesAtivo && (
-                <div className={styles.rowDesc}>
-                  1 Ataque Desarmado extra (Ação Bônus) de graça, ou 2 gastando 1 Ponto de Foco.
+                <div
+                  className={styles.row}
+                  style={semUsos ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onUsarRecuperarFolego}
+                >
+                  <div className={styles.rowName}>🩹 Recuperar Fôlego</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Recupera 1d10 + seu nível de Guerreiro em Pontos de Vida. Gasta 1 uso — 1 volta no Descanso Curto,
+                      todos no Descanso Longo.
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          )}
-        </>
-      )}
-      {percorrerArvoreDisponivel && (
-        <>
-          <div className={styles.row} onClick={onUsarPercorrerArvore}>
-            <div className={styles.rowName}>🌳 Percorrer a Árvore</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Teleporta a até 18m pra um espaço desocupado à sua vista, sem custo de recurso — pode usar todo
-                turno, como qualquer Ação Bônus.
-              </div>
-            )}
-          </div>
-          <div
-            className={styles.row}
-            style={!percorrerArvoreEstendidaDisponivel ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-            onClick={onUsarPercorrerArvoreLongaDistancia}
-          >
-            <div className={styles.rowName}>🌳 Percorrer a Árvore — Longa Distância</div>
-            {detalhesAtivo && (
-              <div className={styles.rowDesc}>
-                Estende o alcance pra 45m e permite levar até 6 criaturas voluntárias a até 3m de você. 1x por
-                Fúria.
-              </div>
-            )}
-          </div>
-          {!percorrerArvoreEstendidaDisponivel && (
-            <div className="label" style={{ marginTop: 6 }}>
-              Longa Distância já usada nesta Fúria — a versão de 18m continua livre, sem custo de recurso.
-            </div>
-          )}
-        </>
-      )}
-      {revelacaoCelestialDisponivel && (
-        <>
-          {revelacaoCelestialFormaAtiva ? (
-            <div className="box" style={{ padding: 10, marginBottom: 8 }}>
-              <div className={styles.rowName}>🔒 Transformado: {revelacaoCelestialFormaAtiva}</div>
-              <div className={styles.rowDesc}>
-                {opcoesRevelacaoCelestial.find((o) => o.nome === revelacaoCelestialFormaAtiva)?.descricaoEfeito}
-              </div>
-              <div className="label" style={{ marginTop: 4 }}>
-                Lembrete até o Descanso Longo — some +{danoBonusRevelacaoCelestial} de dano 1x por turno ao acertar.
-              </div>
-            </div>
-          ) : (
-            <div
-              className={styles.row}
-              style={revelacaoCelestialGasto ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-              onClick={() => setEscolhendoFormaRevelacao(true)}
-            >
-              <div className={styles.rowName}>✨ Revelação Celestial</div>
-              {detalhesAtivo && (
-                <div className={styles.rowDesc}>
-                  Transforme-se — escolha 1 de 3 formas. Dura até o Descanso Longo (o app não segue tempo real). 1x —
-                  recupera no Descanso Longo.
+                {semUsos && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    sem usos disponíveis — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Paladino', no: (
+      usosCanalizarMaximo > 0 && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Canalizar Divindade:</span>
+                  <TickPips
+                    total={usosCanalizarMaximo}
+                    usados={usosCanalizarMaximo - usosCanalizarRestantes}
+                    cor={corDoRecursoDaClasse('Paladino')}
+                  />
                 </div>
-              )}
-            </div>
-          )}
-          {revelacaoCelestialGasto && !revelacaoCelestialFormaAtiva && (
-            <div className="label" style={{ marginTop: 6 }}>
-              já usado — descanse pra recuperar.
-            </div>
-          )}
-        </>
-      )}
-      {mestreDaMorteDisponivel && (
-        <div className={styles.row} onClick={() => setEscolhendoMestreDaMorte(true)}>
-          <div className={styles.rowName}>💀 Mestre da Morte</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              Concede {pvTempMestreDaMorte} PV Temporário a Mortos-Vivos sob seu controle a até 18m, à sua escolha.
-            </div>
-          )}
-        </div>
-      )}
-      {acoesGenericasBonus.map((a) => (
-        <div key={a.nome} className={styles.row} onClick={() => onEscolher(`${a.icone} ${a.nome}`, a.desc)}>
-          <div className={styles.rowName}>
-            {a.icone} {a.nome}
-          </div>
-          {detalhesAtivo && <div className={styles.rowDesc}>{a.desc}</div>}
-        </div>
-      ))}
-    </>
-  );
+                <div
+                  className={styles.row}
+                  style={usosCanalizarRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onUsarSentidoDivino}
+                >
+                  <div className={styles.rowName}>🙏 Sentido Divino</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Por 10 minutos (ou até ficar Incapacitado), você sabe onde estão Celestiais, Ínferos e Mortos-Vivos a
+                      até 18 m e detecta lugares ou objetos consagrados/profanados. Gasta 1 uso de Canalizar Divindade — 1
+                      volta no Descanso Curto, todos no Descanso Longo.
+                    </div>
+                  )}
+                </div>
+                {usosCanalizarRestantes <= 0 && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    sem usos disponíveis — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Paladino', no: (
+      resplendorSagradoDisponivel && (
+              <div className={styles.row} onClick={onUsarResplendorSagrado}>
+                <div className={styles.rowName}>✨ Resplendor Sagrado</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    Imbui sua Aura de Proteção com poder sagrado por 10 minutos ou até encerrar. 1x por Descanso Longo (ou
+                    recupere gastando 1 espaço de 5º círculo).
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Paladino', no: (
+      maosConsagradasMaximo > 0 && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Mãos Consagradas:</span>
+                  <span style={{ color: 'var(--text-faint)' }}>
+                    {maosConsagradasRestantes}/{maosConsagradasMaximo} PV
+                  </span>
+                </div>
+                <div
+                  className={styles.row}
+                  style={maosConsagradasRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onAbrirMaosConsagradas}
+                >
+                  <div className={styles.rowName}>🖐️ Mãos Consagradas</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Toca uma criatura (você ou outra) e restaura PV da reserva, até o que resta. Ou gasta 5 PV pra remover
+                      Envenenado. Recarrega só no Descanso Longo.
+                    </div>
+                  )}
+                </div>
+                {maosConsagradasRestantes <= 0 && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    sem PV na reserva — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Espécie', no: (
+      usosConhecimentoDePedrasMaximo > 0 && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Conhecimento de Pedras:</span>
+                  <TickPips total={usosConhecimentoDePedrasMaximo} usados={usosConhecimentoDePedrasMaximo - usosConhecimentoDePedrasRestantes} />
+                </div>
+                <div
+                  className={styles.row}
+                  style={usosConhecimentoDePedrasRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onUsarConhecimentoDePedras}
+                >
+                  <div className={styles.rowName}>🪨 Conhecimento de Pedras</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Adquire Sismiconsciência (18m) por 10 minutos — precisa estar em/tocando pedra. Gasta 1 uso, todos
+                      voltam no Descanso Longo.
+                    </div>
+                  )}
+                </div>
+                {usosConhecimentoDePedrasRestantes <= 0 && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    sem usos disponíveis — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Espécie', no: (
+      usosPicoDeAdrenalinaMaximo > 0 && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Pico de Adrenalina:</span>
+                  <TickPips total={usosPicoDeAdrenalinaMaximo} usados={usosPicoDeAdrenalinaMaximo - usosPicoDeAdrenalinaRestantes} />
+                </div>
+                <div
+                  className={styles.row}
+                  style={usosPicoDeAdrenalinaRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onUsarPicoDeAdrenalina}
+                >
+                  <div className={styles.rowName}>⚡ Pico de Adrenalina</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Executa a ação Correr como Ação Bônus e concede PV Temporário igual ao seu Bônus de Proficiência.
+                      Gasta 1 uso — todos voltam no Descanso Curto ou Longo.
+                    </div>
+                  )}
+                </div>
+                {usosPicoDeAdrenalinaRestantes <= 0 && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    sem usos disponíveis — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Espécie', no: (
+      vooDraconicoDisponivel && (
+              <>
+                <div
+                  className={styles.row}
+                  style={vooDraconicoGasto ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onUsarVooDraconico}
+                >
+                  <div className={styles.rowName}>🐲 Voo Dracônico</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Cria asas espectrais — Deslocamento de Voo igual ao seu Deslocamento por 10 minutos ou até retrair.
+                      1x — recupera no Descanso Longo.
+                    </div>
+                  )}
+                </div>
+                {vooDraconicoGasto && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    já usado — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Espécie', no: (
+      saltoDaNuvemDisponivel && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Salto da Nuvem:</span>
+                  <TickPips total={usosSaltoDaNuvemMaximo} usados={usosSaltoDaNuvemMaximo - usosSaltoDaNuvemRestantes} />
+                </div>
+                <div
+                  className={styles.row}
+                  style={usosSaltoDaNuvemRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onUsarSaltoDaNuvem}
+                >
+                  <div className={styles.rowName}>☁️ Salto da Nuvem</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Teleporte-se magicamente até 9m pra um espaço desocupado à sua vista. Gasta 1 uso — todos voltam no
+                      Descanso Longo.
+                    </div>
+                  )}
+                </div>
+                {usosSaltoDaNuvemRestantes <= 0 && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    sem usos disponíveis — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Espécie', no: (
+      formaGrandeDisponivel && (
+              <>
+                <div
+                  className={`${styles.row} ${styles.toggleRowLine}`}
+                  style={formaGrandeGasto && !formaGrandeAtiva ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onUsarFormaGrande}
+                >
+                  <div>
+                    <div className={styles.rowName}>🗿 Forma Grande</div>
+                    {detalhesAtivo && (
+                      <div className={styles.rowDesc}>
+                        Tamanho vira Grande — Vantagem em testes de Força, Deslocamento +3m e +1 tamanho na Capacidade de
+                        Carga enquanto ativa. Sem tempo real no app: você mesmo liga/desliga (desligar não devolve o uso).
+                        1x — recupera (e desliga sozinha) no Descanso Longo.
+                      </div>
+                    )}
+                  </div>
+                  <div className={`${styles.switchTrack} ${formaGrandeAtiva ? styles.switchOn : ''}`}>
+                    <div className={styles.switchThumb} />
+                  </div>
+                </div>
+                {formaGrandeGasto && !formaGrandeAtiva && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    já usado — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Bárbaro', no: (
+      furiaDisponivel && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Fúria:</span>
+                  <TickPips total={furiaMaximo} usados={furiaMaximo - furiaRestantes} cor={corDoRecursoDaClasse('Bárbaro')} />
+                </div>
+                <div
+                  className={`${styles.row} ${styles.toggleRowLine}`}
+                  style={furiaAtiva || furiaRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onUsarFuria}
+                >
+                  <div>
+                    <div className={styles.rowName}>😡 Fúria</div>
+                    {detalhesAtivo && (
+                      <div className={styles.rowDesc}>
+                        Resistência a dano Contundente/Cortante/Perfurante, +dano em ataques baseados em Força, Vantagem em
+                        testes/salvaguardas de Força — sem Concentração/magia. Encerra sozinha ao vestir Armadura Pesada, ou
+                        manualmente pelo card fixo do Combate.
+                      </div>
+                    )}
+                  </div>
+                  <div className={`${styles.switchTrack} ${furiaAtiva ? styles.switchOn : ''}`}>
+                    <div className={styles.switchThumb} />
+                  </div>
+                </div>
+                {furiaAtiva && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    já ativa — encerre pelo card fixo na tela do Combate.
+                  </div>
+                )}
+                {!furiaAtiva && furiaRestantes <= 0 && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    sem usos disponíveis ({furiaMaximo} no total) — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Monge', no: (
+      pontosDeFocoMaximo > 0 && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Pontos de Foco:</span>
+                  <TickPips total={pontosDeFocoMaximo} usados={pontosDeFocoMaximo - pontosDeFocoRestantes} cor={corDoRecursoDaClasse('Monge')} quebrarACada={10} />
+                </div>
+                <div className={styles.row} onClick={() => onAbrirTecnicaMonge('defesa-paciente')}>
+                  <div className={styles.rowName}>🥋 Defesa Paciente</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>Desengajar como Ação Bônus — de graça, ou gastando 1 Ponto de Foco pra somar Esquivar.</div>
+                  )}
+                </div>
+                <div className={styles.row} onClick={() => onAbrirTecnicaMonge('passo-do-vento')}>
+                  <div className={styles.rowName}>💨 Passo do Vento</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Correr como Ação Bônus — de graça, ou gastando 1 Ponto de Foco pra Desengajar + Correr e dobrar a
+                      distância de salto até o fim do turno.
+                    </div>
+                  )}
+                </div>
+                {!(numAtaquesTorrente > 0 && ataquesTorrenteFeitos < numAtaquesTorrente) && (
+                  <div className={styles.row} onClick={() => onAbrirTecnicaMonge('torrente')}>
+                    <div className={styles.rowName}>👊 Torrente de Golpes</div>
+                    {detalhesAtivo && (
+                      <div className={styles.rowDesc}>
+                        Ataque Desarmado Adicional (Artes Marciais, Ação Bônus) de graça, ou Torrente: 2 Ataques gastando 1 Ponto de Foco.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Bárbaro', no: (
+      percorrerArvoreDisponivel && (
+              <>
+                <div className={styles.row} onClick={onUsarPercorrerArvore}>
+                  <div className={styles.rowName}>🌳 Percorrer a Árvore</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Teleporta a até 18m pra um espaço desocupado à sua vista, sem custo de recurso — pode usar todo
+                      turno, como qualquer Ação Bônus.
+                    </div>
+                  )}
+                </div>
+                <div
+                  className={styles.row}
+                  style={!percorrerArvoreEstendidaDisponivel ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onUsarPercorrerArvoreLongaDistancia}
+                >
+                  <div className={styles.rowName}>🌳 Percorrer a Árvore — Longa Distância</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Estende o alcance pra 45m e permite levar até 6 criaturas voluntárias a até 3m de você. 1x por
+                      Fúria.
+                    </div>
+                  )}
+                </div>
+                {!percorrerArvoreEstendidaDisponivel && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    Longa Distância já usada nesta Fúria — a versão de 18m continua livre, sem custo de recurso.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Espécie', no: (
+      revelacaoCelestialDisponivel && (
+              <>
+                {revelacaoCelestialFormaAtiva ? (
+                  <div className="box" style={{ padding: 10, marginBottom: 8 }}>
+                    <div className={styles.rowName}>🔒 Transformado: {revelacaoCelestialFormaAtiva}</div>
+                    <div className={styles.rowDesc}>
+                      {opcoesRevelacaoCelestial.find((o) => o.nome === revelacaoCelestialFormaAtiva)?.descricaoEfeito}
+                    </div>
+                    <div className="label" style={{ marginTop: 4 }}>
+                      Lembrete até o Descanso Longo — some +{danoBonusRevelacaoCelestial} de dano 1x por turno ao acertar.
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className={styles.row}
+                    style={revelacaoCelestialGasto ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                    onClick={() => setEscolhendoFormaRevelacao(true)}
+                  >
+                    <div className={styles.rowName}>✨ Revelação Celestial</div>
+                    {detalhesAtivo && (
+                      <div className={styles.rowDesc}>
+                        Transforme-se — escolha 1 de 3 formas. Dura até o Descanso Longo (o app não segue tempo real). 1x —
+                        recupera no Descanso Longo.
+                      </div>
+                    )}
+                  </div>
+                )}
+                {revelacaoCelestialGasto && !revelacaoCelestialFormaAtiva && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    já usado — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Mago', no: (
+      mestreDaMorteDisponivel && (
+              <div className={styles.row} onClick={() => setEscolhendoMestreDaMorte(true)}>
+                <div className={styles.rowName}>💀 Mestre da Morte</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    Concede {pvTempMestreDaMorte} PV Temporário a Mortos-Vivos sob seu controle a até 18m, à sua escolha.
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Outras', no: (
+      acoesGenericasBonus.map((a) => (
+              <div key={a.nome} className={styles.row} onClick={() => onEscolher(`${a.icone} ${a.nome}`, a.desc)}>
+                <div className={styles.rowName}>
+                  {a.icone} {a.nome}
+                </div>
+                {detalhesAtivo && <div className={styles.rowDesc}>{a.desc}</div>}
+              </div>
+            ))
+    ) },
+  ];
+
+  return <GruposDoPainel blocos={blocos} />;
 }

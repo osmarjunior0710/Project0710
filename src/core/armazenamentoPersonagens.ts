@@ -336,6 +336,9 @@ export interface PersonagemSalvo {
   /** Golpe de Escudo (Mestre em Escudos) — 1x por turno, reseta no Fim
    * do Turno. */
   golpeDeEscudoUsadoTurno?: boolean;
+  /** Golpe Atordoante (Monge nível 5) — 1x por turno, reseta no Fim do
+   * Turno (mesmo padrão de `golpeDeEscudoUsadoTurno`). */
+  golpeAtordoanteUsadoTurno?: boolean;
   /** Força Revigorante (Vitalidade da Árvore, Bárbaro Trilha da Árvore
    * do Mundo, nível 3+) — 1x por turno, reseta no Fim do Turno (mesmo
    * padrão de `golpeDeEscudoUsadoTurno`). */
@@ -410,6 +413,15 @@ export interface PersonagemSalvo {
    * de Canalizar Divindade além do gasto de ativação. Ver
    * `sdd/sdd-paladino-devocao.md` seção 2. */
   armaSagradaAtiva?: boolean;
+  /** `true` = Defesa Superior ATIVA agora (Monge nível 18, gastou 3 Pontos de
+   * Foco) — toggle sem contador de tempo (mesmo padrão de `armaSagradaAtiva`). */
+  defesaSuperiorAtiva?: boolean;
+  /** `true` = Sintonia Elemental ATIVA agora (Monge, Combatente dos Elementos, gastou 1
+   * Ponto de Foco) — toggle sem contador de tempo (padrão de `defesaSuperiorAtiva`). */
+  sintoniaElementalAtiva?: boolean;
+  /** `true` = Golpes Potencializados do Ápice Elemental (Monge/Elementos nível 17) já usado NESTE
+   * turno — reseta no Fim do Turno. */
+  apiceGolpesUsadoTurno?: boolean;
   /** `true` = já usou Resplendor Sagrado (Paladino, Juramento da
    * Devoção, nível 20) desde o último Descanso Longo — zera lá, ou
    * gastando 1 espaço de 5º círculo (`onRecuperarComEspaco`).

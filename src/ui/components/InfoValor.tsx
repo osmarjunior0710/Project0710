@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import type { ExplicacaoCalculo } from '../../core/calculoPersonagem';
-import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
-import styles from './InfoValor.module.css';
+import { useState } from "react";
+import { createPortal } from "react-dom";
+import type { ExplicacaoCalculo } from "../../core/calculoPersonagem";
+import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
+import styles from "./InfoValor.module.css";
 
 interface InfoValorProps {
   titulo: string;
@@ -28,7 +29,11 @@ interface InfoValorProps {
  * o overlay continua sendo filho dessa linha, então sem o
  * stopPropagation um toque pra fechar o popup borbulha pro onClick da
  * linha por baixo e dispara a rolagem de dado sem querer. */
-export default function InfoValor({ titulo, descricao, explicacao }: InfoValorProps) {
+export default function InfoValor({
+  titulo,
+  descricao,
+  explicacao,
+}: InfoValorProps) {
   const [aberto, setAberto] = useState(false);
   useLockBodyScroll(aberto);
 
@@ -43,46 +48,58 @@ export default function InfoValor({ titulo, descricao, explicacao }: InfoValorPr
       >
         ⓘ
       </span>
-      {aberto && (
-        <div
-          className={styles.overlay}
-          onClick={(e) => {
-            e.stopPropagation();
-            setAberto(false);
-          }}
-        >
-          <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.title}>{titulo}</div>
-            {descricao &&
-              (Array.isArray(descricao) ? descricao : [descricao]).map((p, i) => (
-                <p key={i} style={{ fontSize: 13, lineHeight: 1.5, margin: '0 0 10px', textTransform: 'none' }}>
-                  {p}
-                </p>
-              ))}
-            <div className={styles.tabela}>
-              {explicacao.linhas.map((linha, i) => (
-                <div className={styles.linha} key={i}>
-                  <span className={styles.label}>{linha.label}</span>
-                  <span className={styles.valor}>{linha.valor}</span>
+      {aberto &&
+        createPortal(
+          <div
+            className={styles.overlay}
+            onClick={(e) => {
+              e.stopPropagation();
+              setAberto(false);
+            }}
+          >
+            <div className={styles.card} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.title}>{titulo}</div>
+              {descricao &&
+                (Array.isArray(descricao) ? descricao : [descricao]).map(
+                  (p, i) => (
+                    <p
+                      key={i}
+                      style={{
+                        fontSize: 13,
+                        lineHeight: 1.5,
+                        margin: "0 0 10px",
+                        textTransform: "none",
+                      }}
+                    >
+                      {p}
+                    </p>
+                  ),
+                )}
+              <div className={styles.tabela}>
+                {explicacao.linhas.map((linha, i) => (
+                  <div className={styles.linha} key={i}>
+                    <span className={styles.label}>{linha.label}</span>
+                    <span className={styles.valor}>{linha.valor}</span>
+                  </div>
+                ))}
+                <div className={`${styles.linha} ${styles.linhaTotal}`}>
+                  <span className={styles.label}>{explicacao.total.label}</span>
+                  <span className={styles.valor}>{explicacao.total.valor}</span>
                 </div>
-              ))}
-              <div className={`${styles.linha} ${styles.linhaTotal}`}>
-                <span className={styles.label}>{explicacao.total.label}</span>
-                <span className={styles.valor}>{explicacao.total.valor}</span>
+              </div>
+              <div
+                className={styles.close}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setAberto(false);
+                }}
+              >
+                fechar
               </div>
             </div>
-            <div
-              className={styles.close}
-              onClick={(e) => {
-                e.stopPropagation();
-                setAberto(false);
-              }}
-            >
-              fechar
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

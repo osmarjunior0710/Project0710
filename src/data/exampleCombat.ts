@@ -48,5 +48,8 @@ export interface AtaqueInfo {
    * exige "arma Corpo a Corpo ou Ataque Desarmado", não "baseado em
    * Força". */
   corpoACorpo: boolean;
+  /** `true` = Ataque Desarmado ou arma de Monge (`core/monge.ts`) — Golpe
+   * Atordoante (Monge nível 5) só vale nesses ataques. */
+  armaDeMonge?: boolean;
 }
 

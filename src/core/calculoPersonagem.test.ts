@@ -248,6 +248,18 @@ describe('calcularSalvaguardas', () => {
     expect(destreza?.mod).toBe(2 + bonusProficiencia(bardo, 1));
   });
 
+  it('Sobrevivente Disciplinado (7º parâmetro) dá proficiência em TODAS as salvaguardas, com linha própria', () => {
+    const s = selecaoGuerreiro();
+    const resultado = calcularSalvaguardas(s, guerreiro, 1, [], false, 0, true);
+    expect(resultado.every((sv) => sv.proficiente)).toBe(true);
+    const destreza = resultado.find((sv) => sv.atributo === 'DES');
+    expect(destreza?.mod).toBe(2 + bonusProficiencia(guerreiro, 1));
+    expect(destreza?.explicacao.linhas.some((l) => l.label.includes('Sobrevivente Disciplinado'))).toBe(true);
+    // quem já era proficiente pela classe não ganha linha duplicada
+    const forca = resultado.find((sv) => sv.atributo === 'FOR');
+    expect(forca?.explicacao.linhas.some((l) => l.label.includes('Sobrevivente'))).toBe(false);
+  });
+
   it('borda: classeOriginal null (personagem ainda sem classe escolhida) devolve todas sem proficiência', () => {
     const s = selecaoGuerreiro();
     const resultado = calcularSalvaguardas(s, null, 1);

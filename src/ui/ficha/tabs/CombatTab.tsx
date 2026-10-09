@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { EstiloDeLuta } from '../../../data/rulesets/dnd2024/estilosDeLuta';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
@@ -6,6 +6,23 @@ import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
+import { TEXTO_EMPURRAO_ELEMENTAL } from '../../../core/ataquesElementais';
+import { golpesPotencializadosApiceDisponivel } from '../../../core/apiceElemental';
+import {
+  CUSTO_FOCO_EXPLOSAO_ELEMENTAL,
+  formulaDanoExplosaoElemental,
+  metadeDoDanoDaExplosao,
+  podeUsarExplosaoElemental,
+  temExplosaoElemental,
+} from '../../../core/explosaoElemental';
+import ElementoSintoniaModal from '../combat/ElementoSintoniaModal';
+import { golpesPotencializadosAtivo, TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
+import { ataquesTorrenteComFoco, temFocoAprimorado } from '../../../core/focoAprimorado';
+import { pontosDeFocoRecuperadosFocoPerfeito } from '../../../core/focoPerfeito';
+import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, SUBCLASSE_ELEMENTOS } from '../../../core/sintoniaElemental';
+import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior } from '../../../core/defesaSuperior';
+import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
+import { formulaRedirecionarDefletir, formulaReducaoDefletirAtaques } from '../../../core/defletirAtaques';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import {
@@ -18,12 +35,12 @@ import {
 import SobrecargaEscolha from '../combat/SobrecargaEscolha';
 import EscolherMontariaModal from '../combat/EscolherMontariaModal';
 import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional, ResumoConjuracaoPorClasse } from '../../../core/magiasPersonagem';
-import type { AcaoBase } from '../../../data/exampleCombat';
+import type { AcaoBase, AtaqueInfo } from '../../../data/exampleCombat';
 import type { AjustesPet, Pet } from '../../../core/pets';
 import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
-import { useRoll } from '../../roll/RollContext';
+import { useRoll, type LadosDado } from '../../roll/RollContext';
 import InfoChip from '../../components/InfoChip';
 import BarraDeVida from '../../components/BarraDeVida';
 import ContadorUsos from '../../components/ContadorUsos';
@@ -317,6 +334,24 @@ interface CombatTabProps {
    * `elegivel` (jogador pode ter trocado de arma). `bonus` já vem
    * zerado quando a arma atual não é mais elegível (ver
    * `FichaShell.tsx`). */
+  /** Defesa Superior (Monge nível 18) — card com Ativar (3 Foco)/Encerrar. */
+  /** Sintonia Elemental (Monge/Elementos nível 3) — card com Ativar (1 Foco)/Encerrar. */
+  /** Ápice Elemental (Monge/Elementos nível 17) — Golpes Potencializados (1x por turno). */
+  apiceElemental: {
+    disponivel: boolean;
+    golpesUsadoTurno: boolean;
+    onUsarGolpes: () => void;
+  };
+  sintoniaElemental: {
+    disponivel: boolean;
+    ativa: boolean;
+    onAlternar: () => boolean;
+  };
+  defesaSuperior: {
+    disponivel: boolean;
+    ativa: boolean;
+    onAlternar: () => boolean;
+  };
   armaSagrada: {
     disponivel: boolean;
     elegivel: boolean;
@@ -460,6 +495,20 @@ interface CombatTabProps {
   /** Nível de Monge (não o nível total do personagem) — soma na
    * rolagem de cura de Metabolismo Incomum. */
   nivelMonge: number;
+  /** Mod. de Destreza — Defletir Ataques (Monge nível 3). */
+  desModMonge: number;
+  /** Foco Perfeito (Monge nível 15) — devolve N Pontos de Foco gastos. */
+  onRecuperarPontosDeFoco: (quantidade: number) => void;
+  /** Foco Aprimorado (Defesa Paciente) — soma PV Temporário (não acumula, fica o maior). */
+  onGanharPvTemporario: (valor: number) => void;
+  /** Golpe Atordoante (Monge nível 5) — CD (8+SAB+prof) e controle de
+   * 1x por turno. Aparece como botão no popup de dano de um acerto com
+   * arma de Monge/Desarmado e abre `SalvaguardaDoAlvoModal`. */
+  golpeAtordoante: {
+    explicacaoCd: ExplicacaoCalculo;
+    usadoTurno: boolean;
+    onUsar: () => void;
+  };
   /** Zera Pontos de Foco gastos + marca a característica como usada
    * até o próximo Descanso Longo. A ROLAGEM de cura (dado de Artes
    * Marciais + nível de Monge) acontece aqui no CombatTab — ver
@@ -714,6 +763,9 @@ export default function CombatTab({
   },
   temRepudiarInimigos,
   temGolpesRadiantes,
+  apiceElemental,
+  sintoniaElemental,
+  defesaSuperior,
   armaSagrada,
   resplendorSagrado,
   revelacaoCelestial: {
@@ -771,6 +823,10 @@ export default function CombatTab({
   metabolismoIncomumDisponivel,
   ladosArtesMarciaisMonge,
   nivelMonge,
+  desModMonge,
+  onRecuperarPontosDeFoco,
+  onGanharPvTemporario,
+  golpeAtordoante,
   onConfirmarMetabolismoIncomum,
   inspiracao: {
     maximo: usosInspiracaoMaximo,
@@ -811,6 +867,7 @@ export default function CombatTab({
   const [tecnicaMongeAberta, setTecnicaMongeAberta] = useState<TipoTecnicaMonge | null>(null);
   /** Popup de resultado informativo sem rolagem (ex.: Queda Lenta) —
    * `AvisoModal.tsx`, pedido do Osmar (2026-10). */
+  const [redirecionamentoDefletir, setRedirecionamentoDefletir] = useState<{ dano: number } | null>(null);
   const [avisoReacao, setAvisoReacao] = useState<{ titulo: string; texto: string } | null>(null);
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
@@ -862,6 +919,24 @@ export default function CombatTab({
   const [lancarNoInfernoDano, setLancarNoInfernoDano] = useState<number | null>(null);
   const [ataqueDeSoproDano, setAtaqueDeSoproDano] = useState<number | null>(null);
   const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
+  // `aoFechar` = o que continua depois do Ok (ex.: próximo ataque da Torrente).
+  // Marca que não fica velha: o 2º ataque da Torrente é disparado de dentro
+  // do callback do 1º (closure antiga, `golpeAtordoante.usadoTurno` ainda
+  // `false`) — sem isso o botão reaparecia no 2º acerto do mesmo turno.
+  const golpeAtordoanteUsadoRef = useRef(golpeAtordoante.usadoTurno);
+  useEffect(() => {
+    golpeAtordoanteUsadoRef.current = golpeAtordoante.usadoTurno;
+  }, [golpeAtordoante.usadoTurno]);
+  // Ataques Elementais (Sintonia Elemental): `elementoPendente` = escolhendo o elemento;
+  // `empurraoElemental` = popup de salvaguarda de Força do alvo. `aoFechar` = o que
+  // continua depois (ex.: próximo ataque da Torrente de Golpes).
+  // Explosão Elemental (nível 6): `explosaoEscolhendo` = escolhendo o elemento; `explosaoResultado` =
+  // popup de salvaguarda de Destreza com o dano já rolado.
+  const [explosaoEscolhendo, setExplosaoEscolhendo] = useState(false);
+  const [explosaoResultado, setExplosaoResultado] = useState<{ elemento: string; dano: number } | null>(null);
+  const [elementoPendente, setElementoPendente] = useState<{ aoFechar?: () => void } | null>(null);
+  const [empurraoElemental, setEmpurraoElemental] = useState<{ elemento: string; aoFechar?: () => void } | null>(null);
+  const [golpeAtordoanteAberto, setGolpeAtordoanteAberto] = useState<{ aoFechar?: () => void } | null>(null);
   const [ramosDaArvoreAberto, setRamosDaArvoreAberto] = useState(false);
   const [repudiarInimigosAberto, setRepudiarInimigosAberto] = useState(false);
   // Esmagador/Talhador — qual popup de "Ativar efeito" está aberto
@@ -906,7 +981,19 @@ export default function CombatTab({
       onResultado: (total) => setIniciativaValor(total),
     });
     onRolarIniciativa?.();
+    aplicarFocoPerfeito();
     if (metabolismoIncomumDisponivel) setMetabolismoIncomumPendente(true);
+  }
+
+  /** Foco Perfeito (Monge nível 15) — automático em TODA Iniciativa. A regra
+   * diz "sem usar Metabolismo Incomum", mas o Metabolismo restaura todos os
+   * Pontos de Foco, então aplicar o Foco Perfeito antes e depois deixar o
+   * jogador usar o Metabolismo por cima dá o mesmo resultado final. */
+  function aplicarFocoPerfeito() {
+    const qtd = pontosDeFocoRecuperadosFocoPerfeito(nivelMonge, pontosDeFocoRestantes);
+    if (qtd <= 0) return;
+    onRecuperarPontosDeFoco(qtd);
+    setFeedback(`🎯 Foco Perfeito — recuperou ${qtd} Ponto${qtd === 1 ? '' : 's'} de Foco (você volta a ter 4).`);
   }
 
   /** "Fim do Turno" = uma piscada de olho (pedido do Osmar) — 2 planos
@@ -967,6 +1054,45 @@ export default function CombatTab({
    * `feedback` no corpo da aba — pra resultado informativo sem
    * rolagem que é fácil de não notar ali embaixo (Queda Lenta, pedido
    * do Osmar 2026-10). */
+  /** Defletir Ataques (Monge nível 3, ver sdd/sdd-monge.md seção 7) —
+   * Reação: rola a REDUÇÃO (1d10+DES+nível de Monge); o jogador desconta
+   * do dano pelos botões de PV. Se zerar o dano, o popup do dado oferece
+   * redirecionar (1 Foco): rola 2 dados de Artes Marciais+DES e abre o
+   * popup de salvaguarda do alvo. */
+  function usarDefletirAtaques() {
+    onMarcarUsado('reacao');
+    setPainelAberto(null);
+    const reducao = formulaReducaoDefletirAtaques(desModMonge, nivelMonge);
+    rolarDados({
+      label: 'Defletir Ataques — redução',
+      formula: reducao.formula,
+      quantidade: 1,
+      lados: 10,
+      mod: reducao.mod,
+      confirmarFechamento:
+        pontosDeFocoRestantes >= 1
+          ? [{ rotulo: 'OK' }, { rotulo: '🛡 Zerou o dano — redirecionar (1 Foco)', aoTocar: redirecionarDefletir }]
+          : { },
+    });
+  }
+
+  function redirecionarDefletir() {
+    if (!onUsarPontoDeFoco()) return;
+    const d = formulaRedirecionarDefletir(ladosArtesMarciaisMonge, desModMonge);
+    let totalRolado = 0;
+    rolarDados({
+      label: 'Defletir — dano redirecionado',
+      formula: d.formula,
+      quantidade: 2,
+      lados: ladosArtesMarciaisMonge,
+      mod: d.mod,
+      onResultado: (total) => {
+        totalRolado = total;
+      },
+      confirmarFechamento: { aoTocar: () => setRedirecionamentoDefletir({ dano: totalRolado }) },
+    });
+  }
+
   function abrirAvisoReacao(titulo: string, texto: string) {
     onMarcarUsado('reacao');
     setPainelAberto(null);
@@ -1306,10 +1432,20 @@ export default function CombatTab({
   function usarDefesaPaciente(comFoco: boolean) {
     if (comFoco && !onUsarPontoDeFoco()) return;
     onMarcarUsado('bonus');
+    if (comFoco && temFocoAprimorado(nivelMonge)) {
+      rolarDados({
+        label: 'Defesa Paciente — PV Temporários',
+        formula: `2d${ladosArtesMarciaisMonge}`,
+        quantidade: 2,
+        lados: ladosArtesMarciaisMonge,
+        mod: 0,
+        onResultado: (total) => onGanharPvTemporario(total),
+      });
+    }
     setFeedback(
       comFoco
-        ? '🥋 Defesa Paciente — Esquivar + Desengajar (Ação Bônus). Gastou 1 Ponto de Foco.'
-        : '🥋 Defesa Paciente — Esquivar (Ação Bônus), de graça.',
+        ? `🥋 Defesa Paciente — Desengajar + Esquivar (Ação Bônus). Gastou 1 Ponto de Foco.${temFocoAprimorado(nivelMonge) ? ' PV Temporários já aplicados.' : ''}`
+        : '🥋 Defesa Paciente — Desengajar (Ação Bônus), de graça.',
     );
   }
 
@@ -1318,8 +1454,8 @@ export default function CombatTab({
     onMarcarUsado('bonus');
     setFeedback(
       comFoco
-        ? '💨 Passo do Vento — Correr ou Desengajar (Ação Bônus) + salto dobrado de distância até o fim do turno. Gastou 1 Ponto de Foco.'
-        : '💨 Passo do Vento — Correr ou Desengajar (Ação Bônus), de graça.',
+        ? `💨 Passo do Vento — Desengajar + Correr (Ação Bônus) + salto dobrado de distância até o fim do turno. Gastou 1 Ponto de Foco.${temFocoAprimorado(nivelMonge) ? ' Pode levar 1 criatura voluntária (Grande ou menor, a até 1,5m) com você até o fim do turno, sem provocar Ataques de Oportunidade.' : ''}`
+        : '💨 Passo do Vento — Correr (Ação Bônus), de graça.',
     );
   }
 
@@ -1331,10 +1467,11 @@ export default function CombatTab({
    * decidir se ataca de novo — ver `rolarAtaqueTorrente`. */
   function ativarTorrenteDeGolpes(comFoco: boolean) {
     if (comFoco && !onUsarPontoDeFoco()) return;
-    setNumAtaquesTorrente(comFoco ? 2 : 1);
+    const total = comFoco ? ataquesTorrenteComFoco(nivelMonge) : 1;
+    setNumAtaquesTorrente(total);
     setAtaquesTorrenteFeitos(0);
     onMarcarUsado('bonus');
-    rolarAtaqueTorrente(1, comFoco ? 2 : 1);
+    rolarAtaqueTorrente(1, total);
   }
 
   /** Popup de escolha das 3 técnicas (`TecnicaMongeModal.tsx`) — abrir
@@ -1377,16 +1514,30 @@ export default function CombatTab({
             label: `Dano — ${ataqueTorrente.nome} (Torrente de Golpes)${critico ? ' (Crítico)' : ''} (${numero}/${total})`,
             formula: dano.formula,
             quantidade: dano.quantidade,
+            gruposExtras: dano.gruposExtras as { quantidade: number; lados: LadosDado }[] | undefined,
             lados: ataqueTorrente.info.danoLados,
             mod: ataqueTorrente.info.danoMod,
             rerollSe1: danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
             rerollEscolhido: perfuradorDisponivel && ataqueTorrente.info.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
-            confirmarFechamento: {
-              aoTocar: () => {
+            confirmarFechamento: (() => {
+              const continuar = () => {
                 setAtaquesTorrenteFeitos(numero);
                 if (numero < total) rolarAtaqueTorrente(numero + 1, total);
-              },
-            },
+              };
+              const potencializados = golpesPotencializadosAtivo(nivelMonge);
+              const atordoa = golpeAtordoanteParaAtaque(ataqueTorrente.info);
+              const elemental = sintoniaElemental.ativa;
+              const apice = apiceGolpesDisponivelAgora();
+              if (!potencializados && !atordoa && !elemental && !apice) return { aoTocar: continuar };
+              return [
+                ...(potencializados
+                  ? TIPOS_DANO_GOLPES_POTENCIALIZADOS.map((rotulo) => ({ rotulo, aoTocar: continuar }))
+                  : [{ rotulo: 'OK', aoTocar: continuar }]),
+                ...(elemental ? [{ rotulo: '🌪 Elemental', aoTocar: () => abrirElemental(continuar) }] : []),
+                ...(apice ? [{ rotulo: '➕ Ápice (+1 dado)', aoTocar: () => usarApiceGolpes(critico, continuar) }] : []),
+                ...(atordoa ? [{ rotulo: '💫 Golpe Atordoante', aoTocar: () => abrirGolpeAtordoante(continuar) }] : []),
+              ];
+            })(),
           });
         },
         onErrou: () => {
@@ -1472,6 +1623,100 @@ export default function CombatTab({
    * `abrirAtaqueDeSopro`/`abrirLancarNoInferno`: marca o uso (1x/turno)
    * e abre o popup padrão de "salvaguarda do alvo" junto, na mesma
    * ação de tocar a linha no painel de Ação. */
+  /** Golpe Atordoante (Monge nível 5) — vale só em ataque com arma de
+   * Monge/Desarmado (`AtaqueInfo.armaDeMonge`), com Foco, 1x por turno. */
+  function golpeAtordoanteParaAtaque(ataque: AtaqueInfo): boolean {
+    return golpeAtordoanteDisponivel({
+      nivelMonge,
+      pontosDeFocoRestantes,
+      usadoTurno: golpeAtordoante.usadoTurno || golpeAtordoanteUsadoRef.current,
+      armaDeMongeOuDesarmado: ataque.armaDeMonge === true,
+    });
+  }
+
+  /** Explosão Elemental (Monge/Elementos nível 6): ação Usar Magia, 2 Foco. Tocar na linha do
+   * painel de Ação abre a escolha do elemento; escolher gasta o Foco e a Ação, rola 3 dados de
+   * Artes Marciais e, ao fechar o dado, abre a salvaguarda de Destreza do alvo (metade no sucesso). */
+  function abrirExplosaoElemental() {
+    if (!podeUsarExplosaoElemental(nivelMonge, SUBCLASSE_ELEMENTOS, pontosDeFocoRestantes)) return;
+    setPainelAberto(null);
+    setExplosaoEscolhendo(true);
+  }
+
+  function usarExplosaoElemental(elemento: string) {
+    setExplosaoEscolhendo(false);
+    for (let i = 0; i < CUSTO_FOCO_EXPLOSAO_ELEMENTAL; i++) {
+      if (!onUsarPontoDeFoco()) return;
+    }
+    onMarcarUsado('acao');
+    let totalRolado = 0;
+    rolarDados({
+      label: `Explosão Elemental — ${elemento}`,
+      formula: formulaDanoExplosaoElemental(ladosArtesMarciaisMonge),
+      quantidade: 3,
+      lados: ladosArtesMarciaisMonge,
+      mod: 0,
+      onResultado: (total) => {
+        totalRolado = total;
+      },
+      confirmarFechamento: { aoTocar: () => setExplosaoResultado({ elemento, dano: totalRolado }) },
+    });
+  }
+
+  // Marca que não fica velha (mesmo motivo de `golpeAtordoanteUsadoRef`: o 2º/3º ataque da Torrente
+  // nasce de dentro do callback do 1º, com a closure antiga).
+  const apiceGolpesUsadoRef = useRef(apiceElemental.golpesUsadoTurno);
+  useEffect(() => {
+    apiceGolpesUsadoRef.current = apiceElemental.golpesUsadoTurno;
+  }, [apiceElemental.golpesUsadoTurno]);
+
+  /** Golpes Potencializados do Ápice Elemental (nível 17): 1x por turno, com a Sintonia ativa, num
+   * acerto de Ataque Desarmado o jogador PODE somar 1 dado de Artes Marciais (mesmo tipo do ataque;
+   * dobra no crítico) — botão "➕ Ápice" no popup de dano. Escolhe em qual acerto usar. */
+  function apiceGolpesDisponivelAgora(): boolean {
+    return (
+      ladosArtesMarciaisMonge > 0 &&
+      golpesPotencializadosApiceDisponivel({
+        nivelMonge,
+        subclasseMonge: apiceElemental.disponivel ? SUBCLASSE_ELEMENTOS : null,
+        sintoniaAtiva: sintoniaElemental.ativa,
+        usadoTurno: apiceElemental.golpesUsadoTurno || apiceGolpesUsadoRef.current,
+      })
+    );
+  }
+
+  /** Rola o dado extra do Ápice (2 dados no crítico) e marca "usado neste turno". `aoFechar` =
+   * o que continua depois (ex.: próximo ataque da Torrente de Golpes). */
+  function usarApiceGolpes(critico: boolean, aoFechar?: () => void) {
+    if (!apiceGolpesDisponivelAgora()) {
+      aoFechar?.();
+      return;
+    }
+    apiceGolpesUsadoRef.current = true;
+    apiceElemental.onUsarGolpes();
+    const quantidade = critico ? 2 : 1;
+    rolarDados({
+      label: `Ápice Elemental — dano extra${critico ? ' (Crítico)' : ''}`,
+      formula: `${quantidade}d${ladosArtesMarciaisMonge}`,
+      quantidade,
+      lados: ladosArtesMarciaisMonge as LadosDado,
+      mod: 0,
+      confirmarFechamento: { aoTocar: aoFechar },
+    });
+    setFeedback('➕ Ápice Elemental — soma esse dano extra ao do ataque (mesmo tipo de dano).');
+  }
+
+  function abrirElemental(aoFechar?: () => void) {
+    setElementoPendente({ aoFechar });
+  }
+
+  function abrirGolpeAtordoante(aoFechar?: () => void) {
+    if (!onUsarPontoDeFoco()) return;
+    golpeAtordoanteUsadoRef.current = true;
+    golpeAtordoante.onUsar();
+    setGolpeAtordoanteAberto({ aoFechar });
+  }
+
   function abrirGolpeDeEscudo() {
     onUsarGolpeDeEscudo();
     setGolpeDeEscudoAberto(true);
@@ -1639,7 +1884,7 @@ export default function CombatTab({
       : (telaSalvaguarda?.magia.salvaguardaSucesso ?? null);
 
   return (
-    <>
+    <div className={styles.abaCombate}>
       <DescansoFab icone="↻" itens={[{ label: 'Fim do Turno', onClick: fimDoTurno }]} />
       {piscando && (
         <div
@@ -1692,7 +1937,6 @@ export default function CombatTab({
         <div className={`${styles.splitBtn} ${styles.splitBtnFimTurno}`} onClick={fimDoTurno}>
           <div className={styles.sbIcon}>↻</div>
           <div className={styles.sbLabel}>Fim do Turno</div>
-          <div className={styles.sbState}>restaura os 3 botões</div>
         </div>
       </div>
 
@@ -1718,6 +1962,7 @@ export default function CombatTab({
         </div>
       )}
 
+      <div className={styles.sepGrupo} />
       <div className={`box-solid ${styles.hpLive}`}>
         <div className={styles.hpHeader}>
           <div className="label">
@@ -1752,9 +1997,10 @@ export default function CombatTab({
         </div>
       </div>
 
+      <div className={styles.sepGrupo} />
       <RecursosDeClasse recursos={recursosDeClasse} />
 
-      {furiaDisponivel && (
+      {furiaDisponivel && (furiaAtiva || furiaPersistenteDisponivel) && (
         <div className="opt-card" style={{ marginBottom: 12, borderColor: furiaAtiva ? '#b23b3b' : undefined }}>
           <div className="opt-card-name">😡 Fúria {furiaAtiva ? 'ATIVA' : ''}</div>
           {furiaAtiva ? (
@@ -1790,16 +2036,78 @@ export default function CombatTab({
                 Encerrar Fúria
               </div>
             </>
-          ) : (
-            <div className="opt-card-desc">
-              {furiaRestantes} de {furiaMaximo} usos disponíveis — ative no painel de Ação Bônus.
-            </div>
-          )}
+          ) : null}
           {furiaPersistenteDisponivel && (
             <div className="btn" style={{ marginTop: 8 }} onClick={onRecuperarFuriaPersistente}>
               🔥 Recuperar Fúria (Fúria Persistente)
             </div>
           )}
+        </div>
+      )}
+
+      {sintoniaElemental.disponivel && (
+        <div className="opt-card" style={{ marginBottom: 12, borderColor: sintoniaElemental.ativa ? '#d9742c' : undefined }}>
+          <div className="opt-card-name">🌪 Sintonia Elemental {sintoniaElemental.ativa ? 'ATIVA' : ''}</div>
+          <div className="opt-card-desc">
+            {sintoniaElemental.ativa ? (
+              <>
+                Dura 10 minutos ou até você ficar Incapacitado — toque abaixo pra encerrar.
+                <br />• Ataques Elementais: seu Ataque Desarmado pode causar dano Ácido, Elétrico, Gélido, Ígneo ou Trovejante.
+                <br />• Extensão: seu alcance no Ataque Desarmado aumenta em 3 metros.
+                {apiceElemental.disponivel && (
+                  <>
+                    <br />• Ápice — Golpes Potencializados: 1x por turno, num acerto desarmado, soma 1 dado de Artes Marciais (mesmo tipo; botão "➕ Ápice" no popup de dano){apiceElemental.golpesUsadoTurno ? ' — já usado neste turno' : ''}.
+                  </>
+                )}
+                {nivelMonge >= 11 && (
+                  <>
+                    <br />• Passo dos Elementos: Deslocamento de Natação e de Voo igual ao seu Deslocamento.
+                  </>
+                )}
+              </>
+            ) : (
+              `No início do seu turno, gaste ${CUSTO_FOCO_SINTONIA_ELEMENTAL} Ponto de Foco pra imbuir-se de energia elemental (10 minutos ou até ficar Incapacitado).`
+            )}
+          </div>
+          <div
+            className="btn"
+            style={{
+              marginTop: 8,
+              ...(sintoniaElemental.ativa
+                ? { background: 'rgba(178, 59, 59, 0.16)', borderColor: '#b23b3b' }
+                : podeAtivarSintoniaElemental(nivelMonge, SUBCLASSE_ELEMENTOS, pontosDeFocoRestantes)
+                  ? {}
+                  : { opacity: 0.5, pointerEvents: 'none' as const }),
+            }}
+            onClick={() => sintoniaElemental.onAlternar()}
+          >
+            {sintoniaElemental.ativa ? 'Encerrar Sintonia Elemental' : `Ativar (gasta ${CUSTO_FOCO_SINTONIA_ELEMENTAL} Ponto de Foco)`}
+          </div>
+        </div>
+      )}
+
+      {defesaSuperior.disponivel && (
+        <div className="opt-card" style={{ marginBottom: 12, borderColor: defesaSuperior.ativa ? '#4a5fd9' : undefined }}>
+          <div className="opt-card-name">🛡 Defesa Superior {defesaSuperior.ativa ? 'ATIVA' : ''}</div>
+          <div className="opt-card-desc">
+            {defesaSuperior.ativa
+              ? 'Resistência a todos os tipos de dano, exceto Energético. Dura 1 minuto ou até você ficar Incapacitado — toque abaixo pra encerrar.'
+              : `No início do seu turno, gaste ${CUSTO_FOCO_DEFESA_SUPERIOR} Pontos de Foco: Resistência a todos os tipos de dano, exceto Energético, por 1 minuto ou até ficar Incapacitado.`}
+          </div>
+          <div
+            className="btn"
+            style={{
+              marginTop: 8,
+              ...(defesaSuperior.ativa
+                ? { background: 'rgba(178, 59, 59, 0.16)', borderColor: '#b23b3b' }
+                : podeAtivarDefesaSuperior(nivelMonge, pontosDeFocoRestantes)
+                  ? {}
+                  : { opacity: 0.5, pointerEvents: 'none' as const }),
+            }}
+            onClick={() => defesaSuperior.onAlternar()}
+          >
+            {defesaSuperior.ativa ? 'Encerrar Defesa Superior' : `Ativar (gasta ${CUSTO_FOCO_DEFESA_SUPERIOR} Pontos de Foco)`}
+          </div>
         </div>
       )}
 
@@ -1910,6 +2218,7 @@ export default function CombatTab({
 
       {(estiloDeLuta || mestreTatico || ataquesEstudados || ajusteTatico) && (
         <>
+          <div className={styles.sepGrupo} />
           <div className="section-title">Características</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
             {estiloDeLuta && <InfoChip nome={estiloDeLuta.nome} descricao={estiloDeLuta.beneficios} />}
@@ -1922,6 +2231,7 @@ export default function CombatTab({
 
       {indomavelMaximo > 0 && (
         <>
+          <div className={styles.sepItem} />
           <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span>Indomável</span>
             <ContadorUsos total={indomavelMaximo} usados={indomavelMaximo - indomavelRestantes} />
@@ -1946,6 +2256,7 @@ export default function CombatTab({
 
       {pontosDeSorteMaximo > 0 && (
         <>
+          <div className={styles.sepItem} />
           <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span>Pontos de Sorte</span>
             <ContadorUsos total={pontosDeSorteMaximo} usados={pontosDeSorteMaximo - pontosDeSorteRestantes} />
@@ -1972,6 +2283,7 @@ export default function CombatTab({
 
       {usosFolegoMaximo > 0 && (
         <>
+          <div className={styles.sepItem} />
           <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span>Mente Tática</span>
             <ContadorUsos total={usosFolegoMaximo} usados={usosFolegoMaximo - usosFolegoRestantes} />
@@ -1995,6 +2307,7 @@ export default function CombatTab({
 
       {periciaInigualavelDisponivel && (
         <>
+          <div className={styles.sepItem} />
           <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span>Perícia Inigualável</span>
             <ContadorUsos total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} cor={corDoRecursoDaClasse('Bardo')} />
@@ -2036,6 +2349,7 @@ export default function CombatTab({
         </>
       )}
 
+      <div className={styles.sepGrupo} />
       <div className={styles.splitBtns}>
         {(['acao', 'bonus'] as RecursoTurno[]).map((categoria) => {
           const temAtaqueExtraPendente = categoria === 'acao' && ataquesFeitos > 0 && ataquesFeitos < numAtaques;
@@ -2055,7 +2369,7 @@ export default function CombatTab({
             >
               <div className={styles.sbIcon}>{LABELS[categoria].icone}</div>
               <div className={styles.sbLabel}>{LABELS[categoria].nome}</div>
-              <div className={styles.sbState}>{usadaDeVerdade ? 'usada' : 'ativo'}</div>
+              {usadaDeVerdade && <div className={styles.sbState}>usada</div>}
             </div>
           );
         })}
@@ -2066,7 +2380,7 @@ export default function CombatTab({
       >
         <div className={styles.sbIcon}>{LABELS.reacao.icone}</div>
         <div className={styles.sbLabel}>{LABELS.reacao.nome}</div>
-        <div className={styles.sbState}>{turnState.reacao === 'usada' ? 'usada' : 'ativo'}</div>
+        {turnState.reacao === 'usada' && <div className={styles.sbState}>usada</div>}
       </div>
 
       {feedback && <div className={styles.feedback}>{feedback}</div>}
@@ -2116,6 +2430,7 @@ export default function CombatTab({
           tipo={tecnicaMongeAberta}
           pontosDeFocoMaximo={pontosDeFocoMaximo}
           pontosDeFocoRestantes={pontosDeFocoRestantes}
+          focoAprimorado={temFocoAprimorado(nivelMonge)}
           onEscolher={escolherTecnicaMonge}
           onFechar={() => setTecnicaMongeAberta(null)}
         />
@@ -2192,6 +2507,17 @@ export default function CombatTab({
           temGolpeDeEscudo={golpeDeEscudoDisponivel}
           golpeDeEscudoUsadoTurno={golpeDeEscudoUsadoTurno}
           onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
+          podeGolpeAtordoante={golpeAtordoanteParaAtaque}
+          golpesPotencializados={golpesPotencializadosAtivo(nivelMonge)}
+          sintoniaElementalAtiva={sintoniaElemental.ativa}
+          onElemental={() => abrirElemental()}
+          apiceGolpesDisponivel={apiceGolpesDisponivelAgora}
+          onApiceGolpes={(critico) => usarApiceGolpes(critico)}
+          explosaoElementalDisponivel={temExplosaoElemental(nivelMonge, SUBCLASSE_ELEMENTOS)}
+          onExplosaoElemental={abrirExplosaoElemental}
+          pontosDeFocoMaximo={pontosDeFocoMaximo}
+          pontosDeFocoRestantes={pontosDeFocoRestantes}
+          onGolpeAtordoante={() => abrirGolpeAtordoante()}
           temGolpesRadiantes={temGolpesRadiantes}
           armaSagradaDisponivel={armaSagrada.disponivel}
           armaSagradaElegivel={armaSagrada.elegivel}
@@ -2273,6 +2599,7 @@ export default function CombatTab({
           furiaAtiva={furiaAtiva}
           onUsarFuria={usarFuria}
           pontosDeFocoMaximo={pontosDeFocoMaximo}
+          pontosDeFocoRestantes={pontosDeFocoRestantes}
           onAbrirTecnicaMonge={abrirTecnicaMonge}
           numAtaquesTorrente={numAtaquesTorrente}
           ataquesTorrenteFeitos={ataquesTorrenteFeitos}
@@ -2405,6 +2732,7 @@ export default function CombatTab({
           preferenciasPillsMagia={preferenciasPillsMagia}
           nivelMonge={nivelMonge}
           onAbrirAvisoReacao={abrirAvisoReacao}
+          onDefletirAtaques={usarDefletirAtaques}
         />
       </SidePanel>
       {lancarNoInfernoDano !== null && (
@@ -2448,6 +2776,82 @@ export default function CombatTab({
           }
           semAcaoTexto={telaSalvaguarda.danoRolado === null ? 'Veja a descrição da magia (ⓘ) pro efeito.' : null}
           onFechar={() => setTelaSalvaguarda(null)}
+        />
+      )}
+      {redirecionamentoDefletir && (
+        <SalvaguardaDoAlvoModal
+          titulo="🛡 Defletir Ataques — redirecionar"
+          atributo="Destreza"
+          cd={Number(golpeAtordoante.explicacaoCd.total.valor)}
+          explicacaoCd={golpeAtordoante.explicacaoCd}
+          textoSucesso="nada acontece"
+          textoFalha={`${redirecionamentoDefletir.dano} de dano, do mesmo tipo causado pelo ataque (alvo: criatura a até 1,5m se o ataque foi corpo a corpo, ou a até 18m se à distância e sem Cobertura Total)`}
+          onFechar={() => setRedirecionamentoDefletir(null)}
+        />
+      )}
+      {explosaoEscolhendo && (
+        <ElementoSintoniaModal
+          titulo="💥 Explosão Elemental — escolha o tipo de dano"
+          descricao={`Gasta ${CUSTO_FOCO_EXPLOSAO_ELEMENTAL} Pontos de Foco e a sua Ação. Esfera de 6m de raio a até 36m de você.`}
+          onEscolher={usarExplosaoElemental}
+          onFechar={() => setExplosaoEscolhendo(false)}
+        />
+      )}
+      {explosaoResultado && (
+        <SalvaguardaDoAlvoModal
+          titulo={`💥 Explosão Elemental — ${explosaoResultado.elemento}`}
+          atributo="Destreza"
+          cd={Number(golpeAtordoante.explicacaoCd.total.valor)}
+          explicacaoCd={golpeAtordoante.explicacaoCd}
+          textoSucesso={`${metadeDoDanoDaExplosao(explosaoResultado.dano)} de dano ${explosaoResultado.elemento} (metade)`}
+          textoFalha={`${explosaoResultado.dano} de dano ${explosaoResultado.elemento}`}
+          aviso="Cada criatura na Esfera de 6m de raio faz a salvaguarda."
+          onFechar={() => setExplosaoResultado(null)}
+        />
+      )}
+      {elementoPendente && (
+        <ElementoSintoniaModal
+          onEscolher={(elemento) => {
+            const depois = elementoPendente.aoFechar;
+            setElementoPendente(null);
+            setEmpurraoElemental({ elemento, aoFechar: depois });
+          }}
+          onFechar={() => {
+            const depois = elementoPendente.aoFechar;
+            setElementoPendente(null);
+            depois?.();
+          }}
+        />
+      )}
+      {empurraoElemental && (
+        <SalvaguardaDoAlvoModal
+          titulo={`🌪 Ataques Elementais — ${empurraoElemental.elemento}`}
+          atributo="Força"
+          cd={Number(golpeAtordoante.explicacaoCd.total.valor)}
+          explicacaoCd={golpeAtordoante.explicacaoCd}
+          textoSucesso="nada acontece (o dano já é do elemento escolhido)"
+          textoFalha={TEXTO_EMPURRAO_ELEMENTAL}
+          semAcaoTexto="O empurrão é opcional — feche se não quiser empurrar."
+          onFechar={() => {
+            const depois = empurraoElemental.aoFechar;
+            setEmpurraoElemental(null);
+            depois?.();
+          }}
+        />
+      )}
+      {golpeAtordoanteAberto && (
+        <SalvaguardaDoAlvoModal
+          titulo="💫 Golpe Atordoante"
+          atributo="Constituição"
+          cd={Number(golpeAtordoante.explicacaoCd.total.valor)}
+          explicacaoCd={golpeAtordoante.explicacaoCd}
+          textoSucesso="Deslocamento do alvo pela metade até o início do seu próximo turno, e a próxima jogada de ataque contra ele tem Vantagem"
+          textoFalha="alvo fica Atordoado até o início do seu próximo turno"
+          onFechar={() => {
+            const depois = golpeAtordoanteAberto.aoFechar;
+            setGolpeAtordoanteAberto(null);
+            depois?.();
+          }}
         />
       )}
       {golpeDeEscudoAberto && (
@@ -2547,6 +2951,6 @@ export default function CombatTab({
           }}
         />
       )}
-    </>
+    </div>
   );
 }

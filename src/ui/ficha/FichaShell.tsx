@@ -80,6 +80,12 @@ import {
 import { ataqueAtual, ataqueBonusMaoSecundaria, ataqueDesarmado } from '../../core/ataque';
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
+import { temEvasao } from '../../core/evasao';
+import { temApiceElemental } from '../../core/apiceElemental';
+import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, temSintoniaElemental } from '../../core/sintoniaElemental';
+import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior, temDefesaSuperior } from '../../core/defesaSuperior';
+import { podeRerolarSalvaguardaComFoco, temSobreviventeDisciplinado } from '../../core/sobreviventeDisciplinado';
+import { explicarCdGolpeAtordoante } from '../../core/golpeAtordoante';
 import { explicarCdRamosDaArvore } from '../../core/ramosDaArvore';
 import { explicarCdRaizesDevastadoras } from '../../core/raizesDevastadoras';
 import { alternarSintonizacao } from '../../core/sintonizacao';
@@ -254,6 +260,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     registrarBonusExtra,
     registrarSorte,
     registrarInspiracaoHeroica,
+    registrarSobreviventeDisciplinado,
     registrarForcaIndomavel,
     estado: rollEmAndamento,
     rolarD20,
@@ -307,6 +314,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     const classeCatalogo = catalogoClasses.find((cc) => cc.nome === c.classe);
     return classeCatalogo ? caracteristicaDesbloqueada(classeCatalogo, ID_CARACTERISTICA_CLASSE.campeaoPrimitivo, c.nivel) !== null : false;
   });
+
+  /** Corpo e Mente (Monge nível 20) — mesma lógica: checa todas as classes. */
+  const temCorpoEMente = classesAtual.some((c) => {
+    const classeCatalogo = catalogoClasses.find((cc) => cc.nome === c.classe);
+    return classeCatalogo ? caracteristicaDesbloqueada(classeCatalogo, ID_CARACTERISTICA_CLASSE.corpoEMente, c.nivel) !== null : false;
+  });
+  const capstonesAtributo = { campeaoPrimitivo: temCampeaoPrimitivo, corpoEMente: temCorpoEMente };
 
   /** Recuperação Arcana (Mago nível 1) — mesma lógica de
    * `temCampeaoPrimitivo`: checa TODAS as classes (Mago pode não ser a
@@ -491,6 +505,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [furiaGasto, setFuriaGasto] = useState(personagemSalvo.furiaGasto ?? 0);
   const [furiaAtiva, setFuriaAtiva] = useState(personagemSalvo.furiaAtiva ?? false);
   const [armaSagradaAtiva, setArmaSagradaAtiva] = useState(personagemSalvo.armaSagradaAtiva ?? false);
+  const [defesaSuperiorAtiva, setDefesaSuperiorAtiva] = useState(personagemSalvo.defesaSuperiorAtiva ?? false);
+  const [sintoniaElementalAtiva, setSintoniaElementalAtiva] = useState(personagemSalvo.sintoniaElementalAtiva ?? false);
+  const [apiceGolpesUsadoTurno, setApiceGolpesUsadoTurno] = useState(personagemSalvo.apiceGolpesUsadoTurno ?? false);
   const [resplendorSagradoGasto, setResplendorSagradoGasto] = useState(personagemSalvo.resplendorSagradoGasto ?? false);
   const [resplendorSagradoAtiva, setResplendorSagradoAtiva] = useState(personagemSalvo.resplendorSagradoAtiva ?? false);
   const [ataqueImprudenteAtivo, setAtaqueImprudenteAtivo] = useState(personagemSalvo.ataqueImprudenteAtivoTurno ?? false);
@@ -498,6 +515,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Golpe de Escudo (Mestre em Escudos) — 1x por turno, mesmo padrão
   // de `golpeBrutalUsadoTurno`.
   const [golpeDeEscudoUsadoTurno, setGolpeDeEscudoUsadoTurno] = useState(personagemSalvo.golpeDeEscudoUsadoTurno ?? false);
+  // Golpe Atordoante (Monge nível 5) — 1x por turno, mesmo padrão.
+  const [golpeAtordoanteUsadoTurno, setGolpeAtordoanteUsadoTurno] = useState(
+    personagemSalvo.golpeAtordoanteUsadoTurno ?? false,
+  );
   // Força Revigorante (Vitalidade da Árvore, Bárbaro nível 3+) — regra
   // real é "no início de cada um dos seus turnos", modelada como 1x
   // por turno (mesmo padrão de `golpeDeEscudoUsadoTurno`) em vez do
@@ -700,11 +721,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const pesoAtivo = houseRules.pesoMochila;
   const { preferencias: preferenciasPillsMagia, alternar: alternarPillMagia } = usePreferenciasPillsMagia();
 
-  const desValor = valorFinalAtributo(selecao, 'DES') ?? 10;
+  const desValor = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'DES') ?? 10, 'DES', capstonesAtributo);
   const conValorFinal = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'CON') ?? 10, 'CON', temCampeaoPrimitivo);
   // Só usado pela Defesa sem Armadura do Monge (10+DES+SAB) — ver
   // `DEFESA_SEM_ARMADURA_POR_CLASSE` em `core/calculoPersonagem.ts`.
-  const sabValorParaCA = valorFinalAtributo(selecao, 'SAB') ?? 10;
+  const sabValorParaCA = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'SAB') ?? 10, 'SAB', capstonesAtributo);
   // Talentos que entram no cálculo (Fase 4): os escolhidos em Level
   // Up (`talentosGeraisAtuais`) MAIS o Talento de Origem, ganho fixo
   // na criação (ex: Alerta) — nunca passa pelo picker de Level Up,
@@ -741,11 +762,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // mesmo treinado, diferente de `desvantagemForcaDestreza` acima.
   const desvantagemFurtividadeArmadura =
     armaduraEquipadaCatalogo?.furtividade === 'Desvantagem' ? armaduraEquipadaCatalogo.nome : null;
-  const iniciativa = calcularIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);
-  const percepcaoPassiva = calcularPercepcaoPassiva(selecao, nivelTotalAtual);
-  const atributos = calcularAtributosFinais(selecao, temCampeaoPrimitivo);
+  const iniciativa = calcularIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos, capstonesAtributo);
+  const percepcaoPassiva = calcularPercepcaoPassiva(selecao, nivelTotalAtual, capstonesAtributo);
+  const atributos = calcularAtributosFinais(selecao, capstonesAtributo);
   const atributosFinaisAtuais = Object.fromEntries(
-    atributosOrdem.map((a) => [a, aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, a) ?? 10, a, temCampeaoPrimitivo)]),
+    atributosOrdem.map((a) => [a, aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, a) ?? 10, a, capstonesAtributo)]),
   ) as Record<Atributo, number>;
   const forMod = atributos.find((a) => a.atributo === 'FOR')?.mod ?? 0;
   const desMod = atributos.find((a) => a.atributo === 'DES')?.mod ?? 0;
@@ -779,7 +800,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ],
     nivelTotalAtual,
     { ativa: temConhecimentoPrimordial && furiaAtiva, mod: forMod, pericias: PERICIAS_CONHECIMENTO_PRIMORDIAL },
-    temCampeaoPrimitivo,
+    capstonesAtributo,
   );
   // Canalizar Divindade/Mãos Consagradas/Aura de Proteção (Paladino) —
   // leem o nível DA classe Paladino em `classesAtual` (não da classe
@@ -795,8 +816,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     classeOriginal,
     nivelTotalAtual,
     atributosResilienteEscolhidos(talentosEfetivos, escolhaAtributoTalentoGeral),
-    temCampeaoPrimitivo,
+    capstonesAtributo,
     bonusAuraProtecao,
+    temSobreviventeDisciplinado(classesAtual.find((c) => c.classe === 'Monge')?.nivel ?? 0),
   );
   const proficienciasFerramenta = calcularProficienciasFerramenta(selecao, nivelTotalAtual, ferramentasMulticlasseAtuais);
   const bonusProficienciaAtual = classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
@@ -817,7 +839,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const explicacaoIniciativa = explicarIniciativa(selecao, classe, nivelTotalAtual, talentosEfetivos);
   const explicacaoPercepcaoPassiva = explicarPercepcaoPassiva(selecao, nivelTotalAtual);
   const estiloDeLuta = estilosDeLuta.find((e) => e.nome === personagem.estiloDeLuta) ?? null;
-  const usosFolegoMaximo = classe ? quantidadeRecuperarFolego(classe, personagem.nivel) : 0;
+  // Recuperar Fôlego/Fúria olham a entrada da PRÓPRIA classe em `classesAtual`
+  // (não `classe`/`personagem.nivel`, que seguem a classe conjuradora em foco) —
+  // senão sumiam da lista de Ação Bônus numa multiclasse (achado do Osmar).
+  const entradaGuerreiro = classesAtual.find((c) => c.classe === 'Guerreiro');
+  const classeCatalogoGuerreiro = catalogoClasses.find((c) => c.nome === 'Guerreiro');
+  const usosFolegoMaximo =
+    classeCatalogoGuerreiro && entradaGuerreiro ? quantidadeRecuperarFolego(classeCatalogoGuerreiro, entradaGuerreiro.nivel) : 0;
   const usosFolegoRestantes = Math.max(0, usosFolegoMaximo - folegoGasto);
   const usosCanalizarMaximo =
     classeCatalogoPaladino && entradaPaladino ? quantidadeCanalizarDivindade(classeCatalogoPaladino, entradaPaladino.nivel) : 0;
@@ -849,10 +877,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Fúria (Bárbaro) — ver sdd/sdd-barbaro-furia.md. `armaduraPesadaEquipada`
   // também trava a ATIVAÇÃO (regra real) e força o encerramento
   // automático ao equipar (ver `equiparItem`).
-  const furiaMaximo = classe ? quantidadeFuria(classe, personagem.nivel) : 0;
+  const entradaBarbaro = classesAtual.find((c) => c.classe === 'Bárbaro');
+  const classeCatalogoBarbaro = catalogoClasses.find((c) => c.nome === 'Bárbaro');
+  const furiaMaximo = classeCatalogoBarbaro && entradaBarbaro ? quantidadeFuria(classeCatalogoBarbaro, entradaBarbaro.nivel) : 0;
   const furiaDisponivel = furiaMaximo > 0;
   const furiaRestantes = Math.max(0, furiaMaximo - furiaGasto);
-  const furiaBonusDano = classe ? bonusDanoFuria(classe, personagem.nivel) : 0;
+  const furiaBonusDano = classeCatalogoBarbaro && entradaBarbaro ? bonusDanoFuria(classeCatalogoBarbaro, entradaBarbaro.nivel) : 0;
   // Pontos de Foco (Monge) — ver sdd/sdd-monge.md seção 3. Olha a
   // entrada de Monge em `classesAtual` DIRETO (não `classe`/
   // `personagem.nivel`, que seguem a classe conjuradora "ativa" — ver
@@ -1006,6 +1036,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasPactoDoInferoAtuais,
     magiasJuramentoDaDevocaoAtuais,
     magiasEspecieAtuais,
+    magiasSubclasseAtuais,
     magiasTalentoOrigemAtuais,
     magiaIniciadaOrigemAtual,
     magiaIniciadaEspecieAtual,
@@ -1337,6 +1368,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     golpeBrutalUsadoTurno,
     cortarProntoTurno: cortarPronto,
     golpeDeEscudoUsadoTurno,
+    golpeAtordoanteUsadoTurno,
     forcaRevigoranteUsadaTurno,
     esmagadorUsadoTurno,
     talhadorUsadoTurno,
@@ -1366,6 +1398,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     furiaGasto,
     furiaAtiva,
     armaSagradaAtiva,
+    defesaSuperiorAtiva,
+    sintoniaElementalAtiva,
+    apiceGolpesUsadoTurno,
     resplendorSagradoGasto,
     resplendorSagradoAtiva,
     maosCurativasGasto,
@@ -1451,6 +1486,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       golpeBrutalUsadoTurno,
       cortarPronto,
       golpeDeEscudoUsadoTurno,
+      golpeAtordoanteUsadoTurno,
       forcaRevigoranteUsadaTurno,
       esmagadorUsadoTurno,
       talhadorUsadoTurno,
@@ -1476,6 +1512,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       furiaGasto,
       furiaAtiva,
       armaSagradaAtiva,
+      defesaSuperiorAtiva,
+      sintoniaElementalAtiva,
+      apiceGolpesUsadoTurno,
       resplendorSagradoGasto,
       resplendorSagradoAtiva,
       maosCurativasGasto,
@@ -1699,6 +1738,32 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * encerrar é de graça. Ativar exige a arma atual elegível (ver
    * `armaSagradaArmaElegivel`) — encerrar sempre funciona, mesmo que
    * o jogador tenha trocado de arma depois. */
+  /** Defesa Superior (Monge nível 18) — ativar gasta 3 Pontos de Foco;
+   * encerrar é de graça (1 minuto ou Incapacitado, o app não conta tempo). */
+  function usarDefesaSuperior(): boolean {
+    if (defesaSuperiorAtiva) {
+      setDefesaSuperiorAtiva(false);
+      return true;
+    }
+    if (!podeAtivarDefesaSuperior(mongeEntry?.nivel ?? 0, pontosDeFocoRestantes)) return false;
+    setPontosDeFocoGasto((v) => v + CUSTO_FOCO_DEFESA_SUPERIOR);
+    setDefesaSuperiorAtiva(true);
+    return true;
+  }
+
+  /** Sintonia Elemental (Monge/Elementos nível 3) — ativar gasta 1 Ponto de
+   * Foco; encerrar é de graça (10 min ou Incapacitado, o app não conta tempo). */
+  function usarSintoniaElemental(): boolean {
+    if (sintoniaElementalAtiva) {
+      setSintoniaElementalAtiva(false);
+      return true;
+    }
+    if (!podeAtivarSintoniaElemental(mongeEntry?.nivel ?? 0, mongeEntry?.subclasse, pontosDeFocoRestantes)) return false;
+    setPontosDeFocoGasto((v) => v + CUSTO_FOCO_SINTONIA_ELEMENTAL);
+    setSintoniaElementalAtiva(true);
+    return true;
+  }
+
   function usarArmaSagrada(): boolean {
     if (armaSagradaAtiva) {
       setArmaSagradaAtiva(false);
@@ -1770,6 +1835,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setGolpeBrutalUsadoTurno(false);
     setCortarPronto(false);
     setGolpeDeEscudoUsadoTurno(false);
+    setGolpeAtordoanteUsadoTurno(false);
+    setApiceGolpesUsadoTurno(false);
     setForcaRevigoranteUsadaTurno(false);
     setEsmagadorUsadoTurno(false);
     setTalhadorUsadoTurno(false);
@@ -2416,6 +2483,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return () => registrarInspiracaoHeroica(null);
   }, [inspiracaoHeroicaAtiva, registrarInspiracaoHeroica]);
 
+  // Sobrevivente Disciplinado (Monge nível 14) — reroll de Salvaguarda
+  // gastando 1 Ponto de Foco, no modal de rolagem global.
+  useEffect(() => {
+    registrarSobreviventeDisciplinado({
+      disponivel: podeRerolarSalvaguardaComFoco(mongeEntry?.nivel ?? 0, pontosDeFocoRestantes),
+      usar: gastarPontoDeFoco,
+    });
+    return () => registrarSobreviventeDisciplinado(null);
+  }, [mongeEntry?.nivel, pontosDeFocoRestantes, registrarSobreviventeDisciplinado]);
+
   // Registra Força Indomável (Bárbaro nível 18) no modal de rolagem
   // global — aplica sozinho em teste/salvaguarda de Força (sem botão,
   // sem custo, ver `RollContext.tsx`). Some sozinha se a Ficha
@@ -3026,6 +3103,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             pericias={pericias}
             salvaguardas={salvaguardas}
             temSentidoDePerigo={temSentidoDePerigo}
+            temEvasao={temEvasao(mongeEntry?.nivel ?? 0)}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             desvantagemFurtividadeArmadura={desvantagemFurtividadeArmadura}
             proficienciasFerramenta={proficienciasFerramenta}
@@ -3182,6 +3260,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             magiasPactoDoInferoAtuais={magiasPactoDoInferoAtuais}
             magiasJuramentoDaDevocaoAtuais={magiasJuramentoDaDevocaoAtuais}
             magiasEspecieAtuais={magiasEspecieAtuais}
+            magiasSubclasseAtuais={magiasSubclasseAtuais}
             magiasTalentoOrigemAtuais={magiasTalentoOrigemAtuais}
             magiasTalentoGeralAtuais={magiasTalentoGeralAtuais}
             temPactoDaLamina={invocacoesMisticasAtuais.includes('pacto-da-lamina')}
@@ -3336,6 +3415,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             }}
             temRepudiarInimigos={temRepudiarInimigos}
             temGolpesRadiantes={temGolpesRadiantes}
+            apiceElemental={{
+              disponivel: temApiceElemental(mongeEntry?.nivel ?? 0, mongeEntry?.subclasse),
+              golpesUsadoTurno: apiceGolpesUsadoTurno,
+              onUsarGolpes: () => setApiceGolpesUsadoTurno(true),
+            }}
+            sintoniaElemental={{
+              disponivel: temSintoniaElemental(mongeEntry?.nivel ?? 0, mongeEntry?.subclasse),
+              ativa: sintoniaElementalAtiva,
+              onAlternar: usarSintoniaElemental,
+            }}
+            defesaSuperior={{
+              disponivel: temDefesaSuperior(mongeEntry?.nivel ?? 0),
+              ativa: defesaSuperiorAtiva,
+              onAlternar: usarDefesaSuperior,
+            }}
             armaSagrada={{
               disponivel: armaSagradaDisponivel,
               elegivel: armaSagradaArmaElegivel,
@@ -3406,6 +3500,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             metabolismoIncomumDisponivel={metabolismoIncomumDisponivel}
             ladosArtesMarciaisMonge={ladosArtesMarciaisMonge}
             nivelMonge={mongeEntry?.nivel ?? 0}
+            desModMonge={desMod}
+            onRecuperarPontosDeFoco={(qtd) => setPontosDeFocoGasto((v) => Math.max(0, v - qtd))}
+            onGanharPvTemporario={(valor) => setPvTemporario((atual) => ganharPvTemporario(atual, valor))}
+            golpeAtordoante={{
+              explicacaoCd: explicarCdGolpeAtordoante(
+                atributos.find((a) => a.atributo === 'SAB')?.mod ?? 0,
+                bonusProficienciaAtual,
+              ),
+              usadoTurno: golpeAtordoanteUsadoTurno,
+              onUsar: () => setGolpeAtordoanteUsadoTurno(true),
+            }}
             onConfirmarMetabolismoIncomum={confirmarMetabolismoIncomum}
             inspiracao={{
               maximo: usosInspiracaoMax,

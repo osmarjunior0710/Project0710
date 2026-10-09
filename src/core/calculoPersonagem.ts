@@ -15,7 +15,7 @@ import { proficienciasIniciaisClasse } from '../data/rulesets/dnd2024/classesPro
 import { modificador, valorFinalAtributo, type WizardSelection } from './personagem';
 import { resumoEquipado } from './equipamento';
 import { caracteristicaDesbloqueada } from './levelUp';
-import { aplicarCampeaoPrimitivo } from './campeaoPrimitivo';
+import { aplicarCampeaoPrimitivo, rotuloCapstoneDoAtributo, type TemCapstone } from './campeaoPrimitivo';
 import type { ItemMochila } from './mochila';
 import { classeProficienteComArmadura } from './proficienciaArmadura';
 
@@ -365,10 +365,16 @@ function proficienteEmPericia(selection: WizardSelection, pericia: string): bool
   return selection.periciasClasseEscolhidas.includes(pericia);
 }
 
-export function calcularPercepcaoPassiva(selection: WizardSelection, nivel: number = 1): number | null {
-  const sabValor = valorFinalAtributo(selection, 'SAB');
+export function calcularPercepcaoPassiva(
+  selection: WizardSelection,
+  nivel: number = 1,
+  /** Corpo e Mente (Monge 20) soma na Sabedoria — ver `core/campeaoPrimitivo.ts`. */
+  capstones: TemCapstone = false,
+): number | null {
+  const sabBase = valorFinalAtributo(selection, 'SAB');
   const classe = classeDaSelecao(selection);
-  if (sabValor === null || !classe) return null;
+  if (sabBase === null || !classe) return null;
+  const sabValor = aplicarCampeaoPrimitivo(sabBase, 'SAB', capstones);
   const proficiente = proficienteEmPericia(selection, 'Percepção');
   const bonus = proficiente ? bonusProficiencia(classe, nivel) : 0;
   return 10 + modificador(sabValor) + bonus;
@@ -383,9 +389,12 @@ export function calcularIniciativa(
   classe?: Classe | null,
   nivel?: number,
   talentosAtuais?: string[],
+  /** Corpo e Mente (Monge 20) soma na Destreza — ver `core/campeaoPrimitivo.ts`. */
+  capstones: TemCapstone = false,
 ): number | null {
-  const desValor = valorFinalAtributo(selection, 'DES');
-  if (desValor === null) return null;
+  const desBase = valorFinalAtributo(selection, 'DES');
+  if (desBase === null) return null;
+  const desValor = aplicarCampeaoPrimitivo(desBase, 'DES', capstones);
   const temAlerta = temEfeitoMecanico(talentosAtuais, 'bonus-iniciativa-bonus-proficiencia');
   const bonusAlerta = temAlerta && classe && nivel ? bonusProficiencia(classe, nivel) : 0;
   return modificador(desValor) + bonusAlerta;
@@ -405,7 +414,7 @@ export interface AtributoFinal {
 
 /** `temCampeaoPrimitivo` — Bárbaro nível 20 (ver `core/campeaoPrimitivo.ts`).
  * `false`/omitido = comportamento de sempre, sem bônus. */
-export function calcularAtributosFinais(selection: WizardSelection, temCampeaoPrimitivo = false): AtributoFinal[] {
+export function calcularAtributosFinais(selection: WizardSelection, temCampeaoPrimitivo: TemCapstone = false): AtributoFinal[] {
   return atributosOrdem
     .map((atributo) => {
       const valorBase = valorFinalAtributo(selection, atributo);
@@ -421,7 +430,7 @@ export function calcularAtributosFinais(selection: WizardSelection, temCampeaoPr
           linhas: aplicouCampeao
             ? [
                 { label: `${atributo} base`, valor: `${valorBase}` },
-                { label: 'Campeão Primitivo', valor: fmtMod(valor - valorBase) },
+                { label: rotuloCapstoneDoAtributo(atributo), valor: fmtMod(valor - valorBase) },
                 { label: `mod. ${atributo}`, valor: fmtMod(mod) },
               ]
             : [{ label: `mod. ${atributo}`, valor: fmtMod(mod) }],
@@ -503,11 +512,14 @@ export function calcularSalvaguardas(
   atributosExtrasProficientes: Atributo[] = [],
   /** Campeão Primitivo (Bárbaro nível 20, ver `core/campeaoPrimitivo.ts`)
    * — `false`/omitido = comportamento de sempre. */
-  temCampeaoPrimitivo = false,
+  temCampeaoPrimitivo: TemCapstone = false,
   /** Aura de Proteção (Paladino nível 6, ver `core/recursosClasse.ts`
    * `temAuraDeProtecao`) — soma nas 6 salvaguardas, mínimo +1. `0`/
    * omitido = sem bônus. */
   bonusAuraProtecao = 0,
+  /** Sobrevivente Disciplinado (Monge nível 14) — proficiência em TODAS as
+   * salvaguardas (ver `core/sobreviventeDisciplinado.ts`). */
+  proficienteEmTodas = false,
 ): SalvaguardaFinal[] {
   const bonus = classeOriginal ? bonusProficiencia(classeOriginal, nivelTotal) : 0;
   return atributosOrdem
@@ -518,7 +530,8 @@ export function calcularSalvaguardas(
       const atribMod = modificador(valor);
       const proficientePelaClasse = classeOriginal?.salvaguardas.includes(atributo) ?? false;
       const proficientePeloTalento = !proficientePelaClasse && atributosExtrasProficientes.includes(atributo);
-      const proficiente = proficientePelaClasse || proficientePeloTalento;
+      const proficientePeloMonge = proficienteEmTodas && !proficientePelaClasse && !proficientePeloTalento;
+      const proficiente = proficientePelaClasse || proficientePeloTalento || proficientePeloMonge;
       const bonusFinal = proficiente ? bonus : 0;
       return {
         atributo,
@@ -526,10 +539,11 @@ export function calcularSalvaguardas(
         proficiente,
         explicacao: {
           linhas: [
-            ...(valor !== valorBase ? [{ label: 'Campeão Primitivo', valor: fmtMod(valor - valorBase) }] : []),
+            ...(valor !== valorBase ? [{ label: rotuloCapstoneDoAtributo(atributo), valor: fmtMod(valor - valorBase) }] : []),
             { label: `mod. ${atributo}`, valor: fmtMod(atribMod) },
             ...(proficientePelaClasse ? [{ label: 'Bônus de Proficiência (proficiente)', valor: fmtMod(bonusFinal) }] : []),
             ...(proficientePeloTalento ? [{ label: 'Bônus de Proficiência (Resiliente)', valor: fmtMod(bonusFinal) }] : []),
+            ...(proficientePeloMonge ? [{ label: 'Bônus de Proficiência (Sobrevivente Disciplinado)', valor: fmtMod(bonusFinal) }] : []),
             ...(bonusAuraProtecao !== 0 ? [{ label: 'Aura de Proteção', valor: fmtMod(bonusAuraProtecao) }] : []),
           ],
           total: {
@@ -589,7 +603,7 @@ export function calcularPericias(
    * Primordial) já recebem o mod. de Força correto de quem chama esta
    * função (o `atributos`/`forMod` de `FichaShell.tsx` já vem
    * ajustado). `false`/omitido = comportamento de sempre. */
-  temCampeaoPrimitivo = false,
+  temCampeaoPrimitivo: TemCapstone = false,
 ): PericiaFinal[] {
   const classe = classeDaSelecao(selection);
   if (!classe) return [];

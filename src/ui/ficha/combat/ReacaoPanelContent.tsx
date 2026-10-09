@@ -21,6 +21,7 @@ import TickPips from '../../components/TickPips';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import styles from './PanelRows.module.css';
+import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
 
 interface ReacaoPanelContentProps {
   /** `true` = Armadura equipada sem treinamento — bloqueia conjurar
@@ -143,6 +144,8 @@ interface ReacaoPanelContentProps {
    * aba (fácil de não notar, ver `AvisoModal.tsx`). Também marca a
    * Reação como usada e fecha o painel, igual `onEscolher`. */
   onAbrirAvisoReacao: (titulo: string, texto: string) => void;
+  /** Defletir Ataques (Monge nível 3) — ver `usarDefletirAtaques` em `CombatTab.tsx`. */
+  onDefletirAtaques: () => void;
 }
 
 export default function ReacaoPanelContent({
@@ -195,6 +198,7 @@ export default function ReacaoPanelContent({
   preferenciasPillsMagia,
   nivelMonge,
   onAbrirAvisoReacao,
+  onDefletirAtaques,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
@@ -435,53 +439,93 @@ export default function ReacaoPanelContent({
     );
   }
 
-  return (
-    <>
-      {usosInspiracaoMaximo > 0 && (
-        <div className={styles.slotCounter}>
-          <span>Inspiração de Bardo (d{tamanhoDadoInspiracao}):</span>
-          <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} cor={corDoRecursoDaClasse('Bardo')} />
-        </div>
-      )}
-      {palavrasDeInterrupcaoDisponivel && (
-        <div
-          className={styles.row}
-          style={semUsosInspiracao ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-          onClick={usarPalavrasDeInterrupcao}
-        >
-          <div className={styles.rowName}>🗯 Palavras de Interrupção</div>
+  const blocos: BlocoPainel[] = [
+    { grupo: 'topo', no: (
+      (
+            <div
+              className={styles.row}
+              onClick={() =>
+                onEscolher(
+                  '⚔ Ataque de Oportunidade',
+                  'Disponível por padrão pra qualquer personagem, quando um inimigo visível sai do seu alcance.',
+                )
+              }
+            >
+              <div className={styles.rowName}>⚔ Ataque de Oportunidade</div>
+              {detalhesAtivo && (
+                <div className={styles.rowDesc}>Disponível por padrão pra qualquer personagem, sem precisar de característica de classe</div>
+              )}
+            </div>
+            )
+    ) },
+    { grupo: 'Bardo', no: (
+      usosInspiracaoMaximo > 0 && (
+              <div className={styles.slotCounter}>
+                <span>Inspiração de Bardo (d{tamanhoDadoInspiracao}):</span>
+                <TickPips total={usosInspiracaoMaximo} usados={usosInspiracaoMaximo - usosInspiracaoRestantes} cor={corDoRecursoDaClasse('Bardo')} />
+==              </div>
+            )
+    ) },
+    { grupo: 'Bardo', no: (
+      palavrasDeInterrupcaoDisponivel && (
+              <div
+                className={styles.row}
+                style={semUsosInspiracao ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                onClick={usarPalavrasDeInterrupcao}
+              >
+                <div className={styles.rowName}>🗯 Palavras de Interrupção</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    Criatura à vista a até 18m rolou dano ou foi bem-sucedida em teste/ataque — gasta 1 uso da sua
+                    Inspiração de Bardo (d{tamanhoDadoInspiracao}), subtraia o resultado do dela ({usosInspiracaoRestantes}{' '}
+                    uso{usosInspiracaoRestantes === 1 ? '' : 's'} restante{usosInspiracaoRestantes === 1 ? '' : 's'}).
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Bardo', no: (
+      contraEncantamentoDisponivel && (
+              <div className={styles.row} onClick={usarContraEncantamento}>
+                <div className={styles.rowName}>🎶 Contra-Encantamento</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    Você ou uma criatura a até 9m falhou salvaguarda contra Amedrontado/Enfeitiçado — role de novo, com
+                    Vantagem. Sem custo de recurso.
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Bárbaro', no: (
+      ramosDaArvoreDisponivel && (
+              <div className={styles.row} onClick={onAbrirRamosDaArvore}>
+                <div className={styles.rowName}>🌳 Ramos da Árvore</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    Criatura à vista começa o turno a até 9m de você — o alvo faz salvaguarda de Força ou é teleportado pra
+                    perto de você e pode ter o Deslocamento reduzido a 0 até o final do turno.
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Monge', no: (
+      nivelMonge >= 3 && (
+        <div className={styles.row} onClick={onDefletirAtaques}>
+          <div className={styles.rowName}>🛡 Defletir Ataques</div>
           {detalhesAtivo && (
             <div className={styles.rowDesc}>
-              Criatura à vista a até 18m rolou dano ou foi bem-sucedida em teste/ataque — gasta 1 uso da sua
-              Inspiração de Bardo (d{tamanhoDadoInspiracao}), subtraia o resultado do dela ({usosInspiracaoRestantes}{' '}
-              uso{usosInspiracaoRestantes === 1 ? '' : 's'} restante{usosInspiracaoRestantes === 1 ? '' : 's'}).
+              Você foi atingido por um ataque — reduz o dano total em 1d10 + mod. Destreza + nível de Monge. Só contra dano{' '}
+              {nivelMonge >= 13 ? 'de qualquer tipo (Defletir Energia)' : 'Contundente, Cortante ou Perfurante'}. Se o dano zerar, dá pra gastar 1
+              Ponto de Foco pra redirecionar o golpe.
             </div>
           )}
         </div>
-      )}
-      {contraEncantamentoDisponivel && (
-        <div className={styles.row} onClick={usarContraEncantamento}>
-          <div className={styles.rowName}>🎶 Contra-Encantamento</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              Você ou uma criatura a até 9m falhou salvaguarda contra Amedrontado/Enfeitiçado — role de novo, com
-              Vantagem. Sem custo de recurso.
-            </div>
-          )}
-        </div>
-      )}
-      {ramosDaArvoreDisponivel && (
-        <div className={styles.row} onClick={onAbrirRamosDaArvore}>
-          <div className={styles.rowName}>🌳 Ramos da Árvore</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              Criatura à vista começa o turno a até 9m de você — o alvo faz salvaguarda de Força ou é teleportado pra
-              perto de você e pode ter o Deslocamento reduzido a 0 até o final do turno.
-            </div>
-          )}
-        </div>
-      )}
-      {nivelMonge >= 4 && (
+      )
+    ) },
+    { grupo: 'Monge', no: (
+      nivelMonge >= 4 && (
         <div className={styles.row} onClick={usarQuedaLenta}>
           <div className={styles.rowName}>🍃 Queda Lenta</div>
           {detalhesAtivo && (
@@ -490,122 +534,120 @@ export default function ReacaoPanelContent({
             </div>
           )}
         </div>
-      )}
-      {resistenciaDaPedraDisponivel && (
-        <div
-          className={styles.row}
-          style={usosAncestralidadeGiganteRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-          onClick={usarResistenciaDaPedra}
-        >
-          <div className={styles.rowName}>🪨 Resistência da Pedra</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              Você sofreu dano — gasta 1 uso da Ancestralidade Gigante ({usosAncestralidadeGiganteRestantes}/
-              {usosAncestralidadeGiganteMaximo} restantes) e reduz o dano pelo resultado de 1d12 + seu mod. de
-              Constituição.
-            </div>
-          )}
-        </div>
-      )}
-      {trovaoDaTempestadeDisponivel && (
-        <div
-          className={styles.row}
-          style={usosAncestralidadeGiganteRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-          onClick={usarTrovaoDaTempestade}
-        >
-          <div className={styles.rowName}>⚡ Trovão da Tempestade</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              Criatura a até 18m te acertou com ataque — gasta 1 uso da Ancestralidade Gigante (
-              {usosAncestralidadeGiganteRestantes}/{usosAncestralidadeGiganteMaximo} restantes) e causa 1d8 de dano
-              Trovejante nela.
-            </div>
-          )}
-        </div>
-      )}
-      {colheitaDosMortosDisponivel && (
-        <div
-          className={styles.row}
-          style={!personagemEnsanguentado || opcoesColheitaDosMortos.length === 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-          onClick={() => setTelaColheitaDosMortos(true)}
-        >
-          <div className={styles.rowName}>💀 Colheita dos Mortos</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              {!personagemEnsanguentado
-                ? 'Só disponível quando você fica Ensanguentado (PV igual ou menor que a metade do máximo).'
-                : opcoesColheitaDosMortos.length === 0
-                  ? 'Nenhum Morto-Vivo sob seu controle agora.'
-                  : 'Reduz um Morto-Vivo sob seu controle a 0 PV e recupera PV igual ao seu nível de Mago.'}
-            </div>
-          )}
-        </div>
-      )}
-      {mestreDaMorteExplosaoDisponivel && (
-        <div
-          className={styles.row}
-          style={!mestreDaMorteExplosaoLiberada ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-          onClick={usarExplosaoMestreDaMorte}
-        >
-          <div className={styles.rowName}>💥 Mestre da Morte — Explosão</div>
-          {detalhesAtivo && (
-            <div className={styles.rowDesc}>
-              {!mestreDaMorteExplosaoLiberada
-                ? 'Só disponível quando um Morto-Vivo sob seu controle é reduzido a 0 PV.'
-                : 'Causa 2d10 + seu mod. de Inteligência de dano Necrótico em criaturas à sua escolha a até 3m do Morto-Vivo (salvaguarda de Destreza reduz à metade).'}
-            </div>
-          )}
-        </div>
-      )}
-      {conjura && magiasReacao.length > 0 && (
-        <>
-          {desvantagemForcaDestreza && (
-            <div className="label" style={{ color: 'var(--danger)', marginBottom: 8 }}>
-              Bloqueado — Armadura equipada sem treinamento impede conjurar magias.
-            </div>
-          )}
-          {magiasReacao.map(({ magia: m, classe }) => {
-            const semEspaco =
-              m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
-            const bloqueada = desvantagemForcaDestreza || semEspaco;
-            return (
+      )
+    ) },
+    { grupo: 'Espécie', no: (
+      resistenciaDaPedraDisponivel && (
               <div
-                key={`${m.id}-${classe ?? 'x'}`}
-                className={styles.spellMiniRow}
-                style={bloqueada ? { opacity: semEspaco ? 0.45 : 0.5, pointerEvents: 'none' } : undefined}
-                onClick={() => conjurarMagia(m, classe)}
+                className={styles.row}
+                style={usosAncestralidadeGiganteRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                onClick={usarResistenciaDaPedra}
               >
-                <span>
-                  <MagiaComDescricao magia={m} /> {iconesMagia(m)}
-                  {semEspaco && <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · sem espaço disponível</span>}
-                </span>
-                <span style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 4, maxWidth: '55%' }}>
-                  <PillsMagia magia={m} classe={classe} preferencias={preferenciasPillsMagia} />
-                </span>
+                <div className={styles.rowName}>🪨 Resistência da Pedra</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    Você sofreu dano — gasta 1 uso da Ancestralidade Gigante ({usosAncestralidadeGiganteRestantes}/
+                    {usosAncestralidadeGiganteMaximo} restantes) e reduz o dano pelo resultado de 1d12 + seu mod. de
+                    Constituição.
+                  </div>
+                )}
               </div>
-            );
-          })}
-          {aviso && (
-            <div className="label" style={{ color: 'var(--danger)', marginBottom: 8, marginTop: 8 }}>
-              {aviso}
-            </div>
-          )}
-        </>
-      )}
-      <div
-        className={styles.row}
-        onClick={() =>
-          onEscolher(
-            '⚔ Ataque de Oportunidade',
-            'Disponível por padrão pra qualquer personagem, quando um inimigo visível sai do seu alcance.',
-          )
-        }
-      >
-        <div className={styles.rowName}>⚔ Ataque de Oportunidade</div>
-        {detalhesAtivo && (
-          <div className={styles.rowDesc}>Disponível por padrão pra qualquer personagem, sem precisar de característica de classe</div>
-        )}
-      </div>
-    </>
-  );
+            )
+    ) },
+    { grupo: 'Espécie', no: (
+      trovaoDaTempestadeDisponivel && (
+              <div
+                className={styles.row}
+                style={usosAncestralidadeGiganteRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                onClick={usarTrovaoDaTempestade}
+              >
+                <div className={styles.rowName}>⚡ Trovão da Tempestade</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    Criatura a até 18m te acertou com ataque — gasta 1 uso da Ancestralidade Gigante (
+                    {usosAncestralidadeGiganteRestantes}/{usosAncestralidadeGiganteMaximo} restantes) e causa 1d8 de dano
+                    Trovejante nela.
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Mago', no: (
+      colheitaDosMortosDisponivel && (
+              <div
+                className={styles.row}
+                style={!personagemEnsanguentado || opcoesColheitaDosMortos.length === 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                onClick={() => setTelaColheitaDosMortos(true)}
+              >
+                <div className={styles.rowName}>💀 Colheita dos Mortos</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    {!personagemEnsanguentado
+                      ? 'Só disponível quando você fica Ensanguentado (PV igual ou menor que a metade do máximo).'
+                      : opcoesColheitaDosMortos.length === 0
+                        ? 'Nenhum Morto-Vivo sob seu controle agora.'
+                        : 'Reduz um Morto-Vivo sob seu controle a 0 PV e recupera PV igual ao seu nível de Mago.'}
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Mago', no: (
+      mestreDaMorteExplosaoDisponivel && (
+              <div
+                className={styles.row}
+                style={!mestreDaMorteExplosaoLiberada ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                onClick={usarExplosaoMestreDaMorte}
+              >
+                <div className={styles.rowName}>💥 Mestre da Morte — Explosão</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    {!mestreDaMorteExplosaoLiberada
+                      ? 'Só disponível quando um Morto-Vivo sob seu controle é reduzido a 0 PV.'
+                      : 'Causa 2d10 + seu mod. de Inteligência de dano Necrótico em criaturas à sua escolha a até 3m do Morto-Vivo (salvaguarda de Destreza reduz à metade).'}
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'topo', no: (
+      conjura && magiasReacao.length > 0 && (
+              <>
+                {desvantagemForcaDestreza && (
+                  <div className="label" style={{ color: 'var(--danger)', marginBottom: 8 }}>
+                    Bloqueado — Armadura equipada sem treinamento impede conjurar magias.
+                  </div>
+                )}
+                {magiasReacao.map(({ magia: m, classe }) => {
+                  const semEspaco =
+                    m.circulo > 0 && circulosDisponiveisParaConjurar(m.circulo, espacos, espacosGastosPorCirculo).length === 0;
+                  const bloqueada = desvantagemForcaDestreza || semEspaco;
+                  return (
+                    <div
+                      key={`${m.id}-${classe ?? 'x'}`}
+                      className={styles.spellMiniRow}
+                      style={bloqueada ? { opacity: semEspaco ? 0.45 : 0.5, pointerEvents: 'none' } : undefined}
+                      onClick={() => conjurarMagia(m, classe)}
+                    >
+                      <span>
+                        <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                        {semEspaco && <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · sem espaço disponível</span>}
+                      </span>
+                      <span style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 4, maxWidth: '55%' }}>
+                        <PillsMagia magia={m} classe={classe} preferencias={preferenciasPillsMagia} />
+                      </span>
+                    </div>
+                  );
+                })}
+                {aviso && (
+                  <div className="label" style={{ color: 'var(--danger)', marginBottom: 8, marginTop: 8 }}>
+                    {aviso}
+                  </div>
+                )}
+              </>
+            )
+    ) },
+  ];
+
+  return <GruposDoPainel blocos={blocos} />;
 }

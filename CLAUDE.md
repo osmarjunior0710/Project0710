@@ -160,6 +160,13 @@ desktop são "esticar depois", nunca o ponto de partida. Toda área
 clicável precisa ser grande o suficiente pro dedo, não pro cursor. Nunca
 esconda informação importante atrás de hover.
 
+**Tamanhos de teste padrão (2026-10):** o que importa é a largura em
+pixels CSS, não a proporção (celular moderno é ~20:9, não 16:9/4:3).
+Teste sempre em **360px** (o mais apertado, Android comum) e **412px**
+(Pixel/Galaxy grandes); 390px (iPhone) é a referência de partida. Se
+cabe bem em 360, cabe nos maiores. Nunca use só o aparelho do Osmar
+como referência.
+
 ## 5.1 Ordem de construção de UI: M3 primeiro, pele RPG depois
 
 Ao implementar qualquer componente/tela nova, siga sempre esta ordem:
@@ -348,14 +355,15 @@ São 2 óticas diferentes buscando a mesma entrega — "conversem" antes,
 resolvendo a tensão entre a melhor UI possível e o que é viável
 construir bem, e só decidam juntos a solução final.
 
-**Personagem de teste dedicado ao foco** (2026-09, ver
-`DECISOES-DESIGN.md` "Personagem de teste dedicado ao foco em
-andamento"): se o foco for validar repetidamente algo que exige um
-personagem num estado específico (classe/nível/círculo/recurso
-particular), monte esse personagem como atalho próprio em "🧪
-PROTÓTIPOS" já na primeira entrega do foco — cada entrega seguinte
-reusa o mesmo atalho pra validar na hora, sem recriar personagem do
-zero a cada rodada.
+**Personagem de teste = o "Char Multiclasse" (nível 20 em todas as
+classes), sempre** (2026-10, pedido do Osmar, substitui a regra antiga de
+montar um personagem dedicado por foco): toda classe nova entra em
+`CLASSES_DO_CHAR_MULTICLASSE` (`core/personagemTesteMulticlasse.ts`) já
+na Entrega 1 do foco, no nível 20 — isso força criar todas as funções
+desde o começo e deixa o Osmar validar cada entrega num personagem
+"anormal" (todas as classes juntas), que também testa a interface cheia
+e a multiclasse de graça. Subclasse: a não homebrew já implementada, ou
+`null` enquanto não houver. Não criar atalho dedicado por foco.
 
 **Regra geral de aprovação antes de codar** (pedido do Osmar, 2026-09):
 antes de escrever qualquer código de uma entrega, apresente a proposta

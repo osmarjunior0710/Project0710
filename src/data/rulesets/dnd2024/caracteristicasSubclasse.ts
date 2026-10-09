@@ -37,6 +37,11 @@ import type { StatusImplementacao } from './statusImplementacao';
 // lateral da página impressa ("Subclasse Evocador") colada no fim da
 // célula (mesmo problema de extração da seção 8 do CLAUDE.md) —
 // cortada, confirmado contra o Livro do Jogador (Cap. 3).
+//
+// Monge / Combatente dos Elementos — "Ápice Elemental" (nível 17) tinha a
+// introdução do capítulo do Paladino colada no fim da célula (mesmo problema
+// de extração da seção 8 do CLAUDE.md) — cortada, confirmado contra o Livro
+// do Jogador (Cap. 3, pág. 165).
 
 export interface CaracteristicaSubclasse {
   classe: string;
@@ -53,6 +58,9 @@ export interface CaracteristicaSubclasse {
    * jogador (diferente de "Descobertas Mágicas" do Bardo, que É uma
    * escolha). `undefined` nas outras características. */
   magiasFixasPorNivel?: Record<number, string[]>;
+  /** Truques concedidos de forma fixa por esta característica (ex.:
+   * Manipular Elementos → Elementalismo). Ver `core/magiasSubclasse.ts`. */
+  truquesConcedidos?: string[];
 }
 
 export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
@@ -472,6 +480,57 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     descricao:
       'Como uma Ação Bônus, você pode imbuir sua Aura de Proteção com poder sagrado, concedendo os benefícios abaixo por 1 minuto ou até a encerrar (nenhuma ação é necessária). Após usar esta característica, você não pode utilizá-la novamente até completar um Descanso Longo. Você também pode restaurar seu uso gastando um espaço de magia de 5º círculo (nenhuma ação é necessária). Aliviar Desafio. Inimigos na sua aura têm Desvantagem em salvaguardas contra suas magias e opções de Canalizar Divindade. Magias Ágeis. Sempre que conjurar uma magia que tenha um tempo de conjuração de uma ação, você pode conjurá-la usando uma Ação Bônus. Regeneração. No início de cada um dos seus turnos, você recupera 10 Pontos de Vida.',
     tipoAcao: 'Ação Bônus',
+    statusImplementacao: 'placeholder-codeimplementation',
+  },
+  {
+    classe: 'Monge',
+    subclasse: 'Combatente dos Elementos',
+    nivel: 3,
+    nome: 'Manipular Elementos',
+    descricao:
+      'Você conhece a magia Elementalismo. Sabedoria é seu atributo de conjuração para ela.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'codeimplementation',
+    truquesConcedidos: ['Elementalismo'],
+  },
+  {
+    classe: 'Monge',
+    subclasse: 'Combatente dos Elementos',
+    nivel: 3,
+    nome: 'Sintonia Elemental',
+    descricao:
+      'No início do seu turno, você pode gastar 1 Ponto de Foco para imbuir-se de energia elemental. A energia dura 10 minutos ou até você ter a condição Incapacitado. Você adquire os seguintes benefícios enquanto esta característica estiver ativa. Ataques Elementais. Ao acertar com seu Ataque Desarmado, você pode causar com ele, à sua escolha, dano Ácido, Elétrico, Gélido, Ígneo ou Trovejante, em vez de seu tipo de dano normal. Ao causar um desses tipos de dano, você também pode forçar o alvo a realizar uma salvaguarda de Força. Se ele falhar, você pode movê-lo até 3 metros em sua direção ou para longe de você, enquanto a energia elemental gira em torno dele. Extensão. Ao realizar um Ataque Desarmado, seu alcance aumenta em 3 metros à medida que a energia elemental se estende por você.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'codeimplementation',
+  },
+  {
+    classe: 'Monge',
+    subclasse: 'Combatente dos Elementos',
+    nivel: 6,
+    nome: 'Explosão Elemental',
+    descricao:
+      'Como uma ação Usar Magia, você pode gastar 2 Pontos de Foco para fazer com que energia elemental exploda em uma Esfera de 6 metros de raio centrada em um ponto a até 36 metros de você. Escolha um tipo de dano: Ácido, Elétrico, Gélido, Ígneo ou Trovejante. Cada criatura na Esfera deve realizar uma salvaguarda de Destreza. Se falhar, uma criatura sofre dano do tipo escolhido igual a três jogadas de seus dados de Artes Marciais. Em caso de sucesso, uma criatura sofre metade do dano.',
+    tipoAcao: 'Ação',
+    statusImplementacao: 'codeimplementation',
+  },
+  {
+    classe: 'Monge',
+    subclasse: 'Combatente dos Elementos',
+    nivel: 11,
+    nome: 'Passo dos Elementos',
+    descricao:
+      'Enquanto sua Sintonia Elemental estiver ativa, você também tem um Deslocamento de Natação e de Voo igual ao seu Deslocamento.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'placeholder-textonly',
+  },
+  {
+    classe: 'Monge',
+    subclasse: 'Combatente dos Elementos',
+    nivel: 17,
+    nome: 'Ápice Elemental',
+    descricao:
+      'Enquanto sua Sintonia Elemental estiver ativa, você também adquire os seguintes benefícios. Golpes Potencializados. Uma vez em cada um dos seus turnos, você pode causar dano adicional a um alvo igual a uma jogada de seu dado de Artes Marciais ao atingi-lo com um Ataque Desarmado. O dano adicional é do mesmo tipo causado por esse ataque. Passo Destrutivo. Ao usar seu Passo do Vento, seu Deslocamento aumenta em 6 metros até o final do turno. Pela duração, qualquer criatura à sua escolha sofre dano igual a uma jogada de seu dado de Artes Marciais quando você entra em um espaço a até 1,5 metro dela. O tipo de dano fica à sua escolha, entre Ácido, Elétrico, Gélido, Ígneo ou Trovejante. Uma criatura pode sofrer esse dano apenas uma vez por turno. Resistência a Dano. Você adquire Resistência a um dos seguintes tipos de dano à sua escolha: Ácido, Elétrico, Gélido, Ígneo ou Trovejante. No início de cada um dos seus turnos, você pode alterar essa escolha.',
+    tipoAcao: 'Passiva / Estática',
     statusImplementacao: 'placeholder-codeimplementation',
   },
 ];

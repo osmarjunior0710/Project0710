@@ -28,6 +28,13 @@ Um arquivo por classe de D&D implementada no app.
   (2026-09); as outras 3 continuam deliberadamente pendentes — ver
   `PENDENCIAS.md`.
 
+- **`classes/monge.md`** — Monge, classe base nível 1-20 sem subclasse
+  (2026-10): 22 características, efeito pós-acerto no popup de dano
+  (Golpe Atordoante), reroll de salvaguarda com Foco, Corpo e Mente
+  (bônus de atributo de nível 20 generalizado), bug de closure velha na
+  Torrente de Golpes, importação tardia dos textos e a revisão final
+  contra o PDF que corrigiu as 3 técnicas base.
+
 - **`classes/mago.md`** — Mago, características base nível 1-20
   (Entregas 1-7): Acadêmico, Guia do Level Up (`statusImplementacao`),
   Copiar Magia pro Livro, Recuperação Arcana, Adepto de Ritual,

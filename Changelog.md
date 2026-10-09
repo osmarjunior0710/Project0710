@@ -5,6 +5,106 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2306
+
+Ápice Elemental (Monge/Elementos nível 17), Golpes Potencializados agora é escolha sua: em vez de somar sozinho no 1º acerto, o popup de dano de cada acerto de Ataque Desarmado ganha o botão "➕ Ápice (+1 dado)" (1 vez por turno, com a Sintonia ativa). Você escolhe em qual acerto usar (ex.: esperar um crítico, que dobra o dado); depois de usado o botão some até o próximo turno. Vale também na Torrente de Golpes.
+
+## v202610_1908
+
+Monge (Combatente dos Elementos) nível 17, Ápice Elemental — 1ª parte: Golpes Potencializados. Com a Sintonia Elemental ativa, o 1º acerto de Ataque Desarmado de cada turno soma 1 dado de Artes Marciais ao dano (aplicado sozinho, com "+ Ápice Elemental" no título do dano); os acertos seguintes do mesmo turno não ganham. Vale também na Torrente de Golpes. O cartão da Sintonia lista o benefício e avisa quando já foi usado no turno.
+
+## v202610_1905
+
+Monge (Combatente dos Elementos) nível 6: Explosão Elemental. No painel de Ação, grupo Monge, a nova linha "💥 Explosão Elemental" gasta 2 Pontos de Foco e a Ação: escolha Ácido, Elétrico, Gélido, Ígneo ou Trovejante, o app rola 3 dados de Artes Marciais e abre o popup de salvaguarda de Destreza do alvo (falha: dano total; sucesso: metade).
+
+## v202610_1859
+
+Caixas de escolha dentro dos popups (elementos da Sintonia, Defesa Paciente/Passo do Vento/Torrente, efeitos de golpe, etc.) agora têm linha contínua em vez de tracejada — mesma regra do resto do app: contínua = toca, tracejada = só informativa.
+
+## v202610_1831
+
+Monge (Combatente dos Elementos): Ataques Elementais. Com a Sintonia Elemental ativa, o popup de dano do Ataque Desarmado (inclusive na Torrente de Golpes) ganha o botão "🌪 Elemental": abre a escolha de Ácido, Elétrico, Gélido, Ígneo ou Trovejante e depois o popup de salvaguarda de Força do alvo (CD, "mover até 3 m pra perto ou pra longe"), que é opcional. Na Torrente, o próximo ataque da sequência continua depois de fechar.
+
+## v202610_1820
+
+Monge (Combatente dos Elementos) nível 3: Sintonia Elemental. Na aba Combate aparece o cartão "🌪 Sintonia Elemental": "Ativar (gasta 1 Ponto de Foco)" liga (cartão passa a mostrar ATIVA com os benefícios: Ataques Elementais, Extensão de +3 m e, no nível 11, Natação/Voo) e "Encerrar" desliga. Os tipos de dano elementais no Ataque Desarmado chegam na próxima entrega.
+
+## v202610_1817
+
+Corrige os popups do ⓘ (descrição de magia e quebra de valores/regras) que ficavam presos dentro do painel lateral de Ação/Bônus/Reação, na largura do painel e com o fundo escuro cortado. Agora abrem por cima de tudo, centralizados na tela inteira.
+
+## v202610_1812
+
+Monge — Combatente dos Elementos, Manipular Elementos (nível 3): o Monge dessa subclasse passa a conhecer o truque Elementalismo. Aparece na aba Magias (seção "Magias de Subclasse") e na aba Combate (Ação → Usar Magia → Truques, com o selo Monge), e a aba Magias aparece mesmo num Monge sem outra classe conjuradora.
+
+## v202610_1743
+
+Monge — Combatente dos Elementos, 1ª entrega: a subclasse já pode ser escolhida no Level Up (nível 3) e o texto das 5 características (Manipular Elementos, Sintonia Elemental, Explosão Elemental, Passo dos Elementos, Ápice Elemental) aparece no Perfil, com [PH] enquanto a mecânica não chega. O Char Multiclasse de teste passa a usar essa subclasse.
+
+## v202610_1729
+
+Revisão final do Monge contra o livro: corrigidos os textos das técnicas. Defesa Paciente de graça agora é Desengajar (com 1 Foco: Desengajar + Esquivar); Passo do Vento de graça é Correr (com 1 Foco: Desengajar + Correr + salto dobrado). A opção "de graça" da Torrente de Golpes passou a se chamar Ataque Desarmado Adicional (Artes Marciais) — a Torrente em si só existe gastando 1 Foco.
+
+## v202610_1723
+
+Monge nível 20: Corpo e Mente. Destreza e Sabedoria sobem +4 (máximo 25) automaticamente, e tudo que depende delas acompanha: modificadores, CA (Defesa sem Armadura do Monge), Iniciativa, Percepção Passiva, salvaguardas e perícias. O ⓘ do atributo mostra a linha "Corpo e Mente".
+
+## v202610_1720
+
+Monge nível 18: Defesa Superior. Na aba Combate aparece o cartão "🛡 Defesa Superior": "Ativar (gasta 3 Pontos de Foco)" liga a Resistência a todos os tipos de dano exceto Energético (o cartão passa a mostrar ATIVA, com botão pra encerrar). O botão fica desabilitado com menos de 3 Pontos de Foco.
+
+## v202610_1718
+
+Foco Perfeito (Monge nível 15) agora entra sempre que você rola Iniciativa, sem esperar a resposta da pergunta do Metabolismo Incomum. Se você usar o Metabolismo depois, ele restaura o resto do Foco e cura por cima, como antes.
+
+## v202610_1601
+
+Monge nível 15: Foco Perfeito. Ao rolar Iniciativa sem usar o Metabolismo Incomum, os Pontos de Foco voltam a 4 se você tiver 3 ou menos (automático, com aviso na tela). Quando o Metabolismo Incomum está disponível, o Foco Perfeito entra ao responder "Não" na pergunta dele.
+
+## v202610_1432
+
+Monge nível 14: Sobrevivente Disciplinado. Todas as 6 salvaguardas passam a ter proficiência (🔵) e, ao rolar qualquer salvaguarda na aba Atributos, aparece o botão "🧘 Sobrevivente Disciplinado" no popup do dado: gasta 1 Ponto de Foco e joga o d20 de novo, ficando com o novo resultado (1x por rolagem).
+
+## v202610_0838
+
+Perfil e Level Up agora mostram o texto de todas as características do Monge (níveis 1 a 20), que antes apareciam como "Descrição detalhada ainda não importada". As que ainda não têm mecânica pronta aparecem com [PH]. Restauro Pessoal e Movimento Acrobático ficam como texto narrativo.
+
+## v202610_0755
+
+Popup de rolagem de dado não ocupa mais a tela inteira no celular: o card tem largura máxima e margem nas laterais, e os títulos das rolagens do Monge (Defesa Paciente, Defletir Ataques) ficaram mais curtos.
+
+## v202610_0743
+
+Monge nível 10: Foco Aprimorado. Defesa Paciente gastando Foco rola 2 dados de Artes Marciais e já aplica como PV Temporários; Passo do Vento mostra que dá pra levar 1 criatura voluntária junto; Torrente de Golpes gastando Foco passa a dar 3 Ataques Desarmados em vez de 2. Os textos do popup de escolha também mudam.
+
+## v202610_0737
+
+Monge nível 7: Evasão. Na aba Atributos, a linha da Salvaguarda de Destreza ganha o aviso "(Evasão: passou = 0 dano, falhou = metade)" — mesmo estilo do aviso de Sentido de Perigo do Bárbaro.
+
+## v202610_0735
+
+Popup de dano com 3 ou mais botões (ex.: Esmagador + Energético + Golpe Atordoante) agora empilha os botões na vertical, sem quebrar o texto em 2 linhas no celular.
+
+## v202610_0056
+
+Monge nível 6: Golpes Potencializados. No popup de dano do Ataque Desarmado (inclusive na Torrente de Golpes) aparece o botão "⚡ Energético" pra escolher o tipo de dano; o normal (Contundente) continua como antes.
+
+## v202610_1827
+
+Monge nível 3: Defletir Ataques na aba Reação. Rola a redução de dano (1d10 + Destreza + nível de Monge); se você zerar o dano, o popup oferece redirecionar o golpe (1 Ponto de Foco), que rola o dano e mostra o popup de salvaguarda de Destreza do alvo. No nível 13 (Defletir Energia) a descrição passa a valer pra qualquer tipo de dano.
+
+## v202610_1809
+
+Corrige o Golpe Atordoante na Torrente de Golpes com Foco: o botão reaparecia no 2º ataque do mesmo turno e dava pra usar 2 vezes. Agora é 1x por turno de verdade.
+
+## v202610_1606
+
+Monge nível 5: Golpe Atordoante. Ao acertar um ataque com arma de Monge ou Desarmado (inclusive na Torrente de Golpes), o popup de dano ganha o botão "💫 Golpe Atordoante" — gasta 1 Ponto de Foco (1x por turno) e mostra a CD, o que acontece na falha (Atordoado) e no sucesso (Deslocamento pela metade + Vantagem no próximo ataque).
+
+## v202610_1531
+
+Aba Combate mais compacta e padronizada: sem contadores numéricos ao lado dos pips, paddings menores nos botões de PV/Iniciativa/Fim do Turno/Ação/Bônus/Reação, linha cheia cinza entre áreas e tracejada dentro do grupo. Painéis de Ação, Bônus e Reação agora são agrupados por classe (selo + recursos com pips na cor da classe + habilidades), com Ataque de Oportunidade primeiro na Reação. Corrige Fúria/Recuperar Fôlego sumindo da lista de Ação Bônus em personagem multiclasse e Pontos de Foco do Monge faltando.
+
 ## v202610_1218
 
 Queda Lenta (Monge) agora abre um popup central com o valor da redução

@@ -33,6 +33,7 @@ import { calcularSentidos } from '../../../core/sentidos';
 import { magiasPactoDoInfero } from '../../../core/magiasPactoDoInfero';
 import { magiasJuramentoDaDevocao } from '../../../core/magiasJuramentoDaDevocao';
 import { magiasFixasDaClasseBase } from '../../../core/magiasFixasDeClasse';
+import { truquesConcedidosPorSubclasse } from '../../../core/magiasSubclasse';
 import { truquesEspecie, magiasEspecie as magiasEspecieDoPersonagem } from '../../../core/magiasEspecie';
 import { truquesMagiaIniciada, magiasMagiaIniciada } from '../../../core/magiaTalentoOrigem';
 import {
@@ -146,7 +147,13 @@ export function useMagiasEConjuracao(input: {
   // personagem, ver FichaShell.tsx), que pode muito bem não conjurar
   // (ex.: Bárbaro) mesmo com OUTRA classe do personagem conjurando —
   // antes disso escondia a aba Magias inteira. Checa TODAS as classes.
-  const conjura = classesAtual.some((c) => personagemConjura(catalogoClasses.find((cc) => cc.nome === c.classe) ?? null, selecao, talentosEfetivos));
+  // Truques de SUBCLASSE (ex.: Elementalismo do Combatente dos Elementos) —
+  // ver `core/magiasSubclasse.ts`; contam como fonte de conjuração mesmo
+  // numa classe sem magia (igual espécie/talento).
+  const truquesSubclasse = truquesConcedidosPorSubclasse(classesAtual);
+  const conjura =
+    truquesSubclasse.length > 0 ||
+    classesAtual.some((c) => personagemConjura(catalogoClasses.find((cc) => cc.nome === c.classe) ?? null, selecao, talentosEfetivos));
   const espacos = espacosDeMagiaAtivos(classe, personagem.nivel);
   // Ponte de Magia de Pacto (SDD Multiclasse seção 8.5) — só quando o
   // personagem tem Bruxo E outra classe conjuradora ao mesmo tempo.
@@ -316,6 +323,8 @@ export function useMagiasEConjuracao(input: {
     ...magiasEspecieDoPersonagem(selecao, nivelTotalAtual),
   ];
   const magiasEspeciePreparadas = magiasPreparadasDoPersonagem(magiasEspecieAtuais);
+  const magiasSubclasseAtuais = truquesSubclasse.map((t) => t.nomeMagia);
+  const classeDaMagiaDeSubclasse = (m: Magia) => truquesSubclasse.find((t) => t.nomeMagia === m.nome)?.classe ?? null;
   // "Falar com Animais - Traço de Gnomo" sai da lista genérica de
   // conjuração (que sempre exige gastar Espaço de Magia de verdade) —
   // ela tem card e contador PRÓPRIOS no painel Ação (usos = Bônus de
@@ -384,6 +393,10 @@ export function useMagiasEConjuracao(input: {
     // (`paladinoObj`), então mostra igual as magias preparadas normais.
     ...magiasFixasClassePreparadas.map((m): MagiaComClasseOpcional => ({ magia: m, classe: magiasFixasClasseNomeConcedente })),
     ...magiasEspeciePreparadasConjuraveis.map(semClasse),
+    // Truque concedido por subclasse — pill da classe dona (ex.: Monge).
+    ...magiasPreparadasDoPersonagem(magiasSubclasseAtuais).map(
+      (m): MagiaComClasseOpcional => ({ magia: m, classe: classeDaMagiaDeSubclasse(m) }),
+    ),
     ...magiasTalentoOrigemPreparadas.map(semClasse),
     ...magiasTalentoGeralPreparadas.map(semClasse),
     ...magiasMaestriaConjuraveis.map(comClasse('Mago')),
@@ -453,6 +466,7 @@ export function useMagiasEConjuracao(input: {
     magiasJuramentoDaDevocaoAtuais,
     magiasJuramentoDaDevocaoPreparadas,
     magiasEspecieAtuais,
+    magiasSubclasseAtuais,
     magiasEspeciePreparadas,
     magiasEspeciePreparadasConjuraveis,
     magiasTalentoOrigemAtuais,

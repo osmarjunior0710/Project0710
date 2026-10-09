@@ -16,6 +16,7 @@ import type { Arma } from '../../../data/rulesets/dnd2024/armas';
 import { buscarDescricaoMaestria } from '../../../data/rulesets/dnd2024/propriedadesMaestria';
 import { NOME_SENTIDO, type TipoSentido } from '../../../data/rulesets/dnd2024/sentidos';
 import { sentidosAtivos } from '../../../core/sentidos';
+import { TEXTO_EVASAO } from '../../../core/evasao';
 import { tiposElegiveisResistenciaInfera } from '../../../core/resistenciaInfera';
 import { useRoll } from '../../roll/RollContext';
 import InfoValor from '../../components/InfoValor';
@@ -62,6 +63,8 @@ interface AtributosTabProps {
    * de Destreza. Se coincidir com `desvantagemForcaDestreza` na mesma
    * rolagem, as duas se cancelam (`resolverVantagem`). */
   temSentidoDePerigo: boolean;
+  /** Evasão (Monge nível 7) — aviso ao lado da Salvaguarda de Destreza. */
+  temEvasao: boolean;
   proficienciasFerramenta: FerramentaFinal[];
   /** Dados de Vida por tipo (soma de todas as classes) — só leitura aqui;
    * gasta-se no Descanso Curto (`DadosDeVidaModal`). */
@@ -136,6 +139,7 @@ export default function AtributosTab({
   desvantagemForcaDestreza,
   desvantagemFurtividadeArmadura,
   temSentidoDePerigo,
+  temEvasao,
   proficienciasFerramenta,
   reservaDadosDeVida,
   onAbrirLevelUp,
@@ -350,6 +354,7 @@ export default function AtributosTab({
               mod: sv.mod,
               explicacaoMod: sv.explicacao,
               categoria: 'atributoOuSalvaguarda',
+              ehSalvaguarda: true,
               permiteForcaIndomavel: sv.atributo === 'FOR',
               vantagem: resolverVantagem(
                 temSentidoDePerigo && sv.atributo === 'DES',
@@ -363,6 +368,11 @@ export default function AtributosTab({
             {temSentidoDePerigo && sv.atributo === 'DES' && (
               <span className="label" style={{ marginLeft: 4 }}>
                 (Vantagem — Sentido de Perigo)
+              </span>
+            )}
+            {temEvasao && sv.atributo === 'DES' && (
+              <span className="label" style={{ marginLeft: 4 }}>
+                {TEXTO_EVASAO}
               </span>
             )}{' '}
             🎲{' '}
