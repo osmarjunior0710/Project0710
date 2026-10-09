@@ -1506,18 +1506,12 @@ export default function CombatTab({
       vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
       confirmarAcerto: {
         onAcertou: ({ critico }) => {
-          const ladosApice = consumirApiceGolpes();
           const dano = danoComCritico(
-            {
-              quantidade: ataqueTorrente.info.danoQuantidade,
-              lados: ataqueTorrente.info.danoLados,
-              mod: ataqueTorrente.info.danoMod,
-              gruposExtras: ladosApice > 0 ? [{ quantidade: 1, lados: ladosApice }] : undefined,
-            },
+            { quantidade: ataqueTorrente.info.danoQuantidade, lados: ataqueTorrente.info.danoLados, mod: ataqueTorrente.info.danoMod },
             critico,
           );
           rolarDados({
-            label: `Dano — ${ataqueTorrente.nome} (Torrente de Golpes)${critico ? ' (Crítico)' : ''}${ladosApice > 0 ? ' + Ápice Elemental' : ''} (${numero}/${total})`,
+            label: `Dano — ${ataqueTorrente.nome} (Torrente de Golpes)${critico ? ' (Crítico)' : ''} (${numero}/${total})`,
             formula: dano.formula,
             quantidade: dano.quantidade,
             gruposExtras: dano.gruposExtras as { quantidade: number; lados: LadosDado }[] | undefined,
@@ -1533,12 +1527,14 @@ export default function CombatTab({
               const potencializados = golpesPotencializadosAtivo(nivelMonge);
               const atordoa = golpeAtordoanteParaAtaque(ataqueTorrente.info);
               const elemental = sintoniaElemental.ativa;
-              if (!potencializados && !atordoa && !elemental) return { aoTocar: continuar };
+              const apice = apiceGolpesDisponivelAgora();
+              if (!potencializados && !atordoa && !elemental && !apice) return { aoTocar: continuar };
               return [
                 ...(potencializados
                   ? TIPOS_DANO_GOLPES_POTENCIALIZADOS.map((rotulo) => ({ rotulo, aoTocar: continuar }))
                   : [{ rotulo: 'OK', aoTocar: continuar }]),
                 ...(elemental ? [{ rotulo: '🌪 Elemental', aoTocar: () => abrirElemental(continuar) }] : []),
+                ...(apice ? [{ rotulo: '➕ Ápice (+1 dado)', aoTocar: () => usarApiceGolpes(critico, continuar) }] : []),
                 ...(atordoa ? [{ rotulo: '💫 Golpe Atordoante', aoTocar: () => abrirGolpeAtordoante(continuar) }] : []),
               ];
             })(),
@@ -1674,20 +1670,40 @@ export default function CombatTab({
     apiceGolpesUsadoRef.current = apiceElemental.golpesUsadoTurno;
   }, [apiceElemental.golpesUsadoTurno]);
 
-  /** Golpes Potencializados do Ápice Elemental (nível 17): ao acertar um Ataque Desarmado com a
-   * Sintonia ativa, 1x por turno, soma 1 dado de Artes Marciais. Devolve os lados (0 = não vale)
-   * e já marca como usado. */
-  function consumirApiceGolpes(): LadosDado | 0 {
-    const vale = golpesPotencializadosApiceDisponivel({
-      nivelMonge,
-      subclasseMonge: apiceElemental.disponivel ? SUBCLASSE_ELEMENTOS : null,
-      sintoniaAtiva: sintoniaElemental.ativa,
-      usadoTurno: apiceElemental.golpesUsadoTurno || apiceGolpesUsadoRef.current,
-    });
-    if (!vale || ladosArtesMarciaisMonge <= 0) return 0;
+  /** Golpes Potencializados do Ápice Elemental (nível 17): 1x por turno, com a Sintonia ativa, num
+   * acerto de Ataque Desarmado o jogador PODE somar 1 dado de Artes Marciais (mesmo tipo do ataque;
+   * dobra no crítico) — botão "➕ Ápice" no popup de dano. Escolhe em qual acerto usar. */
+  function apiceGolpesDisponivelAgora(): boolean {
+    return (
+      ladosArtesMarciaisMonge > 0 &&
+      golpesPotencializadosApiceDisponivel({
+        nivelMonge,
+        subclasseMonge: apiceElemental.disponivel ? SUBCLASSE_ELEMENTOS : null,
+        sintoniaAtiva: sintoniaElemental.ativa,
+        usadoTurno: apiceElemental.golpesUsadoTurno || apiceGolpesUsadoRef.current,
+      })
+    );
+  }
+
+  /** Rola o dado extra do Ápice (2 dados no crítico) e marca "usado neste turno". `aoFechar` =
+   * o que continua depois (ex.: próximo ataque da Torrente de Golpes). */
+  function usarApiceGolpes(critico: boolean, aoFechar?: () => void) {
+    if (!apiceGolpesDisponivelAgora()) {
+      aoFechar?.();
+      return;
+    }
     apiceGolpesUsadoRef.current = true;
     apiceElemental.onUsarGolpes();
-    return ladosArtesMarciaisMonge as LadosDado;
+    const quantidade = critico ? 2 : 1;
+    rolarDados({
+      label: `Ápice Elemental — dano extra${critico ? ' (Crítico)' : ''}`,
+      formula: `${quantidade}d${ladosArtesMarciaisMonge}`,
+      quantidade,
+      lados: ladosArtesMarciaisMonge as LadosDado,
+      mod: 0,
+      confirmarFechamento: { aoTocar: aoFechar },
+    });
+    setFeedback('➕ Ápice Elemental — soma esse dano extra ao do ataque (mesmo tipo de dano).');
   }
 
   function abrirElemental(aoFechar?: () => void) {
@@ -2040,7 +2056,7 @@ export default function CombatTab({
                 <br />• Extensão: seu alcance no Ataque Desarmado aumenta em 3 metros.
                 {apiceElemental.disponivel && (
                   <>
-                    <br />• Ápice — Golpes Potencializados: no 1º acerto desarmado de cada turno soma 1 dado de Artes Marciais (mesmo tipo, aplicado sozinho){apiceElemental.golpesUsadoTurno ? ' — já usado neste turno' : ''}.
+                    <br />• Ápice — Golpes Potencializados: 1x por turno, num acerto desarmado, soma 1 dado de Artes Marciais (mesmo tipo; botão "➕ Ápice" no popup de dano){apiceElemental.golpesUsadoTurno ? ' — já usado neste turno' : ''}.
                   </>
                 )}
                 {nivelMonge >= 11 && (
@@ -2495,7 +2511,8 @@ export default function CombatTab({
           golpesPotencializados={golpesPotencializadosAtivo(nivelMonge)}
           sintoniaElementalAtiva={sintoniaElemental.ativa}
           onElemental={() => abrirElemental()}
-          consumirApiceGolpes={consumirApiceGolpes}
+          apiceGolpesDisponivel={apiceGolpesDisponivelAgora}
+          onApiceGolpes={(critico) => usarApiceGolpes(critico)}
           explosaoElementalDisponivel={temExplosaoElemental(nivelMonge, SUBCLASSE_ELEMENTOS)}
           onExplosaoElemental={abrirExplosaoElemental}
           pontosDeFocoMaximo={pontosDeFocoMaximo}

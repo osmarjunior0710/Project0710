@@ -225,10 +225,12 @@ interface AcaoPanelContentProps {
   onElemental: () => void;
   /** Explosão Elemental (Monge/Elementos nível 6) — linha no grupo Monge; tocar abre a
    * escolha de elemento em `CombatTab.tsx` (gasta 2 Foco + a Ação). */
-  /** Ápice Elemental (Monge/Elementos nível 17) — Golpes Potencializados: chamado ao ACERTAR um
-   * Ataque Desarmado; devolve os lados do dado de Artes Marciais a somar no dano (1 dado extra,
-   * mesmo tipo) e já marca "usado neste turno", ou `0` se não vale. */
-  consumirApiceGolpes: () => LadosDado | 0;
+  /** Ápice Elemental (Monge/Elementos nível 17) — Golpes Potencializados: o popup de dano de um
+   * Ataque Desarmado que acertou ganha o botão "➕ Ápice" quando `apiceGolpesDisponivel()` (a
+   * checagem roda na hora de montar os botões, não na renderização); tocar chama `onApiceGolpes`
+   * (rola o dado extra e marca "usado neste turno"). O jogador escolhe EM QUAL acerto usar. */
+  apiceGolpesDisponivel: () => boolean;
+  onApiceGolpes: (critico: boolean) => void;
   explosaoElementalDisponivel: boolean;
   onExplosaoElemental: () => void;
   /** Pontos de Foco (Monge) — contador no grupo Monge e trava da Explosão Elemental. */
@@ -350,7 +352,8 @@ export default function AcaoPanelContent({
   golpesPotencializados,
   sintoniaElementalAtiva,
   onElemental,
-  consumirApiceGolpes,
+  apiceGolpesDisponivel,
+  onApiceGolpes,
   explosaoElementalDisponivel,
   onExplosaoElemental,
   pontosDeFocoMaximo,
@@ -562,6 +565,18 @@ export default function AcaoPanelContent({
     return [...botoes, { rotulo: '🌪 Elemental', aoTocar: onElemental }];
   }
 
+  /** Acrescenta o botão "➕ Ápice" (Golpes Potencializados do Ápice Elemental, nível 17) ao
+   * fechamento do popup de dano do Ataque Desarmado, 1x por turno. */
+  function comApice(
+    ehDesarmado: boolean,
+    critico: boolean,
+    base: { rotulo?: string; aoTocar?: () => void } | { rotulo: string; aoTocar?: () => void }[],
+  ) {
+    if (!ehDesarmado || !apiceGolpesDisponivel()) return base;
+    const botoes = Array.isArray(base) ? base : [{ rotulo: base.rotulo ?? 'OK', aoTocar: base.aoTocar }];
+    return [...botoes, { rotulo: '➕ Ápice (+1 dado)', aoTocar: () => onApiceGolpes(critico) }];
+  }
+
   /** Acrescenta o botão "💫 Golpe Atordoante" ao lado do(s) botão(ões) de
    * fechamento do popup de dano, quando o acerto é elegível. */
   function comGolpeAtordoante(
@@ -622,22 +637,17 @@ export default function AcaoPanelContent({
       vantagem,
       confirmarAcerto: {
         onAcertou: ({ critico }) => {
-          const ladosApice = ehDanoDesarmado ? consumirApiceGolpes() : 0;
-          const gruposExtrasBase = [
-            ...(golpesRadiantesAtivo ? [{ quantidade: 1, lados: 8 }] : []),
-            ...(ladosApice > 0 ? [{ quantidade: 1, lados: ladosApice }] : []),
-          ];
           const dano = danoComCritico(
             {
               quantidade: ataque.danoQuantidade,
               lados: ataque.danoLados,
               mod: ataque.danoMod,
-              gruposExtras: gruposExtrasBase.length > 0 ? gruposExtrasBase : undefined,
+              gruposExtras: golpesRadiantesAtivo ? [{ quantidade: 1, lados: 8 }] : undefined,
             },
             critico,
           );
           rolarDados({
-            label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}${golpesRadiantesAtivo ? ' + Golpes Radiantes' : ''}${ladosApice > 0 ? ' + Ápice Elemental' : ''}`,
+            label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}${golpesRadiantesAtivo ? ' + Golpes Radiantes' : ''}`,
             formula: dano.formula,
             quantidade: dano.quantidade,
             lados: ataque.danoLados,
@@ -647,11 +657,15 @@ export default function AcaoPanelContent({
             rerollEscolhido: perfuradorDisponivel && ataque.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
             confirmarFechamento: comGolpeAtordoante(
               ataque,
-              comElemental(
+              comApice(
                 ehDanoDesarmado,
-                armaSagradaBonus > 0
-                  ? [{ rotulo: 'Normal' }, { rotulo: '☀️ Radiante' }]
-                  : comGolpesPotencializados(ehDanoDesarmado, confirmarFechamentoDoAtaque(talento)),
+                critico,
+                comElemental(
+                  ehDanoDesarmado,
+                  armaSagradaBonus > 0
+                    ? [{ rotulo: 'Normal' }, { rotulo: '☀️ Radiante' }]
+                    : comGolpesPotencializados(ehDanoDesarmado, confirmarFechamentoDoAtaque(talento)),
+                ),
               ),
             ),
           });

@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2306
+
+Ápice Elemental (Monge/Elementos nível 17), Golpes Potencializados agora é escolha sua: em vez de somar sozinho no 1º acerto, o popup de dano de cada acerto de Ataque Desarmado ganha o botão "➕ Ápice (+1 dado)" (1 vez por turno, com a Sintonia ativa). Você escolhe em qual acerto usar (ex.: esperar um crítico, que dobra o dado); depois de usado o botão some até o próximo turno. Vale também na Torrente de Golpes.
+
 ## v202610_1908
 
 Monge (Combatente dos Elementos) nível 17, Ápice Elemental — 1ª parte: Golpes Potencializados. Com a Sintonia Elemental ativa, o 1º acerto de Ataque Desarmado de cada turno soma 1 dado de Artes Marciais ao dano (aplicado sozinho, com "+ Ápice Elemental" no título do dano); os acertos seguintes do mesmo turno não ganham. Vale também na Torrente de Golpes. O cartão da Sintonia lista o benefício e avisa quando já foi usado no turno.

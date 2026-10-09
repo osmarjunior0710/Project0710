@@ -4,9 +4,10 @@
 // você pode causar dano adicional a um alvo igual a uma jogada de seu dado de
 // Artes Marciais ao atingi-lo com um Ataque Desarmado. O dano adicional é do
 // mesmo tipo causado por esse ataque. Passo Destrutivo. [...] Resistência a
-// Dano. [...]" Aqui: a 1ª parte (Golpes Potencializados do Ápice). A decisão
-// de produto é aplicar o dado extra AUTOMATICAMENTE no 1º acerto desarmado do
-// turno (igual Golpes Radiantes): é sempre vantajoso e só vale 1x por turno.
+// Dano. [...]" Aqui: a 1ª parte (Golpes Potencializados do Ápice). Decisão
+// de produto (Osmar): é OPÇÃO do jogador — botão "➕ Ápice" no popup de dano de
+// um acerto desarmado, em qual acerto do turno quiser (ex.: esperar um
+// crítico, que dobra o dado); depois de usado, só no próximo turno.
 // [codeimplementation]
 
 import { SUBCLASSE_ELEMENTOS } from './sintoniaElemental';

@@ -37,5 +37,5 @@ introdução do Paladino colada — cortada na importação.
       salvaguarda de Força. Decisão de UI da lista de tipos em aberto (SDD
       seção 2).
 - [x] **Entrega 5 — Explosão Elemental (nível 6).** Linha no painel de Ação (grupo Monge, com contador de Foco), `ElementoSintoniaModal` reaproveitado com outro título, 2 Foco + Ação, rola 3×dado de Artes Marciais, `SalvaguardaDoAlvoModal` de Destreza com falha=dano e sucesso=metade; `core/explosaoElemental.ts` + testes; testado ao vivo (3d12=27 → 13). A CD é a de Foco (8+SAB+prof), como no restante da subclasse.
-- [ ] **Entrega 6 — Ápice Elemental (nível 17)** em 3 partes (6a FEITA: Golpes Potencializados do Ápice, automático no 1º acerto desarmado do turno, `core/apiceElemental.ts`, `apiceGolpesUsadoTurno` + ref anti-closure; falta 6b Passo Destrutivo e 6c Resistência a Dano): Golpes
+- [ ] **Entrega 6 — Ápice Elemental (nível 17)** em 3 partes (6a FEITA: Golpes Potencializados do Ápice como OPÇÃO do jogador (botão "➕ Ápice" no popup de dano, em qual acerto quiser, 2 dados no crítico — decisão do Osmar, trocou o automático), `core/apiceElemental.ts`, `apiceGolpesUsadoTurno` + ref anti-closure; falta 6b Passo Destrutivo e 6c Resistência a Dano): Golpes
       Potencializados do Ápice, Passo Destrutivo, Resistência a Dano.
