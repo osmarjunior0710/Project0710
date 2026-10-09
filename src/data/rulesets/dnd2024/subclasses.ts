@@ -38,9 +38,9 @@ export const subclasses: Subclasse[] = [
   { id: 'paladino-juramento-da-gloria', classeId: 'paladino', nome: 'Juramento da Glória', homebrew: false },
   { id: 'paladino-juramento-de-vinganca', classeId: 'paladino', nome: 'Juramento de Vingança', homebrew: false },
   { id: 'paladino-juramento-dos-ancioes', classeId: 'paladino', nome: 'Juramento dos Anciões', homebrew: false },
-  // Nenhuma implementada ainda (ver PENDENCIAS.md, foco Monge) —
-  // `subclasseImplementada` só checa `caracteristicasSubclasse.ts`,
-  // vazio pras 4 por enquanto, então nenhuma é oferecida de verdade.
+  // Só Combatente dos Elementos está implementada (ver PENDENCIAS.md "Monge")
+  // — `subclasseImplementada` checa `caracteristicasSubclasse.ts`, então as outras 3
+  // aparecem mas ainda não são oferecidas de verdade. As 4 já têm banner próprio.
   { id: 'monge-combatente-da-mao-espalmada', classeId: 'monge', nome: 'Combatente da Mão Espalmada', homebrew: false },
   { id: 'monge-combatente-da-misericordia', classeId: 'monge', nome: 'Combatente da Misericórdia', homebrew: false },
   { id: 'monge-combatente-das-sombras', classeId: 'monge', nome: 'Combatente das Sombras', homebrew: false },

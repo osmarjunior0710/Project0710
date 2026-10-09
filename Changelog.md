@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1802
+
+Banners das 4 subclasses do Monge (Combatente dos Elementos, das Sombras, da Misericórdia e da Mão Espalmada) agora aparecem onde a subclasse é mostrada, em vez do ícone genérico.
+
 ## v202610_1757
 
 Ápice Elemental (Monge/Elementos nível 17), Resistência a Dano: com a Sintonia Elemental ativa, o cartão mostra 5 botões (Ácido, Elétrico, Gélido, Ígneo, Trovejante) pra você escolher o tipo de Resistência, que pode ser trocado a cada turno; a escolha fica salva e aparece na lista de benefícios. Com isso o Combatente dos Elementos está completo (nível 3 ao 17).
