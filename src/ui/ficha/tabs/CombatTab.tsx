@@ -7,7 +7,11 @@ import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { TEXTO_EMPURRAO_ELEMENTAL } from '../../../core/ataquesElementais';
-import { golpesPotencializadosApiceDisponivel } from '../../../core/apiceElemental';
+import {
+  BONUS_DESLOCAMENTO_PASSO_DESTRUTIVO_M,
+  golpesPotencializadosApiceDisponivel,
+  passoDestrutivoSeAplica,
+} from '../../../core/apiceElemental';
 import {
   CUSTO_FOCO_EXPLOSAO_ELEMENTAL,
   formulaDanoExplosaoElemental,
@@ -341,6 +345,9 @@ interface CombatTabProps {
     disponivel: boolean;
     golpesUsadoTurno: boolean;
     onUsarGolpes: () => void;
+    /** Passo Destrutivo (2ª parte do Ápice) — ligado no turno ao usar o Passo do Vento. */
+    passoDestrutivoAtivoTurno: boolean;
+    onLigarPassoDestrutivo: () => void;
   };
   sintoniaElemental: {
     disponivel: boolean;
@@ -932,6 +939,7 @@ export default function CombatTab({
   // continua depois (ex.: próximo ataque da Torrente de Golpes).
   // Explosão Elemental (nível 6): `explosaoEscolhendo` = escolhendo o elemento; `explosaoResultado` =
   // popup de salvaguarda de Destreza com o dano já rolado.
+  const [passoDestrutivoEscolhendo, setPassoDestrutivoEscolhendo] = useState(false);
   const [explosaoEscolhendo, setExplosaoEscolhendo] = useState(false);
   const [explosaoResultado, setExplosaoResultado] = useState<{ elemento: string; dano: number } | null>(null);
   const [elementoPendente, setElementoPendente] = useState<{ aoFechar?: () => void } | null>(null);
@@ -1452,11 +1460,23 @@ export default function CombatTab({
   function usarPassoDoVento(comFoco: boolean) {
     if (comFoco && !onUsarPontoDeFoco()) return;
     onMarcarUsado('bonus');
+    const passoDestrutivo = passoDestrutivoSeAplica({
+      nivelMonge,
+      subclasseMonge: apiceElemental.disponivel ? SUBCLASSE_ELEMENTOS : null,
+      sintoniaAtiva: sintoniaElemental.ativa,
+    });
+    if (passoDestrutivo) apiceElemental.onLigarPassoDestrutivo();
     setFeedback(
       comFoco
         ? `💨 Passo do Vento — Desengajar + Correr (Ação Bônus) + salto dobrado de distância até o fim do turno. Gastou 1 Ponto de Foco.${temFocoAprimorado(nivelMonge) ? ' Pode levar 1 criatura voluntária (Grande ou menor, a até 1,5m) com você até o fim do turno, sem provocar Ataques de Oportunidade.' : ''}`
         : '💨 Passo do Vento — Correr (Ação Bônus), de graça.',
     );
+    if (passoDestrutivo) {
+      setFeedback(
+        (f) =>
+          `${f ?? ''} 💥 Passo Destrutivo: Deslocamento +${BONUS_DESLOCAMENTO_PASSO_DESTRUTIVO_M} m até o fim do turno — use o botão no cartão da Sintonia pra rolar o dano de cada criatura que você passar a menos de 1,5 m.`,
+      );
+    }
   }
 
   /** Ativa a técnica (escolhe quantos ataques) e já dispara o Ataque 1
@@ -1637,6 +1657,21 @@ export default function CombatTab({
   /** Explosão Elemental (Monge/Elementos nível 6): ação Usar Magia, 2 Foco. Tocar na linha do
    * painel de Ação abre a escolha do elemento; escolher gasta o Foco e a Ação, rola 3 dados de
    * Artes Marciais e, ao fechar o dado, abre a salvaguarda de Destreza do alvo (metade no sucesso). */
+  /** Passo Destrutivo (Ápice Elemental, nível 17): 1 dado de Artes Marciais de dano elemental a
+   * 1 criatura por vez (cada criatura só sofre 1x por turno — controle do jogador). */
+  function rolarDanoPassoDestrutivo(elemento: string) {
+    setPassoDestrutivoEscolhendo(false);
+    rolarDados({
+      label: `Passo Destrutivo — ${elemento}`,
+      formula: `1d${ladosArtesMarciaisMonge}`,
+      quantidade: 1,
+      lados: ladosArtesMarciaisMonge as LadosDado,
+      mod: 0,
+      confirmarFechamento: {},
+    });
+    setFeedback(`💥 Passo Destrutivo — dano ${elemento} à criatura (cada criatura sofre isso só 1x por turno).`);
+  }
+
   function abrirExplosaoElemental() {
     if (!podeUsarExplosaoElemental(nivelMonge, SUBCLASSE_ELEMENTOS, pontosDeFocoRestantes)) return;
     setPainelAberto(null);
@@ -2059,6 +2094,11 @@ export default function CombatTab({
                     <br />• Ápice — Golpes Potencializados: 1x por turno, num acerto desarmado, soma 1 dado de Artes Marciais (mesmo tipo; botão "➕ Ápice" no popup de dano){apiceElemental.golpesUsadoTurno ? ' — já usado neste turno' : ''}.
                   </>
                 )}
+                {apiceElemental.disponivel && apiceElemental.passoDestrutivoAtivoTurno && (
+                  <>
+                    <br />• Passo Destrutivo ATIVO neste turno: Deslocamento +{BONUS_DESLOCAMENTO_PASSO_DESTRUTIVO_M} m; cada criatura que você passar a menos de 1,5 m sofre 1 dado de Artes Marciais (1x por criatura por turno).
+                  </>
+                )}
                 {nivelMonge >= 11 && (
                   <>
                     <br />• Passo dos Elementos: Deslocamento de Natação e de Voo igual ao seu Deslocamento.
@@ -2069,6 +2109,11 @@ export default function CombatTab({
               `No início do seu turno, gaste ${CUSTO_FOCO_SINTONIA_ELEMENTAL} Ponto de Foco pra imbuir-se de energia elemental (10 minutos ou até ficar Incapacitado).`
             )}
           </div>
+          {sintoniaElemental.ativa && apiceElemental.disponivel && apiceElemental.passoDestrutivoAtivoTurno && (
+            <div className="btn" style={{ marginTop: 8 }} onClick={() => setPassoDestrutivoEscolhendo(true)}>
+              💥 Passo Destrutivo — rolar dano (1 criatura)
+            </div>
+          )}
           <div
             className="btn"
             style={{
@@ -2787,6 +2832,14 @@ export default function CombatTab({
           textoSucesso="nada acontece"
           textoFalha={`${redirecionamentoDefletir.dano} de dano, do mesmo tipo causado pelo ataque (alvo: criatura a até 1,5m se o ataque foi corpo a corpo, ou a até 18m se à distância e sem Cobertura Total)`}
           onFechar={() => setRedirecionamentoDefletir(null)}
+        />
+      )}
+      {passoDestrutivoEscolhendo && (
+        <ElementoSintoniaModal
+          titulo="💥 Passo Destrutivo — escolha o tipo de dano"
+          descricao="1 dado de Artes Marciais pra 1 criatura a até 1,5m de onde você entrou. Cada criatura só sofre isso 1x por turno."
+          onEscolher={rolarDanoPassoDestrutivo}
+          onFechar={() => setPassoDestrutivoEscolhendo(false)}
         />
       )}
       {explosaoEscolhendo && (

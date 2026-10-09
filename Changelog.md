@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1753
+
+Ápice Elemental (Monge/Elementos nível 17), Passo Destrutivo: usar o Passo do Vento com a Sintonia Elemental ativa avisa o +6 m de Deslocamento e liga o Passo Destrutivo no turno. O cartão da Sintonia ganha o botão "💥 Passo Destrutivo — rolar dano (1 criatura)": escolha Ácido, Elétrico, Gélido, Ígneo ou Trovejante e o app rola 1 dado de Artes Marciais; use uma vez por criatura que você passar a menos de 1,5 m.
+
 ## v202610_2306
 
 Ápice Elemental (Monge/Elementos nível 17), Golpes Potencializados agora é escolha sua: em vez de somar sozinho no 1º acerto, o popup de dano de cada acerto de Ataque Desarmado ganha o botão "➕ Ápice (+1 dado)" (1 vez por turno, com a Sintonia ativa). Você escolhe em qual acerto usar (ex.: esperar um crítico, que dobra o dado); depois de usado o botão some até o próximo turno. Vale também na Torrente de Golpes.

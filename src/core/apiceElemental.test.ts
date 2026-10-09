@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { golpesPotencializadosApiceDisponivel, temApiceElemental } from './apiceElemental';
+import {
+  BONUS_DESLOCAMENTO_PASSO_DESTRUTIVO_M,
+  golpesPotencializadosApiceDisponivel,
+  passoDestrutivoSeAplica,
+  temApiceElemental,
+} from './apiceElemental';
 
 describe('Ápice Elemental', () => {
   it('só Monge nível 17+ da subclasse Combatente dos Elementos', () => {
@@ -13,5 +18,18 @@ describe('Ápice Elemental', () => {
     expect(golpesPotencializadosApiceDisponivel({ ...base, sintoniaAtiva: false })).toBe(false);
     expect(golpesPotencializadosApiceDisponivel({ ...base, usadoTurno: true })).toBe(false);
     expect(golpesPotencializadosApiceDisponivel({ ...base, nivelMonge: 16 })).toBe(false);
+  });
+});
+
+describe('Passo Destrutivo', () => {
+  const base = { nivelMonge: 17, subclasseMonge: 'Combatente dos Elementos', sintoniaAtiva: true };
+  it('liga ao usar o Passo do Vento com a Sintonia ativa (nível 17+)', () => {
+    expect(passoDestrutivoSeAplica(base)).toBe(true);
+    expect(passoDestrutivoSeAplica({ ...base, sintoniaAtiva: false })).toBe(false);
+    expect(passoDestrutivoSeAplica({ ...base, nivelMonge: 16 })).toBe(false);
+    expect(passoDestrutivoSeAplica({ ...base, subclasseMonge: null })).toBe(false);
+  });
+  it('o bônus de Deslocamento é 6 m', () => {
+    expect(BONUS_DESLOCAMENTO_PASSO_DESTRUTIVO_M).toBe(6);
   });
 });

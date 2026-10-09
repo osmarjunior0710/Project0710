@@ -422,6 +422,9 @@ export interface PersonagemSalvo {
   /** `true` = Golpes Potencializados do Ápice Elemental (Monge/Elementos nível 17) já usado NESTE
    * turno — reseta no Fim do Turno. */
   apiceGolpesUsadoTurno?: boolean;
+  /** `true` = Passo Destrutivo (Ápice Elemental, nível 17) ligado NESTE turno (usou o Passo do
+   * Vento com a Sintonia ativa) — reseta no Fim do Turno. */
+  passoDestrutivoAtivoTurno?: boolean;
   /** `true` = já usou Resplendor Sagrado (Paladino, Juramento da
    * Devoção, nível 20) desde o último Descanso Longo — zera lá, ou
    * gastando 1 espaço de 5º círculo (`onRecuperarComEspaco`).

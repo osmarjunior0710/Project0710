@@ -508,6 +508,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [defesaSuperiorAtiva, setDefesaSuperiorAtiva] = useState(personagemSalvo.defesaSuperiorAtiva ?? false);
   const [sintoniaElementalAtiva, setSintoniaElementalAtiva] = useState(personagemSalvo.sintoniaElementalAtiva ?? false);
   const [apiceGolpesUsadoTurno, setApiceGolpesUsadoTurno] = useState(personagemSalvo.apiceGolpesUsadoTurno ?? false);
+  const [passoDestrutivoAtivoTurno, setPassoDestrutivoAtivoTurno] = useState(personagemSalvo.passoDestrutivoAtivoTurno ?? false);
   const [resplendorSagradoGasto, setResplendorSagradoGasto] = useState(personagemSalvo.resplendorSagradoGasto ?? false);
   const [resplendorSagradoAtiva, setResplendorSagradoAtiva] = useState(personagemSalvo.resplendorSagradoAtiva ?? false);
   const [ataqueImprudenteAtivo, setAtaqueImprudenteAtivo] = useState(personagemSalvo.ataqueImprudenteAtivoTurno ?? false);
@@ -1401,6 +1402,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     defesaSuperiorAtiva,
     sintoniaElementalAtiva,
     apiceGolpesUsadoTurno,
+    passoDestrutivoAtivoTurno,
     resplendorSagradoGasto,
     resplendorSagradoAtiva,
     maosCurativasGasto,
@@ -1515,6 +1517,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       defesaSuperiorAtiva,
       sintoniaElementalAtiva,
       apiceGolpesUsadoTurno,
+      passoDestrutivoAtivoTurno,
       resplendorSagradoGasto,
       resplendorSagradoAtiva,
       maosCurativasGasto,
@@ -1837,6 +1840,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setGolpeDeEscudoUsadoTurno(false);
     setGolpeAtordoanteUsadoTurno(false);
     setApiceGolpesUsadoTurno(false);
+    setPassoDestrutivoAtivoTurno(false);
     setForcaRevigoranteUsadaTurno(false);
     setEsmagadorUsadoTurno(false);
     setTalhadorUsadoTurno(false);
@@ -3419,6 +3423,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               disponivel: temApiceElemental(mongeEntry?.nivel ?? 0, mongeEntry?.subclasse),
               golpesUsadoTurno: apiceGolpesUsadoTurno,
               onUsarGolpes: () => setApiceGolpesUsadoTurno(true),
+              passoDestrutivoAtivoTurno,
+              onLigarPassoDestrutivo: () => setPassoDestrutivoAtivoTurno(true),
             }}
             sintoniaElemental={{
               disponivel: temSintoniaElemental(mongeEntry?.nivel ?? 0, mongeEntry?.subclasse),

@@ -26,3 +26,19 @@ export function golpesPotencializadosApiceDisponivel(opts: {
 }): boolean {
   return temApiceElemental(opts.nivelMonge, opts.subclasseMonge) && opts.sintoniaAtiva && !opts.usadoTurno;
 }
+
+/** Passo Destrutivo (Ápice Elemental, 2ª parte) — "Ao usar seu Passo do Vento, seu Deslocamento
+ * aumenta em 6 metros até o final do turno. Pela duração, qualquer criatura à sua escolha sofre
+ * dano igual a uma jogada de seu dado de Artes Marciais quando você entra em um espaço a até 1,5
+ * metro dela [...] Uma criatura pode sofrer esse dano apenas uma vez por turno." O app não
+ * rastreia posição: usar o Passo do Vento com a Sintonia ativa liga o Passo Destrutivo no turno
+ * e o jogador rola 1 dado por criatura. [codeimplementation] */
+export const BONUS_DESLOCAMENTO_PASSO_DESTRUTIVO_M = 6;
+
+export function passoDestrutivoSeAplica(opts: {
+  nivelMonge: number;
+  subclasseMonge: string | null | undefined;
+  sintoniaAtiva: boolean;
+}): boolean {
+  return temApiceElemental(opts.nivelMonge, opts.subclasseMonge) && opts.sintoniaAtiva;
+}
