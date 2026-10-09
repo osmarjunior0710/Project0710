@@ -37,6 +37,9 @@ interface AtributosTabProps {
   explicacaoPv: ExplicacaoCalculo;
   explicacaoCa: ExplicacaoCalculo;
   explicacaoIniciativa: ExplicacaoCalculo;
+  /** Deslocamento já formatado (ex.: "9 m") + a conta do ⓘ — `core/deslocamento.ts`. */
+  deslocamento: string;
+  explicacaoDeslocamento: ExplicacaoCalculo;
   explicacaoPercepcaoPassiva: ExplicacaoCalculo;
   atributos: AtributoFinal[];
   /** As 6 Salvaguardas (teste de resistência) — diferente do box de
@@ -132,6 +135,8 @@ export default function AtributosTab({
   explicacaoPv,
   explicacaoCa,
   explicacaoIniciativa,
+  deslocamento,
+  explicacaoDeslocamento,
   explicacaoPercepcaoPassiva,
   atributos,
   salvaguardas,
@@ -229,6 +234,9 @@ export default function AtributosTab({
             {pvAtual}/{pvMax}
           </div>
         </div>
+      </div>
+
+      <div className={styles.hpRow}>
         <div className={`box ${styles.hpBox} ${styles.hpBoxAccent}`} onClick={onAlternarInspiracaoHeroica}>
           <div className="label">
             Ins.
@@ -238,34 +246,6 @@ export default function AtributosTab({
           <div className={styles.hpPipRow}>
             <TickPips total={1} usados={inspiracaoHeroicaAtiva ? 0 : 1} tamanho="lg" />
           </div>
-        </div>
-      </div>
-
-      <div className={styles.hpRow}>
-        <div className={`box ${styles.hpBox}`}>
-          <div className="label">
-            Bônus
-            <br />
-            Prof.
-          </div>
-          <div className={styles.hpNum}>
-            {bonusProficiencia >= 0 ? '+' : ''}
-            {bonusProficiencia}
-          </div>
-        </div>
-        <div className={`box ${styles.hpBox}`}>
-          <div className="label">
-            Percepção
-            <br />
-            Passiva <InfoValor titulo="Percepção Passiva" explicacao={explicacaoPercepcaoPassiva} />
-          </div>
-          <div className={styles.hpNum}>{percepcaoPassiva ?? '—'}</div>
-        </div>
-        <div className={`box ${styles.hpBox}`}>
-          <div className="label">
-            CA <InfoValor titulo="Classe de Armadura" explicacao={explicacaoCa} />
-          </div>
-          <div className={styles.hpNum}>{ca ?? '—'}</div>
         </div>
         <div
           className={`box ${styles.hpBox} ${styles.hpBoxAccent}`}
@@ -285,6 +265,40 @@ export default function AtributosTab({
             Iniciativa <InfoValor titulo="Iniciativa" explicacao={explicacaoIniciativa} />
           </div>
           <div className={styles.hpNum}>{iniciativa !== null ? `${iniciativa >= 0 ? '+' : ''}${iniciativa}` : '—'}</div>
+        </div>
+        <div className={`box ${styles.hpBox}`}>
+          <div className="label">
+            Bônus
+            <br />
+            Prof.
+          </div>
+          <div className={styles.hpNum}>
+            {bonusProficiencia >= 0 ? '+' : ''}
+            {bonusProficiencia}
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.hpRow}>
+        <div className={`box ${styles.hpBox}`}>
+          <div className="label">
+            Percepção
+            <br />
+            Passiva <InfoValor titulo="Percepção Passiva" explicacao={explicacaoPercepcaoPassiva} />
+          </div>
+          <div className={styles.hpNum}>{percepcaoPassiva ?? '—'}</div>
+        </div>
+        <div className={`box ${styles.hpBox}`}>
+          <div className="label">
+            CA <InfoValor titulo="Classe de Armadura" explicacao={explicacaoCa} />
+          </div>
+          <div className={styles.hpNum}>{ca ?? '—'}</div>
+        </div>
+        <div className={`box ${styles.hpBox}`}>
+          <div className="label">
+            Deslocamento <InfoValor titulo="Deslocamento" explicacao={explicacaoDeslocamento} />
+          </div>
+          <div className={styles.hpNum}>{deslocamento}</div>
         </div>
       </div>
 

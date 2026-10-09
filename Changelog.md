@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1902
+
+Deslocamento no app: nova caixa "Deslocamento" na aba Atributos (com ⓘ mostrando a conta) e uma linha embaixo do botão Reação na aba Combate. O valor soma espécie (Elfo Silvestre 10,5 m), Movimento sem Armadura do Monge (só sem armadura nem escudo), Movimento Rápido do Bárbaro (só sem Armadura Pesada), Velocista, Dádiva da Velocidade, Forma Grande, Passo Destrutivo e a penalidade de Força da armadura; fonte que existe mas está inativa aparece no ⓘ com o motivo. O topo da aba Atributos foi reorganizado: Level | PV; Ins. Heroica | Iniciativa | Bônus Prof.; Percepção Passiva | CA | Deslocamento.
+
 ## v202610_1802
 
 Banners das 4 subclasses do Monge (Combatente dos Elementos, das Sombras, da Misericórdia e da Mão Espalmada) agora aparecem onde a subclasse é mostrada, em vez do ícone genérico.

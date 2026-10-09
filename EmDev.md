@@ -15,6 +15,16 @@
 
 ---
 
-Nenhum foco em andamento agora — "Monge — Combatente dos Elementos (subclasse)"
-fechou (ver `aprendizados/classes/monge-elementos.md`). As outras 3 subclasses do
-Monge aguardam o Osmar decidir (ver `PENDENCIAS.md` "Monge").
+## Foco atual: Resolver os 2 [PH] do Monge — Deslocamento + Empurrar/Imobilizar
+
+Decidido pelo Osmar (2026-10). Teste sempre no Char Multiclasse.
+
+- [x] **Entrega 1 — Deslocamento (motor + caixa + linha no Combate).** `core/deslocamento.ts` (função
+      única, fontes com `tem`/`ativa`, ⓘ com a conta), testes, layout novo da aba Atributos (Level|PV;
+      Ins. Her.|Iniciativa|Bônus Prof.; Perc. Passiva|CA|Deslocamento), linha passiva embaixo da Reação.
+      Fontes ligadas: espécie + Elfo Silvestre (10,5 m), Movimento sem Armadura (Monge), Movimento Rápido
+      (Bárbaro), Velocista, Dádiva da Velocidade, Forma Grande, Passo Destrutivo, penalidade de Força da
+      armadura, Exaustão (hook, sempre 0). Pendente de validar com o Osmar: revisar todas as fontes (item 1.2).
+- [ ] **Entrega 2 — Empurrar/Imobilizar no Ataque Desarmado principal** (opções Dano/Empurrar/Imobilizar ao
+      tocar em "Atacar — Ataque Desarmado"; CD 8 + FOR (ou DES do Monge) + prof; popup de salvaguarda do
+      alvo). Só o ataque principal agora; Torrente/Ataque Adicional depois ("generalizamos").

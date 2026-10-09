@@ -526,6 +526,7 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     nome: 'Movimento Rápido',
     descricao: 'Seu Deslocamento aumenta em 3 metros enquanto você não estiver usando Armadura Pesada.',
     tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Bárbaro',
@@ -832,7 +833,7 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Seu Deslocamento aumenta em 3 metros enquanto você não vestir armadura ou empunhar um Escudo. Esse bônus aumenta quando você atinge certos níveis de Monge, conforme detalhado na tabela Características de Monge.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Monge',

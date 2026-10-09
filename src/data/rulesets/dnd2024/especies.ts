@@ -106,6 +106,9 @@ export interface OpcaoSubescolha {
   tipoDano?: string;
   descricaoEfeito?: string;
   sentidoConcedido?: SentidoConcedido;
+  /** Sub-espécie que SUBSTITUI o Deslocamento base (ex.: Elfo Silvestre "aumenta para 10,5 m"),
+   * em metros — lido por `core/deslocamento.ts`. */
+  deslocamentoMetros?: number;
   truquesConhecidos?: string[];
   magiaNivel1?: string;
   magiaNivel3?: string;
@@ -318,6 +321,7 @@ export const especies: Especie[] = [
       {
         nome: "Elfo Silvestre",
         descricaoEfeito: "Seu Deslocamento aumenta para 10,5 metros e você também conhece o truque Arte Druídica.",
+        deslocamentoMetros: 10.5,
         truquesConhecidos: ["Arte Druídica"],
         magiaNivel3: "Passos Largos",
         // "Passo Sem Rastro" (singular) — assim que está no catálogo de

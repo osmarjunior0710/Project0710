@@ -1594,9 +1594,8 @@ Classe base nível 1-20 pronta (ver `aprendizados/classes/monge.md`). O que fico
   Elementos nível 17 (intro do capítulo do Paladino colada no fim).
 - **Artes Marciais — Empurrar/Imobilizar com Destreza** na CD (o Ataque
   Desarmado só tem a opção Dano hoje, ver `core/ataque.ts`). Status `[PH]`.
-- **Movimento sem Armadura** — bônus de Deslocamento (+3 m, +4,5 m...) já
-  existe em `bonusMovimentoSemArmadura`, mas não é somado ao Deslocamento
-  mostrado. Status `[PH]`.
+- ~~Movimento sem Armadura~~ — resolvido (2026-10): Deslocamento ganhou função única
+  (`core/deslocamento.ts`) e a caixa na aba Atributos/linha no Combate.
 - **Condições do personagem não são rastreadas** (Restauro Pessoal e Evasão
   viraram aviso/textonly por isso; Defesa Superior não aplica a Resistência
   nos cálculos). Se um dia o app rastrear condições, revisitar as 3.

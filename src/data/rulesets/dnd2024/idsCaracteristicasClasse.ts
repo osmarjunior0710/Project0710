@@ -81,6 +81,8 @@ export const ID_CARACTERISTICA_CLASSE = {
   campeaoPrimitivo: 'Campeão Primitivo',
   /** Monge nível 20 — Destreza e Sabedoria +4 (máx. 25), ver `core/campeaoPrimitivo.ts`. */
   corpoEMente: 'Corpo e Mente',
+  /** Bárbaro nível 5 — Deslocamento +3 m sem Armadura Pesada (ver `core/deslocamento.ts`). */
+  movimentoRapido: 'Movimento Rápido',
 } as const;
 
 export type IdCaracteristicaClasse = keyof typeof ID_CARACTERISTICA_CLASSE;

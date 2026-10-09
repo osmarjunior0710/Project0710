@@ -81,6 +81,7 @@ import { ataqueAtual, ataqueBonusMaoSecundaria, ataqueDesarmado } from '../../co
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
 import { temEvasao } from '../../core/evasao';
+import { calcularDeslocamento, deslocamentoDaEspecie, forcaMinimaDaArmadura, formatarMetros } from '../../core/deslocamento';
 import { resistenciaApiceValida, temApiceElemental } from '../../core/apiceElemental';
 import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, temSintoniaElemental } from '../../core/sintoniaElemental';
 import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior, temDefesaSuperior } from '../../core/defesaSuperior';
@@ -91,7 +92,7 @@ import { explicarCdRaizesDevastadoras } from '../../core/raizesDevastadoras';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
-import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, quantidadePontosDeFoco, ladosDadoArtesMarciais, temAuraDeProtecao } from '../../core/recursosClasse';
+import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, quantidadePontosDeFoco, bonusMovimentoSemArmadura, ladosDadoArtesMarciais, temAuraDeProtecao } from '../../core/recursosClasse';
 import { condicoesDisponiveisMaosConsagradas, custoTotalMaosConsagradas } from '../../core/maosConsagradas';
 import { bonusArmaSagrada, armaElegivelParaArmaSagrada } from '../../core/armaSagrada';
 import { danoResplendorSagrado } from '../../core/resplendorSagrado';
@@ -1207,6 +1208,31 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const sorteDoTenebrosoMaximo = sorteDoTenebrosoDisponivel ? usosSorteDoTenebroso(carMod) : 0;
   const sorteDoTenebrosoRestantes = Math.max(0, sorteDoTenebrosoMaximo - sorteDoTenebrosoGasto);
   const equipadoAtual = resumoEquipado(itensMochila);
+  // Deslocamento (uma função soma tudo — ver `core/deslocamento.ts`): espécie/sub-espécie + classe +
+  // talentos + armadura/escudo + efeitos ativos. Aparece na aba Atributos (caixa com ⓘ) e no Combate.
+  const opcaoSubespecieAtual = especieAtual?.opcoesSubescolha?.find((o) => o.nome === selecao.subescolhaEspecieEscolhida) ?? null;
+  const classeBarbaroDesloc = entradaBarbaro && classeCatalogoBarbaro ? classeCatalogoBarbaro : null;
+  const deslocamento = calcularDeslocamento({
+    baseEspecieM: deslocamentoDaEspecie(especieAtual?.deslocamento),
+    baseSubespecieM: opcaoSubespecieAtual?.deslocamentoMetros ?? null,
+    rotuloSubespecie: opcaoSubespecieAtual?.nome ?? null,
+    armaduraEquipada: armaduraEquipadaCatalogo !== null,
+    armaduraPesada: armaduraPesadaEquipada,
+    escudoEquipado: equipadoAtual.escudo !== null,
+    forcaMinimaArmadura: forcaMinimaDaArmadura(armaduraEquipadaCatalogo?.forcaMinima),
+    forcaPersonagem: forValorFinal,
+    bonusMovimentoSemArmaduraM: classeMonge && mongeEntry ? bonusMovimentoSemArmadura(classeMonge, mongeEntry.nivel) : 0,
+    temMovimentoRapido:
+      classeBarbaroDesloc !== null &&
+      entradaBarbaro !== undefined &&
+      caracteristicaDesbloqueada(classeBarbaroDesloc, ID_CARACTERISTICA_CLASSE.movimentoRapido, entradaBarbaro.nivel) !== null,
+    temVelocista: talentosEfetivos.includes('velocista'),
+    temDadivaDaVelocidade: talentosEfetivos.includes('dadiva-da-velocidade'),
+    formaGrandeAtiva,
+    passoDestrutivoAtivo: passoDestrutivoAtivoTurno,
+    niveisExaustao: 0,
+  });
+  const deslocamentoTexto = formatarMetros(deslocamento.totalM);
   const armaEquipada = equipadoAtual.maoPrincipal;
   const armaEquipadaCatalogo = armaEquipada ? armas.find((a) => a.nome === armaEquipada.nome) : undefined;
   const armaEquipadaEhCorpoACorpo = armaEquipadaCatalogo ? !armaEquipadaCatalogo.categoria.includes('à Distância') : false;
@@ -3106,6 +3132,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             bonusProficiencia={bonusProficienciaAtual}
             explicacaoPv={explicacaoPv}
             explicacaoCa={explicacaoCa}
+            deslocamento={deslocamentoTexto}
+            explicacaoDeslocamento={deslocamento.explicacao}
             explicacaoIniciativa={explicacaoIniciativa}
             explicacaoPercepcaoPassiva={explicacaoPercepcaoPassiva}
             atributos={atributos}
@@ -3514,6 +3542,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             ladosArtesMarciaisMonge={ladosArtesMarciaisMonge}
             nivelMonge={mongeEntry?.nivel ?? 0}
             desModMonge={desMod}
+            deslocamento={deslocamentoTexto}
+            explicacaoDeslocamento={deslocamento.explicacao}
             onRecuperarPontosDeFoco={(qtd) => setPontosDeFocoGasto((v) => Math.max(0, v - qtd))}
             onGanharPvTemporario={(valor) => setPvTemporario((atual) => ganharPvTemporario(atual, valor))}
             golpeAtordoante={{

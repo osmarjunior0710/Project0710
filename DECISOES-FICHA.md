@@ -536,3 +536,18 @@ dizendo, é ruído. Cada tela decide isso, o componente central não.
 tempo, uma linha sem wrap estoura a largura do celular
 (`MagiasTab.module.css` `.spellRowComPillLinha2`,
 `ReacaoPanelContent.tsx` inline).
+
+## Deslocamento — uma função soma todas as fontes (2026-10)
+
+**Padrão:** o Deslocamento do personagem NUNCA é lido direto da espécie nem recalculado
+em telas diferentes: sai de `core/deslocamento.ts` (`calcularDeslocamento`), que recebe
+as entradas (espécie/sub-espécie, armadura/escudo/Força, classe, talentos, efeitos ativos)
+e devolve o total em metros + a conta pro ⓘ. Cada fonte tem 2 booleanos — `tem` (o
+personagem possui) e `ativa` (as condições valem agora; ex.: Monge só ganha o bônus sem
+armadura nem escudo) — e a fonte que existe mas está inativa aparece no ⓘ com o motivo.
+**Fonte nova = 1 item na lista** (`listarFontesDeslocamento`), não lógica nova em tela.
+Aparece em 2 lugares: caixa "Deslocamento" na aba Atributos (com ⓘ) e linha passiva embaixo
+da Reação no Combate. **Por quê:** a mesma regra (armadura pesada, Movimento Rápido,
+Movimento sem Armadura...) não pode divergir entre telas. **Limites conhecidos:** o app não
+rastreia condições (Exaustão/Imobilizado entram como entrada `niveisExaustao` sempre 0) nem
+tem espaço pra "botas" equipadas — itens mágicos entram pelo campo `extras` quando existirem.

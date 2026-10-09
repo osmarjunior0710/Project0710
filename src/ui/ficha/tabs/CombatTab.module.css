@@ -305,3 +305,16 @@
     transform: translate(var(--fp-dx), var(--fp-dy)) scale(1);
   }
 }
+
+/* Linha passiva do Deslocamento, logo abaixo do botão Reação — só informativa
+   (sem toque, sem borda), valor à direita. */
+.linhaDeslocamento {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px var(--space-2);
+}
+
+.linhaDeslocamentoValor {
+  font-size: 14px;
+}

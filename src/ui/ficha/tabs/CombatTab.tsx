@@ -64,6 +64,7 @@ import AtivarEfeitoModal from '../../components/AtivarEfeitoModal';
 import BonusPanelContent from '../combat/BonusPanelContent';
 import ReacaoPanelContent from '../combat/ReacaoPanelContent';
 import DescansoFab from '../DescansoFab';
+import InfoValor from '../../components/InfoValor';
 import SalvaguardaDoAlvoModal from '../combat/SalvaguardaDoAlvoModal';
 import styles from './CombatTab.module.css';
 
@@ -508,6 +509,9 @@ interface CombatTabProps {
   nivelMonge: number;
   /** Mod. de Destreza — Defletir Ataques (Monge nível 3). */
   desModMonge: number;
+  /** Deslocamento já formatado + a conta do ⓘ — `core/deslocamento.ts` (linha passiva embaixo da Reação). */
+  deslocamento: string;
+  explicacaoDeslocamento: ExplicacaoCalculo;
   /** Foco Perfeito (Monge nível 15) — devolve N Pontos de Foco gastos. */
   onRecuperarPontosDeFoco: (quantidade: number) => void;
   /** Foco Aprimorado (Defesa Paciente) — soma PV Temporário (não acumula, fica o maior). */
@@ -835,6 +839,8 @@ export default function CombatTab({
   ladosArtesMarciaisMonge,
   nivelMonge,
   desModMonge,
+  deslocamento,
+  explicacaoDeslocamento,
   onRecuperarPontosDeFoco,
   onGanharPvTemporario,
   golpeAtordoante,
@@ -2454,6 +2460,12 @@ export default function CombatTab({
         <div className={styles.sbIcon}>{LABELS.reacao.icone}</div>
         <div className={styles.sbLabel}>{LABELS.reacao.nome}</div>
         {turnState.reacao === 'usada' && <div className={styles.sbState}>usada</div>}
+      </div>
+      <div className={styles.linhaDeslocamento}>
+        <span className="label">
+          Deslocamento <InfoValor titulo="Deslocamento" explicacao={explicacaoDeslocamento} />
+        </span>
+        <span className={styles.linhaDeslocamentoValor}>{deslocamento}</span>
       </div>
 
       {feedback && <div className={styles.feedback}>{feedback}</div>}
