@@ -84,3 +84,20 @@ botões, não era preciso simplificar nada). Lição: uma limitação
 técnica que mudaria o que o jogador VÊ/FAZ na tela (não só "como
 implementar por baixo") é pergunta antes de codar, igual qualquer
 outra decisão de UI — nunca uma nota de rodapé no relatório final.
+
+## Ambiente de teste (navegador do Claude) — armadilhas que parecem bug do app
+
+(2026-10, foco Monge; 1ª ocorrência de cada, todas já resolvidas.)
+- Dado 3D só avança se o painel desenha frames: `tabs_select` + screenshot, senão a
+  rolagem fica em "Rolando...".
+- `scrollIntoView` no teste rola o `#root` (overflow hidden) e desloca todo modal
+  `position: fixed` — parece bug de posição do popup, não é.
+- "Fim do Turno" e vários botões são `div`, não `button` (clicar por coordenada/ref).
+- Scripts de edição: nunca `node -e` com texto de código (aspas quebram, ~6x num dia);
+  escrever o script num arquivo e rodar. Script de versão: usar `date` do Git Bash.
+
+## Afirmar "aparece na tela" sem conferir na tela
+
+1ª ocorrência (2026-10, Monge): disse que as características do Monge já apareciam
+no Perfil; na verdade nenhuma tinha texto importado. Só descobri ao conferir de
+verdade. Regra prática: antes de dizer que algo aparece/funciona, abrir a tela.
