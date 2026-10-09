@@ -7,6 +7,26 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
+## Popup de confirmação pra toda linha dos painéis Ação/Bônus/Reação (2026-10-09)
+
+Pedido do Osmar: hoje tocar numa linha dentro do painel de Ação/Ação
+Bônus/Reação já EXECUTA a ação na hora (marca usado, às vezes gasta
+recurso/rola dado) — não dá pra só olhar o texto completo e decidir
+depois, sem querer mexeu já comprometeu o turno. Proposta dele:
+generalizar o padrão já usado nas 3 técnicas do Monge (popup central —
+título, corpo com o texto completo, botão Cancelar | Usar) pra
+qualquer linha desses 3 painéis, não só casos pontuais.
+
+Decidido (2026-10-09): guardado aqui, não vira foco agora — termina o
+Monge primeiro. Quando for puxado, falta decidir com o Osmar se o
+escopo inclui magias (hoje já gastam Espaço de Magia na hora do
+toque, sem upcast) ou só características/talentos — pergunta feita e
+adiada junto com o resto. Reaproveitar `AvisoModal.tsx`/
+`TecnicaMongeModal.tsx` como ponto de partida de padrão visual.
+Cuidado: algumas linhas já abrem tela própria antes de confirmar
+(upcast de magia, Golpe de Escudo com CD, Colheita dos Mortos
+escolhendo pet) — não duplicar confirmação pra essas.
+
 ## Auditoria de padding em botões/caixas do app inteiro (2026-09-25)
 
 Pedido do Osmar: qualquer botão/caixa clicável deveria ter padding
