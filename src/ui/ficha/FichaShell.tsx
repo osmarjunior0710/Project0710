@@ -816,6 +816,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     nivelTotalAtual,
     { ativa: temConhecimentoPrimordial && furiaAtiva, mod: forMod, pericias: PERICIAS_CONHECIMENTO_PRIMORDIAL },
     capstonesAtributo,
+    // Pau pra Toda Obra vem do Bardo em QUALQUER posição da multiclasse (não só da classe da criação/em foco).
+    temCaracteristica(classesCtx, 'Pau pra Toda Obra'),
   );
   // Canalizar Divindade/Mãos Consagradas/Aura de Proteção (Paladino) —
   // leem o nível DA classe Paladino em `classesAtual` (não da classe

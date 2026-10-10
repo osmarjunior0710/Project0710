@@ -17,11 +17,13 @@
 ## Multiclasse — o que ainda segue a "classe em foco" (2026-10)
 
 Característica de classe/subclasse é achada em TODAS as classes por ID (`core/caracteristicasDoPersonagem.ts`, ver
-`DECISOES-CLASSES.md`), e dano/cura de magia e a caixa "Level" já usam o nível TOTAL (Livro, Cap. 2 Multiclasse; ver
-`aprendizados/sistemas/nivel-total-multiclasse.md`). Ainda seguem a classe em foco (1ª que conjura), a revisar: (1)
-`calcularPericias`/Pau pra Toda Obra e `useMagiasEConjuracao` (espaços do pool principal, déficit de truques) com
-`personagem.nivel`; (2) as entradas por classe escritas à mão (`entradaGuerreiro`, `entradaBarbaro`, `mongeEntry`,
-`entradaPaladino`) podem migrar pro módulo genérico quando forem tocadas.
+`DECISOES-CLASSES.md`), dano/cura de magia e a caixa "Level" usam o nível TOTAL, e o Pau pra Toda Obra (Bardo) agora vale em qualquer
+posição da multiclasse (`calcularPericias`, param `pauPraTodaObra`). Ver `aprendizados/sistemas/nivel-total-multiclasse.md`. Ainda:
+(1) `useMagiasEConjuracao`: o pool "principal" de Espaços de Magia e o déficit de truques seguem a 1ª classe que conjura (os outros pools
+aparecem pelo pool combinado/ponte — conferir com um caso real de 2 conjuradores se algum número parecer errado); (2) as entradas por classe
+escritas à mão (`entradaGuerreiro`, `entradaBarbaro`, `mongeEntry`, `entradaPaladino`) podem migrar pro módulo genérico quando forem
+tocadas; (3) o Char Multiclasse tem nível total 140 (impossível de propósito) e o Bônus de Proficiência cai pra +2 (a tabela só vai até 20) —
+artefato do personagem de teste, não de personagem legítimo.
 
 ## Golpe Brutal (Bárbaro) — confirmar se tem limite de usos por descanso
 

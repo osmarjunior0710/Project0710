@@ -604,12 +604,16 @@ export function calcularPericias(
    * função (o `atributos`/`forMod` de `FichaShell.tsx` já vem
    * ajustado). `false`/omitido = comportamento de sempre. */
   temCampeaoPrimitivo: TemCapstone = false,
+  /** Pau pra Toda Obra (Bardo nível 2) já resolvido por quem chama, olhando TODAS as classes do personagem
+   * (`core/caracteristicasDoPersonagem.ts`) — numa multiclasse a classe da criação e o `nivel` acima podem não ser
+   * a do Bardo. `undefined` (chamadas de 1 classe só, resumo do wizard) = decide por `classe`/`nivel`, como sempre. */
+  pauPraTodaObra?: boolean,
 ): PericiaFinal[] {
   const classe = classeDaSelecao(selection);
   if (!classe) return [];
   const proficientes = new Set([...periciasProficientes(selection), ...periciasBonusExtras]);
   const bonus = bonusProficiencia(classe, nivelTotal ?? nivel);
-  const temPauParaTodaObra = caracteristicaDesbloqueada(classe, 'Pau pra Toda Obra', nivel) !== null;
+  const temPauParaTodaObra = pauPraTodaObra ?? caracteristicaDesbloqueada(classe, 'Pau pra Toda Obra', nivel) !== null;
   const resultado: PericiaFinal[] = [];
   for (const pericia of pericias) {
     const atributoOriginal = ATRIBUTO_POR_NOME_COMPLETO[pericia.atributo];

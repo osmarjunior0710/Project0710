@@ -27,3 +27,11 @@
 Característica que escala por nível: perguntar "isto é nível da CLASSE dona ou do PERSONAGEM?". Classe dona →
 `donaDaCaracteristica(...).nivel`; personagem → `nivelTotalAtual`. Nunca `personagem.nivel` (é o da classe em foco).
 Dúvida de regra: `npm run pdf`, nunca de memória.
+
+## Pau pra Toda Obra (Bardo) em multiclasse
+
+`calcularPericias` decidia o Pau pra Toda Obra por `classeDaSelecao` (classe da CRIAÇÃO) + `nivel` (classe em foco): num personagem cuja 1ª classe
+não é Bardo (Char Multiclasse: Bárbaro) o bônus nunca aparecia. Agora `FichaShell.tsx` passa `temCaracteristica(classesCtx, 'Pau pra Toda Obra')`
+no novo param `pauPraTodaObra` (omitido = comportamento antigo, pro wizard/1 classe só). Texto do livro: só testes que usam uma perícia sem proficiência
+(Iniciativa, que é Destreza pura, não entra). Teste em `calculoPersonagem.test.ts`; na tela, perícias sem proficiência do Char Multiclasse ganharam +1
+(metade do Bônus +2 que a ficha mostra).

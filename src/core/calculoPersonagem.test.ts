@@ -501,3 +501,27 @@ describe('ferramentasProficientes (Talento de Origem + Versátil)', () => {
     expect(ferramentasProficientes(selecaoGuerreiro())).toEqual([]);
   });
 });
+
+describe('calcularPericias (Pau pra Toda Obra resolvido por quem chama — multiclasse)', () => {
+  it('flag true dá metade do Bônus de Proficiência em perícia sem proficiência, mesmo com a classe da criação sem a característica', () => {
+    const s = selecaoGuerreiro();
+    const sem = calcularPericias(s, 1, [], [], undefined, undefined, false, false).find((p) => p.nome === 'Arcanismo');
+    const com = calcularPericias(s, 1, [], [], undefined, undefined, false, true).find((p) => p.nome === 'Arcanismo');
+    expect(sem?.proficiente).toBe(false);
+    expect((com?.mod ?? 0) - (sem?.mod ?? 0)).toBe(1); // nível 1: Bônus +2, metade = +1
+  });
+
+  it('flag omitida mantém o comportamento de sempre (decide pela classe/nível)', () => {
+    const s = selecaoGuerreiro();
+    const padrao = calcularPericias(s, 1).find((p) => p.nome === 'Arcanismo');
+    const falso = calcularPericias(s, 1, [], [], undefined, undefined, false, false).find((p) => p.nome === 'Arcanismo');
+    expect(padrao?.mod).toBe(falso?.mod);
+  });
+
+  it('perícia em que já é proficiente não ganha o bônus extra', () => {
+    const s = selecaoGuerreiro({ periciaEspecieEscolhida: 'Arcanismo' });
+    const sem = calcularPericias(s, 1, [], [], undefined, undefined, false, false).find((p) => p.nome === 'Arcanismo');
+    const com = calcularPericias(s, 1, [], [], undefined, undefined, false, true).find((p) => p.nome === 'Arcanismo');
+    expect(com?.mod).toBe(sem?.mod);
+  });
+});

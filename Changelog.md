@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1737
+
+O Pau pra Toda Obra do Bardo (metade do Bônus de Proficiência nas perícias sem proficiência) agora funciona também quando o Bardo não é a primeira classe do personagem. No Char Multiclasse, todas as perícias sem proficiência ganharam esse bônus.
+
 ## v202610_1728
 
 O "Modo de Teste" (menu do avatar) agora faz o d20 sair em 1, 10 e 20, nessa ordem (antes era 1, 10, 15, 20) — o 1 é falha crítica, o 10 é um acerto comum e o 20 é crítico.
