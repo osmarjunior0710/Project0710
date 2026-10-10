@@ -680,6 +680,9 @@ confirmada linha a linha, idêntica entre as duas classes, removido. Ver
 ## 9. Escopo do produto (não expandir sem confirmar)
 
 - Só D&D 5e (regras 2024), sem abstração para outros sistemas.
+- **Exceção confirmada pelo Osmar (2026-10): a classe Psiônico (Unearthed Arcana 2025, não oficial)** entra no app, sempre rotulada como não oficial
+  (mesmo critério do Necromante homebrew). Fonte: `livros-referencia/unearthed-arcana/Psionico_Atualizacoes_UA_2025.pdf`; levantamento em
+  `sdd/sdd-psionico.md`. Quando sair material oficial, as entradas UA são revistas.
 - Uso pessoal — Osmar e o grupo de mesa dele. Sem lançamento público, sem
   monetização, sem paywall.
 - Login/nuvem (Supabase) só entra na Fase 5, depois de tudo local estar

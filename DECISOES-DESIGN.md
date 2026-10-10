@@ -270,9 +270,9 @@ fisicamente 1 arquivo só no `dist/`).
 **Hoje:** as 3 categorias completas com arte própria (12 classes, 10
 espécies, 16 origens) — não sobra nenhum 🖼 genérico. Existe também um
 `psionico-banner.webp` pronto mas **não ligado a nenhuma tela**
-(Psiônico é conteúdo Unearthed Arcana, fora de escopo — CLAUDE.md
-seção 9); fica pronto caso o escopo mude, sem criar entrada "em breve"
-que sugeriria suporte futuro.
+(Psiônico era conteúdo Unearthed Arcana fora de escopo; **em 2026-10 o Osmar
+incluiu a classe no escopo**, rotulada como não oficial — CLAUDE.md seção 9 e
+`sdd/sdd-psionico.md`). O banner será ligado quando a classe aparecer na criação.
 
 ## `MagiaComDescricao` — formato único e fixo pra qualquer magia/truque na tela
 

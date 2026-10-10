@@ -81,6 +81,14 @@ Selvagem, e qualquer personagem pode escolher um onde normalmente escolheria um 
 8. **Escopo/rótulo:** conteúdo não oficial, então a classe aparece marcada como "UA / não oficial" na tela (mesmo critério do Necromante homebrew).
 9. **Lista de Disciplinas:** o PDF não diz quantas são; a lista alfabética tem 11 — conferir se falta alguma.
 
+## 2.1 Decisões do Osmar (2026-10)
+
+1. **Truques:** vale a **tabela** (2 truques nos níveis 1-2, 3 do nível 3 ao 9, 4 do nível 10 em diante), não a frase "níveis 4 e 10" do texto.
+2. **Onde ficam os dados:** arquivo próprio marcado como UA/não oficial (fonte primária, como o Necromante homebrew) — não na planilha por enquanto.
+3. **Magias UA:** ficam como magias "novas" próprias do Psiônico, mesmo quando repetem uma magia oficial (**inclui Animar Mortos**, como na planilha); revisar quando
+   sair o material oficial.
+4. **Escopo:** Psiônico entra no app marcado como não oficial (`CLAUDE.md` seção 9).
+
 ## 3. Proposta de quebra em entregas (cada uma testável sozinha)
 
 - **E1 — dado no banco, sem mudar nada visível:** classe Psiônico (progressão 1-20 com as colunas da tabela, texto das características), as 17 magias novas
