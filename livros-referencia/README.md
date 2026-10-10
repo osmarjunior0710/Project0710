@@ -27,3 +27,8 @@ Criando Personagens do Mestre, Cap. 5 Ambientes de Aventura, Cap. 6
 Entre Aventuras, Cap. 7 Tesouro (2 partes), Cap. 8 Conduzindo o Jogo,
 Cap. 9 Oficina do Mestre, Ap. A Masmorras Aleatórias, Ap. B Listas de
 Monstros, Ap. C Mapas, Ap. D Inspiração do Mestre.
+
+## Como procurar um texto nos PDFs
+
+`npm run pdf -- <arquivo.pdf> "<regex>" [caracteres-depois]` (script `ferramentas/ler-pdf.mjs`, usa `pdfjs-dist`). Mostra cada trecho
+encontrado com o número da página. Exemplo: `npm run pdf -- livros-referencia/livro-do-jogador/03_-_Cap_2_Criacao_de_Personagens.pdf "Truques\\." 500`.

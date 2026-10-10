@@ -1064,3 +1064,6 @@ pedido — condição pra publicar:**
 - **Navegador de teste**: dados 3D só animam enquanto o painel desenha frames (screenshot destrava);
   não usar `scrollIntoView` (rola o `#root` e desloca modais); "Fim do Turno" e vários botões são
   `div`, não `button`. Testar em 360px e 412px (seção 5).
+- **Ler os PDFs dos livros**: o ambiente não tem `pdftotext`/`pdftoppm`. Use `npm run pdf -- <arquivo.pdf> "<regex>" [caracteres]`
+  (`ferramentas/ler-pdf.mjs`), que mostra o trecho com a página — ex.: `npm run pdf -- livros-referencia/livro-do-jogador/03_-_Cap_2_Criacao_de_Personagens.pdf "Truques\\." 500`.
+  Regra do projeto (seção 3): dúvida de regra = ler o PDF, nunca responder de memória. Nunca afirmar "o livro diz" sem ter rodado isso.
