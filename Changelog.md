@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0051
+
+Torrente de Golpes e Ataque Desarmado Adicional (Monge) ganham Empurrar e Imobilizar: depois de escolher a Torrente (de graça ou gastando Foco) abre a pergunta "Só atacar" ou "Atacar, empurrar ou imobilizar". Só atacar roda a sequência direto, como antes; o outro modo pergunta Dano / Empurrar / Imobilizar antes de cada ataque (Empurrar e Imobilizar gastam aquele ataque, mostram a CD e o próximo ataque vem depois de fechar o popup).
+
 ## v202610_2120
 
 Ataque Desarmado ganha as opções Empurrar e Imobilizar (regra do Livro, vale pra qualquer classe): ao tocar em "Atacar — Ataque Desarmado" aparecem Dano, Empurrar e Imobilizar. Empurrar/Imobilizar não rolam ataque: gastam um dos seus ataques da ação Atacar e abrem o popup com a CD (8 + atributo + proficiência; o Monge usa Destreza quando é maior), o que acontece na falha e o limite de tamanho. Por enquanto só no Atacar principal (Torrente de Golpes e Ataque Adicional vêm depois). Também: as caixas de escolha do Atacar passaram a ter linha contínua.

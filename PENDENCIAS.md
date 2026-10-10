@@ -1593,8 +1593,8 @@ Classe base nível 1-20 pronta (ver `aprendizados/classes/monge.md`). O que fico
   Combatente das Sombras nível 3 (texto de outra legenda) e Combatente dos
   Elementos nível 17 (intro do capítulo do Paladino colada no fim).
 - ~~Artes Marciais — Empurrar/Imobilizar com Destreza~~ — resolvido no "Atacar" principal
-  (2026-10, `core/empurrarImobilizar.ts`). Falta estender pro ataque da Torrente de Golpes e pro
-  Ataque Desarmado Adicional (Artes Marciais), e pro Ataque Desarmado de outras fontes — ver `EmDev.md`.
+  (2026-10, `core/empurrarImobilizar.ts`). Torrente de Golpes e Ataque Desarmado Adicional (Artes Marciais) também
+  já oferecem (2026-10). Falta só o ataque da Mão Secundária desarmada e outras fontes de Ataque Desarmado.
 - ~~Movimento sem Armadura~~ — resolvido (2026-10): Deslocamento ganhou função única
   (`core/deslocamento.ts`) e a caixa na aba Atributos/linha no Combate.
 - **Condições do personagem não são rastreadas** (Restauro Pessoal e Evasão

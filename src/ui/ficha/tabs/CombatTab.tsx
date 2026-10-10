@@ -27,6 +27,7 @@ import {
   temExplosaoElemental,
 } from '../../../core/explosaoElemental';
 import ElementoSintoniaModal from '../combat/ElementoSintoniaModal';
+import { ModoTorrenteModal, OpcaoAtaqueTorrenteModal } from '../combat/TorrenteOpcoesModal';
 import { golpesPotencializadosAtivo, TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
 import { ataquesTorrenteComFoco, temFocoAprimorado } from '../../../core/focoAprimorado';
 import { pontosDeFocoRecuperadosFocoPerfeito } from '../../../core/focoPerfeito';
@@ -960,7 +961,15 @@ export default function CombatTab({
     tipo: 'empurrar' | 'imobilizar';
     cd: number;
     explicacao: ExplicacaoCalculo;
+    /** O que continua depois do Ok (ex.: próximo ataque da Torrente de Golpes). */
+    aoFechar?: () => void;
   } | null>(null);
+  // Torrente de Golpes/Ataque Adicional: 1ª pergunta (só atacar x empurrar/imobilizar) e, no modo
+  // "escolher", a pergunta de CADA ataque. O modo vive num ref porque a sequência encadeia os ataques
+  // dentro de callbacks (closure velha — mesma lição do Golpe Atordoante).
+  const [modoTorrentePendente, setModoTorrentePendente] = useState<{ comFoco: boolean } | null>(null);
+  const [opcaoAtaqueTorrente, setOpcaoAtaqueTorrente] = useState<{ numero: number; total: number } | null>(null);
+  const modoTorrenteRef = useRef<'dano' | 'escolher'>('dano');
   const [passoDestrutivoEscolhendo, setPassoDestrutivoEscolhendo] = useState(false);
   const [explosaoEscolhendo, setExplosaoEscolhendo] = useState(false);
   const [explosaoResultado, setExplosaoResultado] = useState<{ elemento: string; dano: number } | null>(null);
@@ -1526,7 +1535,7 @@ export default function CombatTab({
   function escolherTecnicaMonge(comFoco: boolean) {
     if (tecnicaMongeAberta === 'defesa-paciente') usarDefesaPaciente(comFoco);
     else if (tecnicaMongeAberta === 'passo-do-vento') usarPassoDoVento(comFoco);
-    else if (tecnicaMongeAberta === 'torrente') ativarTorrenteDeGolpes(comFoco);
+    else if (tecnicaMongeAberta === 'torrente') setModoTorrentePendente({ comFoco });
   }
 
   /** Ataque contínuo (vários socos em sequência) — cada ataque dispara
@@ -1536,9 +1545,37 @@ export default function CombatTab({
    * 2026-10). `numero`/`total` vêm por parâmetro (não do state
    * `numAtaquesTorrente`) porque o 1º ataque dispara na mesma chamada
    * que ativa a técnica, antes do state atualizar. */
-  function rolarAtaqueTorrente(numero: number, total: number) {
+  /** Escolha de CADA ataque da Torrente no modo "Atacar, empurrar ou imobilizar": Dano segue o ataque
+   * normal; Empurrar/Imobilizar gastam esse ataque (sem jogada), mostram a CD e só depois vem o próximo. */
+  function escolherOpcaoAtaqueTorrente(opcao: 'dano' | 'empurrar' | 'imobilizar') {
+    const alvo = opcaoAtaqueTorrente;
+    setOpcaoAtaqueTorrente(null);
+    if (!alvo || !ataqueTorrente) return;
+    const { numero, total } = alvo;
+    if (opcao === 'dano') {
+      rolarAtaqueTorrente(numero, total, true);
+      return;
+    }
+    const cd = cdEmpurrarImobilizar(ataqueTorrente.info.modAcerto);
+    setAtaquesTorrenteFeitos(numero);
+    setFeedback(`👊 Torrente de Golpes (${numero}/${total}) — ${opcao === 'empurrar' ? 'Empurrar' : 'Imobilizar'}: o alvo faz uma salvaguarda.`);
+    setEmpurrarImobilizar({
+      tipo: opcao,
+      cd,
+      explicacao: explicarCdEmpurrarImobilizar(ataqueTorrente.info.explicacaoAcerto.linhas, cd),
+      aoFechar: () => {
+        if (numero < total) rolarAtaqueTorrente(numero + 1, total);
+      },
+    });
+  }
+
+  function rolarAtaqueTorrente(numero: number, total: number, opcaoJaEscolhida = false) {
     if (!ataqueTorrente) return;
     setPainelAberto(null);
+    if (modoTorrenteRef.current === 'escolher' && !opcaoJaEscolhida) {
+      setOpcaoAtaqueTorrente({ numero, total });
+      return;
+    }
     setFeedback(`🗡 ${ataqueTorrente.nome} (Torrente de Golpes) — ${ataqueTorrente.descricao}`);
     rolarD20({
       label: `Ataque — ${ataqueTorrente.nome} (Torrente de Golpes) (${numero}/${total})`,
@@ -2896,6 +2933,20 @@ export default function CombatTab({
           onFechar={() => setRedirecionamentoDefletir(null)}
         />
       )}
+      {modoTorrentePendente && (
+        <ModoTorrenteModal
+          onEscolher={(modo) => {
+            const { comFoco } = modoTorrentePendente;
+            setModoTorrentePendente(null);
+            modoTorrenteRef.current = modo;
+            ativarTorrenteDeGolpes(comFoco);
+          }}
+          onFechar={() => setModoTorrentePendente(null)}
+        />
+      )}
+      {opcaoAtaqueTorrente && (
+        <OpcaoAtaqueTorrenteModal numero={opcaoAtaqueTorrente.numero} total={opcaoAtaqueTorrente.total} onEscolher={escolherOpcaoAtaqueTorrente} />
+      )}
       {empurrarImobilizar && (
         <SalvaguardaDoAlvoModal
           titulo={empurrarImobilizar.tipo === 'empurrar' ? TEXTO_EMPURRAR.titulo : textosImobilizar(empurrarImobilizar.cd).titulo}
@@ -2905,7 +2956,11 @@ export default function CombatTab({
           textoSucesso={empurrarImobilizar.tipo === 'empurrar' ? TEXTO_EMPURRAR.sucesso : textosImobilizar(empurrarImobilizar.cd).sucesso}
           textoFalha={empurrarImobilizar.tipo === 'empurrar' ? TEXTO_EMPURRAR.falha : textosImobilizar(empurrarImobilizar.cd).falha}
           aviso={empurrarImobilizar.tipo === 'empurrar' ? TEXTO_EMPURRAR.aviso : textosImobilizar(empurrarImobilizar.cd).aviso}
-          onFechar={() => setEmpurrarImobilizar(null)}
+          onFechar={() => {
+            const depois = empurrarImobilizar.aoFechar;
+            setEmpurrarImobilizar(null);
+            depois?.();
+          }}
         />
       )}
       {passoDestrutivoEscolhendo && (
