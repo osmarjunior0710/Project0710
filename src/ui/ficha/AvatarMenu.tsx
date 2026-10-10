@@ -78,7 +78,7 @@ export default function AvatarMenu({
     },
     {
       label: '🎲 Modo de Teste',
-      desc: 'Todo d20 sai fixo em 1, 10, 15, 20 (em sequência) — dano continua de verdade. Desliga sozinho ao recarregar a página.',
+      desc: 'Todo d20 sai fixo em 1, 10, 20 (em sequência) — dano continua de verdade. Desliga sozinho ao recarregar a página.',
       valor: modoTeste,
       onToggle: alternarModoTeste,
       desabilitado: false,

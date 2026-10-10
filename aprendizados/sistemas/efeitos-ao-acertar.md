@@ -48,3 +48,9 @@ Bênção do Tenebroso, magias do Ínfero/Devoção, Necromante e Recuperar Fôl
 
 - Golpes Radiantes (Paladino 11) continua automático (+1d8), sem linha na lista.
 - Raízes e Arma Sagrada valem só pra arma da Mão Principal (a Mão Secundária não as oferece).
+
+## Teste ao vivo com o Modo de Teste (avatar → 🎲 Modo de Teste, d20 = 1, 10, 20)
+
+O crítico do Perfurador foi validado com o Modo de Teste: no Char Multiclasse + talento Perfurador (adicionado só na ficha salva do navegador) + Adaga,
+o 3º d20 saiu 20 e o dano foi `2d4 + 7 + 2d8 + 1d4` (dado da arma dobrado, Golpes Radiantes dobrado, +1d4 do Perfurador sem dobrar). Usar o modo
+sempre que precisar de crítico/falha crítica (ver `CLAUDE.md` seção 21).

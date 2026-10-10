@@ -303,7 +303,7 @@ card (−5 · −1 · Manual `[PH]` · +1 · +5), não mais dentro dele —
 ## Modo de Teste — sequência fixa de d20 pra testar estados visuais, sem afetar dano
 
 **Padrão:** ferramenta de QA que força resultado de dado previsível
-(fila fixa `[1, 10, 15, 20]`, dá a volta no fim), com escopo restrito ao
+(fila fixa `[1, 10, 20]`, dá a volta no fim), com escopo restrito ao
 d20 — dano e qualquer outro dado continuam de verdade mesmo ligado.
 Nunca persiste entre carregamentos de página, e mostra indicador visual
 (badge) quando ativo, pra nunca "esquecer ligado" no meio de uma sessão

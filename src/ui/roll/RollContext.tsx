@@ -459,7 +459,7 @@ interface RollContextValue {
    * `permiteForcaIndomavel`, recalculado a cada mudança de total. */
   registrarForcaIndomavel: (valor: number | null) => void;
   /** Modo de Teste (ver `AvatarMenu`) — `true` faz todo d20 sair da
-   * sequência fixa 1/10/15/20 em vez de rolar de verdade (dano e
+   * sequência fixa 1/10/20 em vez de rolar de verdade (dano e
    * outros dados continuam aleatórios). Não persiste entre sessões —
    * sempre nasce desligado, pra nunca "esquecer ligado" sem perceber. */
   modoTeste: boolean;
@@ -513,8 +513,8 @@ const DURACAO_ANIMACAO_MS = 1000;
 
 /** Modo de Teste (ver `AvatarMenu`): em vez de rolar de verdade, todo
  * d20 sai dessa sequência fixa, em ordem, dando a volta quando chega
- * no fim — pensada pra exercitar os 4 estados visuais de acerto que
- * mais importam testar (1 = falha crítica, 10/15 = resultado
+ * no fim — pensada pra exercitar os 3 estados visuais de acerto que
+ * mais importam testar (1 = falha crítica, 10 = resultado
  * mediano, 20 = sucesso crítico) sem depender de sorte. Quando 2 d20
  * saem juntos (Vantagem/Desvantagem), cada um consome o PRÓXIMO da
  * fila — nunca reseta entre eles — então uma rolagem com Vantagem já
@@ -522,7 +522,7 @@ const DURACAO_ANIMACAO_MS = 1000;
  * d20 — dano e qualquer outro dado (`rolarDados`) continuam de
  * verdade mesmo com o modo ligado, já que o objetivo é testar
  * acerto/crítico, não dano. */
-const SEQUENCIA_MODO_TESTE = [1, 10, 15, 20];
+const SEQUENCIA_MODO_TESTE = [1, 10, 20];
 
 /** `modoTeste`/`indice` são refs (não state) de propósito: esta função
  * roda dentro de callbacks memoizados com `[]` de dependência

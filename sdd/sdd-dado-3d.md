@@ -110,7 +110,7 @@ de escopo aqui também. Quando existir, dobra a notação
 (`3d6` → `['3d6','3d6']` ou `'6d6'`, a decidir na hora) — mesma
 mecânica de "vários dados", nada novo.
 
-### Modo de Teste (sequência fixa 1/10/15/20 pra QA)
+### Modo de Teste (sequência fixa 1/10/20 pra QA)
 
 **Incompatível com física de verdade** — não dá pra forçar face. Duas
 decisões:

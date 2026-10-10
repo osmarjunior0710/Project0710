@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1728
+
+O "Modo de Teste" (menu do avatar) agora faz o d20 sair em 1, 10 e 20, nessa ordem (antes era 1, 10, 15, 20) — o 1 é falha crítica, o 10 é um acerto comum e o 20 é crítico.
+
 ## v202610_1723
 
 Talento Perfurador: num Acerto Crítico com dano Perfurante, o app agora joga automaticamente 1 dado de dano extra (do mesmo tamanho do dado da arma), além do dobro normal do crítico. Vale pro Atacar, Golpe Brutal, ataque da Mão Secundária e Cortar.
