@@ -20,8 +20,8 @@
 Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiônico nível 20 no Char Multiclasse com tudo [PH], implementando aos poucos.
 
 - [x] E1a — esqueleto: classe (tabelas conferidas vs PDF), 12 características com texto literal [PH], proficiências, equipamento, conjurador completo, cor provisória, Char Multiclasse nível 20, teste de integridade.  (wizard mostra "em breve").
-- [ ] E1b — 4 subclasses (homebrew:true) + 28 características de subclasse [PH] com texto literal (hoje o Char usa subclasse null).
-- [ ] E2 — lista de magias do Psiônico (overlay) + 17 magias UA + Animar Mortos; conferir abas Magias E Combate (seção 6.6).
+- [ ] E1b — (adiado por decisão do Osmar, junto das E6a-d) 4 subclasses (homebrew:true) + 28 características [PH]; hoje o Char usa subclasse null.
+- [x] E2 — lista de magias do Psiônico (143 do PDF) + 18 magias novas UA (inclui Animar Mortos); conferido nas abas Magias e Combate (360px).
 - [ ] E3 — Dados de Energia Psiônica / Impulso / Conexão / Telecinese Sutil.
 - [ ] E4 — Disciplinas Psiônicas. E5 — Restauração/Surto/Reservas/Força Vital. E6a-d — subclasses. E7 — Talentos Selvagens.
 - [ ] Ligar `disponivel: true` + selo "UA · não oficial" no wizard quando a classe estiver jogável.

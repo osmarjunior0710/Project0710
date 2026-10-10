@@ -87,6 +87,9 @@ Um arquivo por classe de D&D implementada no app.
 Bardo/Bruxo — continuam só em `DECISOES-CLASSES.md`; migração pra cá é
 gradual, sob demanda, não obrigatória de uma vez.)*
 
+- **`classes/psionico.md`** — Psiônico (UA 2025, não oficial): esqueleto da classe nível 20 (tudo [PH]), magias geradas (lista da classe + 18 novas) e achados
+  (nomes da lista ≠ catálogo; Animar Mortos colado no texto de outra magia).
+
 ## `talentos/`
 
 - **`talentos/fase-4.md`** — Talentos Fase 4 (efeito mecânico de

@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1924
+
+Psiônico agora tem magias: a lista da classe (143 magias do PDF) aparece nas abas Magias e Combate do Char Multiclasse, e as 18 magias novas do UA (Arremesso Telecinético, Sifão Vital, Explosão Psiônica, Grito Psíquico, Animar Mortos...) entram com descrição completa.
+
 ## v202610_1902
 
 Psiônico: pré-requisito e proficiências de multiclasse provisoriamente iguais às do Mago (marcado como não oficial) e cor da classe definida em roxo (diferente do Bruxo).

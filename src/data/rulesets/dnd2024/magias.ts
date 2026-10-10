@@ -107,6 +107,8 @@
 // texto aproximado (a condição junto do dano pode não bater com TODO
 // raio possível, só o mais comum) — ver PENDENCIAS.md.
 
+import { aplicarListaPsionico } from './magiasPsionico';
+
 export type UpcastTipo =
   | 'dado-por-circulo'
   | 'alvo-por-circulo'
@@ -177,7 +179,8 @@ export interface Magia {
   salvaguardaSucesso: string | null;
 }
 
-export const magias: Magia[] = [
+// Catálogo oficial (gerado da planilha). `magias` (abaixo) = este + lista/magias do Psiônico (UA, não oficial).
+const magiasOficiais: Magia[] = [
   {
     id: "acudirosmoribundos",
     nome: "Acudir os Moribundos",
@@ -11525,6 +11528,9 @@ export const magias: Magia[] = [
     salvaguardaSucesso: null,
   },
 ];
+
+// Psiônico (UA 2025, não oficial) — ver magiasPsionico.ts.
+export const magias: Magia[] = aplicarListaPsionico(magiasOficiais);
 
 /** Círculo → alfabético, sempre — padrão de toda listagem de magia
  * (Magias, Combat, Level Up, criação de personagem). Quem sorteia

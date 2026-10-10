@@ -1628,3 +1628,7 @@ Função única pronta (`core/deslocamento.ts`, ver `aprendizados/sistemas/deslo
   condições/efeitos ativos (ver `Backlog.md`).
 - **Bônus só na ação Correr** (Corrida Aprimorada, Agressor, Psicinético) — o app não modela a ação Correr como estado.
 - **Fontes de classe/subclasse não implementadas** (Paladino/Glória, Guardião): 1 item na lista quando existirem.
+
+## Catálogo de magias — Animar Mortos
+
+- `Animar Mortos` (oficial) não tem entrada própria em `magias.ts`: o texto ficou colado no fim da descrição de outra magia (problema de extração da planilha). O Psiônico usa a cópia da aba UA Psion; as classes oficiais (Clérigo, Mago) ainda não têm a magia. Corrigir na planilha e reimportar.
