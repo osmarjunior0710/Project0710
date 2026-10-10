@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   calcularDeslocamento,
   deslocamentoDaEspecie,
+  estaEquipado,
   forcaMinimaDaArmadura,
   formatarMetros,
   type EntradaDeslocamento,
@@ -108,5 +109,13 @@ describe('calcularDeslocamento', () => {
     });
     expect(r.totalM).toBe(9);
     expect(r.explicacao.linhas.at(-1)).toEqual({ label: 'Voo (Asas Celestiais)', valor: 'igual ao Deslocamento' });
+  });
+});
+
+describe('estaEquipado (slot vazio pode vir como null OU undefined)', () => {
+  it('null e undefined = vazio; qualquer item = equipado', () => {
+    expect(estaEquipado(null)).toBe(false);
+    expect(estaEquipado(undefined)).toBe(false);
+    expect(estaEquipado({ nome: 'Cota de Malha' })).toBe(true);
   });
 });

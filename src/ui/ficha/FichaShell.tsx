@@ -81,7 +81,7 @@ import { ataqueAtual, ataqueBonusMaoSecundaria, ataqueDesarmado } from '../../co
 import { armas } from '../../data/rulesets/dnd2024/armas';
 import { explicarCdGolpeDeEscudo } from '../../core/golpeDeEscudo';
 import { temEvasao } from '../../core/evasao';
-import { calcularDeslocamento, deslocamentoDaEspecie, forcaMinimaDaArmadura, formatarMetros } from '../../core/deslocamento';
+import { calcularDeslocamento, deslocamentoDaEspecie, estaEquipado, forcaMinimaDaArmadura, formatarMetros } from '../../core/deslocamento';
 import { resistenciaApiceValida, temApiceElemental } from '../../core/apiceElemental';
 import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, temSintoniaElemental } from '../../core/sintoniaElemental';
 import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior, temDefesaSuperior } from '../../core/defesaSuperior';
@@ -1216,9 +1216,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     baseEspecieM: deslocamentoDaEspecie(especieAtual?.deslocamento),
     baseSubespecieM: opcaoSubespecieAtual?.deslocamentoMetros ?? null,
     rotuloSubespecie: opcaoSubespecieAtual?.nome ?? null,
-    armaduraEquipada: armaduraEquipadaCatalogo !== null,
+    armaduraEquipada: estaEquipado(itemArmaduraEquipada),
     armaduraPesada: armaduraPesadaEquipada,
-    escudoEquipado: equipadoAtual.escudo !== null,
+    escudoEquipado: estaEquipado(equipadoAtual.escudo),
     forcaMinimaArmadura: forcaMinimaDaArmadura(armaduraEquipadaCatalogo?.forcaMinima),
     forcaPersonagem: forValorFinal,
     bonusMovimentoSemArmaduraM: classeMonge && mongeEntry ? bonusMovimentoSemArmadura(classeMonge, mongeEntry.nivel) : 0,

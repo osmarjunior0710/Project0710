@@ -101,3 +101,11 @@ outra decisão de UI — nunca uma nota de rodapé no relatório final.
 1ª ocorrência (2026-10, Monge): disse que as características do Monge já apareciam
 no Perfil; na verdade nenhuma tinha texto importado. Só descobri ao conferir de
 verdade. Regra prática: antes de dizer que algo aparece/funciona, abrir a tela.
+
+**2ª ocorrência (2026-10, Deslocamento):** dei o Deslocamento por "validado ao vivo" olhando só o total e o ⓘ,
+sem checar se o personagem de teste REALMENTE usava armadura — o ⓘ dizia "armadura equipada" (bug:
+`undefined !== null`) e eu li como correto. O Osmar viu na Mochila que não havia armadura. Regra prática:
+validar um número **contra o estado real** (abrir a Mochila/aba de origem), e testar o caso oposto (aqui:
+equipar uma armadura de verdade e ver o bônus virar "inativo"). Slot vazio pode ser `null` OU `undefined`:
+usar `estaEquipado()` (`core/deslocamento.ts`) em vez de `!== null`. (Na 3ª ocorrência, perguntar ao
+Osmar se vira regra permanente — seção 16 do `CLAUDE.md`.)

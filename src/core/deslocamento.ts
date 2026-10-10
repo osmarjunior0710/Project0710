@@ -70,6 +70,13 @@ export const BONUS_FORMA_GRANDE_M = 3;
 export const BONUS_PASSO_DESTRUTIVO_M = 6;
 export const PENALIDADE_EXAUSTAO_POR_NIVEL_M = 1.5;
 
+/** `true` se há algo equipado no slot. Aceita `null` E `undefined` como "vazio" — o catálogo devolve
+ * `undefined` (`Array.find` sem achado) e a mochila `null`; comparar só com `!== null` dá "sempre equipado"
+ * (bug real de 2026-10: o Monge nunca ganhava Movimento sem Armadura). */
+export function estaEquipado(item: unknown): boolean {
+  return item !== null && item !== undefined;
+}
+
 /** "9 metros" / "10,5 metros" → 9 / 10.5 (`null` se não achar número). */
 export function deslocamentoDaEspecie(texto: string | null | undefined): number | null {
   const m = (texto ?? '').match(/(\d+(?:[.,]\d+)?)\s*metros?/i);

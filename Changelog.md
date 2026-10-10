@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1132
+
+Corrige o Deslocamento: o ⓘ dizia "armadura equipada" mesmo sem armadura, então o Monge nunca ganhava Movimento sem Armadura (e o Bárbaro, Movimento Rápido). Agora só conta como equipado o que está de fato na Mão/Armadura/Escudo da Mochila: sem armadura o Monge soma o bônus; com Cota de Malha, os dois bônus ficam inativos com o motivo certo.
+
 ## v202610_0110
 
 Deslocamento: o ⓘ agora também lista as outras velocidades que você tem no momento (Voo e Natação do Passo dos Elementos com a Sintonia ativa, Voo das Asas Celestiais ativas) sem mudar o número de caminhada, e o total passa a se chamar "Deslocamento (caminhada)". Revisão das fontes do Deslocamento concluída; o que ainda não entra (itens mágicos, condições, efeitos de magia) ficou registrado.
