@@ -168,7 +168,9 @@ pixels CSS, não a proporção (celular moderno é ~20:9, não 16:9/4:3).
 Teste sempre em **360px** (o mais apertado, Android comum) e **412px**
 (Pixel/Galaxy grandes); 390px (iPhone) é a referência de partida. Se
 cabe bem em 360, cabe nos maiores. Nunca use só o aparelho do Osmar
-como referência.
+como referência. **Mudança de layout/CSS também se confere em tablet**:
+**768px** (em pé) e **1024px** (deitado) — o app estica até 820px (`DECISOES-DESIGN.md` "Tablet/desktop"). Depois de qualquer
+testagem com `resize_window`, voltar pro preset `desktop`.
 
 ## 5.1 Ordem de construção de UI: M3 primeiro, pele RPG depois
 
@@ -1068,3 +1070,5 @@ pedido — condição pra publicar:**
   (`ferramentas/ler-pdf.mjs`), que mostra o trecho com a página — ex.: `npm run pdf -- livros-referencia/livro-do-jogador/03_-_Cap_2_Criacao_de_Personagens.pdf "Truques\\." 500`.
   Regra do projeto (seção 3): dúvida de regra = ler o PDF, nunca responder de memória. Nunca afirmar "o livro diz" sem ter rodado isso.
 - **Resultado de d20 fixo pra teste**: avatar (👤, canto superior direito da ficha) → "🎲 Modo de Teste" faz todo d20 sair em 1, 10, 20 (repete; Vantagem consome 2: use pra testar crítico e falha crítica). Só d20 — dano continua aleatório; desliga o dado 3D e se desliga sozinho ao recarregar. Use pra testar crítico (20) e falha crítica (1) em vez de esperar sorte.
+- **Cliques em largura de tablet (768/1024px) no navegador de teste**: a captura da tela fica em escala diferente da página, então clique por
+  coordenada erra o alvo. Use `find` + clique por `ref`, ou leia a posição pelo DOM antes de clicar.

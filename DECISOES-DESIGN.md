@@ -826,7 +826,13 @@ local no teste, sem criar atalho novo.
 
 ## Tablet/desktop — largura máxima centralizada, não `clamp()`/`vw` nem breakpoints
 
-**Decisão (2026-10):** em vez de fazer o app inteiro escalar
+**Atualização (2026-10, Osmar: "no tablet não dava fit"):** o limite subiu de **430px para 820px** (`#root` em `src/index.css`). Celular (≤430px) não muda;
+tablet em pé (768px) preenche a largura; tablet deitado/desktop (≥820px) fica centralizado em 820px com a faixa escura dos lados. Mesma tela
+esticada (coluna única), não layout novo de 2 colunas — descartado por ser desenhar telas novas. Overlays (modais, painel lateral) continuam
+cortados/centralizados pelo `#root` (testado em 768 e 1024px: modal centralizado, painel de Bônus à direita). Onde os "430px" abaixo aparecem,
+leia "a largura máxima do `#root`".
+
+**Decisão original (2026-10):** em vez de fazer o app inteiro escalar
 proporcionalmente em telas largas, `#root` trava numa largura máxima
 de **430px**, sempre centralizado (`margin: 0 auto`) — o app vira um
 "cartão" de tamanho celular em qualquer tela, com fundo sólido neutro
