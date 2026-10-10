@@ -32,7 +32,10 @@ import { armazenamentoPersonagens, type PersonagemSalvo } from './armazenamentoP
 import type { PersonagemClasse } from './multiclasse';
 import { gerarPersonagemTeste } from './geradorPersonagemTeste';
 import { dadoVidaValor } from '../data/levelUpFixtures';
-import { modificador } from './personagem';
+import { modificador, type WizardSelection } from './personagem';
+import { construirCatalogoLoja } from './loja';
+import { itensMagicos } from '../data/rulesets/dnd2024/itensMagicos';
+import { calcularItensIniciais, criarItemManual, type ItemMochila } from './mochila';
 
 export const ID_PERSONAGEM_TESTE_MULTICLASSE = 'teste-fixo-multiclasse';
 
@@ -129,6 +132,27 @@ function selecionarInvocacoesAteNivel(nivel: number, quantidade: number): string
     }
   }
   return [...escolhidasIds];
+}
+
+/** Mochila de teste (pedido do Osmar, 2026-10 — "tá difícil testar algumas coisas"): os itens iniciais do personagem
+ * (que já vêm equipados: armadura, escudo...) MAIS 1 unidade de cada item que existe hoje no jogo — todo o catálogo da
+ * Loja (armas, armaduras, escudos, ferramentas, instrumentos, focos, munição, equipamento de aventura; os kits ficam de
+ * fora porque se desfazem em itens soltos) e todos os itens mágicos (sem sintonizar nenhum). Nunca duplica nome. */
+export function montarMochilaDeTeste(selecao: WizardSelection): ItemMochila[] {
+  const iniciais = calcularItensIniciais(selecao);
+  const nomes = new Set(iniciais.map((i) => i.nome));
+  const extras: ItemMochila[] = [];
+  const adicionar = (nome: string) => {
+    if (nomes.has(nome)) return;
+    nomes.add(nome);
+    extras.push(criarItemManual(nome, 1));
+  };
+  for (const grupo of construirCatalogoLoja()) {
+    if (grupo.id === 'kits') continue;
+    grupo.itens.forEach((item) => adicionar(item.nome));
+  }
+  itensMagicos.forEach((item) => adicionar(item.nome));
+  return [...iniciais, ...extras];
 }
 
 /** PV máximo "manual" pra multiclasse impossível (nível 20 em CADA
@@ -242,6 +266,13 @@ export function montarPersonagemTesteMulticlasse(): PersonagemSalvo {
     modConstituicao,
   );
 
+  const selecaoFinal: WizardSelection = {
+    ...base.selecao,
+    atributos: ATRIBUTOS_TESTE,
+    desbloquearAtributos: true,
+    nome: 'Char Multiclasse (todas as classes, nível 20)',
+  };
+
   return {
     ...base,
     id: ID_PERSONAGEM_TESTE_MULTICLASSE,
@@ -250,12 +281,8 @@ export function montarPersonagemTesteMulticlasse(): PersonagemSalvo {
     xp: 0,
     pvAtual: pvMax,
     pvMax,
-    selecao: {
-      ...base.selecao,
-      atributos: ATRIBUTOS_TESTE,
-      desbloquearAtributos: true,
-      nome: 'Char Multiclasse (todas as classes, nível 20)',
-    },
+    selecao: selecaoFinal,
+    itensMochilaAtual: montarMochilaDeTeste(selecaoFinal),
     classes: classesFinal,
     classeAtivaAtual: classesFinal[0].classe,
     // Entrada em Bardo — única classe (das implementadas) com

@@ -730,6 +730,20 @@ alvo que salva) que tenha fórmula de dano própria já rola sozinha ao
 abrir e mostra Falha/Sucesso com o número certo — nunca mais um botão
 manual de "Rolar Dano" dentro de `SalvaguardaDoAlvoModal`.
 
+## Efeitos "ao acertar": lista antes do dano + fila depois (2026-10) — substitui os botões do popup de dano
+
+Desde 2026-10, **todo efeito opcional "ao acertar" (Esmagador, Atordoante, Raízes, Golpe Brutal, tipo de dano...) entra
+na lista que abre logo depois do d20 acertar**, em vez de virar botão no popup de dano (que só deixava usar 1 por
+acerto). Padrão pra qualquer efeito novo: (1) adicionar uma linha em `efeitosAoAcertar` (`CombatTab.tsx`) com `id`
+estável, `origem` (tag), `fase` e `custoFoco` se houver; (2) fase `'dano'` = entra na rolagem de dano (dado extra);
+fase `'depois'` = vira item da fila e precisa de um caso em `executarEfeitoAoAcertar` que chame `aoFechar` quando o
+popup dele terminar (inclusive se o jogador desistir); (3) efeito que exige escolha ANTES do d20 (Golpe Brutal
+renunciando Vantagem) continua sendo ataque próprio — só o efeito pós-acerto vai pra lista. "Tipo de dano" é sempre UMA
+linha (janela própria). Custo de recurso é gasto quando o efeito executa. Ataque novo (Mão Secundária, Cortar...) usa
+`aoAcertarAtaqueSimples`; passar `armaPrincipal: false` quando Raízes/Arma Sagrada não valem. Em sequência encadeada
+(Torrente), ler props pelo valor mais recente via ref — closure velha já causou 2 bugs. Histórico em
+`aprendizados/sistemas/efeitos-ao-acertar.md`.
+
 ## Fluxo Acerto/Erro sem "renunciar" nada antes — Esmagador/Talhador/Ancestralidade Gigante
 
 Diferente do Golpe Brutal (o 1º caso do Fluxo Acerto/Erro), Esmagador/

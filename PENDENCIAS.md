@@ -14,6 +14,13 @@
 
 ---
 
+## Efeitos ao acertar — classe ativa da ficha (2026-10)
+
+Ataque Imprudente, Golpe Brutal, Raízes Devastadoras e Arma Sagrada só aparecem quando a classe do Bárbaro/Paladino é a
+**ativa** (`classeAtivaNome` em `FichaShell.tsx` = 1ª classe que conjura; `classe`/`personagem.subclasse` vêm dela).
+Num multiclasse (Char Multiclasse: Bardo) esses recursos "ativos" não aparecem, mesmo com o nível. Resolver exige olhar
+`classesAtual` (por classe) em vez da classe ativa, igual já foi feito pra Monge. Decidir com o Osmar se vira entrega.
+
 ## Golpe Brutal (Bárbaro) — confirmar se tem limite de usos por descanso
 
 Pedido do Osmar (2026-09), enquanto discutíamos Esmagador/Talhador:

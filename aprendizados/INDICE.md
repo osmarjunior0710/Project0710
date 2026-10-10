@@ -106,6 +106,9 @@ classe/talento específico).
   aba Atributos + linha no Combate, layout novo do topo) e Empurrar/Imobilizar do Ataque Desarmado (principal,
   Torrente e Ataque Adicional), com a revisão do que está/não está coberto (itens mágicos, condições, voo/natação).
 
+- **`sistemas/efeitos-ao-acertar.md`** — Efeitos "ao acertar" em lista + fila (lista com checkbox e tag de origem antes do
+  dano, fila depois): Atacar, Torrente, Mão Secundária, Cortar, Golpe Brutal, Raízes, Arma Sagrada; bugs de closure velha.
+
 - **`sistemas/multiclasse.md`** — Multiclasse: Truques/Magias
   Preparadas por classe (com selo), Espaços de Magia mostrando os 2
   pools juntos, CD/Ataque por classe, e a remoção completa do pill

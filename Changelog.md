@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1354
+
+Os efeitos "ao acertar" também valem no ataque da Mão Secundária e no Cortar (mesma lista e fila do Atacar). O personagem "Char Multiclasse" agora vem com 1 unidade de cada item do jogo na Mochila (armas, armaduras, escudos, ferramentas, equipamento e todos os itens mágicos), pra facilitar os testes.
+
 ## v202610_1304
 
 Os efeitos "ao acertar" do Bárbaro e do Paladino entram na mesma lista e fila: Golpe Brutal (o dado extra continua automático; o efeito Debilitador/Poderoso vira uma linha opcional), Raízes Devastadoras (Derrubar/Empurrar) e Arma Sagrada (dano Radiante, dentro de "Tipo de dano diferente do normal"). Os botões antigos do popup de dano saíram do Atacar.

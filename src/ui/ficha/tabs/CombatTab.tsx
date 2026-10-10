@@ -74,7 +74,6 @@ import {
   type EfeitoAoAcertar,
 } from '../../../core/efeitosAoAcertar';
 import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
-import EfeitosDoGolpeModal from '../../components/EfeitosDoGolpeModal';
 import AtivarEfeitoModal from '../../components/AtivarEfeitoModal';
 import BonusPanelContent from '../combat/BonusPanelContent';
 import ReacaoPanelContent from '../combat/ReacaoPanelContent';
@@ -996,19 +995,6 @@ export default function CombatTab({
   // salvaguarda, é automático); Derrubar abre a 2ª tela com a CD.
   const [raizesDevastadorasEscolhaAberta, setRaizesDevastadorasEscolhaAberta] = useState(false);
   const [raizesDevastadorasSalvaguardaAberta, setRaizesDevastadorasSalvaguardaAberta] = useState(false);
-  // Efeitos do Golpe — quando Esmagador/Talhador E Raízes Devastadoras
-  // qualificam JUNTOS no mesmo acerto (arma Pesada/Versátil +
-  // Contundente/Cortante, ex. Malho). `null` = popup fechado. Cada
-  // cartão resolve independente — o talento reaproveita
-  // `golpeCondicionalPendente`/`ativarGolpeCondicional` de sempre (o
-  // status "resolvido" vem de `esmagadorDisponivel`/`talhadorDisponivel`
-  // virarem `false` depois de usado, não precisa de flag própria);
-  // Raízes precisa de 1 flag local (`raizesResolvidaTexto`) porque não
-  // tem "usado no turno" (sem limite de usos).
-  const [efeitosDoGolpePendentes, setEfeitosDoGolpePendentes] = useState<
-    ('esmagador' | 'talhador' | 'raizesDevastadoras')[] | null
-  >(null);
-  const [raizesResolvidaTexto, setRaizesResolvidaTexto] = useState<string | null>(null);
   const cdConjuracaoClasseAtual = modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null;
   const temEspacoDePactoDisponivel = espacos.some((e) => (espacosGastosPorCirculo[e.circulo] ?? 0) < e.maximo);
   const { rolarD20, rolarDados } = useRoll();
@@ -1431,9 +1417,8 @@ export default function CombatTab({
 
   /** Fluxo Acerto/Erro sempre (retrofit 2026-09, ver
    * `DECISOES-COMBATE.md`) — igual ao ataque principal
-   * (`AcaoPanelContent.tsx` `rolarAtaque`), sem botão de talento (essa
-   * dupla nunca teve Esmagador/Talhador ligado, fora de escopo desta
-   * rodada). */
+   * (`AcaoPanelContent.tsx` `rolarAtaque`), agora também com a lista de
+   * efeitos "ao acertar" (`aoAcertarAtaqueSimples`, Entrega C do foco). */
   function usarAtaqueMaoSecundaria() {
     if (!ataqueBonus) return;
     rolarD20({
@@ -1443,26 +1428,8 @@ export default function CombatTab({
       explicacaoMod: ataqueBonus.info.explicacaoAcerto,
       vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
       confirmarAcerto: {
-        onAcertou: ({ critico }) => {
-          const dano = danoComCritico(
-            { quantidade: ataqueBonus.info.danoQuantidade, lados: ataqueBonus.info.danoLados, mod: ataqueBonus.info.danoMod },
-            critico,
-          );
-          rolarDados({
-            label: `Dano — ${ataqueBonus.nome} (Mão Secundária)${critico ? ' (Crítico)' : ''}`,
-            formula: dano.formula,
-            quantidade: dano.quantidade,
-            lados: ataqueBonus.info.danoLados,
-            mod: ataqueBonus.info.danoMod,
-            rerollSe1:
-              ataqueBonus.nome.endsWith('Ataque Desarmado') && danoDesarmadoRerollDisponivel
-                ? { rotulo: 'Dano Garantido' }
-                : undefined,
-            rerollEscolhido:
-              perfuradorDisponivel && ataqueBonus.info.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
-            confirmarFechamento: {},
-          });
-        },
+        onAcertou: ({ critico }) =>
+          aoAcertarAtaqueSimples({ rotulo: 'Mão Secundária', nome: ataqueBonus.nome, info: ataqueBonus.info, critico, armaPrincipal: false }),
         onErrou: () => {},
       },
     });
@@ -1648,26 +1615,8 @@ export default function CombatTab({
       explicacaoMod: cortarAtaque.info.explicacaoAcerto,
       vantagem: desvantagemForcaDestreza ? 'desvantagem' : undefined,
       confirmarAcerto: {
-        onAcertou: ({ critico }) => {
-          const dano = danoComCritico(
-            { quantidade: cortarAtaque.info.danoQuantidade, lados: cortarAtaque.info.danoLados, mod: cortarAtaque.info.danoMod },
-            critico,
-          );
-          rolarDados({
-            label: `Dano — ${cortarAtaque.nome} (Cortar)${critico ? ' (Crítico)' : ''}`,
-            formula: dano.formula,
-            quantidade: dano.quantidade,
-            lados: cortarAtaque.info.danoLados,
-            mod: cortarAtaque.info.danoMod,
-            rerollSe1:
-              cortarAtaque.nome.endsWith('Ataque Desarmado') && danoDesarmadoRerollDisponivel
-                ? { rotulo: 'Dano Garantido' }
-                : undefined,
-            rerollEscolhido:
-              perfuradorDisponivel && cortarAtaque.info.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
-            confirmarFechamento: {},
-          });
-        },
+        onAcertou: ({ critico }) =>
+          aoAcertarAtaqueSimples({ rotulo: 'Cortar', nome: cortarAtaque.nome, info: cortarAtaque.info, critico, armaPrincipal: true }),
         onErrou: () => {},
       },
     });
@@ -1848,7 +1797,7 @@ export default function CombatTab({
 
   /** Efeitos "ao acertar" elegíveis pra esse ataque (vazio = nenhum → segue o fluxo antigo/normal).
    * `desarmado` libera os efeitos do Ataque Desarmado (tipo de dano e Ápice). */
-  function efeitosAoAcertar(ataque: AtaqueInfo, desarmado: boolean): EfeitoAoAcertar[] {
+  function efeitosAoAcertar(ataque: AtaqueInfo, desarmado: boolean, armaPrincipal = true): EfeitoAoAcertar[] {
     const lista: EfeitoAoAcertar[] = [];
     if (desarmado && apiceGolpesDisponivelAgora()) {
       lista.push({
@@ -1871,7 +1820,7 @@ export default function CombatTab({
       opcoesTipo.push({ nome: 'Elemental', texto: 'Ataques Elementais: escolhe o elemento; o alvo pode ser empurrado.' });
       if (!origensTipo.includes('Monge')) origensTipo.push('Monge');
     }
-    if (armaSagrada.bonus > 0) {
+    if (armaPrincipal && armaSagrada.bonus > 0) {
       opcoesTipo.push({ nome: 'Radiante', texto: 'Arma Sagrada: dano Radiante no lugar do tipo normal da arma.' });
       origensTipo.push('Paladino');
     }
@@ -1885,7 +1834,7 @@ export default function CombatTab({
         fase: 'depois',
       });
     }
-    if (raizesDevastadorasDisponivel) {
+    if (armaPrincipal && raizesDevastadorasDisponivel) {
       lista.push({
         id: 'raizes',
         nome: '🌳 Raízes Devastadoras',
@@ -1936,6 +1885,36 @@ export default function CombatTab({
       });
     }
     return lista;
+  }
+
+  /** Fluxo "ao acertar" dos ataques simples (Mão Secundária, Cortar): lista de efeitos → dano (com os extras da
+   * fase 'dano') → fila. Sem nenhum efeito elegível rola o dano direto. `armaPrincipal` = false na Mão Secundária
+   * (Raízes e Arma Sagrada valem só pra arma principal). */
+  function aoAcertarAtaqueSimples(p: { rotulo: string; nome: string; info: AtaqueInfo; critico: boolean; armaPrincipal: boolean }) {
+    const desarmado = p.nome.endsWith('Ataque Desarmado');
+    const rolarDano = (extras: { quantidade: number; lados: LadosDado }[], aoFecharDano: () => void) => {
+      const dano = danoComCritico(
+        { quantidade: p.info.danoQuantidade, lados: p.info.danoLados, mod: p.info.danoMod, gruposExtras: extras.length ? extras : undefined },
+        p.critico,
+      );
+      rolarDados({
+        label: `Dano — ${p.nome} (${p.rotulo})${p.critico ? ' (Crítico)' : ''}${extras.length ? ' + Ápice' : ''}`,
+        formula: dano.formula,
+        quantidade: dano.quantidade,
+        gruposExtras: dano.gruposExtras as { quantidade: number; lados: LadosDado }[] | undefined,
+        lados: p.info.danoLados,
+        mod: p.info.danoMod,
+        rerollSe1: desarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
+        rerollEscolhido: perfuradorDisponivel && p.info.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
+        confirmarFechamento: { aoTocar: aoFecharDano },
+      });
+    };
+    const efeitos = efeitosAoAcertar(p.info, desarmado, p.armaPrincipal);
+    if (efeitos.length === 0) {
+      rolarDano([], () => {});
+      return;
+    }
+    pedirEfeitosAoAcertar({ efeitos, critico: p.critico, rolarDano });
   }
 
   /** Abre a lista; ao confirmar, rola o dano (com os extras da fase 'dano') e roda a fila da fase 'depois'. */
@@ -2005,7 +1984,6 @@ export default function CombatTab({
       aoFechar();
     } else if (id === 'raizes') {
       raizesFechaRef.current = aoFechar;
-      setRaizesResolvidaTexto(null);
       setRaizesDevastadorasEscolhaAberta(true);
     } else if (id === 'golpe-brutal') {
       golpeBrutalFechaRef.current = aoFechar;
@@ -2176,7 +2154,6 @@ export default function CombatTab({
     if (nomes[0] === 'Empurrar') {
       const texto = 'Empurrar: empurra o alvo (Grande ou menor) até 3m pra longe de você.';
       setFeedback(`🌳 Raízes Devastadoras — ${texto}`);
-      setRaizesResolvidaTexto(texto);
       continuarFilaDasRaizes();
       return;
     }
@@ -3311,30 +3288,6 @@ export default function CombatTab({
           onFechar={() => tipoDanoJanela.aoEscolher(tipoDanoJanela.opcoes[0].nome)}
         />
       )}
-      {efeitosDoGolpePendentes && (
-        <EfeitosDoGolpeModal
-          titulo="Efeitos do Golpe"
-          cartoes={efeitosDoGolpePendentes.map((efeito) =>
-            efeito === 'raizesDevastadoras'
-              ? {
-                  chave: 'raizesDevastadoras',
-                  titulo: '🌳 Raízes Devastadoras',
-                  descricao: 'Ativa Derrubar ou Empurrar, além da maestria da arma.',
-                  resolvido: raizesResolvidaTexto !== null,
-                  descricaoResolvido: raizesResolvidaTexto ?? undefined,
-                  onTocar: () => setRaizesDevastadorasEscolhaAberta(true),
-                }
-              : {
-                  chave: efeito,
-                  titulo: TEXTOS_GOLPE_CONDICIONAL[efeito].titulo,
-                  descricao: TEXTOS_GOLPE_CONDICIONAL[efeito].textoEfeito,
-                  resolvido: efeito === 'esmagador' ? !esmagadorDisponivel : !talhadorDisponivel,
-                  onTocar: () => setGolpeCondicionalPendente(efeito),
-                },
-          )}
-          onFechar={() => setEfeitosDoGolpePendentes(null)}
-        />
-      )}
       {golpeCondicionalPendente && (
         <AtivarEfeitoModal
           titulo={TEXTOS_GOLPE_CONDICIONAL[golpeCondicionalPendente].titulo}
@@ -3371,7 +3324,7 @@ export default function CombatTab({
           textoFalha="fica com a condição Caído"
           onFechar={() => {
             setRaizesDevastadorasSalvaguardaAberta(false);
-            setRaizesResolvidaTexto(`Derrubar: CD ${cdRaizesDevastadoras} informada ao Mestre (Constituição).`);
+            setFeedback(`🌳 Raízes Devastadoras — Derrubar: CD ${cdRaizesDevastadoras} informada ao Mestre (Constituição).`);
             continuarFilaDasRaizes();
           }}
         />
