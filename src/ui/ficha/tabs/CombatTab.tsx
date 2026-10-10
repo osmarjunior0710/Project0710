@@ -8,6 +8,12 @@ import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { TEXTO_EMPURRAO_ELEMENTAL } from '../../../core/ataquesElementais';
 import {
+  cdEmpurrarImobilizar,
+  explicarCdEmpurrarImobilizar,
+  TEXTO_EMPURRAR,
+  textosImobilizar,
+} from '../../../core/empurrarImobilizar';
+import {
   TIPOS_RESISTENCIA_APICE,
   BONUS_DESLOCAMENTO_PASSO_DESTRUTIVO_M,
   golpesPotencializadosApiceDisponivel,
@@ -949,6 +955,12 @@ export default function CombatTab({
   // continua depois (ex.: próximo ataque da Torrente de Golpes).
   // Explosão Elemental (nível 6): `explosaoEscolhendo` = escolhendo o elemento; `explosaoResultado` =
   // popup de salvaguarda de Destreza com o dano já rolado.
+  // Ataque Desarmado — Empurrar/Imobilizar (Glossário): popup de salvaguarda do alvo.
+  const [empurrarImobilizar, setEmpurrarImobilizar] = useState<{
+    tipo: 'empurrar' | 'imobilizar';
+    cd: number;
+    explicacao: ExplicacaoCalculo;
+  } | null>(null);
   const [passoDestrutivoEscolhendo, setPassoDestrutivoEscolhendo] = useState(false);
   const [explosaoEscolhendo, setExplosaoEscolhendo] = useState(false);
   const [explosaoResultado, setExplosaoResultado] = useState<{ elemento: string; dano: number } | null>(null);
@@ -1680,6 +1692,15 @@ export default function CombatTab({
       confirmarFechamento: {},
     });
     setFeedback(`💥 Passo Destrutivo — dano ${elemento} à criatura (cada criatura sofre isso só 1x por turno).`);
+  }
+
+  /** Ataque Desarmado, opção Empurrar/Imobilizar: sem jogada de ataque, gasta um dos ataques da
+   * ação Atacar (mesma contagem do Ataque Extra) e mostra a CD + o que acontece na falha. A CD vem do
+   * bônus de acerto do próprio Ataque Desarmado (Força, ou Destreza do Monge — Artes Marciais). */
+  function abrirEmpurrarImobilizar(tipo: 'empurrar' | 'imobilizar', info: AtaqueInfo) {
+    const cd = cdEmpurrarImobilizar(info.modAcerto);
+    registrarAtaqueSemDanoPendente(`🗡 Ataque Desarmado (${tipo === 'empurrar' ? 'Empurrar' : 'Imobilizar'})`, 'o alvo faz uma salvaguarda.');
+    setEmpurrarImobilizar({ tipo, cd, explicacao: explicarCdEmpurrarImobilizar(info.explicacaoAcerto.linhas, cd) });
   }
 
   function abrirExplosaoElemental() {
@@ -2598,6 +2619,7 @@ export default function CombatTab({
           onElemental={() => abrirElemental()}
           apiceGolpesDisponivel={apiceGolpesDisponivelAgora}
           onApiceGolpes={(critico) => usarApiceGolpes(critico)}
+          onEmpurrarImobilizar={abrirEmpurrarImobilizar}
           explosaoElementalDisponivel={temExplosaoElemental(nivelMonge, SUBCLASSE_ELEMENTOS)}
           onExplosaoElemental={abrirExplosaoElemental}
           pontosDeFocoMaximo={pontosDeFocoMaximo}
@@ -2872,6 +2894,18 @@ export default function CombatTab({
           textoSucesso="nada acontece"
           textoFalha={`${redirecionamentoDefletir.dano} de dano, do mesmo tipo causado pelo ataque (alvo: criatura a até 1,5m se o ataque foi corpo a corpo, ou a até 18m se à distância e sem Cobertura Total)`}
           onFechar={() => setRedirecionamentoDefletir(null)}
+        />
+      )}
+      {empurrarImobilizar && (
+        <SalvaguardaDoAlvoModal
+          titulo={empurrarImobilizar.tipo === 'empurrar' ? TEXTO_EMPURRAR.titulo : textosImobilizar(empurrarImobilizar.cd).titulo}
+          atributo={empurrarImobilizar.tipo === 'empurrar' ? TEXTO_EMPURRAR.atributo : textosImobilizar(empurrarImobilizar.cd).atributo}
+          cd={empurrarImobilizar.cd}
+          explicacaoCd={empurrarImobilizar.explicacao}
+          textoSucesso={empurrarImobilizar.tipo === 'empurrar' ? TEXTO_EMPURRAR.sucesso : textosImobilizar(empurrarImobilizar.cd).sucesso}
+          textoFalha={empurrarImobilizar.tipo === 'empurrar' ? TEXTO_EMPURRAR.falha : textosImobilizar(empurrarImobilizar.cd).falha}
+          aviso={empurrarImobilizar.tipo === 'empurrar' ? TEXTO_EMPURRAR.aviso : textosImobilizar(empurrarImobilizar.cd).aviso}
+          onFechar={() => setEmpurrarImobilizar(null)}
         />
       )}
       {passoDestrutivoEscolhendo && (

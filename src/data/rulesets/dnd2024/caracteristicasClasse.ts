@@ -797,7 +797,7 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     descricao:
       'Sua prática de artes marciais lhe confere domínio de estilos de combate que usam seu Ataque Desarmado e armas de Monge, que incluem: • Armas Simples Corpo a Corpo • Armas Marciais Corpo a Corpo que tem a propriedade Leve Você adquire os seguintes benefícios enquanto estiver desarmado ou empunhando apenas armas de Monge e não estiver vestindo armadura ou empunhando um Escudo. Ataque Desarmado Adicional. Você pode realizar um Ataque Desarmado como uma Ação Bônus. Dado de Artes Marciais. Você pode jogar 1d6 ao invés do dano normal de seu Ataque Desarmado ou armas de Monge. Este dado muda à medida que você atinge níveis de Monge, conforme detalhado na coluna Artes Marciais da tabela Características de Monge. Ataques com Destreza. Você pode usar seu modificador de Destreza em vez de seu modificador de Força para as jogadas de ataque e dano de seus Ataques Desarmados e armas de Monge. Além disso, quando você usa a opção Empurrar ou Imobilizar do seu Ataque Desarmado, você pode usar seu modificador de Destreza em vez de seu modificador de Força para determinar a CD da salvaguarda.',
     tipoAcao: 'Ação Bônus',
-    statusImplementacao: 'placeholder-codeimplementation',
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Monge',

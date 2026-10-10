@@ -231,6 +231,9 @@ interface AcaoPanelContentProps {
    * (rola o dado extra e marca "usado neste turno"). O jogador escolhe EM QUAL acerto usar. */
   apiceGolpesDisponivel: () => boolean;
   onApiceGolpes: (critico: boolean) => void;
+  /** Ataque Desarmado, opções Empurrar/Imobilizar (Glossário) — sem jogada de ataque: gasta um dos
+   * ataques da ação Atacar e abre o popup de salvaguarda do alvo (`CombatTab.tsx`). */
+  onEmpurrarImobilizar: (tipo: 'empurrar' | 'imobilizar', info: AtaqueInfo) => void;
   explosaoElementalDisponivel: boolean;
   onExplosaoElemental: () => void;
   /** Pontos de Foco (Monge) — contador no grupo Monge e trava da Explosão Elemental. */
@@ -354,6 +357,7 @@ export default function AcaoPanelContent({
   onElemental,
   apiceGolpesDisponivel,
   onApiceGolpes,
+  onEmpurrarImobilizar,
   explosaoElementalDisponivel,
   onExplosaoElemental,
   pontosDeFocoMaximo,
@@ -682,11 +686,31 @@ export default function AcaoPanelContent({
    * Normal/Imprudente — some depois de escolhido, pros ataques
    * seguintes do mesmo turno (Ataque Extra) rolarem direto. */
   const [escolhendoAtaque, setEscolhendoAtaque] = useState(false);
+  /** Escolha Dano/Empurrar/Imobilizar do Ataque Desarmado. */
+  const [escolhendoOpcaoDesarmado, setEscolhendoOpcaoDesarmado] = useState(false);
+
+  function escolherOpcaoDesarmado(opcao: 'dano' | 'empurrar' | 'imobilizar') {
+    if (!ataqueAtual) return;
+    setEscolhendoOpcaoDesarmado(false);
+    if (opcao === 'dano') iniciarAtaqueDeDano();
+    else onEmpurrarImobilizar(opcao, ataqueAtual.info);
+  }
 
   /** Toque em "Atacar" — só abre o mini-picker Normal/Imprudente na 1ª
    * jogada do turno de quem tem Ataque Imprudente; senão rola direto
    * usando o que já foi decidido esse turno (`ataqueImprudenteAtivo`). */
   function tocarAtacar() {
+    if (!ataqueAtual) return;
+    // Ataque Desarmado tem 3 opções (Glossário): Dano, Empurrar e Imobilizar.
+    if (ataqueAtual.nome.endsWith('Ataque Desarmado')) {
+      setEscolhendoOpcaoDesarmado(true);
+      return;
+    }
+    iniciarAtaqueDeDano();
+  }
+
+  /** Opção "Dano" (o fluxo de sempre): Normal/Imprudente na 1ª jogada do turno, senão rola direto. */
+  function iniciarAtaqueDeDano() {
     if (!ataqueAtual) return;
     if (temAtaqueImprudente && ataquesFeitos === 0) {
       setEscolhendoAtaque(true);
@@ -715,14 +739,41 @@ export default function AcaoPanelContent({
 
   if (picker) return picker;
 
+  if (escolhendoOpcaoDesarmado && ataqueAtual) {
+    return (
+      <>
+        <div className="section-title">Atacar — {ataqueAtual.nome}</div>
+        <div className="opt-card" style={{ borderStyle: 'solid' }} onClick={() => escolherOpcaoDesarmado('dano')}>
+          <div className="opt-card-name">👊 Dano</div>
+          <div className="opt-card-desc">Jogada de ataque; se acertar, dano Contundente (o fluxo de sempre).</div>
+        </div>
+        <div className="opt-card" style={{ borderStyle: 'solid' }} onClick={() => escolherOpcaoDesarmado('empurrar')}>
+          <div className="opt-card-name">🤼 Empurrar</div>
+          <div className="opt-card-desc">
+            Sem jogada de ataque: o alvo faz salvaguarda de Destreza ou Força. Falhou: você o empurra 1,5 m ou impõe Caído.
+          </div>
+        </div>
+        <div className="opt-card" style={{ borderStyle: 'solid' }} onClick={() => escolherOpcaoDesarmado('imobilizar')}>
+          <div className="opt-card-name">🤝 Imobilizar</div>
+          <div className="opt-card-desc">
+            Sem jogada de ataque: o alvo faz salvaguarda de Força ou Destreza. Falhou: fica Imobilizado. Precisa de uma mão livre.
+          </div>
+        </div>
+        <div className="label" style={{ marginTop: 4 }}>
+          Empurrar e Imobilizar gastam um dos seus ataques desta ação Atacar.
+        </div>
+      </>
+    );
+  }
+
   if (escolhendoAtaque && ataqueAtual) {
     return (
       <>
         <div className="section-title">Atacar — {ataqueAtual.nome}</div>
-        <div className="opt-card" onClick={() => escolherAtaque(false)}>
+        <div className="opt-card" style={{ borderStyle: 'solid' }} onClick={() => escolherAtaque(false)}>
           <div className="opt-card-name">🗡 Ataque Normal</div>
         </div>
-        <div className="opt-card" onClick={() => escolherAtaque(true)}>
+        <div className="opt-card" style={{ borderStyle: 'solid' }} onClick={() => escolherAtaque(true)}>
           <div className="opt-card-name">😤 Ataque Imprudente</div>
           <div className="opt-card-desc">
             Vantagem em jogadas de ataque baseadas em Força até o início do seu próximo turno — mas jogadas de ataque

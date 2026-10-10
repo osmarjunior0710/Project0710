@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2120
+
+Ataque Desarmado ganha as opções Empurrar e Imobilizar (regra do Livro, vale pra qualquer classe): ao tocar em "Atacar — Ataque Desarmado" aparecem Dano, Empurrar e Imobilizar. Empurrar/Imobilizar não rolam ataque: gastam um dos seus ataques da ação Atacar e abrem o popup com a CD (8 + atributo + proficiência; o Monge usa Destreza quando é maior), o que acontece na falha e o limite de tamanho. Por enquanto só no Atacar principal (Torrente de Golpes e Ataque Adicional vêm depois). Também: as caixas de escolha do Atacar passaram a ter linha contínua.
+
 ## v202610_1902
 
 Deslocamento no app: nova caixa "Deslocamento" na aba Atributos (com ⓘ mostrando a conta) e uma linha embaixo do botão Reação na aba Combate. O valor soma espécie (Elfo Silvestre 10,5 m), Movimento sem Armadura do Monge (só sem armadura nem escudo), Movimento Rápido do Bárbaro (só sem Armadura Pesada), Velocista, Dádiva da Velocidade, Forma Grande, Passo Destrutivo e a penalidade de Força da armadura; fonte que existe mas está inativa aparece no ⓘ com o motivo. O topo da aba Atributos foi reorganizado: Level | PV; Ins. Heroica | Iniciativa | Bônus Prof.; Percepção Passiva | CA | Deslocamento.
