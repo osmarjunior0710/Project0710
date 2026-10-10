@@ -39,8 +39,8 @@ describe('bonusProficiencia', () => {
     expect(bonusProficiencia(guerreiro, 9)).toBe(4);
   });
 
-  it('cai pro nível 1 quando o nível pedido não existe na tabela (fallback de borda)', () => {
-    expect(bonusProficiencia(guerreiro, 999)).toBe(bonusProficiencia(guerreiro, 1));
+  it('cai pro nível 1 quando o nível pedido é menor que a tabela (fallback de borda)', () => {
+    expect(bonusProficiencia(guerreiro, 0)).toBe(bonusProficiencia(guerreiro, 1));
   });
 });
 
@@ -523,5 +523,18 @@ describe('calcularPericias (Pau pra Toda Obra resolvido por quem chama — multi
     const sem = calcularPericias(s, 1, [], [], undefined, undefined, false, false).find((p) => p.nome === 'Arcanismo');
     const com = calcularPericias(s, 1, [], [], undefined, undefined, false, true).find((p) => p.nome === 'Arcanismo');
     expect(com?.mod).toBe(sem?.mod);
+  });
+});
+
+describe('bonusProficiencia acima do nível 20 (Char Multiclasse, nível total 140)', () => {
+  it('vale o maior bônus da tabela (+6), não o +2 do nível 1', () => {
+    expect(bonusProficiencia(guerreiro, 20)).toBe(6);
+    expect(bonusProficiencia(guerreiro, 21)).toBe(6);
+    expect(bonusProficiencia(guerreiro, 140)).toBe(6);
+  });
+
+  it('até o 20 nada muda', () => {
+    expect(bonusProficiencia(guerreiro, 1)).toBe(2);
+    expect(bonusProficiencia(guerreiro, 17)).toBe(6);
   });
 });

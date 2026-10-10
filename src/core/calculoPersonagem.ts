@@ -65,8 +65,12 @@ function parseDadoDeVida(dado: string): number {
   return parseInt(dado.replace(/[^0-9]/g, ''), 10) || 8;
 }
 
+/** Bônus de Proficiência pelo nível (o TOTAL do personagem, ver chamadores). Acima do nível 20 — só acontece no Char Multiclasse de teste
+ * (todas as classes no 20, nível total 140) — vale o MAIOR bônus da tabela (+6), nunca cai pro +2 do nível 1. */
 export function bonusProficiencia(classe: Classe, nivel: number): number {
-  const linha = classe.progressao.find((p) => p.nivel === nivel) ?? classe.progressao[0];
+  const nivelMaximo = Math.max(...classe.progressao.map((p) => p.nivel));
+  const nivelConsultado = Math.min(nivel, nivelMaximo);
+  const linha = classe.progressao.find((p) => p.nivel === nivelConsultado) ?? classe.progressao[0];
   return parseInt(linha.bonusProficiencia.replace(/[^0-9]/g, ''), 10) || 2;
 }
 

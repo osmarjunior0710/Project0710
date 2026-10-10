@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1752
+
+O Bônus de Proficiência acima do nível 20 (só acontece no Char Multiclasse, nível total 140) agora vale o maior da tabela, +6, em vez de cair pra +2. Isso corrige o bônus de todas as perícias e rolagens dessa ficha de teste.
+
 ## v202610_1737
 
 O Pau pra Toda Obra do Bardo (metade do Bônus de Proficiência nas perícias sem proficiência) agora funciona também quando o Bardo não é a primeira classe do personagem. No Char Multiclasse, todas as perícias sem proficiência ganharam esse bônus.

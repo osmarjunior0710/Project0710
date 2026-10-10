@@ -22,8 +22,7 @@ posição da multiclasse (`calcularPericias`, param `pauPraTodaObra`). Ver `apre
 (1) `useMagiasEConjuracao`: o pool "principal" de Espaços de Magia e o déficit de truques seguem a 1ª classe que conjura (os outros pools
 aparecem pelo pool combinado/ponte — conferir com um caso real de 2 conjuradores se algum número parecer errado); (2) as entradas por classe
 escritas à mão (`entradaGuerreiro`, `entradaBarbaro`, `mongeEntry`, `entradaPaladino`) podem migrar pro módulo genérico quando forem
-tocadas; (3) o Char Multiclasse tem nível total 140 (impossível de propósito) e o Bônus de Proficiência cai pra +2 (a tabela só vai até 20) —
-artefato do personagem de teste, não de personagem legítimo.
+tocadas. (O Bônus de Proficiência acima do nível 20 — Char Multiclasse, nível total 140 — já vale o maior da tabela, +6.)
 
 ## Golpe Brutal (Bárbaro) — confirmar se tem limite de usos por descanso
 
