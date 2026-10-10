@@ -1231,6 +1231,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     formaGrandeAtiva,
     passoDestrutivoAtivo: passoDestrutivoAtivoTurno,
     niveisExaustao: 0,
+    velocidadesEspeciais: [
+      ...(sintoniaElementalAtiva && mongeEntry && mongeEntry.subclasse === 'Combatente dos Elementos' && mongeEntry.nivel >= 11
+        ? [{ rotulo: 'Voo e Natação (Passo dos Elementos)', valor: 'igual ao Deslocamento' }]
+        : []),
+      ...(revelacaoCelestialFormaAtiva === 'Asas Celestiais' ? [{ rotulo: 'Voo (Asas Celestiais)', valor: 'igual ao Deslocamento' }] : []),
+    ],
   });
   const deslocamentoTexto = formatarMetros(deslocamento.totalM);
   const armaEquipada = equipadoAtual.maoPrincipal;

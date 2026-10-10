@@ -100,4 +100,13 @@ describe('calcularDeslocamento', () => {
     });
     expect(r.totalM).toBe(12);
   });
+
+  it('velocidades especiais (voo/natação) aparecem no ⓘ mas NÃO somam no total de caminhada', () => {
+    const r = calcularDeslocamento({
+      ...base,
+      velocidadesEspeciais: [{ rotulo: 'Voo (Asas Celestiais)', valor: 'igual ao Deslocamento' }],
+    });
+    expect(r.totalM).toBe(9);
+    expect(r.explicacao.linhas.at(-1)).toEqual({ label: 'Voo (Asas Celestiais)', valor: 'igual ao Deslocamento' });
+  });
 });

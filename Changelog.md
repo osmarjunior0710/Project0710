@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0110
+
+Deslocamento: o ⓘ agora também lista as outras velocidades que você tem no momento (Voo e Natação do Passo dos Elementos com a Sintonia ativa, Voo das Asas Celestiais ativas) sem mudar o número de caminhada, e o total passa a se chamar "Deslocamento (caminhada)". Revisão das fontes do Deslocamento concluída; o que ainda não entra (itens mágicos, condições, efeitos de magia) ficou registrado.
+
 ## v202610_0051
 
 Torrente de Golpes e Ataque Desarmado Adicional (Monge) ganham Empurrar e Imobilizar: depois de escolher a Torrente (de graça ou gastando Foco) abre a pergunta "Só atacar" ou "Atacar, empurrar ou imobilizar". Só atacar roda a sequência direto, como antes; o outro modo pergunta Dano / Empurrar / Imobilizar antes de cada ataque (Empurrar e Imobilizar gastam aquele ataque, mostram a CD e o próximo ataque vem depois de fechar o popup).

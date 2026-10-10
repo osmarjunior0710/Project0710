@@ -1606,3 +1606,15 @@ Classe base nível 1-20 pronta (ver `aprendizados/classes/monge.md`). O que fico
 - **CD/ataque de magia lendo Destreza/Sabedoria** não recebem Corpo e Mente
   (nenhuma classe implementada conjura com esses atributos — revisitar ao
   entrar Clérigo/Druida/Guardião).
+
+## Deslocamento — fontes ainda não cobertas (2026-10)
+
+Função única pronta (`core/deslocamento.ts`, ver `aprendizados/sistemas/deslocamento-e-empurrar.md`). Falta:
+- **Itens mágicos que mudam a caminhada** (Botas de Caminhar e Saltar, Botas de Velocidade) — depende de existir um
+  espaço de calçado/item equipado no app; o motor já aceita `extras`.
+- **Voo/natação/escalada** vindos de itens (Botas Aladas, Anel de Natação, Asas Voadoras...) e de espécies (Voo
+  Dracônico não tem estado "ativo", só "gasto"): hoje só aparecem no ⓘ os de Passo dos Elementos e Asas Celestiais.
+- **Condições e efeitos de magia** (Exaustão, Imobilizado, Passos Largos, Lentidão...) — depende do tracking de
+  condições/efeitos ativos (ver `Backlog.md`).
+- **Bônus só na ação Correr** (Corrida Aprimorada, Agressor, Psicinético) — o app não modela a ação Correr como estado.
+- **Fontes de classe/subclasse não implementadas** (Paladino/Glória, Guardião): 1 item na lista quando existirem.

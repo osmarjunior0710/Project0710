@@ -102,6 +102,10 @@ gradual, sob demanda, não obrigatória de uma vez.)*
 Um arquivo por sistema/infraestrutura transversal (não amarrado a 1
 classe/talento específico).
 
+- **`sistemas/deslocamento-e-empurrar.md`** — Deslocamento (função única `core/deslocamento.ts`, caixa na
+  aba Atributos + linha no Combate, layout novo do topo) e Empurrar/Imobilizar do Ataque Desarmado (principal,
+  Torrente e Ataque Adicional), com a revisão do que está/não está coberto (itens mágicos, condições, voo/natação).
+
 - **`sistemas/multiclasse.md`** — Multiclasse: Truques/Magias
   Preparadas por classe (com selo), Espaços de Magia mostrando os 2
   pools juntos, CD/Ataque por classe, e a remoção completa do pill

@@ -51,6 +51,9 @@ export interface EntradaDeslocamento {
   niveisExaustao: number;
   /** Fontes extras de item/efeito (ex.: futuras botas mágicas), no mesmo formato. */
   extras?: FonteDeslocamento[];
+  /** Outras velocidades que o personagem tem AGORA (voo, natação, escalada) — só informativas no ⓘ,
+   * nunca entram no total de caminhada. Ex.: { rotulo: "Voo (Passo dos Elementos)", valor: "igual ao Deslocamento" }. */
+  velocidadesEspeciais?: { rotulo: string; valor: string }[];
 }
 
 export interface ResultadoDeslocamento {
@@ -158,5 +161,7 @@ export function calcularDeslocamento(e: EntradaDeslocamento): ResultadoDeslocame
         : { label: `${f.rotulo} — inativo: ${f.motivoInativa ?? 'condição não atendida'}`, valor: `(${formatarDelta(f.metros)})` },
     ),
   ];
-  return { totalM, fontes, explicacao: { linhas, total: { label: 'Deslocamento', valor: formatarMetros(totalM) } } };
+  // Voo/natação/escalada: linhas só informativas, depois das fontes (não somam).
+  const especiais = (e.velocidadesEspeciais ?? []).map((v) => ({ label: v.rotulo, valor: v.valor }));
+  return { totalM, fontes, explicacao: { linhas: [...linhas, ...especiais], total: { label: 'Deslocamento (caminhada)', valor: formatarMetros(totalM) } } };
 }
