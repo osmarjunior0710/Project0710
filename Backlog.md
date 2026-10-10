@@ -186,21 +186,6 @@ existentes, sem tocar no formato salvo nem em `descansoCurto`/`Longo`)
 6.2 do CLAUDE.md) descrevendo a migração, não ser feito de passagem
 dentro de uma leva de limpeza.
 
-## Dano em crítico não dobra (geral) + "+1 dado extra" do Perfurador (2026-09)
-
-Descoberto ao implementar o Perfurador: nenhum ataque do app dobra os
-dados de dano num acerto crítico hoje — "Rolar Dano" sempre rola a
-quantidade normal, sem saber se o "Rolar Ataque" anterior foi crítico.
-Decisão do Osmar: implementar só o reroll de 1 dado do Perfurador por
-enquanto (já funciona, ver DECISOES-COMBATE.md "Grid de dados
-individuais"), deixando de fora:
-
-- **Dano dobra em crítico** — FEITO pros ataques de arma (2026-09, foco
-  Melhorias e correções: `onAcertou({ critico })` + `core/danoCritico.ts`).
-  Ataques de MAGIA também feitos. Só falta o Perfurador (+1 dado).
-- **Perfurador — "+1 dado extra no crítico"** — depende do item acima
-  pra fazer sentido (some ENCIMA do dobro já esperado, não sozinho).
-
 ## Inspiração Heroica
 
 - **Reroll não cobre dano/outras rolagens fora do D20** — a regra real

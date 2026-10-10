@@ -887,3 +887,11 @@ transição de fechamento o painel ainda está renderizado por cima (CSS
 z-index padrão (55) fica escondido atrás dele. Passe `zIndex` inline
 maior que 111 (ex.: 120, abaixo do RollOverlay, 135) pra qualquer
 popup que nasça desse jeito.
+
+## Crítico: dobra os dados; dado que já é bônus do crítico não dobra (2026-10)
+
+`danoComCritico` (`core/danoCritico.ts`) dobra a quantidade de cada grupo de `gruposExtras` (Golpe Brutal, Ápice...) e **nunca** o
+modificador. Dado extra que a própria regra concede POR cima do dobro entra em `gruposFixos` (não dobra) — hoje só o **Crítico
+Melhorado do Perfurador** (Livro do Jogador Cap. 5): crítico + dano Perfurante + talento = +1 dado do tamanho do dado da arma
+(`dadoExtraPerfurador`). Automático (decisão do Osmar: jogar o dado extra nunca tem desvantagem). Vale pra Atacar, Golpe Brutal,
+Mão Secundária e Cortar; magia não usa. Feature nova com "+N dados no crítico" usa `gruposFixos`, não `gruposExtras`.

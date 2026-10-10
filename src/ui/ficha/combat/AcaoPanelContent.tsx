@@ -8,7 +8,7 @@ import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagi
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import { resolverVantagem, fmtMod } from '../../../core/calculoPersonagem';
 import type { ResumoConjuracaoPorClasse } from '../../../core/magiasPersonagem';
-import { danoComCritico } from '../../../core/danoCritico';
+import { danoComCritico, dadoExtraPerfurador } from '../../../core/danoCritico';
 import type { EfeitoAoAcertar } from '../../../core/efeitosAoAcertar';
 import { useRoll } from '../../roll/RollContext';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
@@ -411,6 +411,7 @@ export default function AcaoPanelContent({
                   lados: ataque.danoLados,
                   mod: ataque.danoMod,
                   gruposExtras: [{ quantidade: golpeBrutalDados, lados: 10 as LadosDado }, ...extras],
+                  gruposFixos: dadoExtraPerfurador(critico, ataque.danoTipo, perfuradorDisponivel, ataque.danoLados as LadosDado),
                 },
                 critico,
               );
@@ -495,6 +496,7 @@ export default function AcaoPanelContent({
                 lados: ataque.danoLados,
                 mod: ataque.danoMod,
                 gruposExtras: [...(golpesRadiantesAtivo ? [{ quantidade: 1, lados: 8 as LadosDado }] : []), ...extras],
+                gruposFixos: dadoExtraPerfurador(critico, ataque.danoTipo, perfuradorDisponivel, ataque.danoLados as LadosDado),
               },
               critico,
             );

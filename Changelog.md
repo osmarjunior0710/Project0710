@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1723
+
+Talento Perfurador: num Acerto Crítico com dano Perfurante, o app agora joga automaticamente 1 dado de dano extra (do mesmo tamanho do dado da arma), além do dobro normal do crítico. Vale pro Atacar, Golpe Brutal, ataque da Mão Secundária e Cortar.
+
 ## v202610_1655
 
 O dano e a cura de truques e magias agora escalam pelo nível TOTAL do personagem (soma de todas as classes), como manda o Livro do Jogador — por exemplo, um Mago 3 / Bárbaro 3 (nível 6) já usa o dado do nível 5 nos truques. A caixa "Level" da aba Atributos também mostra o nível total. Os espaços de magia já estavam certos.

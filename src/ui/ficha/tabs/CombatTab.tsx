@@ -36,7 +36,7 @@ import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior } from '../../../c
 import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
 import { formulaRedirecionarDefletir, formulaReducaoDefletirAtaques } from '../../../core/defletirAtaques';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
-import { danoComCritico } from '../../../core/danoCritico';
+import { danoComCritico, dadoExtraPerfurador } from '../../../core/danoCritico';
 import {
   truqueElegivelTruquePotente,
   aplicarEvocacaoPotencializadaAoDano,
@@ -1900,7 +1900,13 @@ export default function CombatTab({
     const desarmado = p.nome.endsWith('Ataque Desarmado');
     const rolarDano = (extras: { quantidade: number; lados: LadosDado }[], aoFecharDano: () => void) => {
       const dano = danoComCritico(
-        { quantidade: p.info.danoQuantidade, lados: p.info.danoLados, mod: p.info.danoMod, gruposExtras: extras.length ? extras : undefined },
+        {
+          quantidade: p.info.danoQuantidade,
+          lados: p.info.danoLados,
+          mod: p.info.danoMod,
+          gruposExtras: extras.length ? extras : undefined,
+          gruposFixos: dadoExtraPerfurador(p.critico, p.info.danoTipo, perfuradorDisponivel, p.info.danoLados as LadosDado),
+        },
         p.critico,
       );
       rolarDados({
