@@ -14,12 +14,15 @@
 
 ---
 
-## Efeitos ao acertar — classe ativa da ficha (2026-10)
+## Multiclasse — o que ainda segue a "classe em foco" (2026-10)
 
-Ataque Imprudente, Golpe Brutal, Raízes Devastadoras e Arma Sagrada só aparecem quando a classe do Bárbaro/Paladino é a
-**ativa** (`classeAtivaNome` em `FichaShell.tsx` = 1ª classe que conjura; `classe`/`personagem.subclasse` vêm dela).
-Num multiclasse (Char Multiclasse: Bardo) esses recursos "ativos" não aparecem, mesmo com o nível. Resolver exige olhar
-`classesAtual` (por classe) em vez da classe ativa, igual já foi feito pra Monge. Decidir com o Osmar se vira entrega.
+Característica de classe/subclasse agora é achada em TODAS as classes por ID (`core/caracteristicasDoPersonagem.ts`, ver
+`DECISOES-CLASSES.md` "Multiclasse: característica por ID em todas as classes"). Ainda seguem a classe em foco (1ª que conjura),
+a revisar com o Osmar: (1) escala de truque/magia de ataque nas abas Magias/Combate (`nivel` = nível da classe em foco; a regra
+é nível TOTAL do personagem); (2) caixa "Level" da aba Atributos (mostra o nível da classe em foco, não o total);
+(3) `calcularPericias`/Pau pra Toda Obra e `useMagiasEConjuracao` (espaços, déficit de truques) com `personagem.nivel`;
+(4) as entradas por classe escritas à mão (`entradaGuerreiro`, `entradaBarbaro`, `mongeEntry`, `entradaPaladino`) podem migrar
+pro módulo genérico quando forem tocadas.
 
 ## Golpe Brutal (Bárbaro) — confirmar se tem limite de usos por descanso
 

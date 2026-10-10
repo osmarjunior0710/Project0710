@@ -1078,3 +1078,15 @@ o que não é verdade fora do caso mais comum de teste.
 
 **Histórico completo** (as 6 entregas, os 4 bugs achados e
 corrigidos, o SDD): `aprendizados/sistemas/multiclasse.md`.
+
+## Multiclasse: característica por ID em todas as classes, nunca pela "classe em foco" (2026-10)
+
+Regra pra qualquer classe/subclasse nova e qualquer característica nova: **não** ler `classe`/`personagem.nivel`/
+`personagem.subclasse` de `FichaShell.tsx` pra decidir se o personagem tem uma característica — essas 3 seguem a 1ª classe que
+conjura e escondem tudo das outras num multiclasse. Use `core/caracteristicasDoPersonagem.ts`: `contextosDasClasses(classesAtual,
+catalogo)` (cada classe com SEU nível e sua ÚNICA subclasse ativa) e `temCaracteristica` / `donaDaCaracteristica` /
+`repeticoesDaCaracteristica` / `detalheDaCaracteristica` (característica de classe, por ID) e `caracteristicasDeSubclasse` /
+`donaDaCaracteristicaDeSubclasse` (subclasse). Quem escala por nível usa o nível da CLASSE DONA (`.nivel` do contexto); quem escala
+pelo personagem inteiro usa `nivelTotalAtual`. Classe/subclasse nova só registra o ID no dado — nada a editar na ficha. Ataque Extra
+de classes diferentes não soma (`maiorNumeroDeAtaques`). O Char Multiclasse (todas as classes ao mesmo tempo) é o teste: se funciona
+nele, qualquer combinação funciona. Histórico: `aprendizados/sistemas/efeitos-ao-acertar.md`.

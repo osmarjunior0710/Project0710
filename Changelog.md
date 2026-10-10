@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1417
+
+Num personagem multiclasse, as características de todas as classes e subclasses agora aparecem juntas, não só as da primeira classe que conjura: Ataque Imprudente, Golpe Brutal, Raízes Devastadoras, Arma Sagrada, Surto de Ação, Inspiração de Bardo e o resto. O número de ataques passa a ser o maior entre as classes (4 no Char Multiclasse). A cura da Fúria Implacável e dos outros efeitos que dependem do nível usam o nível da classe certa.
+
 ## v202610_1354
 
 Os efeitos "ao acertar" também valem no ataque da Mão Secundária e no Cortar (mesma lista e fila do Atacar). O personagem "Char Multiclasse" agora vem com 1 unidade de cada item do jogo na Mochila (armas, armaduras, escudos, ferramentas, equipamento e todos os itens mágicos), pra facilitar os testes.

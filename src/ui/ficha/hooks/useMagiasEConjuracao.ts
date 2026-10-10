@@ -1,4 +1,5 @@
 import type { Classe } from '../../../data/rulesets/dnd2024/classes';
+import { contextosDasClasses, donaDaCaracteristicaDeSubclasse } from '../../../core/caracteristicasDoPersonagem';
 import type { Origem } from '../../../data/rulesets/dnd2024/origens';
 import type { WizardSelection } from '../../../core/personagem';
 import type { PersonagemClasse } from '../../../core/multiclasse';
@@ -76,7 +77,7 @@ const NOME_FALAR_COM_ANIMAIS_GNOMO = 'Falar com Animais - Traço de Gnomo';
  * nome `use*` (mantido por consistência com os outros arquivos desta
  * pasta). Também inclui as poucas derivações de Pets que dependiam de
  * características de subclasse já resolvidas antes (`mestreDaMorteDisponivel`,
- * calculado por `caracteristicasSubclasseAtivas`, G3.4). */
+ * calculado por `caracteristicasDeSubclasse`, G3.4). */
 export function useMagiasEConjuracao(input: {
   classe: Classe | null;
   personagem: PersonagemNivel;
@@ -223,11 +224,22 @@ export function useMagiasEConjuracao(input: {
   const usaRedefPorDescanso = usaRedefinicaoPorDescanso(magoObj);
   const magiasGratisConcedidas = magiasGratisDasInvocacoes(invocacoesMisticasAtuais);
   const formasFamiliarElegiveis = formasFamiliarDasInvocacoes(invocacoesMisticasAtuais);
-  const formasFamiliarMortoVivoElegiveis = formasFamiliarMortoVivoElegiveisNecro(personagem.subclasse, personagem.nivel);
+  // Cada característica de subclasse escala pelo nível da CLASSE dona dela (não da classe em foco) — multiclasse.
+  const classesCtx = contextosDasClasses(classesAtual, catalogoClasses);
+  const donaNecromancia = donaDaCaracteristicaDeSubclasse(classesCtx, 'legiaoDosMortos');
+  const formasFamiliarMortoVivoElegiveis = formasFamiliarMortoVivoElegiveisNecro(
+    donaNecromancia?.subclasse ?? null,
+    donaNecromancia?.nivel ?? 0,
+  );
   const modIntAtual = atributos.find((a) => a.atributo === 'INT')?.mod ?? 0;
   const personagemEstaEnsanguentado = personagemEnsanguentado(pvAtual, personagem.pvMax);
-  const opcoesColheitaDosMortosAtuais = opcoesColheitaDosMortos(pets, personagem.nivel);
-  const pvTempMestreDaMorteAtual = mestreDaMorteDisponivel ? bonusPvTempMestreDaMorte(personagem.nivel) : 0;
+  const opcoesColheitaDosMortosAtuais = opcoesColheitaDosMortos(
+    pets,
+    donaDaCaracteristicaDeSubclasse(classesCtx, 'colheitaDosMortos')?.nivel ?? 0,
+  );
+  const pvTempMestreDaMorteAtual = mestreDaMorteDisponivel
+    ? bonusPvTempMestreDaMorte(donaDaCaracteristicaDeSubclasse(classesCtx, 'mestreDaMorte')?.nivel ?? 0)
+    : 0;
   const petsMortoVivoAtuais = petsMortoVivo(pets);
   const mestreDaMorteExplosaoLiberadaAtual = algumMortoVivoEm0PV(pets);
   const astuciaMagicaDisponivel =
@@ -289,15 +301,17 @@ export function useMagiasEConjuracao(input: {
   // em combate, mas são arrays PRÓPRIOS separados, só unidos aqui pra
   // montar a lista de "o que aparece nos painéis de Ação/Reação".
   // `magiasPactoDoInferoDisponivel` vem de fora (G3.4,
-  // `caracteristicasSubclasseAtivas`) — recebido como parâmetro em vez
+  // `caracteristicasDeSubclasse`) — recebido como parâmetro em vez
   // de recalculado aqui, pra não duplicar a mesma checagem de
   // característica de subclasse em 2 lugares.
-  const magiasPactoDoInferoAtuais = magiasPactoDoInferoDisponivel ? magiasPactoDoInfero(personagem.nivel) : [];
+  const magiasPactoDoInferoAtuais = magiasPactoDoInferoDisponivel
+    ? magiasPactoDoInfero(donaDaCaracteristicaDeSubclasse(classesCtx, 'magiasDePactoDoInfero')?.nivel ?? 0)
+    : [];
   const magiasPactoDoInferoPreparadas = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
   // Magias do Juramento da Devoção (Paladino) — mesmo padrão do Pacto
   // do Ínfero acima, ver `sdd/sdd-paladino-devocao.md` seção 1.
   const magiasJuramentoDaDevocaoAtuais = magiasJuramentoDaDevocaoDisponivel
-    ? magiasJuramentoDaDevocao(personagem.nivel)
+    ? magiasJuramentoDaDevocao(donaDaCaracteristicaDeSubclasse(classesCtx, 'magiasDoJuramentoDaDevocao')?.nivel ?? 0)
     : [];
   const magiasJuramentoDaDevocaoPreparadas = magiasPreparadasDoPersonagem(magiasJuramentoDaDevocaoAtuais);
   // Magia fixa de CLASSE BASE (Destruição do Paladino, Montaria Fiel —

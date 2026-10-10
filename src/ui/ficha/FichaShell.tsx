@@ -13,7 +13,16 @@ import { useHouseRules } from './hooks/useHouseRules';
 import { usePreferenciasPillsMagia } from './hooks/usePreferenciasPillsMagia';
 import { useAutosavePersonagem } from './hooks/useAutosavePersonagem';
 import { recursoContado, recursoFlagUnica } from './hooks/recursoGasto';
-import { caracteristicasSubclasseAtivas } from './hooks/caracteristicasSubclasseAtivas';
+import {
+  caracteristicasDeSubclasse,
+  contextosDasClasses,
+  detalheDaCaracteristica,
+  donaDaCaracteristica,
+  donaDaCaracteristicaDeSubclasse,
+  maiorNumeroDeAtaques,
+  repeticoesDaCaracteristica,
+  temCaracteristica,
+} from '../../core/caracteristicasDoPersonagem';
 import { useMagiasEConjuracao } from './hooks/useMagiasEConjuracao';
 import {
   bonusProficiencia,
@@ -132,7 +141,7 @@ import {
   type MagiaConhecida,
 } from '../../core/magiasPersonagem';
 import { usosInspiracaoMaximo, dadoInspiracao, fonteDeInspiracaoDesbloqueada } from '../../core/inspiracaoBardo';
-import { caracteristicaDesbloqueada, contarRepeticoesCaracteristica, numeroDeAtaques } from '../../core/levelUp';
+import { caracteristicaDesbloqueada } from '../../core/levelUp';
 import { orcamentoRecuperacaoArcana, podeUsarRecuperacaoArcana } from '../../core/recuperacaoArcana';
 import { ID_CARACTERISTICA_CLASSE } from '../../data/rulesets/dnd2024/idsCaracteristicasClasse';
 import { estilosDeLuta } from '../../data/rulesets/dnd2024/estilosDeLuta';
@@ -295,6 +304,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const nivelTotalAtual = nivelTotalPersonagem(classesAtual);
 
   const classe = catalogoClasses.find((c) => c.nome === classeAtivaNome) ?? classeDaSelecao(selecao);
+  // TODAS as classes do personagem já resolvidas (classe + nível NELA + subclasse): característica de classe/subclasse
+  // é achada por ID em qualquer uma delas (`core/caracteristicasDoPersonagem.ts`), nunca só na classe em foco.
+  const classesCtx = contextosDasClasses(classesAtual, catalogoClasses);
   // Proficiência de arma/armadura NÃO segue a classe ativa (pill de
   // exibição) — segue "classe original" (a primeira, com o pacote de
   // nível 1 completo, sempre `classesAtual[0]`) + qualquer OUTRA classe
@@ -781,9 +793,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // atributo normal (ver `calcularPericias`, parâmetro
   // `substituicaoForca`). Lista fixa da própria característica (Livro
   // do Jogador), não vem da planilha.
-  const temConhecimentoPrimordial = classe
-    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.conhecimentoPrimordial, personagem.nivel) !== null
-    : false;
+  const temConhecimentoPrimordial = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.conhecimentoPrimordial);
   const PERICIAS_CONHECIMENTO_PRIMORDIAL = ['Acrobacia', 'Furtividade', 'Intimidação', 'Percepção', 'Sobrevivência'];
   const pericias = calcularPericias(
     selecao,
@@ -976,7 +986,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     ramosDaArvore: ramosDaArvoreDesbloqueada,
     raizesDevastadoras: raizesDevastadorasDesbloqueada,
     percorrerArvore: percorrerArvoreDesbloqueada,
-  } = caracteristicasSubclasseAtivas(personagem.subclasse, personagem.nivel, [
+  } = caracteristicasDeSubclasse(classesCtx, [
     'legiaoDosMortos',
     'grimorioDeNecromancia',
     'colheitaDosMortos',
@@ -996,6 +1006,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'raizesDevastadoras',
     'percorrerArvore',
   ]);
+  // Nível da CLASSE dona de cada característica que escala por ele (nunca o da classe em foco, nunca o total).
+  const nivelFuriaImplacavel = donaDaCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.furiaImplacavel)?.nivel ?? 0;
+  const nivelVitalidadeDaArvore = donaDaCaracteristicaDeSubclasse(classesCtx, 'vitalidadeDaArvore')?.nivel ?? 0;
+  const nivelBencaoDoTenebroso = donaDaCaracteristicaDeSubclasse(classesCtx, 'bencaoDoTenebroso')?.nivel ?? 0;
+  const nivelRecuperarFolego = donaDaCaracteristica(classesCtx, 'Recuperar Fôlego')?.nivel ?? 0;
+  const nivelIndomavel = donaDaCaracteristica(classesCtx, 'Indomável')?.nivel ?? 0;
   // G3.3 (foco de saúde do projeto, ver EmDevB.md): todo o bloco de
   // magia/conjuração/pool combinado (antes ~150 linhas soltas aqui)
   // agora mora em `useMagiasEConjuracao` — cópia literal, mesmos nomes
@@ -1128,7 +1144,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       return faltam > 0 ? { classeNome: entry.classe, faltam } : null;
     })
     .filter((d): d is NonNullable<typeof d> => d !== null);
-  const usosInspiracaoMax = usosInspiracaoMaximo(selecao, classe, personagem.nivel);
+  const donaInspiracao = donaDaCaracteristica(classesCtx, 'Inspiração de Bardo');
+  const usosInspiracaoMax = usosInspiracaoMaximo(selecao, donaInspiracao?.classe ?? null, donaInspiracao?.nivel ?? 0);
   const usosInspiracaoRestantes = Math.max(0, usosInspiracaoMax - inspiracaoGasto);
   // Recursos de classe com contador, de TODAS as classes (não só a em foco) —
   // área passiva da aba Combate. Ver `core/recursosVisiveis.ts`.
@@ -1146,64 +1163,48 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       espacosPorClasseECirculo: espacosGastosPorClasseECirculo,
     },
   });
-  const tamanhoDadoInspiracao = dadoInspiracao(classe, personagem.nivel);
-  const fonteDeInspiracao = fonteDeInspiracaoDesbloqueada(classe, personagem.nivel);
-  const numAtaquesBase = classe ? numeroDeAtaques(classe, personagem.nivel) : 1;
-  const indomavelMaximo = classe ? contarRepeticoesCaracteristica(classe, 'Indomável', personagem.nivel) : 0;
+  const tamanhoDadoInspiracao = dadoInspiracao(donaInspiracao?.classe ?? null, donaInspiracao?.nivel ?? 0);
+  const fonteDeInspiracao = fonteDeInspiracaoDesbloqueada(donaInspiracao?.classe ?? null, donaInspiracao?.nivel ?? 0);
+  const numAtaquesBase = maiorNumeroDeAtaques(classesCtx);
+  const indomavelMaximo = repeticoesDaCaracteristica(classesCtx, 'Indomável');
   const indomavelRestantes = Math.max(0, indomavelMaximo - indomavelGasto);
   const pontosDeSorteDisponivel = efeitoMecanicoDoTalento(talentosEfetivos, 'pontos-de-sorte') !== null;
   const danoDesarmadoRerollDisponivel = efeitoMecanicoDoTalento(talentosEfetivos, 'dado-ataque-desarmado') !== null;
   const perfuradorDisponivel = temPerfurador(talentosEfetivos);
   const pontosDeSorteMaximo = pontosDeSorteDisponivel ? bonusProficienciaAtual : 0;
   const pontosDeSorteRestantes = Math.max(0, pontosDeSorteMaximo - pontosDeSorteGasto);
-  const surtoMaximo = classe ? contarRepeticoesCaracteristica(classe, 'Surto de Ação', personagem.nivel) : 0;
+  const surtoMaximo = repeticoesDaCaracteristica(classesCtx, 'Surto de Ação');
   const surtoRestantes = Math.max(0, surtoMaximo - surtoGasto);
-  const mestreTatico = classe ? caracteristicaDesbloqueada(classe, 'Mestre Tático', personagem.nivel) : null;
-  const ataquesEstudados = classe ? caracteristicaDesbloqueada(classe, 'Ataques Estudados', personagem.nivel) : null;
-  const ajusteTatico = classe ? caracteristicaDesbloqueada(classe, 'Ajuste Tático', personagem.nivel) : null;
-  const contraEncantamentoDisponivel = classe ? caracteristicaDesbloqueada(classe, 'Contra-Encantamento', personagem.nivel) !== null : false;
-  const inspiracaoSuperiorDesbloqueada = classe ? caracteristicaDesbloqueada(classe, 'Inspiração Superior', personagem.nivel) !== null : false;
-  const temSentidoDePerigo = classe
-    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.sentidoDePerigo, personagem.nivel) !== null
-    : false;
-  const temAtaqueImprudente = classe
-    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.ataqueImprudente, personagem.nivel) !== null
-    : false;
-  const temInstintosPrimitivos = classe
-    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.instintosPrimitivos, personagem.nivel) !== null
-    : false;
-  const temGolpeBrutal = classe
-    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.golpeBrutal, personagem.nivel) !== null
-    : false;
+  const mestreTatico = detalheDaCaracteristica(classesCtx, 'Mestre Tático');
+  const ataquesEstudados = detalheDaCaracteristica(classesCtx, 'Ataques Estudados');
+  const ajusteTatico = detalheDaCaracteristica(classesCtx, 'Ajuste Tático');
+  const contraEncantamentoDisponivel = temCaracteristica(classesCtx, 'Contra-Encantamento');
+  const inspiracaoSuperiorDesbloqueada = temCaracteristica(classesCtx, 'Inspiração Superior');
+  const temSentidoDePerigo = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.sentidoDePerigo);
+  const temAtaqueImprudente = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.ataqueImprudente);
+  const temInstintosPrimitivos = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.instintosPrimitivos);
+  const temGolpeBrutal = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.golpeBrutal);
   /** 0 = ainda não chegou no nível 13; 1 = nível 13-16 (+2 efeitos);
    * 2 = nível 17+ (2d10, escolhe 2 efeitos de uma vez) — mesmo padrão
    * de "conta repetições do mesmo nome" já usado por Indomável/Surto
    * de Ação (2 níveis de característica com o MESMO nome). */
-  const golpeBrutalFortalecidoCount = classe
-    ? contarRepeticoesCaracteristica(classe, ID_CARACTERISTICA_CLASSE.golpeBrutalFortalecido, personagem.nivel)
-    : 0;
+  const golpeBrutalFortalecidoCount = repeticoesDaCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.golpeBrutalFortalecido);
   const golpeBrutalDados = golpeBrutalFortalecidoCount >= 2 ? 2 : 1;
   const golpeBrutalEfeitosNivel13 = golpeBrutalFortalecidoCount >= 1;
   const golpeBrutalEscolhas = golpeBrutalFortalecidoCount >= 2 ? 2 : 1;
-  const temFuriaImplacavel = classe
-    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.furiaImplacavel, personagem.nivel) !== null
-    : false;
+  const temFuriaImplacavel = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.furiaImplacavel);
   /** Salvaguarda de Constituição do personagem — reaproveitada pela
    * própria Fúria Implacável pra rolar o d20 dela (ver
    * `rolarFuriaImplacavel`), em vez de mandar o jogador pra aba
    * Atributos. */
   const salvaguardaCon = salvaguardas.find((s) => s.atributo === 'CON') ?? null;
-  const temFuriaPersistente = classe
-    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.furiaPersistente, personagem.nivel) !== null
-    : false;
+  const temFuriaPersistente = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.furiaPersistente);
   /** Botão "Recuperar Fúria" só aparece com a característica, pelo
    * menos 1 uso gasto pra recuperar de verdade, e ainda não usada
    * desde o último Descanso Longo — regra real não trava no instante
    * exato de rolar Iniciativa (ver `EmDevB.md`, B4.7). */
   const furiaPersistenteDisponivel = temFuriaPersistente && furiaGasto > 0 && !furiaPersistenteUsada;
-  const temForcaIndomavel = classe
-    ? caracteristicaDesbloqueada(classe, ID_CARACTERISTICA_CLASSE.forcaIndomavel, personagem.nivel) !== null
-    : false;
+  const temForcaIndomavel = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.forcaIndomavel);
   const forValorFinal = aplicarCampeaoPrimitivo(valorFinalAtributo(selecao, 'FOR') ?? 10, 'FOR', temCampeaoPrimitivo);
   const sorteDoTenebrosoMaximo = sorteDoTenebrosoDisponivel ? usosSorteDoTenebroso(carMod) : 0;
   const sorteDoTenebrosoRestantes = Math.max(0, sorteDoTenebrosoMaximo - sorteDoTenebrosoGasto);
@@ -1673,7 +1674,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   /** "Curar" (fase 'resultado', sucesso) — aplica o PV cheio (2× nível
    * NA CLASSE Bárbaro) e fecha o modal. */
   function curarFuriaImplacavel() {
-    setPvAtual(pvFuriaImplacavel(personagem.nivel));
+    setPvAtual(pvFuriaImplacavel(nivelFuriaImplacavel));
     setFuriaImplacavelPendente(false);
     setFuriaImplacavelResultado(null);
   }
@@ -1764,7 +1765,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // ativar, sem perguntar (mesmo espírito de Força Indomável/Campeão
     // Primitivo — nunca teria opção, o jogador nunca ia recusar).
     if (vitalidadeDaArvoreDisponivel) {
-      setPvTemporario((atual) => ganharPvTemporario(atual, personagem.nivel));
+      setPvTemporario((atual) => ganharPvTemporario(atual, nivelVitalidadeDaArvore));
     }
     // Percorrer a Árvore (nível 14) — a versão estendida (45m) é 1x por
     // FÚRIA: toda ativação nova libera o uso de novo.
@@ -2257,7 +2258,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }
 
   function aplicarBencaoDoTenebroso() {
-    const valor = valorBencaoDoTenebroso(carMod, personagem.nivel);
+    const valor = valorBencaoDoTenebroso(carMod, nivelBencaoDoTenebroso);
     setPvTemporario((atual) => ganharPvTemporario(atual, valor));
   }
 
@@ -3071,7 +3072,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           mod={salvaguardaCon?.mod ?? 0}
           explicacaoMod={salvaguardaCon?.explicacao ?? { linhas: [], total: { label: '', valor: '' } }}
           passou={furiaImplacavelResultado ?? false}
-          pvCura={pvFuriaImplacavel(personagem.nivel)}
+          pvCura={pvFuriaImplacavel(nivelFuriaImplacavel)}
           onRolar={rolarFuriaImplacavel}
           onDispensar={fecharFuriaImplacavel}
           onCurar={curarFuriaImplacavel}
@@ -3348,6 +3349,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             ponte={ponte}
             estiloDeLuta={estiloDeLuta}
             nivel={personagem.nivel}
+            nivelRecuperarFolego={nivelRecuperarFolego}
+            nivelIndomavel={nivelIndomavel}
             folego={{ maximo: usosFolegoMaximo, restantes: usosFolegoRestantes, onUsar: usarUsoFolego }}
             canalizarDivindade={{ maximo: usosCanalizarMaximo, restantes: usosCanalizarRestantes, onUsar: usarUsoCanalizarDivindade }}
             maosConsagradas={{

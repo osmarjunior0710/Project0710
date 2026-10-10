@@ -150,6 +150,9 @@ interface CombatTabProps {
   ponte: PoolDePonte | null;
   estiloDeLuta: EstiloDeLuta | null;
   nivel: number;
+  /** Nível da classe que dá Recuperar Fôlego / Indomável (Guerreiro) — o `nivel` acima segue a classe em foco. */
+  nivelRecuperarFolego: number;
+  nivelIndomavel: number;
   /** Recuperar Fôlego / Mente Tática (Guerreiro). */
   folego: RecursoContado;
   /** Canalizar Divindade (Paladino) — `maximo` 0 = antes do nível 3 ou
@@ -678,6 +681,8 @@ export default function CombatTab({
   ponte,
   estiloDeLuta,
   nivel,
+  nivelRecuperarFolego,
+  nivelIndomavel,
   folego: { maximo: usosFolegoMaximo, restantes: usosFolegoRestantes, onUsar: onUsarUsoFolego },
   canalizarDivindade: {
     maximo: usosCanalizarMaximo,
@@ -1390,10 +1395,10 @@ export default function CombatTab({
     if (!onUsarUsoFolego()) return;
     rolarDados({
       label: 'Recuperar Fôlego (cura)',
-      formula: `1d10 + ${nivel}`,
+      formula: `1d10 + ${nivelRecuperarFolego}`,
       quantidade: 1,
       lados: 10,
-      mod: nivel,
+      mod: nivelRecuperarFolego,
       onResultado: (total) => onAlterarPv(total),
     });
     onMarcarUsado('bonus');
@@ -1639,7 +1644,7 @@ export default function CombatTab({
 
   function usarIndomavel() {
     if (!onUsarIndomavel()) return;
-    rolarD20({ label: 'Indomável (nova salvaguarda)', formula: `1d20 + ${nivel}`, mod: nivel, categoria: 'atributoOuSalvaguarda' });
+    rolarD20({ label: 'Indomável (nova salvaguarda)', formula: `1d20 + ${nivelIndomavel}`, mod: nivelIndomavel, categoria: 'atributoOuSalvaguarda' });
     setFeedback('🛡️ Indomável — use esse resultado como sua nova salvaguarda.');
   }
 

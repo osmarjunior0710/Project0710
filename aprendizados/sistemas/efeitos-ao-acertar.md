@@ -35,10 +35,16 @@
   zera quando o talento volta a ficar disponível. Mesma família do Golpe Atordoante 2x (ver `monge-postmortem.md`).
 - **Atordoante sem Foco travava a fila**: toda ação da fila precisa chamar `aoFechar` também no caminho de desistência.
 
+## Correção de multiclasse (a mesma sessão)
+
+Golpe Brutal, Ataque Imprudente, Raízes e Arma Sagrada não apareciam no Char Multiclasse porque a ficha só olhava a classe em
+foco. O Osmar apontou que numa multiclasse todas as classes valem ao mesmo tempo. Solução geral (não por característica):
+`core/caracteristicasDoPersonagem.ts` + teste (inclui uma classe inventada reconhecida só pelo dado). `FichaShell.tsx`
+passou a usar o módulo pro Bárbaro, Guerreiro, Bardo e todas as subclasses; níveis de Fúria Implacável, Vitalidade da Árvore,
+Bênção do Tenebroso, magias do Ínfero/Devoção, Necromante e Recuperar Fôlego/Indomável vêm da classe dona. Ver
+`DECISOES-CLASSES.md` "Multiclasse: característica por ID...". O que ainda segue a classe em foco está em `PENDENCIAS.md`.
+
 ## Limites conhecidos
 
-- Raízes Devastadoras, Golpe Brutal, Ataque Imprudente e Arma Sagrada só funcionam quando a classe é a **ativa** da
-  ficha (`classeAtivaNome` = primeira classe que conjura). No Char Multiclasse isso é o Bardo, então esses efeitos não
-  aparecem lá — ver `PENDENCIAS.md` "Efeitos ao acertar". Para testar, trocar o personagem de teste temporariamente.
 - Golpes Radiantes (Paladino 11) continua automático (+1d8), sem linha na lista.
 - Raízes e Arma Sagrada valem só pra arma da Mão Principal (a Mão Secundária não as oferece).
