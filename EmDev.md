@@ -42,8 +42,11 @@ Tipos de efeito: **dano** (entra na rolagem; fora da fila), **tipo de dano** (1 
   usar o mesmo fluxo: Esmagador/Talhador e Ancestralidade Gigante (Golias) em qualquer ataque. Testado no Char
   Multiclasse em 360px, incluindo 1º/2º/3º golpe da Torrente (achou e corrigiu o Esmagador reaparecendo no 3º golpe).
   Falta testar em 412px.
-- [ ] **B — o que sobrou das armas**: Raízes Devastadoras (hoje usa o botão antigo e, enquanto ativa, o ataque
-  inteiro volta ao fluxo antigo), Arma Sagrada (Normal/Radiante, idem), Golpe Brutal (ataque próprio), Golpes
-  Radiantes (já automático no dano; só falta virar linha da lista se o Osmar quiser vê-lo).
+- [x] **B — o que sobrou das armas**: Raízes Devastadoras (linha da lista + escolha Derrubar/Empurrar encadeada na fila),
+  Arma Sagrada (vira o "Tipo de dano diferente do normal" com Radiante), Golpe Brutal (dado extra automático; efeito
+  vira linha opcional). O fluxo antigo de botões no popup de dano saiu do Atacar principal. Testado em 360px com
+  Bárbaro (Golpe Brutal + Esmagador, Raízes + Esmagador) e Paladino (Arma Sagrada) — personagem de teste trocado
+  temporariamente e restaurado. Golpes Radiantes segue automático. Sobrou: apagar `EfeitosDoGolpeModal` e o estado
+  `efeitosDoGolpePendentes` (código morto), na limpeza final.
 - [ ] **C — ataque bônus, Torrente restante e magias de ataque**, se fizer sentido.
 - [ ] Fechar: `aprendizados/sistemas/efeitos-ao-acertar.md`, padrão em `DECISOES-COMBATE.md`, limpar o item do `Feedback.md`.

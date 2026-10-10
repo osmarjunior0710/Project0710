@@ -13,8 +13,6 @@ import type { EfeitoAoAcertar } from '../../../core/efeitosAoAcertar';
 import { useRoll } from '../../roll/RollContext';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
-import { TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
-import { podeAtaqueElemental } from '../../../core/ataquesElementais';
 import type { LadosDado } from '../../roll/RollContext';
 import { CUSTO_FOCO_EXPLOSAO_ELEMENTAL } from '../../../core/explosaoElemental';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
@@ -26,7 +24,6 @@ import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
 export interface PedidoEfeitosAoAcertar {
   efeitos: EfeitoAoAcertar[];
   critico: boolean;
-  ataque: AtaqueInfo;
   rolarDano: (extras: { quantidade: number; lados: LadosDado }[], aoFecharDano: () => void) => void;
   aoFinalizar?: () => void;
 }
@@ -151,47 +148,6 @@ interface AcaoPanelContentProps {
    * `DECISOES-COMBATE.md`), nunca mais usa `DanoPendente`/os botões
    * antigos de dano. */
   onAtacouSemDanoPendente: (nome: string, desc: string) => void;
-  /** Chamado quando o jogador toca "🔨 Golpe Brutal" no popup de dano
-   * (depois de acertar e rolar) — abre o modal de efeito no
-   * `CombatTab`. */
-  onGolpeBrutalDanoConfirmado: () => void;
-  /** Esmagador/Talhador — ver `CombatTab.tsx` (`golpeCondicional`).
-   * `onAbrirGolpeCondicional` chamado quando o jogador toca o botão do
-   * talento no popup de dano (mesmo padrão do Golpe Brutal), o
-   * `CombatTab` decide qual popup (`AtivarEfeitoModal`) mostrar. */
-  esmagadorDisponivel: boolean;
-  talhadorDisponivel: boolean;
-  onAbrirGolpeCondicional: (talento: 'esmagador' | 'talhador') => void;
-  /** Raízes Devastadoras (Bárbaro, Trilha da Árvore do Mundo) —
-   * `disponivel` já garante nível 10+ e arma Pesada/Versátil (checado
-   * em `FichaShell.tsx`); diferente de Esmagador/Talhador, não trava
-   * por tipo de dano nem por 1x/turno. Só entra na prioridade quando
-   * Esmagador/Talhador NÃO se aplicam nesse ataque (arma como Clava
-   * Grande qualifica pros 2 — ver `DECISOES-COMBATE.md` "Fluxo Acerto/
-   * Erro sem 'renunciar'... Raízes Devastadoras"; popup com os 2
-   * botões juntos fica pra quando o app suportar múltiplos efeitos
-   * pendentes ao mesmo tempo). */
-  raizesDevastadorasDisponivel: boolean;
-  onAbrirRaizesDevastadoras: () => void;
-  /** Quando o talento (Esmagador/Talhador) E Raízes Devastadoras
-   * qualificam JUNTOS nesse acerto (arma Pesada/Versátil + Contundente/
-   * Cortante, ex. Malho) — o popup de dano abre `EfeitosDoGolpeModal`
-   * (2 cartões, cada um resolve independente) em vez de ir direto num
-   * dos 2. Ver `DECISOES-COMBATE.md` "Fluxo Acerto/Erro sem
-   * 'renunciar'...". */
-  onAbrirEfeitosDoGolpe: (efeitos: ('esmagador' | 'talhador' | 'raizesDevastadoras')[]) => void;
-  /** Ancestralidade Gigante (Golias) — as 3 opções "ao acertar"
-   * (Arrepio do Gelo/Queimadura de Fogo/Tombo da Colina), retrofit
-   * 2026-09 pro Fluxo Acerto/Erro (antes era um card avulso solto na
-   * tela, "toque ao acertar", ver `DECISOES-COMBATE.md`) — mesmo
-   * padrão de Esmagador/Talhador: o popup de dano do ataque principal
-   * já oferece o botão, `null`/0 usos = nenhuma disponível agora.
-   * `onAtivarAncestralidadeGigante` já faz tudo (gasta o uso, rola o
-   * dano certo, mostra o feedback) — mora no `CombatTab.tsx` porque é
-   * quem tem o resto do estado (Salto da Nuvem usa o MESMO contador). */
-  ancestralidadeGiganteEscolhida: string | null;
-  usosAncestralidadeGiganteRestantes: number;
-  onAtivarAncestralidadeGigante: () => void;
   detalhesAtivo: boolean;
   /** Mãos Curativas (Aasimar) — `false` = espécie não é Aasimar. */
   maosCurativasDisponivel: boolean;
@@ -227,25 +183,6 @@ interface AcaoPanelContentProps {
   temGolpeDeEscudo: boolean;
   golpeDeEscudoUsadoTurno: boolean;
   onUsarGolpeDeEscudo: () => void;
-  /** Golpe Atordoante (Monge nível 5) — `podeGolpeAtordoante(ataque)` diz
-   * se o botão aparece no popup de dano desse acerto; `onGolpeAtordoante`
-   * gasta o Foco e abre o popup de salvaguarda do alvo (`CombatTab.tsx`). */
-  podeGolpeAtordoante: (ataque: AtaqueInfo) => boolean;
-  /** Golpes Potencializados (Monge nível 6) — Ataque Desarmado oferece
-   * escolher Energético no fechamento do popup de dano. */
-  golpesPotencializados: boolean;
-  /** Ataques Elementais (Monge/Elementos, Sintonia Elemental ativa) — o popup de
-   * dano do Ataque Desarmado ganha o botão "🌪 Elemental" (`onElemental`). */
-  sintoniaElementalAtiva: boolean;
-  onElemental: () => void;
-  /** Explosão Elemental (Monge/Elementos nível 6) — linha no grupo Monge; tocar abre a
-   * escolha de elemento em `CombatTab.tsx` (gasta 2 Foco + a Ação). */
-  /** Ápice Elemental (Monge/Elementos nível 17) — Golpes Potencializados: o popup de dano de um
-   * Ataque Desarmado que acertou ganha o botão "➕ Ápice" quando `apiceGolpesDisponivel()` (a
-   * checagem roda na hora de montar os botões, não na renderização); tocar chama `onApiceGolpes`
-   * (rola o dado extra e marca "usado neste turno"). O jogador escolhe EM QUAL acerto usar. */
-  apiceGolpesDisponivel: () => boolean;
-  onApiceGolpes: (critico: boolean) => void;
   /** Ataque Desarmado, opções Empurrar/Imobilizar (Glossário) — sem jogada de ataque: gasta um dos
    * ataques da ação Atacar e abre o popup de salvaguarda do alvo (`CombatTab.tsx`). */
   onEmpurrarImobilizar: (tipo: 'empurrar' | 'imobilizar', info: AtaqueInfo) => void;
@@ -254,7 +191,6 @@ interface AcaoPanelContentProps {
   /** Pontos de Foco (Monge) — contador no grupo Monge e trava da Explosão Elemental. */
   pontosDeFocoMaximo: number;
   pontosDeFocoRestantes: number;
-  onGolpeAtordoante: () => void;
   /** Golpes Radiantes (Paladino nível 11) — sempre ativa, sem toggle:
    * soma 1d8 Radiante automático no dano de qualquer ataque Corpo a
    * Corpo/Desarmado que acertar (`rolarAtaque`, via `ataque.corpoACorpo`).
@@ -342,16 +278,6 @@ export default function AcaoPanelContent({
   golpeBrutalUsadoTurno,
   onUsarGolpeBrutal,
   onAtacouSemDanoPendente,
-  onGolpeBrutalDanoConfirmado,
-  esmagadorDisponivel,
-  talhadorDisponivel,
-  onAbrirGolpeCondicional,
-  raizesDevastadorasDisponivel,
-  onAbrirRaizesDevastadoras,
-  onAbrirEfeitosDoGolpe,
-  ancestralidadeGiganteEscolhida,
-  usosAncestralidadeGiganteRestantes,
-  onAtivarAncestralidadeGigante,
   detalhesAtivo,
   maosCurativasDisponivel,
   maosCurativasGasto,
@@ -368,18 +294,11 @@ export default function AcaoPanelContent({
   temGolpeDeEscudo,
   golpeDeEscudoUsadoTurno,
   onUsarGolpeDeEscudo,
-  podeGolpeAtordoante,
-  golpesPotencializados,
-  sintoniaElementalAtiva,
-  onElemental,
-  apiceGolpesDisponivel,
-  onApiceGolpes,
   onEmpurrarImobilizar,
   explosaoElementalDisponivel,
   onExplosaoElemental,
   pontosDeFocoMaximo,
   pontosDeFocoRestantes,
-  onGolpeAtordoante,
   temGolpesRadiantes,
   armaSagradaDisponivel,
   armaSagradaElegivel,
@@ -470,23 +389,41 @@ export default function AcaoPanelContent({
       explicacaoMod: ataque.explicacaoAcerto,
       confirmarAcerto: {
         onAcertou: ({ critico }) => {
-          const dano = danoComCritico(
+          // O dado extra é automático (o jogador já renunciou à Vantagem); o EFEITO do Golpe Brutal é
+          // "pode causar" → linha opcional da lista, junto dos demais efeitos "ao acertar".
+          const efeitos: EfeitoAoAcertar[] = [
             {
-              quantidade: ataque.danoQuantidade,
-              lados: ataque.danoLados,
-              mod: ataque.danoMod,
-              gruposExtras: [{ quantidade: golpeBrutalDados, lados: 10 }],
+              id: 'golpe-brutal',
+              nome: '🔨 Golpe Brutal — efeito',
+              origem: 'Bárbaro',
+              descricao: 'Golpe Debilitador (Deslocamento do alvo −4,5m) ou Golpe Poderoso (empurra o alvo 4,5m).',
+              fase: 'depois',
             },
+            ...efeitosAoAcertar(ataque, nome.endsWith('Ataque Desarmado')),
+          ];
+          onPedirEfeitosAoAcertar({
+            efeitos,
             critico,
-          );
-          rolarDados({
-            label: `${nome} — Dano + Golpe Brutal${critico ? ' (Crítico)' : ''}`,
-            formula: dano.formula,
-            quantidade: dano.quantidade,
-            lados: ataque.danoLados,
-            mod: ataque.danoMod,
-            gruposExtras: dano.gruposExtras,
-            confirmarFechamento: { rotulo: '🔨 Golpe Brutal', aoTocar: onGolpeBrutalDanoConfirmado },
+            rolarDano: (extras, aoFecharDano) => {
+              const dano = danoComCritico(
+                {
+                  quantidade: ataque.danoQuantidade,
+                  lados: ataque.danoLados,
+                  mod: ataque.danoMod,
+                  gruposExtras: [{ quantidade: golpeBrutalDados, lados: 10 as LadosDado }, ...extras],
+                },
+                critico,
+              );
+              rolarDados({
+                label: `${nome} — Dano + Golpe Brutal${critico ? ' (Crítico)' : ''}`,
+                formula: dano.formula,
+                quantidade: dano.quantidade,
+                lados: ataque.danoLados,
+                mod: ataque.danoMod,
+                gruposExtras: dano.gruposExtras as { quantidade: number; lados: LadosDado }[] | undefined,
+                confirmarFechamento: { aoTocar: aoFecharDano },
+              });
+            },
           });
         },
         onErrou: () => {},
@@ -496,117 +433,6 @@ export default function AcaoPanelContent({
       `🗡 ${nome}`,
       'Rolagem de acerto feita — renunciou à Vantagem do Ataque Imprudente pro Golpe Brutal.',
     );
-  }
-
-  /** Esmagador/Talhador — qual dos 2 (se algum) entra em jogo NESSE
-   * ataque específico, olhando o tipo de dano REAL da arma usada
-   * agora (`ataque.danoTipo`) — `esmagadorDisponivel`/
-   * `talhadorDisponivel` (vindo do `FichaShell.tsx`) já garantem talento
-   * + ainda não usado no turno; só falta bater o tipo de dano. Nunca os
-   * 2 ao mesmo tempo (Contundente e Cortante são mutuamente exclusivos
-   * pra uma mesma arma). */
-  function talentoGolpeCondicionalAtivavel(ataque: AtaqueInfo): 'esmagador' | 'talhador' | null {
-    if (esmagadorDisponivel && ataque.danoTipo === 'Contundente') return 'esmagador';
-    if (talhadorDisponivel && ataque.danoTipo === 'Cortante') return 'talhador';
-    return null;
-  }
-
-  const ROTULO_GOLPE_CONDICIONAL: Record<'esmagador' | 'talhador', string> = {
-    esmagador: '🔨 Esmagador',
-    talhador: '🗡️ Talhador',
-  };
-
-  const ROTULO_ANCESTRALIDADE_GIGANTE: Record<string, string> = {
-    'Arrepio do Gelo (Gigante do Gelo)': '🧊 Arrepio do Gelo',
-    'Queimadura de Fogo (Gigante de Fogo)': '🔥 Queimadura de Fogo',
-    'Tombo da Colina (Gigante da Colina)': '⛰️ Tombo da Colina',
-  };
-
-  /** `confirmarFechamento` do popup de dano do ataque principal —
-   * Esmagador/Talhador (por tipo de dano da arma) e Raízes Devastadoras
-   * (por propriedade da arma — Pesada/Versátil) PODEM coexistir numa
-   * mesma arma (ex. Malho: Pesada + Contundente) — quando os 2
-   * qualificam juntos, o botão abre `EfeitosDoGolpeModal` (2 cartões,
-   * cada um resolve independente, ver `DECISOES-COMBATE.md` "Fluxo
-   * Acerto/Erro sem 'renunciar'..."); com só 1 dos 2, vai direto no
-   * modal daquele efeito, sem essa etapa a mais. Sem nenhum dos 2,
-   * oferece Ancestralidade Gigante se disponível
-   * (`ancestralidadeGiganteEscolhida` é uma das 3 opções "ao acertar"
-   * E ainda sobra uso); sem nada aplicável, fica só o "OK". Esmagador/
-   * Talhador nunca coexistem entre si numa mesma arma (Contundente vs.
-   * Cortante são mutuamente exclusivos); Ancestralidade Gigante
-   * TEORICAMENTE poderia coincidir com os outros 2 (espécie Golias +
-   * Talento Geral + Bárbaro nível 10), mas o popup multi-efeito ainda
-   * não cobre esse 3º caso — nesse cenário raríssimo, o talento/Raízes
-   * ganham prioridade sobre Ancestralidade Gigante, igual antes. */
-  function confirmarFechamentoDoAtaque(talento: 'esmagador' | 'talhador' | null): {
-    rotulo?: string;
-    aoTocar?: () => void;
-  } {
-    if (talento && raizesDevastadorasDisponivel) {
-      return { rotulo: '💥🌳 Efeitos do Golpe', aoTocar: () => onAbrirEfeitosDoGolpe([talento, 'raizesDevastadoras']) };
-    }
-    if (talento) {
-      return { rotulo: ROTULO_GOLPE_CONDICIONAL[talento], aoTocar: () => onAbrirGolpeCondicional(talento) };
-    }
-    if (raizesDevastadorasDisponivel) {
-      return { rotulo: '🌳 Raízes Devastadoras', aoTocar: onAbrirRaizesDevastadoras };
-    }
-    const rotuloAncestralidade = ancestralidadeGiganteEscolhida
-      ? ROTULO_ANCESTRALIDADE_GIGANTE[ancestralidadeGiganteEscolhida]
-      : undefined;
-    if (rotuloAncestralidade && usosAncestralidadeGiganteRestantes > 0) {
-      return { rotulo: rotuloAncestralidade, aoTocar: onAtivarAncestralidadeGigante };
-    }
-    return {};
-  }
-
-  /** Golpes Potencializados (Monge nível 6): no Ataque Desarmado, o popup de
-   * dano fecha escolhendo o tipo (Contundente ou Energético) — só rótulo
-   * informativo. Com botão de talento (Esmagador etc.), o Energético entra ao lado. */
-  function comGolpesPotencializados(
-    ehDesarmado: boolean,
-    base: { rotulo?: string; aoTocar?: () => void },
-  ): { rotulo?: string; aoTocar?: () => void } | { rotulo: string; aoTocar?: () => void }[] {
-    if (!golpesPotencializados || !ehDesarmado) return base;
-    // Botão de talento (Esmagador etc.) só vale pro tipo normal (Contundente);
-    // o Energético entra ao lado, sem o efeito do talento.
-    if (base.rotulo) return [{ rotulo: base.rotulo, aoTocar: base.aoTocar }, { rotulo: TIPOS_DANO_GOLPES_POTENCIALIZADOS[1] }];
-    return TIPOS_DANO_GOLPES_POTENCIALIZADOS.map((rotulo) => ({ rotulo, aoTocar: base.aoTocar }));
-  }
-
-  /** Acrescenta o botão "🌪 Elemental" (Ataques Elementais) ao fechamento do
-   * popup de dano do Ataque Desarmado, com a Sintonia Elemental ativa. */
-  function comElemental(
-    ehDesarmado: boolean,
-    base: { rotulo?: string; aoTocar?: () => void } | { rotulo: string; aoTocar?: () => void }[],
-  ) {
-    if (!podeAtaqueElemental(sintoniaElementalAtiva, ehDesarmado)) return base;
-    const botoes = Array.isArray(base) ? base : [{ rotulo: base.rotulo ?? 'OK', aoTocar: base.aoTocar }];
-    return [...botoes, { rotulo: '🌪 Elemental', aoTocar: onElemental }];
-  }
-
-  /** Acrescenta o botão "➕ Ápice" (Golpes Potencializados do Ápice Elemental, nível 17) ao
-   * fechamento do popup de dano do Ataque Desarmado, 1x por turno. */
-  function comApice(
-    ehDesarmado: boolean,
-    critico: boolean,
-    base: { rotulo?: string; aoTocar?: () => void } | { rotulo: string; aoTocar?: () => void }[],
-  ) {
-    if (!ehDesarmado || !apiceGolpesDisponivel()) return base;
-    const botoes = Array.isArray(base) ? base : [{ rotulo: base.rotulo ?? 'OK', aoTocar: base.aoTocar }];
-    return [...botoes, { rotulo: '➕ Ápice (+1 dado)', aoTocar: () => onApiceGolpes(critico) }];
-  }
-
-  /** Acrescenta o botão "💫 Golpe Atordoante" ao lado do(s) botão(ões) de
-   * fechamento do popup de dano, quando o acerto é elegível. */
-  function comGolpeAtordoante(
-    ataque: AtaqueInfo,
-    base: { rotulo?: string; aoTocar?: () => void } | { rotulo: string; aoTocar?: () => void }[],
-  ) {
-    if (!podeGolpeAtordoante(ataque)) return base;
-    const botoes = Array.isArray(base) ? base : [{ rotulo: base.rotulo ?? 'OK', aoTocar: base.aoTocar }];
-    return [...botoes, { rotulo: '💫 Golpe Atordoante', aoTocar: onGolpeAtordoante }];
   }
 
   /** `imprudente` — Ataque Imprudente (Bárbaro) já decidido pra esse
@@ -623,7 +449,6 @@ export default function AcaoPanelContent({
    * mostra só "OK". */
   function rolarAtaque(nome: string, ataque: AtaqueInfo, imprudente: boolean) {
     const vantagem = resolverVantagem(imprudente && ataque.usouForca, desvantagemForcaDestreza);
-    const talento = talentoGolpeCondicionalAtivavel(ataque);
     // Ver `AcaoPanelContentProps.danoDesarmadoRerollDisponivel`/
     // `perfuradorDisponivel` — os 2 rerolls de dano do ataque comum
     // (checados aqui, não em `rerollDanoTalento.ts`, porque dependem
@@ -658,10 +483,8 @@ export default function AcaoPanelContent({
       vantagem,
       confirmarAcerto: {
         onAcertou: ({ critico }) => {
-          // Efeitos "ao acertar" em lista + fila (ver `core/efeitosAoAcertar.ts`). Arma Sagrada e Raízes
-          // Devastadoras ainda usam os botões antigos do popup de dano.
-          const efeitos =
-            armaSagradaBonus > 0 || raizesDevastadorasDisponivel ? [] : efeitosAoAcertar(ataque, ehDanoDesarmado);
+          // Efeitos "ao acertar" em lista + fila (ver `core/efeitosAoAcertar.ts`).
+          const efeitos = efeitosAoAcertar(ataque, ehDanoDesarmado);
           const rolarDanoComExtras = (
             extras: { quantidade: number; lados: LadosDado }[],
             fechamentoPadrao: Parameters<typeof rolarDados>[0]['confirmarFechamento'],
@@ -691,27 +514,11 @@ export default function AcaoPanelContent({
             onPedirEfeitosAoAcertar({
               efeitos,
               critico,
-              ataque,
               rolarDano: (extras, aoFecharDano) => rolarDanoComExtras(extras, { aoTocar: aoFecharDano }),
             });
             return;
           }
-          rolarDanoComExtras(
-            [],
-            comGolpeAtordoante(
-              ataque,
-              comApice(
-                ehDanoDesarmado,
-                critico,
-                comElemental(
-                  ehDanoDesarmado,
-                  armaSagradaBonus > 0
-                    ? [{ rotulo: 'Normal' }, { rotulo: '☀️ Radiante' }]
-                    : comGolpesPotencializados(ehDanoDesarmado, confirmarFechamentoDoAtaque(talento)),
-                ),
-              ),
-            ),
-          );
+          rolarDanoComExtras([], {});
         },
         onErrou: () => {},
       },

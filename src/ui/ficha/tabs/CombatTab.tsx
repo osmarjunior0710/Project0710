@@ -1627,7 +1627,6 @@ export default function CombatTab({
           pedirEfeitosAoAcertar({
             efeitos,
             critico,
-            ataque: ataqueTorrente.info,
             rolarDano: rolarDanoTorrente,
             aoFinalizar: continuar,
           });
@@ -1801,27 +1800,6 @@ export default function CombatTab({
     );
   }
 
-  /** Rola o dado extra do Ápice (2 dados no crítico) e marca "usado neste turno". `aoFechar` =
-   * o que continua depois (ex.: próximo ataque da Torrente de Golpes). */
-  function usarApiceGolpes(critico: boolean, aoFechar?: () => void) {
-    if (!apiceGolpesDisponivelAgora()) {
-      aoFechar?.();
-      return;
-    }
-    apiceGolpesUsadoRef.current = true;
-    apiceElemental.onUsarGolpes();
-    const quantidade = critico ? 2 : 1;
-    rolarDados({
-      label: `Ápice Elemental — dano extra${critico ? ' (Crítico)' : ''}`,
-      formula: `${quantidade}d${ladosArtesMarciaisMonge}`,
-      quantidade,
-      lados: ladosArtesMarciaisMonge as LadosDado,
-      mod: 0,
-      confirmarFechamento: { aoTocar: aoFechar },
-    });
-    setFeedback('➕ Ápice Elemental — soma esse dano extra ao do ataque (mesmo tipo de dano).');
-  }
-
   // ===== Efeitos "ao acertar" em lista + fila (core/efeitosAoAcertar.ts, EmDev.md) =====
   // Foco restante sempre atual (o 2º/3º ataque da Torrente nasce de dentro do callback do 1º, com closure velha).
   const focoRestanteRef = useRef(pontosDeFocoRestantes);
@@ -1845,6 +1823,10 @@ export default function CombatTab({
   }, [talhadorDisponivel]);
   // Quando o AtivarEfeitoModal (Esmagador/Talhador) vem da fila, ao fechar chama a continuação da fila.
   const golpeCondicionalFechaRef = useRef<(() => void) | null>(null);
+  const raizesFechaRef = useRef<(() => void) | null>(null);
+  const golpeBrutalFechaRef = useRef<(() => void) | null>(null);
+  // Opções da janela "Tipo de dano" montadas junto da lista (Monge: Energético/Elemental; Paladino: Radiante).
+  const opcoesTipoDanoRef = useRef<{ nome: string; texto: string }[]>([]);
   const [listaAoAcertar, setListaAoAcertar] = useState<{
     efeitos: EfeitoAoAcertar[];
     aoConfirmar: (ids: string[]) => void;
@@ -1877,12 +1859,38 @@ export default function CombatTab({
         fase: 'dano',
       });
     }
-    if (desarmado && (golpesPotencializadosAtivo(nivelMonge) || podeAtaqueElemental(sintoniaElemental.ativa, true))) {
+    const opcoesTipo: { nome: string; texto: string }[] = [
+      { nome: ataque.danoTipo ?? 'Normal', texto: 'O tipo de dano normal do ataque.' },
+    ];
+    const origensTipo: string[] = [];
+    if (desarmado && golpesPotencializadosAtivo(nivelMonge)) {
+      opcoesTipo.push({ nome: TIPOS_DANO_GOLPES_POTENCIALIZADOS[1], texto: 'Golpes Potencializados: Energético no lugar do tipo normal.' });
+      origensTipo.push('Monge');
+    }
+    if (desarmado && podeAtaqueElemental(sintoniaElemental.ativa, true)) {
+      opcoesTipo.push({ nome: 'Elemental', texto: 'Ataques Elementais: escolhe o elemento; o alvo pode ser empurrado.' });
+      if (!origensTipo.includes('Monge')) origensTipo.push('Monge');
+    }
+    if (armaSagrada.bonus > 0) {
+      opcoesTipo.push({ nome: 'Radiante', texto: 'Arma Sagrada: dano Radiante no lugar do tipo normal da arma.' });
+      origensTipo.push('Paladino');
+    }
+    if (opcoesTipo.length > 1) {
+      opcoesTipoDanoRef.current = opcoesTipo;
       lista.push({
         id: 'tipo-dano',
         nome: '🎯 Tipo de dano diferente do normal',
-        origem: 'Monge',
-        descricao: 'Abre uma janela pra dizer qual tipo de dano foi dado (Energético ou Elemental).',
+        origem: origensTipo.join(' · '),
+        descricao: `Abre uma janela pra dizer qual tipo de dano foi dado (${opcoesTipo.slice(1).map((o) => o.nome).join(', ')}).`,
+        fase: 'depois',
+      });
+    }
+    if (raizesDevastadorasDisponivel) {
+      lista.push({
+        id: 'raizes',
+        nome: '🌳 Raízes Devastadoras',
+        origem: 'Bárbaro · Árvore do Mundo',
+        descricao: 'Ativa a maestria Derrubar ou Empurrar, além da maestria da arma.',
         fase: 'depois',
       });
     }
@@ -1945,19 +1953,19 @@ export default function CombatTab({
           setFeedback('➕ Ápice Elemental — o dado extra já entrou na rolagem de dano.');
         }
         const fila = marcadosDaFase(pedido.efeitos, marcados, 'depois');
-        pedido.rolarDano(extras, () => rodarFilaAoAcertar(fila, pedido.ataque, pedido.aoFinalizar));
+        pedido.rolarDano(extras, () => rodarFilaAoAcertar(fila, pedido.aoFinalizar));
       },
     });
   }
 
-  function rodarFilaAoAcertar(fila: EfeitoAoAcertar[], ataque: AtaqueInfo, aoFinalizar?: () => void) {
+  function rodarFilaAoAcertar(fila: EfeitoAoAcertar[], aoFinalizar?: () => void) {
     const passo = proximoPassoDaFila(fila);
     if (passo.tipo === 'fim') {
       aoFinalizar?.();
       return;
     }
     const executar = (efeito: EfeitoAoAcertar) =>
-      executarEfeitoAoAcertar(efeito.id, ataque, () => rodarFilaAoAcertar(removerDaFila(fila, efeito.id), ataque, aoFinalizar));
+      executarEfeitoAoAcertar(efeito.id, () => rodarFilaAoAcertar(removerDaFila(fila, efeito.id), aoFinalizar));
     if (passo.tipo === 'automatico') {
       executar(passo.efeito);
       return;
@@ -1973,19 +1981,12 @@ export default function CombatTab({
   }
 
   /** Resolve UM efeito da fila; `aoFechar` continua a fila quando o popup/ação dele termina. */
-  function executarEfeitoAoAcertar(id: string, ataque: AtaqueInfo, aoFechar: () => void) {
+  function executarEfeitoAoAcertar(id: string, aoFechar: () => void) {
     if (id === 'atordoante') {
       abrirGolpeAtordoante(aoFechar);
     } else if (id === 'tipo-dano') {
-      const opcoes = [{ nome: ataque.danoTipo ?? 'Normal', texto: 'O tipo de dano normal do ataque.' }];
-      if (golpesPotencializadosAtivo(nivelMonge)) {
-        opcoes.push({ nome: TIPOS_DANO_GOLPES_POTENCIALIZADOS[1], texto: 'Golpes Potencializados: Energético no lugar do tipo normal.' });
-      }
-      if (podeAtaqueElemental(sintoniaElemental.ativa, true)) {
-        opcoes.push({ nome: 'Elemental', texto: 'Ataques Elementais: escolhe o elemento; o alvo pode ser empurrado.' });
-      }
       setTipoDanoJanela({
-        opcoes,
+        opcoes: opcoesTipoDanoRef.current,
         aoEscolher: (nome) => {
           setTipoDanoJanela(null);
           if (nome === 'Elemental') {
@@ -2002,6 +2003,13 @@ export default function CombatTab({
     } else if (id === 'ancestralidade') {
       usarAncestralidadeGiganteAoAcertar();
       aoFechar();
+    } else if (id === 'raizes') {
+      raizesFechaRef.current = aoFechar;
+      setRaizesResolvidaTexto(null);
+      setRaizesDevastadorasEscolhaAberta(true);
+    } else if (id === 'golpe-brutal') {
+      golpeBrutalFechaRef.current = aoFechar;
+      setGolpeBrutalEfeitoPendente(true);
     } else {
       aoFechar();
     }
@@ -2116,6 +2124,13 @@ export default function CombatTab({
     const textos = nomes.map((nome) => efeitosGolpeBrutalDisponiveis.find((e) => e.nome === nome)?.texto ?? '');
     setFeedback(`🔨 ${nomes.join(' + ')} — ${textos.join(' ')}`);
     setGolpeBrutalEfeitoPendente(false);
+    continuarFilaDoGolpeBrutal();
+  }
+
+  function continuarFilaDoGolpeBrutal() {
+    const depois = golpeBrutalFechaRef.current;
+    golpeBrutalFechaRef.current = null;
+    depois?.();
   }
 
   const TEXTOS_GOLPE_CONDICIONAL: Record<'esmagador' | 'talhador', { titulo: string; textoEfeito: string }> = {
@@ -2150,9 +2165,10 @@ export default function CombatTab({
     depois?.();
   }
 
-  function abrirEfeitosDoGolpe(efeitos: ('esmagador' | 'talhador' | 'raizesDevastadoras')[]) {
-    setRaizesResolvidaTexto(null);
-    setEfeitosDoGolpePendentes(efeitos);
+  function continuarFilaDasRaizes() {
+    const depois = raizesFechaRef.current;
+    raizesFechaRef.current = null;
+    depois?.();
   }
 
   function escolherRaizesDevastadoras(nomes: string[]) {
@@ -2161,6 +2177,7 @@ export default function CombatTab({
       const texto = 'Empurrar: empurra o alvo (Grande ou menor) até 3m pra longe de você.';
       setFeedback(`🌳 Raízes Devastadoras — ${texto}`);
       setRaizesResolvidaTexto(texto);
+      continuarFilaDasRaizes();
       return;
     }
     setRaizesDevastadorasSalvaguardaAberta(true);
@@ -2465,7 +2482,7 @@ export default function CombatTab({
         <div className="opt-card" style={{ marginBottom: 12, borderColor: '#d9a441' }}>
           <div className="opt-card-name">⚔️ Arma Sagrada ATIVA — {armaSagrada.nomeArma}</div>
           <div className="opt-card-desc">
-            +{Math.max(1, modCarisma)} no acerto com {armaSagrada.nomeArma}; ao acertar, escolha dano Normal ou
+            +{Math.max(1, modCarisma)} no acerto com {armaSagrada.nomeArma}; ao acertar, marque "Tipo de dano diferente do normal" pra dano Normal ou
             Radiante no popup de dano. Emite luz (não simulado pelo app).
             {!armaSagrada.elegivel && ' A arma equipada agora não é elegível — o bônus some até você voltar a usar uma arma Corpo a Corpo.'}
           </div>
@@ -2763,7 +2780,10 @@ export default function CombatTab({
           opcoes={efeitosGolpeBrutalDisponiveis}
           maxEscolhas={golpeBrutalEscolhas}
           onEscolher={finalizarEfeitosGolpeBrutal}
-          onFechar={() => setGolpeBrutalEfeitoPendente(false)}
+          onFechar={() => {
+            setGolpeBrutalEfeitoPendente(false);
+            continuarFilaDoGolpeBrutal();
+          }}
         />
       )}
 
@@ -2857,7 +2877,6 @@ export default function CombatTab({
           golpeBrutalUsadoTurno={golpeBrutalUsadoTurno}
           onUsarGolpeBrutal={onUsarGolpeBrutal}
           onAtacouSemDanoPendente={registrarAtaqueSemDanoPendente}
-          onGolpeBrutalDanoConfirmado={() => setGolpeBrutalEfeitoPendente(true)}
           podeOferecerCortar={cortarDisponivel}
           onConfirmarCortarReduzirAZero={onConfirmarCortarReduzirAZero}
           temGolpeDeEscudo={golpeDeEscudoDisponivel}
@@ -2865,33 +2884,17 @@ export default function CombatTab({
           onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
           efeitosAoAcertar={efeitosAoAcertar}
           onPedirEfeitosAoAcertar={pedirEfeitosAoAcertar}
-          podeGolpeAtordoante={golpeAtordoanteParaAtaque}
-          golpesPotencializados={golpesPotencializadosAtivo(nivelMonge)}
-          sintoniaElementalAtiva={sintoniaElemental.ativa}
-          onElemental={() => abrirElemental()}
-          apiceGolpesDisponivel={apiceGolpesDisponivelAgora}
-          onApiceGolpes={(critico) => usarApiceGolpes(critico)}
           onEmpurrarImobilizar={abrirEmpurrarImobilizar}
           explosaoElementalDisponivel={temExplosaoElemental(nivelMonge, SUBCLASSE_ELEMENTOS)}
           onExplosaoElemental={abrirExplosaoElemental}
           pontosDeFocoMaximo={pontosDeFocoMaximo}
           pontosDeFocoRestantes={pontosDeFocoRestantes}
-          onGolpeAtordoante={() => abrirGolpeAtordoante()}
           temGolpesRadiantes={temGolpesRadiantes}
           armaSagradaDisponivel={armaSagrada.disponivel}
           armaSagradaElegivel={armaSagrada.elegivel}
           armaSagradaAtiva={armaSagrada.ativa}
           armaSagradaBonus={armaSagrada.bonus}
           onUsarArmaSagrada={usarArmaSagrada}
-          esmagadorDisponivel={esmagadorDisponivel}
-          talhadorDisponivel={talhadorDisponivel}
-          onAbrirGolpeCondicional={setGolpeCondicionalPendente}
-          raizesDevastadorasDisponivel={raizesDevastadorasDisponivel}
-          onAbrirRaizesDevastadoras={() => setRaizesDevastadorasEscolhaAberta(true)}
-          onAbrirEfeitosDoGolpe={abrirEfeitosDoGolpe}
-          ancestralidadeGiganteEscolhida={ancestralidadeGiganteEscolhida}
-          usosAncestralidadeGiganteRestantes={usosAncestralidadeGiganteRestantes}
-          onAtivarAncestralidadeGigante={usarAncestralidadeGiganteAoAcertar}
           detalhesAtivo={detalhesAtivo}
           maosCurativasDisponivel={maosCurativasDisponivel}
           maosCurativasGasto={maosCurativasGasto}
@@ -3352,7 +3355,10 @@ export default function CombatTab({
             { nome: 'Empurrar', texto: 'Automático — empurra o alvo (Grande ou menor) até 3m pra longe de você.' },
           ]}
           onEscolher={escolherRaizesDevastadoras}
-          onFechar={() => setRaizesDevastadorasEscolhaAberta(false)}
+          onFechar={() => {
+            setRaizesDevastadorasEscolhaAberta(false);
+            continuarFilaDasRaizes();
+          }}
         />
       )}
       {raizesDevastadorasSalvaguardaAberta && (
@@ -3366,6 +3372,7 @@ export default function CombatTab({
           onFechar={() => {
             setRaizesDevastadorasSalvaguardaAberta(false);
             setRaizesResolvidaTexto(`Derrubar: CD ${cdRaizesDevastadoras} informada ao Mestre (Constituição).`);
+            continuarFilaDasRaizes();
           }}
         />
       )}
