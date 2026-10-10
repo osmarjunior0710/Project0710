@@ -109,6 +109,9 @@ classe/talento específico).
 - **`sistemas/efeitos-ao-acertar.md`** — Efeitos "ao acertar" em lista + fila (lista com checkbox e tag de origem antes do
   dano, fila depois): Atacar, Torrente, Mão Secundária, Cortar, Golpe Brutal, Raízes, Arma Sagrada; bugs de closure velha.
 
+- **`sistemas/nivel-total-multiclasse.md`** — Nível total vs. da classe na multiclasse: o que o livro manda (truque = nível total;
+  espaços = soma de conjurador), auditoria da tabela, dano/cura de magia e caixa Level pelo nível total.
+
 - **`sistemas/multiclasse.md`** — Multiclasse: Truques/Magias
   Preparadas por classe (com selo), Espaços de Magia mostrando os 2
   pools juntos, CD/Ataque por classe, e a remoção completa do pill

@@ -3130,7 +3130,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       <div className={styles.tabContent}>
         {tab === 'atributos' && (
           <AtributosTab
-            nivel={personagem.nivel}
+            nivel={nivelTotalAtual}
             pvMax={personagem.pvMax}
             pvAtual={pvAtual}
             ca={ca}
@@ -3225,6 +3225,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           <MagiasTab
             classe={classe}
             nivel={personagem.nivel}
+            nivelPersonagem={nivelTotalAtual}
             onAdicionarPet={adicionarPet}
             espacosGastosPorCirculo={espacosGastosParaConjurar}
             classeAtivaNome={chaveDoPoolDeMagia}
@@ -3348,7 +3349,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             classeAtivaNome={chaveDoPoolDeMagia}
             ponte={ponte}
             estiloDeLuta={estiloDeLuta}
-            nivel={personagem.nivel}
+            nivel={nivelTotalAtual}
             nivelRecuperarFolego={nivelRecuperarFolego}
             nivelIndomavel={nivelIndomavel}
             folego={{ maximo: usosFolegoMaximo, restantes: usosFolegoRestantes, onUsar: usarUsoFolego }}

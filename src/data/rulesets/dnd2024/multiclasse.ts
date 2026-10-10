@@ -17,7 +17,7 @@
 // - `espacosMagiaPorNivelCombinado` — tabela oficial de Espaços de
 //   Magia pra conjurador multiclasse (Bárbaro/Guerreiro/Ladino contam
 //   0 nessa soma; meio-conjuradores como Guardião/Paladino contam
-//   metade do nível, arredondado pra baixo; Bruxo — Magia de Pacto —
+//   metade do nível, arredondado pra CIMA (confirmado no Livro, Cap. 2 p.14); Bruxo — Magia de Pacto —
 //   NUNCA entra aqui, sempre separado). O "Nível Combinado" em si (a
 //   soma que indexa essa tabela) é calculado em `core/`, não faz parte
 //   do dado.

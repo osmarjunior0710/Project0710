@@ -15,5 +15,5 @@
 
 ---
 
-Nenhum foco em andamento agora — "Efeitos ao acertar em lista + fila" fechou (ver
-`aprendizados/sistemas/efeitos-ao-acertar.md`; o que ficou em aberto está em `PENDENCIAS.md` "Efeitos ao acertar").
+Nenhum foco em andamento agora — "Nível total em truque/dano/cura e na caixa Level" fechou (ver
+`aprendizados/sistemas/nivel-total-multiclasse.md`; o que ficou em aberto está em `PENDENCIAS.md` "Multiclasse").

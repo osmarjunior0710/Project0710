@@ -53,6 +53,9 @@ const armasMarciais = armas.filter((a) => a.categoria.includes('Marciais'));
 interface MagiasTabProps {
   classe: Classe | null;
   nivel: number;
+  /** Nível TOTAL do personagem (soma das classes) — o dano/cura de truque e magia escala por ele (Livro, Cap. 2
+   * Multiclasse), enquanto `nivel` acima é o da classe em foco (só serve pro pool de espaços dela). */
+  nivelPersonagem: number;
   /** Cria um Pet a partir do catálogo de `Criatura` (ver `core/pets.ts`)
    * — usado por Convocar Montaria (Paladino, Montaria Fiel). */
   onAdicionarPet: (nome: string, criaturaId: string, origemInvocacaoId?: string, ajustes?: { ca: number; pvMax: number }) => void;
@@ -336,6 +339,7 @@ interface MagiasTabProps {
 export default function MagiasTab({
   classe,
   nivel,
+  nivelPersonagem,
   onAdicionarPet,
   espacosGastosPorCirculo,
   classeAtivaNome,
@@ -530,7 +534,7 @@ export default function MagiasTab({
     const resultado = decidirConjuracao(
       m,
       circuloUsado,
-      nivel,
+      nivelPersonagem,
       modAcertoReal,
       colheitaMacabraDisponivel,
       gastouEspacoDeVerdade,
@@ -623,7 +627,7 @@ export default function MagiasTab({
       return;
     }
     if (resultado.mecanica === 'salvaguarda') {
-      const danoBase = calcularDanoMagia(m, circuloUsado, nivel);
+      const danoBase = calcularDanoMagia(m, circuloUsado, nivelPersonagem);
       if (!danoBase) {
         setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: null, upcastNaoAutomatico: false });
         return;
@@ -700,7 +704,7 @@ export default function MagiasTab({
   // popup e rola direto, sem juntar no Falha/Sucesso.
   function rolarDanoCondicionalSalvaguarda() {
     if (!telaSalvaguarda) return;
-    const dano = calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel);
+    const dano = calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivelPersonagem);
     const texto = telaSalvaguarda.magia.danoCondicionalTexto;
     setTelaSalvaguarda(null);
     if (!dano) return;
@@ -773,7 +777,7 @@ export default function MagiasTab({
     return (
       <EscolherCirculoShell
         magia={telaCirculo.magia}
-        nivelPersonagem={nivel}
+        nivelPersonagem={nivelPersonagem}
         opcoes={opcoesGastoComPonte(
           telaCirculo.magia.circulo,
           classeAtivaNome,
@@ -821,7 +825,7 @@ export default function MagiasTab({
   const avisoRecuperacao = temCurto ? 'Recupera no Descanso Curto ou Longo.' : 'Recupera no Descanso Longo.';
 
   const danoCondicionalSalvaguarda = telaSalvaguarda
-    ? calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivel)
+    ? calcularDanoCondicionalMagia(telaSalvaguarda.magia, telaSalvaguarda.circuloUsado, nivelPersonagem)
     : null;
   const avisoUpcastSalvaguarda =
     telaSalvaguarda?.upcastNaoAutomatico && telaSalvaguarda?.magia.upcastTexto

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, calcularCuraMagia, mecanicaDaMagia, atributoSalvaguarda } from './magiaDano';
 import { magias } from '../data/rulesets/dnd2024/magias';
+import { nivelTotalPersonagem } from './multiclasse';
 
 function magia(id: string) {
   const m = magias.find((m) => m.id === id);
@@ -260,5 +261,28 @@ describe('atributoSalvaguarda', () => {
 
   it('"aleatório" (Rajada Prismática) — texto explicando que varia', () => {
     expect(atributoSalvaguarda(magia('rajadaprismatica'))).toBe('variável (sorteado pela magia, veja descrição)');
+  });
+});
+
+describe('truque escala pelo nível TOTAL do personagem (Livro, Cap. 2 Multiclasse)', () => {
+  // Mago 3 / Bárbaro 3 = nível 6; a escala de truque nunca lê o nível de uma classe só.
+  const nivelTotal = nivelTotalPersonagem([
+    { classe: 'Mago', nivel: 3, subclasse: null },
+    { classe: 'Bárbaro', nivel: 3, subclasse: null },
+  ]);
+
+  it('Mago 3 / Bárbaro 3 (nível 6) usa o dado do nível 5; só o Mago 3 usaria o do nível 1', () => {
+    expect(nivelTotal).toBe(6);
+    expect(calcularDanoMagia(magia('chamasagrada'), 0, nivelTotal)).toMatchObject({ quantidade: 2, lados: 8 });
+    expect(calcularDanoMagia(magia('chamasagrada'), 0, 3)).toMatchObject({ quantidade: 1, lados: 8 });
+  });
+
+  it('marcos 5 / 11 / 17 do personagem inteiro', () => {
+    const dados = [4, 5, 10, 11, 16, 17].map((n) => calcularDanoMagia(magia('chamasagrada'), 0, n)?.quantidade);
+    expect(dados).toEqual([1, 2, 2, 3, 3, 4]);
+  });
+
+  it('personagem de uma classe só não muda (nível total = nível da classe)', () => {
+    expect(nivelTotalPersonagem([{ classe: 'Mago', nivel: 5, subclasse: null }])).toBe(5);
   });
 });

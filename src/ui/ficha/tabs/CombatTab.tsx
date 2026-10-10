@@ -149,6 +149,7 @@ interface CombatTabProps {
    * quem não tem Bruxo + outra classe conjuradora ao mesmo tempo. */
   ponte: PoolDePonte | null;
   estiloDeLuta: EstiloDeLuta | null;
+  /** Nível TOTAL do personagem (soma das classes): dano/cura de magia escala por ele (Livro, Cap. 2 Multiclasse). */
   nivel: number;
   /** Nível da classe que dá Recuperar Fôlego / Indomável (Guerreiro) — o `nivel` acima segue a classe em foco. */
   nivelRecuperarFolego: number;
