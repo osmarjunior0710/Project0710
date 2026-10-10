@@ -16,6 +16,20 @@ if (!arquivo || !padrao) {
 }
 
 const doc = await getDocument({ data: new Uint8Array(fs.readFileSync(arquivo)), useSystemFonts: true }).promise;
+
+if (padrao === '--tudo') {
+  const de = Number(process.argv[4] ?? 1);
+  const ate = Number(process.argv[5] ?? doc.numPages);
+  for (let numero = de; numero <= Math.min(ate, doc.numPages); numero++) {
+    const pagina = await doc.getPage(numero);
+    const conteudo = await pagina.getTextContent();
+    const linhas = conteudo.items.map((item) => item.str + (item.hasEOL ? '\n' : ' ')).join('');
+    console.log('\n===== p.' + numero + ' =====\n' + linhas);
+  }
+  console.log('\n(' + doc.numPages + ' páginas no total)');
+  process.exit(0);
+}
+
 let achados = 0;
 for (let numero = 1; numero <= doc.numPages; numero++) {
   const pagina = await doc.getPage(numero);

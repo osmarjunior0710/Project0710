@@ -15,5 +15,8 @@
 
 ---
 
-Nenhum foco em andamento agora — "Nível total em truque/dano/cura e na caixa Level" fechou (ver
-`aprendizados/sistemas/nivel-total-multiclasse.md`; o que ficou em aberto está em `PENDENCIAS.md` "Multiclasse").
+## Foco em ABERTURA: classe Psiônico (Unearthed Arcana 2025) — chapéu 1 (levantamento) feito, aguardando decisões do Osmar
+
+Fonte: `livros-referencia/unearthed-arcana/Psionico_Atualizacoes_UA_2025.pdf` (23 págs). Levantamento exaustivo + texto literal + inconsistências + quebra
+em entregas E1-E7 em `sdd/sdd-psionico.md`. Nenhum código escrito ainda. Próximo passo: o Osmar decide as inconsistências (seção 2 do SDD) e aprova a
+quebra; só então vira checklist aqui (chapéus 2 e 3 do `CLAUDE.md`).
