@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1902
+
+Psiônico: pré-requisito e proficiências de multiclasse provisoriamente iguais às do Mago (marcado como não oficial) e cor da classe definida em roxo (diferente do Bruxo).
+
 ## v202610_1853
 
 Psiônico (Unearthed Arcana 2025, não oficial) entrou como esqueleto: o Char Multiclasse agora tem Psiônico nível 20 (nível total 160), com todas as características da classe aparecendo no Perfil marcadas como [PH] (ainda sem mecânica). A classe ainda não aparece como opção pronta na criação de personagem; subclasses, magias e mecânicas vêm nas próximas entregas.

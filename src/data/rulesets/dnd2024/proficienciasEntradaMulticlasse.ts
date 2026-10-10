@@ -75,4 +75,13 @@ export const proficienciasEntradaMulticlasse: ProficienciaEntradaMulticlasse[] =
     ferramentaAEscolha: null,
     fonte: 'Livro do Jogador (D&D 5e 2024)',
   },
+  {
+    // Provisório, igual ao Mago (decisão do Osmar) — o PDF UA não define.
+    classe: 'Psiônico',
+    proficienciaArmas: '',
+    treinamentoArmadura: '',
+    periciaAEscolha: null,
+    ferramentaAEscolha: null,
+    fonte: 'Unearthed Arcana 2025 — não oficial (provisório: igual ao Mago por decisão do Osmar, 2026-10; o PDF não define)',
+  },
 ];

@@ -49,6 +49,7 @@ export const preRequisitosMulticlasse: PreRequisitoMulticlasse[] = [
   { classe: 'Mago', atributosMinimos: ['INT'], modo: 'todos', fonte: 'Livro do Jogador (D&D 5e 2024)' },
   { classe: 'Monge', atributosMinimos: ['DES', 'SAB'], modo: 'todos', fonte: 'Livro do Jogador (D&D 5e 2024)' },
   { classe: 'Paladino', atributosMinimos: ['FOR', 'CAR'], modo: 'todos', fonte: 'Livro do Jogador (D&D 5e 2024)' },
+  { classe: 'Psiônico', atributosMinimos: ['INT'], modo: 'todos', fonte: 'Unearthed Arcana 2025 — não oficial (provisório: igual ao Mago por decisão do Osmar, 2026-10; o PDF não define)' },
 ];
 
 export interface ProficienciasMulticlasse {
@@ -120,6 +121,11 @@ export const proficienciasMulticlasse: ProficienciasMulticlasse[] = [
     classe: 'Paladino',
     proficienciasObtidas: 'Dado de Ponto de Vida, proficiência com armas Marciais e treinamento com armaduras Leves, Médias e Escudos.',
     fonte: 'Livro do Jogador (D&D 5e 2024)',
+  },
+  {
+    classe: 'Psiônico',
+    proficienciasObtidas: 'Apenas o Dado de Ponto de Vida.',
+    fonte: 'Unearthed Arcana 2025 — não oficial (provisório: igual ao Mago por decisão do Osmar, 2026-10; o PDF não define)',
   },
 ];
 

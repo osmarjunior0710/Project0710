@@ -25,4 +25,4 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
 - [ ] E3 — Dados de Energia Psiônica / Impulso / Conexão / Telecinese Sutil.
 - [ ] E4 — Disciplinas Psiônicas. E5 — Restauração/Surto/Reservas/Força Vital. E6a-d — subclasses. E7 — Talentos Selvagens.
 - [ ] Ligar `disponivel: true` + selo "UA · não oficial" no wizard quando a classe estiver jogável.
-- Pendente de decisão do Osmar: pré-requisito de multiclasse e proficiências de entrada do Psiônico (não estão no PDF); cor definitiva da classe.
+- Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.
