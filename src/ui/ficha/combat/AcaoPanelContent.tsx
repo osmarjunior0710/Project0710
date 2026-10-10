@@ -9,6 +9,7 @@ import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import { resolverVantagem, fmtMod } from '../../../core/calculoPersonagem';
 import type { ResumoConjuracaoPorClasse } from '../../../core/magiasPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
+import type { EfeitoAoAcertar } from '../../../core/efeitosAoAcertar';
 import { useRoll } from '../../roll/RollContext';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
@@ -20,7 +21,21 @@ import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import styles from './PanelRows.module.css';
 import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
 
+/** Pedido de "efeitos ao acertar" (lista + fila, ver `core/efeitosAoAcertar.ts`). `rolarDano` rola o dano
+ * com os dados extras da fase 'dano' (ex.: Ápice) e chama `aoFecharDano` quando o popup de dano fecha. */
+export interface PedidoEfeitosAoAcertar {
+  efeitos: EfeitoAoAcertar[];
+  critico: boolean;
+  ataque: AtaqueInfo;
+  rolarDano: (extras: { quantidade: number; lados: LadosDado }[], aoFecharDano: () => void) => void;
+  aoFinalizar?: () => void;
+}
+
 interface AcaoPanelContentProps {
+  /** Efeitos "ao acertar" elegíveis pra esse ataque (lista antes do dano + fila depois). Vazio = fluxo
+   * antigo (botões no popup de dano). `desarmado` libera os efeitos do Ataque Desarmado. */
+  efeitosAoAcertar: (ataque: AtaqueInfo, desarmado: boolean) => EfeitoAoAcertar[];
+  onPedirEfeitosAoAcertar: (pedido: PedidoEfeitosAoAcertar) => void;
   /** `SidePanel.open` do drawer — ver comentário em
    * `useUsarMagiaPainel.tsx` (reseta o picker de "Usar Magia" ao
    * fechar pela borda/backdrop, não só pelo "← Voltar" dele mesmo). */
@@ -274,6 +289,8 @@ interface AcaoPanelContentProps {
 }
 
 export default function AcaoPanelContent({
+  efeitosAoAcertar,
+  onPedirEfeitosAoAcertar,
   aberto,
   desvantagemForcaDestreza,
   onEscolher,
@@ -641,25 +658,47 @@ export default function AcaoPanelContent({
       vantagem,
       confirmarAcerto: {
         onAcertou: ({ critico }) => {
-          const dano = danoComCritico(
-            {
-              quantidade: ataque.danoQuantidade,
+          // Efeitos "ao acertar" em lista + fila (ver `core/efeitosAoAcertar.ts`). Arma Sagrada e Raízes
+          // Devastadoras ainda usam os botões antigos do popup de dano.
+          const efeitos =
+            armaSagradaBonus > 0 || raizesDevastadorasDisponivel ? [] : efeitosAoAcertar(ataque, ehDanoDesarmado);
+          const rolarDanoComExtras = (
+            extras: { quantidade: number; lados: LadosDado }[],
+            fechamentoPadrao: Parameters<typeof rolarDados>[0]['confirmarFechamento'],
+          ) => {
+            const dano = danoComCritico(
+              {
+                quantidade: ataque.danoQuantidade,
+                lados: ataque.danoLados,
+                mod: ataque.danoMod,
+                gruposExtras: [...(golpesRadiantesAtivo ? [{ quantidade: 1, lados: 8 as LadosDado }] : []), ...extras],
+              },
+              critico,
+            );
+            rolarDados({
+              label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}${golpesRadiantesAtivo ? ' + Golpes Radiantes' : ''}${extras.length ? ' + Ápice' : ''}`,
+              formula: dano.formula,
+              quantidade: dano.quantidade,
               lados: ataque.danoLados,
               mod: ataque.danoMod,
-              gruposExtras: golpesRadiantesAtivo ? [{ quantidade: 1, lados: 8 }] : undefined,
-            },
-            critico,
-          );
-          rolarDados({
-            label: `Dano — ${nome}${critico ? ' (Crítico)' : ''}${golpesRadiantesAtivo ? ' + Golpes Radiantes' : ''}`,
-            formula: dano.formula,
-            quantidade: dano.quantidade,
-            lados: ataque.danoLados,
-            mod: ataque.danoMod,
-            gruposExtras: dano.gruposExtras as { quantidade: number; lados: LadosDado }[] | undefined,
-            rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
-            rerollEscolhido: perfuradorDisponivel && ataque.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
-            confirmarFechamento: comGolpeAtordoante(
+              gruposExtras: dano.gruposExtras as { quantidade: number; lados: LadosDado }[] | undefined,
+              rerollSe1: ehDanoDesarmado && danoDesarmadoRerollDisponivel ? { rotulo: 'Dano Garantido' } : undefined,
+              rerollEscolhido: perfuradorDisponivel && ataque.danoTipo === 'Perfurante' ? { rotulo: 'Perfurador' } : undefined,
+              confirmarFechamento: fechamentoPadrao,
+            });
+          };
+          if (efeitos.length > 0) {
+            onPedirEfeitosAoAcertar({
+              efeitos,
+              critico,
+              ataque,
+              rolarDano: (extras, aoFecharDano) => rolarDanoComExtras(extras, { aoTocar: aoFecharDano }),
+            });
+            return;
+          }
+          rolarDanoComExtras(
+            [],
+            comGolpeAtordoante(
               ataque,
               comApice(
                 ehDanoDesarmado,
@@ -672,7 +711,7 @@ export default function AcaoPanelContent({
                 ),
               ),
             ),
-          });
+          );
         },
         onErrou: () => {},
       },

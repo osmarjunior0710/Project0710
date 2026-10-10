@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1159
+
+Novo jeito de ativar efeitos ao acertar: depois que o d20 acerta, abre uma lista com caixinhas (cada efeito mostra de onde vem: Monge, Talento, Espécie), você marca os que quer e o dano rola; os efeitos marcados entram numa fila, e se forem 2 ou mais o app pergunta qual resolver primeiro. O dado extra do Ápice agora entra na mesma rolagem do dano, e o tipo de dano diferente do normal (Energético/Elemental) vira uma janela própria. Vale pro Atacar e pra Torrente de Golpes (cada golpe abre a lista de novo).
+
 ## v202610_1132
 
 Corrige o Deslocamento: o ⓘ dizia "armadura equipada" mesmo sem armadura, então o Monge nunca ganhava Movimento sem Armadura (e o Bárbaro, Movimento Rápido). Agora só conta como equipado o que está de fato na Mão/Armadura/Escudo da Mochila: sem armadura o Monge soma o bônus; com Cota de Malha, os dois bônus ficam inativos com o motivo certo.
