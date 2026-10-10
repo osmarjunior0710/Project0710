@@ -52,4 +52,6 @@ export const conjuradoresMulticlasse: ConjuradorMulticlasse[] = [
   { classe: 'Mago', tipo: 'completo', fonte: 'Livro do Jogador (D&D 5e 2024)' },
   { classe: 'Monge', tipo: 'nenhum', fonte: 'Livro do Jogador (D&D 5e 2024)' },
   { classe: 'Paladino', tipo: 'meio', fonte: 'Livro do Jogador (D&D 5e 2024)' },
+  // Mesma tabela de espaços do Mago (conferido no PDF UA 2025).
+  { classe: 'Psiônico', tipo: 'completo', fonte: 'Unearthed Arcana 2025 — O Psiônico (não oficial)' },
 ];

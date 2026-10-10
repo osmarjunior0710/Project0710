@@ -87,4 +87,10 @@ export const proficienciasArmaArmaduraClasse: ProficienciaArmaArmadura[] = [
     treinamentoArmadura: "Armaduras Leve, Média e Pesada, Escudos",
     fonte: "Livro do Jogador (D&D 5e 2024)",
   },
+  {
+    classe: "Psiônico",
+    proficienciaArmas: "Armas Simples",
+    treinamentoArmadura: "Nenhuma",
+    fonte: "Unearthed Arcana 2025 — O Psiônico (não oficial)",
+  },
 ];

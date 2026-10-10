@@ -32,6 +32,8 @@ const COR_POR_CLASSE: Record<string, CorClasse> = {
   Mago: { hex: '#2b53e3', textoClaro: true },
   Monge: { hex: '#c45200', textoClaro: true },
   Paladino: { hex: '#000075', textoClaro: true },
+  // Provisória (UA, não oficial) — o Osmar escolhe a definitiva.
+  Psiônico: { hex: '#008b8b', textoClaro: true },
 };
 
 /** `null` = a classe ainda não tem cor definida (usa o azul padrão do

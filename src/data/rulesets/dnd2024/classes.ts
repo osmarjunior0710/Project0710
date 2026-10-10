@@ -46,6 +46,8 @@ export interface Classe {
 
 const FONTE = 'Livro do Jogador (D&D 5e 2024)';
 
+import { classePsionico } from './classePsionico';
+
 export const classes: Classe[] = [
   {
     id: 'guerreiro',
@@ -639,4 +641,6 @@ export const classes: Classe[] = [
     disponivel: true,
     fonte: FONTE,
   },
+  // Unearthed Arcana 2025 — não oficial (CLAUDE.md seção 9).
+  classePsionico,
 ];

@@ -2,6 +2,7 @@
 // de Classe". Não editar valores à mão.
 //
 import type { StatusImplementacao } from './statusImplementacao';
+import { caracteristicasClassePsionico } from './classePsionico';
 
 // Guerreiro e Bardo importados por enquanto (base, sem subclasses). Na
 // célula da planilha, as descrições dos níveis 2 ("Mente Tática"), 5
@@ -32,7 +33,7 @@ export interface CaracteristicaClasse {
   magiaFixaConcedida?: { nomeMagia: string; usosGratisPorDescansoLongo: number };
 }
 
-export const caracteristicasClasse: CaracteristicaClasse[] = [
+const caracteristicasClasseOficiais: CaracteristicaClasse[] = [
   {
     classe: 'Guerreiro',
     nivel: 1,
@@ -987,4 +988,9 @@ export const caracteristicasClasse: CaracteristicaClasse[] = [
     tipoAcao: 'Passiva / Estática',
     statusImplementacao: 'codeimplementation',
   },
+];
+
+export const caracteristicasClasse: CaracteristicaClasse[] = [
+  ...caracteristicasClasseOficiais,
+  ...caracteristicasClassePsionico,
 ];

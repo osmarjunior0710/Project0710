@@ -271,4 +271,31 @@ export const proficienciasIniciaisClasse: Record<string, ProficienciasIniciaisCl
     ],
     fonte: 'Livro do Jogador (D&D 5e 2024), Cap. 3, pág. 159',
   },
+  // Unearthed Arcana 2025 (não oficial) — ver sdd/sdd-psionico.md.
+  psionico: {
+    classeId: 'psionico',
+    periciasEscolha: {
+      quantidade: 2,
+      opcoes: ['Arcanismo', 'Intuição', 'Intimidação', 'Investigação', 'Medicina', 'Percepção', 'Persuasão'],
+    },
+    equipamentoInicial: [
+      {
+        rotulo: 'A',
+        itens: [
+          { nome: 'Lança', quantidade: 1, unidade: null },
+          { nome: 'Adaga', quantidade: 2, unidade: null },
+          { nome: 'Besta Leve', quantidade: 1, unidade: null },
+          { nome: 'Virotes (20, Estojo)', quantidade: 1, unidade: null },
+          { nome: 'Kit de Explorador de Masmorras', quantidade: 1, unidade: null },
+        ],
+        ouro: 6,
+      },
+      {
+        rotulo: 'B',
+        itens: [],
+        ouro: 50,
+      },
+    ],
+    fonte: 'Unearthed Arcana 2025 — O Psiônico (não oficial)',
+  },
 };

@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1853
+
+Psiônico (Unearthed Arcana 2025, não oficial) entrou como esqueleto: o Char Multiclasse agora tem Psiônico nível 20 (nível total 160), com todas as características da classe aparecendo no Perfil marcadas como [PH] (ainda sem mecânica). A classe ainda não aparece como opção pronta na criação de personagem; subclasses, magias e mecânicas vêm nas próximas entregas.
+
 ## v202610_1755
 
 No tablet o app agora preenche a tela: a largura máxima subiu de 430px para 820px (celular não muda). Em tablet em pé (768px) a ficha ocupa a largura toda; em tablet deitado ou desktop ela fica centralizada em 820px, com a faixa escura dos lados.

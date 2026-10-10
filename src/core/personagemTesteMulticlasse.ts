@@ -58,6 +58,7 @@ const CLASSES_DO_CHAR_MULTICLASSE: { classe: string; subclasse: string | null }[
   { classe: 'Mago', subclasse: 'Evocador' },
   { classe: 'Monge', subclasse: 'Combatente dos Elementos' },
   { classe: 'Paladino', subclasse: 'Juramento da Devoção' },
+  { classe: 'Psiônico', subclasse: null },
 ];
 
 function prioridadeDeSituacao(m: Magia): number {
