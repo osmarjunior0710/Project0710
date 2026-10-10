@@ -42,7 +42,10 @@
 > tecnicamente possível, mas que a gente decide não fazer agora por
 > prioridade (diferente de `PENDENCIAS.md`, que é o que trava
 > estruturalmente) fica em `Backlog.md` (ver seção 17).
-> Toda publicação na branch principal (a que dispara o deploy) ganha
+> Convenções de UI que já custaram retrabalho (borda contínua = toca,
+> popup com largura máxima, ⓘ em portal...) ficam em `CONVENCOES-UI.md` —
+> **consulte antes de criar qualquer modal, popup ou caixa de escolha** (ver
+> seção 6.4). Toda publicação na branch principal (a que dispara o deploy) ganha
 > uma entrada nova no topo de `Changelog.md` — resumo do que subiu,
 > pro Osmar acompanhar sem precisar ler commit (ver seção 19).
 
@@ -311,6 +314,13 @@ pra garantir que a parte nova vai funcionar de verdade:
 - Qualquer decisão de como mapear/simplificar a regra do livro pro
   motor do app.
 
+**O SDD cita o texto literal da fonte** (planilha/PDF) dentro da seção de
+cada característica — não só um resumo —, e a entrega de cada característica
+só conta como pronta quando o que o app mostra/faz bate com esse texto
+(2026-10, postmortem do Monge: o SDD das 3 técnicas base foi escrito sem
+copiar o PDF, estava errado, e as entregas seguintes confiaram nele; só a
+revisão final contra o PDF achou). Se achar divergência, corrija o SDD e o app.
+
 Guarde o documento em `sdd/sdd-<assunto>.md` (ex.:
 `sdd/sdd-multiclasse.md`). Diferente do `EmDev`/`EmDevB`, o SDD **não
 é descartado ao fechar o foco** — continua valendo depois, como
@@ -364,6 +374,19 @@ desde o começo e deixa o Osmar validar cada entrega num personagem
 "anormal" (todas as classes juntas), que também testa a interface cheia
 e a multiclasse de graça. Subclasse: a não homebrew já implementada, ou
 `null` enquanto não houver. Não criar atalho dedicado por foco.
+
+**Regras de execução vindas do postmortem do Monge** (2026-10, aprovadas pelo Osmar;
+histórico em `aprendizados/classes/monge-postmortem.md`):
+1. **Depois de importar texto de característica, conferir na tela** — abrir o Perfil e o
+   Level Up e ver o texto lá (nunca afirmar "aparece na tela" sem abrir a tela). O teste
+   `core/caracteristicasComTexto.test.ts` quebra se uma característica da progressão ficar
+   sem texto; nome novo sem texto exige texto importado ou uma exceção justificada no teste.
+2. **Característica ligada a ataque com "1x por turno"/sequência (Ataque Extra, Torrente):
+   testar o 2º e o 3º golpe**, não só ataques isolados — o 2º golpe nasce dentro do callback
+   do 1º (closure velha): o estado de "já usei/modo escolhido" vive também num `useRef`.
+3. **Texto com "você pode" é opcional**: a proposta diz se é **automático ou escolha do
+   jogador** *antes* de codar. Efeito opcional de "ao acertar" é botão no popup de dano.
+4. **Antes de criar modal/popup/caixa de escolha, consultar `CONVENCOES-UI.md`.**
 
 **Regra geral de aprovação antes de codar** (pedido do Osmar, 2026-09):
 antes de escrever qualquer código de uma entrega, apresente a proposta
@@ -1026,3 +1049,18 @@ pedido — condição pra publicar:**
   regra/lógica de forma incompatível — não é só adição em paralelo,
   como a maioria dos conflitos já vistos) — aí pare e pergunte ao
   Osmar antes de decidir sozinho qual lado vale.
+
+## 21. Ferramentas e teste — armadilhas que já custaram tempo (2026-10)
+
+(Aprovado pelo Osmar depois do postmortem do Monge; detalhes em `LICOES-RAPIDAS.md`.)
+
+- **Scripts de edição de arquivo**: escrever o script num arquivo (`Write`) e rodar com
+  `node arquivo.cjs` — **nunca `node -e` com texto de código** (aspas quebram). Em arquivo de
+  código com final de linha CRLF, normalizar `\r\n` antes de editar e restaurar depois.
+- **Versão/horário**: usar `date` do Git Bash (`date -u -d '-3 hours' +v%Y%m_%H%M`); `date` chamado
+  de dentro do Node no Windows é outro comando e falha. Conferir `src/version.ts` e a entrada do
+  `Changelog.md` **antes** do `git push`.
+- **Contagem suspeita** (0 achados, "não existe") exige conferir a busca antes de afirmar.
+- **Navegador de teste**: dados 3D só animam enquanto o painel desenha frames (screenshot destrava);
+  não usar `scrollIntoView` (rola o `#root` e desloca modais); "Fim do Turno" e vários botões são
+  `div`, não `button`. Testar em 360px e 412px (seção 5).

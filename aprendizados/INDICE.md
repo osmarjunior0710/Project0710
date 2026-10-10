@@ -38,7 +38,7 @@ Um arquivo por classe de D&D implementada no app.
 - **`classes/monge-postmortem.md`** — postmortem dos 2 focos do Monge (2026-10):
   números, o que funcionou, 10 problemas com causa raiz (dado nunca importado,
   SDD errado, closure velha, popups, ordem de scripts...), mudanças de processo
-  sugeridas e o inventário completo do que ficou em aberto.
+  (aprovadas e aplicadas no `CLAUDE.md`/`CONVENCOES-UI.md`) e o inventário do que ficou em aberto.
 
 - **`classes/monge-elementos.md`** — subclasse Combatente dos Elementos do Monge
   (2026-10): 6 entregas em ordem de nível — Elementalismo concedido por

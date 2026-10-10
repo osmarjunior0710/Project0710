@@ -47,7 +47,12 @@
 | 9 | Vários scripts de edição quebraram. | Aspas dentro de `node -e` no shell (~6 vezes). | Erro imediato |
 | 10 | Testes "falhando" que eram do ambiente: modal deslocado, dados 3D travados em "Rolando...", "Fim do Turno" que não clicava. | `scrollIntoView` rola o `#root` (overflow hidden); o painel só anima 3D com frames; o botão é `div`, não `button`. | Investigação |
 
-## Mudanças de processo sugeridas (pro Osmar aprovar)
+## Mudanças de processo — APROVADAS pelo Osmar e aplicadas (2026-10)
+
+Onde cada uma foi parar: 1 → `CLAUDE.md` 6.4 regra 1 + teste `core/caracteristicasComTexto.test.ts`;
+2 → `CLAUDE.md` 6.2 (SDD cita o texto literal); 3 → `CLAUDE.md` 6.4 regra 2; 4 → `CONVENCOES-UI.md` +
+`CLAUDE.md` 6.4 regra 4; 5 → `CLAUDE.md` 6.4 regra 3 + `CONVENCOES-UI.md`; 6 e 7 → `CLAUDE.md` seção 21 +
+`LICOES-RAPIDAS.md`. Texto original da proposta:
 
 1. **Checklist de "dado importado" por classe/subclasse**: depois de importar
    texto, abrir o Perfil e o Level Up e conferir na tela (a auditoria pode ser
