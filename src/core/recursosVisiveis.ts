@@ -14,7 +14,7 @@ import { dadoInspiracao, usosInspiracaoMaximo } from './inspiracaoBardo';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
 import type { PersonagemClasse } from './multiclasse';
 import type { WizardSelection } from './personagem';
-import { quantidadeCanalizarDivindade, quantidadeFuria, quantidadeMaosConsagradas, quantidadePontosDeFoco, quantidadeRecuperarFolego } from './recursosClasse';
+import { ladosDadoEnergiaPsionica, quantidadeDadosEnergiaPsionica, quantidadeCanalizarDivindade, quantidadeFuria, quantidadeMaosConsagradas, quantidadePontosDeFoco, quantidadeRecuperarFolego } from './recursosClasse';
 
 export interface RecursoVisivel {
   /** Estável, pra key de lista e testes. */
@@ -54,6 +54,8 @@ export interface EntradaRecursosVisiveis {
     maosConsagradas: number;
     /** Pontos de Foco (Monge) — ver sdd/sdd-monge.md seção 3. */
     pontosDeFoco: number;
+    /** Dados de Energia Psiônica (Psiônico, UA) gastos. */
+    dadosEnergiaPsionica: number;
     /** `espacosGastosPorClasseECirculo` — a chave do pool de Pacto é o nome da classe. */
     espacosPorClasseECirculo: Record<string, Record<number, number>>;
   };
@@ -133,6 +135,26 @@ export function montarRecursosVisiveis(e: EntradaRecursosVisiveis): RecursoVisiv
           descricao: [
             `Ação Bônus: você recupera Pontos de Vida iguais a 1d10 + seu nível de Guerreiro (${c.nivel}).`,
             `Recarrega: ${recuperaEm(classe, 'Recuperar Fôlego (usos)')}.`,
+          ],
+        });
+      }
+    }
+
+    if (classe.nome === 'Psiônico') {
+      const maximo = quantidadeDadosEnergiaPsionica(classe, c.nivel);
+      const lados = ladosDadoEnergiaPsionica(classe, c.nivel);
+      if (maximo > 0) {
+        lista.push({
+          id: 'dados-de-energia-psionica',
+          nome: `Dados de Energia Psiônica (d${lados})`,
+          maximo,
+          restantes: Math.max(0, maximo - e.gastos.dadosEnergiaPsionica),
+          cor: corDoRecursoDaClasse(classe.nome),
+          exibicao: 'pips-bloco',
+          quebrarACada: 6,
+          descricao: [
+            'Abastecem o Impulso Telecinético, a Conexão Telepática e as Disciplinas Psiônicas. Se um poder exige gastar o dado e você não tem nenhum, não pode usá-lo. Salvaguardas desses poderes usam a sua CD de magia.',
+            `Recarrega: ${recuperaEm(classe, 'Dados de Energia Psiônica (quantidade)')}.`,
           ],
         });
       }

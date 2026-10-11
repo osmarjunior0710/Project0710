@@ -20,6 +20,7 @@ function entrada(classes: EntradaRecursosVisiveis['classes'], gastos: Partial<En
       inspiracao: 0,
       maosConsagradas: 0,
       pontosDeFoco: 0,
+      dadosEnergiaPsionica: 0,
       espacosPorClasseECirculo: {},
       ...gastos,
     },
@@ -27,6 +28,14 @@ function entrada(classes: EntradaRecursosVisiveis['classes'], gastos: Partial<En
 }
 
 describe('montarRecursosVisiveis', () => {
+  it('Psiônico: Dados de Energia Psiônica — nível 1 (4d6), nível 20 (12d12), gasto desconta', () => {
+    const n1 = montarRecursosVisiveis(entrada([{ classe: 'Psiônico', nivel: 1, subclasse: null }], { dadosEnergiaPsionica: 1 }));
+    expect(n1[0]).toMatchObject({ id: 'dados-de-energia-psionica', nome: 'Dados de Energia Psiônica (d6)', maximo: 4, restantes: 3 });
+    const n20 = montarRecursosVisiveis(entrada([{ classe: 'Psiônico', nivel: 20, subclasse: null }]));
+    expect(n20[0]).toMatchObject({ nome: 'Dados de Energia Psiônica (d12)', maximo: 12, restantes: 12 });
+    expect(n20[0].descricao.join(' ')).toContain('Descanso Longo');
+  });
+
   it('Bárbaro nível 1: Fúria com 2 usos, todos disponíveis', () => {
     const r = montarRecursosVisiveis(entrada([{ classe: 'Bárbaro', nivel: 1, subclasse: null }]));
     expect(r).toHaveLength(1);

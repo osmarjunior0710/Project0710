@@ -480,6 +480,8 @@ export interface PersonagemSalvo {
    * tudo no Descanso Curto E no Longo (igual Magia de Pacto do Bruxo,
    * ver sdd/sdd-monge.md seção 3). */
   pontosDeFocoGasto?: number;
+  /** Dados de Energia Psiônica (Psiônico, UA) já gastos — ausente = 0. Descanso Curto devolve 1, o Longo devolve todos. */
+  dadosEnergiaPsionicaGasto?: number;
   /** `true` = já usou Metabolismo Incomum (Monge, nível 2) desde o
    * último Descanso Longo — só ele reseta (ver sdd/sdd-monge.md
    * seção 8). */

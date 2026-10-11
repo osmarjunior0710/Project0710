@@ -22,7 +22,8 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
 - [x] E1a — esqueleto: classe (tabelas conferidas vs PDF), 12 características com texto literal [PH], proficiências, equipamento, conjurador completo, cor provisória, Char Multiclasse nível 20, teste de integridade.  (wizard mostra "em breve").
 - [ ] E1b — (adiado por decisão do Osmar, junto das E6a-d) 4 subclasses (homebrew:true) + 28 características [PH]; hoje o Char usa subclasse null.
 - [x] E2 — lista de magias do Psiônico (143 do PDF) + 18 magias novas UA (inclui Animar Mortos); conferido nas abas Magias e Combate (360px).
-- [ ] E3 — Dados de Energia Psiônica / Impulso / Conexão / Telecinese Sutil.
+- [x] E3a — contador de Dados de Energia Psiônica (Combate), descansos Curto (-1) e Longo (todos). Conferido em 360px.
+- [ ] E3d — Telecinese Sutil (Mão Mágica sempre conhecida); E3b — Impulso Telecinético; E3c — Conexão Telepática (grátis 1x por Descanso Longo).
 - [ ] E4 — Disciplinas Psiônicas. E5 — Restauração/Surto/Reservas/Força Vital. E6a-d — subclasses. E7 — Talentos Selvagens.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.

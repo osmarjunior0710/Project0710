@@ -564,6 +564,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [inspiracaoHeroicaAtiva, setInspiracaoHeroicaAtiva] = useState(personagemSalvo.inspiracaoHeroicaAtiva ?? false);
   // Monge — Pontos de Foco (ver sdd/sdd-monge.md seção 3).
   const [pontosDeFocoGasto, setPontosDeFocoGasto] = useState(personagemSalvo.pontosDeFocoGasto ?? 0);
+  // Psiônico (UA) — Dados de Energia Psiônica gastos.
+  const [dadosEnergiaPsionicaGasto, setDadosEnergiaPsionicaGasto] = useState(personagemSalvo.dadosEnergiaPsionicaGasto ?? 0);
   // Monge — Metabolismo Incomum (nível 2, ver sdd/sdd-monge.md seção
   // 8) — 1x por Descanso Longo, oferecido ao rolar Iniciativa.
   const [metabolismoIncomumUsado, setMetabolismoIncomumUsado] = useState(
@@ -1162,6 +1164,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       inspiracao: inspiracaoGasto,
       maosConsagradas: maosConsagradasGasto,
       pontosDeFoco: pontosDeFocoGasto,
+      dadosEnergiaPsionica: dadosEnergiaPsionicaGasto,
       espacosPorClasseECirculo: espacosGastosPorClasseECirculo,
     },
   });
@@ -1450,6 +1453,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     falarComAnimaisGnomoGasto,
     inspiracaoHeroicaAtiva,
     pontosDeFocoGasto,
+    dadosEnergiaPsionicaGasto,
     metabolismoIncomumUsado,
     indomavelGasto,
     pontosDeSorteGasto,
@@ -1566,6 +1570,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       falarComAnimaisGnomoGasto,
       inspiracaoHeroicaAtiva,
       pontosDeFocoGasto,
+      dadosEnergiaPsionicaGasto,
       metabolismoIncomumUsado,
       indomavelGasto,
       pontosDeSorteGasto,
@@ -2032,6 +2037,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setPontosDeFocoGasto(0);
     setMetabolismoIncomumUsado(false);
 
+    // Psiônico (UA).
+    setDadosEnergiaPsionicaGasto(0);
+
     // Paladino.
     setCanalizarDivindadeGasto(0);
     setMaosConsagradasGasto(0);
@@ -2095,6 +2103,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
     // Monge.
     setPontosDeFocoGasto(0);
+
+    // Psiônico (UA) — recupera 1 Dado de Energia Psiônica.
+    setDadosEnergiaPsionicaGasto((v) => Math.max(0, v - 1));
 
     // Paladino.
     setCanalizarDivindadeGasto((v) => Math.max(0, v - 1));

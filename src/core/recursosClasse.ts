@@ -62,6 +62,16 @@ export function quantidadePontosDeFoco(classe: Classe, nivel: number): number {
   return valorRecursoClasse(classe, 'Pontos de Foco', nivel);
 }
 
+/** Nº de Dados de Energia Psiônica (Psiônico, UA 2025) no nível atual — coluna "Nº de Dados" da tabela da classe. */
+export function quantidadeDadosEnergiaPsionica(classe: Classe, nivel: number): number {
+  return valorRecursoClasse(classe, 'Dados de Energia Psiônica', nivel);
+}
+
+/** Tamanho (lados) dos Dados de Energia Psiônica no nível atual — d6 a d12, coluna "Dado de Energia". */
+export function ladosDadoEnergiaPsionica(classe: Classe, nivel: number): number {
+  return valorRecursoClasse(classe, 'Dado de Energia Psiônica', nivel);
+}
+
 /** Bônus de Deslocamento (em metros) de Movimento sem Armadura (Monge)
  * no nível atual — só vale sem armadura/escudo equipado, ver
  * `sdd/sdd-monge.md` (mesma condição da Defesa sem Armadura). */
