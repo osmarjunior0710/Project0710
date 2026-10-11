@@ -64,6 +64,16 @@ interface BonusPanelContentProps {
   usosConhecimentoDePedrasRestantes: number;
   onUsarConhecimentoDePedras: () => void;
   /** Pico de Adrenalina (Orc) — 0 = espécie não é Orc. */
+  /** Conexão Telepática (Psiônico, UA) — ver `core/conexaoTelepatica.ts`. */
+  conexaoTelepatica: {
+    disponivel: boolean;
+    dadosMaximo: number;
+    dadosRestantes: number;
+    lados: number;
+    gratisDisponivel: boolean;
+    alcanceAtual: number | null;
+  };
+  onUsarConexaoTelepatica: () => void;
   usosPicoDeAdrenalinaMaximo: number;
   usosPicoDeAdrenalinaRestantes: number;
   onUsarPicoDeAdrenalina: () => void;
@@ -251,6 +261,8 @@ export default function BonusPanelContent({
   usosConhecimentoDePedrasMaximo,
   usosConhecimentoDePedrasRestantes,
   onUsarConhecimentoDePedras,
+  conexaoTelepatica,
+  onUsarConexaoTelepatica,
   usosPicoDeAdrenalinaMaximo,
   usosPicoDeAdrenalinaRestantes,
   onUsarPicoDeAdrenalina,
@@ -394,6 +406,7 @@ export default function BonusPanelContent({
     usosInspiracaoMaximo === 0 &&
     usosConhecimentoDePedrasMaximo === 0 &&
     usosPicoDeAdrenalinaMaximo === 0 &&
+    !conexaoTelepatica.disponivel &&
     !vooDraconicoDisponivel &&
     !saltoDaNuvemDisponivel &&
     !formaGrandeDisponivel &&
@@ -958,6 +971,36 @@ export default function BonusPanelContent({
                 {revelacaoCelestialGasto && !revelacaoCelestialFormaAtiva && (
                   <div className="label" style={{ marginTop: 6 }}>
                     já usado — descanse pra recuperar.
+                  </div>
+                )}
+              </>
+            )
+    ) },
+    { grupo: 'Psiônico', no: (
+      conexaoTelepatica.disponivel && (
+              <>
+                <div className={styles.slotCounter}>
+                  <span>Dados de Energia (d{conexaoTelepatica.lados}):</span>
+                  <TickPips total={conexaoTelepatica.dadosMaximo} usados={conexaoTelepatica.dadosMaximo - conexaoTelepatica.dadosRestantes} cor={corDoRecursoDaClasse('Psiônico')} />
+                </div>
+                <div
+                  className={styles.row}
+                  style={!conexaoTelepatica.gratisDisponivel && conexaoTelepatica.dadosRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={onUsarConexaoTelepatica}
+                >
+                  <div className={styles.rowName}>
+                    🧠 Conexão Telepática{conexaoTelepatica.gratisDisponivel ? ' — 1ª vez grátis' : ' — gasta 1 Dado de Energia'}
+                  </div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Telepatia de 9 m. Rola 1 Dado de Energia Psiônica: por 1 hora o alcance aumenta em 3 m × o resultado.
+                      {conexaoTelepatica.alcanceAtual !== null ? ` Alcance anotado agora: ${conexaoTelepatica.alcanceAtual} m.` : ''}
+                    </div>
+                  )}
+                </div>
+                {!conexaoTelepatica.gratisDisponivel && conexaoTelepatica.dadosRestantes <= 0 && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    sem Dados de Energia — descanse pra recuperar.
                   </div>
                 )}
               </>

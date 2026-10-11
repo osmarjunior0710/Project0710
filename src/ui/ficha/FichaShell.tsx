@@ -101,7 +101,8 @@ import { explicarCdRaizesDevastadoras } from '../../core/raizesDevastadoras';
 import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
-import { quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, quantidadePontosDeFoco, bonusMovimentoSemArmadura, ladosDadoArtesMarciais, temAuraDeProtecao } from '../../core/recursosClasse';
+import { usoDaConexaoTelepatica } from '../../core/conexaoTelepatica';
+import { ladosDadoEnergiaPsionica, quantidadeDadosEnergiaPsionica, quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, quantidadePontosDeFoco, bonusMovimentoSemArmadura, ladosDadoArtesMarciais, temAuraDeProtecao } from '../../core/recursosClasse';
 import { condicoesDisponiveisMaosConsagradas, custoTotalMaosConsagradas } from '../../core/maosConsagradas';
 import { bonusArmaSagrada, armaElegivelParaArmaSagrada } from '../../core/armaSagrada';
 import { danoResplendorSagrado } from '../../core/resplendorSagrado';
@@ -566,6 +567,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [pontosDeFocoGasto, setPontosDeFocoGasto] = useState(personagemSalvo.pontosDeFocoGasto ?? 0);
   // Psiônico (UA) — Dados de Energia Psiônica gastos.
   const [dadosEnergiaPsionicaGasto, setDadosEnergiaPsionicaGasto] = useState(personagemSalvo.dadosEnergiaPsionicaGasto ?? 0);
+  const [conexaoTelepaticaGratisUsada, setConexaoTelepaticaGratisUsada] = useState(personagemSalvo.conexaoTelepaticaGratisUsada ?? false);
+  const [conexaoTelepaticaAlcance, setConexaoTelepaticaAlcance] = useState<number | null>(personagemSalvo.conexaoTelepaticaAlcance ?? null);
   // Monge — Metabolismo Incomum (nível 2, ver sdd/sdd-monge.md seção
   // 8) — 1x por Descanso Longo, oferecido ao rolar Iniciativa.
   const [metabolismoIncomumUsado, setMetabolismoIncomumUsado] = useState(
@@ -912,6 +915,29 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const classeMonge = mongeEntry ? (catalogoClasses.find((c) => c.nome === 'Monge') ?? null) : null;
   const pontosDeFocoMaximo = classeMonge && mongeEntry ? quantidadePontosDeFoco(classeMonge, mongeEntry.nivel) : 0;
   const pontosDeFocoRestantes = Math.max(0, pontosDeFocoMaximo - pontosDeFocoGasto);
+  // Psiônico (UA) — Dados de Energia Psiônica e Conexão Telepática (core/conexaoTelepatica.ts).
+  const psionicoEntry = classesAtual.find((c) => c.classe === 'Psiônico');
+  const classePsionico = psionicoEntry ? (catalogoClasses.find((c) => c.nome === 'Psiônico') ?? null) : null;
+  const dadosEnergiaMaximo = classePsionico && psionicoEntry ? quantidadeDadosEnergiaPsionica(classePsionico, psionicoEntry.nivel) : 0;
+  const dadosEnergiaLados = classePsionico && psionicoEntry ? ladosDadoEnergiaPsionica(classePsionico, psionicoEntry.nivel) : 0;
+  const dadosEnergiaRestantes = Math.max(0, dadosEnergiaMaximo - dadosEnergiaPsionicaGasto);
+  const conexaoTelepatica = {
+    disponivel: dadosEnergiaMaximo > 0,
+    dadosMaximo: dadosEnergiaMaximo,
+    dadosRestantes: dadosEnergiaRestantes,
+    lados: dadosEnergiaLados,
+    gratisDisponivel: !conexaoTelepaticaGratisUsada,
+    alcanceAtual: conexaoTelepaticaAlcance,
+    /** Marca o uso (grátis ou gastando 1 dado) — `false` = não pode. */
+    onIniciar: (): boolean => {
+      const uso = usoDaConexaoTelepatica({ gratisUsada: conexaoTelepaticaGratisUsada, dadosRestantes: dadosEnergiaRestantes });
+      if (!uso) return false;
+      if (uso.gastaDado) setDadosEnergiaPsionicaGasto((v) => v + 1);
+      else setConexaoTelepaticaGratisUsada(true);
+      return true;
+    },
+    onResultado: (alcance: number) => setConexaoTelepaticaAlcance(alcance),
+  };
   function gastarPontoDeFoco(): boolean {
     if (pontosDeFocoRestantes <= 0) return false;
     setPontosDeFocoGasto((v) => v + 1);
@@ -1454,6 +1480,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     inspiracaoHeroicaAtiva,
     pontosDeFocoGasto,
     dadosEnergiaPsionicaGasto,
+    conexaoTelepaticaGratisUsada,
+    conexaoTelepaticaAlcance,
     metabolismoIncomumUsado,
     indomavelGasto,
     pontosDeSorteGasto,
@@ -1571,6 +1599,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       inspiracaoHeroicaAtiva,
       pontosDeFocoGasto,
       dadosEnergiaPsionicaGasto,
+      conexaoTelepaticaGratisUsada,
+      conexaoTelepaticaAlcance,
       metabolismoIncomumUsado,
       indomavelGasto,
       pontosDeSorteGasto,
@@ -2039,6 +2069,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
     // Psiônico (UA).
     setDadosEnergiaPsionicaGasto(0);
+    setConexaoTelepaticaGratisUsada(false);
+    setConexaoTelepaticaAlcance(null);
 
     // Paladino.
     setCanalizarDivindadeGasto(0);
@@ -2106,6 +2138,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
     // Psiônico (UA) — recupera 1 Dado de Energia Psiônica.
     setDadosEnergiaPsionicaGasto((v) => Math.max(0, v - 1));
+    setConexaoTelepaticaAlcance(null); // a "próxima hora" já passou
 
     // Paladino.
     setCanalizarDivindadeGasto((v) => Math.max(0, v - 1));
@@ -3378,6 +3411,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               restantes: usosConhecimentoDePedrasRestantes,
               onUsar: usarConhecimentoDePedras,
             }}
+            conexaoTelepatica={conexaoTelepatica}
             picoDeAdrenalina={{
               maximo: usosPicoDeAdrenalinaMaximo,
               restantes: usosPicoDeAdrenalinaRestantes,

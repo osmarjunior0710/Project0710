@@ -53,6 +53,7 @@ import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { useRoll, type LadosDado } from '../../roll/RollContext';
+import { alcanceConexaoTelepatica } from '../../../core/conexaoTelepatica';
 import InfoChip from '../../components/InfoChip';
 import BarraDeVida from '../../components/BarraDeVida';
 import ContadorUsos from '../../components/ContadorUsos';
@@ -175,6 +176,17 @@ interface CombatTabProps {
   };
   /** Conhecimento de Pedras (Anão) — `maximo` 0 = espécie não é Anão. */
   conhecimentoDePedras: RecursoContado;
+  /** Conexão Telepática (Psiônico, UA) — `disponivel` `false` = personagem sem a classe. */
+  conexaoTelepatica: {
+    disponivel: boolean;
+    dadosMaximo: number;
+    dadosRestantes: number;
+    lados: number;
+    gratisDisponivel: boolean;
+    alcanceAtual: number | null;
+    onIniciar: () => boolean;
+    onResultado: (alcance: number) => void;
+  };
   /** Pico de Adrenalina (Orc) — `maximo` 0 = espécie não é Orc. */
   picoDeAdrenalina: RecursoContado;
   /** Ataque de Sopro (Draconato) — `disponivel` `false` = espécie não
@@ -701,6 +713,7 @@ export default function CombatTab({
     restantes: usosConhecimentoDePedrasRestantes,
     onUsar: onUsarConhecimentoDePedras,
   },
+  conexaoTelepatica,
   picoDeAdrenalina: {
     maximo: usosPicoDeAdrenalinaMaximo,
     restantes: usosPicoDeAdrenalinaRestantes,
@@ -1227,6 +1240,21 @@ export default function CombatTab({
   function usarConhecimentoDePedras() {
     if (!onUsarConhecimentoDePedras()) return;
     onMarcarUsado('bonus');
+  }
+
+  // Conexão Telepática (Psiônico, UA): rola o Dado de Energia (grátis na 1ª vez após o Descanso Longo)
+  // e anota o alcance (9 m + 3 × resultado).
+  function usarConexaoTelepatica() {
+    if (!conexaoTelepatica.onIniciar()) return;
+    onMarcarUsado('bonus');
+    rolarDados({
+      label: '🧠 Conexão Telepática — alcance +3 m por ponto',
+      formula: `1d${conexaoTelepatica.lados}`,
+      quantidade: 1,
+      lados: conexaoTelepatica.lados,
+      mod: 0,
+      onResultado: (total) => conexaoTelepatica.onResultado(alcanceConexaoTelepatica(total)),
+    });
   }
 
   function usarPicoDeAdrenalina() {
@@ -2930,6 +2958,8 @@ export default function CombatTab({
           usosConhecimentoDePedrasMaximo={usosConhecimentoDePedrasMaximo}
           usosConhecimentoDePedrasRestantes={usosConhecimentoDePedrasRestantes}
           onUsarConhecimentoDePedras={usarConhecimentoDePedras}
+          conexaoTelepatica={conexaoTelepatica}
+          onUsarConexaoTelepatica={usarConexaoTelepatica}
           usosPicoDeAdrenalinaMaximo={usosPicoDeAdrenalinaMaximo}
           usosPicoDeAdrenalinaRestantes={usosPicoDeAdrenalinaRestantes}
           onUsarPicoDeAdrenalina={usarPicoDeAdrenalina}
