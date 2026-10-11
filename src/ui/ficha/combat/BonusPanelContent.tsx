@@ -74,8 +74,10 @@ interface BonusPanelContentProps {
     alcanceAtual: number | null;
     /** Ação Bônus já gasta neste turno — o card continua visível (mostra o alcance), mas travado. */
     bonusJaUsadaNoTurno: boolean;
+    cdImpulso: number | null;
   };
   onUsarConexaoTelepatica: () => void;
+  onUsarImpulsoTelecinetico: (comDado: boolean) => void;
   usosPicoDeAdrenalinaMaximo: number;
   usosPicoDeAdrenalinaRestantes: number;
   onUsarPicoDeAdrenalina: () => void;
@@ -265,6 +267,7 @@ export default function BonusPanelContent({
   onUsarConhecimentoDePedras,
   conexaoTelepatica,
   onUsarConexaoTelepatica,
+  onUsarImpulsoTelecinetico,
   usosPicoDeAdrenalinaMaximo,
   usosPicoDeAdrenalinaRestantes,
   onUsarPicoDeAdrenalina,
@@ -997,6 +1000,30 @@ export default function BonusPanelContent({
                     <div className={styles.rowDesc}>
                       Telepatia de 9 m. Rola 1 Dado de Energia Psiônica: por 1 hora o alcance aumenta em 3 m × o resultado.
                       {conexaoTelepatica.alcanceAtual !== null ? ` Alcance anotado agora: ${conexaoTelepatica.alcanceAtual} m.` : ''}
+                    </div>
+                  )}
+                </div>
+                <div
+                  className={styles.row}
+                  style={conexaoTelepatica.bonusJaUsadaNoTurno ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={() => onUsarImpulsoTelecinetico(false)}
+                >
+                  <div className={styles.rowName}>💥 Impulso Telecinético — 1,5 m (sem dado)</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Criatura Grande ou menor a até 9 m: salvaguarda de Força (CD {conexaoTelepatica.cdImpulso ?? '—'}) ou é empurrada (ou puxada, à sua escolha) 1,5 m em linha reta.
+                    </div>
+                  )}
+                </div>
+                <div
+                  className={styles.row}
+                  style={conexaoTelepatica.bonusJaUsadaNoTurno || conexaoTelepatica.dadosRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  onClick={() => onUsarImpulsoTelecinetico(true)}
+                >
+                  <div className={styles.rowName}>💥 Impulso Telecinético — com Dado de Energia</div>
+                  {detalhesAtivo && (
+                    <div className={styles.rowDesc}>
+                      Rola 1 Dado de Energia: a distância é 5 m × o resultado. O dado só é gasto se o alvo falhar na salvaguarda.
                     </div>
                   )}
                 </div>

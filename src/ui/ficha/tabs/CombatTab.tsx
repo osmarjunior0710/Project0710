@@ -186,6 +186,9 @@ interface CombatTabProps {
     alcanceAtual: number | null;
     onIniciar: () => boolean;
     onResultado: (alcance: number) => void;
+    /** Impulso Telecinético: CD de magia do Psiônico e gasto de 1 dado (só quando o alvo falha). */
+    cdImpulso: number | null;
+    onGastarDado: () => boolean;
   };
   /** Pico de Adrenalina (Orc) — `maximo` 0 = espécie não é Orc. */
   picoDeAdrenalina: RecursoContado;
@@ -969,6 +972,8 @@ export default function CombatTab({
   const [lancarNoInfernoDano, setLancarNoInfernoDano] = useState<number | null>(null);
   const [ataqueDeSoproDano, setAtaqueDeSoproDano] = useState<number | null>(null);
   const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
+  // Impulso Telecinético (Psiônico, UA): `distancia` em metros; `comDado` = rolou um Dado de Energia; `gasto` = já gastou o dado (alvo falhou).
+  const [impulsoAberto, setImpulsoAberto] = useState<{ comDado: boolean; distancia: number; gasto: boolean } | null>(null);
   // `aoFechar` = o que continua depois do Ok (ex.: próximo ataque da Torrente).
   // Marca que não fica velha: o 2º ataque da Torrente é disparado de dentro
   // do callback do 1º (closure antiga, `golpeAtordoante.usadoTurno` ainda
@@ -1255,6 +1260,26 @@ export default function CombatTab({
       lados: conexaoTelepatica.lados,
       mod: 0,
       onResultado: (total) => conexaoTelepatica.onResultado(alcanceConexaoTelepatica(total)),
+    });
+  }
+
+  // Impulso Telecinético (Psiônico, UA): Ação Bônus. Sem dado = 1,5 m; com Dado de Energia = 5 m × resultado, e o
+  // dado só é gasto se o alvo falhar na salvaguarda de Força (botão no popup).
+  function usarImpulsoTelecinetico(comDado: boolean) {
+    if (turnState.bonus === 'usada') return;
+    onMarcarUsado('bonus');
+    if (!comDado) {
+      setImpulsoAberto({ comDado: false, distancia: 1.5, gasto: false });
+      return;
+    }
+    if (conexaoTelepatica.dadosRestantes <= 0) return;
+    rolarDados({
+      label: '💥 Impulso Telecinético — 5 m por ponto',
+      formula: `1d${conexaoTelepatica.lados}`,
+      quantidade: 1,
+      lados: conexaoTelepatica.lados,
+      mod: 0,
+      onResultado: (total) => setImpulsoAberto({ comDado: true, distancia: 5 * total, gasto: false }),
     });
   }
 
@@ -2960,6 +2985,7 @@ export default function CombatTab({
           onUsarConhecimentoDePedras={usarConhecimentoDePedras}
           conexaoTelepatica={{ ...conexaoTelepatica, bonusJaUsadaNoTurno: turnState.bonus === 'usada' }}
           onUsarConexaoTelepatica={usarConexaoTelepatica}
+          onUsarImpulsoTelecinetico={usarImpulsoTelecinetico}
           usosPicoDeAdrenalinaMaximo={usosPicoDeAdrenalinaMaximo}
           usosPicoDeAdrenalinaRestantes={usosPicoDeAdrenalinaRestantes}
           onUsarPicoDeAdrenalina={usarPicoDeAdrenalina}
@@ -3271,6 +3297,29 @@ export default function CombatTab({
             setGolpeAtordoanteAberto(null);
             depois?.();
           }}
+        />
+      )}
+      {impulsoAberto && (
+        <SalvaguardaDoAlvoModal
+          titulo="💥 Impulso Telecinético"
+          atributo="Força"
+          cd={conexaoTelepatica.cdImpulso}
+          explicacaoCd={null}
+          textoFalha={`empurrado (ou puxado, à sua escolha) ${String(impulsoAberto.distancia).replace('.', ',')} m em linha reta${impulsoAberto.comDado ? ' — gasta 1 Dado de Energia Psiônica' : ''}`}
+          textoSucesso={impulsoAberto.comDado ? 'nada acontece — o Dado de Energia NÃO é gasto' : 'nada acontece'}
+          aviso="Alvo: criatura Grande ou menor que você veja a até 9 m."
+          acaoSecundaria={
+            impulsoAberto.comDado && !impulsoAberto.gasto
+              ? {
+                  label: '🎲 Alvo falhou — gastar 1 Dado de Energia',
+                  onClick: () => {
+                    if (conexaoTelepatica.onGastarDado()) setImpulsoAberto({ ...impulsoAberto, gasto: true });
+                  },
+                }
+              : null
+          }
+          semAcaoTexto={impulsoAberto.gasto ? '✔ 1 Dado de Energia Psiônica gasto.' : null}
+          onFechar={() => setImpulsoAberto(null)}
         />
       )}
       {golpeDeEscudoAberto && (

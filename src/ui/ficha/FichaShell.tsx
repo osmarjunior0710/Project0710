@@ -938,6 +938,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       return true;
     },
     onResultado: (alcance: number) => setConexaoTelepaticaAlcance(alcance),
+    // Impulso Telecinético (Psiônico, UA) — CD = CD de magia do Psiônico; o dado só é gasto se o alvo falhar.
+    cdImpulso: classePsionico ? (calcularResumoConjuracao(selecao, classePsionico, nivelTotalAtual)?.cd ?? null) : null,
+    onGastarDado: (): boolean => {
+      if (dadosEnergiaRestantes <= 0) return false;
+      setDadosEnergiaPsionicaGasto((v) => v + 1);
+      return true;
+    },
   };
   function gastarPontoDeFoco(): boolean {
     if (pontosDeFocoRestantes <= 0) return false;

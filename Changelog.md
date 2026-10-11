@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1816
+
+Psiônico: Impulso Telecinético na Ação Bônus, em 2 opções. "Sem dado" mostra a CD e o empurrão de 1,5 m. "Com Dado de Energia" rola o dado (distância = 5 m x resultado) e só gasta o dado se você tocar em "Alvo falhou". Com isso o Poder Psiônico (nível 1) fica completo.
+
 ## v202610_1708
 
 Psiônico: Telecinese Sutil pronta — o personagem já conhece o truque Mãos Mágicas de graça, sem gastar um dos truques escolhidos. Aparece na aba Magias (seção "Magias de Classe e Subclasse") e no Usar Magia da aba Combate.
