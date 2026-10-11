@@ -31,6 +31,9 @@ export interface CaracteristicaClasse {
    * migrado, ver Backlog.md). `undefined` = essa característica não
    * concede nenhuma magia fixa. */
   magiaFixaConcedida?: { nomeMagia: string; usosGratisPorDescansoLongo: number };
+  /** Truques que essa característica de CLASSE BASE concede de graça, fora do limite de truques (ex.: Telecinese Sutil do
+   * Psiônico → Mãos Mágicas). Mesmo padrão de `truquesConcedidos` das subclasses — ver `core/magiasSubclasse.ts`. */
+  truquesConcedidos?: string[];
 }
 
 const caracteristicasClasseOficiais: CaracteristicaClasse[] = [

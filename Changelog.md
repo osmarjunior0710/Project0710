@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1708
+
+Psiônico: Telecinese Sutil pronta — o personagem já conhece o truque Mãos Mágicas de graça, sem gastar um dos truques escolhidos. Aparece na aba Magias (seção "Magias de Classe e Subclasse") e no Usar Magia da aba Combate.
+
 ## v202610_0121
 
 Sortudo agora aparece na própria rolagem: depois de rolar um d20 (teste, salvaguarda ou ataque) surge o botão "🍀 Sortudo — Vantagem", que gasta 1 Ponto de Sorte, rola outro d20 e fica com o maior. Se o personagem também tem Inspiração Heroica, os dois botões aparecem. O card de Pontos de Sorte na aba Combate ficou só pra impor Desvantagem num ataque contra você.

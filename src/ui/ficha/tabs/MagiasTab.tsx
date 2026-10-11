@@ -1480,9 +1480,9 @@ export default function MagiasTab({
 
       {magiasSubclasse.length > 0 && (
         <>
-          <div className="section-title">Magias de Subclasse</div>
+          <div className="section-title">Magias de Classe e Subclasse</div>
           <div className="label" style={{ marginBottom: 4 }}>
-            Concedidas pela subclasse — sempre disponíveis, não contam na conta de Magias Preparadas.
+            Concedidas pela classe ou pela subclasse — sempre disponíveis, não contam na conta de Magias Preparadas.
           </div>
           {magiasSubclasse.map((m) => {
             const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;

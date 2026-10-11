@@ -125,7 +125,8 @@ export const caracteristicasClassePsionico: CaracteristicaClasse[] = [
     descricao:
       'Você conhece o truque Mão Mágica. Você pode conjurá-lo sem componentes somáticos, e pode tornar a mão espectral invisível ao conjurá-la.',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: PH,
+    truquesConcedidos: ['Mãos Mágicas'],
+    statusImplementacao: 'codeimplementation', // o app não controla componentes (somático) nem invisibilidade da mão
   },
   {
     classe: 'Psiônico',

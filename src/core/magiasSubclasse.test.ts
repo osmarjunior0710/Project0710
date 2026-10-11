@@ -7,6 +7,9 @@ describe('truquesConcedidosPorSubclasse', () => {
       { nomeMagia: 'Elementalismo', classe: 'Monge' },
     ]);
   });
+  it('Psiônico (Telecinese Sutil, classe base) conhece Mãos Mágicas já no nível 1, sem precisar de subclasse', () => {
+    expect(truquesConcedidosPorSubclasse([{ classe: 'Psiônico', nivel: 1, subclasse: null }])).toEqual([{ nomeMagia: 'Mãos Mágicas', classe: 'Psiônico' }]);
+  });
   it('borda: sem subclasse escolhida, de outra subclasse ou abaixo do nível 3, não concede nada', () => {
     expect(truquesConcedidosPorSubclasse([{ classe: 'Monge', nivel: 5, subclasse: null }])).toEqual([]);
     expect(truquesConcedidosPorSubclasse([{ classe: 'Monge', nivel: 5, subclasse: 'Combatente da Mão Espalmada' }])).toEqual([]);
