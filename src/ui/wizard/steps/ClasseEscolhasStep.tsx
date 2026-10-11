@@ -405,7 +405,9 @@ export default function ClasseEscolhasStep({ selection, update }: StepProps) {
               <div className="label" style={{ marginBottom: 4 }}>
                 {temLivroDeMagias
                   ? 'escolha dentre as magias do seu Livro de Magias, acima.'
-                  : 'sugestão do livro: Enfeitiçar Pessoa, Leque Cromático, Palavra Curativa e Sussurros Dissonantes.'}
+                  : selection.classe === 'Psiônico'
+                    ? 'sugestão do livro: Enfeitiçar Pessoa, Comando, Sussurros Dissonantes e Armadura Arcana.'
+                    : 'sugestão do livro: Enfeitiçar Pessoa, Leque Cromático, Palavra Curativa e Sussurros Dissonantes.'}
               </div>
               {magiasParaPreparar.map((m) => {
                 const fonte = jaConcedidas.magias.get(m.nome);

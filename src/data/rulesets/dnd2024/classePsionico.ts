@@ -93,7 +93,7 @@ export const classePsionico: Classe = {
     { nivel: 19, bonusProficiencia: '+6', caracteristicas: ['Dádiva Épica'] },
     { nivel: 20, bonusProficiencia: '+6', caracteristicas: ['Força Vital Incandescente'] },
   ],
-  disponivel: false,
+  disponivel: true,
   fonte: FONTE,
 };
 

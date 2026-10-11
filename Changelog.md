@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2306
+
+Psiônico já aparece na criação de personagem (com o selo "UA · não oficial") e dá pra criar um do nível 1 até a ficha. As características ainda são só texto [PH]; a sugestão de magias do 1º círculo agora é a do Psiônico. Monge e Paladino saíram da lista "em breve" (já estavam prontos).
+
 ## v202610_1924
 
 Psiônico agora tem magias: a lista da classe (143 magias do PDF) aparece nas abas Magias e Combate do Char Multiclasse, e as 18 magias novas do UA (Arremesso Telecinético, Sifão Vital, Explosão Psiônica, Grito Psíquico, Animar Mortos...) entram com descrição completa.

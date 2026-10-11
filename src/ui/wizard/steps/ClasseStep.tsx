@@ -8,8 +8,6 @@ const CLASSES_EM_BREVE = [
   { nome: 'Feiticeiro', id: 'feiticeiro' },
   { nome: 'Guardião', id: 'guardiao' },
   { nome: 'Ladino', id: 'ladino' },
-  { nome: 'Monge', id: 'monge' },
-  { nome: 'Paladino', id: 'paladino' },
 ];
 
 function porNome<T extends { nome: string }>(a: T, b: T): number {
@@ -42,6 +40,7 @@ export default function ClasseStep({ selection, update }: StepProps) {
               <div className="opt-card-tags">
                 <span className="tag">Dado de Vida {c.dadoDeVida}</span>
                 <span className="tag">Salvaguardas {c.salvaguardas.join('/')}</span>
+                {c.fonte.includes('não oficial') && <span className="tag">UA · não oficial</span>}
               </div>
             </div>
           </div>
@@ -74,7 +73,7 @@ export default function ClasseStep({ selection, update }: StepProps) {
         </div>
       ))}
       <div className="label" style={{ marginTop: 6 }}>
-        Bárbaro, Guerreiro, Bardo, Bruxo, Mago, Paladino e Monge estão prontos por enquanto —
+        Bárbaro, Guerreiro, Bardo, Bruxo, Mago, Paladino e Monge estão prontos por enquanto (o Psiônico, não oficial, está em construção: as características ainda são só texto) —
         as outras classes ainda não foram implementadas de ponta a ponta. Ver <code>PENDENCIAS.md</code>.
       </div>
     </>
