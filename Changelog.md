@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0112
+
+Correção: depois de usar a Conexão Telepática, o painel de Ação Bônus continua aberto mostrando o alcance, mas o card fica travado ("Ação Bônus já usada neste turno") e não gasta mais Dados de Energia até o próximo turno.
+
 ## v202610_0039
 
 Psiônico: na aba Combate, Ação Bônus, aparece a Conexão Telepática. Tocar rola o Dado de Energia e anota o alcance da telepatia (9 m + 3 m por ponto rolado). A 1ª vez depois do Descanso Longo é grátis; nas seguintes gasta 1 Dado de Energia. O alcance anotado some em qualquer descanso.

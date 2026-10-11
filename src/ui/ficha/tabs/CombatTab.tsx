@@ -1245,6 +1245,7 @@ export default function CombatTab({
   // Conexão Telepática (Psiônico, UA): rola o Dado de Energia (grátis na 1ª vez após o Descanso Longo)
   // e anota o alcance (9 m + 3 × resultado).
   function usarConexaoTelepatica() {
+    if (turnState.bonus === 'usada') return; // 1 Ação Bônus por turno — o painel fica aberto só pra mostrar o alcance
     if (!conexaoTelepatica.onIniciar()) return;
     onMarcarUsado('bonus');
     rolarDados({
@@ -2958,7 +2959,7 @@ export default function CombatTab({
           usosConhecimentoDePedrasMaximo={usosConhecimentoDePedrasMaximo}
           usosConhecimentoDePedrasRestantes={usosConhecimentoDePedrasRestantes}
           onUsarConhecimentoDePedras={usarConhecimentoDePedras}
-          conexaoTelepatica={conexaoTelepatica}
+          conexaoTelepatica={{ ...conexaoTelepatica, bonusJaUsadaNoTurno: turnState.bonus === 'usada' }}
           onUsarConexaoTelepatica={usarConexaoTelepatica}
           usosPicoDeAdrenalinaMaximo={usosPicoDeAdrenalinaMaximo}
           usosPicoDeAdrenalinaRestantes={usosPicoDeAdrenalinaRestantes}

@@ -72,6 +72,8 @@ interface BonusPanelContentProps {
     lados: number;
     gratisDisponivel: boolean;
     alcanceAtual: number | null;
+    /** Ação Bônus já gasta neste turno — o card continua visível (mostra o alcance), mas travado. */
+    bonusJaUsadaNoTurno: boolean;
   };
   onUsarConexaoTelepatica: () => void;
   usosPicoDeAdrenalinaMaximo: number;
@@ -985,7 +987,7 @@ export default function BonusPanelContent({
                 </div>
                 <div
                   className={styles.row}
-                  style={!conexaoTelepatica.gratisDisponivel && conexaoTelepatica.dadosRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+                  style={conexaoTelepatica.bonusJaUsadaNoTurno || (!conexaoTelepatica.gratisDisponivel && conexaoTelepatica.dadosRestantes <= 0) ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
                   onClick={onUsarConexaoTelepatica}
                 >
                   <div className={styles.rowName}>
@@ -998,7 +1000,12 @@ export default function BonusPanelContent({
                     </div>
                   )}
                 </div>
-                {!conexaoTelepatica.gratisDisponivel && conexaoTelepatica.dadosRestantes <= 0 && (
+                {conexaoTelepatica.bonusJaUsadaNoTurno && (
+                  <div className="label" style={{ marginTop: 6 }}>
+                    Ação Bônus já usada neste turno.
+                  </div>
+                )}
+                {!conexaoTelepatica.bonusJaUsadaNoTurno && !conexaoTelepatica.gratisDisponivel && conexaoTelepatica.dadosRestantes <= 0 && (
                   <div className="label" style={{ marginTop: 6 }}>
                     sem Dados de Energia — descanse pra recuperar.
                   </div>
