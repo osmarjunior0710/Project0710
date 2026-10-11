@@ -47,6 +47,9 @@ export default function RollOverlay() {
     aplicarBonusExtra,
     sorteDisponivel,
     usarSorte,
+    sortudoDisponivel,
+    sortudoRestantes,
+    usarSortudo,
     rolarConfirmacaoCritico,
     usarRerollSe1,
     rerollDadoEscolhido,
@@ -392,6 +395,14 @@ export default function RollOverlay() {
               <span className={styles.bonusExtraBtnSub}>Rola dado novamente e fica com novo valor</span>
             </div>
           )}
+        {sortudoDisponivel && estado.fase === 'concluido' && estado.tipo === 'd20' && !estado.dado2 && (
+          <div className={`${styles.bonusExtraBtn} ${styles.bonusExtraBtnColuna}`} onClick={usarSortudo}>
+            <span>🍀 Sortudo — Vantagem</span>
+            <span className={styles.bonusExtraBtnSub}>
+              Gasta 1 Ponto de Sorte (restam {sortudoRestantes}): rola outro d20 e fica com o maior
+            </span>
+          </div>
+        )}
         {sobreviventeDisciplinadoDisponivel &&
           estado.fase === 'concluido' &&
           estado.tipo === 'd20' &&

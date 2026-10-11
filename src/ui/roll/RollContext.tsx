@@ -300,6 +300,15 @@ export interface InspiracaoHeroicaProvider {
   usar: () => void;
 }
 
+/** Sortudo (Talento de Origem): Pontos de Sorte pra dar Vantagem num d20 DEPOIS de ver o resultado —
+ * rola um 2º d20 e fica com o maior (mesma mecânica da Vantagem escolhida pós-rolagem). `usar` devolve
+ * `false` se não havia ponto pra gastar. */
+export interface SortudoProvider {
+  disponivel: boolean;
+  restantes: number;
+  usar: () => boolean;
+}
+
 /** Sobrevivente Disciplinado (Monge nível 14): re-rolar uma Salvaguarda
  * gastando 1 Ponto de Foco — mesmo mecanismo de reroll da Inspiração
  * Heroica. `usar` devolve `false` se não conseguiu gastar o Foco. */
@@ -396,7 +405,7 @@ interface RollContextValue {
    * Desvantagem ainda decidida — rola um 2º d20 e usa o maior
    * ('vantagem') ou o menor ('desvantagem') dos dois, recalculando
    * total e crítico a partir do dado escolhido. */
-  escolherVantagemPosRolagem: (tipo: Vantagem) => void;
+  escolherVantagemPosRolagem: (tipo: Vantagem, forcar?: boolean) => void;
   fechar: () => void;
   /** Bônus extra registrado agora (ver `BonusExtraProvider`) — `null`
    * quando nenhuma característica desse tipo está disponível pro
@@ -449,6 +458,12 @@ interface RollContextValue {
    * nesta rolagem) — substitui o resultado e gasta a Inspiração
    * Heroica do personagem (`InspiracaoHeroicaProvider.usar`). */
   usarInspiracaoHeroica: () => void;
+  /** Sortudo (Talento de Origem) — ver `SortudoProvider`. */
+  sortudoDisponivel: boolean;
+  sortudoRestantes: number;
+  registrarSortudo: (provider: SortudoProvider | null) => void;
+  /** Gasta 1 Ponto de Sorte e rola um 2º d20 (fica com o maior) numa rolagem d20 concluída sem Vantagem/Desvantagem. */
+  usarSortudo: () => void;
   /** Sobrevivente Disciplinado (Monge nível 14) — ver `SobreviventeDisciplinadoProvider`. */
   sobreviventeDisciplinadoDisponivel: boolean;
   registrarSobreviventeDisciplinado: (provider: SobreviventeDisciplinadoProvider | null) => void;
@@ -1017,8 +1032,10 @@ export function RollProvider({ children }: { children: ReactNode }) {
   );
 
   const escolherVantagemPosRolagem = useCallback(
-    (tipo: Vantagem) => {
-      if (!estado || estado.fase !== 'concluido' || estado.tipo !== 'd20' || !estado.podeEscolherVantagem) return;
+    (tipo: Vantagem, forcar = false) => {
+      if (!estado || estado.fase !== 'concluido' || estado.tipo !== 'd20') return;
+      // `forcar` (Sortudo): vale mesmo sem o modo "escolher depois", desde que ainda não haja 2º dado.
+      if (forcar ? !!estado.dado2 : !estado.podeEscolherVantagem) return;
       // 1º dado já parou físico (motor3D) — o 2º entra na MESMA cena
       // via box.add() (não limpa o que já está parado, diferente de
       // .roll()) em vez de Math.random(). Ver "Escolha PÓS-rolagem" em
@@ -1082,6 +1099,15 @@ export function RollProvider({ children }: { children: ReactNode }) {
     },
     [estado, dado3DAtivo],
   );
+
+  const [sortudoProvider, setSortudoProvider] = useState<SortudoProvider | null>(null);
+  const registrarSortudo = useCallback((provider: SortudoProvider | null) => setSortudoProvider(provider), []);
+  const usarSortudo = useCallback(() => {
+    if (!sortudoProvider?.disponivel) return;
+    if (!estado || estado.fase !== 'concluido' || estado.tipo !== 'd20' || estado.dado2) return;
+    if (!sortudoProvider.usar()) return;
+    escolherVantagemPosRolagem('vantagem', true);
+  }, [sortudoProvider, estado, escolherVantagemPosRolagem]);
 
   const rolarConfirmacaoCritico = useCallback(() => {
     if (!estado || estado.fase !== 'concluido' || !estado.confirmarAcerto || estado.confirmacaoCritico) return;
@@ -1305,6 +1331,10 @@ export function RollProvider({ children }: { children: ReactNode }) {
         inspiracaoHeroicaDisponivel: inspiracaoHeroicaProvider?.disponivel ?? false,
         registrarInspiracaoHeroica,
         usarInspiracaoHeroica,
+        sortudoDisponivel: sortudoProvider?.disponivel ?? false,
+        sortudoRestantes: sortudoProvider?.restantes ?? 0,
+        registrarSortudo,
+        usarSortudo,
         sobreviventeDisciplinadoDisponivel: sobreviventeProvider?.disponivel ?? false,
         registrarSobreviventeDisciplinado,
         usarSobreviventeDisciplinado,

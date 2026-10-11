@@ -1669,7 +1669,7 @@ export default function CombatTab({
 
   function usarPontoDeSorte() {
     if (!onUsarPontoDeSorte()) return;
-    setFeedback('🍀 Ponto de Sorte gasto — use o botão Vantagem/Desvantagem na rolagem.');
+    setFeedback('🍀 Ponto de Sorte gasto — Desvantagem no ataque contra você.');
   }
 
   function usarIndomavel() {
@@ -2656,11 +2656,10 @@ export default function CombatTab({
             }}
             onClick={pontosDeSorteRestantes > 0 ? usarPontoDeSorte : undefined}
           >
-            <div style={{ fontSize: 13 }}>🍀 Toque aqui pra gastar 1 ponto</div>
+            <div style={{ fontSize: 13 }}>🍀 Ataque contra você? Toque aqui pra impor Desvantagem</div>
             <div className="label" style={{ marginTop: 2 }}>
-              Dá Vantagem numa jogada sua de d20, ou impõe Desvantagem num ataque contra você — use
-              os botões Vantagem/Desvantagem já disponíveis em qualquer rolagem (só recupera no
-              Descanso Longo).
+              Gasta 1 ponto. Pra dar Vantagem numa jogada sua de d20 não precisa tocar aqui: depois de
+              rolar, aparece o botão 🍀 Sortudo na própria rolagem (só recupera no Descanso Longo).
             </div>
           </div>
         </>

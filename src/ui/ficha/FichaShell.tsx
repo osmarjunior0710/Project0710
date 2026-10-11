@@ -271,6 +271,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     registrarBonusExtra,
     registrarSorte,
     registrarInspiracaoHeroica,
+    registrarSortudo,
     registrarSobreviventeDisciplinado,
     registrarForcaIndomavel,
     estado: rollEmAndamento,
@@ -2570,6 +2571,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     });
     return () => registrarInspiracaoHeroica(null);
   }, [inspiracaoHeroicaAtiva, registrarInspiracaoHeroica]);
+
+  // Sortudo (Talento de Origem) — botão "🍀 Vantagem" na rolagem d20, gasta 1 Ponto de Sorte.
+  useEffect(() => {
+    registrarSortudo({
+      disponivel: pontosDeSorteMaximo > 0 && pontosDeSorteRestantes > 0,
+      restantes: pontosDeSorteRestantes,
+      usar: usarPontoDeSorte,
+    });
+    return () => registrarSortudo(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pontosDeSorteMaximo, pontosDeSorteRestantes, registrarSortudo]);
 
   // Sobrevivente Disciplinado (Monge nível 14) — reroll de Salvaguarda
   // gastando 1 Ponto de Foco, no modal de rolagem global.
