@@ -50,6 +50,9 @@ export default function RollOverlay() {
     sortudoDisponivel,
     sortudoRestantes,
     usarSortudo,
+    opcaoDadoPsionico,
+    usarDadoPsionico,
+    resolverDadoPsionico,
     rolarConfirmacaoCritico,
     usarRerollSe1,
     rerollDadoEscolhido,
@@ -92,7 +95,9 @@ export default function RollOverlay() {
   // [Protótipo, ver sdd/sdd-fluxo-rolagem.md] Rolagem com
   // confirmarAcerto/confirmarFechamento só fecha pelos botões novos —
   // nem tap fora, nem ✕ (o jogador precisa decidir antes de seguir).
-  const aguardandoDecisaoNova = !!estado.confirmarAcerto || !!estado.confirmarFechamento || !!estado.confirmarAlvoCura;
+  // Dado de Energia Psiônica somado a um d20 que NÃO é ataque: precisa dizer se deu sucesso (gasta o dado) antes de fechar.
+  const decidindoDadoPsionico = !!estado.dadoPsionico && !estado.dadoPsionico.decidido && !estado.confirmarAcerto;
+  const aguardandoDecisaoNova = !!estado.confirmarAcerto || !!estado.confirmarFechamento || !!estado.confirmarAlvoCura || decidindoDadoPsionico;
   const podeFechar = estado.fase === 'concluido' && !aguardandoDecisaoNova;
 
   return (
@@ -197,6 +202,23 @@ export default function RollOverlay() {
         {estado.fase === 'concluido' && estado.forcaIndomavelAplicada && (
           <div className={styles.feedback}>💪 Força Indomável — total virou seu valor de Força</div>
         )}
+        {opcaoDadoPsionico && estado.fase === 'concluido' && estado.tipo === 'd20' && (
+          <div
+            className={`${styles.bonusExtraBtn} ${styles.bonusExtraBtnColuna}`}
+            style={opcaoDadoPsionico.bloqueioMotivo ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
+            onClick={usarDadoPsionico}
+          >
+            <span>
+              ✨ +{opcaoDadoPsionico.quantidade}d{opcaoDadoPsionico.lados} {opcaoDadoPsionico.rotulo}
+            </span>
+            <span className={styles.bonusExtraBtnSub}>
+              {opcaoDadoPsionico.bloqueioMotivo ??
+                (estado.confirmarAcerto
+                  ? 'Soma ao ataque — só gasta o Dado de Energia se o ataque acertar'
+                  : 'Soma à jogada — só gasta o Dado de Energia se der sucesso')}
+            </span>
+          </div>
+        )}
         {estado.podeEscolherVantagem && (
           <div className={styles.vantagemButtons}>
             <div
@@ -246,6 +268,7 @@ export default function RollOverlay() {
                 className={`${styles.vantagemBtn} ${styles.desvantagemBtn}`}
                 onClick={() => {
                   const { onErrou } = estado.confirmarAcerto!;
+                  resolverDadoPsionico(false);
                   fechar();
                   onErrou();
                 }}
@@ -260,6 +283,7 @@ export default function RollOverlay() {
                 className={`${styles.vantagemBtn} ${styles.vantagemBtnPositivo}`}
                 onClick={() => {
                   const { onAcertou } = estado.confirmarAcerto!;
+                  resolverDadoPsionico(true);
                   fechar();
                   onAcertou({ critico: false });
                 }}
@@ -271,6 +295,7 @@ export default function RollOverlay() {
               className={`${styles.vantagemBtn} ${styles.vantagemBtnPositivo}`}
               onClick={() => {
                 const { onAcertou } = estado.confirmarAcerto!;
+                resolverDadoPsionico(true);
                 fechar();
                 onAcertou({ critico: estado.critico === 'sucesso' });
               }}
@@ -417,6 +442,28 @@ export default function RollOverlay() {
               <span className={styles.bonusExtraBtnSub}>Falhou? Gasta 1 Ponto de Foco e joga de novo</span>
             </div>
           )}
+        {estado.dadoPsionico && (
+          <>
+            <div className={styles.formula}>
+              +{estado.dadoPsionico.opcao.quantidade}d{estado.dadoPsionico.opcao.lados} ({estado.dadoPsionico.opcao.rotulo})
+            </div>
+            <div className={styles.diceRow}>
+              {(estado.dadoPsionico.valores ?? Array.from({ length: estado.dadoPsionico.opcao.quantidade }, () => '🎲' as number | string)).map((v, i) => (
+                <DadoVisual key={i} valor={v} lados={estado.dadoPsionico!.opcao.lados} className={styles.dieBonusExtra} />
+              ))}
+            </div>
+          </>
+        )}
+        {decidindoDadoPsionico && estado.dadoPsionico?.valores && (
+          <div className={styles.vantagemButtons}>
+            <div className={`${styles.vantagemBtn} ${styles.desvantagemBtn}`} onClick={() => resolverDadoPsionico(false)}>
+              Falhou — não gasta
+            </div>
+            <div className={`${styles.vantagemBtn} ${styles.vantagemBtnPositivo}`} onClick={() => resolverDadoPsionico(true)}>
+              Sucesso — gasta o dado
+            </div>
+          </div>
+        )}
         {estado.categoria === 'atributoOuSalvaguarda' && estado.bonusExtra && (
           <>
             <div className={styles.formula}>

@@ -3,6 +3,7 @@ import { classes } from '../data/rulesets/dnd2024/classes';
 import { disciplinasPsionicas } from '../data/rulesets/dnd2024/disciplinasPsionicas';
 import {
   caracteristicaDisciplinaTemTexto,
+  disciplinaParaRolagem,
   DISCIPLINAS_QUE_NAO_CONTAM_NO_TURNO,
   podeUsarDisciplina,
   quantidadeDisciplinasPsionicas,
@@ -50,5 +51,21 @@ describe('podeUsarDisciplina — 1 disciplina por turno, 1 vez cada', () => {
     expect(podeUsarDisciplina(comum, 'defesa-psionica').pode).toBe(false);
     const defesa = registrarUsoDeDisciplina({ usadas: [] }, 'defesa-psionica');
     expect(podeUsarDisciplina(defesa, 'defesa-psionica').pode).toBe(false);
+  });
+});
+
+describe('disciplinaParaRolagem', () => {
+  const todas = ['consciencia-expandida', 'lingua-diabolica', 'mente-atenta', 'mira-inerrante', 'bio-retorno'];
+  it('perícia: cada disciplina vale só pras perícias da ação dela', () => {
+    const d = (label: string) => disciplinaParaRolagem(todas, { label, ehAtaque: false })?.id ?? null;
+    expect(d('Percepção')).toBe('consciencia-expandida');
+    expect(d('Persuasão')).toBe('lingua-diabolica');
+    expect(d('Arcanismo')).toBe('mente-atenta');
+    expect(d('Atletismo')).toBeNull();
+  });
+  it('ataque: só Mira Inerrante; sem a disciplina conhecida, nada', () => {
+    expect(disciplinaParaRolagem(todas, { label: 'Espada', ehAtaque: true })?.id).toBe('mira-inerrante');
+    expect(disciplinaParaRolagem(['consciencia-expandida'], { label: 'Espada', ehAtaque: true })).toBeNull();
+    expect(disciplinaParaRolagem([], { label: 'Percepção', ehAtaque: false })).toBeNull();
   });
 });

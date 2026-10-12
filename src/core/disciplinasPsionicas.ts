@@ -10,6 +10,7 @@
 
 import type { Classe } from '../data/rulesets/dnd2024/classes';
 import { caracteristicasClasse } from '../data/rulesets/dnd2024/caracteristicasClasse';
+import { disciplinasPsionicas, type DisciplinaPsionica } from '../data/rulesets/dnd2024/disciplinasPsionicas';
 
 const NOME_CARACTERISTICA = 'Disciplina Psiônica';
 
@@ -47,4 +48,15 @@ export function podeUsarDisciplina(estado: UsoDeDisciplinasNoTurno, id: string):
 /** Registra o uso (imutável) — chamar só depois de `podeUsarDisciplina` dar `pode: true`. */
 export function registrarUsoDeDisciplina(estado: UsoDeDisciplinasNoTurno, id: string): UsoDeDisciplinasNoTurno {
   return { usadas: [...estado.usadas, id] };
+}
+
+/** Qual das disciplinas CONHECIDAS soma o Dado de Energia a esta rolagem de d20 — por perícia (o rótulo da rolagem é o nome da perícia)
+ * ou por ataque. `null` = nenhuma se aplica. */
+export function disciplinaParaRolagem(conhecidas: string[], rolagem: { label: string; ehAtaque: boolean }): DisciplinaPsionica | null {
+  for (const d of disciplinasPsionicas) {
+    if (!conhecidas.includes(d.id) || !d.gatilho) continue;
+    if (d.gatilho.tipo === 'ataque' && rolagem.ehAtaque) return d;
+    if (d.gatilho.tipo === 'pericia' && !rolagem.ehAtaque && d.gatilho.pericias.includes(rolagem.label)) return d;
+  }
+  return null;
 }

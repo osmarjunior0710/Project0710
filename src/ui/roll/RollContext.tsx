@@ -87,6 +87,11 @@ export interface ConfirmarAcerto {
  * próprio `aoTocar` se tiver. */
 export type ConfirmarFechamento = { rotulo?: string; aoTocar?: () => void } | { rotulo: string; aoTocar?: () => void }[];
 
+/** Soma do(s) Dado(s) de Energia Psiônica já rolado(s) nesta rolagem (0 se não houver). */
+function somaDadoPsionico(e: { dadoPsionico?: { valores: number[] | null } | null }): number {
+  return (e.dadoPsionico?.valores ?? []).reduce((a, b) => a + b, 0);
+}
+
 export interface RollState {
   label: string;
   formula: string;
@@ -128,6 +133,8 @@ export interface RollState {
    * `valor: '🎲'` enquanto anima (mesmo efeito do 2º d20 de Vantagem/
    * Desvantagem) — `total` só soma o valor quando a animação termina. */
   bonusExtra?: { rotulo: string; lados: number; valor: number | string } | null;
+  /** Dado de Energia Psiônica já somado a esta rolagem (ver `DadoPsionicoProvider`). `valores: null` enquanto anima; `decidido` = já resolveu se gasta o dado. */
+  dadoPsionico?: { opcao: DadoPsionicoOpcao; valores: number[] | null; decidido: boolean } | null;
   /** `true` = o jogador já usou Sorte (Pequenino) nesta rolagem — só 1x
    * por rolagem, mesmo que o novo resultado também seja 1. */
   sorteUsada?: boolean;
@@ -300,6 +307,24 @@ export interface InspiracaoHeroicaProvider {
   usar: () => void;
 }
 
+/** Disciplinas Psiônicas que somam Dado(s) de Energia a um d20 (Consciência Expandida, Língua Diabólica, Mente Atenta, Mira Inerrante —
+ * ver `core/disciplinasPsionicas.ts`). O dado é somado na hora e só é GASTO se a rolagem der certo (sucesso/acerto). */
+export interface DadoPsionicoOpcao {
+  id: string;
+  rotulo: string;
+  quantidade: number;
+  lados: number;
+  /** Preenchido quando já não dá pra usar (ex.: outra Disciplina já usada neste turno) — o botão aparece apagado com este motivo. */
+  bloqueioMotivo: string | null;
+}
+export interface DadoPsionicoProvider {
+  opcaoPara: (rolagem: { label: string; ehAtaque: boolean }) => DadoPsionicoOpcao | null;
+  /** Chamado ao rolar o dado: registra o uso da disciplina no turno. */
+  iniciar: (opcao: DadoPsionicoOpcao) => void;
+  /** Chamado só quando deu certo: gasta os Dados de Energia. */
+  gastar: (opcao: DadoPsionicoOpcao) => void;
+}
+
 /** Sortudo (Talento de Origem): Pontos de Sorte pra dar Vantagem num d20 DEPOIS de ver o resultado —
  * rola um 2º d20 e fica com o maior (mesma mecânica da Vantagem escolhida pós-rolagem). `usar` devolve
  * `false` se não havia ponto pra gastar. */
@@ -464,6 +489,12 @@ interface RollContextValue {
   registrarSortudo: (provider: SortudoProvider | null) => void;
   /** Gasta 1 Ponto de Sorte e rola um 2º d20 (fica com o maior) numa rolagem d20 concluída sem Vantagem/Desvantagem. */
   usarSortudo: () => void;
+  /** Dado de Energia Psiônica (Disciplinas) — ver `DadoPsionicoProvider`. `opcaoDadoPsionico` já vem filtrada pra rolagem atual. */
+  opcaoDadoPsionico: DadoPsionicoOpcao | null;
+  registrarDadoPsionico: (provider: DadoPsionicoProvider | null) => void;
+  usarDadoPsionico: () => void;
+  /** Diz se o d20 deu certo (sucesso/acerto): gasta o dado só se sim. */
+  resolverDadoPsionico: (deuCerto: boolean) => void;
   /** Sobrevivente Disciplinado (Monge nível 14) — ver `SobreviventeDisciplinadoProvider`. */
   sobreviventeDisciplinadoDisponivel: boolean;
   registrarSobreviventeDisciplinado: (provider: SobreviventeDisciplinadoProvider | null) => void;
@@ -1065,7 +1096,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
           if (!prev || prev.tipo !== 'd20') return prev;
           const rolagem1 = typeof prev.valorDado === 'number' ? prev.valorDado : 0;
           const usado = prev.vantagem === 'vantagem' ? Math.max(rolagem1, rolagem2) : Math.min(rolagem1, rolagem2);
-          const { total, aplicada } = totalComForcaIndomavel(usado + (prev.mod ?? 0), prev.permiteForcaIndomavel, forcaIndomavelRef.current);
+          const { total, aplicada } = totalComForcaIndomavel(usado + (prev.mod ?? 0) + somaDadoPsionico(prev), prev.permiteForcaIndomavel, forcaIndomavelRef.current);
           return {
             ...prev,
             fase: 'concluido',
@@ -1108,6 +1139,38 @@ export function RollProvider({ children }: { children: ReactNode }) {
     if (!sortudoProvider.usar()) return;
     escolherVantagemPosRolagem('vantagem', true);
   }, [sortudoProvider, estado, escolherVantagemPosRolagem]);
+
+  const [dadoPsionicoProvider, setDadoPsionicoProvider] = useState<DadoPsionicoProvider | null>(null);
+  const registrarDadoPsionico = useCallback((provider: DadoPsionicoProvider | null) => setDadoPsionicoProvider(provider), []);
+  const opcaoDadoPsionico =
+    dadoPsionicoProvider && estado && estado.fase === 'concluido' && estado.tipo === 'd20' && !estado.dadoPsionico
+      ? dadoPsionicoProvider.opcaoPara({ label: estado.label, ehAtaque: !!estado.confirmarAcerto })
+      : null;
+  const usarDadoPsionico = useCallback(() => {
+    if (!dadoPsionicoProvider || !opcaoDadoPsionico || opcaoDadoPsionico.bloqueioMotivo) return;
+    if (!estado || estado.fase !== 'concluido' || estado.tipo !== 'd20' || estado.dadoPsionico) return;
+    const opcao = opcaoDadoPsionico;
+    dadoPsionicoProvider.iniciar(opcao);
+    setEstado((prev) => (prev ? { ...prev, dadoPsionico: { opcao, valores: null, decidido: false } } : prev));
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      const valores = Array.from({ length: opcao.quantidade }, () => 1 + Math.floor(Math.random() * opcao.lados));
+      setEstado((prev) => {
+        if (!prev) return prev;
+        const soma = valores.reduce((a, b) => a + b, 0);
+        const { total, aplicada } = totalComForcaIndomavel((prev.total ?? 0) + soma, prev.permiteForcaIndomavel, forcaIndomavelRef.current);
+        return { ...prev, dadoPsionico: { opcao, valores, decidido: false }, total, forcaIndomavelAplicada: aplicada };
+      });
+    }, DURACAO_ANIMACAO_MS);
+  }, [dadoPsionicoProvider, opcaoDadoPsionico, estado]);
+  const resolverDadoPsionico = useCallback(
+    (deuCerto: boolean) => {
+      if (!dadoPsionicoProvider || !estado?.dadoPsionico || estado.dadoPsionico.decidido || !estado.dadoPsionico.valores) return;
+      if (deuCerto) dadoPsionicoProvider.gastar(estado.dadoPsionico.opcao);
+      setEstado((prev) => (prev && prev.dadoPsionico ? { ...prev, dadoPsionico: { ...prev.dadoPsionico, decidido: true } } : prev));
+    },
+    [dadoPsionicoProvider, estado],
+  );
 
   const rolarConfirmacaoCritico = useCallback(() => {
     if (!estado || estado.fase !== 'concluido' || !estado.confirmarAcerto || estado.confirmacaoCritico) return;
@@ -1184,7 +1247,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
     function concluir(novaRolagem: number, novoResultadoBruto?: DiceBoxResultado) {
       setEstado((prev) => {
         if (!prev || prev.tipo !== 'd20') return prev;
-        const totalBase = novaRolagem + (prev.mod ?? 0) + (typeof prev.bonusExtra?.valor === 'number' ? prev.bonusExtra.valor : 0);
+        const totalBase = novaRolagem + (prev.mod ?? 0) + (typeof prev.bonusExtra?.valor === 'number' ? prev.bonusExtra.valor : 0) + somaDadoPsionico(prev);
         const { total, aplicada } = totalComForcaIndomavel(totalBase, prev.permiteForcaIndomavel, forcaIndomavelRef.current);
         return {
           ...prev,
@@ -1331,6 +1394,10 @@ export function RollProvider({ children }: { children: ReactNode }) {
         inspiracaoHeroicaDisponivel: inspiracaoHeroicaProvider?.disponivel ?? false,
         registrarInspiracaoHeroica,
         usarInspiracaoHeroica,
+        opcaoDadoPsionico,
+        registrarDadoPsionico,
+        usarDadoPsionico,
+        resolverDadoPsionico,
         sortudoDisponivel: sortudoProvider?.disponivel ?? false,
         sortudoRestantes: sortudoProvider?.restantes ?? 0,
         registrarSortudo,

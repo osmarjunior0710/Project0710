@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0125
+
+Psiônico: Consciência Expandida, Língua Diabólica, Mente Atenta e Mira Inerrante funcionam. Na rolagem de uma perícia da ação correspondente (Procurar, Influenciar ou Analisar), ou num ataque, aparece o botão "+1d6 <disciplina>" antes de Vantagem/Desvantagem. O dado é somado ao total e só é gasto se a jogada der certo (você marca Sucesso ou Falhou; no ataque vale o Acertei). Só 1 disciplina por turno, e a mesma não repete: o botão fica apagado com o motivo até o Fim do Turno.
+
 ## v202610_2336
 
 Psiônico: as Disciplinas Psiônicas já podem ser escolhidas. No Level Up do nível 2 você escolhe 2 (e mais 1 nos níveis 5, 10, 13 e 17); a cada nível dá pra trocar 1. Elas aparecem no Perfil com o texto completo, ainda marcadas como [PH] (sem efeito). O Char Multiclasse já vem com as 6 disciplinas do nível 20.

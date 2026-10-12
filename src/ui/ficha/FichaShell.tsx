@@ -102,6 +102,7 @@ import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
 import { usoDaConexaoTelepatica } from '../../core/conexaoTelepatica';
+import { disciplinaParaRolagem, podeUsarDisciplina, registrarUsoDeDisciplina } from '../../core/disciplinasPsionicas';
 import { ladosDadoEnergiaPsionica, quantidadeDadosEnergiaPsionica, quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, quantidadePontosDeFoco, bonusMovimentoSemArmadura, ladosDadoArtesMarciais, temAuraDeProtecao } from '../../core/recursosClasse';
 import { condicoesDisponiveisMaosConsagradas, custoTotalMaosConsagradas } from '../../core/maosConsagradas';
 import { bonusArmaSagrada, armaElegivelParaArmaSagrada } from '../../core/armaSagrada';
@@ -272,6 +273,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     registrarSorte,
     registrarInspiracaoHeroica,
     registrarSortudo,
+    registrarDadoPsionico,
     registrarSobreviventeDisciplinado,
     registrarForcaIndomavel,
     estado: rollEmAndamento,
@@ -572,6 +574,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [pontosDeFocoGasto, setPontosDeFocoGasto] = useState(personagemSalvo.pontosDeFocoGasto ?? 0);
   // Psiônico (UA) — Dados de Energia Psiônica gastos.
   const [dadosEnergiaPsionicaGasto, setDadosEnergiaPsionicaGasto] = useState(personagemSalvo.dadosEnergiaPsionicaGasto ?? 0);
+  // Disciplinas Psiônicas já usadas neste turno (1 por turno, 1 vez cada — core/disciplinasPsionicas.ts); zera no Fim do Turno.
+  const [disciplinasUsadasNoTurno, setDisciplinasUsadasNoTurno] = useState<string[]>([]);
   const [conexaoTelepaticaGratisUsada, setConexaoTelepaticaGratisUsada] = useState(personagemSalvo.conexaoTelepaticaGratisUsada ?? false);
   const [conexaoTelepaticaAlcance, setConexaoTelepaticaAlcance] = useState<number | null>(personagemSalvo.conexaoTelepaticaAlcance ?? null);
   // Monge — Metabolismo Incomum (nível 2, ver sdd/sdd-monge.md seção
@@ -1922,6 +1926,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   function fimDoTurno() {
     setTurnState(turnoInicial);
+    setDisciplinasUsadasNoTurno([]);
     setSurtoUsadoTurno(false);
     setAtaqueImprudenteAtivo(false);
     setGolpeBrutalUsadoTurno(false);
@@ -2005,6 +2010,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * travados do combate anterior. */
   function aoRolarIniciativa() {
     setTurnState(turnoInicial);
+    setDisciplinasUsadasNoTurno([]);
     setSurtoUsadoTurno(false);
     recuperarInspiracaoAoRolarIniciativa();
   }
@@ -2584,6 +2590,25 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     });
     return () => registrarInspiracaoHeroica(null);
   }, [inspiracaoHeroicaAtiva, registrarInspiracaoHeroica]);
+
+  // Disciplinas Psiônicas que somam Dado de Energia a um d20 (E4b) — botão "✨ +1d6 <Disciplina>" no popup da rolagem.
+  useEffect(() => {
+    if (dadosEnergiaRestantes <= 0 || disciplinasPsionicasAtuais.length === 0) {
+      registrarDadoPsionico(null);
+      return;
+    }
+    registrarDadoPsionico({
+      opcaoPara: (rolagem) => {
+        const d = disciplinaParaRolagem(disciplinasPsionicasAtuais, rolagem);
+        if (!d) return null;
+        const uso = podeUsarDisciplina({ usadas: disciplinasUsadasNoTurno }, d.id);
+        return { id: d.id, rotulo: d.nome, quantidade: 1, lados: dadosEnergiaLados, bloqueioMotivo: uso.pode ? null : uso.motivo };
+      },
+      iniciar: (o) => setDisciplinasUsadasNoTurno((prev) => registrarUsoDeDisciplina({ usadas: prev }, o.id).usadas),
+      gastar: (o) => setDadosEnergiaPsionicaGasto((v) => v + o.quantidade),
+    });
+    return () => registrarDadoPsionico(null);
+  }, [dadosEnergiaRestantes, dadosEnergiaLados, disciplinasPsionicasAtuais, disciplinasUsadasNoTurno, registrarDadoPsionico]);
 
   // Sortudo (Talento de Origem) — botão "🍀 Vantagem" na rolagem d20, gasta 1 Ponto de Sorte.
   useEffect(() => {

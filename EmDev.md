@@ -27,7 +27,8 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
 - [x] E3d — Telecinese Sutil (Mãos Mágicas de graça, fora do limite de truques). Conferido em Magias e Combate (360px).
 - [x] E3b — Impulso Telecinético (Ação Bônus; sem dado 1,5 m ou com dado 5 m x resultado, dado só gasto se o alvo falhar). Conferido em 360px. E3 completo.
 - [x] E4a — escolha das Disciplinas Psiônicas (Level Up nível 2: 2, +1 em 5/10/13/17, troca 1 por nível), Perfil, Char Multiclasse, regra do turno (1 por turno, 1 vez cada, exceções Defesa Psiônica e Mente Aguçada) no core com testes. Conferido em 360px.
-- [ ] E4b — Consciência Expandida, Língua Diabólica, Mente Atenta, Mira Inerrante (estado do turno no FichaShell entra aqui, no 1º uso). E4c — Aperfeiçoamento de Precognição, Bio-Retorno, Insinuação do Id, Pensamentos Destrutivos. E4d — Defesa Psiônica, Mente Aguçada, Retaliação Psíquica.
+- [x] E4b — Consciência Expandida, Língua Diabólica, Mente Atenta, Mira Inerrante: botão +nDx no popup de rolagem (perícia da ação ou ataque), dado só gasto se der certo, bloqueio 1 disciplina por turno. Conferido em 360px.
+- [ ] (restante da E4) Consciência Expandida, Língua Diabólica, Mente Atenta, Mira Inerrante (estado do turno no FichaShell entra aqui, no 1º uso). E4c — Aperfeiçoamento de Precognição, Bio-Retorno, Insinuação do Id, Pensamentos Destrutivos. E4d — Defesa Psiônica, Mente Aguçada, Retaliação Psíquica.
 - [ ] E5 — Restauração/Surto/Reservas/Força Vital. E6a-d — subclasses. E7 — Talentos Selvagens.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.

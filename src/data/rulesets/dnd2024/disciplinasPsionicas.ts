@@ -5,11 +5,17 @@
 
 import type { StatusImplementacao } from './statusImplementacao';
 
+/** Quando a disciplina soma o Dado de Energia Psiônica a uma rolagem de d20: numa perícia da ação correspondente (Procurar,
+ * Influenciar, Analisar — o "Estudar" do UA), ou num ataque que errou. */
+export type GatilhoDisciplina = { tipo: 'pericia'; pericias: string[] } | { tipo: 'ataque' };
+
 export interface DisciplinaPsionica {
   id: string;
   nome: string;
   descricao: string;
   statusImplementacao: StatusImplementacao;
+  /** Só nas disciplinas que se encaixam numa rolagem de d20 (E4b). */
+  gatilho?: GatilhoDisciplina;
 }
 
 const PH: StatusImplementacao = 'placeholder-codeimplementation';
@@ -34,7 +40,8 @@ export const disciplinasPsionicas: DisciplinaPsionica[] = [
     nome: 'Consciência Expandida',
     descricao:
       'Ao realizar a ação de Procurar, você pode gastar um Dado de Energia Psiônica, rolá-lo e adicionar o resultado à sua jogada de habilidade. Se isso resultar em sucesso no teste de habilidade, o dado é gasto.',
-    statusImplementacao: PH,
+    statusImplementacao: 'codeimplementation',
+    gatilho: { tipo: 'pericia', pericias: ['Intuição', 'Medicina', 'Percepção', 'Sobrevivência'] },
   },
   {
     id: 'defesa-psionica',
@@ -55,7 +62,8 @@ export const disciplinasPsionicas: DisciplinaPsionica[] = [
     nome: 'Língua Diabólica',
     descricao:
       'Ao realizar a ação de Influenciar, você pode gastar um Dado de Energia Psiônica, rolá-lo e adicionar o resultado à sua jogada de habilidade. Se isso resultar em sucesso no teste de habilidade, o dado é gasto.',
-    statusImplementacao: PH,
+    statusImplementacao: 'codeimplementation',
+    gatilho: { tipo: 'pericia', pericias: ['Atuação', 'Enganação', 'Intimidação', 'Persuasão', 'Lidar com Animais'] },
   },
   {
     id: 'mente-agucada',
@@ -69,14 +77,16 @@ export const disciplinasPsionicas: DisciplinaPsionica[] = [
     nome: 'Mente Atenta',
     descricao:
       'Ao realizar a ação de Estudar, você pode gastar um Dado de Energia Psiônica, rolá-lo e adicionar o resultado à jogada de habilidade. Se isso resultar em sucesso no teste de habilidade, o dado é gasto.',
-    statusImplementacao: PH,
+    statusImplementacao: 'codeimplementation',
+    gatilho: { tipo: 'pericia', pericias: ['Arcanismo', 'História', 'Investigação', 'Natureza', 'Religião'] },
   },
   {
     id: 'mira-inerrante',
     nome: 'Mira Inerrante',
     descricao:
       'Quando errar um ataque, você pode gastar um Dado de Energia Psiônica e adicioná-lo à jogada de ataque. Se isso fizer o ataque acertar, o dado é gasto.',
-    statusImplementacao: PH,
+    statusImplementacao: 'codeimplementation',
+    gatilho: { tipo: 'ataque' },
   },
   {
     id: 'pensamentos-destrutivos',
