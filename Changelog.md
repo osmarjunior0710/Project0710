@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0804
+
+Psiônico, correção: o limite de "1 disciplina por turno" agora só vale onde existe turno (ataque, aba Combate). Teste de perícia feito pela aba Atributos não tem limite nem trava. Além disso, numa rolagem com Vantagem ou Desvantagem que recebeu o dado psiônico, o popup mostra a soma de cada d20 (ex.: "Com o dado psiônico (+3): 13 / 14").
+
 ## v202610_0746
 
 Psiônico: o texto de Consciência Expandida, Língua Diabólica e Mente Atenta agora diz quais perícias valem (ex.: Procurar = Intuição, Medicina, Percepção e Sobrevivência; Estudar do UA = Analisar), e a Mira Inerrante avisa que aparece no popup do ataque. A nota aparece no Level Up e no Perfil.

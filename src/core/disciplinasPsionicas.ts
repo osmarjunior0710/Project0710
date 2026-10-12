@@ -60,3 +60,9 @@ export function disciplinaParaRolagem(conhecidas: string[], rolagem: { label: st
   }
   return null;
 }
+
+/** A regra "1 disciplina por turno, 1 vez cada" só existe onde há o conceito de turno: as rolagens da aba Combate (ataque). Um teste de
+ * perícia feito pela aba Atributos é narrativo — sem turno, sem limite e sem registrar uso (a mesma disciplina pode ser usada de novo). */
+export function rolagemTemLimiteDeTurno(rolagem: { ehAtaque: boolean }): boolean {
+  return rolagem.ehAtaque;
+}

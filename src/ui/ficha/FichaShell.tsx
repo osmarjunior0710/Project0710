@@ -102,7 +102,7 @@ import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
 import { usoDaConexaoTelepatica } from '../../core/conexaoTelepatica';
-import { disciplinaParaRolagem, podeUsarDisciplina, registrarUsoDeDisciplina } from '../../core/disciplinasPsionicas';
+import { disciplinaParaRolagem, podeUsarDisciplina, registrarUsoDeDisciplina, rolagemTemLimiteDeTurno } from '../../core/disciplinasPsionicas';
 import { ladosDadoEnergiaPsionica, quantidadeDadosEnergiaPsionica, quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, quantidadePontosDeFoco, bonusMovimentoSemArmadura, ladosDadoArtesMarciais, temAuraDeProtecao } from '../../core/recursosClasse';
 import { condicoesDisponiveisMaosConsagradas, custoTotalMaosConsagradas } from '../../core/maosConsagradas';
 import { bonusArmaSagrada, armaElegivelParaArmaSagrada } from '../../core/armaSagrada';
@@ -2601,10 +2601,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       opcaoPara: (rolagem) => {
         const d = disciplinaParaRolagem(disciplinasPsionicasAtuais, rolagem);
         if (!d) return null;
-        const uso = podeUsarDisciplina({ usadas: disciplinasUsadasNoTurno }, d.id);
-        return { id: d.id, rotulo: d.nome, quantidade: 1, lados: dadosEnergiaLados, bloqueioMotivo: uso.pode ? null : uso.motivo };
+        // Só a rolagem COM turno (ataque, aba Combate) respeita "1 disciplina por turno"; perícia pela aba Atributos é livre.
+        const limitaPorTurno = rolagemTemLimiteDeTurno(rolagem);
+        const uso = limitaPorTurno ? podeUsarDisciplina({ usadas: disciplinasUsadasNoTurno }, d.id) : { pode: true as const };
+        return { id: d.id, rotulo: d.nome, quantidade: 1, lados: dadosEnergiaLados, bloqueioMotivo: uso.pode ? null : uso.motivo, limitaPorTurno };
       },
-      iniciar: (o) => setDisciplinasUsadasNoTurno((prev) => registrarUsoDeDisciplina({ usadas: prev }, o.id).usadas),
+      iniciar: (o) => {
+        if (o.limitaPorTurno) setDisciplinasUsadasNoTurno((prev) => registrarUsoDeDisciplina({ usadas: prev }, o.id).usadas);
+      },
       gastar: (o) => setDadosEnergiaPsionicaGasto((v) => v + o.quantidade),
     });
     return () => registrarDadoPsionico(null);

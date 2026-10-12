@@ -7,6 +7,7 @@ import {
   DISCIPLINAS_QUE_NAO_CONTAM_NO_TURNO,
   podeUsarDisciplina,
   quantidadeDisciplinasPsionicas,
+  rolagemTemLimiteDeTurno,
   registrarUsoDeDisciplina,
 } from './disciplinasPsionicas';
 
@@ -79,5 +80,12 @@ describe('nota do app nas disciplinas de rolagem', () => {
     expect(d('mente-atenta')).toContain('Arcanismo, História, Investigação, Natureza e Religião');
     expect(d('mira-inerrante')).toContain('popup do ataque');
     expect(d('bio-retorno')).not.toContain('Nota do app');
+  });
+});
+
+describe('rolagemTemLimiteDeTurno', () => {
+  it('ataque (aba Combate) tem limite de turno; teste de perícia (aba Atributos) não', () => {
+    expect(rolagemTemLimiteDeTurno({ ehAtaque: true })).toBe(true);
+    expect(rolagemTemLimiteDeTurno({ ehAtaque: false })).toBe(false);
   });
 });

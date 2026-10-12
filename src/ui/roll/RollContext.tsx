@@ -316,6 +316,8 @@ export interface DadoPsionicoOpcao {
   lados: number;
   /** Preenchido quando já não dá pra usar (ex.: outra Disciplina já usada neste turno) — o botão aparece apagado com este motivo. */
   bloqueioMotivo: string | null;
+  /** `false` = rolagem sem conceito de turno (ex.: perícia pela aba Atributos): não bloqueia nem registra uso da disciplina. */
+  limitaPorTurno: boolean;
 }
 export interface DadoPsionicoProvider {
   opcaoPara: (rolagem: { label: string; ehAtaque: boolean }) => DadoPsionicoOpcao | null;

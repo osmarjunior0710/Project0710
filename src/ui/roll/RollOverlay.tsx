@@ -175,6 +175,18 @@ export default function RollOverlay() {
         {estado.vantagem && (
           <div className={styles.formula}>{estado.vantagem === 'vantagem' ? 'Vantagem' : 'Desvantagem'}</div>
         )}
+        {/* Dado de Energia Psiônica numa rolagem com Vantagem/Desvantagem: o mesmo dado soma nos DOIS d20 (a escolha entre eles não muda,
+            o total é o mesmo) — mostra a soma de cada um pra conferir. */}
+        {estado.dadoPsionico?.valores &&
+          typeof estado.valorDado === 'number' &&
+          typeof estado.dado2 === 'number' &&
+          estado.fase === 'concluido' && (
+            <div className={styles.formula}>
+              Com o dado psiônico (+{estado.dadoPsionico.valores.reduce((x, y) => x + y, 0)}):{' '}
+              {estado.valorDado + (estado.mod ?? 0) + estado.dadoPsionico.valores.reduce((x, y) => x + y, 0)} /{' '}
+              {estado.dado2 + (estado.mod ?? 0) + estado.dadoPsionico.valores.reduce((x, y) => x + y, 0)}
+            </div>
+          )}
         <div className={styles.total}>
           {estado.fase === 'rolando' ? (
             <span className={styles.rolando}>
