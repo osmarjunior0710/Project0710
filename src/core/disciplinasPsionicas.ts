@@ -50,6 +50,13 @@ export function registrarUsoDeDisciplina(estado: UsoDeDisciplinasNoTurno, id: st
   return { usadas: [...estado.usadas, id] };
 }
 
+/** `true` quando já usou alguma disciplina "comum" (que conta na regra de 1 por turno) neste turno —
+ * usado por quem ainda não sabe QUAL disciplina vai se aplicar (ex.: antes de saber a escola da magia
+ * conjurada), só se já está bloqueado de qualquer forma. */
+export function algumaDisciplinaComumUsadaNoTurno(estado: UsoDeDisciplinasNoTurno): boolean {
+  return estado.usadas.some((u) => !DISCIPLINAS_QUE_NAO_CONTAM_NO_TURNO.includes(u));
+}
+
 /** Qual das disciplinas CONHECIDAS soma o Dado de Energia a esta rolagem de d20 — por perícia (o rótulo da rolagem é o nome da perícia)
  * ou por ataque. `null` = nenhuma se aplica. */
 export function disciplinaParaRolagem(conhecidas: string[], rolagem: { label: string; ehAtaque: boolean }): DisciplinaPsionica | null {
@@ -65,4 +72,17 @@ export function disciplinaParaRolagem(conhecidas: string[], rolagem: { label: st
  * perícia feito pela aba Atributos é narrativo — sem turno, sem limite e sem registrar uso (a mesma disciplina pode ser usada de novo). */
 export function rolagemTemLimiteDeTurno(rolagem: { ehAtaque: boolean }): boolean {
   return rolagem.ehAtaque;
+}
+
+/** Qual das disciplinas CONHECIDAS se encaixa ao conjurar `magia` (E4c) — por escola, e só quando a
+ * magia exige teste de resistência pras que pedem isso (Insinuação do Id, Pensamentos Destrutivos).
+ * `null` = nenhuma se aplica (escola não bate, ou a disciplina não foi escolhida). */
+export function disciplinaParaConjuracao(conhecidas: string[], magia: { escola: string }, exigeSalvaguarda: boolean): DisciplinaPsionica | null {
+  for (const d of disciplinasPsionicas) {
+    if (!conhecidas.includes(d.id) || d.gatilho?.tipo !== 'conjuracao') continue;
+    if (!d.gatilho.escolas.includes(magia.escola)) continue;
+    if (d.gatilho.exigeSalvaguarda && !exigeSalvaguarda) continue;
+    return d;
+  }
+  return null;
 }

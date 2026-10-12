@@ -583,6 +583,15 @@ interface CombatTabProps {
    * painel de Ação avisar quando a conjuração se qualifica, ver
    * `core/necromante.ts`. */
   colheitaMacabra: { disponivel: boolean; onDisponivel: (cura: number) => void };
+  /** Disciplinas Psiônicas pós-conjuração (Psiônico UA, E4c: Aperfeiçoamento
+   * de Precognição/Bio-Retorno/Insinuação do Id/Pensamentos Destrutivos) —
+   * mesmo motivo da Colheita Macabra acima (modal de verdade mora no
+   * `FichaShell.tsx`). `conhecidas` é `[]` pra quem não é Psiônico. */
+  disciplinaPosConjuracao: {
+    conhecidas: string[];
+    bloqueadaNoTurno: boolean;
+    onDisponivel: (d: { id: string; nome: string; descricao: string; quantidadeDados: number }) => void;
+  };
   /** Colheita dos Mortos (Necromante, nível 10) — passo de escolha de
    * pet fica dentro do próprio painel de Reação (não precisa
    * sobreviver a troca de aba, diferente da Colheita Macabra: a
@@ -898,6 +907,11 @@ export default function CombatTab({
   explicacaoIniciativa,
   onRolarIniciativa,
   colheitaMacabra: { disponivel: colheitaMacabraDisponivel, onDisponivel: onColheitaMacabraDisponivel },
+  disciplinaPosConjuracao: {
+    conhecidas: disciplinasPsionicasConhecidas,
+    bloqueadaNoTurno: disciplinaPsionicaBloqueadaNoTurno,
+    onDisponivel: onDisciplinaPosConjuracaoDisponivel,
+  },
   colheitaDosMortos: {
     disponivel: colheitaDosMortosDisponivel,
     personagemEnsanguentado,
@@ -2956,6 +2970,9 @@ export default function CombatTab({
           onUsarFalarComAnimaisGnomo={onUsarFalarComAnimaisGnomo}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
+          disciplinasPsionicasConhecidas={disciplinasPsionicasConhecidas}
+          disciplinaPsionicaBloqueadaNoTurno={disciplinaPsionicaBloqueadaNoTurno}
+          onDisciplinaPosConjuracaoDisponivel={onDisciplinaPosConjuracaoDisponivel}
           preferenciasPillsMagia={preferenciasPillsMagia}
           temRepudiarInimigos={temRepudiarInimigos}
           usosCanalizarMaximo={usosCanalizarMaximo}
@@ -3073,6 +3090,9 @@ export default function CombatTab({
           onAbrirSalvaguarda={abrirSalvaguarda}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
+          disciplinasPsionicasConhecidas={disciplinasPsionicasConhecidas}
+          disciplinaPsionicaBloqueadaNoTurno={disciplinaPsionicaBloqueadaNoTurno}
+          onDisciplinaPosConjuracaoDisponivel={onDisciplinaPosConjuracaoDisponivel}
           ataqueBonus={ataqueBonus}
           onUsarAtaqueBonus={usarAtaqueMaoSecundaria}
           cortarAtaque={cortarAtaque}
@@ -3122,6 +3142,9 @@ export default function CombatTab({
           onAbrirEscolhaSobrecarga={setEscolhaSobrecarga}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
+          disciplinasPsionicasConhecidas={disciplinasPsionicasConhecidas}
+          disciplinaPsionicaBloqueadaNoTurno={disciplinaPsionicaBloqueadaNoTurno}
+          onDisciplinaPosConjuracaoDisponivel={onDisciplinaPosConjuracaoDisponivel}
           detalhesAtivo={detalhesAtivo}
           contraEncantamentoDisponivel={contraEncantamentoDisponivel}
           palavrasDeInterrupcaoDisponivel={palavrasDeInterrupcaoDisponivel}

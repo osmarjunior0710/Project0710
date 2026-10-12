@@ -331,6 +331,15 @@ interface MagiasTabProps {
    * troca de aba, ver `ColheitaMacabraModal.tsx`) que a conjuração se
    * qualificou pra Colheita Macabra, com a cura já calculada. */
   onColheitaMacabraDisponivel: (cura: number) => void;
+  /** Ids das Disciplinas Psiônicas conhecidas (Psiônico UA, E4c) — conjurar
+   * pela aba Magias é narrativo (sem conceito de turno), então nunca passa
+   * "bloqueada" pro `decidirConjuracao` (mesmo critério de
+   * `rolagemTemLimiteDeTurno`). `[]` pra quem não é Psiônico. */
+  disciplinasPsionicasConhecidas: string[];
+  /** Avisa o `FichaShell` (mesmo padrão de `onColheitaMacabraDisponivel`
+   * acima) que a conjuração se qualificou pra uma Disciplina Psiônica
+   * pós-conjuração — ver `DisciplinaPosConjuracaoModal.tsx`. */
+  onDisciplinaPosConjuracaoDisponivel: (d: { id: string; nome: string; descricao: string; quantidadeDados: number }) => void;
   /** Quais pills de info aparecem em cada linha de magia/truque —
    * preferência do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
@@ -431,6 +440,8 @@ export default function MagiasTab({
   onCompletarMagiasPreparadas,
   colheitaMacabraDisponivel,
   onColheitaMacabraDisponivel,
+  disciplinasPsionicasConhecidas,
+  onDisciplinaPosConjuracaoDisponivel,
 }: MagiasTabProps) {
   const { rolarD20, rolarDados } = useRoll();
   const [telaCirculo, setTelaCirculo] = useState<{ magia: Magia; classeDonaDaMagia: string | null } | null>(null);
@@ -543,9 +554,14 @@ export default function MagiasTab({
       explicacaoReal,
       evocacaoPotencializadaAtiva,
       modIntAtual,
+      disciplinasPsionicasConhecidas,
+      false,
     );
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
+    }
+    if (resultado.disciplinaPosConjuracao) {
+      onDisciplinaPosConjuracaoDisponivel(resultado.disciplinaPosConjuracao);
     }
     if (resultado.rollAcerto) {
       const dano = resultado.danoPendente;

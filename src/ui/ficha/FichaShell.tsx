@@ -102,7 +102,20 @@ import { alternarSintonizacao } from '../../core/sintonizacao';
 import { armaDePactoAtual, vincularArmaDePacto, desvincularArmaDePacto, ataqueExtraDoPactoDaLamina } from '../../core/pactoDaLamina';
 import { armasParaMaestria as listarArmasParaMaestria, armasElegiveisParaMaestriaExtra } from '../../core/maestriaArma';
 import { usoDaConexaoTelepatica } from '../../core/conexaoTelepatica';
-import { disciplinaParaRolagem, podeUsarDisciplina, registrarUsoDeDisciplina, rolagemTemLimiteDeTurno } from '../../core/disciplinasPsionicas';
+import {
+  disciplinaParaRolagem,
+  podeUsarDisciplina,
+  registrarUsoDeDisciplina,
+  rolagemTemLimiteDeTurno,
+  algumaDisciplinaComumUsadaNoTurno,
+} from '../../core/disciplinasPsionicas';
+import {
+  bonusAperfeicoamentoDePrecognicao,
+  reducaoInsinuacaoDoId,
+  pvTemporarioBioRetorno,
+  danoPensamentosDestrutivos,
+} from '../../core/disciplinasConjuracao';
+import DisciplinaPosConjuracaoModal from '../components/DisciplinaPosConjuracaoModal';
 import { ladosDadoEnergiaPsionica, quantidadeDadosEnergiaPsionica, quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, quantidadePontosDeFoco, bonusMovimentoSemArmadura, ladosDadoArtesMarciais, temAuraDeProtecao } from '../../core/recursosClasse';
 import { condicoesDisponiveisMaosConsagradas, custoTotalMaosConsagradas } from '../../core/maosConsagradas';
 import { bonusArmaSagrada, armaElegivelParaArmaSagrada } from '../../core/armaSagrada';
@@ -161,6 +174,7 @@ import CombatTab, { type EstadoRecurso, type RecursoTurno } from './tabs/CombatT
 import PetsTab from './tabs/PetsTab';
 import AjustarPetShell from './pets/AjustarPetShell';
 import ColheitaMacabraModal from '../components/ColheitaMacabraModal';
+import AvisoModal from './combat/AvisoModal';
 import FuriaImplacavelModal from '../components/FuriaImplacavelModal';
 import Dice3dFab from './dice3d/Dice3dFab';
 import DescansoFab from './DescansoFab';
@@ -278,6 +292,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     registrarForcaIndomavel,
     estado: rollEmAndamento,
     rolarD20,
+    rolarDados,
   } = useRoll();
   const [selecao, setSelecao] = useState<WizardSelection>(personagemSalvo.selecao);
 
@@ -704,6 +719,17 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * não importa de onde a magia foi conjurada, ver
    * `ColheitaMacabraModal.tsx`. */
   const [colheitaMacabraPendente, setColheitaMacabraPendente] = useState<{ cura: number } | null>(null);
+  /** Disciplina Psiônica pós-conjuração (Psiônico UA, E4c: Aperfeiçoamento
+   * de Precognição/Bio-Retorno/Insinuação do Id/Pensamentos Destrutivos) —
+   * mesmo motivo da Colheita Macabra acima (mora fora da aba Magias/Combate
+   * pra sobreviver à troca de aba), ver `DisciplinaPosConjuracaoModal.tsx`. */
+  const [disciplinaPosConjuracaoPendente, setDisciplinaPosConjuracaoPendente] = useState<{
+    id: string;
+    nome: string;
+    descricao: string;
+    quantidadeDados: number;
+  } | null>(null);
+  const [disciplinaPosConjuracaoResultado, setDisciplinaPosConjuracaoResultado] = useState<{ titulo: string; texto: string } | null>(null);
   const [levelUpAberto, setLevelUpAberto] = useState(false);
   // Carrega a classe junto (Entrega 5f) — cada classe tem sua própria
   // cota de Truques/Magias Preparadas, então "completar" precisa saber
@@ -2614,6 +2640,65 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return () => registrarDadoPsionico(null);
   }, [dadosEnergiaRestantes, dadosEnergiaLados, disciplinasPsionicasAtuais, disciplinasUsadasNoTurno, registrarDadoPsionico]);
 
+  /** Dispensar a Disciplina pós-conjuração (E4c) não custa nada — o texto da regra é sempre "você
+   * pode gastar", nunca automático. */
+  function dispensarDisciplinaPosConjuracao() {
+    setDisciplinaPosConjuracaoPendente(null);
+  }
+
+  /** "Sim" na Disciplina pós-conjuração pendente (Aperfeiçoamento de Precognição/Bio-Retorno/
+   * Insinuação do Id/Pensamentos Destrutivos, E4c) — gasta os Dados de Energia Psiônica, rola (se
+   * sobrar algum pra rolar) e aplica o resultado de cada uma. `quantidadeDados` pode ser 0/negativo
+   * nas 2 que usam o mod. de Inteligência como contagem — aí não rola nada, só garante o mínimo de 1
+   * do próprio texto da regra. */
+  function usarDisciplinaPosConjuracao() {
+    const d = disciplinaPosConjuracaoPendente;
+    if (!d) return;
+    setDisciplinaPosConjuracaoPendente(null);
+    setDisciplinasUsadasNoTurno((prev) => registrarUsoDeDisciplina({ usadas: prev }, d.id).usadas);
+    const numDados = Math.max(0, d.quantidadeDados);
+
+    function aplicar(somaDados: number) {
+      if (d!.id === 'bio-retorno') {
+        const pv = pvTemporarioBioRetorno(somaDados, modIntAtual);
+        setPvTemporario((atual) => ganharPvTemporario(atual, pv));
+        setDisciplinaPosConjuracaoResultado({ titulo: `🔮 ${d!.nome}`, texto: `Você ganhou ${pv} Pontos de Vida Temporários.` });
+      } else if (d!.id === 'pensamentos-destrutivos') {
+        const dano = danoPensamentosDestrutivos(somaDados, modIntAtual);
+        setDisciplinaPosConjuracaoResultado({
+          titulo: `🔮 ${d!.nome}`,
+          texto: `${dano} de dano Psíquico extra numa criatura à vista, mesmo que ela passe no teste de resistência.`,
+        });
+      } else if (d!.id === 'aperfeicoamento-de-precognicao') {
+        const bonus = bonusAperfeicoamentoDePrecognicao(somaDados);
+        setDisciplinaPosConjuracaoResultado({
+          titulo: `🔮 ${d!.nome}`,
+          texto: `Escolha uma criatura à vista a até 18m (pode ser você) — ela recebe +${bonus} no próximo Teste de D20 que fizer, até o fim do seu próximo turno.`,
+        });
+      } else if (d!.id === 'insinuacao-do-id') {
+        const reducao = reducaoInsinuacaoDoId(somaDados);
+        setDisciplinaPosConjuracaoResultado({
+          titulo: `🔮 ${d!.nome}`,
+          texto: `Um dos alvos à vista dessa magia subtrai ${reducao} do teste de resistência dele contra ela.`,
+        });
+      }
+    }
+
+    if (numDados <= 0) {
+      aplicar(0);
+      return;
+    }
+    setDadosEnergiaPsionicaGasto((v) => v + numDados);
+    rolarDados({
+      label: `${d.nome} — Dado${numDados > 1 ? 's' : ''} de Energia Psiônica`,
+      formula: `${numDados}d${dadosEnergiaLados}`,
+      quantidade: numDados,
+      lados: dadosEnergiaLados,
+      mod: 0,
+      onResultado: aplicar,
+    });
+  }
+
   // Sortudo (Talento de Origem) — botão "🍀 Vantagem" na rolagem d20, gasta 1 Ponto de Sorte.
   useEffect(() => {
     registrarSortudo({
@@ -3165,6 +3250,24 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           onFechar={() => setColheitaMacabraPendente(null)}
         />
       )}
+      {/* Mesmo motivo do Colheita Macabra acima (E4c, Disciplinas Psiônicas pós-conjuração). */}
+      {disciplinaPosConjuracaoPendente && rollEmAndamento === null && (
+        <DisciplinaPosConjuracaoModal
+          nome={disciplinaPosConjuracaoPendente.nome}
+          descricao={disciplinaPosConjuracaoPendente.descricao}
+          quantidadeDados={disciplinaPosConjuracaoPendente.quantidadeDados}
+          dadosRestantes={dadosEnergiaRestantes}
+          onUsar={usarDisciplinaPosConjuracao}
+          onDispensar={dispensarDisciplinaPosConjuracao}
+        />
+      )}
+      {disciplinaPosConjuracaoResultado && rollEmAndamento === null && (
+        <AvisoModal
+          titulo={disciplinaPosConjuracaoResultado.titulo}
+          texto={disciplinaPosConjuracaoResultado.texto}
+          onFechar={() => setDisciplinaPosConjuracaoResultado(null)}
+        />
+      )}
       {/* Mesmo motivo do Colheita Macabra acima (não "espiar" atrás do
           RollOverlay da própria rolagem de dano que zerou o PV, NEM da
           própria rolagem da Salvaguarda de Constituição que este modal
@@ -3423,6 +3526,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onCompletarMagiasPreparadas={(classeNome) => setCompletarAberto({ tipo: 'magiasPreparadas', classeNome })}
             colheitaMacabraDisponivel={colheitaMacabraDisponivel}
             onColheitaMacabraDisponivel={(cura) => setColheitaMacabraPendente({ cura })}
+            disciplinasPsionicasConhecidas={disciplinasPsionicasAtuais}
+            onDisciplinaPosConjuracaoDisponivel={setDisciplinaPosConjuracaoPendente}
             preferenciasPillsMagia={preferenciasPillsMagia}
           />
         )}
@@ -3689,6 +3794,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             colheitaMacabra={{
               disponivel: colheitaMacabraDisponivel,
               onDisponivel: (cura) => setColheitaMacabraPendente({ cura }),
+            }}
+            disciplinaPosConjuracao={{
+              conhecidas: disciplinasPsionicasAtuais,
+              bloqueadaNoTurno: algumaDisciplinaComumUsadaNoTurno({ usadas: disciplinasUsadasNoTurno }),
+              onDisponivel: setDisciplinaPosConjuracaoPendente,
             }}
             colheitaDosMortos={{
               disponivel: colheitaDosMortosDisponivel,

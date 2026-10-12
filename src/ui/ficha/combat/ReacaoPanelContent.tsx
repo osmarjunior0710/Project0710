@@ -146,6 +146,12 @@ interface ReacaoPanelContentProps {
   onAbrirAvisoReacao: (titulo: string, texto: string) => void;
   /** Defletir Ataques (Monge nível 3) — ver `usarDefletirAtaques` em `CombatTab.tsx`. */
   onDefletirAtaques: () => void;
+  /** Disciplinas Psiônicas pós-conjuração (Psiônico UA, E4c) — mesmo
+   * padrão de `useUsarMagiaPainel.tsx` (Reação também tem conceito de
+   * turno, mesmo critério). */
+  disciplinasPsionicasConhecidas: string[];
+  disciplinaPsionicaBloqueadaNoTurno: boolean;
+  onDisciplinaPosConjuracaoDisponivel: (d: { id: string; nome: string; descricao: string; quantidadeDados: number }) => void;
 }
 
 export default function ReacaoPanelContent({
@@ -199,6 +205,9 @@ export default function ReacaoPanelContent({
   nivelMonge,
   onAbrirAvisoReacao,
   onDefletirAtaques,
+  disciplinasPsionicasConhecidas,
+  disciplinaPsionicaBloqueadaNoTurno,
+  onDisciplinaPosConjuracaoDisponivel,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
@@ -246,9 +255,14 @@ export default function ReacaoPanelContent({
       explicacaoReal,
       evocacaoPotencializadaAtiva,
       modIntAtual,
+      disciplinasPsionicasConhecidas,
+      disciplinaPsionicaBloqueadaNoTurno,
     );
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
+    }
+    if (resultado.disciplinaPosConjuracao) {
+      onDisciplinaPosConjuracaoDisponivel(resultado.disciplinaPosConjuracao);
     }
     if (resultado.rollAcerto) {
       const dano = resultado.danoPendente;

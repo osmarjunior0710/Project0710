@@ -16,6 +16,7 @@ import { calcularDanoMagia, calcularCuraMagia, mecanicaDaMagia, fmtDado, type Me
 import { curaColheitaMacabra } from './necromante';
 import { bonusExplosaoAgonizante } from './invocacoesMisticas';
 import { bonusEvocacaoPotencializada } from './evocador';
+import { disciplinaParaConjuracao } from './disciplinasPsionicas';
 
 /** Rolagem de 1 dado só (acerto de magia) — mesmo formato mínimo de
  * `RollD20Options` (`useRoll()`), sem `quantidade`/`lados` (sempre 1d20). */
@@ -76,6 +77,14 @@ export interface ConjuracaoDecidida {
    * (característica não desbloqueada, magia não é de Necromancia, ou
    * não gastou um espaço de verdade). */
   curaColheitaMacabra: number | null;
+  /** Disciplina Psiônica que se encaixa nesta conjuração (Psiônico UA, E4c:
+   * Aperfeiçoamento de Precognição/Bio-Retorno/Insinuação do Id/Pensamentos
+   * Destrutivos) — `null` quando nenhuma bate (escola errada, disciplina não
+   * conhecida, ou já usou uma disciplina comum neste turno). `quantidadeDados`
+   * é 1 (Aperfeiçoamento/Insinuação) ou o mod. de Inteligência, possivelmente
+   * 0/negativo (Bio-Retorno/Pensamentos Destrutivos — nesse caso a tela
+   * aplica o mínimo de 1 direto, sem rolar dado nenhum). */
+  disciplinaPosConjuracao: { id: string; nome: string; descricao: string; quantidadeDados: number } | null;
 }
 
 /** Decide o que fazer ao conjurar `m`, usando `circuloUsado` pra
@@ -104,11 +113,25 @@ export function decidirConjuracao(
   explicacaoAcertoConjuracao: ExplicacaoCalculo | null = null,
   evocacaoPotencializadaAtiva = false,
   modInt = 0,
+  disciplinasPsionicasConhecidas: string[] = [],
+  disciplinaPsionicaBloqueada = false,
 ): ConjuracaoDecidida {
   const curaMacabra =
     colheitaMacabraDisponivel && gastouEspacoDeVerdade && m.escola === 'Necromancia' ? curaColheitaMacabra(circuloUsado) : null;
 
   const mecanica = mecanicaDaMagia(m);
+
+  const disciplina = disciplinaPsionicaBloqueada
+    ? null
+    : disciplinaParaConjuracao(disciplinasPsionicasConhecidas, m, mecanica === 'salvaguarda');
+  const disciplinaPosConjuracao = disciplina
+    ? {
+        id: disciplina.id,
+        nome: disciplina.nome,
+        descricao: disciplina.descricao,
+        quantidadeDados: disciplina.id === 'bio-retorno' || disciplina.id === 'pensamentos-destrutivos' ? modInt : 1,
+      }
+    : null;
 
   if (mecanica === 'ataque' && modAcertoConjuracao !== null) {
     const dano = calcularDanoMagia(m, circuloUsado, nivelPersonagem);
@@ -147,6 +170,7 @@ export function decidirConjuracao(
         ? 'Rolagem de acerto feita.'
         : 'Rolagem de acerto feita. Veja a descrição da magia (ⓘ) pro dano.',
       curaColheitaMacabra: curaMacabra,
+      disciplinaPosConjuracao,
     };
   }
 
@@ -155,6 +179,7 @@ export function decidirConjuracao(
       mecanica,
       textoFeedback: 'Alvo faz salvaguarda — veja o popup pra CD e dano.',
       curaColheitaMacabra: curaMacabra,
+      disciplinaPosConjuracao,
     };
   }
 
@@ -173,6 +198,7 @@ export function decidirConjuracao(
         },
         textoFeedback: 'Cura rolada — escolha o alvo no popup ("Me curar" ou "Curar outro").',
         curaColheitaMacabra: curaMacabra,
+        disciplinaPosConjuracao,
       };
     }
   }
@@ -192,9 +218,10 @@ export function decidirConjuracao(
         },
         textoFeedback: 'Dano automático — role e aplique no alvo.',
         curaColheitaMacabra: curaMacabra,
+        disciplinaPosConjuracao,
       };
     }
   }
 
-  return { mecanica: 'nenhuma', textoFeedback: m.descricaoCurta ?? '', curaColheitaMacabra: curaMacabra };
+  return { mecanica: 'nenhuma', textoFeedback: m.descricaoCurta ?? '', curaColheitaMacabra: curaMacabra, disciplinaPosConjuracao };
 }

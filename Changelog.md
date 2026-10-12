@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1526
+
+Psiônico ganha 4 Disciplinas que reagem ao conjurar magia: Aperfeiçoamento
+de Precognição, Bio-Retorno, Insinuação do Id e Pensamentos Destrutivos.
+Depois de conjurar uma magia da escola certa, abre um popup perguntando
+se quer gastar Dado(s) de Energia Psiônica — Bio-Retorno já aplica PV
+Temporário de verdade, as outras 3 mostram o resultado como texto.
+
 ## v202610_1118
 
 O dado psiônico (Consciência Expandida, Mira Inerrante etc.) agora rola no dado 3D, junto do d20 — antes aparecia um dado 2D desenhado. Sem o Dado 3D ligado, continua no 2D de sempre.

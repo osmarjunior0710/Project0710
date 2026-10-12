@@ -97,4 +97,55 @@ describe('decidirConjuracao', () => {
     const resultado = decidirConjuracao(magia('toquenecrotico'), 0, 1, 5, false, false, 'Raio Místico', 3);
     expect(resultado.danoPendente?.mod).toBe(0);
   });
+
+  describe('disciplinaPosConjuracao (Psiônico E4c)', () => {
+    it('Pensamentos Destrutivos qualifica — magia de Evocação com salvaguarda, disciplina conhecida', () => {
+      const resultado = decidirConjuracao(magia('boladefogo'), 3, 5, 5, false, false, undefined, 0, null, false, 2, [
+        'pensamentos-destrutivos',
+      ]);
+      expect(resultado.disciplinaPosConjuracao).toEqual({
+        id: 'pensamentos-destrutivos',
+        nome: 'Pensamentos Destrutivos',
+        descricao: expect.any(String),
+        quantidadeDados: 2,
+      });
+    });
+
+    it('Bio-Retorno qualifica — magia de Transmutação, SEM precisar de salvaguarda', () => {
+      const resultado = decidirConjuracao(magia('artedruidica'), 0, 5, null, false, false, undefined, 0, null, false, 3, ['bio-retorno']);
+      expect(resultado.disciplinaPosConjuracao?.id).toBe('bio-retorno');
+      expect(resultado.disciplinaPosConjuracao?.quantidadeDados).toBe(3);
+    });
+
+    it('não qualifica sem a disciplina conhecida', () => {
+      const resultado = decidirConjuracao(magia('boladefogo'), 3, 5, 5, false, false, undefined, 0, null, false, 2, []);
+      expect(resultado.disciplinaPosConjuracao).toBeNull();
+    });
+
+    it('não qualifica com escola errada (Raio Místico é Evocação, mas sem salvaguarda — Pensamentos Destrutivos exige)', () => {
+      const resultado = decidirConjuracao(magia('raiomistico'), 0, 1, 5, false, false, undefined, 0, null, false, 2, [
+        'pensamentos-destrutivos',
+      ]);
+      expect(resultado.disciplinaPosConjuracao).toBeNull();
+    });
+
+    it('bloqueada (já usou uma disciplina comum neste turno) — null mesmo com tudo certo', () => {
+      const resultado = decidirConjuracao(
+        magia('boladefogo'),
+        3,
+        5,
+        5,
+        false,
+        false,
+        undefined,
+        0,
+        null,
+        false,
+        2,
+        ['pensamentos-destrutivos'],
+        true,
+      );
+      expect(resultado.disciplinaPosConjuracao).toBeNull();
+    });
+  });
 });

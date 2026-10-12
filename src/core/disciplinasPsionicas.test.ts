@@ -4,6 +4,8 @@ import { disciplinasPsionicas } from '../data/rulesets/dnd2024/disciplinasPsioni
 import {
   caracteristicaDisciplinaTemTexto,
   disciplinaParaRolagem,
+  disciplinaParaConjuracao,
+  algumaDisciplinaComumUsadaNoTurno,
   DISCIPLINAS_QUE_NAO_CONTAM_NO_TURNO,
   podeUsarDisciplina,
   quantidadeDisciplinasPsionicas,
@@ -79,7 +81,41 @@ describe('nota do app nas disciplinas de rolagem', () => {
     expect(d('mente-atenta')).toContain('Analisar (o "Estudar" do UA)');
     expect(d('mente-atenta')).toContain('Arcanismo, História, Investigação, Natureza e Religião');
     expect(d('mira-inerrante')).toContain('popup do ataque');
-    expect(d('bio-retorno')).not.toContain('Nota do app');
+    expect(d('bio-retorno')).toContain('pergunta logo depois de conjurar a magia');
+  });
+});
+
+describe('disciplinaParaConjuracao', () => {
+  const todas = ['aperfeicoamento-de-precognicao', 'bio-retorno', 'insinuacao-do-id', 'pensamentos-destrutivos'];
+  it('bate por escola, sem exigir salvaguarda quando a disciplina não pede', () => {
+    expect(disciplinaParaConjuracao(todas, { escola: 'Abjuração' }, false)?.id).toBe('aperfeicoamento-de-precognicao');
+    expect(disciplinaParaConjuracao(todas, { escola: 'Adivinhação' }, false)?.id).toBe('aperfeicoamento-de-precognicao');
+    expect(disciplinaParaConjuracao(todas, { escola: 'Transmutação' }, false)?.id).toBe('bio-retorno');
+  });
+  it('Insinuação do Id e Pensamentos Destrutivos só valem quando a magia exige teste de resistência', () => {
+    expect(disciplinaParaConjuracao(todas, { escola: 'Ilusão' }, true)?.id).toBe('insinuacao-do-id');
+    expect(disciplinaParaConjuracao(todas, { escola: 'Ilusão' }, false)).toBeNull();
+    expect(disciplinaParaConjuracao(todas, { escola: 'Evocação' }, true)?.id).toBe('pensamentos-destrutivos');
+    expect(disciplinaParaConjuracao(todas, { escola: 'Evocação' }, false)).toBeNull();
+  });
+  it('escola fora das 4 disciplinas, ou disciplina não conhecida: null', () => {
+    expect(disciplinaParaConjuracao(todas, { escola: 'Evocação' }, true)).not.toBeNull();
+    expect(disciplinaParaConjuracao(todas, { escola: 'Encantamento' }, false)).toBeNull();
+    expect(disciplinaParaConjuracao([], { escola: 'Abjuração' }, false)).toBeNull();
+  });
+});
+
+describe('algumaDisciplinaComumUsadaNoTurno', () => {
+  it('nenhuma usada: false', () => {
+    expect(algumaDisciplinaComumUsadaNoTurno({ usadas: [] })).toBe(false);
+  });
+  it('comum usada: true', () => {
+    expect(algumaDisciplinaComumUsadaNoTurno(registrarUsoDeDisciplina({ usadas: [] }, 'mira-inerrante'))).toBe(true);
+  });
+  it('só as exceções usadas (Defesa Psiônica/Mente Aguçada): continua false', () => {
+    let e = registrarUsoDeDisciplina({ usadas: [] }, 'defesa-psionica');
+    e = registrarUsoDeDisciplina(e, 'mente-agucada');
+    expect(algumaDisciplinaComumUsadaNoTurno(e)).toBe(false);
   });
 });
 

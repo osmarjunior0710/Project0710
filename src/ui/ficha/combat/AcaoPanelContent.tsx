@@ -169,6 +169,11 @@ interface AcaoPanelContentProps {
    * fecha logo em seguida (mesmo `onEscolher`), então quem mostra o
    * banner de verdade é o `CombatTab` (que sobrevive ao fechamento). */
   onColheitaMacabraDisponivel: (cura: number) => void;
+  /** Disciplinas Psiônicas pós-conjuração (Psiônico UA, E4c) — ver
+   * `useUsarMagiaPainel.tsx`. */
+  disciplinasPsionicasConhecidas: string[];
+  disciplinaPsionicaBloqueadaNoTurno: boolean;
+  onDisciplinaPosConjuracaoDisponivel: (d: { id: string; nome: string; descricao: string; quantidadeDados: number }) => void;
   /** Cortar (Mestre em Armas Grandes) — `podeOferecerCortar` = talento
    * + arma Corpo a Corpo equipada, mostra o botão manual "Reduziu a 0
    * PV?" ao lado de Atacar (Crítico já é detectado sozinho pelo
@@ -289,6 +294,9 @@ export default function AcaoPanelContent({
   onUsarFalarComAnimaisGnomo,
   colheitaMacabraDisponivel,
   onColheitaMacabraDisponivel,
+  disciplinasPsionicasConhecidas,
+  disciplinaPsionicaBloqueadaNoTurno,
+  onDisciplinaPosConjuracaoDisponivel,
   podeOferecerCortar,
   onConfirmarCortarReduzirAZero,
   temGolpeDeEscudo,
@@ -349,6 +357,9 @@ export default function AcaoPanelContent({
     onAbrirEscolhaDeMontaria,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
+    disciplinasPsionicasConhecidas,
+    disciplinaPsionicaBloqueadaNoTurno,
+    onDisciplinaPosConjuracaoDisponivel,
     preferenciasPillsMagia,
   });
 

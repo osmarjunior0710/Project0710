@@ -233,6 +233,11 @@ interface BonusPanelContentProps {
    * a característica. Ver `core/necromante.ts`. */
   colheitaMacabraDisponivel: boolean;
   onColheitaMacabraDisponivel: (cura: number) => void;
+  /** Disciplinas Psiônicas pós-conjuração (Psiônico UA, E4c) — ver
+   * `useUsarMagiaPainel.tsx`. */
+  disciplinasPsionicasConhecidas: string[];
+  disciplinaPsionicaBloqueadaNoTurno: boolean;
+  onDisciplinaPosConjuracaoDisponivel: (d: { id: string; nome: string; descricao: string; quantidadeDados: number }) => void;
   /** Quais pills de info aparecem em cada linha de magia — preferência
    * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
@@ -345,6 +350,9 @@ export default function BonusPanelContent({
   onCuraDeMagiaAplicada,
   colheitaMacabraDisponivel,
   onColheitaMacabraDisponivel,
+  disciplinasPsionicasConhecidas,
+  disciplinaPsionicaBloqueadaNoTurno,
+  onDisciplinaPosConjuracaoDisponivel,
   preferenciasPillsMagia,
 }: BonusPanelContentProps) {
   const [escolhendoFormaRevelacao, setEscolhendoFormaRevelacao] = useState(false);
@@ -386,6 +394,9 @@ export default function BonusPanelContent({
     onAbrirEscolhaDeMontaria,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
+    disciplinasPsionicasConhecidas,
+    disciplinaPsionicaBloqueadaNoTurno,
+    onDisciplinaPosConjuracaoDisponivel,
     preferenciasPillsMagia,
   });
   const temMagiaBonus = conjura && (truques.length > 0 || magiasPreparadas.length > 0);

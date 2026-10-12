@@ -6,8 +6,12 @@
 import type { StatusImplementacao } from './statusImplementacao';
 
 /** Quando a disciplina soma o Dado de Energia Psiônica a uma rolagem de d20: numa perícia da ação correspondente (Procurar,
- * Influenciar, Analisar — o "Estudar" do UA), ou num ataque que errou. */
-export type GatilhoDisciplina = { tipo: 'pericia'; pericias: string[] } | { tipo: 'ataque' };
+ * Influenciar, Analisar — o "Estudar" do UA), num ataque que errou, ou ao conjurar uma magia Psiônica de
+ * uma das `escolas` listadas (`exigeSalvaguarda` = só quando a magia força um teste de resistência no alvo). */
+export type GatilhoDisciplina =
+  | { tipo: 'pericia'; pericias: string[] }
+  | { tipo: 'ataque' }
+  | { tipo: 'conjuracao'; escolas: string[]; exigeSalvaguarda?: boolean };
 
 export interface DisciplinaPsionica {
   id: string;
@@ -26,14 +30,16 @@ const disciplinasBase: DisciplinaPsionica[] = [
     nome: 'Aperfeiçoamento de Precognição',
     descricao:
       'Ao conjurar uma magia Psiônica da escola de Abjuração ou Adivinhação, você pode gastar um Dado de Energia Psiônica. Role o dado e escolha uma criatura que você possa ver a até 18 metros (que pode ser você mesmo). Até o final do seu próximo turno, a criatura recebe um bônus no próximo Teste de D20 que fizer, igual ao número rolado.',
-    statusImplementacao: PH,
+    statusImplementacao: 'codeimplementation',
+    gatilho: { tipo: 'conjuracao', escolas: ['Abjuração', 'Adivinhação'] },
   },
   {
     id: 'bio-retorno',
     nome: 'Bio-Retorno',
     descricao:
       'Ao conjurar uma magia Psiônica da escola de Necromancia ou Transmutação, você pode gastar um número de Dados de Energia Psiônica igual ao seu modificador de Inteligência, rolar os dados e ganhar um número de Pontos de Vida Temporários igual ao total dos dados rolados mais o seu modificador de Inteligência (mínimo de um).',
-    statusImplementacao: PH,
+    statusImplementacao: 'codeimplementation',
+    gatilho: { tipo: 'conjuracao', escolas: ['Necromancia', 'Transmutação'] },
   },
   {
     id: 'consciencia-expandida',
@@ -55,7 +61,8 @@ const disciplinasBase: DisciplinaPsionica[] = [
     nome: 'Insinuação do Id',
     descricao:
       'Ao conjurar uma magia de psiônico das escolas de Encantamento ou Ilusão que exige um teste de resistência, você pode gastar um Dado de Energia Psiônica. Você rola um Dado de Energia Psiônica e um dos alvos da magia que você possa ver subtrai o total do dado rolado do teste de resistência.',
-    statusImplementacao: PH,
+    statusImplementacao: 'codeimplementation',
+    gatilho: { tipo: 'conjuracao', escolas: ['Encantamento', 'Ilusão'], exigeSalvaguarda: true },
   },
   {
     id: 'lingua-diabolica',
@@ -93,7 +100,8 @@ const disciplinasBase: DisciplinaPsionica[] = [
     nome: 'Pensamentos Destrutivos',
     descricao:
       'Ao conjurar uma magia Psiônica da escola de Conjuração ou Evocação que force uma criatura que você possa ver a fazer um teste de resistência contra a magia, você pode gastar um número de Dados de Energia Psiônica igual ao seu modificador de Inteligência e rolá-los. A criatura sofre dano Psíquico igual ao total dos dados rolados mais o seu modificador de Inteligência (mínimo de um), independentemente do resultado do teste de resistência.',
-    statusImplementacao: PH,
+    statusImplementacao: 'codeimplementation',
+    gatilho: { tipo: 'conjuracao', escolas: ['Conjuração', 'Evocação'], exigeSalvaguarda: true },
   },
   {
     id: 'retaliacao-psiquica',
@@ -124,6 +132,9 @@ export const disciplinasPsionicas: DisciplinaPsionica[] = disciplinasBase.map((d
   }
   if (d.gatilho?.tipo === 'ataque') {
     return { ...d, descricao: `${d.descricao} (Nota do app: aparece como botão no popup do ataque.)` };
+  }
+  if (d.gatilho?.tipo === 'conjuracao') {
+    return { ...d, descricao: `${d.descricao} (Nota do app: aparece como pergunta logo depois de conjurar a magia.)` };
   }
   return d;
 });

@@ -93,6 +93,17 @@ interface UsarMagiaPainelParams {
   onAbrirEscolhaDeMontaria: (circuloUsado: number) => void;
   colheitaMacabraDisponivel: boolean;
   onColheitaMacabraDisponivel: (cura: number) => void;
+  /** Ids das Disciplinas Psiônicas conhecidas (Psiônico UA, E4c) — `[]` pra
+   * quem não é Psiônico. */
+  disciplinasPsionicasConhecidas: string[];
+  /** `true` quando já usou uma Disciplina Psiônica "comum" neste turno
+   * (regra de 1 por turno, ver `core/disciplinasPsionicas.ts`
+   * `algumaDisciplinaComumUsadaNoTurno`) — conjurar pela aba Combate TEM
+   * conceito de turno, diferente da aba Magias. */
+  disciplinaPsionicaBloqueadaNoTurno: boolean;
+  /** Mesmo padrão de `onColheitaMacabraDisponivel` — ver
+   * `DisciplinaPosConjuracaoModal.tsx`. */
+  onDisciplinaPosConjuracaoDisponivel: (d: { id: string; nome: string; descricao: string; quantidadeDados: number }) => void;
   /** Aplica a cura rolada (`rollCura`) no PV do personagem E dispara
    * o efeito visual de Cura — ver `RollDadosOptions.confirmarAlvoCura`
    * ("Me curar") e `FichaShell.tsx` `onCuraDeMagiaAplicada`. */
@@ -194,9 +205,14 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
       explicacaoReal,
       p.evocacaoPotencializadaAtiva,
       p.modIntAtual,
+      p.disciplinasPsionicasConhecidas,
+      p.disciplinaPsionicaBloqueadaNoTurno,
     );
     if (resultado.curaColheitaMacabra !== null) {
       p.onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
+    }
+    if (resultado.disciplinaPosConjuracao) {
+      p.onDisciplinaPosConjuracaoDisponivel(resultado.disciplinaPosConjuracao);
     }
     if (resultado.rollAcerto) {
       const dano = resultado.danoPendente;
