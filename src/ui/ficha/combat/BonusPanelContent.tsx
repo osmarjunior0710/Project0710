@@ -77,7 +77,7 @@ interface BonusPanelContentProps {
     cdImpulso: number | null;
   };
   onUsarConexaoTelepatica: () => void;
-  onUsarImpulsoTelecinetico: (comDado: boolean) => void;
+  onUsarImpulsoTelecinetico: () => void;
   usosPicoDeAdrenalinaMaximo: number;
   usosPicoDeAdrenalinaRestantes: number;
   onUsarPicoDeAdrenalina: () => void;
@@ -1006,24 +1006,12 @@ export default function BonusPanelContent({
                 <div
                   className={styles.row}
                   style={conexaoTelepatica.bonusJaUsadaNoTurno ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-                  onClick={() => onUsarImpulsoTelecinetico(false)}
+                  onClick={onUsarImpulsoTelecinetico}
                 >
-                  <div className={styles.rowName}>💥 Impulso Telecinético — 1,5 m (sem dado)</div>
+                  <div className={styles.rowName}>💥 Impulso Telecinético</div>
                   {detalhesAtivo && (
                     <div className={styles.rowDesc}>
-                      Criatura Grande ou menor a até 9 m: salvaguarda de Força (CD {conexaoTelepatica.cdImpulso ?? '—'}) ou é empurrada (ou puxada, à sua escolha) 1,5 m em linha reta.
-                    </div>
-                  )}
-                </div>
-                <div
-                  className={styles.row}
-                  style={conexaoTelepatica.bonusJaUsadaNoTurno || conexaoTelepatica.dadosRestantes <= 0 ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
-                  onClick={() => onUsarImpulsoTelecinetico(true)}
-                >
-                  <div className={styles.rowName}>💥 Impulso Telecinético — com Dado de Energia</div>
-                  {detalhesAtivo && (
-                    <div className={styles.rowDesc}>
-                      Rola 1 Dado de Energia: a distância é 5 m × o resultado. O dado só é gasto se o alvo falhar na salvaguarda.
+                      Criatura Grande ou menor a até 9 m: salvaguarda de Força (CD {conexaoTelepatica.cdImpulso ?? '—'}) ou é empurrada/puxada 1,5 m — ou 5 m × um Dado de Energia.
                     </div>
                   )}
                 </div>

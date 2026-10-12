@@ -81,6 +81,7 @@ import ReacaoPanelContent from '../combat/ReacaoPanelContent';
 import DescansoFab from '../DescansoFab';
 import InfoValor from '../../components/InfoValor';
 import SalvaguardaDoAlvoModal from '../combat/SalvaguardaDoAlvoModal';
+import ImpulsoTelecineticoModal from '../combat/ImpulsoTelecineticoModal';
 import styles from './CombatTab.module.css';
 
 /** Duração total da "piscada" de Fim do Turno (ver `fimDoTurno`) — os
@@ -972,8 +973,9 @@ export default function CombatTab({
   const [lancarNoInfernoDano, setLancarNoInfernoDano] = useState<number | null>(null);
   const [ataqueDeSoproDano, setAtaqueDeSoproDano] = useState<number | null>(null);
   const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
-  // Impulso Telecinético (Psiônico, UA): `distancia` em metros; `comDado` = rolou um Dado de Energia; `gasto` = já gastou o dado (alvo falhou).
-  const [impulsoAberto, setImpulsoAberto] = useState<{ comDado: boolean; distancia: number; gasto: boolean } | null>(null);
+  // Impulso Telecinético (Psiônico, UA): `distancia` em metros; `comDado` = rolou um Dado de Energia (só é gasto se o alvo falhar).
+  const [impulsoEscolhaAberta, setImpulsoEscolhaAberta] = useState(false);
+  const [impulsoAberto, setImpulsoAberto] = useState<{ comDado: boolean; distancia: number } | null>(null);
   // `aoFechar` = o que continua depois do Ok (ex.: próximo ataque da Torrente).
   // Marca que não fica velha: o 2º ataque da Torrente é disparado de dentro
   // do callback do 1º (closure antiga, `golpeAtordoante.usadoTurno` ainda
@@ -1263,23 +1265,29 @@ export default function CombatTab({
     });
   }
 
-  // Impulso Telecinético (Psiônico, UA): Ação Bônus. Sem dado = 1,5 m; com Dado de Energia = 5 m × resultado, e o
-  // dado só é gasto se o alvo falhar na salvaguarda de Força (botão no popup).
-  function usarImpulsoTelecinetico(comDado: boolean) {
+  // Impulso Telecinético (Psiônico, UA): Ação Bônus. Tocar no card abre o popup com o texto e as saídas (sem dado / com Dado de
+  // Energia / fechar); a Ação Bônus só é gasta ao escolher uma das 2 primeiras. O dado só é gasto se o alvo falhar (popup da salvaguarda).
+  function abrirImpulsoTelecinetico() {
     if (turnState.bonus === 'usada') return;
+    setPainelAberto(null);
+    setImpulsoEscolhaAberta(true);
+  }
+
+  function escolherImpulsoTelecinetico(comDado: boolean) {
+    setImpulsoEscolhaAberta(false);
+    if (comDado && conexaoTelepatica.dadosRestantes <= 0) return;
     onMarcarUsado('bonus');
     if (!comDado) {
-      setImpulsoAberto({ comDado: false, distancia: 1.5, gasto: false });
+      setImpulsoAberto({ comDado: false, distancia: 1.5 });
       return;
     }
-    if (conexaoTelepatica.dadosRestantes <= 0) return;
     rolarDados({
       label: '💥 Impulso Telecinético — 5 m por ponto',
       formula: `1d${conexaoTelepatica.lados}`,
       quantidade: 1,
       lados: conexaoTelepatica.lados,
       mod: 0,
-      onResultado: (total) => setImpulsoAberto({ comDado: true, distancia: 5 * total, gasto: false }),
+      onResultado: (total) => setImpulsoAberto({ comDado: true, distancia: 5 * total }),
     });
   }
 
@@ -2985,7 +2993,7 @@ export default function CombatTab({
           onUsarConhecimentoDePedras={usarConhecimentoDePedras}
           conexaoTelepatica={{ ...conexaoTelepatica, bonusJaUsadaNoTurno: turnState.bonus === 'usada' }}
           onUsarConexaoTelepatica={usarConexaoTelepatica}
-          onUsarImpulsoTelecinetico={usarImpulsoTelecinetico}
+          onUsarImpulsoTelecinetico={abrirImpulsoTelecinetico}
           usosPicoDeAdrenalinaMaximo={usosPicoDeAdrenalinaMaximo}
           usosPicoDeAdrenalinaRestantes={usosPicoDeAdrenalinaRestantes}
           onUsarPicoDeAdrenalina={usarPicoDeAdrenalina}
@@ -3299,6 +3307,14 @@ export default function CombatTab({
           }}
         />
       )}
+      {impulsoEscolhaAberta && (
+        <ImpulsoTelecineticoModal
+          dadosRestantes={conexaoTelepatica.dadosRestantes}
+          ladosDado={conexaoTelepatica.lados}
+          onEscolher={escolherImpulsoTelecinetico}
+          onFechar={() => setImpulsoEscolhaAberta(false)}
+        />
+      )}
       {impulsoAberto && (
         <SalvaguardaDoAlvoModal
           titulo="💥 Impulso Telecinético"
@@ -3307,18 +3323,20 @@ export default function CombatTab({
           explicacaoCd={null}
           textoFalha={`empurrado (ou puxado, à sua escolha) ${String(impulsoAberto.distancia).replace('.', ',')} m em linha reta${impulsoAberto.comDado ? ' — gasta 1 Dado de Energia Psiônica' : ''}`}
           textoSucesso={impulsoAberto.comDado ? 'nada acontece — o Dado de Energia NÃO é gasto' : 'nada acontece'}
-          aviso="Alvo: criatura Grande ou menor que você veja a até 9 m."
-          acaoSecundaria={
-            impulsoAberto.comDado && !impulsoAberto.gasto
-              ? {
-                  label: '🎲 Alvo falhou — gastar 1 Dado de Energia',
-                  onClick: () => {
-                    if (conexaoTelepatica.onGastarDado()) setImpulsoAberto({ ...impulsoAberto, gasto: true });
-                  },
-                }
-              : null
-          }
-          semAcaoTexto={impulsoAberto.gasto ? '✔ 1 Dado de Energia Psiônica gasto.' : null}
+          aviso="Alvo: criatura Grande ou menor que você veja a até 9 m. Como o alvo se saiu?"
+          acoesResultado={[
+            {
+              label: 'Inimigo passou',
+              onClick: () => setImpulsoAberto(null),
+            },
+            {
+              label: 'Inimigo falhou',
+              onClick: () => {
+                if (impulsoAberto.comDado) conexaoTelepatica.onGastarDado();
+                setImpulsoAberto(null);
+              },
+            },
+          ]}
           onFechar={() => setImpulsoAberto(null)}
         />
       )}

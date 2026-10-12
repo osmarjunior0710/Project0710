@@ -24,6 +24,9 @@ interface SalvaguardaDoAlvoModalProps {
   /** Nota extra mostrada só quando a magia não tem fórmula de dano
    * própria pro app rolar sozinho (ex.: magia sem dano, só status). */
   semAcaoTexto?: string | null;
+  /** Quando presente, SUBSTITUI o "Ok": o jogador diz como o alvo se saiu (ex.: "Inimigo falhou"/"Inimigo passou"), e quem chama
+   * resolve o custo/efeito de cada resultado. Cada botão deve fechar o popup (`onClick` do chamador). */
+  acoesResultado?: { label: string; onClick: () => void }[] | null;
   onFechar: () => void;
 }
 
@@ -53,6 +56,7 @@ export default function SalvaguardaDoAlvoModal({
   aviso,
   acaoSecundaria,
   semAcaoTexto,
+  acoesResultado,
   onFechar,
 }: SalvaguardaDoAlvoModalProps) {
   return (
@@ -80,9 +84,19 @@ export default function SalvaguardaDoAlvoModal({
             {acaoSecundaria.label}
           </div>
         )}
-        <div className="btn btn-primary" style={{ marginTop: 16 }} onClick={onFechar}>
-          Ok
-        </div>
+        {acoesResultado && acoesResultado.length > 0 ? (
+          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+            {acoesResultado.map((a) => (
+              <div key={a.label} className="btn btn-primary" style={{ flex: 1 }} onClick={a.onClick}>
+                {a.label}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="btn btn-primary" style={{ marginTop: 16 }} onClick={onFechar}>
+            Ok
+          </div>
+        )}
       </div>
     </div>
   );

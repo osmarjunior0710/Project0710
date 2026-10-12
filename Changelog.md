@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2105
+
+Psiônico: o Impulso Telecinético agora é um card só na Ação Bônus. Tocar abre um popup com o texto da característica e 3 opções (Sem dado, Com Dado de Energia, Fechar). Depois aparece a salvaguarda do alvo com "Inimigo passou" ou "Inimigo falhou": o Dado de Energia só é gasto se o inimigo falhar.
+
 ## v202610_1816
 
 Psiônico: Impulso Telecinético na Ação Bônus, em 2 opções. "Sem dado" mostra a CD e o empurrão de 1,5 m. "Com Dado de Energia" rola o dado (distância = 5 m x resultado) e só gasta o dado se você tocar em "Alvo falhou". Com isso o Poder Psiônico (nível 1) fica completo.
