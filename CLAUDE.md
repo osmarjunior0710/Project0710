@@ -389,6 +389,26 @@ histórico em `aprendizados/classes/monge-postmortem.md`):
 3. **Texto com "você pode" é opcional**: a proposta diz se é **automático ou escolha do
    jogador** *antes* de codar. Efeito opcional de "ao acertar" é botão no popup de dano.
 4. **Antes de criar modal/popup/caixa de escolha, consultar `CONVENCOES-UI.md`.**
+5. **Chapéu 4 — QA/Jogador leigo** (2026-10, pedido do Osmar): antes de apresentar a
+   proposta de qualquer entrega com tela/interação nova, releia ela vestindo o chapéu de
+   alguém que **não sabe D&D e não tem a ficha do personagem na cabeça** — só está olhando o
+   app. Essa pessoa consegue usar a tela sem precisar lembrar o que ativou em outra hora, sem
+   precisar entender uma regra de D&D que o app não explica, e sem margem pra errar o fluxo?
+   Se a proposta tem um card que o jogador "ativa" e precisa lembrar sozinho que ele está
+   ativo (ou quando ele acaba), ou se o fluxo só faz sentido pra quem já sabe a regra de cor,
+   **simplifique antes de apresentar** — não é o Osmar quem vai filtrar isso depois, é
+   trabalho deste chapéu antes da proposta chegar nele. Lembrete central: **o app é um wizard
+   pra fazer a vida de quem não sabe D&D ser o mais simples possível** — cada entrega é
+   julgada por esse padrão, não só "implementei a regra certo".
+6. **Nunca deixe pro jogador lembrar/fazer manualmente o que o app pode fazer sozinho**
+   (2026-10, pedido do Osmar): se a proposta tem um texto do tipo "você precisa lembrar de
+   X depois" ou "aplique Y manualmente na hora certa", pare e pergunte: dá pra o app
+   rastrear/aplicar isso sozinho? Quase sempre dá — e um fluxo mais longo/chato que cobre o
+   caso inteiro é SEMPRE melhor que um fluxo curto que deixa metade da regra na memória do
+   jogador. Só vale deixar manual quando é genuinamente impossível pro app saber (ex.: dano
+   em criatura inimiga, que o app não tem ficha de monstro pra rastrear) — mesmo nesse caso,
+   o aviso vem junto do resultado já calculado, na hora, nunca como "lembre de fazer isso
+   depois".
 
 **Regra geral de aprovação antes de codar** (pedido do Osmar, 2026-09):
 antes de escrever qualquer código de uma entrega, apresente a proposta
