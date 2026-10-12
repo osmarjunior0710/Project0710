@@ -10,6 +10,7 @@ import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import type { TipoTecnicaMonge } from './TecnicaMongeModal';
 import TickPips from '../../components/TickPips';
+import InfoTexto from '../../components/InfoTexto';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import styles from './PanelRows.module.css';
@@ -994,7 +995,13 @@ export default function BonusPanelContent({
                   onClick={onUsarConexaoTelepatica}
                 >
                   <div className={styles.rowName}>
-                    🧠 Conexão Telepática{conexaoTelepatica.gratisDisponivel ? ' — 1ª vez grátis' : ' — gasta 1 Dado de Energia'}
+                    🧠 Conexão Telepática{conexaoTelepatica.gratisDisponivel ? ' — 1ª vez grátis' : ' — gasta 1 Dado de Energia'}{' '}
+                    <InfoTexto
+                      titulo="Conexão Telepática"
+                      paragrafos={[
+                        'Você possui telepatia com alcance de 9 metros. Como uma Ação Bônus, você pode gastar um Dado de Energia Psiônica. Pela próxima hora, o alcance da sua telepatia aumenta em metros igual a 3 vezes o número rolado. Na primeira vez que você usar esta Ação Bônus após cada Descanso Longo, você não gasta o Dado de Energia Psiônica. Em todas as outras vezes que usar esta habilidade, você gasta o dado.',
+                      ]}
+                    />
                   </div>
                   {detalhesAtivo && (
                     <div className={styles.rowDesc}>
