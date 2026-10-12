@@ -1,3 +1,4 @@
+import { corDoRecursoDaClasse } from '../../core/corRecursoClasse';
 import TickPips from './TickPips';
 import styles from './TrocarArmaMaestria.module.css';
 
@@ -10,6 +11,10 @@ interface DisciplinaPosConjuracaoModalProps {
   quantidadeDados: number;
   dadosMaximo: number;
   dadosRestantes: number;
+  /** Lados do Dado de Energia Psiônica (d6/d8/d10/d12, escala por nível) —
+   * só pro rótulo "Dados de Energia Psiônica (dN)", igual ao resto do app
+   * (ver `RecursosDeClasse.tsx`). */
+  dadosLados: number;
   onUsar: () => void;
   onDispensar: () => void;
 }
@@ -25,6 +30,7 @@ export default function DisciplinaPosConjuracaoModal({
   quantidadeDados,
   dadosMaximo,
   dadosRestantes,
+  dadosLados,
   onUsar,
   onDispensar,
 }: DisciplinaPosConjuracaoModalProps) {
@@ -36,8 +42,9 @@ export default function DisciplinaPosConjuracaoModal({
         <div className={styles.title}>🔮 {nome}</div>
         <div style={{ fontSize: 13, marginBottom: 14 }}>{descricao}</div>
         {quantidadeDados > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-            <TickPips total={dadosMaximo} usados={dadosMaximo - dadosRestantes} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-3)', marginBottom: 14 }}>
+            <span style={{ fontSize: 13 }}>Dados de Energia Psiônica (d{dadosLados})</span>
+            <TickPips total={dadosMaximo} usados={dadosMaximo - dadosRestantes} cor={corDoRecursoDaClasse('Psiônico')} />
           </div>
         )}
         <div

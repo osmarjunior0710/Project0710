@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1923
+
+Ajuste visual nos pips de Dado de Energia Psiônica do popup das
+Disciplinas Psiônicas (Aperfeiçoamento de Precognição etc.): agora
+mostram o rótulo "Dados de Energia Psiônica" do lado esquerdo (igual
+ao resto do app) e usam a cor roxa do Psiônico em vez do azul padrão.
+
 ## v202610_1616
 
 2 ajustes nas Disciplinas Psiônicas pós-conjuração: o botão de gastar

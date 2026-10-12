@@ -3277,6 +3277,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           quantidadeDados={disciplinaPosConjuracaoPendente.quantidadeDados}
           dadosMaximo={dadosEnergiaMaximo}
           dadosRestantes={dadosEnergiaRestantes}
+          dadosLados={dadosEnergiaLados}
           onUsar={usarDisciplinaPosConjuracao}
           onDispensar={dispensarDisciplinaPosConjuracao}
         />
