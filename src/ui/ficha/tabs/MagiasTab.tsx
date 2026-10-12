@@ -18,7 +18,7 @@ import {
 } from '../../../core/magiasPersonagem';
 import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
-import { decidirConjuracao } from '../../../core/conjurarMagia';
+import { decidirConjuracao, type DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
 import { cdConjuracao, modAcertoConjuracaoPorClasse, type ResumoConjuracao } from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
@@ -339,7 +339,7 @@ interface MagiasTabProps {
   /** Avisa o `FichaShell` (mesmo padrão de `onColheitaMacabraDisponivel`
    * acima) que a conjuração se qualificou pra uma Disciplina Psiônica
    * pós-conjuração — ver `DisciplinaPosConjuracaoModal.tsx`. */
-  onDisciplinaPosConjuracaoDisponivel: (d: { id: string; nome: string; descricao: string; quantidadeDados: number }) => void;
+  onDisciplinaPosConjuracaoDisponivel: (d: DisciplinaPosConjuracaoPendente) => void;
   /** Quais pills de info aparecem em cada linha de magia/truque —
    * preferência do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
@@ -455,6 +455,9 @@ export default function MagiasTab({
     circuloUsado: number;
     danoRolado: number | null;
     upcastNaoAutomatico: boolean;
+    /** Resultado de uma Disciplina Psiônica que exige salvaguarda (E4c)
+     * — ver o mesmo campo em `CombatTab.tsx`. */
+    avisoDisciplina: string | null;
   } | null>(null);
   // Truque Potente (Mago/Evocador) no caso de ataque errado — aba
   // Magias não tem um banner de feedback como o Combate (`onEscolher`),
@@ -517,6 +520,76 @@ export default function MagiasTab({
   const magiasTalentoGeral = magiasPreparadasDoPersonagem(magiasTalentoGeralAtuais);
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);
 
+  /** Abre `SalvaguardaDoAlvoModal` pra `m`/`circuloUsado` — `avisoDisciplina` (E4c, Insinuação do
+   * Id/Pensamentos Destrutivos) vira linha extra no popup quando presente (ver `telaSalvaguarda`).
+   * Mesmo fluxo de `CombatTab.tsx` `abrirSalvaguarda` (dano já rola sozinho ao abrir, sem botão
+   * manual de "Rolar Dano" — ver DECISOES-COMBATE.md). */
+  function abrirSalvaguardaComAviso(m: Magia, circuloUsado: number, avisoDisciplina: string | null) {
+    const danoBase = calcularDanoMagia(m, circuloUsado, nivelPersonagem);
+    if (!danoBase) {
+      setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: null, upcastNaoAutomatico: false, avisoDisciplina });
+      return;
+    }
+    const dano = aplicarEvocacaoPotencializadaAoDano(danoBase, m, evocacaoPotencializadaAtiva, modIntAtual);
+    const rolarNormal = () => {
+      let totalRolado = 0;
+      rolarDados({
+        label: `Dano — ✨ ${m.nome}`,
+        formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
+        quantidade: dano.quantidade,
+        lados: dano.lados,
+        mod: dano.mod,
+        explicacaoMod: dano.explicacao,
+        onResultado: (total) => {
+          totalRolado = total;
+        },
+        confirmarFechamento: {
+          aoTocar: () =>
+            setTelaSalvaguarda({
+              magia: m,
+              circuloUsado,
+              danoRolado: totalRolado,
+              upcastNaoAutomatico: dano.upcastNaoAutomatico,
+              avisoDisciplina,
+            }),
+        },
+      });
+    };
+    if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {
+      setEscolhaSobrecarga({
+        nomeMagia: m.nome,
+        danoMaximo: danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, false),
+        aoRolarNormal: () => {
+          setEscolhaSobrecarga(null);
+          rolarNormal();
+        },
+        aoUsarSobrecarga: () => {
+          setEscolhaSobrecarga(null);
+          const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, false);
+          const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
+          onUsarSobrecarga();
+          setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: max, upcastNaoAutomatico: dano.upcastNaoAutomatico, avisoDisciplina });
+          if (necrotico) {
+            let totalNecrotico = 0;
+            rolarDados({
+              label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
+              formula: `${necrotico.quantidade}d12`,
+              quantidade: necrotico.quantidade,
+              lados: necrotico.lados,
+              mod: 0,
+              onResultado: (total) => {
+                totalNecrotico = total;
+              },
+              confirmarFechamento: { aoTocar: () => onAlterarPv(-totalNecrotico) },
+            });
+          }
+        },
+      });
+      return;
+    }
+    rolarNormal();
+  }
+
   /** `gastouEspacoDeVerdade` — só true quando um Espaço de Magia real foi
    * gasto (não pra truque nem magia concedida de graça por Invocação
    * Mística) — controla se essa conjuração pode disparar a Colheita
@@ -560,7 +633,20 @@ export default function MagiasTab({
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
     }
+    // Insinuação do Id/Pensamentos Destrutivos sempre vêm de magia com
+    // salvaguarda — abrir os 2 popups juntos fazia o resultado da
+    // Disciplina "sumir" atrás do de Salvaguarda (pedido do Osmar,
+    // 2026-10). Em vez disso, SÓ abre a Salvaguarda depois que a
+    // Disciplina resolver (usou ou dispensou), já com o texto pronto
+    // pra virar linha extra (ver `abrirSalvaguardaComAviso` abaixo).
     if (resultado.disciplinaPosConjuracao) {
+      if (resultado.mecanica === 'salvaguarda') {
+        onDisciplinaPosConjuracaoDisponivel({
+          ...resultado.disciplinaPosConjuracao,
+          aoResolverSalvaguarda: (aviso) => abrirSalvaguardaComAviso(m, circuloUsado, aviso),
+        });
+        return;
+      }
       onDisciplinaPosConjuracaoDisponivel(resultado.disciplinaPosConjuracao);
     }
     if (resultado.rollAcerto) {
@@ -643,63 +729,7 @@ export default function MagiasTab({
       return;
     }
     if (resultado.mecanica === 'salvaguarda') {
-      const danoBase = calcularDanoMagia(m, circuloUsado, nivelPersonagem);
-      if (!danoBase) {
-        setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: null, upcastNaoAutomatico: false });
-        return;
-      }
-      const dano = aplicarEvocacaoPotencializadaAoDano(danoBase, m, evocacaoPotencializadaAtiva, modIntAtual);
-      const rolarNormal = () => {
-        let totalRolado = 0;
-        rolarDados({
-          label: `Dano — ✨ ${m.nome}`,
-          formula: `${dano.quantidade}d${dano.lados}${dano.mod ? ` + ${dano.mod}` : ''}`,
-          quantidade: dano.quantidade,
-          lados: dano.lados,
-          mod: dano.mod,
-          explicacaoMod: dano.explicacao,
-          onResultado: (total) => {
-            totalRolado = total;
-          },
-          confirmarFechamento: {
-            aoTocar: () =>
-              setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: totalRolado, upcastNaoAutomatico: dano.upcastNaoAutomatico }),
-          },
-        });
-      };
-      if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {
-        setEscolhaSobrecarga({
-          nomeMagia: m.nome,
-          danoMaximo: danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, false),
-          aoRolarNormal: () => {
-            setEscolhaSobrecarga(null);
-            rolarNormal();
-          },
-          aoUsarSobrecarga: () => {
-            setEscolhaSobrecarga(null);
-            const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, false);
-            const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
-            onUsarSobrecarga();
-            setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: max, upcastNaoAutomatico: dano.upcastNaoAutomatico });
-            if (necrotico) {
-              let totalNecrotico = 0;
-              rolarDados({
-                label: '☠️ Sobrecarga — Dano Necrótico auto-infligido',
-                formula: `${necrotico.quantidade}d12`,
-                quantidade: necrotico.quantidade,
-                lados: necrotico.lados,
-                mod: 0,
-                onResultado: (total) => {
-                  totalNecrotico = total;
-                },
-                confirmarFechamento: { aoTocar: () => onAlterarPv(-totalNecrotico) },
-              });
-            }
-          },
-        });
-        return;
-      }
-      rolarNormal();
+      abrirSalvaguardaComAviso(m, circuloUsado, null);
       return;
     }
     if (resultado.rollCura) {
@@ -847,6 +877,9 @@ export default function MagiasTab({
     telaSalvaguarda?.upcastNaoAutomatico && telaSalvaguarda?.magia.upcastTexto
       ? `Círculo usado é maior que o base — dano acima NÃO inclui o upcast. Efeito real: ${telaSalvaguarda.magia.upcastTexto}`
       : null;
+  // Mesmo motivo de `CombatTab.tsx` — junta com o resultado da
+  // Disciplina Psiônica (E4c), quando presente.
+  const avisoSalvaguardaCompleto = [avisoUpcastSalvaguarda, telaSalvaguarda?.avisoDisciplina].filter(Boolean).join('\n\n') || null;
   // Ver o mesmo padrão em `CombatTab.tsx` (`textoFalhaSalvaguarda`) —
   // nunca reescreve/assume a estrutura do texto da planilha, só
   // prefixa o valor já rolado quando ele existe.
@@ -1026,7 +1059,7 @@ export default function MagiasTab({
           explicacaoCd={explicacaoCdConjuracao}
           textoSucesso={textoSucessoSalvaguarda}
           textoFalha={textoFalhaSalvaguarda}
-          aviso={avisoUpcastSalvaguarda}
+          aviso={avisoSalvaguardaCompleto}
           acaoSecundaria={
             danoCondicionalSalvaguarda
               ? {

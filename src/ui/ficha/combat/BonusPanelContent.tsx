@@ -13,6 +13,7 @@ import TickPips from '../../components/TickPips';
 import InfoTexto from '../../components/InfoTexto';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
+import type { DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
 import styles from './PanelRows.module.css';
 import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
 
@@ -228,7 +229,7 @@ interface BonusPanelContentProps {
   onAbrirEscolhaDeMontaria: (circuloUsado: number) => void;
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda, que vive em CombatTab. */
-  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
+  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null) => void;
   /** Colheita Macabra (Necromante, nível 3+) — `true` = personagem tem
    * a característica. Ver `core/necromante.ts`. */
   colheitaMacabraDisponivel: boolean;
@@ -237,7 +238,7 @@ interface BonusPanelContentProps {
    * `useUsarMagiaPainel.tsx`. */
   disciplinasPsionicasConhecidas: string[];
   disciplinaPsionicaBloqueadaNoTurno: boolean;
-  onDisciplinaPosConjuracaoDisponivel: (d: { id: string; nome: string; descricao: string; quantidadeDados: number }) => void;
+  onDisciplinaPosConjuracaoDisponivel: (d: DisciplinaPosConjuracaoPendente) => void;
   /** Quais pills de info aparecem em cada linha de magia — preferência
    * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;

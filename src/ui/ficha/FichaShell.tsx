@@ -728,6 +728,18 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     nome: string;
     descricao: string;
     quantidadeDados: number;
+    /** Presente só quando a magia que disparou essa Disciplina TAMBÉM
+     * abre `SalvaguardaDoAlvoModal` (Insinuação do Id/Pensamentos
+     * Destrutivos, que exigem salvaguarda — ver
+     * `disciplinaParaConjuracao`) — chamado com o texto do resultado
+     * (ou `null` se dispensou) assim que a Disciplina resolve, pra
+     * quem chamou abrir a Salvaguarda só DEPOIS, já com o texto pronto
+     * pra virar linha extra (pedido do Osmar, 2026-10: os 2 popups
+     * abrindo juntos fazia o resultado da Disciplina "sumir" atrás do
+     * popup de Salvaguarda). Sem isso, mostra o resultado no
+     * `AvisoModal` de sempre (Aperfeiçoamento de Precognição/
+     * Bio-Retorno, que nunca têm salvaguarda). */
+    aoResolverSalvaguarda?: (texto: string | null) => void;
   } | null>(null);
   const [disciplinaPosConjuracaoResultado, setDisciplinaPosConjuracaoResultado] = useState<{ titulo: string; texto: string } | null>(null);
   const [levelUpAberto, setLevelUpAberto] = useState(false);
@@ -2641,16 +2653,26 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }, [dadosEnergiaRestantes, dadosEnergiaLados, disciplinasPsionicasAtuais, disciplinasUsadasNoTurno, registrarDadoPsionico]);
 
   /** Dispensar a Disciplina pós-conjuração (E4c) não custa nada — o texto da regra é sempre "você
-   * pode gastar", nunca automático. */
+   * pode gastar", nunca automático. Se essa Disciplina ia virar linha extra num popup de Salvaguarda
+   * pendente (`aoResolverSalvaguarda`), ainda assim precisa liberar a Salvaguarda pra abrir — só
+   * sem o aviso. */
   function dispensarDisciplinaPosConjuracao() {
+    const d = disciplinaPosConjuracaoPendente;
     setDisciplinaPosConjuracaoPendente(null);
+    d?.aoResolverSalvaguarda?.(null);
   }
 
   /** "Sim" na Disciplina pós-conjuração pendente (Aperfeiçoamento de Precognição/Bio-Retorno/
    * Insinuação do Id/Pensamentos Destrutivos, E4c) — gasta os Dados de Energia Psiônica, rola (se
    * sobrar algum pra rolar) e aplica o resultado de cada uma. `quantidadeDados` pode ser 0/negativo
    * nas 2 que usam o mod. de Inteligência como contagem — aí não rola nada, só garante o mínimo de 1
-   * do próprio texto da regra. */
+   * do próprio texto da regra.
+   *
+   * Insinuação do Id/Pensamentos Destrutivos sempre vêm de magia com salvaguarda — em vez de um
+   * `AvisoModal` separado (que ficava escondido atrás do popup de Salvaguarda, que abria junto),
+   * o texto do resultado vira linha extra DENTRO do popup de Salvaguarda, via
+   * `aoResolverSalvaguarda` (quem chamou só abre a Salvaguarda depois disso resolver — pedido do
+   * Osmar, 2026-10). As outras 2 nunca têm Salvaguarda associada, então continuam no `AvisoModal`. */
   function usarDisciplinaPosConjuracao() {
     const d = disciplinaPosConjuracaoPendente;
     if (!d) return;
@@ -2659,28 +2681,25 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     const numDados = Math.max(0, d.quantidadeDados);
 
     function aplicar(somaDados: number) {
+      let texto = '';
       if (d!.id === 'bio-retorno') {
         const pv = pvTemporarioBioRetorno(somaDados, modIntAtual);
         setPvTemporario((atual) => ganharPvTemporario(atual, pv));
-        setDisciplinaPosConjuracaoResultado({ titulo: `🔮 ${d!.nome}`, texto: `Você ganhou ${pv} Pontos de Vida Temporários.` });
+        texto = `Você ganhou ${pv} Pontos de Vida Temporários.`;
       } else if (d!.id === 'pensamentos-destrutivos') {
         const dano = danoPensamentosDestrutivos(somaDados, modIntAtual);
-        setDisciplinaPosConjuracaoResultado({
-          titulo: `🔮 ${d!.nome}`,
-          texto: `${dano} de dano Psíquico extra numa criatura à vista, mesmo que ela passe no teste de resistência.`,
-        });
+        texto = `${dano} de dano Psíquico extra numa criatura à vista, mesmo que ela passe no teste de resistência.`;
       } else if (d!.id === 'aperfeicoamento-de-precognicao') {
         const bonus = bonusAperfeicoamentoDePrecognicao(somaDados);
-        setDisciplinaPosConjuracaoResultado({
-          titulo: `🔮 ${d!.nome}`,
-          texto: `Escolha uma criatura à vista a até 18m (pode ser você) — ela recebe +${bonus} no próximo Teste de D20 que fizer, até o fim do seu próximo turno.`,
-        });
+        texto = `Escolha uma criatura à vista a até 18m (pode ser você) — ela recebe +${bonus} no próximo Teste de D20 que fizer, até o fim do seu próximo turno.`;
       } else if (d!.id === 'insinuacao-do-id') {
         const reducao = reducaoInsinuacaoDoId(somaDados);
-        setDisciplinaPosConjuracaoResultado({
-          titulo: `🔮 ${d!.nome}`,
-          texto: `Um dos alvos à vista dessa magia subtrai ${reducao} do teste de resistência dele contra ela.`,
-        });
+        texto = `Um dos alvos à vista dessa magia subtrai ${reducao} do teste de resistência dele contra ela.`;
+      }
+      if (d!.aoResolverSalvaguarda) {
+        d!.aoResolverSalvaguarda(`🔮 Dado Psiônico: ${d!.nome} — ${texto}`);
+      } else {
+        setDisciplinaPosConjuracaoResultado({ titulo: `🔮 ${d!.nome}`, texto });
       }
     }
 
@@ -3256,6 +3275,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
           nome={disciplinaPosConjuracaoPendente.nome}
           descricao={disciplinaPosConjuracaoPendente.descricao}
           quantidadeDados={disciplinaPosConjuracaoPendente.quantidadeDados}
+          dadosMaximo={dadosEnergiaMaximo}
           dadosRestantes={dadosEnergiaRestantes}
           onUsar={usarDisciplinaPosConjuracao}
           onDispensar={dispensarDisciplinaPosConjuracao}

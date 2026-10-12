@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { Pet } from '../../../core/pets';
 import { iconesMagia } from '../../../core/classificarMagia';
-import { decidirConjuracao } from '../../../core/conjurarMagia';
+import { decidirConjuracao, type DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
 import {
   cdConjuracao,
   circulosDisponiveisParaConjurar,
@@ -33,7 +33,7 @@ interface ReacaoPanelContentProps {
    * de Salvaguarda (CD + atributo + sucesso/falha), que vive em
    * CombatTab. Reação nunca faz upcast, então `circuloUsado` é sempre
    * `magia.circulo`. */
-  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
+  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null) => void;
   /** `classeNome` opcional — Reação sempre gasta da classe ATIVA (sem
    * ponte de Magia de Pacto ainda, ver PENDENCIAS.md "Painel de Reação
    * ainda usa a lista plana antiga"), então quem chama pode omitir. */
@@ -151,7 +151,7 @@ interface ReacaoPanelContentProps {
    * turno, mesmo critério). */
   disciplinasPsionicasConhecidas: string[];
   disciplinaPsionicaBloqueadaNoTurno: boolean;
-  onDisciplinaPosConjuracaoDisponivel: (d: { id: string; nome: string; descricao: string; quantidadeDados: number }) => void;
+  onDisciplinaPosConjuracaoDisponivel: (d: DisciplinaPosConjuracaoPendente) => void;
 }
 
 export default function ReacaoPanelContent({
@@ -261,7 +261,18 @@ export default function ReacaoPanelContent({
     if (resultado.curaColheitaMacabra !== null) {
       onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
     }
+    // Insinuação do Id/Pensamentos Destrutivos sempre vêm de magia com
+    // salvaguarda — ver o mesmo comentário em `useUsarMagiaPainel.tsx`.
     if (resultado.disciplinaPosConjuracao) {
+      if (resultado.mecanica === 'salvaguarda') {
+        const circuloReal = m.circulo === 0 ? m.circulo : circuloUsado;
+        onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
+        onDisciplinaPosConjuracaoDisponivel({
+          ...resultado.disciplinaPosConjuracao,
+          aoResolverSalvaguarda: (aviso) => onAbrirSalvaguarda(m, circuloReal, aviso),
+        });
+        return;
+      }
       onDisciplinaPosConjuracaoDisponivel(resultado.disciplinaPosConjuracao);
     }
     if (resultado.rollAcerto) {

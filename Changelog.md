@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1616
+
+2 ajustes nas Disciplinas Psiônicas pós-conjuração: o botão de gastar
+Dado de Energia Psiônica agora mostra os pips de verdade em vez de um
+texto "(N restantes)"; e Insinuação do Id/Pensamentos Destrutivos (que
+sempre vêm com salvaguarda) não abrem mais 2 popups ao mesmo tempo — o
+resultado do dado aparece como uma linha extra dentro do próprio popup
+de salvaguarda, depois de Sucesso/Falha.
+
 ## v202610_1526
 
 Psiônico ganha 4 Disciplinas que reagem ao conjurar magia: Aperfeiçoamento

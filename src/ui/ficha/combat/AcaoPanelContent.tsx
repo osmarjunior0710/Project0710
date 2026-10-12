@@ -15,6 +15,7 @@ import { useUsarMagiaPainel } from './useUsarMagiaPainel';
 import TickPips from '../../components/TickPips';
 import type { LadosDado } from '../../roll/RollContext';
 import { CUSTO_FOCO_EXPLOSAO_ELEMENTAL } from '../../../core/explosaoElemental';
+import type { DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import styles from './PanelRows.module.css';
 import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
@@ -48,7 +49,7 @@ interface AcaoPanelContentProps {
    * de Salvaguarda (CD + atributo + sucesso/falha), que vive em
    * CombatTab (persiste depois do painel fechar). `circuloUsado` é
    * pro upcast (igual `conjurarMagia` já calcula). */
-  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
+  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null) => void;
   gastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
   /** Aplica cura direto no PV do personagem ("Me curar", ver
    * `RollDadosOptions.confirmarAlvoCura`) — usado só por Mãos
@@ -173,7 +174,7 @@ interface AcaoPanelContentProps {
    * `useUsarMagiaPainel.tsx`. */
   disciplinasPsionicasConhecidas: string[];
   disciplinaPsionicaBloqueadaNoTurno: boolean;
-  onDisciplinaPosConjuracaoDisponivel: (d: { id: string; nome: string; descricao: string; quantidadeDados: number }) => void;
+  onDisciplinaPosConjuracaoDisponivel: (d: DisciplinaPosConjuracaoPendente) => void;
   /** Cortar (Mestre em Armas Grandes) — `podeOferecerCortar` = talento
    * + arma Corpo a Corpo equipada, mostra o botão manual "Reduziu a 0
    * PV?" ao lado de Atacar (Crítico já é detectado sozinho pelo

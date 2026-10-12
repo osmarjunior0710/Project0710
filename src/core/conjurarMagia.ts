@@ -84,7 +84,25 @@ export interface ConjuracaoDecidida {
    * é 1 (Aperfeiçoamento/Insinuação) ou o mod. de Inteligência, possivelmente
    * 0/negativo (Bio-Retorno/Pensamentos Destrutivos — nesse caso a tela
    * aplica o mínimo de 1 direto, sem rolar dado nenhum). */
-  disciplinaPosConjuracao: { id: string; nome: string; descricao: string; quantidadeDados: number } | null;
+  disciplinaPosConjuracao: DisciplinaPosConjuracaoInfo | null;
+}
+
+/** Forma mínima de `disciplinaPosConjuracao` acima — exportado pra quem exibe o popup (ver
+ * `DisciplinaPosConjuracaoModal.tsx`) não precisar repetir o shape em cada painel/aba. */
+export interface DisciplinaPosConjuracaoInfo {
+  id: string;
+  nome: string;
+  descricao: string;
+  quantidadeDados: number;
+}
+
+/** O que `onDisciplinaPosConjuracaoDisponivel` recebe de cada painel/aba — `aoResolverSalvaguarda`
+ * só vem preenchido quando a magia TAMBÉM abre `SalvaguardaDoAlvoModal` (Insinuação do
+ * Id/Pensamentos Destrutivos, que exigem salvaguarda): quem chama usa isso pra só abrir a
+ * Salvaguarda DEPOIS da Disciplina resolver, já com o texto do resultado pronto pra virar linha
+ * extra — ver `FichaShell.tsx` `usarDisciplinaPosConjuracao`. */
+export interface DisciplinaPosConjuracaoPendente extends DisciplinaPosConjuracaoInfo {
+  aoResolverSalvaguarda?: (texto: string | null) => void;
 }
 
 /** Decide o que fazer ao conjurar `m`, usando `circuloUsado` pra

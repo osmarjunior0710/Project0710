@@ -4,6 +4,7 @@ import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { OpcaoSubescolha } from '../../../data/rulesets/dnd2024/especies';
 import type { CaracteristicaNivel } from '../../../core/levelUp';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
+import type { DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { TEXTO_EMPURRAO_ELEMENTAL, podeAtaqueElemental } from '../../../core/ataquesElementais';
@@ -590,7 +591,7 @@ interface CombatTabProps {
   disciplinaPosConjuracao: {
     conhecidas: string[];
     bloqueadaNoTurno: boolean;
-    onDisponivel: (d: { id: string; nome: string; descricao: string; quantidadeDados: number }) => void;
+    onDisponivel: (d: DisciplinaPosConjuracaoPendente) => void;
   };
   /** Colheita dos Mortos (Necromante, nível 10) — passo de escolha de
    * pet fica dentro do próprio painel de Reação (não precisa
@@ -955,6 +956,14 @@ export default function CombatTab({
     circuloUsado: number;
     danoRolado: number | null;
     upcastNaoAutomatico: boolean;
+    /** Resultado de uma Disciplina Psiônica que exige salvaguarda
+     * (Insinuação do Id/Pensamentos Destrutivos, E4c) — texto pronto
+     * pra virar linha extra no popup (ver `aviso` no render), já
+     * resolvido ANTES de abrir essa tela (mesmo motivo do Colheita
+     * Macabra: não deixar 2 popups abrindo ao mesmo tempo e um
+     * "sumindo" atrás do outro). `null` = não usou a Disciplina (ou
+     * não se aplica). */
+    avisoDisciplina: string | null;
   } | null>(null);
   // Sobrecarga (Mago/Evocador) — mesmo padrão de `MagiasTab.tsx`:
   // escolha "rolar normal vs. dano máximo", pausando a rolagem
@@ -1177,10 +1186,10 @@ export default function CombatTab({
   // magia tem fórmula de dano própria, já rola sozinho ao abrir (sem
   // botão manual de "Rolar Dano") — o popup final só abre depois que o
   // dado resolve, com Falha/Sucesso já calculados.
-  function abrirSalvaguarda(magia: Magia, circuloUsado: number) {
+  function abrirSalvaguarda(magia: Magia, circuloUsado: number, avisoDisciplina: string | null = null) {
     const danoBase = calcularDanoMagia(magia, circuloUsado, nivel);
     if (!danoBase) {
-      setTelaSalvaguarda({ magia, circuloUsado, danoRolado: null, upcastNaoAutomatico: false });
+      setTelaSalvaguarda({ magia, circuloUsado, danoRolado: null, upcastNaoAutomatico: false, avisoDisciplina });
       return;
     }
     const dano = aplicarEvocacaoPotencializadaAoDano(danoBase, magia, evocacaoPotencializadaAtiva, modIntAtual);
@@ -1198,7 +1207,7 @@ export default function CombatTab({
         },
         confirmarFechamento: {
           aoTocar: () =>
-            setTelaSalvaguarda({ magia, circuloUsado, danoRolado: totalRolado, upcastNaoAutomatico: dano.upcastNaoAutomatico }),
+            setTelaSalvaguarda({ magia, circuloUsado, danoRolado: totalRolado, upcastNaoAutomatico: dano.upcastNaoAutomatico, avisoDisciplina }),
         },
       });
     };
@@ -1215,7 +1224,7 @@ export default function CombatTab({
           const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, false);
           const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
           onUsarSobrecarga();
-          setTelaSalvaguarda({ magia, circuloUsado, danoRolado: max, upcastNaoAutomatico: dano.upcastNaoAutomatico });
+          setTelaSalvaguarda({ magia, circuloUsado, danoRolado: max, upcastNaoAutomatico: dano.upcastNaoAutomatico, avisoDisciplina });
           if (necrotico) {
             let totalNecrotico = 0;
             rolarDados({
@@ -2261,6 +2270,10 @@ export default function CombatTab({
     telaSalvaguarda?.upcastNaoAutomatico && telaSalvaguarda?.magia.upcastTexto
       ? `Círculo usado é maior que o base — dano acima NÃO inclui o upcast. Efeito real: ${telaSalvaguarda.magia.upcastTexto}`
       : null;
+  // Junta o aviso de upcast (se tiver) com o resultado da Disciplina
+  // Psiônica (E4c, Insinuação do Id/Pensamentos Destrutivos) — os 2 são
+  // independentes e raramente coincidem, mas nada impede.
+  const avisoSalvaguardaCompleto = [avisoUpcastSalvaguarda, telaSalvaguarda?.avisoDisciplina].filter(Boolean).join('\n\n') || null;
   // `${total} — ${texto original}` (nunca reescreve/assume a estrutura
   // do texto da planilha — ver PENDENCIAS.md "Salvaguarda do Alvo":
   // reconhecer TIPO de sucesso (metade/nenhum/cheio) precisa de coluna
@@ -3203,7 +3216,7 @@ export default function CombatTab({
           explicacaoCd={explicacaoCdConjuracao}
           textoSucesso={textoSucessoSalvaguarda}
           textoFalha={textoFalhaSalvaguarda}
-          aviso={avisoUpcastSalvaguarda}
+          aviso={avisoSalvaguardaCompleto}
           acaoSecundaria={
             danoCondicionalSalvaguarda
               ? {

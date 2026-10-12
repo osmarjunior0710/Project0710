@@ -12,7 +12,7 @@ import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import { circuloGratisMagiaFixaDeClasse, type MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
-import { decidirConjuracao } from '../../../core/conjurarMagia';
+import { decidirConjuracao, type DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
 import { truqueElegivelTruquePotente, sobrecargaElegivel, danoMaximoSobrecarga, danoNecroticoSobrecarga } from '../../../core/evocador';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
@@ -35,7 +35,7 @@ interface UsarMagiaPainelParams {
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda (CD + atributo + sucesso/falha), que vive em
    * CombatTab (persiste depois do painel fechar). */
-  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number) => void;
+  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null) => void;
   gastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
   /** Nível do personagem — pro Aprimoramento de Truque (dano escala
    * nos níveis 5/11/17, ver `calcularDanoMagia`). */
@@ -103,7 +103,7 @@ interface UsarMagiaPainelParams {
   disciplinaPsionicaBloqueadaNoTurno: boolean;
   /** Mesmo padrão de `onColheitaMacabraDisponivel` — ver
    * `DisciplinaPosConjuracaoModal.tsx`. */
-  onDisciplinaPosConjuracaoDisponivel: (d: { id: string; nome: string; descricao: string; quantidadeDados: number }) => void;
+  onDisciplinaPosConjuracaoDisponivel: (d: DisciplinaPosConjuracaoPendente) => void;
   /** Aplica a cura rolada (`rollCura`) no PV do personagem E dispara
    * o efeito visual de Cura — ver `RollDadosOptions.confirmarAlvoCura`
    * ("Me curar") e `FichaShell.tsx` `onCuraDeMagiaAplicada`. */
@@ -211,7 +211,20 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
     if (resultado.curaColheitaMacabra !== null) {
       p.onColheitaMacabraDisponivel(resultado.curaColheitaMacabra);
     }
+    // Insinuação do Id/Pensamentos Destrutivos sempre vêm de magia com
+    // salvaguarda — abrir os 2 popups juntos fazia o resultado da
+    // Disciplina "sumir" atrás do de Salvaguarda (pedido do Osmar,
+    // 2026-10). Em vez disso, SÓ abre a Salvaguarda depois que a
+    // Disciplina resolver, já com o texto pronto pra virar linha extra.
     if (resultado.disciplinaPosConjuracao) {
+      if (resultado.mecanica === 'salvaguarda') {
+        p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
+        p.onDisciplinaPosConjuracaoDisponivel({
+          ...resultado.disciplinaPosConjuracao,
+          aoResolverSalvaguarda: (aviso) => p.onAbrirSalvaguarda(m, circuloUsado, aviso),
+        });
+        return;
+      }
       p.onDisciplinaPosConjuracaoDisponivel(resultado.disciplinaPosConjuracao);
     }
     if (resultado.rollAcerto) {

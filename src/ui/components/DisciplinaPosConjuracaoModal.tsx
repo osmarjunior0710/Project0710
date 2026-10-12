@@ -1,3 +1,4 @@
+import TickPips from './TickPips';
 import styles from './TrocarArmaMaestria.module.css';
 
 interface DisciplinaPosConjuracaoModalProps {
@@ -7,6 +8,7 @@ interface DisciplinaPosConjuracaoModalProps {
    * Insinuação do Id) ou o mod. de Inteligência, que pode ser 0/negativo (Bio-Retorno/Pensamentos
    * Destrutivos — aí não rola nada, só garante o mínimo de 1 do próprio texto da regra). */
   quantidadeDados: number;
+  dadosMaximo: number;
   dadosRestantes: number;
   onUsar: () => void;
   onDispensar: () => void;
@@ -21,6 +23,7 @@ export default function DisciplinaPosConjuracaoModal({
   nome,
   descricao,
   quantidadeDados,
+  dadosMaximo,
   dadosRestantes,
   onUsar,
   onDispensar,
@@ -32,13 +35,18 @@ export default function DisciplinaPosConjuracaoModal({
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
         <div className={styles.title}>🔮 {nome}</div>
         <div style={{ fontSize: 13, marginBottom: 14 }}>{descricao}</div>
+        {quantidadeDados > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+            <TickPips total={dadosMaximo} usados={dadosMaximo - dadosRestantes} />
+          </div>
+        )}
         <div
           className="btn btn-primary"
           style={{ marginBottom: 8, opacity: semDados ? 0.5 : 1, pointerEvents: semDados ? 'none' : 'auto' }}
           onClick={onUsar}
         >
           {quantidadeDados > 0
-            ? `Gastar ${custo} Dado${custo > 1 ? 's' : ''} de Energia Psiônica (${dadosRestantes} restante${dadosRestantes === 1 ? '' : 's'})`
+            ? `Gastar ${custo} Dado${custo > 1 ? 's' : ''} de Energia Psiônica`
             : 'Usar (mínimo garantido, sem dado pra rolar)'}
         </div>
         <div className="btn" onClick={onDispensar}>
