@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0746
+
+Psiônico: o texto de Consciência Expandida, Língua Diabólica e Mente Atenta agora diz quais perícias valem (ex.: Procurar = Intuição, Medicina, Percepção e Sobrevivência; Estudar do UA = Analisar), e a Mira Inerrante avisa que aparece no popup do ataque. A nota aparece no Level Up e no Perfil.
+
 ## v202610_0125
 
 Psiônico: Consciência Expandida, Língua Diabólica, Mente Atenta e Mira Inerrante funcionam. Na rolagem de uma perícia da ação correspondente (Procurar, Influenciar ou Analisar), ou num ataque, aparece o botão "+1d6 <disciplina>" antes de Vantagem/Desvantagem. O dado é somado ao total e só é gasto se a jogada der certo (você marca Sucesso ou Falhou; no ataque vale o Acertei). Só 1 disciplina por turno, e a mesma não repete: o botão fica apagado com o motivo até o Fim do Turno.

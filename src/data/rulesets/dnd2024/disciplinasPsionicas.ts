@@ -20,7 +20,7 @@ export interface DisciplinaPsionica {
 
 const PH: StatusImplementacao = 'placeholder-codeimplementation';
 
-export const disciplinasPsionicas: DisciplinaPsionica[] = [
+const disciplinasBase: DisciplinaPsionica[] = [
   {
     id: 'aperfeicoamento-de-precognicao',
     nome: 'Aperfeiçoamento de Precognição',
@@ -103,6 +103,30 @@ export const disciplinasPsionicas: DisciplinaPsionica[] = [
     statusImplementacao: PH,
   },
 ];
+
+/** Ação do Livro do Jogador a que cada disciplina de perícia se refere. O UA cita só o nome da ação (e usa "Estudar", que no Livro do Jogador
+ * é "Analisar"); a nota abaixo diz quais perícias valem, pro jogador não precisar adivinhar. */
+const ACAO_DA_DISCIPLINA: Record<string, string> = {
+  'consciencia-expandida': 'Procurar',
+  'lingua-diabolica': 'Influenciar',
+  'mente-atenta': 'Analisar (o "Estudar" do UA)',
+};
+
+function listaComE(itens: string[]): string {
+  return itens.length <= 1 ? itens.join('') : itens.slice(0, -1).join(', ') + ' e ' + itens[itens.length - 1];
+}
+
+/** Catálogo final: o texto literal do PDF + (nas disciplinas de perícia) uma nota do app com as perícias da ação, lidas do próprio `gatilho`. */
+export const disciplinasPsionicas: DisciplinaPsionica[] = disciplinasBase.map((d) => {
+  if (d.gatilho?.tipo === 'pericia') {
+    const acao = ACAO_DA_DISCIPLINA[d.id];
+    return { ...d, descricao: `${d.descricao} (Nota do app: na ação ${acao}, vale nas perícias ${listaComE(d.gatilho.pericias)}.)` };
+  }
+  if (d.gatilho?.tipo === 'ataque') {
+    return { ...d, descricao: `${d.descricao} (Nota do app: aparece como botão no popup do ataque.)` };
+  }
+  return d;
+});
 
 export function disciplinaPorId(id: string): DisciplinaPsionica | undefined {
   return disciplinasPsionicas.find((d) => d.id === id);

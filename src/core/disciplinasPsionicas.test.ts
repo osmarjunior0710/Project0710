@@ -69,3 +69,15 @@ describe('disciplinaParaRolagem', () => {
     expect(disciplinaParaRolagem([], { label: 'Percepção', ehAtaque: false })).toBeNull();
   });
 });
+
+describe('nota do app nas disciplinas de rolagem', () => {
+  it('diz a ação e as perícias que valem (lidas do gatilho)', () => {
+    const d = (id: string) => disciplinasPsionicas.find((x) => x.id === id)!.descricao;
+    expect(d('consciencia-expandida')).toContain('Procurar, vale nas perícias Intuição, Medicina, Percepção e Sobrevivência');
+    expect(d('lingua-diabolica')).toContain('Atuação, Enganação, Intimidação, Persuasão e Lidar com Animais');
+    expect(d('mente-atenta')).toContain('Analisar (o "Estudar" do UA)');
+    expect(d('mente-atenta')).toContain('Arcanismo, História, Investigação, Natureza e Religião');
+    expect(d('mira-inerrante')).toContain('popup do ataque');
+    expect(d('bio-retorno')).not.toContain('Nota do app');
+  });
+});
