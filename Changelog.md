@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1118
+
+O dado psiônico (Consciência Expandida, Mira Inerrante etc.) agora rola no dado 3D, junto do d20 — antes aparecia um dado 2D desenhado. Sem o Dado 3D ligado, continua no 2D de sempre.
+
 ## v202610_0804
 
 Psiônico, correção: o limite de "1 disciplina por turno" agora só vale onde existe turno (ataque, aba Combate). Teste de perícia feito pela aba Atributos não tem limite nem trava. Além disso, numa rolagem com Vantagem ou Desvantagem que recebeu o dado psiônico, o popup mostra a soma de cada d20 (ex.: "Com o dado psiônico (+3): 13 / 14").

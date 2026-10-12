@@ -7,6 +7,21 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
+## Remover 100% das referências ao dado 2D do app (2026-10-12)
+
+Pedido do Osmar: o dado de verdade é o 3D (física); toda aparição do dado "desenhado" 2D no popup de rolagem deve sumir do app. Aconteceu de novo
+com o Dado de Energia Psiônica (aparecia o 2D verde em vez de cair no 3D) — corrigido nesse caso (v202610_1118: entra na cena 3D via `add()`), mas o
+2D continua existindo como caminho padrão/alternativo em outros lugares.
+
+Onde o 2D vive hoje (levantamento de 2026-10-12): `DadoVisual` e as classes `dieGrid`/`dieBonusExtra`/`dieDescartado` em
+`src/ui/roll/RollOverlay.tsx` + `RollOverlay.module.css`; os caminhos "sem 3D" de cada rolagem em `src/ui/roll/RollContext.tsx` (`rolar2D`, `Math.random`
+com `DURACAO_ANIMACAO_MS`: d20, dados avulsos, Vantagem pós-rolagem, Sorte, Inspiração Heroica, confirmação de crítico, Bônus Extra tipo Sorte do Tenebroso);
+o interruptor "Dado 3D" e o **Modo de Teste** em `src/ui/ficha/AvatarMenu.tsx` (hoje o Modo de Teste DESLIGA o 3D pra devolver d20 fixos 1/10/20).
+
+Antes de puxar, decidir com o Osmar: (1) o que fazer quando o aparelho não consegue carregar o 3D (WebGL/offline) — hoje cai no 2D; (2) como o Modo de
+Teste (d20 fixo) funciona sem 2D — dá pra forçar o resultado no 3D? (a lib de física precisa aceitar valor predeterminado); (3) se o interruptor "Dado 3D"
+some junto. Sem essas 3 respostas, remover o 2D quebra o teste manual do Osmar e os testes de tela.
+
 ## Popup de confirmação pra toda linha dos painéis Ação/Bônus/Reação (2026-10-09)
 
 Pedido do Osmar: hoje tocar numa linha dentro do painel de Ação/Ação

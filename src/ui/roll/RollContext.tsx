@@ -134,7 +134,7 @@ export interface RollState {
    * Desvantagem) — `total` só soma o valor quando a animação termina. */
   bonusExtra?: { rotulo: string; lados: number; valor: number | string } | null;
   /** Dado de Energia Psiônica já somado a esta rolagem (ver `DadoPsionicoProvider`). `valores: null` enquanto anima; `decidido` = já resolveu se gasta o dado. */
-  dadoPsionico?: { opcao: DadoPsionicoOpcao; valores: number[] | null; decidido: boolean } | null;
+  dadoPsionico?: { opcao: DadoPsionicoOpcao; valores: number[] | null; decidido: boolean; motor3D?: boolean } | null;
   /** `true` = o jogador já usou Sorte (Pequenino) nesta rolagem — só 1x
    * por rolagem, mesmo que o novo resultado também seja 1. */
   sorteUsada?: boolean;
@@ -1153,18 +1153,38 @@ export function RollProvider({ children }: { children: ReactNode }) {
     if (!estado || estado.fase !== 'concluido' || estado.tipo !== 'd20' || estado.dadoPsionico) return;
     const opcao = opcaoDadoPsionico;
     dadoPsionicoProvider.iniciar(opcao);
-    setEstado((prev) => (prev ? { ...prev, dadoPsionico: { opcao, valores: null, decidido: false } } : prev));
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      const valores = Array.from({ length: opcao.quantidade }, () => 1 + Math.floor(Math.random() * opcao.lados));
+    // Mesmo padrão do 2º d20 da Vantagem pós-rolagem: se o d20 foi físico (motor 3D), o dado psiônico entra na MESMA cena via
+    // `add()` (não limpa o que já está parado) e o `DadoVisual` 2D dele fica escondido; sem 3D, cai no 2D de sempre.
+    const usar3D = !!estado.motor3D && dado3DAtivo;
+    setEstado((prev) =>
+      prev ? { ...prev, fase: usar3D ? 'rolando' : prev.fase, dadoPsionico: { opcao, valores: null, decidido: false, motor3D: usar3D } } : prev,
+    );
+
+    function concluir(valores: number[], viaMotor3D: boolean) {
       setEstado((prev) => {
         if (!prev) return prev;
         const soma = valores.reduce((a, b) => a + b, 0);
         const { total, aplicada } = totalComForcaIndomavel((prev.total ?? 0) + soma, prev.permiteForcaIndomavel, forcaIndomavelRef.current);
-        return { ...prev, dadoPsionico: { opcao, valores, decidido: false }, total, forcaIndomavelAplicada: aplicada };
+        return { ...prev, fase: 'concluido', dadoPsionico: { opcao, valores, decidido: false, motor3D: viaMotor3D }, total, forcaIndomavelAplicada: aplicada };
       });
-    }, DURACAO_ANIMACAO_MS);
-  }, [dadoPsionicoProvider, opcaoDadoPsionico, estado]);
+    }
+    const sortear = () => Array.from({ length: opcao.quantidade }, () => 1 + Math.floor(Math.random() * opcao.lados));
+
+    if (usar3D) {
+      (async () => {
+        try {
+          const [grupo] = await lancarGrupos({ qty: opcao.quantidade, sides: opcao.lados }, { modo: 'add' });
+          const valores = grupo.rolls ? grupo.rolls.map((r) => r.value) : [grupo.value];
+          concluir(valores, true);
+        } catch {
+          timeoutRef.current = setTimeout(() => concluir(sortear(), false), DURACAO_ANIMACAO_MS);
+        }
+      })();
+      return;
+    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => concluir(sortear(), false), DURACAO_ANIMACAO_MS);
+  }, [dadoPsionicoProvider, opcaoDadoPsionico, estado, dado3DAtivo]);
   const resolverDadoPsionico = useCallback(
     (deuCerto: boolean) => {
       if (!dadoPsionicoProvider || !estado?.dadoPsionico || estado.dadoPsionico.decidido || !estado.dadoPsionico.valores) return;

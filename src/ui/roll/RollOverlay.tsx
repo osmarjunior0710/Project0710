@@ -459,11 +459,14 @@ export default function RollOverlay() {
             <div className={styles.formula}>
               +{estado.dadoPsionico.opcao.quantidade}d{estado.dadoPsionico.opcao.lados} ({estado.dadoPsionico.opcao.rotulo})
             </div>
-            <div className={styles.diceRow}>
-              {(estado.dadoPsionico.valores ?? Array.from({ length: estado.dadoPsionico.opcao.quantidade }, () => '🎲' as number | string)).map((v, i) => (
-                <DadoVisual key={i} valor={v} lados={estado.dadoPsionico!.opcao.lados} className={styles.dieBonusExtra} />
-              ))}
-            </div>
+            {/* Dado físico (motor 3D): já aparece caindo no canvas por trás do card — não desenha o 2D de novo. */}
+            {!estado.dadoPsionico.motor3D && (
+              <div className={styles.diceRow}>
+                {(estado.dadoPsionico.valores ?? Array.from({ length: estado.dadoPsionico.opcao.quantidade }, () => '🎲' as number | string)).map((v, i) => (
+                  <DadoVisual key={i} valor={v} lados={estado.dadoPsionico!.opcao.lados} className={styles.dieBonusExtra} />
+                ))}
+              </div>
+            )}
           </>
         )}
         {decidindoDadoPsionico && estado.dadoPsionico?.valores && (
