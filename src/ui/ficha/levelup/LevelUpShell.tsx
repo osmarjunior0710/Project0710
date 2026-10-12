@@ -40,6 +40,8 @@ import {
   INVOCACOES_COM_VINCULO_TRUQUE,
   truquesElegiveisParaVinculo,
 } from '../../../core/invocacoesMisticas';
+import { disciplinasPsionicas } from '../../../data/rulesets/dnd2024/disciplinasPsionicas';
+import { quantidadeDisciplinasPsionicas } from '../../../core/disciplinasPsionicas';
 import { circulosArcanaMisticaDesbloqueados, magiasElegiveisArcanaMistica, trocasArcanaMistica } from '../../../core/arcanaMistica';
 import { magiasPeritoNecromanciaNesteNivel, catalogoPeritoNecromancia } from '../../../core/necromante';
 import { magiasVersadoEmEvocacaoNesteNivel, catalogoVersadoEmEvocacao } from '../../../core/evocador';
@@ -99,6 +101,8 @@ interface LevelUpShellProps {
     livroDeMagiasEscolhidas: string[] | null;
     magiasPreparadasEscolhidas: string[] | null;
     invocacoesMisticasEscolhidas: string[] | null;
+    /** Disciplinas Psiônicas (Psiônico, UA) — lista COMPLETA pós level-up (mesmo padrão de `truquesEscolhidos`). `null` = classe sem a característica / sem escolha neste nível. */
+    disciplinasPsionicasEscolhidas: string[] | null;
     /** Mapa COMPLETO (antigos + recém-vinculados), mesmo padrão de
      * `truquesEscolhidos`/`invocacoesMisticasEscolhidas` — nunca perde
      * um vínculo já existente, só cresce. `null` = nenhuma vinculação
@@ -195,6 +199,8 @@ interface LevelUpShellProps {
   /** Invocações Místicas (Bruxo) que o personagem já tem — Etapa 4.3
    * do Bruxo, mesmo padrão de troca de Truques (1 por level-up). */
   invocacoesMisticasAtuais: string[];
+  /** Disciplinas Psiônicas (Psiônico, UA) que o personagem já conhece — troca 1 por level-up (core/disciplinasPsionicas.ts). */
+  disciplinasPsionicasAtuais: string[];
   /** Truque já vinculado a cada Invocação Mística que exige essa
    * escolha (Explosão Agonizante/Repulsiva) — chave = id da invocação,
    * valor = NOME do truque. Ausente/sem a chave = ainda não vinculado
@@ -289,6 +295,7 @@ type LuStep =
   | 'versadoEmEvocacao'
   | 'magiasPreparadas'
   | 'invocacoes'
+  | 'disciplinasPsionicas'
   | 'vinculoTruqueInvocacao'
   | 'descobertasMagicas'
   | 'especialista'
@@ -327,6 +334,7 @@ export default function LevelUpShell({
   livroDeMagiasAtuais,
   magiasDaClasseDisponiveis,
   invocacoesMisticasAtuais,
+  disciplinasPsionicasAtuais,
   invocacoesTruqueVinculadoAtuais,
   arcanaMisticaAtuais,
   maestriaDeMagiasAtuais,
@@ -360,6 +368,13 @@ export default function LevelUpShell({
   // Bardo/Bruxo continuam com a regra de sempre (0 ou 1 troca).
   const usaRedefPorDescanso = usaRedefinicaoPorDescanso(classe);
   const maxInvocacoes = valorRecursoClasse(classe, 'Invocações Místicas', novoNivel);
+  // Disciplinas Psiônicas (Psiônico, UA): 2 no nível 2, +1 nos níveis 5/10/13/17; troca 1 por level-up.
+  const maxDisciplinas = classe.id === 'psionico' ? quantidadeDisciplinasPsionicas(classe, novoNivel) : 0;
+  const {
+    escolhidos: disciplinasEscolhidas,
+    toggle: toggleDisciplina,
+    trocas: trocasDeDisciplina,
+  } = useEscolhaMultipla(disciplinasPsionicasAtuais, maxDisciplinas);
   const invocacoesCatalogo = invocacoesElegiveisAteNivel(novoNivel);
   const circuloMaximoNovoNivel = Math.max(0, ...espacosDeMagiaAtivos(classe, novoNivel).map((e) => e.circulo));
 
@@ -695,6 +710,7 @@ export default function LevelUpShell({
     luSteps.push('magiasPreparadas');
   }
   if (maxInvocacoes > 0) luSteps.push('invocacoes');
+  if (maxDisciplinas > 0) luSteps.push('disciplinasPsionicas');
   // Independe de `maxInvocacoes > 0` — dispara mesmo num level-up que
   // não concede invocação nova, se alguma marcada antes ainda não
   // tiver truque vinculado (ver comentário de `invocacoesQuePrecisamVinculo`).
@@ -990,6 +1006,7 @@ export default function LevelUpShell({
   const assinaturaMagicaValido = assinaturaMagicaEscolhidas.length === MAX_ASSINATURA_MAGICA;
 
   const invocacoesValido = invocacoesEscolhidas.length === maxInvocacoes && trocasDeInvocacao <= 1;
+  const disciplinasValido = disciplinasEscolhidas.length === maxDisciplinas && trocasDeDisciplina <= 1;
 
   const descobertasMagicasValido =
     descobertasMagicasEscolhidas.length === MAX_DESCOBERTAS_MAGICAS && trocasDeDescobertaMagica <= 1;
@@ -1082,6 +1099,7 @@ export default function LevelUpShell({
     versadoEmEvocacao: 'Versado em Evocação',
     magiasPreparadas: 'Magias Preparadas',
     invocacoes: 'Invocações Místicas',
+    disciplinasPsionicas: 'Disciplinas Psiônicas',
     vinculoTruqueInvocacao: 'Truque Vinculado',
     descobertasMagicas: 'Descobertas Mágicas',
     especialista: 'Especialista',
@@ -1186,6 +1204,14 @@ export default function LevelUpShell({
       );
       return;
     }
+    if (step === 'disciplinasPsionicas' && !disciplinasValido) {
+      setAviso(
+        trocasDeDisciplina > 1
+          ? 'Você só pode trocar 1 Disciplina Psiônica por level-up — desmarque menos disciplinas que já tinha.'
+          : `Escolha exatamente ${maxDisciplinas} Disciplinas Psiônicas antes de avançar.`,
+      );
+      return;
+    }
     if (step === 'invocacoes' && !invocacoesValido) {
       setAviso(
         trocasDeInvocacao > 1
@@ -1286,6 +1312,7 @@ export default function LevelUpShell({
           : null,
         magiasPreparadasEscolhidas: luSteps.includes('magiasPreparadas') ? magiasPreparadasEscolhidas : null,
         invocacoesMisticasEscolhidas: luSteps.includes('invocacoes') ? invocacoesEscolhidas : null,
+        disciplinasPsionicasEscolhidas: luSteps.includes('disciplinasPsionicas') ? disciplinasEscolhidas : null,
         invocacoesTruqueVinculadoEscolhido: luSteps.includes('vinculoTruqueInvocacao') ? vinculoTruqueEscolhido : null,
         periciasEspecialistaEscolhidas: luSteps.includes('especialista') ? especialistaEscolhidas : null,
         periciasSubclasseBonusEscolhidas: luSteps.includes('proficienciasBonus') ? proficienciasBonusEscolhidas : null,
@@ -1801,6 +1828,45 @@ export default function LevelUpShell({
                 }}
               </GrupoMagiaColapsavel>
             ))}
+          </>
+        )}
+
+        {step === 'disciplinasPsionicas' && (
+          <>
+            <div className="section-title">
+              Disciplinas Psiônicas — escolha {maxDisciplinas} ({disciplinasEscolhidas.length}/{maxDisciplinas})
+            </div>
+            <div className="label" style={{ marginBottom: 8 }}>
+              Regra: a cada nível você pode substituir 1 disciplina que já conhece por outra — não precisa mexer se não quiser. Você só pode usar
+              1 disciplina por turno (e 1 vez cada), salvo as exceções do texto. [PH] sem efeito mecânico ainda — só o texto de regra.
+            </div>
+            {disciplinasPsionicas.map((d) => {
+              const jaTinha = disciplinasPsionicasAtuais.includes(d.id);
+              const marcado = disciplinasEscolhidas.includes(d.id);
+              const removendo = jaTinha && !marcado;
+              return (
+                <div
+                  key={d.id}
+                  className={`check-row ${jaTinha ? (removendo ? styles.truqueRemovendo : styles.truqueAtual) : ''}`}
+                  onClick={() => toggleDisciplina(d.id)}
+                >
+                  <div className={`check-box ${marcado ? 'checked' : ''}`} />
+                  <div className="check-label" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <div className="opt-card-name">
+                      {d.nome}
+                      {removendo && <span style={{ color: 'var(--danger)', fontSize: 11 }}> · 🔻 será removida</span>}
+                      {jaTinha && !removendo && <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · já tinha</span>}
+                    </div>
+                    <div className="opt-card-desc">{d.descricao}</div>
+                  </div>
+                </div>
+              );
+            })}
+            {trocasDeDisciplina > 1 && (
+              <div className="label" style={{ color: 'var(--danger)', marginTop: 6 }}>
+                ⚠️ {trocasDeDisciplina} disciplinas trocadas — só pode trocar 1 por level-up.
+              </div>
+            )}
           </>
         )}
 
@@ -2535,6 +2601,17 @@ export default function LevelUpShell({
                     : trocasDeMagia > 0
                       ? `${trocasDeMagia} trocada(s)`
                       : 'sem troca'}
+                </span>
+              </div>
+            )}
+            {luSteps.includes('disciplinasPsionicas') && (
+              <div className="summary-row">
+                <span>Disciplinas Psiônicas</span>
+                <span>
+                  {disciplinasEscolhidas.length > disciplinasPsionicasAtuais.length
+                    ? `+${disciplinasEscolhidas.length - disciplinasPsionicasAtuais.length} nova(s)`
+                    : 'sem nova'}
+                  {trocasDeDisciplina > 0 ? `, ${trocasDeDisciplina} trocada(s)` : ''}
                 </span>
               </div>
             )}

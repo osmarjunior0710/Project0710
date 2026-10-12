@@ -440,6 +440,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [invocacoesMisticasAtuais, setInvocacoesMisticasAtuais] = useState<string[]>(
     personagemSalvo.invocacoesMisticasAtual ?? selecao.invocacoesMisticasEscolhidas,
   );
+  // Disciplinas Psiônicas (Psiônico, UA) — ver core/disciplinasPsionicas.ts.
+  const [disciplinasPsionicasAtuais, setDisciplinasPsionicasAtuais] = useState<string[]>(
+    personagemSalvo.disciplinasPsionicasAtual ?? selecao.disciplinasPsionicasEscolhidas ?? [],
+  );
   /** Truque vinculado a cada Invocação Mística que exige essa escolha
    * (Explosão Agonizante/Repulsiva) — chave = id da invocação, valor =
    * NOME do truque. Escolhido numa tela própria do Level Up, logo
@@ -1506,6 +1510,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasPreparadasAtual: magiasPreparadasAtuais,
     livroDeMagiasAtual: livroDeMagiasAtuais,
     invocacoesMisticasAtual: invocacoesMisticasAtuais,
+    disciplinasPsionicasAtual: disciplinasPsionicasAtuais,
     invocacoesTruqueVinculado,
     periciasEspecialistaAtual: periciasEspecialistaAtuais,
     periciasSubclasseBonusAtual: periciasSubclasseBonusAtuais,
@@ -1625,6 +1630,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       magiasPreparadasAtuais,
       livroDeMagiasAtuais,
       invocacoesMisticasAtuais,
+      disciplinasPsionicasAtuais,
       invocacoesTruqueVinculado,
       periciasEspecialistaAtuais,
       periciasSubclasseBonusAtuais,
@@ -2626,6 +2632,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     livroDeMagiasEscolhidas: string[] | null;
     magiasPreparadasEscolhidas: string[] | null;
     invocacoesMisticasEscolhidas: string[] | null;
+    disciplinasPsionicasEscolhidas: string[] | null;
     invocacoesTruqueVinculadoEscolhido: Record<string, string> | null;
     periciasEspecialistaEscolhidas: string[] | null;
     periciasSubclasseBonusEscolhidas: string[] | null;
@@ -2698,6 +2705,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (resultado.magiasPreparadasEscolhidas)
       setMagiasPreparadasAtuais(marcarClasseDasEscolhas(resultado.magiasPreparadasEscolhidas, magiasPreparadasAtuais, classeAlvo));
     if (resultado.invocacoesMisticasEscolhidas) setInvocacoesMisticasAtuais(resultado.invocacoesMisticasEscolhidas);
+    if (resultado.disciplinasPsionicasEscolhidas) setDisciplinasPsionicasAtuais(resultado.disciplinasPsionicasEscolhidas);
     if (resultado.invocacoesTruqueVinculadoEscolhido) setInvocacoesTruqueVinculado(resultado.invocacoesTruqueVinculadoEscolhido);
     if (resultado.periciasEspecialistaEscolhidas) setPericiasEspecialistaAtuais(resultado.periciasEspecialistaEscolhidas);
     if (resultado.periciasSubclasseBonusEscolhidas) setPericiasSubclasseBonusAtuais(resultado.periciasSubclasseBonusEscolhidas);
@@ -2794,6 +2802,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       magiasPreparadasAtuais: nomesDeMagiasConhecidas(magiasPreparadasAtuais.filter((m) => m.classe === classeAlvoRapido)),
       livroDeMagiasAtuais,
       invocacoesMisticasAtuais,
+      disciplinasPsionicasAtuais,
       invocacoesTruqueVinculadoAtuais: invocacoesTruqueVinculado,
       arcanaMisticaAtuais,
       periciasEspecialistaAtuais,
@@ -2885,6 +2894,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         livroDeMagiasAtuais={livroDeMagiasAtuais}
         magiasDaClasseDisponiveis={magiasDisponiveisParaPreparar(classeParaLevelUpObj, personagemParaLevelUp.nivel + 1)}
         invocacoesMisticasAtuais={invocacoesMisticasAtuais}
+        disciplinasPsionicasAtuais={disciplinasPsionicasAtuais}
         invocacoesTruqueVinculadoAtuais={invocacoesTruqueVinculado}
         arcanaMisticaAtuais={arcanaMisticaAtuais}
         maestriaDeMagiasAtuais={maestriaDeMagiasAtuais}
@@ -3260,6 +3270,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             catalogoClasses={catalogoClasses}
             talentosGeraisAtuais={talentosGeraisAtuais}
             invocacoesMisticasAtuais={invocacoesMisticasAtuais}
+            disciplinasPsionicasAtuais={disciplinasPsionicasAtuais}
             invocacoesTruqueVinculado={invocacoesTruqueVinculado}
             onAdicionarIdiomas={(novos) => setSelecao((prev) => ({ ...prev, linguas: [...prev.linguas, ...novos] }))}
             onRemoverIdioma={(idioma) =>

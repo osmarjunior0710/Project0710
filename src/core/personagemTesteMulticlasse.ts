@@ -24,6 +24,8 @@
 import { classes, type Classe } from '../data/rulesets/dnd2024/classes';
 import { magiasDaClasse, type Magia } from '../data/rulesets/dnd2024/magias';
 import { invocacoesMisticas } from '../data/rulesets/dnd2024/invocacoesMisticas';
+import { disciplinasPsionicas } from '../data/rulesets/dnd2024/disciplinasPsionicas';
+import { quantidadeDisciplinasPsionicas } from './disciplinasPsionicas';
 import { espacosDeMagiaAtivos } from './magiasPersonagem';
 import type { MagiaConhecida } from './magiasPersonagem';
 import { valorRecursoClasse } from './recursosClasse';
@@ -200,6 +202,7 @@ export function montarPersonagemTesteMulticlasse(): PersonagemSalvo {
   const magiasPreparadasAtual: MagiaConhecida[] = [];
   let livroDeMagiasAtual: string[] = [];
   let invocacoesMisticasAtual: string[] = [];
+  let disciplinasPsionicasAtual: string[] = [];
   let estiloDeLutaAtual: string | null = null;
   const maestriaArmaAtual = new Set<string>();
   const periciasEspecialistaAtual: string[] = [];
@@ -238,6 +241,11 @@ export function montarPersonagemTesteMulticlasse(): PersonagemSalvo {
         escolhidasPreparadas = selecionarMagiasDiversificadasEmCirculos(entry.classe, circulos, maxPreparadas);
       }
       for (const m of escolhidasPreparadas) magiasPreparadasAtual.push({ nome: m.nome, classe: entry.classe });
+    }
+
+    if (classeObj.id === 'psionico') {
+      // Todas as disciplinas que couberem (6 no nível 20; o catálogo tem 11) — cobre o máximo de situações de teste.
+      disciplinasPsionicasAtual = disciplinasPsionicas.slice(0, quantidadeDisciplinasPsionicas(classeObj, NIVEL_TESTE)).map((d) => d.id);
     }
 
     const maxInvocacoes = valorRecursoClasse(classeObj, 'Invocações Místicas', NIVEL_TESTE);
@@ -296,6 +304,7 @@ export function montarPersonagemTesteMulticlasse(): PersonagemSalvo {
     magiasPreparadasAtual,
     livroDeMagiasAtual,
     invocacoesMisticasAtual,
+    disciplinasPsionicasAtual,
     estiloDeLutaAtual,
     maestriaArmaAtual: [...maestriaArmaAtual],
     periciasEspecialistaAtual,

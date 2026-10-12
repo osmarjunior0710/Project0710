@@ -149,3 +149,46 @@ describe('sortearLevelUpRapido', () => {
     }
   });
 });
+
+describe('sortearLevelUpRapido — Psiônico (Disciplinas Psiônicas)', () => {
+  const psionico = classes.find((c) => c.nome === 'Psiônico')!;
+  const base = {
+    classe: psionico,
+    personagem: { nivel: 1, pvMax: 8, dadoVida: 'd6', conMod: 0, subclasse: null, estiloDeLuta: null, bonusPvPorNivel: 0 },
+    truquesAtuais: [],
+    magiasPreparadasAtuais: [],
+    livroDeMagiasAtuais: [],
+    invocacoesMisticasAtuais: [],
+    invocacoesTruqueVinculadoAtuais: {},
+    arcanaMisticaAtuais: {},
+    periciasEspecialistaAtuais: [],
+    periciasProficientesDoPersonagem: [],
+    periciasSubclasseBonusAtuais: [],
+    magiasDescobertasMagicasAtuais: [],
+    atributosFinaisAtuais: { ...atributosFinaisNeutros },
+    talentosGeraisAtuais: [],
+    conhecimentoPrimordialPericiaAtual: null,
+    academicoPericiaAtual: null,
+    maestriaDeMagiasAtuais: {},
+    assinaturaMagicaAtuais: [],
+  };
+
+  it('nível 1 → 2 sorteia 2 disciplinas distintas', () => {
+    const r = sortearLevelUpRapido(base);
+    expect(r.disciplinasPsionicasEscolhidas).toHaveLength(2);
+    expect(new Set(r.disciplinasPsionicasEscolhidas).size).toBe(2);
+  });
+
+  it('borda: já tendo 2, o nível 5 só acrescenta 1 e mantém as antigas; nível sem disciplina nova mantém as mesmas (a troca de 1 é opcional)', () => {
+    const r5 = sortearLevelUpRapido({
+      ...base,
+      personagem: { ...base.personagem, nivel: 4 },
+      disciplinasPsionicasAtuais: ['mira-inerrante', 'bio-retorno'],
+    });
+    expect(r5.disciplinasPsionicasEscolhidas).toHaveLength(3);
+    expect(r5.disciplinasPsionicasEscolhidas).toEqual(expect.arrayContaining(['mira-inerrante', 'bio-retorno']));
+    const r3 = sortearLevelUpRapido({ ...base, personagem: { ...base.personagem, nivel: 2 }, disciplinasPsionicasAtuais: ['mira-inerrante', 'bio-retorno'] });
+    expect(r3.disciplinasPsionicasEscolhidas).toEqual(['mira-inerrante', 'bio-retorno']);
+  });
+});
+

@@ -19,6 +19,7 @@ import {
 import type { WizardSelection } from '../../../core/personagem';
 import type { PersonagemClasse } from '../../../core/multiclasse';
 import { invocacoesMisticas } from '../../../data/rulesets/dnd2024/invocacoesMisticas';
+import { disciplinasPsionicas } from '../../../data/rulesets/dnd2024/disciplinasPsionicas';
 import { invocacaoTemPlaceholder } from '../../../core/invocacoesMisticas';
 import { talentoTemPlaceholder } from '../../../core/classificarTalento';
 import { descricaoTracoResolvida, opcoesSubescolhaNoWizard, tracoComEscolhaDePericia } from '../../../core/especieSubescolha';
@@ -36,6 +37,8 @@ interface PerfilTabProps {
   /** Invocações Místicas (Bruxo) atuais — vazio pra qualquer outra
    * classe, a seção some sozinha. */
   invocacoesMisticasAtuais: string[];
+  /** Disciplinas Psiônicas (Psiônico, UA) conhecidas — ver `core/disciplinasPsionicas.ts`. */
+  disciplinasPsionicasAtuais: string[];
   /** Truque vinculado a cada Invocação Mística que exige essa escolha
    * (Explosão Agonizante/Repulsiva) — ver `core/invocacoesMisticas.ts`. */
   invocacoesTruqueVinculado: Record<string, string>;
@@ -49,6 +52,7 @@ export default function PerfilTab({
   catalogoClasses,
   talentosGeraisAtuais,
   invocacoesMisticasAtuais,
+  disciplinasPsionicasAtuais,
   invocacoesTruqueVinculado,
   onAdicionarIdiomas,
   onRemoverIdioma,
@@ -82,6 +86,9 @@ export default function PerfilTab({
   const talentosGeraisEscolhidos = talentosGeraisAtuais
     .map((id) => talentos.find((t) => t.id === id))
     .filter((t) => t !== undefined);
+  const disciplinasEscolhidas = disciplinasPsionicasAtuais
+    .map((id) => disciplinasPsionicas.find((d) => d.id === id))
+    .filter((d) => d !== undefined);
   const invocacoesEscolhidas = invocacoesMisticasAtuais
     .map((id) => invocacoesMisticas.find((i) => i.id === id))
     .filter((i) => i !== undefined);
@@ -146,6 +153,23 @@ export default function PerfilTab({
                 <div key={c.nome} className="opt-card" style={{ cursor: 'default' }}>
                   <div className="opt-card-name">{c.nome}</div>
                   <div className="opt-card-desc">{c.descricao}</div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {classeObj?.id === 'psionico' && disciplinasEscolhidas.length > 0 && (
+            <>
+              <div className="section-title" style={{ marginTop: 16 }}>
+                Disciplinas Psiônicas
+              </div>
+              {disciplinasEscolhidas.map((d) => (
+                <div key={d.id} className="opt-card" style={{ cursor: 'default' }}>
+                  <div className="opt-card-name">{d.nome}</div>
+                  <div className="opt-card-desc">
+                    {d.statusImplementacao.startsWith('placeholder-') ? '[PH] sem efeito mecânico ainda — ' : ''}
+                    {d.descricao}
+                  </div>
                 </div>
               ))}
             </>

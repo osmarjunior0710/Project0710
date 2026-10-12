@@ -140,6 +140,8 @@ export interface PersonagemSalvo {
    * `truquesAtual`. Ausente = cai pra `selecao.invocacoesMisticasEscolhidas`
    * (retrato da criação). */
   invocacoesMisticasAtual?: string[];
+  /** Disciplinas Psiônicas (Psiônico, UA) conhecidas DEPOIS da criação — cresce/troca no Level Up. Ausente = cai pra `selecao.disciplinasPsionicasEscolhidas`. */
+  disciplinasPsionicasAtual?: string[];
   /** Truque de Bruxo vinculado a cada Invocação Mística que exige essa
    * escolha (hoje: Explosão Agonizante/Repulsiva — ver
    * `core/invocacoesMisticas.ts`, `INVOCACOES_COM_VINCULO_TRUQUE`) —

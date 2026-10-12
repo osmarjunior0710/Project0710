@@ -19,6 +19,8 @@ import { proficienciasIniciaisClasse } from '../data/rulesets/dnd2024/classesPro
 import { magiasDaClasse } from '../data/rulesets/dnd2024/magias';
 import { talentos } from '../data/rulesets/dnd2024/talentos';
 import type { InvocacaoMistica } from '../data/rulesets/dnd2024/invocacoesMisticas';
+import { disciplinasPsionicas } from '../data/rulesets/dnd2024/disciplinasPsionicas';
+import { quantidadeDisciplinasPsionicas } from './disciplinasPsionicas';
 import {
   caracteristicaDesbloqueada,
   caracteristicaSubclasseDesbloqueada,
@@ -68,6 +70,8 @@ export interface ParamsLevelUpRapido {
   magiasPreparadasAtuais: string[];
   livroDeMagiasAtuais: string[];
   invocacoesMisticasAtuais: string[];
+  /** Opcional: só o Psiônico usa; ausente = nenhuma. */
+  disciplinasPsionicasAtuais?: string[];
   invocacoesTruqueVinculadoAtuais: Record<string, string>;
   arcanaMisticaAtuais: Record<number, string>;
   periciasEspecialistaAtuais: string[];
@@ -100,6 +104,7 @@ export interface ResultadoLevelUpRapido {
   livroDeMagiasEscolhidas: string[] | null;
   magiasPreparadasEscolhidas: string[] | null;
   invocacoesMisticasEscolhidas: string[] | null;
+  disciplinasPsionicasEscolhidas: string[] | null;
   invocacoesTruqueVinculadoEscolhido: Record<string, string> | null;
   periciasEspecialistaEscolhidas: string[] | null;
   periciasSubclasseBonusEscolhidas: string[] | null;
@@ -302,6 +307,12 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
             .map((m) => m.nome)
       : null;
 
+  const maxDisciplinas = classe.id === 'psionico' ? quantidadeDisciplinasPsionicas(classe, novoNivel) : 0;
+  const disciplinasPsionicasEscolhidas =
+    maxDisciplinas > 0
+      ? [...(params.disciplinasPsionicasAtuais ?? []), ...embaralhar(disciplinasPsionicas.map((d) => d.id).filter((id) => !(params.disciplinasPsionicasAtuais ?? []).includes(id)))].slice(0, maxDisciplinas)
+      : null;
+
   const maxInvocacoes = valorRecursoClasse(classe, 'Invocações Místicas', novoNivel);
   const invocacoesMisticasEscolhidas =
     maxInvocacoes > 0 ? sortearInvocacoes(invocacoesElegiveisAteNivel(novoNivel), maxInvocacoes) : null;
@@ -402,6 +413,7 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     livroDeMagiasEscolhidas,
     magiasPreparadasEscolhidas,
     invocacoesMisticasEscolhidas,
+    disciplinasPsionicasEscolhidas,
     invocacoesTruqueVinculadoEscolhido,
     periciasEspecialistaEscolhidas,
     periciasSubclasseBonusEscolhidas,

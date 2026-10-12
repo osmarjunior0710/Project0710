@@ -5,6 +5,10 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2336
+
+Psiônico: as Disciplinas Psiônicas já podem ser escolhidas. No Level Up do nível 2 você escolhe 2 (e mais 1 nos níveis 5, 10, 13 e 17); a cada nível dá pra trocar 1. Elas aparecem no Perfil com o texto completo, ainda marcadas como [PH] (sem efeito). O Char Multiclasse já vem com as 6 disciplinas do nível 20.
+
 ## v202610_2107
 
 Psiônico: a Conexão Telepática ganhou o ⓘ ao lado do nome, que abre um popup com o texto da característica.

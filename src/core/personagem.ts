@@ -19,6 +19,8 @@ export interface WizardSelection {
   /** IDs de `invocacoesMisticas.ts` (Bruxo) — Fase 1, ver
    * PENDENCIAS.md "Bruxo — Invocações Místicas Fase 2". */
   invocacoesMisticasEscolhidas: string[];
+  /** IDs de `disciplinasPsionicas.ts` (Psiônico, UA) — só existem a partir do nível 2, então nascem vazios; crescem/trocam no Level Up. */
+  disciplinasPsionicasEscolhidas?: string[];
   truquesEscolhidos: string[];
   /** Livro de Magias (grimório) do Mago — pool de magias CONHECIDAS,
    * maior que `magiasPreparadasEscolhidas` (ver DECISOES-CLASSES.md
@@ -103,6 +105,7 @@ export function criarSelecaoInicial(): WizardSelection {
     periciasClasseEscolhidas: [],
     ferramentasClasseEscolhidas: [],
     invocacoesMisticasEscolhidas: [],
+    disciplinasPsionicasEscolhidas: [],
     truquesEscolhidos: [],
     livroDeMagiasEscolhido: [],
     magiasPreparadasEscolhidas: [],
