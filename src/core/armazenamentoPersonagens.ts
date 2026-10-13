@@ -421,6 +421,11 @@ export interface PersonagemSalvo {
   /** `true` = Sintonia Elemental ATIVA agora (Monge, Combatente dos Elementos, gastou 1
    * Ponto de Foco) — toggle sem contador de tempo (padrão de `defesaSuperiorAtiva`). */
   sintoniaElementalAtiva?: boolean;
+  /** `true` = Defesa Psiônica ATIVA agora (Psiônico, UA, gastou 1 Dado de Energia
+   * Psiônica) — diferente de `defesaSuperiorAtiva` (duração "1 minuto", encerramento manual),
+   * essa dura só "até o início do próximo turno", então encerra sozinha no Fim do Turno, no
+   * Descanso Curto e no Descanso Longo — nunca precisa de botão de encerrar. */
+  defesaPsionicaAtiva?: boolean;
   /** `true` = Golpes Potencializados do Ápice Elemental (Monge/Elementos nível 17) já usado NESTE
    * turno — reseta no Fim do Turno. */
   apiceGolpesUsadoTurno?: boolean;

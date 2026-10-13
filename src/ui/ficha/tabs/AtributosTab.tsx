@@ -66,6 +66,9 @@ interface AtributosTabProps {
    * de Destreza. Se coincidir com `desvantagemForcaDestreza` na mesma
    * rolagem, as duas se cancelam (`resolverVantagem`). */
   temSentidoDePerigo: boolean;
+  /** Defesa Psiônica (Psiônico, UA) ATIVA agora — Vantagem na Salvaguarda de
+   * Inteligência até o fim do turno (ou Descanso Curto/Longo, ver `core/defesaPsionica.ts`). */
+  defesaPsionicaAtiva: boolean;
   /** Evasão (Monge nível 7) — aviso ao lado da Salvaguarda de Destreza. */
   temEvasao: boolean;
   proficienciasFerramenta: FerramentaFinal[];
@@ -144,6 +147,7 @@ export default function AtributosTab({
   desvantagemForcaDestreza,
   desvantagemFurtividadeArmadura,
   temSentidoDePerigo,
+  defesaPsionicaAtiva,
   temEvasao,
   proficienciasFerramenta,
   reservaDadosDeVida,
@@ -371,7 +375,7 @@ export default function AtributosTab({
               ehSalvaguarda: true,
               permiteForcaIndomavel: sv.atributo === 'FOR',
               vantagem: resolverVantagem(
-                temSentidoDePerigo && sv.atributo === 'DES',
+                (temSentidoDePerigo && sv.atributo === 'DES') || (defesaPsionicaAtiva && sv.atributo === 'INT'),
                 desvantagemForcaDestreza && (sv.atributo === 'FOR' || sv.atributo === 'DES'),
               ),
             })
@@ -382,6 +386,11 @@ export default function AtributosTab({
             {temSentidoDePerigo && sv.atributo === 'DES' && (
               <span className="label" style={{ marginLeft: 4 }}>
                 (Vantagem — Sentido de Perigo)
+              </span>
+            )}
+            {defesaPsionicaAtiva && sv.atributo === 'INT' && (
+              <span className="label" style={{ marginLeft: 4 }}>
+                (Vantagem — Defesa Psiônica)
               </span>
             )}
             {temEvasao && sv.atributo === 'DES' && (

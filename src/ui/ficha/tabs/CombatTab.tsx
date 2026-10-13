@@ -399,6 +399,12 @@ interface CombatTabProps {
     ativa: boolean;
     onAlternar: () => boolean;
   };
+  defesaPsionica: {
+    disponivel: boolean;
+    ativa: boolean;
+    dadosRestantes: number;
+    onAtivar: () => boolean;
+  };
   armaSagrada: {
     disponivel: boolean;
     elegivel: boolean;
@@ -828,6 +834,7 @@ export default function CombatTab({
   apiceElemental,
   sintoniaElemental,
   defesaSuperior,
+  defesaPsionica,
   armaSagrada,
   resplendorSagrado,
   revelacaoCelestial: {
@@ -2553,6 +2560,29 @@ export default function CombatTab({
           >
             {defesaSuperior.ativa ? 'Encerrar Defesa Superior' : `Ativar (gasta ${CUSTO_FOCO_DEFESA_SUPERIOR} Pontos de Foco)`}
           </div>
+        </div>
+      )}
+
+      {defesaPsionica.disponivel && (
+        <div
+          className="opt-card"
+          style={{ marginBottom: 12, borderColor: defesaPsionica.ativa ? corDoRecursoDaClasse('Psiônico')?.hex : undefined }}
+        >
+          <div className="opt-card-name">🧠 Defesa Psiônica {defesaPsionica.ativa ? 'ATIVA' : ''}</div>
+          <div className="opt-card-desc">
+            {defesaPsionica.ativa
+              ? 'Imunidade a Amedrontado e Enfeitiçado, e Vantagem na Salvaguarda de Inteligência (já aplicada abaixo, na aba Atributos). Encerra sozinha no "Fim do Turno" ou em qualquer Descanso.'
+              : 'No início do seu turno, gaste 1 Dado de Energia Psiônica: Imunidade a Amedrontado e Enfeitiçado, e Vantagem na Salvaguarda de Inteligência até o início do próximo turno.'}
+          </div>
+          {!defesaPsionica.ativa && (
+            <div
+              className="btn"
+              style={defesaPsionica.dadosRestantes > 0 ? { marginTop: 8 } : { marginTop: 8, opacity: 0.5, pointerEvents: 'none' }}
+              onClick={() => defesaPsionica.onAtivar()}
+            >
+              Ativar (gasta 1 Dado de Energia Psiônica)
+            </div>
+          )}
         </div>
       )}
 

@@ -53,8 +53,8 @@ const disciplinasBase: DisciplinaPsionica[] = [
     id: 'defesa-psionica',
     nome: 'Defesa Psiônica',
     descricao:
-      'No início do seu turno, você pode gastar um Dado de Energia Psiônica. Até o início do seu próximo turno, você tem Imunidade às condições Amedrontado e Enfeitiçado, e Vantagem em testes de resistência de Inteligência. Se estiver sob uma dessas condições ao ativar essa disciplina, ela termina. Você ainda pode usar outra Disciplina Psiônica neste turno.',
-    statusImplementacao: PH,
+      'No início do seu turno, você pode gastar um Dado de Energia Psiônica. Até o início do seu próximo turno, você tem Imunidade às condições Amedrontado e Enfeitiçado, e Vantagem em testes de resistência de Inteligência. Se estiver sob uma dessas condições ao ativar essa disciplina, ela termina. Você ainda pode usar outra Disciplina Psiônica neste turno.\n\nNota do app: ativa num toque (Combate), sem rolar dado. Vantagem na Salvaguarda de Inteligência já entra automática. Encerra sozinha no "Fim do Turno", Descanso Curto ou Descanso Longo (todos mais longos que "até o início do próximo turno") — nunca precisa lembrar de desligar.',
+    statusImplementacao: 'codeimplementation',
   },
   {
     id: 'insinuacao-do-id',

@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0800
+
+Defesa Psiônica (Psiônico, UA) ligada: na aba Combate, toque em "Ativar"
+pra gastar 1 Dado de Energia Psiônica e ganhar Vantagem na Salvaguarda
+de Inteligência (já aplicada sozinha na aba Atributos, com aviso ao
+lado da linha) e Imunidade a Amedrontado/Enfeitiçado até o início do
+seu próximo turno. Encerra sozinha — nunca precisa lembrar de desligar:
+some no "Fim do Turno", no Descanso Curto e no Descanso Longo.
+
 ## v202610_1923
 
 Ajuste visual nos pips de Dado de Energia Psiônica do popup das

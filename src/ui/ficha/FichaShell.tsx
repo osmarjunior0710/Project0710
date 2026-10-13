@@ -94,6 +94,7 @@ import { calcularDeslocamento, deslocamentoDaEspecie, estaEquipado, forcaMinimaD
 import { resistenciaApiceValida, temApiceElemental } from '../../core/apiceElemental';
 import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, temSintoniaElemental } from '../../core/sintoniaElemental';
 import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior, temDefesaSuperior } from '../../core/defesaSuperior';
+import { podeAtivarDefesaPsionica, temDefesaPsionica } from '../../core/defesaPsionica';
 import { podeRerolarSalvaguardaComFoco, temSobreviventeDisciplinado } from '../../core/sobreviventeDisciplinado';
 import { explicarCdGolpeAtordoante } from '../../core/golpeAtordoante';
 import { explicarCdRamosDaArvore } from '../../core/ramosDaArvore';
@@ -543,6 +544,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [armaSagradaAtiva, setArmaSagradaAtiva] = useState(personagemSalvo.armaSagradaAtiva ?? false);
   const [defesaSuperiorAtiva, setDefesaSuperiorAtiva] = useState(personagemSalvo.defesaSuperiorAtiva ?? false);
   const [sintoniaElementalAtiva, setSintoniaElementalAtiva] = useState(personagemSalvo.sintoniaElementalAtiva ?? false);
+  const [defesaPsionicaAtiva, setDefesaPsionicaAtiva] = useState(personagemSalvo.defesaPsionicaAtiva ?? false);
   const [apiceGolpesUsadoTurno, setApiceGolpesUsadoTurno] = useState(personagemSalvo.apiceGolpesUsadoTurno ?? false);
   const [passoDestrutivoAtivoTurno, setPassoDestrutivoAtivoTurno] = useState(personagemSalvo.passoDestrutivoAtivoTurno ?? false);
   const [resistenciaApiceElemental, setResistenciaApiceElemental] = useState<string | null>(
@@ -1522,6 +1524,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     armaSagradaAtiva,
     defesaSuperiorAtiva,
     sintoniaElementalAtiva,
+    defesaPsionicaAtiva,
     apiceGolpesUsadoTurno,
     passoDestrutivoAtivoTurno,
     resistenciaApiceElemental,
@@ -1642,6 +1645,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       armaSagradaAtiva,
       defesaSuperiorAtiva,
       sintoniaElementalAtiva,
+      defesaPsionicaAtiva,
       apiceGolpesUsadoTurno,
       passoDestrutivoAtivoTurno,
       resistenciaApiceElemental,
@@ -1885,6 +1889,19 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return true;
   }
 
+  /** Defesa Psiônica (Psiônico, UA) — ativar gasta 1 Dado de Energia
+   * Psiônica; diferente de `usarDefesaSuperior`, nunca encerra manual —
+   * dura só "até o início do próximo turno", então `fimDoTurno`,
+   * `descansoCurto` e `descansoLongo` (via `fimDoTurno`) já encerram
+   * sozinhos (ver `core/defesaPsionica.ts`). */
+  function usarDefesaPsionica(): boolean {
+    if (defesaPsionicaAtiva) return false;
+    if (!podeAtivarDefesaPsionica(disciplinasPsionicasAtuais, dadosEnergiaRestantes)) return false;
+    setDadosEnergiaPsionicaGasto((v) => v + 1);
+    setDefesaPsionicaAtiva(true);
+    return true;
+  }
+
   /** Sintonia Elemental (Monge/Elementos nível 3) — ativar gasta 1 Ponto de
    * Foco; encerrar é de graça (10 min ou Incapacitado, o app não conta tempo). */
   function usarSintoniaElemental(): boolean {
@@ -1976,6 +1993,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setForcaRevigoranteUsadaTurno(false);
     setEsmagadorUsadoTurno(false);
     setTalhadorUsadoTurno(false);
+    setDefesaPsionicaAtiva(false);
   }
 
   /** `classeNome` — omitido = gasta do pool "principal" em foco agora
@@ -2050,6 +2068,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setTurnState(turnoInicial);
     setDisciplinasUsadasNoTurno([]);
     setSurtoUsadoTurno(false);
+    setDefesaPsionicaAtiva(false);
     recuperarInspiracaoAoRolarIniciativa();
   }
 
@@ -2197,6 +2216,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // Psiônico (UA) — recupera 1 Dado de Energia Psiônica.
     setDadosEnergiaPsionicaGasto((v) => Math.max(0, v - 1));
     setConexaoTelepaticaAlcance(null); // a "próxima hora" já passou
+    // Defesa Psiônica dura só "até o início do próximo turno" — 1h de
+    // Descanso Curto é muito mais longo que isso, então também encerra.
+    setDefesaPsionicaAtiva(false);
 
     // Paladino.
     setCanalizarDivindadeGasto((v) => Math.max(0, v - 1));
@@ -3375,6 +3397,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             pericias={pericias}
             salvaguardas={salvaguardas}
             temSentidoDePerigo={temSentidoDePerigo}
+            defesaPsionicaAtiva={defesaPsionicaAtiva}
             temEvasao={temEvasao(mongeEntry?.nivel ?? 0)}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             desvantagemFurtividadeArmadura={desvantagemFurtividadeArmadura}
@@ -3712,6 +3735,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               disponivel: temDefesaSuperior(mongeEntry?.nivel ?? 0),
               ativa: defesaSuperiorAtiva,
               onAlternar: usarDefesaSuperior,
+            }}
+            defesaPsionica={{
+              disponivel: temDefesaPsionica(disciplinasPsionicasAtuais),
+              ativa: defesaPsionicaAtiva,
+              dadosRestantes: dadosEnergiaRestantes,
+              onAtivar: usarDefesaPsionica,
             }}
             armaSagrada={{
               disponivel: armaSagradaDisponivel,
