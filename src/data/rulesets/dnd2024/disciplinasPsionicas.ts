@@ -76,8 +76,8 @@ const disciplinasBase: DisciplinaPsionica[] = [
     id: 'mente-agucada',
     nome: 'Mente Aguçada',
     descricao:
-      'No início do seu turno, você pode gastar um Dado de Energia Psiônica para aprimorar seus poderes psíquicos destrutivos. Role o dado e anote o número obtido. Você recebe os seguintes benefícios por 1 minuto ou até ficar Incapacitado. Ignorando Psiônicos. O dano de seus ataques com armas, magias Psiônicas e habilidades Psiônicas ignora a Resistência a dano Psíquico. Modo de Ataque. Uma vez por turno, quando você causar dano Psíquico a uma ou mais criaturas, você pode substituir o número obtido em um dos dados de dano pelo número anotado quando você ativou esta Disciplina Psiônica. Ao usar Mente Aguçada, você também pode usar uma Disciplina Psiônica diferente neste turno.',
-    statusImplementacao: PH,
+      'No início do seu turno, você pode gastar um Dado de Energia Psiônica para aprimorar seus poderes psíquicos destrutivos. Role o dado e anote o número obtido. Você recebe os seguintes benefícios por 1 minuto ou até ficar Incapacitado. Ignorando Psiônicos. O dano de seus ataques com armas, magias Psiônicas e habilidades Psiônicas ignora a Resistência a dano Psíquico. Modo de Ataque. Uma vez por turno, quando você causar dano Psíquico a uma ou mais criaturas, você pode substituir o número obtido em um dos dados de dano pelo número anotado quando você ativou esta Disciplina Psiônica. Ao usar Mente Aguçada, você também pode usar uma Disciplina Psiônica diferente neste turno.\n\nNota do app: ativa num toque (Combate), rola e mostra o número anotado no card. "Ignorando Psiônicos" é só texto (o app não rastreia resistência de inimigos). O "Modo de Ataque" aparece sozinho, dentro do popup de dano, toda vez que você causa dano Psíquico (magia ou Pensamentos Destrutivos) — sempre o menor dado, só quando compensa. Encerra manualmente (duração "1 minuto" não é automatizável pelo Fim do Turno) — mas Descanso Curto e Longo encerram sozinhos, por serem bem mais longos que isso.',
+    statusImplementacao: 'codeimplementation',
   },
   {
     id: 'mente-atenta',

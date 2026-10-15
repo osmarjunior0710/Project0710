@@ -54,6 +54,7 @@ import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { useRoll, type LadosDado } from '../../roll/RollContext';
+import { ofertaMenteAgucada } from '../../roll/ofertaMenteAgucada';
 import { alcanceConexaoTelepatica } from '../../../core/conexaoTelepatica';
 import InfoChip from '../../components/InfoChip';
 import BarraDeVida from '../../components/BarraDeVida';
@@ -404,6 +405,16 @@ interface CombatTabProps {
     ativa: boolean;
     dadosRestantes: number;
     onAtivar: () => boolean;
+  };
+  menteAgucada: {
+    disponivel: boolean;
+    ativa: boolean;
+    anotado: number | null;
+    usadaNoTurno: boolean;
+    dadosRestantes: number;
+    onAtivar: () => void;
+    onEncerrar: () => void;
+    onTrocado: () => void;
   };
   armaSagrada: {
     disponivel: boolean;
@@ -835,6 +846,7 @@ export default function CombatTab({
   sintoniaElemental,
   defesaSuperior,
   defesaPsionica,
+  menteAgucada,
   armaSagrada,
   resplendorSagrado,
   revelacaoCelestial: {
@@ -1216,6 +1228,13 @@ export default function CombatTab({
           aoTocar: () =>
             setTelaSalvaguarda({ magia, circuloUsado, danoRolado: totalRolado, upcastNaoAutomatico: dano.upcastNaoAutomatico, avisoDisciplina }),
         },
+        // `onTrocado` atualiza `totalRolado` (não só o `onResultado` original)
+        // — sem isso, uma troca feita DEPOIS do resultado inicial nunca
+        // chegaria no `danoRolado` passado pra tela de Sucesso/Falha.
+        ofertaTrocaDeDado: ofertaMenteAgucada(dano.tipo, menteAgucada.ativa, menteAgucada.anotado, menteAgucada.usadaNoTurno, (novoTotal) => {
+          totalRolado = novoTotal;
+          menteAgucada.onTrocado();
+        }),
       });
     };
     if (sobrecargaElegivel(magia, circuloUsado, sobrecargaAtiva)) {
@@ -2586,6 +2605,44 @@ export default function CombatTab({
         </div>
       )}
 
+      {menteAgucada.disponivel && (
+        <div
+          className="opt-card"
+          style={{ marginBottom: 12, borderColor: menteAgucada.ativa ? corDoRecursoDaClasse('Psiônico')?.hex : undefined }}
+        >
+          <div className="opt-card-name">🧠 Mente Aguçada {menteAgucada.ativa ? 'ATIVA' : ''}</div>
+          <div className="opt-card-desc">
+            {menteAgucada.ativa
+              ? `Ignorando Psiônicos (seus ataques e magias Psiônicas ignoram Resistência a dano Psíquico de inimigos). Modo de Ataque: 1x por turno, dano Psíquico pode trocar o menor dado pelo número anotado (${menteAgucada.anotado}) — já aparece sozinho no popup de dano, quando compensa. Dura 1 minuto ou até ficar Incapacitado — toque abaixo pra encerrar.`
+              : 'No início do seu turno, gaste 1 Dado de Energia Psiônica: role e anote um número. Por 1 minuto, ignora Resistência a dano Psíquico e pode, 1x por turno, trocar o menor dado de um dano Psíquico pelo número anotado.'}
+          </div>
+          {!menteAgucada.ativa ? (
+            <div
+              className="btn"
+              style={menteAgucada.dadosRestantes > 0 ? { marginTop: 8 } : { marginTop: 8, opacity: 0.5, pointerEvents: 'none' }}
+              onClick={menteAgucada.onAtivar}
+            >
+              Ativar (gasta 1 Dado de Energia Psiônica)
+            </div>
+          ) : (
+            <>
+              <div
+                className="btn"
+                style={{ marginTop: 8, background: 'rgba(178, 59, 59, 0.16)', borderColor: '#b23b3b' }}
+                onClick={menteAgucada.onEncerrar}
+              >
+                Encerrar Mente Aguçada
+              </div>
+              {menteAgucada.usadaNoTurno && (
+                <div className="label" style={{ marginTop: 4 }}>
+                  Modo de Ataque já usado neste turno — libera de novo no próximo.
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
       {armaSagrada.disponivel && armaSagrada.ativa && (
         <div className="opt-card" style={{ marginBottom: 12, borderColor: '#d9a441' }}>
           <div className="opt-card-name">⚔️ Arma Sagrada ATIVA — {armaSagrada.nomeArma}</div>
@@ -3016,6 +3073,10 @@ export default function CombatTab({
           disciplinasPsionicasConhecidas={disciplinasPsionicasConhecidas}
           disciplinaPsionicaBloqueadaNoTurno={disciplinaPsionicaBloqueadaNoTurno}
           onDisciplinaPosConjuracaoDisponivel={onDisciplinaPosConjuracaoDisponivel}
+          menteAgucadaAtiva={menteAgucada.ativa}
+          menteAgucadaAnotado={menteAgucada.anotado}
+          menteAgucadaUsadaNoTurno={menteAgucada.usadaNoTurno}
+          onMenteAgucadaTrocada={menteAgucada.onTrocado}
           preferenciasPillsMagia={preferenciasPillsMagia}
           temRepudiarInimigos={temRepudiarInimigos}
           usosCanalizarMaximo={usosCanalizarMaximo}
@@ -3136,6 +3197,10 @@ export default function CombatTab({
           disciplinasPsionicasConhecidas={disciplinasPsionicasConhecidas}
           disciplinaPsionicaBloqueadaNoTurno={disciplinaPsionicaBloqueadaNoTurno}
           onDisciplinaPosConjuracaoDisponivel={onDisciplinaPosConjuracaoDisponivel}
+          menteAgucadaAtiva={menteAgucada.ativa}
+          menteAgucadaAnotado={menteAgucada.anotado}
+          menteAgucadaUsadaNoTurno={menteAgucada.usadaNoTurno}
+          onMenteAgucadaTrocada={menteAgucada.onTrocado}
           ataqueBonus={ataqueBonus}
           onUsarAtaqueBonus={usarAtaqueMaoSecundaria}
           cortarAtaque={cortarAtaque}
@@ -3188,6 +3253,10 @@ export default function CombatTab({
           disciplinasPsionicasConhecidas={disciplinasPsionicasConhecidas}
           disciplinaPsionicaBloqueadaNoTurno={disciplinaPsionicaBloqueadaNoTurno}
           onDisciplinaPosConjuracaoDisponivel={onDisciplinaPosConjuracaoDisponivel}
+          menteAgucadaAtiva={menteAgucada.ativa}
+          menteAgucadaAnotado={menteAgucada.anotado}
+          menteAgucadaUsadaNoTurno={menteAgucada.usadaNoTurno}
+          onMenteAgucadaTrocada={menteAgucada.onTrocado}
           detalhesAtivo={detalhesAtivo}
           contraEncantamentoDisponivel={contraEncantamentoDisponivel}
           palavrasDeInterrupcaoDisponivel={palavrasDeInterrupcaoDisponivel}

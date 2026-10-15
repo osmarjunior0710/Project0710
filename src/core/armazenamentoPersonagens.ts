@@ -426,6 +426,18 @@ export interface PersonagemSalvo {
    * essa dura só "até o início do próximo turno", então encerra sozinha no Fim do Turno, no
    * Descanso Curto e no Descanso Longo — nunca precisa de botão de encerrar. */
   defesaPsionicaAtiva?: boolean;
+  /** `true` = Mente Aguçada ATIVA agora (Psiônico, UA, gastou 1 Dado de Energia
+   * Psiônica) — mesmo padrão de `defesaSuperiorAtiva` (duração "1 minuto",
+   * encerramento manual), mas Descanso Curto/Longo também encerram (bem mais
+   * longos que "1 minuto" — mesmo raciocínio de `defesaPsionicaAtiva`). */
+  menteAgucadaAtiva?: boolean;
+  /** Número anotado ao ativar Mente Aguçada (rolou o Dado de Energia Psiônica) —
+   * usado pelo "Modo de Ataque" (trocar o menor dado de um dano Psíquico por
+   * esse valor). `null` = não ativa ou acabou de encerrar. */
+  menteAgucadaAnotado?: number | null;
+  /** `true` = "Modo de Ataque" da Mente Aguçada já usado NESTE turno (1x por
+   * turno) — reseta no Fim do Turno, igual `apiceGolpesUsadoTurno`. */
+  menteAgucadaUsadaNoTurno?: boolean;
   /** `true` = Golpes Potencializados do Ápice Elemental (Monge/Elementos nível 17) já usado NESTE
    * turno — reseta no Fim do Turno. */
   apiceGolpesUsadoTurno?: boolean;

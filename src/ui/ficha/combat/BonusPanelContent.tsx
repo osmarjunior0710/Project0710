@@ -239,6 +239,12 @@ interface BonusPanelContentProps {
   disciplinasPsionicasConhecidas: string[];
   disciplinaPsionicaBloqueadaNoTurno: boolean;
   onDisciplinaPosConjuracaoDisponivel: (d: DisciplinaPosConjuracaoPendente) => void;
+  /** Mente Aguçada (Psiônico UA, E4d-b) — "Modo de Ataque". Ver
+   * `useUsarMagiaPainel.tsx`. */
+  menteAgucadaAtiva: boolean;
+  menteAgucadaAnotado: number | null;
+  menteAgucadaUsadaNoTurno: boolean;
+  onMenteAgucadaTrocada: () => void;
   /** Quais pills de info aparecem em cada linha de magia — preferência
    * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
@@ -354,6 +360,10 @@ export default function BonusPanelContent({
   disciplinasPsionicasConhecidas,
   disciplinaPsionicaBloqueadaNoTurno,
   onDisciplinaPosConjuracaoDisponivel,
+  menteAgucadaAtiva,
+  menteAgucadaAnotado,
+  menteAgucadaUsadaNoTurno,
+  onMenteAgucadaTrocada,
   preferenciasPillsMagia,
 }: BonusPanelContentProps) {
   const [escolhendoFormaRevelacao, setEscolhendoFormaRevelacao] = useState(false);
@@ -398,6 +408,10 @@ export default function BonusPanelContent({
     disciplinasPsionicasConhecidas,
     disciplinaPsionicaBloqueadaNoTurno,
     onDisciplinaPosConjuracaoDisponivel,
+    menteAgucadaAtiva,
+    menteAgucadaAnotado,
+    menteAgucadaUsadaNoTurno,
+    onMenteAgucadaTrocada,
     preferenciasPillsMagia,
   });
   const temMagiaBonus = conjura && (truques.length > 0 || magiasPreparadas.length > 0);

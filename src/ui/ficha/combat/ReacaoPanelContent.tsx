@@ -15,6 +15,7 @@ import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { danoComCritico } from '../../../core/danoCritico';
 import { truqueElegivelTruquePotente, sobrecargaElegivel, danoMaximoSobrecarga, danoNecroticoSobrecarga } from '../../../core/evocador';
 import { useRoll } from '../../roll/RollContext';
+import { ofertaMenteAgucada } from '../../roll/ofertaMenteAgucada';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import PillsMagia from '../../components/PillsMagia';
 import TickPips from '../../components/TickPips';
@@ -152,6 +153,12 @@ interface ReacaoPanelContentProps {
   disciplinasPsionicasConhecidas: string[];
   disciplinaPsionicaBloqueadaNoTurno: boolean;
   onDisciplinaPosConjuracaoDisponivel: (d: DisciplinaPosConjuracaoPendente) => void;
+  /** Mente Aguçada (Psiônico UA, E4d-b) — "Modo de Ataque". Ver
+   * `useUsarMagiaPainel.tsx`. */
+  menteAgucadaAtiva: boolean;
+  menteAgucadaAnotado: number | null;
+  menteAgucadaUsadaNoTurno: boolean;
+  onMenteAgucadaTrocada: () => void;
 }
 
 export default function ReacaoPanelContent({
@@ -208,6 +215,10 @@ export default function ReacaoPanelContent({
   disciplinasPsionicasConhecidas,
   disciplinaPsionicaBloqueadaNoTurno,
   onDisciplinaPosConjuracaoDisponivel,
+  menteAgucadaAtiva,
+  menteAgucadaAnotado,
+  menteAgucadaUsadaNoTurno,
+  onMenteAgucadaTrocada,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
@@ -292,6 +303,13 @@ export default function ReacaoPanelContent({
                 mod: dano.mod,
                 explicacaoMod: dano.explicacaoMod,
                 confirmarFechamento: {},
+                ofertaTrocaDeDado: ofertaMenteAgucada(
+                  dano.tipo,
+                  menteAgucadaAtiva,
+                  menteAgucadaAnotado,
+                  menteAgucadaUsadaNoTurno,
+                  onMenteAgucadaTrocada,
+                ),
               });
             };
             if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {
@@ -365,7 +383,17 @@ export default function ReacaoPanelContent({
       });
     }
     if (resultado.rollDano) {
-      rolarDados({ ...resultado.rollDano, confirmarFechamento: {} });
+      rolarDados({
+        ...resultado.rollDano,
+        confirmarFechamento: {},
+        ofertaTrocaDeDado: ofertaMenteAgucada(
+          resultado.rollDano.tipo,
+          menteAgucadaAtiva,
+          menteAgucadaAnotado,
+          menteAgucadaUsadaNoTurno,
+          onMenteAgucadaTrocada,
+        ),
+      });
     }
     onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
   }

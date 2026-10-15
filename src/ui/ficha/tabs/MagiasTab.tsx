@@ -40,6 +40,7 @@ import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagi
 import TickPips from '../../components/TickPips';
 import { useColapsavel } from '../../hooks/useColapsavel';
 import { useRoll } from '../../roll/RollContext';
+import { ofertaMenteAgucada } from '../../roll/ofertaMenteAgucada';
 import EscolherCirculoShell from '../combat/EscolherCirculoShell';
 import SalvaguardaDoAlvoModal from '../combat/SalvaguardaDoAlvoModal';
 import SobrecargaEscolha from '../combat/SobrecargaEscolha';
@@ -340,6 +341,12 @@ interface MagiasTabProps {
    * acima) que a conjuração se qualificou pra uma Disciplina Psiônica
    * pós-conjuração — ver `DisciplinaPosConjuracaoModal.tsx`. */
   onDisciplinaPosConjuracaoDisponivel: (d: DisciplinaPosConjuracaoPendente) => void;
+  /** Mente Aguçada (Psiônico UA, E4d-b) — "Modo de Ataque". Ver
+   * `ui/roll/ofertaMenteAgucada.ts`. */
+  menteAgucadaAtiva: boolean;
+  menteAgucadaAnotado: number | null;
+  menteAgucadaUsadaNoTurno: boolean;
+  onMenteAgucadaTrocada: () => void;
   /** Quais pills de info aparecem em cada linha de magia/truque —
    * preferência do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
@@ -442,6 +449,10 @@ export default function MagiasTab({
   onColheitaMacabraDisponivel,
   disciplinasPsionicasConhecidas,
   onDisciplinaPosConjuracaoDisponivel,
+  menteAgucadaAtiva,
+  menteAgucadaAnotado,
+  menteAgucadaUsadaNoTurno,
+  onMenteAgucadaTrocada,
 }: MagiasTabProps) {
   const { rolarD20, rolarDados } = useRoll();
   const [telaCirculo, setTelaCirculo] = useState<{ magia: Magia; classeDonaDaMagia: string | null } | null>(null);
@@ -553,6 +564,10 @@ export default function MagiasTab({
               avisoDisciplina,
             }),
         },
+        ofertaTrocaDeDado: ofertaMenteAgucada(dano.tipo, menteAgucadaAtiva, menteAgucadaAnotado, menteAgucadaUsadaNoTurno, (novoTotal) => {
+          totalRolado = novoTotal;
+          onMenteAgucadaTrocada();
+        }),
       });
     };
     if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {
@@ -666,6 +681,13 @@ export default function MagiasTab({
                 mod: dano.mod,
                 explicacaoMod: dano.explicacaoMod,
                 confirmarFechamento: {},
+                ofertaTrocaDeDado: ofertaMenteAgucada(
+                  dano.tipo,
+                  menteAgucadaAtiva,
+                  menteAgucadaAnotado,
+                  menteAgucadaUsadaNoTurno,
+                  onMenteAgucadaTrocada,
+                ),
               });
             };
             if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {
@@ -739,7 +761,17 @@ export default function MagiasTab({
       });
     }
     if (resultado.rollDano) {
-      rolarDados({ ...resultado.rollDano, confirmarFechamento: {} });
+      rolarDados({
+        ...resultado.rollDano,
+        confirmarFechamento: {},
+        ofertaTrocaDeDado: ofertaMenteAgucada(
+          resultado.rollDano.tipo,
+          menteAgucadaAtiva,
+          menteAgucadaAnotado,
+          menteAgucadaUsadaNoTurno,
+          onMenteAgucadaTrocada,
+        ),
+      });
     }
   }
 

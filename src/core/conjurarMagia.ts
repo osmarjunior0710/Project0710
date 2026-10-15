@@ -40,6 +40,9 @@ export interface RollDadosSpec {
   mod: number;
   /** Ver `RollAcertoSpec.explicacaoMod` — quebra do dado de cura (B8). */
   explicacaoMod?: ExplicacaoCalculo;
+  /** Ver `DanoPendenteMagia.tipo` — só preenchido em `rollDano` (dano
+   * automático); `rollCura` não tem tipo de dano. */
+  tipo?: string | null;
 }
 
 export interface DanoPendenteMagia {
@@ -51,6 +54,10 @@ export interface DanoPendenteMagia {
    * — quebra do dado de dano (B8), com a linha extra de Explosão
    * Agonizante somada quando aplicável. */
   explicacaoMod?: ExplicacaoCalculo;
+  /** Tipo de dano da magia (`CalculoDanoMagia.tipo`) — usado pra saber se
+   * qualifica pra "Modo de Ataque" da Mente Aguçada (Psiônico, UA, exige
+   * dano Psíquico). `null` = magia sem tipo de dano único cadastrado. */
+  tipo: string | null;
 }
 
 export interface ConjuracaoDecidida {
@@ -182,6 +189,7 @@ export function decidirConjuracao(
             lados: danoFinal.lados,
             mod: danoFinal.mod,
             explicacaoMod: danoFinal.explicacao,
+            tipo: danoFinal.tipo,
           }
         : undefined,
       textoFeedback: danoFinal
@@ -233,6 +241,7 @@ export function decidirConjuracao(
           lados: dano.lados,
           mod: dano.mod,
           explicacaoMod: dano.explicacao,
+          tipo: dano.tipo,
         },
         textoFeedback: 'Dano automático — role e aplique no alvo.',
         curaColheitaMacabra: curaMacabra,

@@ -55,6 +55,7 @@ describe('decidirConjuracao', () => {
       lados: 8,
       mod: 0,
       explicacaoMod: expect.anything(),
+      tipo: 'Radiante',
     });
     expect(resultado.textoFeedback).toBe('Dano automático — role e aplique no alvo.');
   });

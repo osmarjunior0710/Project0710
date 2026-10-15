@@ -175,6 +175,12 @@ interface AcaoPanelContentProps {
   disciplinasPsionicasConhecidas: string[];
   disciplinaPsionicaBloqueadaNoTurno: boolean;
   onDisciplinaPosConjuracaoDisponivel: (d: DisciplinaPosConjuracaoPendente) => void;
+  /** Mente Aguçada (Psiônico UA, E4d-b) — "Modo de Ataque". Ver
+   * `useUsarMagiaPainel.tsx`. */
+  menteAgucadaAtiva: boolean;
+  menteAgucadaAnotado: number | null;
+  menteAgucadaUsadaNoTurno: boolean;
+  onMenteAgucadaTrocada: () => void;
   /** Cortar (Mestre em Armas Grandes) — `podeOferecerCortar` = talento
    * + arma Corpo a Corpo equipada, mostra o botão manual "Reduziu a 0
    * PV?" ao lado de Atacar (Crítico já é detectado sozinho pelo
@@ -298,6 +304,10 @@ export default function AcaoPanelContent({
   disciplinasPsionicasConhecidas,
   disciplinaPsionicaBloqueadaNoTurno,
   onDisciplinaPosConjuracaoDisponivel,
+  menteAgucadaAtiva,
+  menteAgucadaAnotado,
+  menteAgucadaUsadaNoTurno,
+  onMenteAgucadaTrocada,
   podeOferecerCortar,
   onConfirmarCortarReduzirAZero,
   temGolpeDeEscudo,
@@ -361,6 +371,10 @@ export default function AcaoPanelContent({
     disciplinasPsionicasConhecidas,
     disciplinaPsionicaBloqueadaNoTurno,
     onDisciplinaPosConjuracaoDisponivel,
+    menteAgucadaAtiva,
+    menteAgucadaAnotado,
+    menteAgucadaUsadaNoTurno,
+    onMenteAgucadaTrocada,
     preferenciasPillsMagia,
   });
 

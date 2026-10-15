@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1411
+
+Mente Aguçada (Psiônico, UA) ligada de verdade: na aba Combate, "Ativar"
+gasta 1 Dado de Energia Psiônica, rola e mostra o número anotado no card.
+Por 1 minuto (ou até Incapacitado — toque "Encerrar" pra desligar na mão),
+sempre que causar dano Psíquico (magia ou Pensamentos Destrutivos), o popup
+de dano ganha sozinho um card "Trocar menor resultado (N) por (Y)" — só
+quando compensa, 1x por turno. Descanso Curto e Longo encerram a Mente
+Aguçada sozinhos (duração "1 minuto" é bem menor que isso).
+
 ## v202610_1227
 
 Protótipo "Mente Aguçada" — 2º ajuste pedido pelo Osmar: em vez de botão ao

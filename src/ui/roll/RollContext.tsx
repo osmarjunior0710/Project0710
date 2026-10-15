@@ -114,6 +114,14 @@ export type ConfirmarFechamento =
 export interface OfertaTrocaDeDado {
   titulo: string;
   avaliar: (estado: RollState) => { texto: string; dadoId: string; novoValor: number } | null;
+  /** Chamado por `trocarOfertaDeDado` logo depois de aplicar a troca, já
+   * com o NOVO total — quem chama `rolarDados` usa isso pra sincronizar o
+   * próprio estado (ex.: travar "1x por turno" fora do popup, e corrigir
+   * qualquer total capturado ANTES da troca em `onResultado`/
+   * `confirmarFechamento.aoTocar` — ver Mente Aguçada em
+   * `FichaShell.tsx`/`CombatTab.tsx`). Nunca dispara se `avaliar` tiver
+   * retornado `null` (nada foi trocado). */
+  onTrocado?: (novoTotal: number) => void;
 }
 
 /** Soma do(s) Dado(s) de Energia Psiônica já rolado(s) nesta rolagem (0 se não houver). */
@@ -1113,18 +1121,23 @@ export function RollProvider({ children }: { children: ReactNode }) {
    * marca `trocado: true` no dado certo (`RollOverlay` usa isso pra um
    * destaque visual) e recalcula o total. */
   const trocarOfertaDeDado = useCallback(() => {
-    setEstado((prev) => {
-      if (!prev || prev.fase !== 'concluido' || !prev.dadosIndividuais) return prev;
-      if (!prev.ofertaTrocaDeDado || prev.ofertaTrocaDeDadoUsada) return prev;
-      const resultado = prev.ofertaTrocaDeDado.avaliar(prev);
-      if (!resultado) return prev;
-      const novosDados = prev.dadosIndividuais.map((d) =>
-        d.id === resultado.dadoId ? { ...d, valor: resultado.novoValor, trocado: true } : d,
-      );
-      const soma = novosDados.reduce((acc, d) => acc + (typeof d.valor === 'number' ? d.valor : 0), 0);
-      return { ...prev, dadosIndividuais: novosDados, total: soma + (prev.mod ?? 0), ofertaTrocaDeDadoUsada: true };
-    });
-  }, []);
+    if (!estado || estado.fase !== 'concluido' || !estado.dadosIndividuais) return;
+    if (!estado.ofertaTrocaDeDado || estado.ofertaTrocaDeDadoUsada) return;
+    const resultado = estado.ofertaTrocaDeDado.avaliar(estado);
+    if (!resultado) return;
+    const onTrocado = estado.ofertaTrocaDeDado.onTrocado;
+    const novosDados = estado.dadosIndividuais.map((d) =>
+      d.id === resultado.dadoId ? { ...d, valor: resultado.novoValor, trocado: true } : d,
+    );
+    const soma = novosDados.reduce((acc, d) => acc + (typeof d.valor === 'number' ? d.valor : 0), 0);
+    const novoTotal = soma + (estado.mod ?? 0);
+    setEstado((prev) =>
+      prev && prev.dadosIndividuais
+        ? { ...prev, dadosIndividuais: novosDados, total: novoTotal, ofertaTrocaDeDadoUsada: true }
+        : prev,
+    );
+    onTrocado?.(novoTotal);
+  }, [estado]);
 
   const escolherVantagemPosRolagem = useCallback(
     (tipo: Vantagem, forcar = false) => {

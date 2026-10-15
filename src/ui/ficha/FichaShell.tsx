@@ -95,6 +95,8 @@ import { resistenciaApiceValida, temApiceElemental } from '../../core/apiceEleme
 import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, temSintoniaElemental } from '../../core/sintoniaElemental';
 import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior, temDefesaSuperior } from '../../core/defesaSuperior';
 import { podeAtivarDefesaPsionica, temDefesaPsionica } from '../../core/defesaPsionica';
+import { podeAtivarMenteAgucada, temMenteAgucada } from '../../core/menteAgucada';
+import { ofertaMenteAgucada } from '../roll/ofertaMenteAgucada';
 import { podeRerolarSalvaguardaComFoco, temSobreviventeDisciplinado } from '../../core/sobreviventeDisciplinado';
 import { explicarCdGolpeAtordoante } from '../../core/golpeAtordoante';
 import { explicarCdRamosDaArvore } from '../../core/ramosDaArvore';
@@ -545,6 +547,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [defesaSuperiorAtiva, setDefesaSuperiorAtiva] = useState(personagemSalvo.defesaSuperiorAtiva ?? false);
   const [sintoniaElementalAtiva, setSintoniaElementalAtiva] = useState(personagemSalvo.sintoniaElementalAtiva ?? false);
   const [defesaPsionicaAtiva, setDefesaPsionicaAtiva] = useState(personagemSalvo.defesaPsionicaAtiva ?? false);
+  const [menteAgucadaAtiva, setMenteAgucadaAtiva] = useState(personagemSalvo.menteAgucadaAtiva ?? false);
+  const [menteAgucadaAnotado, setMenteAgucadaAnotado] = useState<number | null>(personagemSalvo.menteAgucadaAnotado ?? null);
+  const [menteAgucadaUsadaNoTurno, setMenteAgucadaUsadaNoTurno] = useState(personagemSalvo.menteAgucadaUsadaNoTurno ?? false);
   const [apiceGolpesUsadoTurno, setApiceGolpesUsadoTurno] = useState(personagemSalvo.apiceGolpesUsadoTurno ?? false);
   const [passoDestrutivoAtivoTurno, setPassoDestrutivoAtivoTurno] = useState(personagemSalvo.passoDestrutivoAtivoTurno ?? false);
   const [resistenciaApiceElemental, setResistenciaApiceElemental] = useState<string | null>(
@@ -1525,6 +1530,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     defesaSuperiorAtiva,
     sintoniaElementalAtiva,
     defesaPsionicaAtiva,
+    menteAgucadaAtiva,
+    menteAgucadaAnotado,
+    menteAgucadaUsadaNoTurno,
     apiceGolpesUsadoTurno,
     passoDestrutivoAtivoTurno,
     resistenciaApiceElemental,
@@ -1646,6 +1654,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       defesaSuperiorAtiva,
       sintoniaElementalAtiva,
       defesaPsionicaAtiva,
+      menteAgucadaAtiva,
+      menteAgucadaAnotado,
+      menteAgucadaUsadaNoTurno,
       apiceGolpesUsadoTurno,
       passoDestrutivoAtivoTurno,
       resistenciaApiceElemental,
@@ -1902,6 +1913,37 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return true;
   }
 
+  /** Mente Aguçada (Psiônico, UA) — ativar gasta 1 Dado de Energia Psiônica
+   * e ROLA (diferente de Defesa Psiônica, que não rola nada): "anota o
+   * número obtido". Duração real "1 minuto ou até Incapacitado" não bate
+   * com nenhum gatilho automático do app — encerra manual (mesmo caso já
+   * tratado em `usarDefesaSuperior`); Descanso Curto/Longo encerram sozinhos
+   * por serem bem mais longos que 1 minuto (ver `descansoCurto`/
+   * `descansoLongo`). */
+  function ativarMenteAgucada() {
+    if (menteAgucadaAtiva) return;
+    if (!podeAtivarMenteAgucada(disciplinasPsionicasAtuais, dadosEnergiaRestantes)) return;
+    setDadosEnergiaPsionicaGasto((v) => v + 1);
+    rolarDados({
+      label: '🧠 Mente Aguçada — anotar número',
+      formula: `1d${dadosEnergiaLados}`,
+      quantidade: 1,
+      lados: dadosEnergiaLados,
+      mod: 0,
+      onResultado: (total) => {
+        setMenteAgucadaAnotado(total);
+        setMenteAgucadaAtiva(true);
+        setMenteAgucadaUsadaNoTurno(false);
+      },
+      confirmarFechamento: {},
+    });
+  }
+
+  function encerrarMenteAgucada() {
+    setMenteAgucadaAtiva(false);
+    setMenteAgucadaAnotado(null);
+  }
+
   /** Sintonia Elemental (Monge/Elementos nível 3) — ativar gasta 1 Ponto de
    * Foco; encerrar é de graça (10 min ou Incapacitado, o app não conta tempo). */
   function usarSintoniaElemental(): boolean {
@@ -1994,6 +2036,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setEsmagadorUsadoTurno(false);
     setTalhadorUsadoTurno(false);
     setDefesaPsionicaAtiva(false);
+    setMenteAgucadaUsadaNoTurno(false);
   }
 
   /** `classeNome` — omitido = gasta do pool "principal" em foco agora
@@ -2148,6 +2191,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setDadosEnergiaPsionicaGasto(0);
     setConexaoTelepaticaGratisUsada(false);
     setConexaoTelepaticaAlcance(null);
+    // Mente Aguçada dura só "1 minuto ou até Incapacitado" — Descanso
+    // Longo (8h) é bem mais longo que isso, então também encerra.
+    setMenteAgucadaAtiva(false);
+    setMenteAgucadaAnotado(null);
 
     // Paladino.
     setCanalizarDivindadeGasto(0);
@@ -2219,6 +2266,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // Defesa Psiônica dura só "até o início do próximo turno" — 1h de
     // Descanso Curto é muito mais longo que isso, então também encerra.
     setDefesaPsionicaAtiva(false);
+    // Mente Aguçada dura só "1 minuto ou até Incapacitado" — 1h de
+    // Descanso Curto também é mais longo que isso.
+    setMenteAgucadaAtiva(false);
+    setMenteAgucadaAnotado(null);
 
     // Paladino.
     setCanalizarDivindadeGasto((v) => Math.max(0, v - 1));
@@ -2730,13 +2781,32 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       return;
     }
     setDadosEnergiaPsionicaGasto((v) => v + numDados);
+    // Soma dos dados guardada numa variável mutável (não aplica direto em
+    // `onResultado`) porque Pensamentos Destrutivos pode qualificar pro
+    // "Modo de Ataque" da Mente Aguçada (troca o menor dado DEPOIS da
+    // rolagem concluir) — aplicar cedo demais congelaria o texto do dano
+    // com a soma de ANTES da troca. `onTrocado` atualiza a soma pro valor
+    // novo; só aplica de verdade quando o popup fecha (`confirmarFechamento`).
+    let somaFinal = 0;
     rolarDados({
       label: `${d.nome} — Dado${numDados > 1 ? 's' : ''} de Energia Psiônica`,
       formula: `${numDados}d${dadosEnergiaLados}`,
       quantidade: numDados,
       lados: dadosEnergiaLados,
       mod: 0,
-      onResultado: aplicar,
+      onResultado: (soma) => {
+        somaFinal = soma;
+      },
+      confirmarFechamento: { aoTocar: () => aplicar(somaFinal) },
+      // Pensamentos Destrutivos causa dano Psíquico direto — qualifica pro
+      // "Modo de Ataque" da Mente Aguçada igual qualquer outro dano Psíquico.
+      ofertaTrocaDeDado:
+        d.id === 'pensamentos-destrutivos'
+          ? ofertaMenteAgucada('Psíquico', menteAgucadaAtiva, menteAgucadaAnotado, menteAgucadaUsadaNoTurno, (novoTotal) => {
+              somaFinal = novoTotal;
+              setMenteAgucadaUsadaNoTurno(true);
+            })
+          : undefined,
     });
   }
 
@@ -3572,6 +3642,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onColheitaMacabraDisponivel={(cura) => setColheitaMacabraPendente({ cura })}
             disciplinasPsionicasConhecidas={disciplinasPsionicasAtuais}
             onDisciplinaPosConjuracaoDisponivel={setDisciplinaPosConjuracaoPendente}
+            menteAgucadaAtiva={menteAgucadaAtiva}
+            menteAgucadaAnotado={menteAgucadaAnotado}
+            menteAgucadaUsadaNoTurno={menteAgucadaUsadaNoTurno}
+            onMenteAgucadaTrocada={() => setMenteAgucadaUsadaNoTurno(true)}
             preferenciasPillsMagia={preferenciasPillsMagia}
           />
         )}
@@ -3741,6 +3815,16 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               ativa: defesaPsionicaAtiva,
               dadosRestantes: dadosEnergiaRestantes,
               onAtivar: usarDefesaPsionica,
+            }}
+            menteAgucada={{
+              disponivel: temMenteAgucada(disciplinasPsionicasAtuais),
+              ativa: menteAgucadaAtiva,
+              anotado: menteAgucadaAnotado,
+              usadaNoTurno: menteAgucadaUsadaNoTurno,
+              dadosRestantes: dadosEnergiaRestantes,
+              onAtivar: ativarMenteAgucada,
+              onEncerrar: encerrarMenteAgucada,
+              onTrocado: () => setMenteAgucadaUsadaNoTurno(true),
             }}
             armaSagrada={{
               disponivel: armaSagradaDisponivel,

@@ -16,6 +16,7 @@ import { decidirConjuracao, type DisciplinaPosConjuracaoPendente } from '../../.
 import { truqueElegivelTruquePotente, sobrecargaElegivel, danoMaximoSobrecarga, danoNecroticoSobrecarga } from '../../../core/evocador';
 import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
+import { ofertaMenteAgucada } from '../../roll/ofertaMenteAgucada';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
@@ -129,6 +130,13 @@ interface UsarMagiaPainelParams {
   /** Quais pills de info aparecem em cada linha de magia — preferência
    * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
+  /** Mente Aguçada (Psiônico UA, E4d-b) — "Modo de Ataque": trocar o menor
+   * dado de um dano Psíquico pelo número anotado, 1x por turno. Ver
+   * `ui/roll/ofertaMenteAgucada.ts`. */
+  menteAgucadaAtiva: boolean;
+  menteAgucadaAnotado: number | null;
+  menteAgucadaUsadaNoTurno: boolean;
+  onMenteAgucadaTrocada: () => void;
 }
 
 /** Fluxo completo de "Usar Magia" dentro de um painel do Combate
@@ -244,6 +252,13 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
                 mod: dano.mod,
                 explicacaoMod: dano.explicacaoMod,
                 confirmarFechamento: {},
+                ofertaTrocaDeDado: ofertaMenteAgucada(
+                  dano.tipo,
+                  p.menteAgucadaAtiva,
+                  p.menteAgucadaAnotado,
+                  p.menteAgucadaUsadaNoTurno,
+                  p.onMenteAgucadaTrocada,
+                ),
               });
             };
             if (sobrecargaElegivel(m, circuloUsado, p.sobrecargaAtiva)) {
@@ -317,7 +332,17 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
       });
     }
     if (resultado.rollDano) {
-      rolarDados({ ...resultado.rollDano, confirmarFechamento: {} });
+      rolarDados({
+        ...resultado.rollDano,
+        confirmarFechamento: {},
+        ofertaTrocaDeDado: ofertaMenteAgucada(
+          resultado.rollDano.tipo,
+          p.menteAgucadaAtiva,
+          p.menteAgucadaAnotado,
+          p.menteAgucadaUsadaNoTurno,
+          p.onMenteAgucadaTrocada,
+        ),
+      });
     }
     p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
   }
