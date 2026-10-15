@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0821
+
+Protótipo novo em `/prototipo` → "Mente Aguçada (Psiônico) — trocar o menor
+dado pelo anotado": explora a mecânica da Disciplina antes de levar pra
+produção (Modo de Ataque — trocar 1 dado de dano Psíquico pelo número
+anotado na ativação). Sem efeito no app real ainda.
+
 ## v202610_0800
 
 Defesa Psiônica (Psiônico, UA) ligada: na aba Combate, toque em "Ativar"

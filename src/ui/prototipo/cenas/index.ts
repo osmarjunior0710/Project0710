@@ -5,6 +5,7 @@ import EsmagadorRaizesCena from './EsmagadorRaizesCena';
 import MulticlasseMagiasCena from './MulticlasseMagiasCena';
 import MulticlasseCombateCena from './MulticlasseCombateCena';
 import CoresDeClasseCena from './CoresDeClasseCena';
+import MenteAgucadaCena from './MenteAgucadaCena';
 
 export interface CenaPrototipo {
   id: string;
@@ -69,5 +70,12 @@ export const cenasPrototipo: CenaPrototipo[] = [
     descricao:
       '12 pills (1 por classe), cada uma com seletor de cor nativo + switcher de texto branco/preto, atualizando ao vivo. Botão "Exportar" devolve nome + hex + cor do texto em texto pra colar de volta no chat.',
     Componente: CoresDeClasseCena,
+  },
+  {
+    id: 'mente-agucada',
+    titulo: 'Mente Aguçada (Psiônico) — trocar o menor dado pelo anotado',
+    descricao:
+      'Ativa (rola 1d12, anota o número) → simula dano Psíquico de uma magia (2+ dados) → o app acha sozinho o menor dado rolado e só oferece a troca quando o número anotado é maior (nunca pergunta quando trocar seria pior).',
+    Componente: MenteAgucadaCena,
   },
 ];
