@@ -40,6 +40,11 @@ export interface DadoIndividual {
    * Guardado pra poder repassar pra `box.reroll()` no Perfurador (ver
    * sdd/sdd-dado-3d.md "Rerolagem") — o app nunca lê os campos dele. */
   resultadoBruto?: DiceBoxResultado;
+  /** `true` = este dado acabou de ter seu valor substituído por
+   * `trocarDadoPorOferta` (ver `OfertaTrocaDeDado`) — `RollOverlay` usa
+   * pra destacar com uma animação (diferente de rerolar: o valor é FIXO,
+   * não um novo resultado aleatório). */
+  trocado?: boolean;
 }
 
 /** Categoria da rolagem 'd20' — hoje só usada pra decidir se um bônus
@@ -95,6 +100,21 @@ export interface ConfirmarAcerto {
 export type ConfirmarFechamento =
   | { rotulo?: string; aoTocar?: () => void }
   | { rotulo: string | ((estado: RollState) => string | null); aoTocar?: () => void }[];
+
+/** Card clicável mostrado DENTRO do popup de dano, abaixo do total e
+ * ACIMA do botão de fechar — pra trocar o valor de 1 dado específico por
+ * um valor FIXO conhecido de antemão (diferente de `rerollEscolhido`,
+ * que é um reroll aleatório). Ex.: Mente Aguçada (Psiônico, UA) —
+ * "substituir o número obtido em um dos dados de dano pelo número
+ * anotado". `avaliar` só roda com a rolagem já concluída (dados
+ * resolvidos) e decide tanto SE o card aparece quanto o texto dele —
+ * `null` = não oferece (ex.: trocar não compensaria). Só 1 troca por
+ * rolagem (`ofertaTrocaDeDadoUsada`), mesmo com múltiplos dados
+ * elegíveis. */
+export interface OfertaTrocaDeDado {
+  titulo: string;
+  avaliar: (estado: RollState) => { texto: string; dadoId: string; novoValor: number } | null;
+}
 
 /** Soma do(s) Dado(s) de Energia Psiônica já rolado(s) nesta rolagem (0 se não houver). */
 function somaDadoPsionico(e: { dadoPsionico?: { valores: number[] | null } | null }): number {
@@ -183,6 +203,11 @@ export interface RollState {
   /** `true` = o jogador já usou o `rerollEscolhido` desta rolagem —
    * só 1x, em QUALQUER um dos dados. */
   rerollEscolhidoUsado?: boolean;
+  /** Ver `OfertaTrocaDeDado` — card de trocar 1 dado por valor fixo,
+   * mostrado dentro do popup entre o total e o fechamento. */
+  ofertaTrocaDeDado?: OfertaTrocaDeDado | null;
+  /** `true` = a oferta já foi usada nesta rolagem — só 1x. */
+  ofertaTrocaDeDadoUsada?: boolean;
   /** `true` = esta rolagem usou o motor 3D (física de verdade,
    * `@3d-dice/dice-box`) em vez de `Math.random()` — Fase B do dado 3D
    * (`sdd/sdd-dado-3d.md`). Pra 'd20': cobre o d20 simples E o 2º dado
@@ -404,6 +429,8 @@ interface RollDadosOptions {
   /** Ver `RollState.rerollEscolhido` — só tem efeito com 2+ dados no
    * total (`quantidade` + soma de `gruposExtras`). */
   rerollEscolhido?: { rotulo: string };
+  /** Ver `OfertaTrocaDeDado` — só tem efeito com 2+ dados no total. */
+  ofertaTrocaDeDado?: OfertaTrocaDeDado;
   /** Quebra do dado base/Aprimoramento de Truque/Upcast (dano/cura de
    * magia, B8) — mesmo formato do "ⓘ" de CA/perícia/ataque, mas com
    * notação de dado em vez de número resolvido (ver
@@ -484,6 +511,10 @@ interface RollContextValue {
    * a animação). Substitui o valor desse dado e recalcula o total —
    * os outros dados (se houver) não mudam. */
   rerollDadoEscolhido: (id?: string) => void;
+  /** Ver `OfertaTrocaDeDado` — aplica a troca (dado + total) da
+   * rolagem concluída atual. Sem efeito se não houver oferta válida ou
+   * já tiver sido usada. */
+  trocarOfertaDeDado: () => void;
   /** `true` só quando o personagem da tela atual tem Inspiração
    * Heroica agora — controla se o botão de reroll aparece em QUALQUER
    * d20 concluído (sem Vantagem/Desvantagem em jogo). */
@@ -832,6 +863,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
       gruposExtras,
       rerollSe1,
       rerollEscolhido,
+      ofertaTrocaDeDado,
       explicacaoMod,
       onResultado,
       confirmarFechamento,
@@ -930,6 +962,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
           dadosIndividuais,
           rerollEscolhido: rerollEscolhido ?? null,
           rerollEscolhidoUsado: false,
+          ofertaTrocaDeDado: ofertaTrocaDeDado ?? null,
+          ofertaTrocaDeDadoUsada: false,
           explicacaoMod,
           motor3D: viaMotor3D,
           confirmarFechamento,
@@ -1072,6 +1106,25 @@ export function RollProvider({ children }: { children: ReactNode }) {
     },
     [estado, dado3DAtivo],
   );
+
+  /** Ver `OfertaTrocaDeDado` (ex.: Mente Aguçada, Psiônico) — diferente
+   * de `rerollDadoEscolhido`, o novo valor é FIXO (já conhecido, não
+   * sorteado de novo), então não precisa reanimar física nenhuma: só
+   * marca `trocado: true` no dado certo (`RollOverlay` usa isso pra um
+   * destaque visual) e recalcula o total. */
+  const trocarOfertaDeDado = useCallback(() => {
+    setEstado((prev) => {
+      if (!prev || prev.fase !== 'concluido' || !prev.dadosIndividuais) return prev;
+      if (!prev.ofertaTrocaDeDado || prev.ofertaTrocaDeDadoUsada) return prev;
+      const resultado = prev.ofertaTrocaDeDado.avaliar(prev);
+      if (!resultado) return prev;
+      const novosDados = prev.dadosIndividuais.map((d) =>
+        d.id === resultado.dadoId ? { ...d, valor: resultado.novoValor, trocado: true } : d,
+      );
+      const soma = novosDados.reduce((acc, d) => acc + (typeof d.valor === 'number' ? d.valor : 0), 0);
+      return { ...prev, dadosIndividuais: novosDados, total: soma + (prev.mod ?? 0), ofertaTrocaDeDadoUsada: true };
+    });
+  }, []);
 
   const escolherVantagemPosRolagem = useCallback(
     (tipo: Vantagem, forcar = false) => {
@@ -1422,6 +1475,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         rolarConfirmacaoCritico,
         usarRerollSe1,
         rerollDadoEscolhido,
+        trocarOfertaDeDado,
         inspiracaoHeroicaDisponivel: inspiracaoHeroicaProvider?.disponivel ?? false,
         registrarInspiracaoHeroica,
         usarInspiracaoHeroica,

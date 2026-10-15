@@ -420,3 +420,85 @@
   font-weight: bold;
   cursor: pointer;
 }
+
+/* Ver `OfertaTrocaDeDado` (ex.: Mente Aguçada, Psiônico) — título + card
+   clicável entre o total e o botão de fechar, sempre empilhados (nunca
+   lado a lado com o "OK" — pedido do Osmar depois de testar a 1ª
+   versão). Cor roxa só como acento neutro de "card especial", não é a
+   cor fixa do Psiônico (essa UI é genérica, outras classes podem usar). */
+.ofertaTitulo {
+  margin-top: var(--space-4);
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--text-dim);
+  text-align: left;
+}
+
+.ofertaCard {
+  margin-top: 4px;
+  min-height: 44px;
+  border-radius: var(--shape-lg, 12px);
+  border: 1.5px solid #b36bd6;
+  background: rgba(179, 107, 214, 0.1);
+  color: #7a3f99;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+}
+
+.ofertaCard:active {
+  opacity: 0.7;
+}
+
+.ofertaCardUsada {
+  border-color: var(--text-faint);
+  background: transparent;
+  color: var(--text-faint);
+  font-weight: normal;
+  cursor: default;
+}
+
+/* Dado que acabou de ter o valor TROCADO (não rerolado — ver
+   `trocarOfertaDeDado`) — giro rápido + anel roxo, pra diferenciar
+   visualmente de um reroll aleatório comum. */
+@keyframes dieTrocado {
+  0% {
+    transform: rotateY(0deg) scale(1);
+  }
+  50% {
+    transform: rotateY(180deg) scale(1.18);
+  }
+  100% {
+    transform: rotateY(360deg) scale(1);
+  }
+}
+
+.dieTrocado {
+  animation: dieTrocado 500ms ease-out;
+  outline: 2px solid #b36bd6;
+  outline-offset: 2px;
+}
+
+/* Total recalculado por uma troca de dado — pulso rápido pra chamar
+   atenção pro número novo, sem reanimar a rolagem inteira. */
+@keyframes totalAtualizado {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.22);
+    color: #7a3f99;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.totalAtualizado {
+  animation: totalAtualizado 500ms ease-out;
+}

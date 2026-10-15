@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1227
+
+Protótipo "Mente Aguçada" — 2º ajuste pedido pelo Osmar: em vez de botão ao
+lado do "OK", agora é título + card clicável empilhados abaixo do total
+(dentro do mesmo popup de dano). Tocar troca o dado (com giro + anel roxo
+no dado trocado, pulso no total) e o card vira cinza "já usada". `RollContext`
+ganhou `OfertaTrocaDeDado`, capacidade genérica nova do popup de dano
+(reaproveitável por qualquer feature parecida no futuro).
+
 ## v202610_1207
 
 Protótipo "Mente Aguçada" corrigido: o botão de trocar o menor dado agora

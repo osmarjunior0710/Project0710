@@ -56,6 +56,7 @@ export default function RollOverlay() {
     rolarConfirmacaoCritico,
     usarRerollSe1,
     rerollDadoEscolhido,
+    trocarOfertaDeDado,
     inspiracaoHeroicaDisponivel,
     usarInspiracaoHeroica,
     sobreviventeDisciplinadoDisponivel,
@@ -138,7 +139,7 @@ export default function RollOverlay() {
                       key={d.id}
                       valor={d.valor}
                       lados={d.lados}
-                      className={`${styles.dieGrid} ${podeRerolar ? styles.dieRerolavel : ''}`}
+                      className={`${styles.dieGrid} ${podeRerolar ? styles.dieRerolavel : ''} ${d.trocado ? styles.dieTrocado : ''}`}
                       onClick={podeRerolar ? () => rerollDadoEscolhido(d.id) : undefined}
                     />
                   );
@@ -187,7 +188,7 @@ export default function RollOverlay() {
               {estado.dado2 + (estado.mod ?? 0) + estado.dadoPsionico.valores.reduce((x, y) => x + y, 0)}
             </div>
           )}
-        <div className={styles.total}>
+        <div className={`${styles.total} ${estado.ofertaTrocaDeDadoUsada ? styles.totalAtualizado : ''}`}>
           {estado.fase === 'rolando' ? (
             <span className={styles.rolando}>
               Rolando
@@ -322,6 +323,34 @@ export default function RollOverlay() {
             </div>
           </div>
         )}
+        {/* Ver `OfertaTrocaDeDado` (ex.: Mente Aguçada, Psiônico) — título +
+            card clicável DENTRO do popup, entre o total e o(s) botão(ões) de
+            fechar (pedido do Osmar: nunca ao lado do "OK", sempre abaixo,
+            empilhado). `avaliar` decide se aparece E o texto — sem oferta
+            válida (trocar não compensaria), não mostra nada aqui. */}
+        {estado.fase === 'concluido' &&
+          estado.tipo === 'dados' &&
+          estado.ofertaTrocaDeDado &&
+          (() => {
+            if (estado.ofertaTrocaDeDadoUsada) {
+              return (
+                <>
+                  <div className={styles.ofertaTitulo}>{estado.ofertaTrocaDeDado.titulo}</div>
+                  <div className={`${styles.ofertaCard} ${styles.ofertaCardUsada}`}>Já usada nesta rolagem</div>
+                </>
+              );
+            }
+            const resultado = estado.ofertaTrocaDeDado.avaliar(estado);
+            if (!resultado) return null;
+            return (
+              <>
+                <div className={styles.ofertaTitulo}>{estado.ofertaTrocaDeDado.titulo}</div>
+                <div className={styles.ofertaCard} onClick={trocarOfertaDeDado}>
+                  {resultado.texto}
+                </div>
+              </>
+            );
+          })()}
         {estado.fase === 'concluido' && estado.confirmarFechamento && Array.isArray(estado.confirmarFechamento) && (
           // 3+ botões (ex.: tipo de dano + Golpe Atordoante) empilham na vertical —
           // lado a lado quebravam o rótulo em 2 linhas no celular.
