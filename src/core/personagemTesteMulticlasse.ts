@@ -244,8 +244,32 @@ export function montarPersonagemTesteMulticlasse(): PersonagemSalvo {
     }
 
     if (classeObj.id === 'psionico') {
-      // Todas as disciplinas que couberem (6 no nível 20; o catálogo tem 11) — cobre o máximo de situações de teste.
-      disciplinasPsionicasAtual = disciplinasPsionicas.slice(0, quantidadeDisciplinasPsionicas(classeObj, NIVEL_TESTE)).map((d) => d.id);
+      // Ordem pensada pra cobrir mecânicas DISTINTAS, não as 6 primeiras em
+      // ordem alfabética (isso deixava Pensamentos Destrutivos e Mente
+      // Aguçada de fora pra sempre, sem jeito de testar ao vivo — pedido
+      // do Osmar, 2026-10, depois de descobrir isso testando a Mente
+      // Aguçada). Consciência Expandida/Língua Diabólica/Mente Atenta/Mira
+      // Inerrante somam 1 dado numa perícia/ataque — mecanicamente
+      // idênticas entre si, 1 já cobre o grupo inteiro; o resto do slice
+      // prioriza as com dano/estado mais complexo de testar.
+      const ORDEM_TESTE_DISCIPLINAS_PSIONICAS = [
+        'aperfeicoamento-de-precognicao',
+        'bio-retorno',
+        'insinuacao-do-id',
+        'pensamentos-destrutivos',
+        'defesa-psionica',
+        'mente-agucada',
+        'consciencia-expandida',
+        'lingua-diabolica',
+        'mente-atenta',
+        'mira-inerrante',
+        'retaliacao-psiquica',
+      ];
+      const idsValidos = new Set(disciplinasPsionicas.map((d) => d.id));
+      disciplinasPsionicasAtual = ORDEM_TESTE_DISCIPLINAS_PSIONICAS.filter((id) => idsValidos.has(id)).slice(
+        0,
+        quantidadeDisciplinasPsionicas(classeObj, NIVEL_TESTE),
+      );
     }
 
     const maxInvocacoes = valorRecursoClasse(classeObj, 'Invocações Místicas', NIVEL_TESTE);

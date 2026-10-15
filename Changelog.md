@@ -5,6 +5,17 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1824
+
+Char Multiclasse (personagem de teste) ganhou uma seleção melhor de
+Disciplinas Psiônicas — antes pegava sempre as 6 primeiras em ordem
+alfabética (nunca incluía Mente Aguçada nem Pensamentos Destrutivos,
+mesmo já implementadas). Agora prioriza mecânicas distintas, cobrindo
+as 2. Testado ao vivo: Mente Aguçada ativa, rola e anota certo; "Modo
+de Ataque" aparece no popup de dano de uma magia Psíquica (Grito
+Psíquico), troca o dado certo e o total correto chega na tela de
+Sucesso/Falha.
+
 ## v202610_1411
 
 Mente Aguçada (Psiônico, UA) ligada de verdade: na aba Combate, "Ativar"
