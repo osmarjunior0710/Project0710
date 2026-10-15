@@ -85,7 +85,16 @@ export interface ConfirmarAcerto {
  * a lado, cada um com `rotulo` obrigatório (ex.: "Normal"/"☀️
  * Radiante" da Arma Sagrada) — qualquer um fecha o popup, chamando seu
  * próprio `aoTocar` se tiver. */
-export type ConfirmarFechamento = { rotulo?: string; aoTocar?: () => void } | { rotulo: string; aoTocar?: () => void }[];
+/** `rotulo` como função (em vez de texto fixo) resolve só quando a
+ * rolagem já concluiu (`estado.fase === 'concluido'`, dados já
+ * resolvidos) — pra texto de botão que depende do RESULTADO (ex.: "Trocar
+ * menor resultado (N) por (Y)", N = menor `dadosIndividuais`, só existe
+ * depois de rolar). Retornar `null` esconde o botão (ex.: trocar não
+ * seria vantajoso) — diferente de omitir o botão inteiro da lista, que
+ * precisaria saber isso ANTES de rolar. */
+export type ConfirmarFechamento =
+  | { rotulo?: string; aoTocar?: () => void }
+  | { rotulo: string | ((estado: RollState) => string | null); aoTocar?: () => void }[];
 
 /** Soma do(s) Dado(s) de Energia Psiônica já rolado(s) nesta rolagem (0 se não houver). */
 function somaDadoPsionico(e: { dadoPsionico?: { valores: number[] | null } | null }): number {

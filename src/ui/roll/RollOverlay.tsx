@@ -329,19 +329,22 @@ export default function RollOverlay() {
             className={styles.vantagemButtons}
             style={estado.confirmarFechamento.length >= 3 ? { flexDirection: 'column' } : undefined}
           >
-            {estado.confirmarFechamento.map((botao, i) => (
-              <div
-                key={i}
-                className={styles.okBtn}
-                style={{ flex: 1, marginTop: 0 }}
-                onClick={() => {
-                  fechar();
-                  botao.aoTocar?.();
-                }}
-              >
-                {botao.rotulo}
-              </div>
-            ))}
+            {estado.confirmarFechamento
+              .map((botao, i) => ({ i, rotulo: typeof botao.rotulo === 'function' ? botao.rotulo(estado) : botao.rotulo, aoTocar: botao.aoTocar }))
+              .filter((botao) => botao.rotulo !== null)
+              .map((botao) => (
+                <div
+                  key={botao.i}
+                  className={styles.okBtn}
+                  style={{ flex: 1, marginTop: 0 }}
+                  onClick={() => {
+                    fechar();
+                    botao.aoTocar?.();
+                  }}
+                >
+                  {botao.rotulo}
+                </div>
+              ))}
           </div>
         )}
         {estado.fase === 'concluido' && estado.confirmarFechamento && !Array.isArray(estado.confirmarFechamento) && (

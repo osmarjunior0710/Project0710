@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1207
+
+Protótipo "Mente Aguçada" corrigido: o botão de trocar o menor dado agora
+fica DENTRO do próprio popup de dano (lado do "OK"), não atrás dele —
+feedback do Osmar testando no celular. `RollContext` ganhou suporte
+genérico a botão de popup com texto dinâmico (só existe depois do
+resultado) — reaproveitável por qualquer feature futura parecida, não só
+essa.
+
 ## v202610_0821
 
 Protótipo novo em `/prototipo` → "Mente Aguçada (Psiônico) — trocar o menor

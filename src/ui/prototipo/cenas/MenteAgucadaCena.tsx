@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useRoll } from '../../roll/RollContext';
+import { useEffect, useRef, useState } from 'react';
+import { useRoll, type RollState } from '../../roll/RollContext';
 
 /** Cena de exploração pra "Mente Aguçada" (Psiônico, UA, E4d-b — ver EmDev.md).
  *
@@ -14,9 +14,23 @@ import { useRoll } from '../../roll/RollContext';
  * pra decidir sozinha qual dado faria sentido trocar — sempre o MENOR, e só
  * sugere a troca quando o número anotado é MAIOR que ele (trocar por um valor
  * menor nunca ajuda, pedido do Osmar: a escolha "óbvia" não devia precisar de
- * decisão manual). Nenhuma escrita em produção — só mockup local. */
+ * decisão manual).
+ *
+ * Achado do Osmar testando a 1ª versão: o botão de troca apareceu NUM CARD
+ * ATRÁS do popup de dano, em vez de DENTRO dele — corrigido usando
+ * `confirmarFechamento` com `rotulo` como FUNÇÃO (ver `RollContext.tsx`,
+ * extensão genérica pra texto de botão que só existe depois do resultado,
+ * ex.: "Trocar menor resultado (N) por (Y)"), em vez de uma 2ª UI própria.
+ * `aoTocar` lê `estadoRef` (não o `estado` do hook, que já foi pra `null`
+ * pelo `fechar()` no instante em que o botão é tocado) pra pegar os valores
+ * da rolagem concluída. Nenhuma escrita em produção — só mockup local. */
 export default function MenteAgucadaCena() {
   const { rolarDados, estado } = useRoll();
+  const estadoRef = useRef<RollState | null>(estado);
+  useEffect(() => {
+    estadoRef.current = estado;
+  }, [estado]);
+
   const [ativa, setAtiva] = useState(false);
   const [anotado, setAnotado] = useState<number | null>(null);
   const [usadaNesteTurno, setUsadaNesteTurno] = useState(false);
@@ -54,6 +68,23 @@ export default function MenteAgucadaCena() {
     empilhar('Fim do Turno — Modo de Ataque disponível de novo (Mente Aguçada continua ATIVA, dura 1 minuto).');
   }
 
+  function menorDaRolagem(est: RollState | null): number | null {
+    if (!est || est.fase !== 'concluido' || est.tipo !== 'dados' || !est.dadosIndividuais) return null;
+    const numeros = est.dadosIndividuais.filter((d) => typeof d.valor === 'number').map((d) => d.valor as number);
+    return numeros.length > 0 ? Math.min(...numeros) : null;
+  }
+
+  function aplicarTroca() {
+    const est = estadoRef.current;
+    const menor = menorDaRolagem(est);
+    if (!est || menor === null || anotado === null || est.total === null) return;
+    const novoTotal = est.total - menor + anotado;
+    setUsadaNesteTurno(true);
+    empilhar(
+      `${est.label} — Modo de Ataque usado: trocou o menor dado (${menor}) pelo número anotado (${anotado}). Total: ${est.total} → ${novoTotal}.`,
+    );
+  }
+
   function simularDanoMagia(nomeMagia: string, quantidade: number, lados: number) {
     rolarDados({
       label: `✨ ${nomeMagia} — Dano Psíquico`,
@@ -64,32 +95,28 @@ export default function MenteAgucadaCena() {
       onResultado: (total) => {
         empilhar(`${nomeMagia} — dano rolado: ${total}.`);
       },
-      confirmarFechamento: {},
+      confirmarFechamento: [
+        { rotulo: 'OK' },
+        {
+          rotulo: (est) => {
+            if (!ativa || usadaNesteTurno || anotado === null) return null;
+            const menor = menorDaRolagem(est);
+            if (menor === null || anotado <= menor) return null;
+            return `🔮 Trocar menor resultado (${menor}) por (${anotado})`;
+          },
+          aoTocar: aplicarTroca,
+        },
+      ],
     });
-  }
-
-  // Lê o grid de dados individuais da rolagem que acabou de concluir (só
-  // disponível com 2+ dados) pra calcular a sugestão de troca.
-  const grid = estado?.fase === 'concluido' && estado.tipo === 'dados' ? (estado.dadosIndividuais ?? null) : null;
-  const valoresNumericos = grid?.filter((d) => typeof d.valor === 'number').map((d) => d.valor as number) ?? [];
-  const menorValor = valoresNumericos.length > 0 ? Math.min(...valoresNumericos) : null;
-  const podeOferecerTroca =
-    ativa && !usadaNesteTurno && grid !== null && menorValor !== null && anotado !== null && anotado > menorValor;
-
-  function aplicarTroca() {
-    if (menorValor === null || anotado === null || !estado || estado.total === null) return;
-    const novoTotal = estado.total - menorValor + anotado;
-    setUsadaNesteTurno(true);
-    empilhar(`Modo de Ataque usado — trocou o menor dado (${menorValor}) pelo número anotado (${anotado}). Total: ${estado.total} → ${novoTotal}.`);
   }
 
   return (
     <div>
       <p style={{ marginBottom: 12 }}>
-        1. Ativa (rola 1d12, "anota o número"). 2. Simula o dano Psíquico de uma magia (2+ dados, pra
-        aparecer o grid). 3. Se o número anotado for MAIOR que o menor dado rolado, aparece um botão só
-        pra trocar — a decisão "vale a pena?" já vem resolvida pelo app, nunca pergunta quando trocar
-        seria pior.
+        1. Ativa (rola 1d12, "anota o número"). 2. Simula o dano Psíquico de uma magia (2+ dados). 3. Se o
+        número anotado for MAIOR que o menor dado rolado, o próprio popup de dano ganha um 2º botão —
+        "Trocar menor resultado (N) por (Y)" — já dentro dele; se não compensar, só aparece "OK" (a
+        decisão "vale a pena?" já vem resolvida pelo app).
       </p>
 
       <div className="box-solid" style={{ marginBottom: 12, padding: 10 }}>
@@ -135,26 +162,6 @@ export default function MenteAgucadaCena() {
         </div>
       </div>
 
-      {podeOferecerTroca && (
-        <div className="box-solid" style={{ marginBottom: 12, padding: 10, borderColor: '#b36bd6' }}>
-          <div className="label" style={{ marginBottom: 6 }}>
-            🔮 Mente Aguçada disponível
-          </div>
-          <div style={{ fontSize: 13, marginBottom: 8 }}>
-            Dados rolados: {valoresNumericos.join(', ')} — menor foi <b>{menorValor}</b>. Número anotado:{' '}
-            <b>{anotado}</b>.
-          </div>
-          <div className="btn btn-primary" onClick={aplicarTroca}>
-            Trocar {menorValor} pelo anotado ({anotado})
-          </div>
-        </div>
-      )}
-      {ativa && !usadaNesteTurno && grid !== null && !podeOferecerTroca && (
-        <p style={{ fontSize: 12, color: 'var(--text-faint)', marginBottom: 12 }}>
-          (Mente Aguçada não oferece troca aqui — o número anotado ({anotado}) não é maior que nenhum dado
-          rolado, trocar só pioraria o total.)
-        </p>
-      )}
       {ativa && usadaNesteTurno && (
         <p style={{ fontSize: 12, color: 'var(--text-faint)', marginBottom: 12 }}>
           Modo de Ataque já usado neste turno — só libera de novo no próximo turno.
