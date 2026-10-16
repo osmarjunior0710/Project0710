@@ -160,9 +160,9 @@ export const caracteristicasClassePsionico: CaracteristicaClasse[] = [
     nivel: 5,
     nome: 'Restauração Psiônica',
     descricao:
-      'Você pode realizar uma meditação que concentra a mente por 1 minuto. Ao final dela, você recupera os Dados de Energia Psiônica gastos. Após usar essa habilidade, você não poderá usá-la novamente até concluir um Descanso Longo.',
+      'Você pode realizar uma meditação que concentra a mente por 1 minuto. Ao final dela, você recupera os Dados de Energia Psiônica gastos. Após usar essa habilidade, você não poderá usá-la novamente até concluir um Descanso Longo.\n\nNota do app: card em Combate (grupo Psiônico) — meditar recupera TODOS os dados gastos, sem rolar nada. 1x por Descanso Longo, reseta sozinho lá.',
     tipoAcao: '1 minuto',
-    statusImplementacao: PH,
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Psiônico',

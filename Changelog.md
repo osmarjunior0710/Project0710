@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1546
+
+Restauração Psiônica (Psiônico, nível 5) ligada: card novo na aba Combate
+("🧘 Restauração Psiônica") — meditação de 1 minuto que recupera todos os
+Dados de Energia Psiônica gastos, 1x por Descanso Longo.
+
 ## v202610_1543
 
 Pips de recurso com várias linhas (ex.: Dados de Energia Psiônica) agora

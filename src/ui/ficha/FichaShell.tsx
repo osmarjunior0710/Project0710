@@ -97,6 +97,7 @@ import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior, temDefesaSuperior
 import { podeAtivarDefesaPsionica, temDefesaPsionica } from '../../core/defesaPsionica';
 import { podeAtivarMenteAgucada, temMenteAgucada } from '../../core/menteAgucada';
 import { podeAtivarRetaliacaoPsiquica, temRetaliacaoPsiquica } from '../../core/retaliacaoPsiquica';
+import { podeUsarRestauracaoPsionica, temRestauracaoPsionica } from '../../core/restauracaoPsionica';
 import { ofertaMenteAgucada } from '../roll/ofertaMenteAgucada';
 import { podeRerolarSalvaguardaComFoco, temSobreviventeDisciplinado } from '../../core/sobreviventeDisciplinado';
 import { explicarCdGolpeAtordoante } from '../../core/golpeAtordoante';
@@ -601,6 +602,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [disciplinasUsadasNoTurno, setDisciplinasUsadasNoTurno] = useState<string[]>([]);
   const [conexaoTelepaticaGratisUsada, setConexaoTelepaticaGratisUsada] = useState(personagemSalvo.conexaoTelepaticaGratisUsada ?? false);
   const [conexaoTelepaticaAlcance, setConexaoTelepaticaAlcance] = useState<number | null>(personagemSalvo.conexaoTelepaticaAlcance ?? null);
+  // Restauração Psiônica (Psiônico, nível 5, E5a) — 1x por Descanso Longo.
+  const [restauracaoPsionicaUsada, setRestauracaoPsionicaUsada] = useState(personagemSalvo.restauracaoPsionicaUsada ?? false);
   // Monge — Metabolismo Incomum (nível 2, ver sdd/sdd-monge.md seção
   // 8) — 1x por Descanso Longo, oferecido ao rolar Iniciativa.
   const [metabolismoIncomumUsado, setMetabolismoIncomumUsado] = useState(
@@ -1012,6 +1015,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     onGastarDado: (): boolean => {
       if (!podeAtivarRetaliacaoPsiquica(disciplinasPsionicasAtuais, dadosEnergiaRestantes)) return false;
       setDadosEnergiaPsionicaGasto((v) => v + 1);
+      return true;
+    },
+  };
+  // Restauração Psiônica (Psiônico nível 5, E5a) — meditação de 1
+  // minuto, recupera TODOS os Dados de Energia Psiônica gastos, 1x por
+  // Descanso Longo (`restauracaoPsionicaUsada` zera lá, igual
+  // `conexaoTelepaticaGratisUsada`).
+  const restauracaoPsionica = {
+    disponivel: !!psionicoEntry && temRestauracaoPsionica(psionicoEntry.nivel),
+    usada: restauracaoPsionicaUsada,
+    dadosGastos: dadosEnergiaPsionicaGasto,
+    onUsar: (): boolean => {
+      if (!podeUsarRestauracaoPsionica(restauracaoPsionicaUsada, dadosEnergiaPsionicaGasto)) return false;
+      setDadosEnergiaPsionicaGasto(0);
+      setRestauracaoPsionicaUsada(true);
       return true;
     },
   };
@@ -1563,6 +1581,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     dadosEnergiaPsionicaGasto,
     conexaoTelepaticaGratisUsada,
     conexaoTelepaticaAlcance,
+    restauracaoPsionicaUsada,
     metabolismoIncomumUsado,
     indomavelGasto,
     pontosDeSorteGasto,
@@ -1687,6 +1706,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       dadosEnergiaPsionicaGasto,
       conexaoTelepaticaGratisUsada,
       conexaoTelepaticaAlcance,
+      restauracaoPsionicaUsada,
       metabolismoIncomumUsado,
       indomavelGasto,
       pontosDeSorteGasto,
@@ -2207,6 +2227,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setDadosEnergiaPsionicaGasto(0);
     setConexaoTelepaticaGratisUsada(false);
     setConexaoTelepaticaAlcance(null);
+    setRestauracaoPsionicaUsada(false);
     // Mente Aguçada dura só "1 minuto ou até Incapacitado" — Descanso
     // Longo (8h) é bem mais longo que isso, então também encerra.
     setMenteAgucadaAtiva(false);
@@ -3843,6 +3864,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               onTrocado: () => setMenteAgucadaUsadaNoTurno(true),
             }}
             retaliacaoPsiquica={retaliacaoPsiquica}
+            restauracaoPsionica={restauracaoPsionica}
             armaSagrada={{
               disponivel: armaSagradaDisponivel,
               elegivel: armaSagradaArmaElegivel,

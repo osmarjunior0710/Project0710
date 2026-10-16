@@ -424,6 +424,12 @@ interface CombatTabProps {
     cd: number | null;
     onGastarDado: () => boolean;
   };
+  restauracaoPsionica: {
+    disponivel: boolean;
+    usada: boolean;
+    dadosGastos: number;
+    onUsar: () => boolean;
+  };
   armaSagrada: {
     disponivel: boolean;
     elegivel: boolean;
@@ -856,6 +862,7 @@ export default function CombatTab({
   defesaPsionica,
   menteAgucada,
   retaliacaoPsiquica,
+  restauracaoPsionica,
   armaSagrada,
   resplendorSagrado,
   revelacaoCelestial: {
@@ -2678,6 +2685,30 @@ export default function CombatTab({
               )}
             </>
           )}
+        </div>
+      )}
+
+      {restauracaoPsionica.disponivel && (
+        <div className="opt-card" style={{ marginBottom: 12 }}>
+          <div className="opt-card-name">🧘 Restauração Psiônica</div>
+          <div className="opt-card-desc">
+            Meditação de 1 minuto: recupera todos os Dados de Energia Psiônica gastos. 1x por Descanso Longo.
+          </div>
+          <div
+            className="btn"
+            style={
+              restauracaoPsionica.usada || restauracaoPsionica.dadosGastos <= 0
+                ? { marginTop: 8, opacity: 0.5, pointerEvents: 'none' }
+                : { marginTop: 8 }
+            }
+            onClick={() => restauracaoPsionica.onUsar()}
+          >
+            {restauracaoPsionica.usada
+              ? 'Já usada — disponível de novo após Descanso Longo'
+              : restauracaoPsionica.dadosGastos > 0
+                ? `Meditar — recupera ${restauracaoPsionica.dadosGastos} Dado${restauracaoPsionica.dadosGastos > 1 ? 's' : ''} de Energia Psiônica`
+                : 'Nenhum Dado de Energia Psiônica gasto pra recuperar agora'}
+          </div>
         </div>
       )}
 

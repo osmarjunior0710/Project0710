@@ -505,6 +505,8 @@ export interface PersonagemSalvo {
   conexaoTelepaticaGratisUsada?: boolean;
   /** Conexão Telepática: alcance (m) anotado no último uso, até qualquer descanso. Ausente/null = só o base (9 m). */
   conexaoTelepaticaAlcance?: number | null;
+  /** `true` = já usou Restauração Psiônica (Psiônico, nível 5) desde o último Descanso Longo — só ele reseta. Ausente = não. */
+  restauracaoPsionicaUsada?: boolean;
   /** `true` = já usou Metabolismo Incomum (Monge, nível 2) desde o
    * último Descanso Longo — só ele reseta (ver sdd/sdd-monge.md
    * seção 8). */
