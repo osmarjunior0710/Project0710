@@ -15,6 +15,10 @@ interface SalvaguardaDoAlvoModalProps {
   explicacaoCd: ExplicacaoCalculo | null;
   textoSucesso: string | null;
   textoFalha: string | null;
+  /** Quebra (ⓘ) de como o valor numérico citado em `textoSucesso`/
+   * `textoFalha` foi calculado (ex.: "2× dado + mod. Inteligência") —
+   * `null` quando o texto não tem número calculado pra explicar. */
+  explicacaoResultado?: ExplicacaoCalculo | null;
   /** Aviso extra opcional (ex.: upcast não automático de magia). */
   aviso?: string | null;
   /** Botão pra um dano à PARTE, sem relação com Sucesso/Falha (ex.:
@@ -53,6 +57,7 @@ export default function SalvaguardaDoAlvoModal({
   explicacaoCd,
   textoSucesso,
   textoFalha,
+  explicacaoResultado,
   aviso,
   acaoSecundaria,
   semAcaoTexto,
@@ -77,6 +82,11 @@ export default function SalvaguardaDoAlvoModal({
           Sucesso
         </div>
         <div style={{ fontSize: 13, color: 'var(--good)' }}>{textoSucesso ?? '—'}</div>
+        {explicacaoResultado && (
+          <div style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 10 }}>
+            Como foi calculado <InfoValor titulo={titulo} explicacao={explicacaoResultado} />
+          </div>
+        )}
         {aviso && <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 10 }}>{aviso}</div>}
         {semAcaoTexto && <div style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 10 }}>{semAcaoTexto}</div>}
         {acaoSecundaria && (

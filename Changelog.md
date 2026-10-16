@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1533
+
+Resultado da Retaliação Psíquica (aba Reação) ganhou um ⓘ "Como foi
+calculado" mostrando a conta (2× o dado rolado + modificador de
+Inteligência) — antes o número de redução aparecia sem explicação.
+
 ## v202610_0910
 
 Retaliação Psíquica (Psiônico, UA) ligada — última Disciplina Psiônica,

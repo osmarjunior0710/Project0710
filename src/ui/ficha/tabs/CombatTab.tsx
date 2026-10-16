@@ -36,7 +36,7 @@ import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, SUBCLASSE_E
 import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior } from '../../../core/defesaSuperior';
 import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
 import { formulaRedirecionarDefletir, formulaReducaoDefletirAtaques } from '../../../core/defletirAtaques';
-import { reducaoRetaliacaoPsiquica } from '../../../core/retaliacaoPsiquica';
+import { explicarReducaoRetaliacaoPsiquica, reducaoRetaliacaoPsiquica } from '../../../core/retaliacaoPsiquica';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico, dadoExtraPerfurador } from '../../../core/danoCritico';
 import {
@@ -965,7 +965,9 @@ export default function CombatTab({
   /** Popup de resultado informativo sem rolagem (ex.: Queda Lenta) —
    * `AvisoModal.tsx`, pedido do Osmar (2026-10). */
   const [redirecionamentoDefletir, setRedirecionamentoDefletir] = useState<{ dano: number } | null>(null);
-  const [retaliacaoPsiquicaPendente, setRetaliacaoPsiquicaPendente] = useState<{ reducao: number } | null>(null);
+  const [retaliacaoPsiquicaPendente, setRetaliacaoPsiquicaPendente] = useState<{ dadoRolado: number; modInt: number } | null>(
+    null,
+  );
   const [avisoReacao, setAvisoReacao] = useState<{ titulo: string; texto: string } | null>(null);
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
@@ -1225,7 +1227,7 @@ export default function CombatTab({
         totalRolado = total;
       },
       confirmarFechamento: {
-        aoTocar: () => setRetaliacaoPsiquicaPendente({ reducao: reducaoRetaliacaoPsiquica(totalRolado, modIntAtual) }),
+        aoTocar: () => setRetaliacaoPsiquicaPendente({ dadoRolado: totalRolado, modInt: modIntAtual }),
       },
     });
   }
@@ -3383,8 +3385,9 @@ export default function CombatTab({
           atributo="Sabedoria"
           cd={retaliacaoPsiquica.cd}
           explicacaoCd={null}
-          textoSucesso={`Reduza ${retaliacaoPsiquicaPendente.reducao} do dano recebido.`}
-          textoFalha={`Reduza ${retaliacaoPsiquicaPendente.reducao} do dano recebido — e o atacante sofre ${retaliacaoPsiquicaPendente.reducao} de dano Psíquico.`}
+          textoSucesso={`Reduza ${reducaoRetaliacaoPsiquica(retaliacaoPsiquicaPendente.dadoRolado, retaliacaoPsiquicaPendente.modInt)} do dano recebido.`}
+          textoFalha={`Reduza ${reducaoRetaliacaoPsiquica(retaliacaoPsiquicaPendente.dadoRolado, retaliacaoPsiquicaPendente.modInt)} do dano recebido — e o atacante sofre ${reducaoRetaliacaoPsiquica(retaliacaoPsiquicaPendente.dadoRolado, retaliacaoPsiquicaPendente.modInt)} de dano Psíquico.`}
+          explicacaoResultado={explicarReducaoRetaliacaoPsiquica(retaliacaoPsiquicaPendente.dadoRolado, retaliacaoPsiquicaPendente.modInt)}
           onFechar={() => setRetaliacaoPsiquicaPendente(null)}
         />
       )}

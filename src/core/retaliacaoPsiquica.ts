@@ -10,6 +10,9 @@
 // calculados, junto, na hora; quem aplica na mesa é o jogador.
 // [codeimplementation]
 
+import type { ExplicacaoCalculo } from './calculoPersonagem';
+import { fmtMod } from './calculoPersonagem';
+
 export function temRetaliacaoPsiquica(disciplinasConhecidas: string[]): boolean {
   return disciplinasConhecidas.includes('retaliacao-psiquica');
 }
@@ -23,4 +26,17 @@ export function podeAtivarRetaliacaoPsiquica(disciplinasConhecidas: string[], da
  * modificador de Inteligência, mínimo de dois". */
 export function reducaoRetaliacaoPsiquica(dadoRolado: number, modInt: number): number {
   return Math.max(2, 2 * dadoRolado + modInt);
+}
+
+/** Quebra (ⓘ) da conta acima — "2× o dado rolado + mod. Inteligência,
+ * mínimo 2" — pra mostrar na tela como o valor de redução foi calculado. */
+export function explicarReducaoRetaliacaoPsiquica(dadoRolado: number, modInt: number): ExplicacaoCalculo {
+  const bruto = 2 * dadoRolado + modInt;
+  return {
+    linhas: [
+      { label: `Dado rolado (${dadoRolado}) × 2`, valor: `${2 * dadoRolado}` },
+      { label: 'Modificador de Inteligência', valor: fmtMod(modInt) },
+    ],
+    total: { label: 'Redução de dano (mínimo 2)', valor: `${Math.max(2, bruto)}` },
+  };
 }
