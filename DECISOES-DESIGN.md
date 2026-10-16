@@ -346,6 +346,18 @@ Gerais) usa `variante="especial"` (roxo/lavanda) só na cor do
 Implacável, Astúcia Mágica) continua sendo card/checkbox normal, sem
 pip — "N de M" é o gatilho, não "tem uma habilidade especial".
 
+**Quebra de linha com `quebrarACada` é sempre EQUILIBRADA, nunca
+"enche a 1ª linha até o máximo"** (2026-10, pedido do Osmar depois de
+ver Dados de Energia Psiônica com 8 pips virar 3 linhas desiguais —
+5+1+2 — num celular estreito): `quebrarACada` é o máximo de pips por
+linha, não a quantidade fixa — `TickPips` recalcula
+`porLinha = ceil(total / ceil(total / quebrarACada))` pra distribuir o
+mais igual possível (8 com máximo 6 vira 4+4, não 6+2). O container dos
+pips também ganha `flexShrink: 0` — quem cede espaço quando o texto do
+nome do recurso é grande é o texto (`flex: 1 1 auto; min-width: 0`,
+quebra linha), nunca os pips espremendo/quebrando de forma
+imprevisível.
+
 ## Auditoria externa (GPT) — o que foi adotado e o que não foi
 
 **Contexto:** uma auditoria técnica feita por outra IA (documento

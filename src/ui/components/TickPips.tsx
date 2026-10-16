@@ -21,10 +21,14 @@ interface TickPipsProps {
    * compartilhado. `null`/omitido = cor padrão do app (azul). Ignorado
    * se `variante="especial"`. */
   cor?: CorClasse | null;
-  /** Força quebra de linha a cada N pips (ex: 10) — em vez de depender
-   * da largura do container pra decidir quando quebrar. Pensado pra
-   * recursos com muitos usos (ex: Pontos de Foco do Monge, até 20 —
-   * pedido do Osmar: sempre 2 linhas de 10, nunca uma linha só). */
+  /** Máximo de pips por linha (ex: 10) — em vez de depender da largura
+   * do container pra decidir quando quebrar. Pensado pra recursos com
+   * bastante uso (ex: Pontos de Foco do Monge, até 20 — pedido do
+   * Osmar: nunca uma linha só). O número de linhas é `ceil(total /
+   * quebrarACada)`, mas a quantidade REAL por linha é recalculada pra
+   * ficar equilibrada entre as linhas (ex: 8 pips com `quebrarACada=6`
+   * vira 4+4, não 6+2) — pedido do Osmar depois de ver 5+1+2 em 3
+   * linhas desiguais. */
   quebrarACada?: number;
 }
 
@@ -47,12 +51,14 @@ export default function TickPips({ total, usados, tamanho = 'sm', variante = 'pa
   // interna já fica alinhada à direita dentro desse bloco.
   const pipPx = tamanho === 'lg' ? 22 : 16;
   const gapPx = 4; // var(--space-1)
-  const largura = quebrarACada ? quebrarACada * pipPx + (quebrarACada - 1) * gapPx : undefined;
+  const linhas = quebrarACada && total > 0 ? Math.ceil(total / quebrarACada) : 0;
+  const porLinha = linhas > 0 ? Math.ceil(total / linhas) : quebrarACada;
+  const largura = porLinha ? porLinha * pipPx + (porLinha - 1) * gapPx : undefined;
   return (
-    <div className={styles.row} style={largura ? { width: largura } : undefined}>
+    <div className={styles.row} style={largura ? { width: largura, flexShrink: 0 } : undefined}>
       {Array.from({ length: total }).map((_, i) => {
         const gasto = i >= total - usados;
-        const quebraAntes = quebrarACada && i > 0 && i % quebrarACada === 0;
+        const quebraAntes = porLinha && i > 0 && i % porLinha === 0;
         return (
           <Fragment key={i}>
             {quebraAntes && <div style={{ flexBasis: '100%', height: 0 }} />}

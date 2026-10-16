@@ -52,7 +52,7 @@ export default function RecursosDeClasse({ recursos }: RecursosDeClasseProps) {
                 gap: 'var(--space-3)',
               }}
             >
-              <span style={{ fontSize: 13, lineHeight: '16px' }}>
+              <span style={{ fontSize: 13, lineHeight: '16px', flex: '1 1 auto', minWidth: 0 }}>
                 {r.nome} <InfoTexto titulo={r.nome} paragrafos={r.descricao} />
               </span>
               <TickPips total={r.maximo} usados={r.maximo - r.restantes} cor={r.cor} quebrarACada={r.quebrarACada} />

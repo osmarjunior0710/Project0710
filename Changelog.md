@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1543
+
+Pips de recurso com várias linhas (ex.: Dados de Energia Psiônica) agora
+dividem igualmente entre as linhas — antes enchia a 1ª linha até o máximo
+e sobrava pouco nas seguintes (ex.: 5+1+2 virou 4+4).
+
 ## v202610_1533
 
 Resultado da Retaliação Psíquica (aba Reação) ganhou um ⓘ "Como foi
