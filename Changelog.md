@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1817
+
+Reservas Psiônicas (Psiônico, nível 18) ligada: automático ao rolar
+Iniciativa, recupera Dados de Energia Psiônica gastos até ter 4 (sem
+precisar fazer nada — só rolar Iniciativa como sempre).
+
 ## v202610_1546
 
 Restauração Psiônica (Psiônico, nível 5) ligada: card novo na aba Combate

@@ -32,6 +32,7 @@ import { ModoTorrenteModal, OpcaoAtaqueTorrenteModal } from '../combat/TorrenteO
 import { golpesPotencializadosAtivo, TIPOS_DANO_GOLPES_POTENCIALIZADOS } from '../../../core/golpesPotencializados';
 import { ataquesTorrenteComFoco, temFocoAprimorado } from '../../../core/focoAprimorado';
 import { pontosDeFocoRecuperadosFocoPerfeito } from '../../../core/focoPerfeito';
+import { dadosRecuperadosReservasPsionicas } from '../../../core/reservasPsionicas';
 import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, SUBCLASSE_ELEMENTOS } from '../../../core/sintoniaElemental';
 import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior } from '../../../core/defesaSuperior';
 import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
@@ -580,6 +581,10 @@ interface CombatTabProps {
   explicacaoDeslocamento: ExplicacaoCalculo;
   /** Foco Perfeito (Monge nível 15) — devolve N Pontos de Foco gastos. */
   onRecuperarPontosDeFoco: (quantidade: number) => void;
+  /** Reservas Psiônicas (Psiônico nível 18, E5b) — nível de Psiônico (0 = não tem a classe) e Dados de Energia Psiônica restantes AGORA, pra decidir quanto devolver ao rolar Iniciativa. */
+  nivelPsionico: number;
+  dadosEnergiaRestantes: number;
+  onRecuperarDadosEnergiaPsionica: (quantidade: number) => void;
   /** Foco Aprimorado (Defesa Paciente) — soma PV Temporário (não acumula, fica o maior). */
   onGanharPvTemporario: (valor: number) => void;
   /** Golpe Atordoante (Monge nível 5) — CD (8+SAB+prof) e controle de
@@ -924,6 +929,9 @@ export default function CombatTab({
   deslocamento,
   explicacaoDeslocamento,
   onRecuperarPontosDeFoco,
+  nivelPsionico,
+  dadosEnergiaRestantes,
+  onRecuperarDadosEnergiaPsionica,
   onGanharPvTemporario,
   golpeAtordoante,
   onConfirmarMetabolismoIncomum,
@@ -1101,7 +1109,12 @@ export default function CombatTab({
       onResultado: (total) => setIniciativaValor(total),
     });
     onRolarIniciativa?.();
-    aplicarFocoPerfeito();
+    // Foco Perfeito e Reservas Psiônicas são automáticos e podem disparar
+    // JUNTOS (personagem com Monge 15+ E Psiônico 18+ — ex.: Char
+    // Multiclasse) — combina as 2 mensagens em vez de uma sobrescrever a
+    // outra em `feedback` (string única).
+    const mensagens = [aplicarFocoPerfeito(), aplicarReservasPsionicas()].filter((m): m is string => m !== null);
+    if (mensagens.length > 0) setFeedback(mensagens.join(' '));
     if (metabolismoIncomumDisponivel) setMetabolismoIncomumPendente(true);
   }
 
@@ -1109,11 +1122,20 @@ export default function CombatTab({
    * diz "sem usar Metabolismo Incomum", mas o Metabolismo restaura todos os
    * Pontos de Foco, então aplicar o Foco Perfeito antes e depois deixar o
    * jogador usar o Metabolismo por cima dá o mesmo resultado final. */
-  function aplicarFocoPerfeito() {
+  function aplicarFocoPerfeito(): string | null {
     const qtd = pontosDeFocoRecuperadosFocoPerfeito(nivelMonge, pontosDeFocoRestantes);
-    if (qtd <= 0) return;
+    if (qtd <= 0) return null;
     onRecuperarPontosDeFoco(qtd);
-    setFeedback(`🎯 Foco Perfeito — recuperou ${qtd} Ponto${qtd === 1 ? '' : 's'} de Foco (você volta a ter 4).`);
+    return `🎯 Foco Perfeito — recuperou ${qtd} Ponto${qtd === 1 ? '' : 's'} de Foco (você volta a ter 4).`;
+  }
+
+  /** Reservas Psiônicas (Psiônico nível 18, E5b) — automático em TODA
+   * Iniciativa, mesmo molde de Foco Perfeito (sem escolha do jogador). */
+  function aplicarReservasPsionicas(): string | null {
+    const qtd = dadosRecuperadosReservasPsionicas(nivelPsionico, dadosEnergiaRestantes);
+    if (qtd <= 0) return null;
+    onRecuperarDadosEnergiaPsionica(qtd);
+    return `🧠 Reservas Psiônicas — recuperou ${qtd} Dado${qtd === 1 ? '' : 's'} de Energia Psiônica (você volta a ter 4).`;
   }
 
   /** "Fim do Turno" = uma piscada de olho (pedido do Osmar) — 2 planos

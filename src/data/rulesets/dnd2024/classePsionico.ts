@@ -209,9 +209,10 @@ export const caracteristicasClassePsionico: CaracteristicaClasse[] = [
     classe: 'Psiônico',
     nivel: 18,
     nome: 'Reservas Psiônicas',
-    descricao: 'Ao rolar a Iniciativa, você recupera os usos gastos de Dados de Energia Psiônica até ter quatro, caso tenha menos que isso.',
+    descricao:
+      'Ao rolar a Iniciativa, você recupera os usos gastos de Dados de Energia Psiônica até ter quatro, caso tenha menos que isso.\n\nNota do app: automático, sem escolha — dispara sozinho toda vez que você rola Iniciativa (mesmo padrão de Foco Perfeito do Monge).',
     tipoAcao: 'Passiva / Estática',
-    statusImplementacao: PH,
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Psiônico',

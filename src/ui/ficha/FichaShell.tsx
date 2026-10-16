@@ -3939,6 +3939,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             deslocamento={deslocamentoTexto}
             explicacaoDeslocamento={deslocamento.explicacao}
             onRecuperarPontosDeFoco={(qtd) => setPontosDeFocoGasto((v) => Math.max(0, v - qtd))}
+            nivelPsionico={psionicoEntry?.nivel ?? 0}
+            dadosEnergiaRestantes={dadosEnergiaRestantes}
+            onRecuperarDadosEnergiaPsionica={(qtd) => setDadosEnergiaPsionicaGasto((v) => Math.max(0, v - qtd))}
             onGanharPvTemporario={(valor) => setPvTemporario((atual) => ganharPvTemporario(atual, valor))}
             golpeAtordoante={{
               explicacaoCd: explicarCdGolpeAtordoante(
