@@ -36,6 +36,7 @@ import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, SUBCLASSE_E
 import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior } from '../../../core/defesaSuperior';
 import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
 import { formulaRedirecionarDefletir, formulaReducaoDefletirAtaques } from '../../../core/defletirAtaques';
+import { reducaoRetaliacaoPsiquica } from '../../../core/retaliacaoPsiquica';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico, dadoExtraPerfurador } from '../../../core/danoCritico';
 import {
@@ -415,6 +416,13 @@ interface CombatTabProps {
     onAtivar: () => void;
     onEncerrar: () => void;
     onTrocado: () => void;
+  };
+  retaliacaoPsiquica: {
+    disponivel: boolean;
+    dadosRestantes: number;
+    dadosLados: number;
+    cd: number | null;
+    onGastarDado: () => boolean;
   };
   armaSagrada: {
     disponivel: boolean;
@@ -847,6 +855,7 @@ export default function CombatTab({
   defesaSuperior,
   defesaPsionica,
   menteAgucada,
+  retaliacaoPsiquica,
   armaSagrada,
   resplendorSagrado,
   revelacaoCelestial: {
@@ -956,6 +965,7 @@ export default function CombatTab({
   /** Popup de resultado informativo sem rolagem (ex.: Queda Lenta) —
    * `AvisoModal.tsx`, pedido do Osmar (2026-10). */
   const [redirecionamentoDefletir, setRedirecionamentoDefletir] = useState<{ dano: number } | null>(null);
+  const [retaliacaoPsiquicaPendente, setRetaliacaoPsiquicaPendente] = useState<{ reducao: number } | null>(null);
   const [avisoReacao, setAvisoReacao] = useState<{ titulo: string; texto: string } | null>(null);
   const [painelAberto, setPainelAberto] = useState<RecursoTurno | null>(null);
   const [detalhesAtivo, setDetalhesAtivo] = useState(true);
@@ -1191,6 +1201,32 @@ export default function CombatTab({
         totalRolado = total;
       },
       confirmarFechamento: { aoTocar: () => setRedirecionamentoDefletir({ dano: totalRolado }) },
+    });
+  }
+
+  /** Retaliação Psíquica (Psiônico, UA, E4d-c) — mesmo padrão de Defletir
+   * Ataques: Reação, rola 1 Dado de Energia Psiônica, calcula a redução
+   * (`reducaoRetaliacaoPsiquica`) e abre o popup de Salvaguarda do Alvo já
+   * com os 2 valores prontos (redução sempre vale; dano Psíquico extra só
+   * se o atacante falhar) — o app não tem ficha de monstro pra aplicar
+   * nenhum dos dois sozinho. */
+  function usarRetaliacaoPsiquica() {
+    if (!retaliacaoPsiquica.onGastarDado()) return;
+    onMarcarUsado('reacao');
+    setPainelAberto(null);
+    let totalRolado = 0;
+    rolarDados({
+      label: 'Retaliação Psíquica — Dado de Energia Psiônica',
+      formula: `1d${retaliacaoPsiquica.dadosLados}`,
+      quantidade: 1,
+      lados: retaliacaoPsiquica.dadosLados,
+      mod: 0,
+      onResultado: (total) => {
+        totalRolado = total;
+      },
+      confirmarFechamento: {
+        aoTocar: () => setRetaliacaoPsiquicaPendente({ reducao: reducaoRetaliacaoPsiquica(totalRolado, modIntAtual) }),
+      },
     });
   }
 
@@ -3283,6 +3319,8 @@ export default function CombatTab({
           nivelMonge={nivelMonge}
           onAbrirAvisoReacao={abrirAvisoReacao}
           onDefletirAtaques={usarDefletirAtaques}
+          retaliacaoPsiquica={{ disponivel: retaliacaoPsiquica.disponivel, dadosRestantes: retaliacaoPsiquica.dadosRestantes }}
+          onRetaliacaoPsiquica={usarRetaliacaoPsiquica}
         />
       </SidePanel>
       {lancarNoInfernoDano !== null && (
@@ -3337,6 +3375,17 @@ export default function CombatTab({
           textoSucesso="nada acontece"
           textoFalha={`${redirecionamentoDefletir.dano} de dano, do mesmo tipo causado pelo ataque (alvo: criatura a até 1,5m se o ataque foi corpo a corpo, ou a até 18m se à distância e sem Cobertura Total)`}
           onFechar={() => setRedirecionamentoDefletir(null)}
+        />
+      )}
+      {retaliacaoPsiquicaPendente && (
+        <SalvaguardaDoAlvoModal
+          titulo="💫 Retaliação Psíquica"
+          atributo="Sabedoria"
+          cd={retaliacaoPsiquica.cd}
+          explicacaoCd={null}
+          textoSucesso={`Reduza ${retaliacaoPsiquicaPendente.reducao} do dano recebido.`}
+          textoFalha={`Reduza ${retaliacaoPsiquicaPendente.reducao} do dano recebido — e o atacante sofre ${retaliacaoPsiquicaPendente.reducao} de dano Psíquico.`}
+          onFechar={() => setRetaliacaoPsiquicaPendente(null)}
         />
       )}
       {modoTorrentePendente && (

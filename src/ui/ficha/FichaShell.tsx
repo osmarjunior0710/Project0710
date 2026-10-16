@@ -96,6 +96,7 @@ import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, temSintonia
 import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior, temDefesaSuperior } from '../../core/defesaSuperior';
 import { podeAtivarDefesaPsionica, temDefesaPsionica } from '../../core/defesaPsionica';
 import { podeAtivarMenteAgucada, temMenteAgucada } from '../../core/menteAgucada';
+import { podeAtivarRetaliacaoPsiquica, temRetaliacaoPsiquica } from '../../core/retaliacaoPsiquica';
 import { ofertaMenteAgucada } from '../roll/ofertaMenteAgucada';
 import { podeRerolarSalvaguardaComFoco, temSobreviventeDisciplinado } from '../../core/sobreviventeDisciplinado';
 import { explicarCdGolpeAtordoante } from '../../core/golpeAtordoante';
@@ -995,6 +996,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     cdImpulso: classePsionico ? (calcularResumoConjuracao(selecao, classePsionico, nivelTotalAtual)?.cd ?? null) : null,
     onGastarDado: (): boolean => {
       if (dadosEnergiaRestantes <= 0) return false;
+      setDadosEnergiaPsionicaGasto((v) => v + 1);
+      return true;
+    },
+  };
+  // Retaliação Psíquica (Psiônico, UA, E4d-c) — mesma CD de conjuração
+  // usada no Impulso Telecinético (`cdImpulso` acima); dado gasto sempre
+  // (diferente do Impulso, que só gasta se o alvo falhar — aqui a regra
+  // não tem essa condição).
+  const retaliacaoPsiquica = {
+    disponivel: temRetaliacaoPsiquica(disciplinasPsionicasAtuais),
+    dadosRestantes: dadosEnergiaRestantes,
+    dadosLados: dadosEnergiaLados,
+    cd: classePsionico ? (calcularResumoConjuracao(selecao, classePsionico, nivelTotalAtual)?.cd ?? null) : null,
+    onGastarDado: (): boolean => {
+      if (!podeAtivarRetaliacaoPsiquica(disciplinasPsionicasAtuais, dadosEnergiaRestantes)) return false;
       setDadosEnergiaPsionicaGasto((v) => v + 1);
       return true;
     },
@@ -3826,6 +3842,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               onEncerrar: encerrarMenteAgucada,
               onTrocado: () => setMenteAgucadaUsadaNoTurno(true),
             }}
+            retaliacaoPsiquica={retaliacaoPsiquica}
             armaSagrada={{
               disponivel: armaSagradaDisponivel,
               elegivel: armaSagradaArmaElegivel,

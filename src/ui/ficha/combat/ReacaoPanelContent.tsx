@@ -147,6 +147,10 @@ interface ReacaoPanelContentProps {
   onAbrirAvisoReacao: (titulo: string, texto: string) => void;
   /** Defletir Ataques (Monge nível 3) — ver `usarDefletirAtaques` em `CombatTab.tsx`. */
   onDefletirAtaques: () => void;
+  /** Retaliação Psíquica (Psiônico UA, E4d-c) — ver `usarRetaliacaoPsiquica` em
+   * `CombatTab.tsx`. `disponivel` já cobre ter a disciplina E >=1 Dado de Energia. */
+  retaliacaoPsiquica: { disponivel: boolean; dadosRestantes: number };
+  onRetaliacaoPsiquica: () => void;
   /** Disciplinas Psiônicas pós-conjuração (Psiônico UA, E4c) — mesmo
    * padrão de `useUsarMagiaPainel.tsx` (Reação também tem conceito de
    * turno, mesmo critério). */
@@ -212,6 +216,8 @@ export default function ReacaoPanelContent({
   nivelMonge,
   onAbrirAvisoReacao,
   onDefletirAtaques,
+  retaliacaoPsiquica,
+  onRetaliacaoPsiquica,
   disciplinasPsionicasConhecidas,
   disciplinaPsionicaBloqueadaNoTurno,
   onDisciplinaPosConjuracaoDisponivel,
@@ -572,6 +578,24 @@ export default function ReacaoPanelContent({
               Você foi atingido por um ataque — reduz o dano total em 1d10 + mod. Destreza + nível de Monge. Só contra dano{' '}
               {nivelMonge >= 13 ? 'de qualquer tipo (Defletir Energia)' : 'Contundente, Cortante ou Perfurante'}. Se o dano zerar, dá pra gastar 1
               Ponto de Foco pra redirecionar o golpe.
+            </div>
+          )}
+        </div>
+      )
+    ) },
+    { grupo: 'Psiônico', no: (
+      retaliacaoPsiquica.disponivel && (
+        <div
+          className={styles.row}
+          style={retaliacaoPsiquica.dadosRestantes > 0 ? undefined : { opacity: 0.5, pointerEvents: 'none' }}
+          onClick={onRetaliacaoPsiquica}
+        >
+          <div className={styles.rowName}>💫 Retaliação Psíquica</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Uma criatura à vista te atacou — gasta 1 Dado de Energia Psiônica, rola e reduz o dano recebido (2×
+              resultado + mod. Inteligência, mínimo 2). O atacante ainda faz Salvaguarda de Sabedoria: se falhar, sofre
+              esse mesmo valor em dano Psíquico.
             </div>
           )}
         </div>

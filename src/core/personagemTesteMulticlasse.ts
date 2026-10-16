@@ -250,20 +250,23 @@ export function montarPersonagemTesteMulticlasse(): PersonagemSalvo {
       // do Osmar, 2026-10, depois de descobrir isso testando a Mente
       // Aguçada). Consciência Expandida/Língua Diabólica/Mente Atenta/Mira
       // Inerrante somam 1 dado numa perícia/ataque — mecanicamente
-      // idênticas entre si, 1 já cobre o grupo inteiro; o resto do slice
-      // prioriza as com dano/estado mais complexo de testar.
+      // idênticas entre si, 1 já cobre o grupo inteiro. Bio-Retorno e
+      // Aperfeiçoamento de Precognição também são mecanicamente parecidas
+      // entre si (conjuração sem salvaguarda) — só 1 das 2 (Bio-Retorno,
+      // já testada ao vivo) precisa estar aqui; a vaga que sobra vai pra
+      // Retaliação Psíquica (E4d-c), senão ela cai no mesmo problema.
       const ORDEM_TESTE_DISCIPLINAS_PSIONICAS = [
-        'aperfeicoamento-de-precognicao',
         'bio-retorno',
         'insinuacao-do-id',
         'pensamentos-destrutivos',
         'defesa-psionica',
         'mente-agucada',
+        'retaliacao-psiquica',
+        'aperfeicoamento-de-precognicao',
         'consciencia-expandida',
         'lingua-diabolica',
         'mente-atenta',
         'mira-inerrante',
-        'retaliacao-psiquica',
       ];
       const idsValidos = new Set(disciplinasPsionicas.map((d) => d.id));
       disciplinasPsionicasAtual = ORDEM_TESTE_DISCIPLINAS_PSIONICAS.filter((id) => idsValidos.has(id)).slice(

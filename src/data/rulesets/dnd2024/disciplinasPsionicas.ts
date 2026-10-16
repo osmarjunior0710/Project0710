@@ -1,7 +1,7 @@
 // Opções de Disciplina Psiônica (Psiônico, Unearthed Arcana 2025 — NÃO OFICIAL). Texto literal do PDF
 // `livros-referencia/unearthed-arcana/Psionico_Atualizacoes_UA_2025.pdf` (p.7-8), via sdd/sdd-psionico.md seção 4.1.
 // Convenção do app: "Dado de Energia Psiônica" em todo lugar (o PDF mistura "Psiônica"/"Psíquica").
-// Nenhuma tem mecânica ainda — entram aos poucos (E4b-E4d, ver EmDev.md); por isso todas `placeholder-codeimplementation`.
+// Todas as 11 implementadas (E4b-E4d, ver EmDev.md).
 
 import type { StatusImplementacao } from './statusImplementacao';
 
@@ -21,8 +21,6 @@ export interface DisciplinaPsionica {
   /** Só nas disciplinas que se encaixam numa rolagem de d20 (E4b). */
   gatilho?: GatilhoDisciplina;
 }
-
-const PH: StatusImplementacao = 'placeholder-codeimplementation';
 
 const disciplinasBase: DisciplinaPsionica[] = [
   {
@@ -107,8 +105,8 @@ const disciplinasBase: DisciplinaPsionica[] = [
     id: 'retaliacao-psiquica',
     nome: 'Retaliação Psíquica',
     descricao:
-      'Imediatamente após uma criatura que você possa ver realizar um ataque contra você, você pode usar uma Reação para gastar um Dado de Energia Psiônica, rolar o dado e reduzir o dano recebido do ataque em um valor igual a duas vezes o número rolado mais o seu modificador de Inteligência (mínimo de dois). Além disso, você pode forçar o atacante a fazer um teste de resistência de Sabedoria. Em caso de falha, o alvo sofre dano Psíquico igual ao dano que você reduziu.',
-    statusImplementacao: PH,
+      'Imediatamente após uma criatura que você possa ver realizar um ataque contra você, você pode usar uma Reação para gastar um Dado de Energia Psiônica, rolar o dado e reduzir o dano recebido do ataque em um valor igual a duas vezes o número rolado mais o seu modificador de Inteligência (mínimo de dois). Além disso, você pode forçar o atacante a fazer um teste de resistência de Sabedoria. Em caso de falha, o alvo sofre dano Psíquico igual ao dano que você reduziu.\n\nNota do app: card na aba Reação, igual Defletir Ataques do Monge. Rola o dado e mostra a redução E o dano Psíquico condicional juntos, na mesma tela (popup de Sucesso/Falha) — o app não tem ficha de monstro pra aplicar isso sozinho, então quem desconta o dano é você, na mesa.',
+    statusImplementacao: 'codeimplementation',
   },
 ];
 

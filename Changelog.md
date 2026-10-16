@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0910
+
+Retaliação Psíquica (Psiônico, UA) ligada — última Disciplina Psiônica,
+classe 100% implementada agora. Card novo na aba Reação: uma criatura te
+ataca, gasta 1 Dado de Energia Psiônica, rola e mostra a redução de dano
+E o dano Psíquico que o atacante sofre (se falhar na Salvaguarda de
+Sabedoria) juntos, na mesma tela — reaproveitando o mesmo popup que
+Defletir Ataques do Monge já usa. Char Multiclasse (teste) também ganhou
+essa disciplina pra dar pra testar ao vivo.
+
 ## v202610_1824
 
 Char Multiclasse (personagem de teste) ganhou uma seleção melhor de
