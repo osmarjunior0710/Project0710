@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import type { ExplicacaoCalculo } from '../../core/calculoPersonagem';
 import { deveAplicarForcaIndomavel } from '../../core/forcaIndomavel';
+import { aplicarSurtoPsionicoEmValores, dadosElegiveisSurtoPsionico } from '../../core/surtoPsionico';
 import { useColapsavel } from '../hooks/useColapsavel';
 import { suportaWebGL } from '../utils/suportaWebGL';
 import {
@@ -216,6 +217,18 @@ export interface RollState {
   ofertaTrocaDeDado?: OfertaTrocaDeDado | null;
   /** `true` = a oferta já foi usada nesta rolagem — só 1x. */
   ofertaTrocaDeDadoUsada?: boolean;
+  /** Marca que ESTA rolagem 'dados' É o próprio Dado de Energia
+   * Psiônica sendo rolado (não um dano/teste comum que por acaso usa o
+   * mesmo tipo de dado) — habilita a oferta de Surto Psiônico (ver
+   * `SurtoPsionicoProvider`). Setado só pelo funil
+   * `rolarDadoDeEnergiaPsionica` (`ui/roll/`), nunca numa chamada de
+   * `rolarDados` direta. */
+  ehDadoDeEnergiaPsionica?: boolean;
+  /** `true` = Surto Psiônico já foi usado nesta rolagem (grid de Dado
+   * de Energia OU bônus de dado psiônico somado a um d20) — só 1x. */
+  surtoPsionicoUsado?: boolean;
+  /** Ver `RollDadosOptions.onSurtoPsionicoAplicado`. */
+  onSurtoPsionicoAplicado?: ((novoTotal: number) => void) | null;
   /** `true` = esta rolagem usou o motor 3D (física de verdade,
    * `@3d-dice/dice-box`) em vez de `Math.random()` — Fase B do dado 3D
    * (`sdd/sdd-dado-3d.md`). Pra 'd20': cobre o d20 simples E o 2º dado
@@ -369,6 +382,23 @@ export interface DadoPsionicoProvider {
   gastar: (opcao: DadoPsionicoOpcao) => void;
 }
 
+/** Surto Psiônico (Psiônico nível 7, E5c) — "após rolar 1+ Dados de
+ * Energia Psiônica, gaste 1 Dado de Vida pra tratar todo resultado 1/2/3
+ * como 4". Registrado 1x pela Ficha (igual `DadoPsionicoProvider`) — o
+ * motor decide SOZINHO quando oferecer (ver `ofertaSurtoPsionico` em
+ * `RollContextValue`): tanto numa rolagem PURA de Dado de Energia
+ * (`RollDadosOptions.ehDadoDeEnergiaPsionica`, via o funil
+ * `rolarDadoDeEnergiaPsionica` em `ui/roll/`) quanto no bônus de dado
+ * psiônico somado a um d20 (`RollState.dadoPsionico`, disciplinas
+ * "+nDx") — nenhum dos dois precisa passar nada específico de Surto,
+ * só existir. `disponivel` já cobre nível 7+ E ter Dado de Vida
+ * sobrando; `gastar` desconta 1 Dado de Vida (o chamador escolhe de
+ * qual tipo, ex.: sempre o menor disponível). */
+export interface SurtoPsionicoProvider {
+  disponivel: boolean;
+  gastar: () => void;
+}
+
 /** Sortudo (Talento de Origem): Pontos de Sorte pra dar Vantagem num d20 DEPOIS de ver o resultado —
  * rola um 2º d20 e fica com o maior (mesma mecânica da Vantagem escolhida pós-rolagem). `usar` devolve
  * `false` se não havia ponto pra gastar. */
@@ -418,7 +448,7 @@ interface RollD20Options {
   confirmarAcerto?: ConfirmarAcerto;
 }
 
-interface RollDadosOptions {
+export interface RollDadosOptions {
   label: string;
   formula: string;
   quantidade: number;
@@ -439,6 +469,24 @@ interface RollDadosOptions {
   rerollEscolhido?: { rotulo: string };
   /** Ver `OfertaTrocaDeDado` — só tem efeito com 2+ dados no total. */
   ofertaTrocaDeDado?: OfertaTrocaDeDado;
+  /** Ver `RollState.ehDadoDeEnergiaPsionica` — setado só pelo funil
+   * `rolarDadoDeEnergiaPsionica` (`ui/roll/`). */
+  ehDadoDeEnergiaPsionica?: boolean;
+  /** Força o grid de `dadosIndividuais` mesmo com 1 dado só (sem
+   * `gruposExtras`) — o funil de Dado de Energia Psiônica usa isso pra
+   * garantir que a oferta de Surto Psiônico apareça mesmo numa
+   * rolagem de 1 dado só (ex.: Conexão Telepática, Retaliação
+   * Psíquica), que hoje usa o atalho `concluirUmDado` (sem grid, sem
+   * ofertas) quando `quantidade === 1`. */
+  forcarGrid?: boolean;
+  /** Chamado por `aplicarSurtoPsionico` logo depois de aplicar a troca,
+   * já com o NOVO total — mesmo motivo de `OfertaTrocaDeDado.onTrocado`:
+   * quem chama `rolarDados`/`rolarDadoDeEnergiaPsionica` usa isso pra
+   * corrigir qualquer total capturado ANTES do Surto em `onResultado`/
+   * `confirmarFechamento.aoTocar` (o Surto é oferecido pelo motor, não
+   * por quem chama, então não tem como ler o valor novo de outro
+   * jeito). Nunca dispara se não havia oferta válida. */
+  onSurtoPsionicoAplicado?: (novoTotal: number) => void;
   /** Quebra do dado base/Aprimoramento de Truque/Upcast (dano/cura de
    * magia, B8) — mesmo formato do "ⓘ" de CA/perícia/ataque, mas com
    * notação de dado em vez de número resolvido (ver
@@ -545,6 +593,16 @@ interface RollContextValue {
   usarDadoPsionico: () => void;
   /** Diz se o d20 deu certo (sucesso/acerto): gasta o dado só se sim. */
   resolverDadoPsionico: (deuCerto: boolean) => void;
+  /** Surto Psiônico (Psiônico nível 7) — ver `SurtoPsionicoProvider`.
+   * `ofertaSurtoPsionico` já decide sozinho SE oferece (rolagem
+   * concluída, marcada como Dado de Energia Psiônica OU com bônus de
+   * dado psiônico, ainda não usada, e pelo menos 1 valor ≤3) e o texto
+   * do card — `null` = não mostra nada. */
+  ofertaSurtoPsionico: { texto: string } | null;
+  registrarSurtoPsionico: (provider: SurtoPsionicoProvider | null) => void;
+  /** Aplica o Surto (todo valor ≤3 vira 4) e gasta 1 Dado de Vida —
+   * sem efeito sem oferta válida. */
+  aplicarSurtoPsionico: () => void;
   /** Sobrevivente Disciplinado (Monge nível 14) — ver `SobreviventeDisciplinadoProvider`. */
   sobreviventeDisciplinadoDisponivel: boolean;
   registrarSobreviventeDisciplinado: (provider: SobreviventeDisciplinadoProvider | null) => void;
@@ -872,6 +930,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
       rerollSe1,
       rerollEscolhido,
       ofertaTrocaDeDado,
+      ehDadoDeEnergiaPsionica,
+      forcarGrid,
+      onSurtoPsionicoAplicado,
       explicacaoMod,
       onResultado,
       confirmarFechamento,
@@ -882,7 +943,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
       // "reroll se 1"/reroll de 1 dado só fazem sentido sabendo o
       // valor de UM dado só — com mais de 1 dado (ou grupos extras),
       // vira o grid de `dadosIndividuais` (ver `DadoIndividual`).
-      const umDadoSo = quantidade === 1 && (!gruposExtras || gruposExtras.length === 0);
+      // `forcarGrid` pula esse atalho mesmo com 1 dado só (ver
+      // `RollDadosOptions.forcarGrid`).
+      const umDadoSo = !forcarGrid && quantidade === 1 && (!gruposExtras || gruposExtras.length === 0);
       // Ordem: grupo principal primeiro, depois cada grupo extra na
       // ordem passada — é a ordem em que aparecem no grid (esquerda→
       // direita, 4 por linha) e a mesma ordem em que os grupos são
@@ -910,6 +973,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
         motor3D: usar3D,
         confirmarFechamento,
         confirmarAlvoCura,
+        ehDadoDeEnergiaPsionica,
       });
 
       // Dado único concluído (Perfurador com arma de 1 dado só) —
@@ -972,6 +1036,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
           rerollEscolhidoUsado: false,
           ofertaTrocaDeDado: ofertaTrocaDeDado ?? null,
           ofertaTrocaDeDadoUsada: false,
+          ehDadoDeEnergiaPsionica,
+          surtoPsionicoUsado: false,
+          onSurtoPsionicoAplicado: onSurtoPsionicoAplicado ?? null,
           explicacaoMod,
           motor3D: viaMotor3D,
           confirmarFechamento,
@@ -1269,6 +1336,58 @@ export function RollProvider({ children }: { children: ReactNode }) {
     [dadoPsionicoProvider, estado],
   );
 
+  // Surto Psiônico (Psiônico nível 7) — ver `SurtoPsionicoProvider`.
+  // Cobre as DUAS formas de "Dado de Energia Psiônica já rolado"
+  // existentes no motor: o grid genérico (`dadosIndividuais`, quando
+  // `ehDadoDeEnergiaPsionica` foi setado pelo funil `ui/roll/
+  // rolarDadoDeEnergiaPsionica.ts`) e o bônus somado a um d20
+  // (`dadoPsionico.valores`, disciplinas "+nDx") — qualquer
+  // característica nova que use um dos dois ganha o Surto de graça,
+  // sem precisar saber que ele existe.
+  const [surtoPsionicoProvider, setSurtoPsionicoProvider] = useState<SurtoPsionicoProvider | null>(null);
+  const registrarSurtoPsionico = useCallback((provider: SurtoPsionicoProvider | null) => setSurtoPsionicoProvider(provider), []);
+  const ofertaSurtoPsionico = (() => {
+    if (!surtoPsionicoProvider?.disponivel || !estado || estado.fase !== 'concluido' || estado.surtoPsionicoUsado) return null;
+    const valoresEmJogo = estado.ehDadoDeEnergiaPsionica && estado.dadosIndividuais
+      ? estado.dadosIndividuais.map((d) => d.valor).filter((v): v is number => typeof v === 'number')
+      : (estado.dadoPsionico?.valores ?? null);
+    if (!valoresEmJogo) return null;
+    const elegiveis = dadosElegiveisSurtoPsionico(valoresEmJogo);
+    if (elegiveis <= 0) return null;
+    return {
+      texto: `⚡ Surto Psiônico — gastar 1 Dado de Vida, ${elegiveis} dado${elegiveis > 1 ? 's' : ''} (1-3) vira${elegiveis > 1 ? 'm' : ''} 4`,
+    };
+  })();
+  const aplicarSurtoPsionico = useCallback(() => {
+    if (!surtoPsionicoProvider || !ofertaSurtoPsionico || !estado || estado.fase !== 'concluido' || estado.surtoPsionicoUsado) return;
+    if (estado.ehDadoDeEnergiaPsionica && estado.dadosIndividuais) {
+      surtoPsionicoProvider.gastar();
+      const novosDados = estado.dadosIndividuais.map((d) =>
+        typeof d.valor === 'number' && d.valor <= 3 ? { ...d, valor: 4, trocado: true } : d,
+      );
+      const soma = novosDados.reduce((acc, d) => acc + (typeof d.valor === 'number' ? d.valor : 0), 0);
+      const novoTotal = soma + (estado.mod ?? 0);
+      setEstado((prev) =>
+        prev && prev.dadosIndividuais
+          ? { ...prev, dadosIndividuais: novosDados, total: novoTotal, surtoPsionicoUsado: true }
+          : prev,
+      );
+      estado.onSurtoPsionicoAplicado?.(novoTotal);
+      return;
+    }
+    if (estado.dadoPsionico?.valores) {
+      const valoresAtuais = estado.dadoPsionico.valores;
+      surtoPsionicoProvider.gastar();
+      const novosValores = aplicarSurtoPsionicoEmValores(valoresAtuais);
+      const diferenca = novosValores.reduce((a, b) => a + b, 0) - valoresAtuais.reduce((a, b) => a + b, 0);
+      setEstado((prev) =>
+        prev && prev.dadoPsionico
+          ? { ...prev, dadoPsionico: { ...prev.dadoPsionico, valores: novosValores }, total: (prev.total ?? 0) + diferenca, surtoPsionicoUsado: true }
+          : prev,
+      );
+    }
+  }, [surtoPsionicoProvider, ofertaSurtoPsionico, estado]);
+
   const rolarConfirmacaoCritico = useCallback(() => {
     if (!estado || estado.fase !== 'concluido' || !estado.confirmarAcerto || estado.confirmacaoCritico) return;
     const usar3D = !!estado.motor3D && dado3DAtivo;
@@ -1496,6 +1615,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
         registrarDadoPsionico,
         usarDadoPsionico,
         resolverDadoPsionico,
+        ofertaSurtoPsionico,
+        registrarSurtoPsionico,
+        aplicarSurtoPsionico,
         sortudoDisponivel: sortudoProvider?.disponivel ?? false,
         sortudoRestantes: sortudoProvider?.restantes ?? 0,
         registrarSortudo,

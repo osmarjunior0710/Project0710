@@ -56,6 +56,7 @@ import { cdConjuracao } from '../../../core/magiasPersonagem';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { useRoll, type LadosDado } from '../../roll/RollContext';
+import { rolarDadoDeEnergiaPsionica } from '../../roll/rolarDadoDeEnergiaPsionica';
 import { ofertaMenteAgucada } from '../../roll/ofertaMenteAgucada';
 import { alcanceConexaoTelepatica } from '../../../core/conexaoTelepatica';
 import InfoChip from '../../components/InfoChip';
@@ -1246,7 +1247,7 @@ export default function CombatTab({
     onMarcarUsado('reacao');
     setPainelAberto(null);
     let totalRolado = 0;
-    rolarDados({
+    rolarDadoDeEnergiaPsionica(rolarDados, {
       label: 'Retaliação Psíquica — Dado de Energia Psiônica',
       formula: `1d${retaliacaoPsiquica.dadosLados}`,
       quantidade: 1,
@@ -1254,6 +1255,9 @@ export default function CombatTab({
       mod: 0,
       onResultado: (total) => {
         totalRolado = total;
+      },
+      onSurtoPsionicoAplicado: (novoTotal) => {
+        totalRolado = novoTotal;
       },
       confirmarFechamento: {
         aoTocar: () => setRetaliacaoPsiquicaPendente({ dadoRolado: totalRolado, modInt: modIntAtual }),
@@ -1371,13 +1375,25 @@ export default function CombatTab({
     if (turnState.bonus === 'usada') return; // 1 Ação Bônus por turno — o painel fica aberto só pra mostrar o alcance
     if (!conexaoTelepatica.onIniciar()) return;
     onMarcarUsado('bonus');
-    rolarDados({
+    // Só anota o alcance ao FECHAR (não em `onResultado`) — o Surto
+    // Psiônico pode subir o resultado depois da rolagem concluir, e
+    // anotar cedo demais usaria o valor de ANTES do Surto.
+    let totalRolado = 0;
+    rolarDadoDeEnergiaPsionica(rolarDados, {
       label: '🧠 Conexão Telepática — alcance +3 m por ponto',
       formula: `1d${conexaoTelepatica.lados}`,
       quantidade: 1,
       lados: conexaoTelepatica.lados,
       mod: 0,
-      onResultado: (total) => conexaoTelepatica.onResultado(alcanceConexaoTelepatica(total)),
+      onResultado: (total) => {
+        totalRolado = total;
+      },
+      onSurtoPsionicoAplicado: (novoTotal) => {
+        totalRolado = novoTotal;
+      },
+      confirmarFechamento: {
+        aoTocar: () => conexaoTelepatica.onResultado(alcanceConexaoTelepatica(totalRolado)),
+      },
     });
   }
 
@@ -1397,13 +1413,22 @@ export default function CombatTab({
       setImpulsoAberto({ comDado: false, distancia: 1.5 });
       return;
     }
-    rolarDados({
+    let totalRolado = 0;
+    rolarDadoDeEnergiaPsionica(rolarDados, {
       label: '💥 Impulso Telecinético — 5 m por ponto',
       formula: `1d${conexaoTelepatica.lados}`,
       quantidade: 1,
       lados: conexaoTelepatica.lados,
       mod: 0,
-      onResultado: (total) => setImpulsoAberto({ comDado: true, distancia: 5 * total }),
+      onResultado: (total) => {
+        totalRolado = total;
+      },
+      onSurtoPsionicoAplicado: (novoTotal) => {
+        totalRolado = novoTotal;
+      },
+      confirmarFechamento: {
+        aoTocar: () => setImpulsoAberto({ comDado: true, distancia: 5 * totalRolado }),
+      },
     });
   }
 

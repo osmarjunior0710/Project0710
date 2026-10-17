@@ -98,6 +98,8 @@ import { podeAtivarDefesaPsionica, temDefesaPsionica } from '../../core/defesaPs
 import { podeAtivarMenteAgucada, temMenteAgucada } from '../../core/menteAgucada';
 import { podeAtivarRetaliacaoPsiquica, temRetaliacaoPsiquica } from '../../core/retaliacaoPsiquica';
 import { podeUsarRestauracaoPsionica, temRestauracaoPsionica } from '../../core/restauracaoPsionica';
+import { temSurtoPsionico } from '../../core/surtoPsionico';
+import { rolarDadoDeEnergiaPsionica } from '../roll/rolarDadoDeEnergiaPsionica';
 import { ofertaMenteAgucada } from '../roll/ofertaMenteAgucada';
 import { podeRerolarSalvaguardaComFoco, temSobreviventeDisciplinado } from '../../core/sobreviventeDisciplinado';
 import { explicarCdGolpeAtordoante } from '../../core/golpeAtordoante';
@@ -293,6 +295,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     registrarInspiracaoHeroica,
     registrarSortudo,
     registrarDadoPsionico,
+    registrarSurtoPsionico,
     registrarSobreviventeDisciplinado,
     registrarForcaIndomavel,
     estado: rollEmAndamento,
@@ -1960,18 +1963,31 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     if (menteAgucadaAtiva) return;
     if (!podeAtivarMenteAgucada(disciplinasPsionicasAtuais, dadosEnergiaRestantes)) return;
     setDadosEnergiaPsionicaGasto((v) => v + 1);
-    rolarDados({
+    // O número anotado só é fixado ao FECHAR o popup (não em
+    // `onResultado`) porque o Surto Psiônico pode subir o resultado
+    // DEPOIS da rolagem concluir — capturar cedo demais anotaria o
+    // valor de ANTES do Surto (mesmo cuidado já tomado com a troca da
+    // própria Mente Aguçada em outras rolagens, ver EmDev.md E4d-b).
+    let totalRolado = 0;
+    rolarDadoDeEnergiaPsionica(rolarDados, {
       label: '🧠 Mente Aguçada — anotar número',
       formula: `1d${dadosEnergiaLados}`,
       quantidade: 1,
       lados: dadosEnergiaLados,
       mod: 0,
       onResultado: (total) => {
-        setMenteAgucadaAnotado(total);
-        setMenteAgucadaAtiva(true);
-        setMenteAgucadaUsadaNoTurno(false);
+        totalRolado = total;
       },
-      confirmarFechamento: {},
+      onSurtoPsionicoAplicado: (novoTotal) => {
+        totalRolado = novoTotal;
+      },
+      confirmarFechamento: {
+        aoTocar: () => {
+          setMenteAgucadaAnotado(totalRolado);
+          setMenteAgucadaAtiva(true);
+          setMenteAgucadaUsadaNoTurno(false);
+        },
+      },
     });
   }
 
@@ -2762,6 +2778,29 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return () => registrarDadoPsionico(null);
   }, [dadosEnergiaRestantes, dadosEnergiaLados, disciplinasPsionicasAtuais, disciplinasUsadasNoTurno, registrarDadoPsionico]);
 
+  // Surto Psiônico (nível 7, E5c) — registrado 1x; o motor de dado
+  // (RollContext) decide sozinho quando oferecer (ver
+  // `rolarDadoDeEnergiaPsionica`/`DadoPsionicoProvider`). `gastar`
+  // desconta 1 Dado de Vida do MENOR tipo disponível (poupa os maiores
+  // pra cura depois) — `reservaDadosDeVida` já vem ordenada do menor
+  // pro maior lado.
+  useEffect(() => {
+    const nivelPsionicoAtual = psionicoEntry?.nivel ?? 0;
+    if (!temSurtoPsionico(nivelPsionicoAtual) || totalDeDadosRestantes(reservaDadosDeVida) <= 0) {
+      registrarSurtoPsionico(null);
+      return;
+    }
+    registrarSurtoPsionico({
+      disponivel: true,
+      gastar: () => {
+        const tipo = reservaDadosDeVida.find((r) => r.restantes > 0)?.tipo;
+        if (!tipo) return;
+        setDadosDeVidaGastos((prev) => ({ ...prev, [tipo]: (prev[tipo] ?? 0) + 1 }));
+      },
+    });
+    return () => registrarSurtoPsionico(null);
+  }, [psionicoEntry?.nivel, reservaDadosDeVida, registrarSurtoPsionico]);
+
   /** Dispensar a Disciplina pós-conjuração (E4c) não custa nada — o texto da regra é sempre "você
    * pode gastar", nunca automático. Se essa Disciplina ia virar linha extra num popup de Salvaguarda
    * pendente (`aoResolverSalvaguarda`), ainda assim precisa liberar a Salvaguarda pra abrir — só
@@ -2825,7 +2864,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // com a soma de ANTES da troca. `onTrocado` atualiza a soma pro valor
     // novo; só aplica de verdade quando o popup fecha (`confirmarFechamento`).
     let somaFinal = 0;
-    rolarDados({
+    rolarDadoDeEnergiaPsionica(rolarDados, {
       label: `${d.nome} — Dado${numDados > 1 ? 's' : ''} de Energia Psiônica`,
       formula: `${numDados}d${dadosEnergiaLados}`,
       quantidade: numDados,
@@ -2844,6 +2883,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               setMenteAgucadaUsadaNoTurno(true);
             })
           : undefined,
+      // Surto Psiônico (Reserva — ver `rolarDadoDeEnergiaPsionica`): mesmo cuidado de staleness, atualiza `somaFinal`.
+      onSurtoPsionicoAplicado: (novoTotal) => {
+        somaFinal = novoTotal;
+      },
     });
   }
 

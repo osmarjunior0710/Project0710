@@ -177,9 +177,9 @@ export const caracteristicasClassePsionico: CaracteristicaClasse[] = [
     nivel: 7,
     nome: 'Surto Psiônico',
     descricao:
-      'Além disso, após rolar um ou mais Dados de Energia Psíquica, você pode gastar um de seus Dados de Vida para tratar qualquer resultado de 1, 2 ou 3 nesses dados como se fosse 4.',
+      'Além disso, após rolar um ou mais Dados de Energia Psíquica, você pode gastar um de seus Dados de Vida para tratar qualquer resultado de 1, 2 ou 3 nesses dados como se fosse 4.\n\nNota do app: card "⚡ Surto Psiônico" aparece sozinho dentro do popup de QUALQUER rolagem de Dado de Energia Psiônica (puro ou somado a um teste/ataque) quando compensa — sem rolar o Dado de Vida, só consome (o menor tipo disponível primeiro).',
     tipoAcao: 'Grátis',
-    statusImplementacao: PH,
+    statusImplementacao: 'codeimplementation',
   },
   {
     classe: 'Psiônico',

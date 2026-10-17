@@ -53,6 +53,8 @@ export default function RollOverlay() {
     opcaoDadoPsionico,
     usarDadoPsionico,
     resolverDadoPsionico,
+    ofertaSurtoPsionico,
+    aplicarSurtoPsionico,
     rolarConfirmacaoCritico,
     usarRerollSe1,
     rerollDadoEscolhido,
@@ -351,6 +353,31 @@ export default function RollOverlay() {
               </>
             );
           })()}
+        {/* Surto Psiônico (Psiônico nível 7) — mesmo padrão visual da
+            troca acima, mas é um 2º slot independente (`ofertaSurtoPsionico`
+            já decide sozinho se oferece) — cobre tanto a rolagem PURA de
+            Dado de Energia Psiônica (`ehDadoDeEnergiaPsionica`) quanto o
+            bônus de dado psiônico somado a um d20 (`dadoPsionico`), por
+            isso não filtra por `estado.tipo` como a troca acima. */}
+        {estado.fase === 'concluido' && (estado.ehDadoDeEnergiaPsionica || estado.dadoPsionico?.valores) && (
+          <>
+            {estado.surtoPsionicoUsado ? (
+              <>
+                <div className={styles.ofertaTitulo}>Surto Psiônico</div>
+                <div className={`${styles.ofertaCard} ${styles.ofertaCardUsada}`}>Já usada nesta rolagem</div>
+              </>
+            ) : (
+              ofertaSurtoPsionico && (
+                <>
+                  <div className={styles.ofertaTitulo}>Surto Psiônico</div>
+                  <div className={styles.ofertaCard} onClick={aplicarSurtoPsionico}>
+                    {ofertaSurtoPsionico.texto}
+                  </div>
+                </>
+              )
+            )}
+          </>
+        )}
         {estado.fase === 'concluido' && estado.confirmarFechamento && Array.isArray(estado.confirmarFechamento) && (
           // 3+ botões (ex.: tipo de dano + Golpe Atordoante) empilham na vertical —
           // lado a lado quebravam o rótulo em 2 linhas no celular.

@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1818
+
+Surto Psiônico (Psiônico, nível 7) ligado: depois de rolar um Dado de
+Energia Psiônica (em qualquer característica — Conexão Telepática,
+Mente Aguçada, Retaliação Psíquica, Impulso Telecinético, disciplinas de
+conjuração e as de "+nDx" num teste/ataque), se algum dado saiu 1, 2 ou
+3, aparece a opção de gastar 1 Dado de Vida pra tratá-lo como 4.
+
 ## v202610_1817
 
 Reservas Psiônicas (Psiônico, nível 18) ligada: automático ao rolar

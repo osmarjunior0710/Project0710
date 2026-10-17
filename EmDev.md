@@ -37,6 +37,28 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
 - [x] E4d-c.1 — Osmar testou Retaliação Psíquica e reportou "tirei 1 no dado e deu 4 de redução" — investigado: a conta estava certa (2×dado + mod. Inteligência do personagem dele, não do Char Multiclasse), o problema real era a tela não explicar de onde veio o número. Adicionado `explicarReducaoRetaliacaoPsiquica` (`core/retaliacaoPsiquica.ts`, com teste) e um novo prop genérico `explicacaoResultado` no `SalvaguardaDoAlvoModal` (ⓘ "Como foi calculado" abaixo do texto de Sucesso, reaproveitável por qualquer entrega futura que use esse popup com número calculado — CLAUDE.md §6.5) — só ligado em Retaliação Psíquica por ora. `npx tsc -b`, `npm test -- --run` (1031/1031), `npm run build` verdes. **Não testado ao vivo na tela nesta rodada** (sem navegador disponível nesta sessão) — pedir ao Osmar pra confirmar o ⓘ no celular antes de considerar 100% fechado.
 - [x] E5a — Restauração Psiônica (nível 5): card novo em Combate (grupo Psiônico, mesmo padrão "opt-card" de Defesa Psiônica/Mente Aguçada), fora da economia de Ação/Bônus/Reação (meditação de 1 minuto, igual Astúcia Mágica do Bruxo — botão de 3 estados: disponível/já usada/nada a recuperar). Toque recupera TODOS os Dados de Energia Psiônica gastos de uma vez (sem rolar dado), 1x por Descanso Longo (`restauracaoPsionicaUsada`, reseta junto dos outros recursos Psiônicos no Descanso Longo). `core/restauracaoPsionica.ts` novo (`temRestauracaoPsionica`/`podeUsarRestauracaoPsionica`, com testes). `npx tsc -b`, `npm test -- --run` (1033/1033), `npm run build` verdes. **Não testado ao vivo na tela** (sem navegador disponível nesta sessão) — pedir ao Osmar pra confirmar o card em Combate antes de fechar.
 - [x] E5b — Reservas Psiônicas (nível 18): automático em TODA rolagem de Iniciativa (sem escolha do jogador — mesmo molde de Foco Perfeito do Monge, `core/focoPerfeito.ts`), recupera Dados de Energia Psiônica gastos até ter 4, se tiver 3 ou menos. `core/reservasPsionicas.ts` novo (`dadosRecuperadosReservasPsionicas`, com testes). `alternarIniciativa` (CombatTab) ganhou `aplicarReservasPsionicas()` ao lado de `aplicarFocoPerfeito()` — as 2 agora retornam a mensagem (em vez de chamar `setFeedback` cada uma) e são combinadas numa string só, porque o Char Multiclasse tem Monge 15+ E Psiônico 18+ ao mesmo tempo — sem isso, uma mensagem sobrescreveria a outra quando as 2 disparassem juntas na mesma Iniciativa. `npx tsc -b`, `npm test -- --run` (1037/1037), `npm run build` verdes. Osmar confirmou ao vivo: funcionando.
-- [ ] E5c — Surto Psiônico (nv7, precisa SDD próprio — mexe no motor de dado). E5d — Força Vital Incandescente (nv20, idem). E6a-d — subclasses. E7 — Talentos Selvagens.
+- [x] E5c — Surto Psiônico (nível 7): depois de o Osmar sugerir um "funil único" pra evitar esquecer de ligar o Surto numa
+  característica futura, o motor de dado (`RollContext.tsx`) ganhou essa capacidade de forma genérica — ver
+  `DECISOES-CLASSES.md` "Surto Psiônico — funil único" pro padrão completo. Resumo técnico: `RollDadosOptions` ganhou
+  `ehDadoDeEnergiaPsionica`/`forcarGrid`/`onSurtoPsionicoAplicado`; novo `SurtoPsionicoProvider` registrado 1x
+  (`registrarSurtoPsionico`, mesmo padrão de `registrarDadoPsionico`) decide sozinho quando oferecer (nível 7+, tem Dado de
+  Vida, rolagem marcada OU com `dadoPsionico.valores`, 1+ valor ≤3) — `ofertaSurtoPsionico`/`aplicarSurtoPsionico` novos no
+  contexto; card "⚡ Surto Psiônico" novo no `RollOverlay.tsx`, 2º slot independente do card de troca da Mente Aguçada (os
+  dois podem aparecer juntos no mesmo popup). Novo funil `ui/roll/rolarDadoDeEnergiaPsionica.ts` troca `rolarDados` direto
+  em Conexão Telepática, Mente Aguçada (ativação), Retaliação Psíquica, Impulso Telecinético e a rolagem das disciplinas de
+  conjuração (Bio-Retorno etc.) — as 4 disciplinas "+nDx num teste/ataque" (Consciência Expandida etc.) já ganham o Surto de
+  graça, sem nenhuma mudança nelas, por já usarem o mecanismo pré-existente `DadoPsionicoProvider`. `core/surtoPsionico.ts`
+  novo (`temSurtoPsionico`/`dadosElegiveisSurtoPsionico`/`aplicarSurtoPsionicoEmValores`, com testes). `gastar` do provider
+  desconta sempre o MENOR tipo de Dado de Vida disponível (poupa os maiores pra cura). 3 dos 5 call sites migrados (Mente
+  Aguçada, disciplinas de conjuração, Retaliação Psíquica) já tinham ou ganharam o cuidado de só aplicar o resultado ao
+  FECHAR o popup (`confirmarFechamento.aoTocar`) — Conexão Telepática e Impulso Telecinético também passaram a fechar assim
+  (antes aplicavam direto em `onResultado`), pro Surto não poder "sumir" atrás de um valor já aplicado antes de rolar.
+  `npx tsc -b`, `npm test -- --run` (1040/1040), `npm run build` verdes. **Não testado ao vivo na tela** (sem navegador
+  nesta sessão) — essa é a entrega mais arriscada até agora (mexeu no motor de dado em 5 pontos diferentes), pedir ao Osmar
+  pra testar BEM: Conexão Telepática, Mente Aguçada, Retaliação Psíquica, Impulso Telecinético (com dado) e alguma
+  disciplina de conjuração (Bio-Retorno/Insinuação do Id/Pensamentos Destrutivos/Aperfeiçoamento de Precognição) — rolando
+  baixo (1/2/3) pra ver o card "⚡ Surto Psiônico" aparecer, confirmar que o Dado de Vida é descontado (menor tipo) e que o
+  valor final bate com o esperado depois do Surto.
+- [ ] E5d — Força Vital Incandescente (nível 20, precisa SDD próprio — mexe no motor de dado). E6a-d — subclasses. E7 — Talentos Selvagens.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.

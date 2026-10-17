@@ -1090,3 +1090,27 @@ catalogo)` (cada classe com SEU nível e sua ÚNICA subclasse ativa) e `temCarac
 pelo personagem inteiro usa `nivelTotalAtual`. Classe/subclasse nova só registra o ID no dado — nada a editar na ficha. Ataque Extra
 de classes diferentes não soma (`maiorNumeroDeAtaques`). O Char Multiclasse (todas as classes ao mesmo tempo) é o teste: se funciona
 nele, qualquer combinação funciona. Histórico: `aprendizados/sistemas/efeitos-ao-acertar.md`.
+
+## Surto Psiônico — funil único no motor de dado, nunca por característica (2026-10)
+
+Padrão pra qualquer regra que se aplica a TODO dado de um tipo específico, não a uma característica específica (ex.: "após rolar
+qualquer Dado de Energia Psiônica, você pode..."): não espalhar a lógica em cada característica que rola aquele dado — isso cria
+risco real de esquecer numa característica futura (pedido do Osmar, Surto Psiônico, E5c). Em vez disso:
+
+1. O motor de dado (`ui/roll/RollContext.tsx`) ganha um jeito de MARCAR uma rolagem como "esse tipo de dado" (ex.:
+   `RollDadosOptions.ehDadoDeEnergiaPsionica`) e decide SOZINHO, a partir de um provider registrado 1x pela Ficha (`registrarSurtoPsionico`,
+   mesmo padrão de `registrarDadoPsionico`/`registrarSorte`), se oferece a regra — sem quem chama `rolarDados` precisar saber que ela existe.
+2. Um "funil" fino (`ui/roll/rolarDadoDeEnergiaPsionica.ts`) troca a chamada direta de `rolarDados` por uma chamada que já marca a
+   rolagem automaticamente — toda característica NOVA que role esse tipo de dado usa o funil, nunca `rolarDados` direto.
+3. Quando o MESMO tipo de dado já tem um 2º mecanismo pré-existente que o some a outra coisa (aqui: `DadoPsionicoProvider`, o bônus
+   "+nDx" somado a um d20 pelas disciplinas), a regra nova se pluga DIRETO nesse mecanismo também (lendo `estado.dadoPsionico.valores`),
+   sem exigir nenhuma mudança nas características que já usam esse 2º mecanismo — elas ganham a regra de graça.
+4. Quando 2 regras independentes podem oferecer um card no MESMO popup de rolagem (aqui: a troca da Mente Aguçada E o Surto Psiônico),
+   cada uma usa seu PRÓPRIO slot de estado (`ofertaTrocaDeDado` vs. `ofertaSurtoPsionico`) — nunca reaproveitar o mesmo slot pra 2
+   mecânicas, mesmo que o visual seja idêntico (título + card clicável), porque só 1 oferta cabia no slot compartilhado.
+5. Se a característica que rola o dado já tinha o cuidado de só aplicar o resultado ao FECHAR o popup (variável capturada em
+   `onResultado`, aplicada em `confirmarFechamento.aoTocar` — ver "Troca de dado..." abaixo), a regra nova também precisa de um callback
+   (`onSurtoPsionicoAplicado`) atualizando essa MESMA variável — senão o valor aplicado fica o de ANTES da regra nova mudar o dado.
+
+Generaliza pra qualquer "dado especial que N características diferentes rolam" no futuro (ex.: um 2º dado de recurso de outra
+classe) — o padrão é sempre: motor marca o tipo, provider registrado decide se oferece, funil evita esquecer.
