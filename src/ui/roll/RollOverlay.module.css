@@ -463,9 +463,16 @@
   cursor: default;
 }
 
-/* Surto Psiônico (Psiônico nível 7) — card com 2 linhas (ação do
-   jogador + efeito), em vez de 1 frase só, pra separar "o que eu
-   pago" de "o que eu ganho" (pedido do Osmar). */
+/* Surto Psiônico (Psiônico nível 7) — card com o título da própria
+   característica DENTRO dele (não como `.ofertaTitulo` separado, que é
+   só pra rótulo curto de 1 linha) + ação do jogador + efeito, 3 linhas
+   empilhadas e centralizadas — pedido do Osmar: título "preso" ao
+   botão, não boiando solto em cima, com hierarquia clara entre as 3
+   linhas (nome > ação > efeito). */
+.ofertaCardSurto {
+  margin-top: var(--space-4);
+}
+
 .ofertaCardDuasLinhas {
   flex-direction: column;
   align-items: center;
@@ -473,9 +480,15 @@
   text-align: center;
 }
 
+.ofertaCardTitulo {
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
 .ofertaCardAcao {
   font-size: 13px;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .ofertaCardEfeito {

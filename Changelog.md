@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2234
+
+Card do "⚡ Surto Psiônico" reorganizado: o título agora fica dentro
+do próprio card (linha de cima, em destaque), com a ação e o efeito
+empilhados abaixo, tudo centralizado — antes o título ficava solto
+acima do card e a ação parecia ser o título.
+
 ## v202610_2228
 
 Corrigido: o botão "Gastar N Dados..." das Disciplinas Psiônicas pós-

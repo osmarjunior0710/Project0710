@@ -78,6 +78,15 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
   Achado ~8 outros arquivos fora do foco Psiônico com a MESMA combinação (`btn btn-primary` + desabilitar
   condicional) ainda não auditados — anotado em `LICOES-RAPIDAS.md` (1ª ocorrência; se aparecer de novo em
   outro foco, vira regra permanente). `npx tsc -b`, `npm test -- --run` (1040/1040), `npm run build` verdes.
+- [x] E5c.3 — Osmar achou o layout do card de Surto "triste": o título "⚡ Surto Psiônico" ficava boiando
+  solto ACIMA do card roxo (via `.ofertaTitulo`, pensado só pra rótulo curto de 1 linha), e dentro do card
+  a linha de AÇÃO ("Gastar 1 Dado de Vida...") acabava lendo como se fosse o título, com a descrição do
+  efeito como legenda pequena embaixo — sem hierarquia clara. Corrigido: título da característica agora
+  DENTRO do próprio card, como a linha mais proeminente (15px negrito), com a ação (13px) e o efeito (11px,
+  mais apagado) empilhados abaixo — 3 linhas, todas centralizadas (elogiado pelo Osmar: "ficou ótimo pra
+  ler"). `.ofertaCardTitulo`/`.ofertaCardSurto` novos no CSS; estado "já usada" também simplificado pra 1
+  linha só dentro do mesmo card, sem título solto fora. `npx tsc -b`, `npm test -- --run` (1040/1040),
+  `npm run build` verdes.
 - [ ] E5d — Força Vital Incandescente (nível 20, precisa SDD próprio — mexe no motor de dado). E6a-d — subclasses. E7 — Talentos Selvagens.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.

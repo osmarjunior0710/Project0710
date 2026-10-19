@@ -353,28 +353,32 @@ export default function RollOverlay() {
               </>
             );
           })()}
-        {/* Surto Psiônico (Psiônico nível 7) — mesmo padrão visual da
-            troca acima, mas é um 2º slot independente (`ofertaSurtoPsionico`
-            já decide sozinho se oferece) — cobre tanto a rolagem PURA de
-            Dado de Energia Psiônica (`ehDadoDeEnergiaPsionica`) quanto o
-            bônus de dado psiônico somado a um d20 (`dadoPsionico`), por
-            isso não filtra por `estado.tipo` como a troca acima. */}
+        {/* Surto Psiônico (Psiônico nível 7) — 2º slot independente do
+            card de troca acima (`ofertaSurtoPsionico` já decide sozinho
+            se oferece), cobrindo tanto a rolagem PURA de Dado de Energia
+            Psiônica (`ehDadoDeEnergiaPsionica`) quanto o bônus de dado
+            psiônico somado a um d20 (`dadoPsionico`) — por isso não
+            filtra por `estado.tipo` como a troca acima. Título DENTRO do
+            card (não como `ofertaTitulo` separado, que é só pra rótulos
+            curtos de 1 linha) — pedido do Osmar: 3 linhas empilhadas,
+            centralizadas, com hierarquia clara (nome da característica >
+            ação que o jogador toma > efeito). */}
         {estado.fase === 'concluido' && (estado.ehDadoDeEnergiaPsionica || estado.dadoPsionico?.valores) && (
           <>
             {estado.surtoPsionicoUsado ? (
-              <>
-                <div className={styles.ofertaTitulo}>⚡ Surto Psiônico</div>
-                <div className={`${styles.ofertaCard} ${styles.ofertaCardUsada}`}>Já usada nesta rolagem</div>
-              </>
+              <div className={`${styles.ofertaCard} ${styles.ofertaCardUsada} ${styles.ofertaCardSurto}`}>
+                ⚡ Surto Psiônico — já usada nesta rolagem
+              </div>
             ) : (
               ofertaSurtoPsionico && (
-                <>
-                  <div className={styles.ofertaTitulo}>⚡ Surto Psiônico</div>
-                  <div className={`${styles.ofertaCard} ${styles.ofertaCardDuasLinhas}`} onClick={aplicarSurtoPsionico}>
-                    <div className={styles.ofertaCardAcao}>{ofertaSurtoPsionico.titulo}</div>
-                    <div className={styles.ofertaCardEfeito}>{ofertaSurtoPsionico.descricao}</div>
-                  </div>
-                </>
+                <div
+                  className={`${styles.ofertaCard} ${styles.ofertaCardDuasLinhas} ${styles.ofertaCardSurto}`}
+                  onClick={aplicarSurtoPsionico}
+                >
+                  <div className={styles.ofertaCardTitulo}>⚡ Surto Psiônico</div>
+                  <div className={styles.ofertaCardAcao}>{ofertaSurtoPsionico.titulo}</div>
+                  <div className={styles.ofertaCardEfeito}>{ofertaSurtoPsionico.descricao}</div>
+                </div>
               )
             )}
           </>
