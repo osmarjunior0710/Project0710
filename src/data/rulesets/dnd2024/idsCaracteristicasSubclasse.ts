@@ -43,6 +43,8 @@ export const ID_CARACTERISTICA_SUBCLASSE = {
   magiasDoJuramentoDaDevocao: 'Magias do Juramento da Devoção',
   armaSagrada: 'Arma Sagrada',
   resplendorSagrado: 'Resplendor Sagrado',
+  // Psiônico — Psicinético (homebrew, UA 2025)
+  magiasDoPsicinetico: 'Magias do Psicinético',
 } as const;
 
 export type IdCaracteristicaSubclasse = keyof typeof ID_CARACTERISTICA_SUBCLASSE;

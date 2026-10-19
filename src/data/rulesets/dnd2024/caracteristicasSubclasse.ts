@@ -533,4 +533,24 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     tipoAcao: 'Passiva / Estática',
     statusImplementacao: 'codeimplementation',
   },
+  // Psiônico — Psicinético (homebrew, Unearthed Arcana 2025, ver CLAUDE.md
+  // seção 9). "Muralha de Força" do UA é a mesma magia já importada no
+  // catálogo como "Muralha de Energia" (tradução oficial do Livro do
+  // Jogador difere da tradução de fã do UA) — ver sdd/sdd-psionico.md.
+  {
+    classe: 'Psiônico',
+    subclasse: 'Psicinético',
+    nivel: 3,
+    nome: 'Magias do Psicinético',
+    descricao:
+      'Quando você alcança um nível de Psiônico conforme indicado na tabela Magias do Psicinético, você passa a ter sempre as magias listadas preparadas.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'codeimplementation',
+    magiasFixasPorNivel: {
+      3: ['Nuvem de Adagas', 'Levitação', 'Escudo Arcano', 'Onda Trovejante'],
+      5: ['Lentidão', 'Esmagamento Telecinético'],
+      7: ['Esfera Resiliente de Otiluke', 'Moldar Rochas'],
+      9: ['Telecinese', 'Muralha de Energia'],
+    },
+  },
 ];

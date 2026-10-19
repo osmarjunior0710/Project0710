@@ -146,6 +146,10 @@ interface MagiasTabProps {
    * preparada, fora do limite normal). Ver
    * `sdd/sdd-paladino-devocao.md` seção 1. */
   magiasJuramentoDaDevocaoAtuais: string[];
+  /** Magias do Psicinético (Psiônico, homebrew UA 2025) — mesmo padrão
+   * de `magiasJuramentoDaDevocaoAtuais` (lista fixa por nível, sempre
+   * preparada, fora do limite normal). Ver `sdd/sdd-psionico.md`. */
+  magiasPsicineticoAtuais: string[];
   /** Magias de Classe Sempre Preparadas (Destruição do Paladino,
    * Montaria Fiel...) — já resolvidas em `Magia[]` pelo hook (mesmo
    * padrão de `magiasPactoDoInferoAtuais`, mas o hook já traz pronto).
@@ -391,6 +395,7 @@ export default function MagiasTab({
   magiasDescobertasMagicasAtuais,
   magiasPactoDoInferoAtuais,
   magiasJuramentoDaDevocaoAtuais,
+  magiasPsicineticoAtuais,
   magiasEspecieAtuais,
   magiasSubclasseAtuais,
   magiasTalentoOrigemAtuais,
@@ -527,6 +532,7 @@ export default function MagiasTab({
   const descobertasMagicas = magiasPreparadasDoPersonagem(magiasDescobertasMagicasAtuais);
   const pactoDoInfero = magiasPreparadasDoPersonagem(magiasPactoDoInferoAtuais);
   const juramentoDaDevocao = magiasPreparadasDoPersonagem(magiasJuramentoDaDevocaoAtuais);
+  const psicinetico = magiasPreparadasDoPersonagem(magiasPsicineticoAtuais);
   const magiasEspecie = magiasPreparadasDoPersonagem(magiasEspecieAtuais);
   const magiasSubclasse = magiasPreparadasDoPersonagem(magiasSubclasseAtuais);
   const magiasTalentoOrigem = magiasPreparadasDoPersonagem(magiasTalentoOrigemAtuais);
@@ -1448,6 +1454,37 @@ export default function MagiasTab({
                   <div
                     className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
                     onClick={() => temAcao && usarMagia(m, 'Paladino')}
+                  >
+                    {temAcao ? 'Usar' : 'Usar (pendência)'}
+                  </div>
+                </div>
+                <div className={styles.spellRowComPillLinha2}>
+                  <PillsMagia magia={m} preferencias={preferenciasPillsMagia} />
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+
+      {psicinetico.length > 0 && (
+        <>
+          <div className="section-title">Magias do Psicinético</div>
+          <div className="label" style={{ marginBottom: 4 }}>
+            Psicinético — sempre preparadas, não contam na conta de Magias Preparadas.
+          </div>
+          {psicinetico.map((m) => {
+            const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
+            const temAcao = usarMagiaTemAcaoAutomatizada(m);
+            return (
+              <div key={m.id} className={styles.spellRowComPill}>
+                <div className={styles.spellRowComPillLinha1}>
+                  <div className={styles.spellName}>
+                    <MagiaComDescricao magia={m} /> {iconesMagia(m)}
+                  </div>
+                  <div
+                    className={`${styles.usarBtn} ${!temAcao ? styles.usarBtnPendencia : semEspaco ? styles.usarBtnDesabilitado : ''}`}
+                    onClick={() => temAcao && usarMagia(m, 'Psiônico')}
                   >
                     {temAcao ? 'Usar' : 'Usar (pendência)'}
                   </div>

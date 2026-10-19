@@ -117,5 +117,21 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
   `npm test -- --run` (1044/1044), `npm run build` verdes. Osmar testou ao vivo e confirmou: "Sucesso, tudo
   funcional" — E5 (a/b/c/d) e a flag `temContextoDeTurno` 100% validados na tela.
 - [ ] E6a-d — subclasses (4, homebrew). E7 — Talentos Selvagens. Com E5 completo, só falta isso pra fechar o foco inteiro.
+  - Começando por **Psicinético** (técnica telecinética, escolhida pelo Osmar). SDD em `sdd/sdd-psionico.md`
+    linhas ~1000-1095 (texto literal do UA) + de-para das 10 magias confirmado contra o catálogo ("Muralha de
+    Força" do UA = "Muralha de Energia" já importado, tradução oficial diferente da tradução de fã do UA).
+  - [x] E6c-a — Magias do Psicinético (nível 3): sempre preparadas, cresce por nível (3/5/7/9), mesmo molde de
+    `magiasJuramentoDaDevocao.ts`. `subclasses.ts` ganhou as 4 subclasses do Psiônico (homebrew: true) — só
+    Psicinético implementada (mesmo padrão do Monge: as outras 3 aparecem mas `subclasseImplementada` ainda
+    não libera). Novo ID `magiasDoPsicinetico` em `idsCaracteristicasSubclasse.ts`; entrada nova em
+    `caracteristicasSubclasse.ts` com `magiasFixasPorNivel: {3: [Nuvem de Adagas, Levitação, Escudo Arcano,
+    Onda Trovejante], 5: [Lentidão, Esmagamento Telecinético], 7: [Esfera Resiliente de Otiluke, Moldar
+    Rochas], 9: [Telecinese, Muralha de Energia]}`. `core/magiasPsicinetico.ts` novo, com testes. Wirado em
+    `useMagiasEConjuracao.ts` (spread em `magiasConjuraveis`, cobre Combate E Magias de uma vez, CLAUDE.md
+    §6.6) e `MagiasTab.tsx` (seção própria "Magias do Psicinético", padrão de Juramento da Devoção).
+    `core/personagemTesteMulticlasse.ts`: subclasse do Psiônico agora é 'Psicinético' (era `null`).
+    `npx tsc -b`, `npm test -- --run` (1054/1054), `npm run build` verdes. **Não testado ao vivo na tela**
+    (sem navegador disponível nesta sessão) — pedir ao Osmar pra confirmar a seção na aba Magias e o picker
+    "Usar Magia" da aba Combate antes de considerar 100% fechado.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.

@@ -45,4 +45,12 @@ export const subclasses: Subclasse[] = [
   { id: 'monge-combatente-da-misericordia', classeId: 'monge', nome: 'Combatente da Misericórdia', homebrew: false },
   { id: 'monge-combatente-das-sombras', classeId: 'monge', nome: 'Combatente das Sombras', homebrew: false },
   { id: 'monge-combatente-dos-elementos', classeId: 'monge', nome: 'Combatente dos Elementos', homebrew: false },
+  // Psiônico é homebrew (Unearthed Arcana 2025, ver CLAUDE.md seção 9) — as 4
+  // subclasses herdam o selo. Só Psicinético está implementada (mesmo padrão
+  // do Monge acima) — as outras 3 aparecem mas ainda não são oferecidas de
+  // verdade (`subclasseImplementada` checa `caracteristicasSubclasse.ts`).
+  { id: 'psionico-metamorfo', classeId: 'psionico', nome: 'Metamorfo', homebrew: true },
+  { id: 'psionico-dobrador-psiquico', classeId: 'psionico', nome: 'Dobrador Psíquico', homebrew: true },
+  { id: 'psionico-psicinetico', classeId: 'psionico', nome: 'Psicinético', homebrew: true },
+  { id: 'psionico-telepata', classeId: 'psionico', nome: 'Telepata', homebrew: true },
 ];

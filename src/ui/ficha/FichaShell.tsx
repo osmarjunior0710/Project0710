@@ -1090,6 +1090,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     mestreDaMorte: mestreDaMorteDisponivel,
     magiasDePactoDoInfero: magiasPactoDoInferoDisponivel,
     magiasDoJuramentoDaDevocao: magiasJuramentoDaDevocaoDisponivel,
+    magiasDoPsicinetico: magiasPsicineticoDisponivel,
     armaSagrada: armaSagradaDisponivel,
     resplendorSagrado: resplendorSagradoDisponivel,
     palavrasDeInterrupcao: palavrasDeInterrupcaoDisponivel,
@@ -1109,6 +1110,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'mestreDaMorte',
     'magiasDePactoDoInfero',
     'magiasDoJuramentoDaDevocao',
+    'magiasDoPsicinetico',
     'armaSagrada',
     'resplendorSagrado',
     'palavrasDeInterrupcao',
@@ -1172,6 +1174,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     sentidos,
     magiasPactoDoInferoAtuais,
     magiasJuramentoDaDevocaoAtuais,
+    magiasPsicineticoAtuais,
     magiasEspecieAtuais,
     magiasSubclasseAtuais,
     magiasTalentoOrigemAtuais,
@@ -1216,6 +1219,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     mestreDaMorteDisponivel,
     magiasPactoDoInferoDisponivel,
     magiasJuramentoDaDevocaoDisponivel,
+    magiasPsicineticoDisponivel,
   });
   const modAcertoConjuracao = calcularModAcertoConjuracao(selecao, classe, nivelTotalAtual);
   const resumoConjuracao = calcularResumoConjuracao(selecao, classe, nivelTotalAtual);
@@ -3754,6 +3758,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onUsarRitualRapido={usarRitualRapido}
             magiasPactoDoInferoAtuais={magiasPactoDoInferoAtuais}
             magiasJuramentoDaDevocaoAtuais={magiasJuramentoDaDevocaoAtuais}
+            magiasPsicineticoAtuais={magiasPsicineticoAtuais}
             magiasEspecieAtuais={magiasEspecieAtuais}
             magiasSubclasseAtuais={magiasSubclasseAtuais}
             magiasTalentoOrigemAtuais={magiasTalentoOrigemAtuais}

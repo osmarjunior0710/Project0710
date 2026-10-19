@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0833
+
+Primeira entrega do Psicinético (subclasse homebrew do Psiônico, UA 2025):
+a partir do nível 3, você sempre tem preparadas Nuvem de Adagas,
+Levitação, Escudo Arcano e Onda Trovejante (e mais magias nos níveis 5,
+7 e 9) — aparecem tanto na aba Magias quanto no painel "Usar Magia" da
+aba Combate.
+
 ## v202610_0042
 
 Os botões da Força Vital Incandescente agora mostram quantos Dados de
