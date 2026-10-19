@@ -5,6 +5,15 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0022
+
+Força Vital Incandescente (Psiônico, nível 20) ligada: ao rolar um Dado
+de Energia Psiônica (em qualquer característica da classe), card novo
+oferece gastar 1 ou 2 Dados de Vida pra rolar dado(s) extra e somar ao
+total — 1x por turno. Com isso, **a classe Psiônico tem todas as
+características de nível (E1-E5) implementadas** — só faltam as
+subclasses.
+
 ## v202610_2354
 
 Corrigido bug latente: o Modo de Ataque da Mente Aguçada podia ficar

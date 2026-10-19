@@ -1259,6 +1259,9 @@ export default function CombatTab({
       onSurtoPsionicoAplicado: (novoTotal) => {
         totalRolado = novoTotal;
       },
+      onForcaVitalAplicada: (novoTotal) => {
+        totalRolado = novoTotal;
+      },
       confirmarFechamento: {
         aoTocar: () => setRetaliacaoPsiquicaPendente({ dadoRolado: totalRolado, modInt: modIntAtual }),
       },
@@ -1392,6 +1395,9 @@ export default function CombatTab({
       onSurtoPsionicoAplicado: (novoTotal) => {
         totalRolado = novoTotal;
       },
+      onForcaVitalAplicada: (novoTotal) => {
+        totalRolado = novoTotal;
+      },
       confirmarFechamento: {
         aoTocar: () => conexaoTelepatica.onResultado(alcanceConexaoTelepatica(totalRolado)),
       },
@@ -1425,6 +1431,9 @@ export default function CombatTab({
         totalRolado = total;
       },
       onSurtoPsionicoAplicado: (novoTotal) => {
+        totalRolado = novoTotal;
+      },
+      onForcaVitalAplicada: (novoTotal) => {
         totalRolado = novoTotal;
       },
       confirmarFechamento: {

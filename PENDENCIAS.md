@@ -1629,6 +1629,15 @@ Função única pronta (`core/deslocamento.ts`, ver `aprendizados/sistemas/deslo
 - **Bônus só na ação Correr** (Corrida Aprimorada, Agressor, Psicinético) — o app não modela a ação Correr como estado.
 - **Fontes de classe/subclasse não implementadas** (Paladino/Glória, Guardião): 1 item na lista quando existirem.
 
+## Força Vital Incandescente — dados extra sem motor 3D
+
+Os Dados de Energia Psiônica extra rolados pela Força Vital Incandescente (Psiônico nível 20, E5d) usam só o fallback
+2D (`Math.random()`), mesmo quando o personagem tem o motor 3D ativo — diferente do resto da rolagem (dados do grid
+principal, que usam física de verdade quando disponível). Trava estruturalmente: dar física a esses dados exigiria
+estender `lancarGrupos`/a integração com `@3d-dice/dice-box` pra "somar dados a uma rolagem 'dados' já em andamento"
+(hoje essa integração só existe pro bônus de dado psiônico somado a um d20, via `usarDadoPsionico`) — mais trabalho de
+motor, não decisão de design em aberto. Revisitar quando o Osmar sentir falta da física nesses dados específicos.
+
 ## Catálogo de magias — Animar Mortos
 
 - `Animar Mortos` (oficial) não tem entrada própria em `magias.ts`: o texto ficou colado no fim da descrição de outra magia (problema de extração da planilha). O Psiônico usa a cópia da aba UA Psion; as classes oficiais (Clérigo, Mago) ainda não têm a magia. Corrigir na planilha e reimportar.

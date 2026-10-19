@@ -100,6 +100,23 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
   `onMenteAgucadaTrocada` removido de `MagiasTab.tsx` (ficou morto). `npx tsc -b`, `npm test -- --run` (1041/1041),
   `npm run build` verdes. **Não testado ao vivo** — pedir ao Osmar pra confirmar que o Modo de Ataque continua
   funcionando igual na aba Combate (não deveria ter mudado nada visível lá).
-- [ ] E5d — Força Vital Incandescente (nível 20, precisa SDD próprio — mexe no motor de dado). E6a-d — subclasses. E7 — Talentos Selvagens.
+- [x] E5d — Força Vital Incandescente (nível 20): mesma superfície do Surto Psiônico (`ehDadoDeEnergiaPsionica` OU
+  `dadoPsionico`), mas rola dado(s) NOVO(S) de verdade (2D, sem motor 3D nesta 1ª versão — ver pendência abaixo) em vez
+  de só transformar os já rolados, e respeita "1x por turno" de verdade usando a flag `temContextoDeTurno` preparada no
+  E5d-prep. Card com 2 botões ("Gastar 1 Dado de Vida"/"Gastar 2 Dados de Vida", o 2º só aparece se tiver 2+ restantes;
+  card inteiro some com 0 restantes). `core/forcaVitalIncandescente.ts` novo (`temForcaVitalIncandescente`/
+  `maximoDadosDeVidaForcaVital`, com testes). Motor (`RollContext.tsx`) ganhou `ForcaVitalIncandescenteProvider`
+  (registrado 1x, mesmo padrão de `SurtoPsionicoProvider`), `RollState.forcaVital`/`temContextoDeTurno`,
+  `ofertaForcaVitalIncandescente`/`aplicarForcaVitalIncandescente`/`onForcaVitalAplicada` novos — "tem contexto de
+  turno" lido POR ROLAGEM: grid usa `estado.temContextoDeTurno` (ausente = true, os 4 pontos que usam o funil sem
+  passar nada são exclusivos da aba Combate), `dadoPsionico` reaproveita `opcao.limitaPorTurno` (já existia pra "1
+  disciplina por turno"). `gastarDadosDeVida` desconta o(s) MENOR(ES) tipo(s) primeiro, cruzando tipos se precisar.
+  Todos os 5 pontos que usam o funil (`rolarDadoDeEnergiaPsionica`) ganharam `onForcaVitalAplicada` (mesmo cuidado de
+  staleness do Surto). `npx tsc -b`, `npm test -- --run` (1044/1044), `npm run build` verdes. **Pendência conhecida,
+  registrada em PENDENCIAS.md**: os dados extra rolam só em 2D (sem física do motor 3D) — diferente do resto do app,
+  que já usa 3D quando ativo; aceitável pra 1ª entrega, mas inconsistente visualmente. **Não testado ao vivo** — pedir
+  ao Osmar pra testar com Dados de Vida 0/1/2+ disponíveis, e também fora de combate (aba Magias) pra confirmar que o
+  card sempre aparece (sem travar "1x por turno" indevidamente).
+- [ ] E6a-d — subclasses (4, homebrew). E7 — Talentos Selvagens. Com E5 completo, só falta isso pra fechar o foco inteiro.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.

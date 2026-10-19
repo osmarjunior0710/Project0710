@@ -228,8 +228,8 @@ export const caracteristicasClassePsionico: CaracteristicaClasse[] = [
     nivel: 20,
     nome: 'Força Vital Incandescente',
     descricao:
-      'Você queima sua força vital para alcançar poderes psíquicos superiores. Uma vez por turno, ao rolar um ou mais Dados de Energia Psiônica para uma habilidade Psion ou Disciplina Psiônica, você pode gastar um ou dois de seus Dados de Pontos de Vida. Para cada Dado de Pontos de Vida gasto, role um Dado de Energia Psiônica adicional e some os números rolados ao total. Essa rolagem não consome o Dado de Energia Psiônica.',
+      'Você queima sua força vital para alcançar poderes psíquicos superiores. Uma vez por turno, ao rolar um ou mais Dados de Energia Psiônica para uma habilidade Psion ou Disciplina Psiônica, você pode gastar um ou dois de seus Dados de Pontos de Vida. Para cada Dado de Pontos de Vida gasto, role um Dado de Energia Psiônica adicional e some os números rolados ao total. Essa rolagem não consome o Dado de Energia Psiônica.\n\nNota do app: card com 2 botões ("+1"/"+2" Dado de Vida) aparece sozinho dentro do popup de qualquer rolagem de Dado de Energia Psiônica (puro ou somado a um teste/ataque), 1x por turno — fora de um contexto de turno (conjuração livre pela aba Magias), sempre oferece.',
     tipoAcao: 'Grátis',
-    statusImplementacao: PH,
+    statusImplementacao: 'codeimplementation',
   },
 ];

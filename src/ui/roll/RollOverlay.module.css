@@ -463,15 +463,20 @@
   cursor: default;
 }
 
+/* Espaço extra acima de um 2º/3º bloco de oferta no mesmo popup (ex.:
+   Surto Psiônico e Força Vital Incandescente podem aparecer juntos) —
+   nome herdado do Surto, reaproveitado por qualquer oferta psiônica
+   nova que precise do mesmo respiro. */
+.ofertaCardSurto {
+  margin-top: var(--space-4);
+}
+
 /* Surto Psiônico (Psiônico nível 7) — card com o título da própria
    característica DENTRO dele (não como `.ofertaTitulo` separado, que é
    só pra rótulo curto de 1 linha) + ação do jogador + efeito, 3 linhas
    empilhadas e centralizadas — pedido do Osmar: título "preso" ao
    botão, não boiando solto em cima, com hierarquia clara entre as 3
    linhas (nome > ação > efeito). */
-.ofertaCardSurto {
-  margin-top: var(--space-4);
-}
 
 .ofertaCardDuasLinhas {
   flex-direction: column;

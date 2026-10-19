@@ -438,6 +438,8 @@ export interface PersonagemSalvo {
   /** `true` = "Modo de Ataque" da Mente Aguçada já usado NESTE turno (1x por
    * turno) — reseta no Fim do Turno, igual `apiceGolpesUsadoTurno`. */
   menteAgucadaUsadaNoTurno?: boolean;
+  /** `true` = Força Vital Incandescente (Psiônico nível 20) já usada NESTE turno (1x por turno) — reseta no Fim do Turno. */
+  forcaVitalUsadaNoTurno?: boolean;
   /** `true` = Golpes Potencializados do Ápice Elemental (Monge/Elementos nível 17) já usado NESTE
    * turno — reseta no Fim do Turno. */
   apiceGolpesUsadoTurno?: boolean;

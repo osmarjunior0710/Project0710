@@ -224,11 +224,26 @@ export interface RollState {
    * `rolarDadoDeEnergiaPsionica` (`ui/roll/`), nunca numa chamada de
    * `rolarDados` direta. */
   ehDadoDeEnergiaPsionica?: boolean;
+  /** Só relevante com `ehDadoDeEnergiaPsionica: true` — `false` =
+   * rolagem sem conceito de turno (ex.: conjuração livre pela aba
+   * Magias). Ausente/`undefined` = `true` (os outros 4 pontos que usam
+   * o funil — Conexão Telepática, Mente Aguçada, Retaliação Psíquica,
+   * Impulso Telecinético — são exclusivos da aba Combate, sempre têm
+   * turno). Usado por Força Vital Incandescente pra decidir se trava
+   * "1x por turno" de verdade (ver `DECISOES-CLASSES.md` "Efeito '1x
+   * por turno' ligado a conjuração"). */
+  temContextoDeTurno?: boolean;
   /** `true` = Surto Psiônico já foi usado nesta rolagem (grid de Dado
    * de Energia OU bônus de dado psiônico somado a um d20) — só 1x. */
   surtoPsionicoUsado?: boolean;
   /** Ver `RollDadosOptions.onSurtoPsionicoAplicado`. */
   onSurtoPsionicoAplicado?: ((novoTotal: number) => void) | null;
+  /** Preenchido quando a Força Vital Incandescente já foi aplicada
+   * NESTA rolagem (`quantidade`/`valores` dos dados extra rolados) —
+   * bloqueia reaplicar na mesma rolagem, mesmo sem contexto de turno. */
+  forcaVital?: { quantidade: 1 | 2; valores: number[] } | null;
+  /** Ver `RollDadosOptions.onForcaVitalAplicada`. */
+  onForcaVitalAplicada?: ((novoTotal: number) => void) | null;
   /** `true` = esta rolagem usou o motor 3D (física de verdade,
    * `@3d-dice/dice-box`) em vez de `Math.random()` — Fase B do dado 3D
    * (`sdd/sdd-dado-3d.md`). Pra 'd20': cobre o d20 simples E o 2º dado
@@ -403,6 +418,33 @@ export interface SurtoPsionicoProvider {
   gastar: () => void;
 }
 
+/** Força Vital Incandescente (Psiônico nível 20, E5d) — "1x por turno,
+ * ao rolar 1+ Dado de Energia Psiônica, gaste 1 ou 2 Dados de Vida:
+ * role 1 Dado de Energia Psiônica ADICIONAL por Dado de Vida gasto e
+ * some ao total (sem gastar o Dado de Energia)". Mesma superfície do
+ * Surto (`ehDadoDeEnergiaPsionica` OU `dadoPsionico`), mas com 2
+ * diferenças: (1) rola dado(s) NOVO(S) em vez de só transformar os já
+ * rolados; (2) trava "1x por turno" de verdade — `usadaNoTurno` só
+ * importa quando `temContextoDeTurno` é `true` (ver
+ * `DisciplinaPosConjuracaoPendente.temContextoDeTurno`,
+ * `DECISOES-CLASSES.md` "Efeito '1x por turno' ligado a conjuração");
+ * sem contexto de turno (aba Magias), sempre oferece e nunca trava. */
+export interface ForcaVitalIncandescenteProvider {
+  disponivel: boolean;
+  usadaNoTurno: boolean;
+  /** Quantos Dados de Vida dá pra oferecer AGORA (0/1/2) — ver
+   * `maximoDadosDeVidaForcaVital`. */
+  maximo: 0 | 1 | 2;
+  /** Gasta `quantidade` Dados de Vida (menor tipo disponível primeiro,
+   * repetido pra cada um) — sem rolar nada, só consome. */
+  gastarDadosDeVida: (quantidade: 1 | 2) => void;
+  /** Marca "usada neste turno" — quem chama (`aplicarForcaVitalIncandescente`)
+   * só invoca isso quando a rolagem atual TEM contexto de turno (ver
+   * `RollState.temContextoDeTurno`/`DadoPsionicoOpcao.limitaPorTurno`),
+   * então o provider pode persistir sempre que for chamado. */
+  marcarUsadaNoTurno: () => void;
+}
+
 /** Sortudo (Talento de Origem): Pontos de Sorte pra dar Vantagem num d20 DEPOIS de ver o resultado —
  * rola um 2º d20 e fica com o maior (mesma mecânica da Vantagem escolhida pós-rolagem). `usar` devolve
  * `false` se não havia ponto pra gastar. */
@@ -476,6 +518,8 @@ export interface RollDadosOptions {
   /** Ver `RollState.ehDadoDeEnergiaPsionica` — setado só pelo funil
    * `rolarDadoDeEnergiaPsionica` (`ui/roll/`). */
   ehDadoDeEnergiaPsionica?: boolean;
+  /** Ver `RollState.temContextoDeTurno`. */
+  temContextoDeTurno?: boolean;
   /** Força o grid de `dadosIndividuais` mesmo com 1 dado só (sem
    * `gruposExtras`) — o funil de Dado de Energia Psiônica usa isso pra
    * garantir que a oferta de Surto Psiônico apareça mesmo numa
@@ -491,6 +535,9 @@ export interface RollDadosOptions {
    * por quem chama, então não tem como ler o valor novo de outro
    * jeito). Nunca dispara se não havia oferta válida. */
   onSurtoPsionicoAplicado?: (novoTotal: number) => void;
+  /** Mesmo motivo de `onSurtoPsionicoAplicado`, pra Força Vital
+   * Incandescente (soma dado(s) NOVO(S) ao total). */
+  onForcaVitalAplicada?: (novoTotal: number) => void;
   /** Quebra do dado base/Aprimoramento de Truque/Upcast (dano/cura de
    * magia, B8) — mesmo formato do "ⓘ" de CA/perícia/ataque, mas com
    * notação de dado em vez de número resolvido (ver
@@ -610,6 +657,16 @@ interface RollContextValue {
   /** Aplica o Surto (todo valor ≤3 vira 4) e gasta 1 Dado de Vida —
    * sem efeito sem oferta válida. */
   aplicarSurtoPsionico: () => void;
+  /** Força Vital Incandescente (Psiônico nível 20) — ver
+   * `ForcaVitalIncandescenteProvider`. `ofertaForcaVitalIncandescente`
+   * já decide sozinho SE oferece e até quantos Dados de Vida (1 ou 2)
+   * — `null` = não mostra nada. */
+  ofertaForcaVitalIncandescente: { max: 1 | 2 } | null;
+  registrarForcaVitalIncandescente: (provider: ForcaVitalIncandescenteProvider | null) => void;
+  /** Gasta `quantidade` Dados de Vida, rola `quantidade` Dados de
+   * Energia Psiônica NOVOS e soma ao total — sem efeito sem oferta
+   * válida ou `quantidade` maior que o oferecido. */
+  aplicarForcaVitalIncandescente: (quantidade: 1 | 2) => void;
   /** Sobrevivente Disciplinado (Monge nível 14) — ver `SobreviventeDisciplinadoProvider`. */
   sobreviventeDisciplinadoDisponivel: boolean;
   registrarSobreviventeDisciplinado: (provider: SobreviventeDisciplinadoProvider | null) => void;
@@ -938,8 +995,10 @@ export function RollProvider({ children }: { children: ReactNode }) {
       rerollEscolhido,
       ofertaTrocaDeDado,
       ehDadoDeEnergiaPsionica,
+      temContextoDeTurno,
       forcarGrid,
       onSurtoPsionicoAplicado,
+      onForcaVitalAplicada,
       explicacaoMod,
       onResultado,
       confirmarFechamento,
@@ -1044,8 +1103,11 @@ export function RollProvider({ children }: { children: ReactNode }) {
           ofertaTrocaDeDado: ofertaTrocaDeDado ?? null,
           ofertaTrocaDeDadoUsada: false,
           ehDadoDeEnergiaPsionica,
+          temContextoDeTurno,
           surtoPsionicoUsado: false,
           onSurtoPsionicoAplicado: onSurtoPsionicoAplicado ?? null,
+          onForcaVitalAplicada: onForcaVitalAplicada ?? null,
+          forcaVital: null,
           explicacaoMod,
           motor3D: viaMotor3D,
           confirmarFechamento,
@@ -1398,6 +1460,85 @@ export function RollProvider({ children }: { children: ReactNode }) {
     }
   }, [surtoPsionicoProvider, ofertaSurtoPsionico, estado]);
 
+  // Força Vital Incandescente (Psiônico nível 20, E5d) — ver
+  // `ForcaVitalIncandescenteProvider`. Mesma superfície do Surto
+  // (grid OU `dadoPsionico`), mas rola dado(s) NOVO(S) de verdade (2D —
+  // sem física/motor 3D nesta 1ª versão, ver EmDev.md) em vez de só
+  // transformar os já rolados, e respeita "1x por turno" de verdade. O
+  // "tem contexto de turno" é lido POR ROLAGEM (não do provider, que é
+  // registrado 1x): grid usa `estado.temContextoDeTurno` (`undefined` =
+  // true, os 4 pontos que usam o funil sem passar nada são exclusivos
+  // da aba Combate); `dadoPsionico` reaproveita
+  // `opcao.limitaPorTurno`, que já existe pra "1 disciplina por turno"
+  // (`rolagemTemLimiteDeTurno`) e significa a MESMA coisa aqui.
+  const [forcaVitalProvider, setForcaVitalProvider] = useState<ForcaVitalIncandescenteProvider | null>(null);
+  const registrarForcaVitalIncandescente = useCallback(
+    (provider: ForcaVitalIncandescenteProvider | null) => setForcaVitalProvider(provider),
+    [],
+  );
+  function temContextoDeTurnoNaRolagem(e: RollState): boolean {
+    if (e.ehDadoDeEnergiaPsionica) return e.temContextoDeTurno ?? true;
+    if (e.dadoPsionico) return e.dadoPsionico.opcao.limitaPorTurno;
+    return true;
+  }
+  const ofertaForcaVitalIncandescente = (() => {
+    if (!forcaVitalProvider?.disponivel) return null;
+    const max = forcaVitalProvider.maximo;
+    if (max !== 1 && max !== 2) return null;
+    if (!estado || estado.fase !== 'concluido' || estado.forcaVital) return null;
+    if (temContextoDeTurnoNaRolagem(estado) && forcaVitalProvider.usadaNoTurno) return null;
+    const temSurface = (estado.ehDadoDeEnergiaPsionica && estado.dadosIndividuais) || estado.dadoPsionico?.valores;
+    if (!temSurface) return null;
+    return { max };
+  })();
+  const aplicarForcaVitalIncandescente = useCallback(
+    (quantidade: 1 | 2) => {
+      if (!forcaVitalProvider || !ofertaForcaVitalIncandescente || quantidade > ofertaForcaVitalIncandescente.max) return;
+      if (!estado || estado.fase !== 'concluido' || estado.forcaVital) return;
+      const lados =
+        estado.ehDadoDeEnergiaPsionica && estado.dadosIndividuais
+          ? estado.dadosIndividuais[0]?.lados
+          : estado.dadoPsionico?.opcao.lados;
+      if (!lados) return;
+      forcaVitalProvider.gastarDadosDeVida(quantidade);
+      if (temContextoDeTurnoNaRolagem(estado)) forcaVitalProvider.marcarUsadaNoTurno();
+      const novosValores = Array.from({ length: quantidade }, () => 1 + Math.floor(Math.random() * lados));
+      const soma = novosValores.reduce((a, b) => a + b, 0);
+      if (estado.ehDadoDeEnergiaPsionica && estado.dadosIndividuais) {
+        const dadosExtras: DadoIndividual[] = novosValores.map((v, i) => ({
+          id: `fv${i}`,
+          lados: lados as LadosDado,
+          valor: v,
+        }));
+        setEstado((prev) => {
+          if (!prev || !prev.dadosIndividuais) return prev;
+          const novosDados = [...prev.dadosIndividuais, ...dadosExtras];
+          const somaTotal = novosDados.reduce((acc, d) => acc + (typeof d.valor === 'number' ? d.valor : 0), 0);
+          const novoTotal = somaTotal + (prev.mod ?? 0);
+          return { ...prev, dadosIndividuais: novosDados, total: novoTotal, forcaVital: { quantidade, valores: novosValores } };
+        });
+        const novoTotal = (estado.total ?? 0) + soma;
+        estado.onForcaVitalAplicada?.(novoTotal);
+        return;
+      }
+      if (estado.dadoPsionico?.valores) {
+        const novoTotal = (estado.total ?? 0) + soma;
+        setEstado((prev) =>
+          prev && prev.dadoPsionico
+            ? {
+                ...prev,
+                dadoPsionico: { ...prev.dadoPsionico, valores: [...prev.dadoPsionico.valores!, ...novosValores] },
+                total: novoTotal,
+                forcaVital: { quantidade, valores: novosValores },
+              }
+            : prev,
+        );
+        estado.onForcaVitalAplicada?.(novoTotal);
+      }
+    },
+    [forcaVitalProvider, ofertaForcaVitalIncandescente, estado],
+  );
+
   const rolarConfirmacaoCritico = useCallback(() => {
     if (!estado || estado.fase !== 'concluido' || !estado.confirmarAcerto || estado.confirmacaoCritico) return;
     const usar3D = !!estado.motor3D && dado3DAtivo;
@@ -1628,6 +1769,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
         ofertaSurtoPsionico,
         registrarSurtoPsionico,
         aplicarSurtoPsionico,
+        ofertaForcaVitalIncandescente,
+        registrarForcaVitalIncandescente,
+        aplicarForcaVitalIncandescente,
         sortudoDisponivel: sortudoProvider?.disponivel ?? false,
         sortudoRestantes: sortudoProvider?.restantes ?? 0,
         registrarSortudo,

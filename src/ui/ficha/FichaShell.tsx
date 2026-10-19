@@ -99,6 +99,7 @@ import { podeAtivarMenteAgucada, temMenteAgucada } from '../../core/menteAgucada
 import { podeAtivarRetaliacaoPsiquica, temRetaliacaoPsiquica } from '../../core/retaliacaoPsiquica';
 import { podeUsarRestauracaoPsionica, temRestauracaoPsionica } from '../../core/restauracaoPsionica';
 import { temSurtoPsionico } from '../../core/surtoPsionico';
+import { maximoDadosDeVidaForcaVital, temForcaVitalIncandescente } from '../../core/forcaVitalIncandescente';
 import type { DisciplinaPosConjuracaoPendente } from '../../core/conjurarMagia';
 import { rolarDadoDeEnergiaPsionica } from '../roll/rolarDadoDeEnergiaPsionica';
 import { ofertaMenteAgucada } from '../roll/ofertaMenteAgucada';
@@ -297,6 +298,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     registrarSortudo,
     registrarDadoPsionico,
     registrarSurtoPsionico,
+    registrarForcaVitalIncandescente,
     registrarSobreviventeDisciplinado,
     registrarForcaIndomavel,
     estado: rollEmAndamento,
@@ -556,6 +558,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [menteAgucadaAtiva, setMenteAgucadaAtiva] = useState(personagemSalvo.menteAgucadaAtiva ?? false);
   const [menteAgucadaAnotado, setMenteAgucadaAnotado] = useState<number | null>(personagemSalvo.menteAgucadaAnotado ?? null);
   const [menteAgucadaUsadaNoTurno, setMenteAgucadaUsadaNoTurno] = useState(personagemSalvo.menteAgucadaUsadaNoTurno ?? false);
+  // Força Vital Incandescente (Psiônico nível 20, E5d) — "1x por turno".
+  const [forcaVitalUsadaNoTurno, setForcaVitalUsadaNoTurno] = useState(personagemSalvo.forcaVitalUsadaNoTurno ?? false);
   const [apiceGolpesUsadoTurno, setApiceGolpesUsadoTurno] = useState(personagemSalvo.apiceGolpesUsadoTurno ?? false);
   const [passoDestrutivoAtivoTurno, setPassoDestrutivoAtivoTurno] = useState(personagemSalvo.passoDestrutivoAtivoTurno ?? false);
   const [resistenciaApiceElemental, setResistenciaApiceElemental] = useState<string | null>(
@@ -1554,6 +1558,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     menteAgucadaAtiva,
     menteAgucadaAnotado,
     menteAgucadaUsadaNoTurno,
+    forcaVitalUsadaNoTurno,
     apiceGolpesUsadoTurno,
     passoDestrutivoAtivoTurno,
     resistenciaApiceElemental,
@@ -1679,6 +1684,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       menteAgucadaAtiva,
       menteAgucadaAnotado,
       menteAgucadaUsadaNoTurno,
+      forcaVitalUsadaNoTurno,
       apiceGolpesUsadoTurno,
       passoDestrutivoAtivoTurno,
       resistenciaApiceElemental,
@@ -1965,6 +1971,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       onSurtoPsionicoAplicado: (novoTotal) => {
         totalRolado = novoTotal;
       },
+      onForcaVitalAplicada: (novoTotal) => {
+        totalRolado = novoTotal;
+      },
       confirmarFechamento: {
         aoTocar: () => {
           setMenteAgucadaAnotado(totalRolado);
@@ -2073,6 +2082,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setTalhadorUsadoTurno(false);
     setDefesaPsionicaAtiva(false);
     setMenteAgucadaUsadaNoTurno(false);
+    setForcaVitalUsadaNoTurno(false);
   }
 
   /** `classeNome` — omitido = gasta do pool "principal" em foco agora
@@ -2787,6 +2797,42 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     return () => registrarSurtoPsionico(null);
   }, [psionicoEntry?.nivel, reservaDadosDeVida, registrarSurtoPsionico]);
 
+  // Força Vital Incandescente (nível 20, E5d) — registrado 1x, mesmo
+  // padrão do Surto acima. `gastarDadosDeVida` desconta N Dados de
+  // Vida, sempre o(s) MENOR(ES) tipo(s) disponível(is) primeiro
+  // (poupa os maiores pra cura), podendo cruzar tipos se precisar
+  // (ex.: só resta 1 d6 e pede 2 — gasta o d6 e o próximo menor).
+  useEffect(() => {
+    const nivelPsionicoAtual = psionicoEntry?.nivel ?? 0;
+    if (!temForcaVitalIncandescente(nivelPsionicoAtual)) {
+      registrarForcaVitalIncandescente(null);
+      return;
+    }
+    registrarForcaVitalIncandescente({
+      disponivel: true,
+      usadaNoTurno: forcaVitalUsadaNoTurno,
+      maximo: maximoDadosDeVidaForcaVital(totalDeDadosRestantes(reservaDadosDeVida)),
+      gastarDadosDeVida: (quantidade) => {
+        const restantesPorTipo = new Map(reservaDadosDeVida.map((r) => [r.tipo, r.restantes]));
+        const tipos: string[] = [];
+        for (let i = 0; i < quantidade; i++) {
+          const tipo = [...restantesPorTipo.entries()].find(([, r]) => r > 0)?.[0];
+          if (!tipo) break;
+          tipos.push(tipo);
+          restantesPorTipo.set(tipo, (restantesPorTipo.get(tipo) ?? 0) - 1);
+        }
+        if (tipos.length === 0) return;
+        setDadosDeVidaGastos((prev) => {
+          const next = { ...prev };
+          for (const tipo of tipos) next[tipo] = (next[tipo] ?? 0) + 1;
+          return next;
+        });
+      },
+      marcarUsadaNoTurno: () => setForcaVitalUsadaNoTurno(true),
+    });
+    return () => registrarForcaVitalIncandescente(null);
+  }, [psionicoEntry?.nivel, reservaDadosDeVida, forcaVitalUsadaNoTurno, registrarForcaVitalIncandescente]);
+
   /** Dispensar a Disciplina pós-conjuração (E4c) não custa nada — o texto da regra é sempre "você
    * pode gastar", nunca automático. Se essa Disciplina ia virar linha extra num popup de Salvaguarda
    * pendente (`aoResolverSalvaguarda`), ainda assim precisa liberar a Salvaguarda pra abrir — só
@@ -2856,8 +2902,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       quantidade: numDados,
       lados: dadosEnergiaLados,
       mod: 0,
+      temContextoDeTurno: d.temContextoDeTurno,
       onResultado: (soma) => {
         somaFinal = soma;
+      },
+      // Força Vital Incandescente (E5d): mesmo cuidado de staleness, atualiza `somaFinal`.
+      onForcaVitalAplicada: (novoTotal) => {
+        somaFinal = novoTotal;
       },
       confirmarFechamento: { aoTocar: () => aplicar(somaFinal) },
       // Pensamentos Destrutivos causa dano Psíquico direto — qualifica pro

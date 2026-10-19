@@ -55,6 +55,8 @@ export default function RollOverlay() {
     resolverDadoPsionico,
     ofertaSurtoPsionico,
     aplicarSurtoPsionico,
+    ofertaForcaVitalIncandescente,
+    aplicarForcaVitalIncandescente,
     rolarConfirmacaoCritico,
     usarRerollSe1,
     rerollDadoEscolhido,
@@ -379,6 +381,35 @@ export default function RollOverlay() {
                   <div className={styles.ofertaCardAcao}>{ofertaSurtoPsionico.titulo}</div>
                   <div className={styles.ofertaCardEfeito}>{ofertaSurtoPsionico.descricao}</div>
                 </div>
+              )
+            )}
+          </>
+        )}
+        {/* Força Vital Incandescente (Psiônico nível 20) — mesma
+            superfície do Surto acima, mas com 2 botões (1 ou 2 Dados de
+            Vida) em vez de 1 card só, já que o jogador escolhe a
+            quantidade — `ofertaForcaVitalIncandescente.max` diz até
+            quantos oferecer. Travada "1x por turno" (o motor já decide
+            isso em `ofertaForcaVitalIncandescente`/`estado.forcaVital`). */}
+        {estado.fase === 'concluido' && (estado.ehDadoDeEnergiaPsionica || estado.dadoPsionico?.valores) && (
+          <>
+            {estado.forcaVital ? (
+              <div className={`${styles.ofertaCard} ${styles.ofertaCardUsada} ${styles.ofertaCardSurto}`}>
+                🔥 Força Vital Incandescente — já usada nesta rolagem
+              </div>
+            ) : (
+              ofertaForcaVitalIncandescente && (
+                <>
+                  <div className={`${styles.ofertaTitulo} ${styles.ofertaCardSurto}`}>🔥 Força Vital Incandescente</div>
+                  <div className={styles.ofertaCard} onClick={() => aplicarForcaVitalIncandescente(1)}>
+                    Gastar 1 Dado de Vida — rola +1 dado extra
+                  </div>
+                  {ofertaForcaVitalIncandescente.max >= 2 && (
+                    <div className={styles.ofertaCard} onClick={() => aplicarForcaVitalIncandescente(2)}>
+                      Gastar 2 Dados de Vida — rola +2 dados extra
+                    </div>
+                  )}
+                </>
               )
             )}
           </>
