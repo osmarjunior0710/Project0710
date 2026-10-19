@@ -563,4 +563,13 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     tipoAcao: 'Passiva / Estática',
     statusImplementacao: 'codeimplementation',
   },
+  {
+    classe: 'Psiônico',
+    subclasse: 'Psicinético',
+    nivel: 3,
+    nome: 'Telecinese Poderoso',
+    descricao: 'Ao conjurar Mão Mágica, seu alcance aumenta em 9 metros e a mão pode carregar até 9 quilos.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'codeimplementation',
+  },
 ];

@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1947
+
+Psicinético (Psiônico, nível 3) — Telecinese Poderoso: a magia Mãos Mágicas (concedida de
+graça pela classe) agora mostra alcance de 18 metros (em vez de 9) e carrega até 9 quilos,
+com nota explicando o bônus — visível na aba Magias e no picker "Usar Magia" do Combate.
+
 ## v202610_1709
 
 Psicinético (Psiônico, nível 3) — Técnicas Telecinéticas: o Impulso Telecinético ganhou uma

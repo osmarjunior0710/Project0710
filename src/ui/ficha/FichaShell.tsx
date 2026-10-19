@@ -1105,6 +1105,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasDoJuramentoDaDevocao: magiasJuramentoDaDevocaoDisponivel,
     magiasDoPsicinetico: magiasPsicineticoDisponivel,
     tecnicasTelecineticas: temTecnicasTelecineticas,
+    telecinesePoderoso: temTelecinesePoderoso,
     armaSagrada: armaSagradaDisponivel,
     resplendorSagrado: resplendorSagradoDisponivel,
     palavrasDeInterrupcao: palavrasDeInterrupcaoDisponivel,
@@ -1126,6 +1127,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'magiasDoJuramentoDaDevocao',
     'magiasDoPsicinetico',
     'tecnicasTelecineticas',
+    'telecinesePoderoso',
     'armaSagrada',
     'resplendorSagrado',
     'palavrasDeInterrupcao',
@@ -1235,6 +1237,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasPactoDoInferoDisponivel,
     magiasJuramentoDaDevocaoDisponivel,
     magiasPsicineticoDisponivel,
+    temTelecinesePoderoso,
   });
   const modAcertoConjuracao = calcularModAcertoConjuracao(selecao, classe, nivelTotalAtual);
   const resumoConjuracao = calcularResumoConjuracao(selecao, classe, nivelTotalAtual);
@@ -3784,6 +3787,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             magiasPactoDoInferoAtuais={magiasPactoDoInferoAtuais}
             magiasJuramentoDaDevocaoAtuais={magiasJuramentoDaDevocaoAtuais}
             magiasPsicineticoAtuais={magiasPsicineticoAtuais}
+            telecinesePoderosoDisponivel={temTelecinesePoderoso}
             magiasEspecieAtuais={magiasEspecieAtuais}
             magiasSubclasseAtuais={magiasSubclasseAtuais}
             magiasTalentoOrigemAtuais={magiasTalentoOrigemAtuais}

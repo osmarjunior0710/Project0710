@@ -164,6 +164,19 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
     Dado de Energia" + "Nenhum" no efeito extra GASTA 1 pip normalmente (regressão confirmada); "Projétil
     Telecinético" mostra o dano certo na opção E no toast final. `npx tsc -b`, `npm test -- --run`
     (1053/1053), `npm run build` verdes.
+  - [x] E6c-b — Telecinese Poderoso (nível 3): "Ao conjurar Mão Mágica, seu alcance aumenta em 9 metros e
+    a mão pode carregar até 9 quilos." Puramente informativo (o app não rastreia peso carregado pela mão
+    espectral). `core/telecinesePoderoso.ts` novo (`temTelecinesePoderoso`/`aplicarTelecinesePoderosoEmMagia`,
+    com testes) — pega a magia "Mãos Mágicas" (concedida de graça por Telecinese Sutil, classe base) e
+    devolve uma CÓPIA com `alcance: '18 metros'` (9+9) + uma nota no fim explicando o bônus, sem tocar no
+    catálogo global (Bardo/Bruxo/Feiticeiro/Mago continuam com Mãos Mágicas em 9m). Achado testando ao vivo:
+    a nota só entrava na `descricaoCompleta`, mas o popup (`MagiaComDescricao`) sempre abre na aba "Desc.
+    curta" por padrão — ficava contraditório (alcance 18m no topo, texto de baixo sem menção ao bônus,
+    "até 5kg"). Corrigido: a nota entra nas DUAS descrições. Aplicado nos 2 pontos que resolvem
+    `magiasSubclasseAtuais` pra objetos `Magia` (`useMagiasEConjuracao.ts`, que alimenta o picker "Usar
+    Magia" do Combate, E `MagiasTab.tsx` — CLAUDE §6.6). Testado ao vivo (navegador headless, 412px, Char
+    Multiclasse): "Alcance: 18 metros" + nota aparecem certinho nas duas telas. `npx tsc -b`,
+    `npm test -- --run` (1059/1059), `npm run build` verdes.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.
 

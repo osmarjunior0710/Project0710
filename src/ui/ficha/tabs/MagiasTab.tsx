@@ -17,6 +17,7 @@ import {
   type EspacoDeMagiaAtivo,
 } from '../../../core/magiasPersonagem';
 import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classificarMagia';
+import { aplicarTelecinesePoderosoEmMagia } from '../../../core/telecinesePoderoso';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { decidirConjuracao, type DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
 import { cdConjuracao, modAcertoConjuracaoPorClasse, type ResumoConjuracao } from '../../../core/magiasPersonagem';
@@ -177,6 +178,9 @@ interface MagiasTabProps {
   magiasEspecieAtuais: string[];
   /** Truques concedidos por subclasse (ex.: Elementalismo do Monge/Elementos) — `core/magiasSubclasse.ts`. */
   magiasSubclasseAtuais: string[];
+  /** Telecinese Poderoso (Psicinético, nível 3) — ajusta o alcance exibido de Mãos Mágicas
+   * (truque de `magiasSubclasseAtuais`), sem tocar no catálogo global. `core/telecinesePoderoso.ts`. */
+  telecinesePoderosoDisponivel: boolean;
   /** Truque(s) + magia de 1º círculo do talento de Origem "Iniciado em
    * Magia" (Acólito/Guia/Sábio) — fixo desde a criação, mesmo
    * tratamento de "sempre preparada" das outras listas fixas acima.
@@ -398,6 +402,7 @@ export default function MagiasTab({
   magiasPsicineticoAtuais,
   magiasEspecieAtuais,
   magiasSubclasseAtuais,
+  telecinesePoderosoDisponivel,
   magiasTalentoOrigemAtuais,
   magiasTalentoGeralAtuais,
   livroDasSombrasAtuais,
@@ -534,7 +539,9 @@ export default function MagiasTab({
   const juramentoDaDevocao = magiasPreparadasDoPersonagem(magiasJuramentoDaDevocaoAtuais);
   const psicinetico = magiasPreparadasDoPersonagem(magiasPsicineticoAtuais);
   const magiasEspecie = magiasPreparadasDoPersonagem(magiasEspecieAtuais);
-  const magiasSubclasse = magiasPreparadasDoPersonagem(magiasSubclasseAtuais);
+  const magiasSubclasse = magiasPreparadasDoPersonagem(magiasSubclasseAtuais).map((m) =>
+    aplicarTelecinesePoderosoEmMagia(m, telecinesePoderosoDisponivel),
+  );
   const magiasTalentoOrigem = magiasPreparadasDoPersonagem(magiasTalentoOrigemAtuais);
   const magiasTalentoGeral = magiasPreparadasDoPersonagem(magiasTalentoGeralAtuais);
   const livroDasSombras = magiasPreparadasDoPersonagem(livroDasSombrasAtuais);

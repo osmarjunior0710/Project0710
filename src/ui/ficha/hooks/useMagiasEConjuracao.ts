@@ -34,6 +34,7 @@ import { calcularSentidos } from '../../../core/sentidos';
 import { magiasPactoDoInfero } from '../../../core/magiasPactoDoInfero';
 import { magiasJuramentoDaDevocao } from '../../../core/magiasJuramentoDaDevocao';
 import { magiasPsicinetico } from '../../../core/magiasPsicinetico';
+import { aplicarTelecinesePoderosoEmMagia } from '../../../core/telecinesePoderoso';
 import { magiasFixasDaClasseBase } from '../../../core/magiasFixasDeClasse';
 import { truquesConcedidosPorSubclasse } from '../../../core/magiasSubclasse';
 import { truquesEspecie, magiasEspecie as magiasEspecieDoPersonagem } from '../../../core/magiasEspecie';
@@ -113,6 +114,7 @@ export function useMagiasEConjuracao(input: {
   magiasPactoDoInferoDisponivel: boolean;
   magiasJuramentoDaDevocaoDisponivel: boolean;
   magiasPsicineticoDisponivel: boolean;
+  temTelecinesePoderoso: boolean;
 }) {
   const {
     classe,
@@ -144,6 +146,7 @@ export function useMagiasEConjuracao(input: {
     magiasPactoDoInferoDisponivel,
     magiasJuramentoDaDevocaoDisponivel,
     magiasPsicineticoDisponivel,
+    temTelecinesePoderoso,
   } = input;
 
   // Bug real corrigido (Entrega 5f, achado testando o Char Multiclasse
@@ -415,9 +418,13 @@ export function useMagiasEConjuracao(input: {
     // (`paladinoObj`), então mostra igual as magias preparadas normais.
     ...magiasFixasClassePreparadas.map((m): MagiaComClasseOpcional => ({ magia: m, classe: magiasFixasClasseNomeConcedente })),
     ...magiasEspeciePreparadasConjuraveis.map(semClasse),
-    // Truque concedido por subclasse — pill da classe dona (ex.: Monge).
+    // Truque concedido por subclasse — pill da classe dona (ex.: Monge). Telecinese Poderoso
+    // (Psicinético) ajusta só o alcance exibido de Mãos Mágicas, sem tocar no catálogo global.
     ...magiasPreparadasDoPersonagem(magiasSubclasseAtuais).map(
-      (m): MagiaComClasseOpcional => ({ magia: m, classe: classeDaMagiaDeSubclasse(m) }),
+      (m): MagiaComClasseOpcional => ({
+        magia: aplicarTelecinesePoderosoEmMagia(m, temTelecinesePoderoso),
+        classe: classeDaMagiaDeSubclasse(m),
+      }),
     ),
     ...magiasTalentoOrigemPreparadas.map(semClasse),
     ...magiasTalentoGeralPreparadas.map(semClasse),
