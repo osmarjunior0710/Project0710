@@ -177,6 +177,26 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
     Magia" do Combate, E `MagiasTab.tsx` — CLAUDE §6.6). Testado ao vivo (navegador headless, 412px, Char
     Multiclasse): "Alcance: 18 metros" + nota aparecem certinho nas duas telas. `npx tsc -b`,
     `npm test -- --run` (1059/1059), `npm run build` verdes.
+  - [x] E6c-d — Campo de Rebatimento (nível 6): reler o texto bruto mostrou que NÃO é um card de
+    narração simples (ideia descartada de uma conversa antiga) — tem dano real + PV Temporário pro
+    próprio personagem (que o app já rastreia). Implementado no mesmo molde de Retaliação Psíquica:
+    `core/campoDeRebatimento.ts` novo (`temCampoDeRebatimento`/`podeAtivarCampoDeRebatimento`/
+    `danoCampoDeRebatimento`/`danoCampoDeRebatimentoSucesso`/`explicarDanoCampoDeRebatimento`, com
+    testes). Card de Reação novo ("🛡 Campo de Rebatimento", disponível sempre — app não sabe se
+    Escudo Arcano foi conjurado nem se o ataque errou, narrativo) — gasta 1 Dado de Energia, rola,
+    abre `SalvaguardaDoAlvoModal` (Destreza, CD do Psiônico) com Falha=dado+mod.INT / Sucesso=metade
+    já calculados, e os 2 `acoesResultado` aplicam PV Temporário automaticamente
+    (`onGanharPvTempCampoDeRebatimento` → `ganharPvTemporario`, FichaShell) — nunca fica pro jogador
+    fazer na mão. Osmar notou que o card (e o já existente de Retaliação Psíquica) não mostravam
+    quantos Dados de Energia restavam antes de decidir gastar — em vez de repetir o número em cada
+    card, seguimos a sugestão dele e trouxemos o padrão já usado pelo Bardo (linha de pips no topo
+    do grupo, habilidades embaixo): nova linha "Dados de Energia Psiônica (dX)" + `TickPips` no topo
+    do grupo "Psiônico" do painel de Reação (`ReacaoPanelContent.tsx`), reaproveitando os dados que
+    `conexaoTelepatica` já carrega (zero estado novo). Testado ao vivo (navegador headless, 412px,
+    Char Multiclasse, 3D dado desligado): painel de Reação mostra "Psiônico → pips (d12) → Retaliação
+    Psíquica → Campo de Rebatimento" na ordem certa; rolar e escolher "Atacante falhou" aplicou "+14
+    TEMP" no PV e gastou 1 pip de Dado de Energia corretamente. `npx tsc -b`, `npm test -- --run`
+    (1067/1067), `npm run build` verdes.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.
 

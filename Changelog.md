@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2019
+
+Psicinético (Psiônico, nível 6) — Campo de Rebatimento: novo card de Reação (💫 Retaliação
+Psíquica ganhou um vizinho, 🛡 Campo de Rebatimento), que gasta 1 Dado de Energia Psiônica pra
+devolver a força de um ataque que o Escudo Arcano bloqueou — dano calculado na hora e PV
+Temporário aplicado automaticamente. O painel de Reação também ganhou uma linha com os pips de
+Dados de Energia Psiônica restantes, visível sem precisar fechar o painel.
+
 ## v202610_1947
 
 Psicinético (Psiônico, nível 3) — Telecinese Poderoso: a magia Mãos Mágicas (concedida de

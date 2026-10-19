@@ -38,6 +38,11 @@ import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior } from '../../../c
 import { golpeAtordoanteDisponivel } from '../../../core/golpeAtordoante';
 import { formulaRedirecionarDefletir, formulaReducaoDefletirAtaques } from '../../../core/defletirAtaques';
 import { explicarReducaoRetaliacaoPsiquica, reducaoRetaliacaoPsiquica } from '../../../core/retaliacaoPsiquica';
+import {
+  danoCampoDeRebatimento,
+  danoCampoDeRebatimentoSucesso,
+  explicarDanoCampoDeRebatimento,
+} from '../../../core/campoDeRebatimento';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico, dadoExtraPerfurador } from '../../../core/danoCritico';
 import {
@@ -432,6 +437,18 @@ interface CombatTabProps {
     cd: number | null;
     onGastarDado: () => boolean;
   };
+  /** Campo de Rebatimento (Psiônico, subclasse Psicinético, nível 6, E6c-d) — mesmo formato de
+   * `retaliacaoPsiquica`. */
+  campoDeRebatimento: {
+    disponivel: boolean;
+    dadosRestantes: number;
+    dadosLados: number;
+    cd: number | null;
+    onGastarDado: () => boolean;
+  };
+  /** Chamado com o valor de PV Temporário ganho (sempre, independente do resultado da
+   * salvaguarda) — `FichaShell.tsx` aplica via `ganharPvTemporario`. */
+  onGanharPvTempCampoDeRebatimento: (valor: number) => void;
   restauracaoPsionica: {
     disponivel: boolean;
     usada: boolean;
@@ -875,6 +892,8 @@ export default function CombatTab({
   defesaPsionica,
   menteAgucada,
   retaliacaoPsiquica,
+  campoDeRebatimento,
+  onGanharPvTempCampoDeRebatimento,
   restauracaoPsionica,
   armaSagrada,
   resplendorSagrado,
@@ -989,6 +1008,9 @@ export default function CombatTab({
    * `AvisoModal.tsx`, pedido do Osmar (2026-10). */
   const [redirecionamentoDefletir, setRedirecionamentoDefletir] = useState<{ dano: number } | null>(null);
   const [retaliacaoPsiquicaPendente, setRetaliacaoPsiquicaPendente] = useState<{ dadoRolado: number; modInt: number } | null>(
+    null,
+  );
+  const [campoDeRebatimentoPendente, setCampoDeRebatimentoPendente] = useState<{ dadoRolado: number; modInt: number } | null>(
     null,
   );
   const [avisoReacao, setAvisoReacao] = useState<{ titulo: string; texto: string } | null>(null);
@@ -1280,6 +1302,36 @@ export default function CombatTab({
       },
       confirmarFechamento: {
         aoTocar: () => setRetaliacaoPsiquicaPendente({ dadoRolado: totalRolado, modInt: modIntAtual }),
+      },
+    });
+  }
+
+  /** Campo de Rebatimento (Psiônico, subclasse Psicinético, E6c-d) — mesmo padrão de Retaliação
+   * Psíquica acima: Reação, gasta 1 Dado de Energia Psiônica, rola e abre a Salvaguarda de Destreza
+   * com os 2 valores (falha/sucesso) já calculados. PV Temporário é aplicado automaticamente nos 2
+   * desfechos (`onGanharPvTempCampoDeRebatimento`) — o app já rastreia o próprio personagem. */
+  function usarCampoDeRebatimento() {
+    if (!campoDeRebatimento.onGastarDado()) return;
+    onMarcarUsado('reacao');
+    setPainelAberto(null);
+    let totalRolado = 0;
+    rolarDadoDeEnergiaPsionica(rolarDados, {
+      label: 'Campo de Rebatimento — Dado de Energia Psiônica',
+      formula: `1d${campoDeRebatimento.dadosLados}`,
+      quantidade: 1,
+      lados: campoDeRebatimento.dadosLados,
+      mod: 0,
+      onResultado: (total) => {
+        totalRolado = total;
+      },
+      onSurtoPsionicoAplicado: (novoTotal) => {
+        totalRolado = novoTotal;
+      },
+      onForcaVitalAplicada: (novoTotal) => {
+        totalRolado = novoTotal;
+      },
+      confirmarFechamento: {
+        aoTocar: () => setCampoDeRebatimentoPendente({ dadoRolado: totalRolado, modInt: modIntAtual }),
       },
     });
   }
@@ -3457,6 +3509,13 @@ export default function CombatTab({
           onDefletirAtaques={usarDefletirAtaques}
           retaliacaoPsiquica={{ disponivel: retaliacaoPsiquica.disponivel, dadosRestantes: retaliacaoPsiquica.dadosRestantes }}
           onRetaliacaoPsiquica={usarRetaliacaoPsiquica}
+          campoDeRebatimento={{ disponivel: campoDeRebatimento.disponivel, dadosRestantes: campoDeRebatimento.dadosRestantes }}
+          onCampoDeRebatimento={usarCampoDeRebatimento}
+          dadosEnergiaPsionica={{
+            maximo: conexaoTelepatica.dadosMaximo,
+            restantes: conexaoTelepatica.dadosRestantes,
+            lados: conexaoTelepatica.lados,
+          }}
         />
       </SidePanel>
       {lancarNoInfernoDano !== null && (
@@ -3523,6 +3582,38 @@ export default function CombatTab({
           textoFalha={`Reduza ${reducaoRetaliacaoPsiquica(retaliacaoPsiquicaPendente.dadoRolado, retaliacaoPsiquicaPendente.modInt)} do dano recebido — e o atacante sofre ${reducaoRetaliacaoPsiquica(retaliacaoPsiquicaPendente.dadoRolado, retaliacaoPsiquicaPendente.modInt)} de dano Psíquico.`}
           explicacaoResultado={explicarReducaoRetaliacaoPsiquica(retaliacaoPsiquicaPendente.dadoRolado, retaliacaoPsiquicaPendente.modInt)}
           onFechar={() => setRetaliacaoPsiquicaPendente(null)}
+        />
+      )}
+      {campoDeRebatimentoPendente && (
+        <SalvaguardaDoAlvoModal
+          titulo="🛡 Campo de Rebatimento"
+          atributo="Destreza"
+          cd={campoDeRebatimento.cd}
+          explicacaoCd={null}
+          textoSucesso={`O atacante sofre ${danoCampoDeRebatimentoSucesso(campoDeRebatimentoPendente.dadoRolado, campoDeRebatimentoPendente.modInt)} de dano de Força (metade) — você ganha ${danoCampoDeRebatimentoSucesso(campoDeRebatimentoPendente.dadoRolado, campoDeRebatimentoPendente.modInt)} de PV Temporário.`}
+          textoFalha={`O atacante sofre ${danoCampoDeRebatimento(campoDeRebatimentoPendente.dadoRolado, campoDeRebatimentoPendente.modInt)} de dano de Força — você ganha ${danoCampoDeRebatimento(campoDeRebatimentoPendente.dadoRolado, campoDeRebatimentoPendente.modInt)} de PV Temporário.`}
+          explicacaoResultado={explicarDanoCampoDeRebatimento(campoDeRebatimentoPendente.dadoRolado, campoDeRebatimentoPendente.modInt)}
+          acoesResultado={[
+            {
+              label: 'Atacante passou',
+              onClick: () => {
+                onGanharPvTempCampoDeRebatimento(
+                  danoCampoDeRebatimentoSucesso(campoDeRebatimentoPendente.dadoRolado, campoDeRebatimentoPendente.modInt),
+                );
+                setCampoDeRebatimentoPendente(null);
+              },
+            },
+            {
+              label: 'Atacante falhou',
+              onClick: () => {
+                onGanharPvTempCampoDeRebatimento(
+                  danoCampoDeRebatimento(campoDeRebatimentoPendente.dadoRolado, campoDeRebatimentoPendente.modInt),
+                );
+                setCampoDeRebatimentoPendente(null);
+              },
+            },
+          ]}
+          onFechar={() => setCampoDeRebatimentoPendente(null)}
         />
       )}
       {modoTorrentePendente && (

@@ -151,6 +151,14 @@ interface ReacaoPanelContentProps {
    * `CombatTab.tsx`. `disponivel` já cobre ter a disciplina E >=1 Dado de Energia. */
   retaliacaoPsiquica: { disponivel: boolean; dadosRestantes: number };
   onRetaliacaoPsiquica: () => void;
+  /** Campo de Rebatimento (Psiônico, subclasse Psicinético, nível 6, E6c-d) — mesmo formato de
+   * `retaliacaoPsiquica` acima. */
+  campoDeRebatimento: { disponivel: boolean; dadosRestantes: number };
+  onCampoDeRebatimento: () => void;
+  /** Linha de pips "Dados de Energia Psiônica" no topo do grupo Psiônico (pedido do Osmar,
+   * E6c-d) — mesmo padrão da linha de Inspiração de Bardo acima, pra não precisar repetir o
+   * número restante no texto de cada característica que gasta esse recurso. */
+  dadosEnergiaPsionica: { maximo: number; restantes: number; lados: number };
   /** Disciplinas Psiônicas pós-conjuração (Psiônico UA, E4c) — mesmo
    * padrão de `useUsarMagiaPainel.tsx` (Reação também tem conceito de
    * turno, mesmo critério). */
@@ -218,6 +226,9 @@ export default function ReacaoPanelContent({
   onDefletirAtaques,
   retaliacaoPsiquica,
   onRetaliacaoPsiquica,
+  campoDeRebatimento,
+  onCampoDeRebatimento,
+  dadosEnergiaPsionica,
   disciplinasPsionicasConhecidas,
   disciplinaPsionicaBloqueadaNoTurno,
   onDisciplinaPosConjuracaoDisponivel,
@@ -591,6 +602,18 @@ export default function ReacaoPanelContent({
       )
     ) },
     { grupo: 'Psiônico', no: (
+      dadosEnergiaPsionica.maximo > 0 && (
+        <div className={styles.slotCounter}>
+          <span>Dados de Energia Psiônica (d{dadosEnergiaPsionica.lados}):</span>
+          <TickPips
+            total={dadosEnergiaPsionica.maximo}
+            usados={dadosEnergiaPsionica.maximo - dadosEnergiaPsionica.restantes}
+            cor={corDoRecursoDaClasse('Psiônico')}
+          />
+        </div>
+      )
+    ) },
+    { grupo: 'Psiônico', no: (
       retaliacaoPsiquica.disponivel && (
         <div
           className={styles.row}
@@ -603,6 +626,24 @@ export default function ReacaoPanelContent({
               Uma criatura à vista te atacou — gasta 1 Dado de Energia Psiônica, rola e reduz o dano recebido (2×
               resultado + mod. Inteligência, mínimo 2). O atacante ainda faz Salvaguarda de Sabedoria: se falhar, sofre
               esse mesmo valor em dano Psíquico.
+            </div>
+          )}
+        </div>
+      )
+    ) },
+    { grupo: 'Psiônico', no: (
+      campoDeRebatimento.disponivel && (
+        <div
+          className={styles.row}
+          style={campoDeRebatimento.dadosRestantes > 0 ? undefined : { opacity: 0.5, pointerEvents: 'none' }}
+          onClick={onCampoDeRebatimento}
+        >
+          <div className={styles.rowName}>🛡 Campo de Rebatimento</div>
+          {detalhesAtivo && (
+            <div className={styles.rowDesc}>
+              Você conjurou Escudo Arcano em resposta a um ataque e ele errou — gasta 1 Dado de Energia Psiônica, rola
+              e lança a força de volta. O atacante faz Salvaguarda de Destreza: se falhar, sofre dano de Força igual ao
+              resultado + mod. Inteligência; se passar, metade. Você ganha PV Temporário igual a esse dano.
             </div>
           )}
         </div>

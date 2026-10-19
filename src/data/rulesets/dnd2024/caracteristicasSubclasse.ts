@@ -572,4 +572,14 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     tipoAcao: 'Passiva / Estática',
     statusImplementacao: 'codeimplementation',
   },
+  {
+    classe: 'Psiônico',
+    subclasse: 'Psicinético',
+    nivel: 6,
+    nome: 'Campo de Rebatimento',
+    descricao:
+      'Quando você conjura Escudo Arcano em resposta a ser atingido por uma jogada de ataque e faz com que o ataque desencadeador erre, você pode gastar um Dado de Energia Psiônica para lançar a força de volta contra o atacante. O atacante realiza um teste de resistência de Destreza. Role um Dado de Energia Psiônica. Em uma falha, o atacante sofre dano de Força igual ao valor rolado + seu modificador de Inteligência. Em um sucesso, o atacante sofre metade desse dano. Independentemente do resultado do teste, você ganha Pontos de Vida Temporários iguais à quantidade de dano causado.',
+    tipoAcao: 'Reação',
+    statusImplementacao: 'codeimplementation',
+  },
 ];

@@ -97,6 +97,7 @@ import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior, temDefesaSuperior
 import { podeAtivarDefesaPsionica, temDefesaPsionica } from '../../core/defesaPsionica';
 import { podeAtivarMenteAgucada, temMenteAgucada } from '../../core/menteAgucada';
 import { podeAtivarRetaliacaoPsiquica, temRetaliacaoPsiquica } from '../../core/retaliacaoPsiquica';
+import { podeAtivarCampoDeRebatimento } from '../../core/campoDeRebatimento';
 import { podeUsarRestauracaoPsionica, temRestauracaoPsionica } from '../../core/restauracaoPsionica';
 import { temSurtoPsionico } from '../../core/surtoPsionico';
 import { maximoDadosDeVidaForcaVital, temForcaVitalIncandescente } from '../../core/forcaVitalIncandescente';
@@ -1106,6 +1107,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasDoPsicinetico: magiasPsicineticoDisponivel,
     tecnicasTelecineticas: temTecnicasTelecineticas,
     telecinesePoderoso: temTelecinesePoderoso,
+    campoDeRebatimento: temCampoDeRebatimento,
     armaSagrada: armaSagradaDisponivel,
     resplendorSagrado: resplendorSagradoDisponivel,
     palavrasDeInterrupcao: palavrasDeInterrupcaoDisponivel,
@@ -1128,6 +1130,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'magiasDoPsicinetico',
     'tecnicasTelecineticas',
     'telecinesePoderoso',
+    'campoDeRebatimento',
     'armaSagrada',
     'resplendorSagrado',
     'palavrasDeInterrupcao',
@@ -1141,6 +1144,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'raizesDevastadoras',
     'percorrerArvore',
   ]);
+  // Campo de Rebatimento (Psiônico, subclasse Psicinético, nível 6, E6c-d) — mesmo padrão de
+  // Retaliação Psíquica (Reação, gasta 1 Dado de Energia Psiônica, CD de conjuração do Psiônico),
+  // só que gatilho é "você conjurou Escudo Arcano e o ataque errou" (narrativo, fora do alcance
+  // do app) em vez de uma Disciplina Psiônica conhecida.
+  const campoDeRebatimento = {
+    disponivel: temCampoDeRebatimento,
+    dadosRestantes: dadosEnergiaRestantes,
+    dadosLados: dadosEnergiaLados,
+    cd: classePsionico ? (calcularResumoConjuracao(selecao, classePsionico, nivelTotalAtual)?.cd ?? null) : null,
+    onGastarDado: (): boolean => {
+      if (!podeAtivarCampoDeRebatimento(psionicoEntry?.nivel ?? 0, dadosEnergiaRestantes)) return false;
+      setDadosEnergiaPsionicaGasto((v) => v + 1);
+      return true;
+    },
+  };
   // Nível da CLASSE dona de cada característica que escala por ele (nunca o da classe em foco, nunca o total).
   const nivelFuriaImplacavel = donaDaCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.furiaImplacavel)?.nivel ?? 0;
   const nivelVitalidadeDaArvore = donaDaCaracteristicaDeSubclasse(classesCtx, 'vitalidadeDaArvore')?.nivel ?? 0;
@@ -2505,6 +2523,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
   function aplicarBencaoDoTenebroso() {
     const valor = valorBencaoDoTenebroso(carMod, nivelBencaoDoTenebroso);
+    setPvTemporario((atual) => ganharPvTemporario(atual, valor));
+  }
+
+  /** Campo de Rebatimento ganha PV Temporário pro PRÓPRIO personagem (não pro atacante, que o
+   * app não rastreia) — sempre, independente do resultado da salvaguarda. */
+  function ganharPvTempCampoDeRebatimento(valor: number) {
     setPvTemporario((atual) => ganharPvTemporario(atual, valor));
   }
 
@@ -3989,6 +4013,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               onTrocado: () => setMenteAgucadaUsadaNoTurno(true),
             }}
             retaliacaoPsiquica={retaliacaoPsiquica}
+            campoDeRebatimento={campoDeRebatimento}
+            onGanharPvTempCampoDeRebatimento={ganharPvTempCampoDeRebatimento}
             restauracaoPsionica={restauracaoPsionica}
             armaSagrada={{
               disponivel: armaSagradaDisponivel,
