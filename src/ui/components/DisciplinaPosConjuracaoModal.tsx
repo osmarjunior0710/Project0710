@@ -48,13 +48,15 @@ export default function DisciplinaPosConjuracaoModal({
           </div>
         )}
         <div
-          className="btn btn-primary"
-          style={{ marginBottom: 8, opacity: semDados ? 0.5 : 1, pointerEvents: semDados ? 'none' : 'auto' }}
-          onClick={onUsar}
+          className={`btn btn-primary${semDados ? ' btn-disabled' : ''}`}
+          style={{ marginBottom: 8 }}
+          onClick={semDados ? undefined : onUsar}
         >
-          {quantidadeDados > 0
-            ? `Gastar ${custo} Dado${custo > 1 ? 's' : ''} de Energia Psiônica`
-            : 'Usar (mínimo garantido, sem dado pra rolar)'}
+          {semDados
+            ? `Sem Dados de Energia Psiônica suficientes (precisa de ${custo})`
+            : quantidadeDados > 0
+              ? `Gastar ${custo} Dado${custo > 1 ? 's' : ''} de Energia Psiônica`
+              : 'Usar (mínimo garantido, sem dado pra rolar)'}
         </div>
         <div className="btn" onClick={onDispensar}>
           Não usar

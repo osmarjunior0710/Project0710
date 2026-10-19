@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2228
+
+Corrigido: o botão "Gastar N Dados..." das Disciplinas Psiônicas pós-
+conjuração (Bio-Retorno e afins) ficava azul/parecendo disponível
+mesmo sem Dados de Energia Psiônica sobrando — agora fica visualmente
+desabilitado de verdade e explica o motivo.
+
 ## v202610_2219
 
 Card "⚡ Surto Psiônico" ficou mais claro: agora mostra em 2 linhas

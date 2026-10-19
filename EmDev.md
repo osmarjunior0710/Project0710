@@ -68,6 +68,16 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
   `gastar` vai descontar, calculado em `FichaShell.tsx` a partir de `reservaDadosDeVida`) pra montar o texto sem o jogador
   precisar ir atrás da informação em outra tela. `npx tsc -b`, `npm test -- --run` (1040/1040), `npm run build` verdes.
   **Não testado ao vivo ainda** — pedir confirmação do novo card de 2 linhas.
+- [x] E5c.2 — Osmar testou com 0 Dados de Energia Psiônica restantes e achou o botão "Gastar N Dados..." do
+  `DisciplinaPosConjuracaoModal` (Bio-Retorno etc.) ainda parecendo disponível (azul forte) mesmo desabilitado —
+  a lógica já bloqueava o clique (`pointerEvents: 'none'`), mas `opacity: 0.5` sobre `btn-primary` (azul/negrito)
+  continuava lendo como "clicável". Corrigido reaproveitando o padrão de `EscolherEfeitoModal.tsx`: classe
+  `btn-disabled` (opacity 0.35, já usada em outros lugares do app) em vez de opacity solta, + o texto do botão
+  passou a dizer POR QUE está desabilitado ("Sem Dados de Energia Psiônica suficientes") em vez de só repetir o
+  custo. Conferi `ImpulsoTelecineticoModal.tsx`/`CombatTab.tsx` (outros botões Psiônico) — sem o mesmo problema.
+  Achado ~8 outros arquivos fora do foco Psiônico com a MESMA combinação (`btn btn-primary` + desabilitar
+  condicional) ainda não auditados — anotado em `LICOES-RAPIDAS.md` (1ª ocorrência; se aparecer de novo em
+  outro foco, vira regra permanente). `npx tsc -b`, `npm test -- --run` (1040/1040), `npm run build` verdes.
 - [ ] E5d — Força Vital Incandescente (nível 20, precisa SDD próprio — mexe no motor de dado). E6a-d — subclasses. E7 — Talentos Selvagens.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.

@@ -109,3 +109,18 @@ validar um número **contra o estado real** (abrir a Mochila/aba de origem), e t
 equipar uma armadura de verdade e ver o bônus virar "inativo"). Slot vazio pode ser `null` OU `undefined`:
 usar `estaEquipado()` (`core/deslocamento.ts`) em vez de `!== null`. (Na 3ª ocorrência, perguntar ao
 Osmar se vira regra permanente — seção 16 do `CLAUDE.md`.)
+
+## Botão desabilitado com `btn-primary` + opacity ad-hoc ainda parece clicável
+
+1ª ocorrência (2026-10, `DisciplinaPosConjuracaoModal.tsx` — Bio-Retorno sem Dado de Energia Psiônica
+sobrando): o botão usava `className="btn btn-primary"` fixo + `style={{opacity: 0.5}}` condicional — o azul
+forte do `btn-primary` a 50% de opacidade ainda lê como "disponível", o Osmar achou que dava pra usar.
+Corrigido reaproveitando o padrão que `EscolherEfeitoModal.tsx` já usava: `btn-disabled` (opacity 0.35,
+`pointer-events: none`) como classe ADICIONAL condicional, não opacity solta — e o texto do botão passou a
+dizer POR QUE está desabilitado ("Sem Dados de Energia Psiônica suficientes"), não só repetir o custo.
+**Não auditado em outros arquivos ainda** — `ImpulsoTelecineticoModal.tsx`/`CombatTab.tsx` (Psiônico) já
+conferidos, sem o problema; outros ~8 arquivos que combinam `btn btn-primary` com desabilitar condicional
+(`LevelUpShell.tsx`, `RecuperacaoArcanaShell.tsx`, `MemorizarMagiaShell.tsx`, `CompletarMagiasShell.tsx`,
+`AjustarPetShell.tsx`, `AprenderIdiomaShell.tsx`, `LivroDasSombrasShell.tsx`, `PersonagemTesteModal.tsx`,
+`BonusPanelContent.tsx`) ainda não foram conferidos — se o Osmar achar o mesmo problema em algum desses,
+já é a 2ª ocorrência.
