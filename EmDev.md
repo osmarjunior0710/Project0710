@@ -117,6 +117,11 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
   que já usa 3D quando ativo; aceitável pra 1ª entrega, mas inconsistente visualmente. **Não testado ao vivo** — pedir
   ao Osmar pra testar com Dados de Vida 0/1/2+ disponíveis, e também fora de combate (aba Magias) pra confirmar que o
   card sempre aparece (sem travar "1x por turno" indevidamente).
+- [x] E5d.1 — Osmar testou ao vivo e achou o mesmo problema já corrigido no Surto Psiônico (E5c.1): os 2 botões não
+  diziam quantos Dados de Vida sobravam pra decidir se valia a pena. Corrigido igual: `ForcaVitalIncandescenteProvider`
+  ganhou `totalDisponivel` (contagem real, sem o teto de 2 do `maximo`), repassado em `ofertaForcaVitalIncandescente` e
+  mostrado em cada botão ("Gastar 1 Dado de Vida (N disponíveis) — rola +1 dado extra"). `npx tsc -b`,
+  `npm test -- --run` (1044/1044), `npm run build` verdes.
 - [ ] E6a-d — subclasses (4, homebrew). E7 — Talentos Selvagens. Com E5 completo, só falta isso pra fechar o foco inteiro.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.

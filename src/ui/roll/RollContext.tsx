@@ -435,6 +435,12 @@ export interface ForcaVitalIncandescenteProvider {
   /** Quantos Dados de Vida dá pra oferecer AGORA (0/1/2) — ver
    * `maximoDadosDeVidaForcaVital`. */
   maximo: 0 | 1 | 2;
+  /** Quantos Dados de Vida o personagem tem de verdade (sem o teto de
+   * 2 do `maximo`) — mostrado no card (pedido do Osmar, 2026-10: mesmo
+   * motivo do Surto Psiônico — sem isso o jogador não tem como saber
+   * se vale a pena, já que Dado de Vida não tem pips visíveis na aba
+   * Combate). */
+  totalDisponivel: number;
   /** Gasta `quantidade` Dados de Vida (menor tipo disponível primeiro,
    * repetido pra cada um) — sem rolar nada, só consome. */
   gastarDadosDeVida: (quantidade: 1 | 2) => void;
@@ -661,7 +667,7 @@ interface RollContextValue {
    * `ForcaVitalIncandescenteProvider`. `ofertaForcaVitalIncandescente`
    * já decide sozinho SE oferece e até quantos Dados de Vida (1 ou 2)
    * — `null` = não mostra nada. */
-  ofertaForcaVitalIncandescente: { max: 1 | 2 } | null;
+  ofertaForcaVitalIncandescente: { max: 1 | 2; totalDisponivel: number } | null;
   registrarForcaVitalIncandescente: (provider: ForcaVitalIncandescenteProvider | null) => void;
   /** Gasta `quantidade` Dados de Vida, rola `quantidade` Dados de
    * Energia Psiônica NOVOS e soma ao total — sem efeito sem oferta
@@ -1489,7 +1495,7 @@ export function RollProvider({ children }: { children: ReactNode }) {
     if (temContextoDeTurnoNaRolagem(estado) && forcaVitalProvider.usadaNoTurno) return null;
     const temSurface = (estado.ehDadoDeEnergiaPsionica && estado.dadosIndividuais) || estado.dadoPsionico?.valores;
     if (!temSurface) return null;
-    return { max };
+    return { max, totalDisponivel: forcaVitalProvider.totalDisponivel };
   })();
   const aplicarForcaVitalIncandescente = useCallback(
     (quantidade: 1 | 2) => {

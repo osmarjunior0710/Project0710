@@ -402,11 +402,13 @@ export default function RollOverlay() {
                 <>
                   <div className={`${styles.ofertaTitulo} ${styles.ofertaCardSurto}`}>🔥 Força Vital Incandescente</div>
                   <div className={styles.ofertaCard} onClick={() => aplicarForcaVitalIncandescente(1)}>
-                    Gastar 1 Dado de Vida — rola +1 dado extra
+                    Gastar 1 Dado de Vida ({ofertaForcaVitalIncandescente.totalDisponivel} disponíve
+                    {ofertaForcaVitalIncandescente.totalDisponivel > 1 ? 'is' : 'l'}) — rola +1 dado extra
                   </div>
                   {ofertaForcaVitalIncandescente.max >= 2 && (
                     <div className={styles.ofertaCard} onClick={() => aplicarForcaVitalIncandescente(2)}>
-                      Gastar 2 Dados de Vida — rola +2 dados extra
+                      Gastar 2 Dados de Vida ({ofertaForcaVitalIncandescente.totalDisponivel} disponíveis) — rola +2 dados
+                      extra
                     </div>
                   )}
                 </>

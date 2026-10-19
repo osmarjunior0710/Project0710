@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0042
+
+Os botões da Força Vital Incandescente agora mostram quantos Dados de
+Vida você tem disponíveis (ex.: "Gastar 1 Dado de Vida (4
+disponíveis)") — antes não dava pra saber sem sair da tela.
+
 ## v202610_0022
 
 Força Vital Incandescente (Psiônico, nível 20) ligada: ao rolar um Dado

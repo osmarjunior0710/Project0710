@@ -2812,6 +2812,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       disponivel: true,
       usadaNoTurno: forcaVitalUsadaNoTurno,
       maximo: maximoDadosDeVidaForcaVital(totalDeDadosRestantes(reservaDadosDeVida)),
+      totalDisponivel: totalDeDadosRestantes(reservaDadosDeVida),
       gastarDadosDeVida: (quantidade) => {
         const restantesPorTipo = new Map(reservaDadosDeVida.map((r) => [r.tipo, r.restantes]));
         const tipos: string[] = [];
