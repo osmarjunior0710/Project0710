@@ -125,6 +125,7 @@ import {
   danoPensamentosDestrutivos,
 } from '../../core/disciplinasConjuracao';
 import DisciplinaPosConjuracaoModal from '../components/DisciplinaPosConjuracaoModal';
+import InfoTexto from '../components/InfoTexto';
 import { ladosDadoEnergiaPsionica, quantidadeDadosEnergiaPsionica, quantidadeRecuperarFolego, quantidadeFuria, bonusDanoFuria, quantidadeCanalizarDivindade, quantidadeMaosConsagradas, quantidadePontosDeFoco, bonusMovimentoSemArmadura, ladosDadoArtesMarciais, temAuraDeProtecao } from '../../core/recursosClasse';
 import { condicoesDisponiveisMaosConsagradas, custoTotalMaosConsagradas } from '../../core/maosConsagradas';
 import { bonusArmaSagrada, armaElegivelParaArmaSagrada } from '../../core/armaSagrada';
@@ -3563,9 +3564,19 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
                 virando um parágrafo só sem hierarquia nenhuma. */}
             <div>{selecao.especie ?? '—'}</div>
             <div>
-              {classesAtual.length > 1
-                ? classesAtual.map((c) => `${c.classe} ${c.nivel}${c.subclasse ? ` (${c.subclasse})` : ''}`).join(' / ')
-                : `${selecao.classe ?? '—'}${personagem.subclasse ? ` (${personagem.subclasse})` : ''}`}
+              {classesAtual.length >= 3 ? (
+                <>
+                  Multiclasse (Nível {nivelTotalAtual})
+                  <InfoTexto
+                    titulo="Classes"
+                    paragrafos={classesAtual.map((c) => `${c.classe} ${c.nivel}${c.subclasse ? ` (${c.subclasse})` : ''}`)}
+                  />
+                </>
+              ) : classesAtual.length > 1 ? (
+                classesAtual.map((c) => `${c.classe} ${c.nivel}${c.subclasse ? ` (${c.subclasse})` : ''}`).join(' / ')
+              ) : (
+                `${selecao.classe ?? '—'}${personagem.subclasse ? ` (${personagem.subclasse})` : ''}`
+              )}
             </div>
             <div>
               Nível {nivelTotalAtual} · CA {ca ?? '—'}

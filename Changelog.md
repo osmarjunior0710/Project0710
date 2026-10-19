@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1356
+
+Personagem com 3 ou mais classes agora mostra "Multiclasse (Nível total)" no
+topo da Ficha, em vez da lista comprida de todas as classes — toque no ⓘ do
+lado pra ver cada classe/subclasse/nível em um popup.
+
 ## v202610_0905
 
 Corrigido o botão de Voltar (topo da Ficha, do lado do nome) que parava de

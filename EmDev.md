@@ -148,3 +148,14 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
     volta pra lista normalmente. `npx tsc -b`, `npm test -- --run` (1049/1049), `npm run build` verdes.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.
+
+## Mini-fix: header da Ficha — "Multiclasse" com 3+ classes
+
+Fora do foco Psiônico (pedido avulso do Osmar, 2026-10). Com 3 ou mais classes, a linha do header
+(embaixo do nome) virava texto corrido comprido demais ("Classe N (Sub) / Classe N (Sub) / ..."). Agora
+colapsa pra "Multiclasse (Nível {total})" + ⓘ que abre popup (reaproveitado `InfoTexto`, já existia — zero
+componente novo) listando 1 linha por classe, mesmo formato de texto que já era usado (`Classe Nível
+(Subclasse)`). Com 1 ou 2 classes, comportamento inalterado. `src/ui/ficha/FichaShell.tsx`.
+`npx tsc -b`, `npm test -- --run` (1049/1049), `npm run build` verdes. Testado ao vivo (navegador headless,
+360px-equivalente/Pixel 7, Char Multiclasse): "Multiclasse (Nível 160) ⓘ" aparece certo, popup lista as 8
+classes certinho ("Bárbaro 20 (Trilha da Árvore do Mundo)", ..., "Guerreiro 20" sem subclasse).
