@@ -1104,6 +1104,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasDePactoDoInfero: magiasPactoDoInferoDisponivel,
     magiasDoJuramentoDaDevocao: magiasJuramentoDaDevocaoDisponivel,
     magiasDoPsicinetico: magiasPsicineticoDisponivel,
+    tecnicasTelecineticas: temTecnicasTelecineticas,
     armaSagrada: armaSagradaDisponivel,
     resplendorSagrado: resplendorSagradoDisponivel,
     palavrasDeInterrupcao: palavrasDeInterrupcaoDisponivel,
@@ -1124,6 +1125,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'magiasDePactoDoInfero',
     'magiasDoJuramentoDaDevocao',
     'magiasDoPsicinetico',
+    'tecnicasTelecineticas',
     'armaSagrada',
     'resplendorSagrado',
     'palavrasDeInterrupcao',
@@ -3849,6 +3851,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               onUsar: usarConhecimentoDePedras,
             }}
             conexaoTelepatica={conexaoTelepatica}
+            tecnicasTelecineticasDisponivel={temTecnicasTelecineticas}
             picoDeAdrenalina={{
               maximo: usosPicoDeAdrenalinaMaximo,
               restantes: usosPicoDeAdrenalinaRestantes,

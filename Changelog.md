@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1709
+
+Psicinético (Psiônico, nível 3) — Técnicas Telecinéticas: o Impulso Telecinético ganhou uma
+3ª opção de dado ("Com 1d4", nunca gasta recurso) e, quando o alvo falha na resistência, você
+pode impor Impulso (velocidade), Desorientar (sem Ataques de Oportunidade) ou Projétil
+Telecinético (dano de Força já calculado na hora).
+
 ## v202610_1356
 
 Personagem com 3 ou mais classes agora mostra "Multiclasse (Nível total)" no

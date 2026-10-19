@@ -553,4 +553,14 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
       9: ['Telecinese', 'Muralha de Energia'],
     },
   },
+  {
+    classe: 'Psiônico',
+    subclasse: 'Psicinético',
+    nivel: 3,
+    nome: 'Técnicas Telecinéticas',
+    descricao:
+      'Ao usar Propulsão Telecinética, você pode rolar 1d4 e usar o número rolado em vez de gastar um Dado de Energia Psiônica. Além disso, quando um alvo falha no teste de resistência contra sua Propulsão Telecinética, você pode impor um dos seguintes efeitos a esse alvo. Impulso: aumenta a velocidade do alvo em 3 metros até o início do seu próximo turno. Desorientar: o alvo não pode realizar Ataques de Oportunidade até o início do próximo turno. Projétil Telecinético: se o alvo falhar no teste de resistência, sofre dano de Força igual ao valor rolado no dado usado na Propulsão.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'codeimplementation',
+  },
 ];

@@ -57,6 +57,7 @@ import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagi
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { useRoll, type LadosDado } from '../../roll/RollContext';
 import { rolarDadoDeEnergiaPsionica } from '../../roll/rolarDadoDeEnergiaPsionica';
+import { danoProjetilTelecinetico, type EfeitoTecnicasTelecineticas } from '../../../core/tecnicasTelecineticas';
 import { ofertaMenteAgucada } from '../../roll/ofertaMenteAgucada';
 import { alcanceConexaoTelepatica } from '../../../core/conexaoTelepatica';
 import InfoChip from '../../components/InfoChip';
@@ -196,6 +197,11 @@ interface CombatTabProps {
     cdImpulso: number | null;
     onGastarDado: () => boolean;
   };
+  /** Técnicas Telecinéticas (Psiônico, subclasse Psicinético, nível 3) — adiciona a opção de
+   * dado 1d4 (nunca gasta recurso) e a escolha de efeito extra ao Impulso Telecinético acima.
+   * `false` = personagem sem a característica (fluxo de Impulso Telecinético fica idêntico a
+   * antes dela existir). */
+  tecnicasTelecineticasDisponivel: boolean;
   /** Pico de Adrenalina (Orc) — `maximo` 0 = espécie não é Orc. */
   picoDeAdrenalina: RecursoContado;
   /** Ataque de Sopro (Draconato) — `disponivel` `false` = espécie não
@@ -765,6 +771,7 @@ export default function CombatTab({
     onUsar: onUsarConhecimentoDePedras,
   },
   conexaoTelepatica,
+  tecnicasTelecineticasDisponivel,
   picoDeAdrenalina: {
     maximo: usosPicoDeAdrenalinaMaximo,
     restantes: usosPicoDeAdrenalinaRestantes,
@@ -1043,9 +1050,18 @@ export default function CombatTab({
   const [lancarNoInfernoDano, setLancarNoInfernoDano] = useState<number | null>(null);
   const [ataqueDeSoproDano, setAtaqueDeSoproDano] = useState<number | null>(null);
   const [golpeDeEscudoAberto, setGolpeDeEscudoAberto] = useState(false);
-  // Impulso Telecinético (Psiônico, UA): `distancia` em metros; `comDado` = rolou um Dado de Energia (só é gasto se o alvo falhar).
+  // Impulso Telecinético (Psiônico, UA): `distancia` em metros. `origem` 'energia' = rolou um
+  // Dado de Energia Psiônica (só é gasto se o alvo falhar); 'd4' = Técnicas Telecinéticas
+  // (nunca gasta recurso); 'nenhum' = sem dado nenhum (1,5m fixo). `valorDado` = o resultado
+  // bruto do dado usado (energia ou d4), pro Projétil Telecinético de Técnicas Telecinéticas
+  // usar o mesmo valor sem rolar de novo — `null` quando `origem` é 'nenhum'.
   const [impulsoEscolhaAberta, setImpulsoEscolhaAberta] = useState(false);
-  const [impulsoAberto, setImpulsoAberto] = useState<{ comDado: boolean; distancia: number } | null>(null);
+  const [impulsoAberto, setImpulsoAberto] = useState<{
+    origem: 'nenhum' | 'energia' | 'd4';
+    distancia: number;
+    valorDado: number | null;
+  } | null>(null);
+  const [impulsoEfeitoExtraAberto, setImpulsoEfeitoExtraAberto] = useState(false);
   // `aoFechar` = o que continua depois do Ok (ex.: próximo ataque da Torrente).
   // Marca que não fica velha: o 2º ataque da Torrente é disparado de dentro
   // do callback do 1º (closure antiga, `golpeAtordoante.usadoTurno` ainda
@@ -1405,41 +1421,71 @@ export default function CombatTab({
   }
 
   // Impulso Telecinético (Psiônico, UA): Ação Bônus. Tocar no card abre o popup com o texto e as saídas (sem dado / com Dado de
-  // Energia / fechar); a Ação Bônus só é gasta ao escolher uma das 2 primeiras. O dado só é gasto se o alvo falhar (popup da salvaguarda).
+  // Energia / com 1d4, só com Técnicas Telecinéticas); a Ação Bônus só é gasta ao escolher uma delas. O Dado de Energia só é
+  // gasto se o alvo falhar (popup da salvaguarda) — o 1d4 de Técnicas Telecinéticas nunca gasta nada.
   function abrirImpulsoTelecinetico() {
     if (turnState.bonus === 'usada') return;
     setPainelAberto(null);
     setImpulsoEscolhaAberta(true);
   }
 
-  function escolherImpulsoTelecinetico(comDado: boolean) {
+  function escolherImpulsoTelecinetico(origem: 'nenhum' | 'energia' | 'd4') {
     setImpulsoEscolhaAberta(false);
-    if (comDado && conexaoTelepatica.dadosRestantes <= 0) return;
+    if (origem === 'energia' && conexaoTelepatica.dadosRestantes <= 0) return;
     onMarcarUsado('bonus');
-    if (!comDado) {
-      setImpulsoAberto({ comDado: false, distancia: 1.5 });
+    if (origem === 'nenhum') {
+      setImpulsoAberto({ origem: 'nenhum', distancia: 1.5, valorDado: null });
       return;
     }
+    const lados = origem === 'energia' ? conexaoTelepatica.lados : 4;
     let totalRolado = 0;
-    rolarDadoDeEnergiaPsionica(rolarDados, {
+    const opcoesRolagem = {
       label: '💥 Impulso Telecinético — 5 m por ponto',
-      formula: `1d${conexaoTelepatica.lados}`,
+      formula: `1d${lados}`,
       quantidade: 1,
-      lados: conexaoTelepatica.lados,
+      lados,
       mod: 0,
-      onResultado: (total) => {
+      onResultado: (total: number) => {
         totalRolado = total;
       },
-      onSurtoPsionicoAplicado: (novoTotal) => {
-        totalRolado = novoTotal;
-      },
-      onForcaVitalAplicada: (novoTotal) => {
-        totalRolado = novoTotal;
-      },
       confirmarFechamento: {
-        aoTocar: () => setImpulsoAberto({ comDado: true, distancia: 5 * totalRolado }),
+        aoTocar: () => setImpulsoAberto({ origem, distancia: 5 * totalRolado, valorDado: totalRolado }),
       },
-    });
+    };
+    if (origem === 'energia') {
+      rolarDadoDeEnergiaPsionica(rolarDados, {
+        ...opcoesRolagem,
+        onSurtoPsionicoAplicado: (novoTotal: number) => {
+          totalRolado = novoTotal;
+        },
+        onForcaVitalAplicada: (novoTotal: number) => {
+          totalRolado = novoTotal;
+        },
+      });
+    } else {
+      // 1d4 de Técnicas Telecinéticas: dado comum, NÃO é Dado de Energia Psiônica — Surto
+      // Psiônico/Força Vital Incandescente não devem (e não podem, sem o funil) se aplicar aqui.
+      rolarDados(opcoesRolagem);
+    }
+  }
+
+  /** Efeito extra de Técnicas Telecinéticas, oferecido só quando o alvo FALHA na resistência
+   * do Impulso Telecinético. "Nenhum" é o comportamento de sempre (só gasta o Dado de Energia
+   * se foi essa a origem); os outros 3 são a escolha do texto da característica — Projétil
+   * Telecinético reaproveita o `valorDado` já rolado pra Propulsão, nunca rola de novo. */
+  function finalizarEfeitoTecnicasTelecineticas(nomes: string[]) {
+    if (!impulsoAberto) return;
+    const escolhido = nomes[0] as EfeitoTecnicasTelecineticas | undefined;
+    if (impulsoAberto.origem === 'energia') conexaoTelepatica.onGastarDado();
+    if (escolhido === 'Impulso') {
+      setFeedback('💥 Impulso — velocidade do alvo +3m até o início do seu próximo turno.');
+    } else if (escolhido === 'Desorientar') {
+      setFeedback('💥 Desorientar — o alvo não pode fazer Ataques de Oportunidade até o início do seu próximo turno.');
+    } else if (escolhido === 'Projétil Telecinético' && impulsoAberto.valorDado !== null) {
+      setFeedback(`💥 Projétil Telecinético — ${danoProjetilTelecinetico(impulsoAberto.valorDado)} de dano de Força agora.`);
+    }
+    setImpulsoEfeitoExtraAberto(false);
+    setImpulsoAberto(null);
   }
 
   function usarPicoDeAdrenalina() {
@@ -3586,18 +3632,19 @@ export default function CombatTab({
         <ImpulsoTelecineticoModal
           dadosRestantes={conexaoTelepatica.dadosRestantes}
           ladosDado={conexaoTelepatica.lados}
+          tecnicasTelecineticasDisponivel={tecnicasTelecineticasDisponivel}
           onEscolher={escolherImpulsoTelecinetico}
           onFechar={() => setImpulsoEscolhaAberta(false)}
         />
       )}
-      {impulsoAberto && (
+      {impulsoAberto && !impulsoEfeitoExtraAberto && (
         <SalvaguardaDoAlvoModal
           titulo="💥 Impulso Telecinético"
           atributo="Força"
           cd={conexaoTelepatica.cdImpulso}
           explicacaoCd={null}
-          textoFalha={`empurrado (ou puxado, à sua escolha) ${String(impulsoAberto.distancia).replace('.', ',')} m em linha reta${impulsoAberto.comDado ? ' — gasta 1 Dado de Energia Psiônica' : ''}`}
-          textoSucesso={impulsoAberto.comDado ? 'nada acontece — o Dado de Energia NÃO é gasto' : 'nada acontece'}
+          textoFalha={`empurrado (ou puxado, à sua escolha) ${String(impulsoAberto.distancia).replace('.', ',')} m em linha reta${impulsoAberto.origem === 'energia' ? ' — gasta 1 Dado de Energia Psiônica' : ''}`}
+          textoSucesso={impulsoAberto.origem === 'energia' ? 'nada acontece — o Dado de Energia NÃO é gasto' : 'nada acontece'}
           aviso="Alvo: criatura Grande ou menor que você veja a até 9 m. Como o alvo se saiu?"
           acoesResultado={[
             {
@@ -3607,12 +3654,39 @@ export default function CombatTab({
             {
               label: 'Inimigo falhou',
               onClick: () => {
-                if (impulsoAberto.comDado) conexaoTelepatica.onGastarDado();
+                if (tecnicasTelecineticasDisponivel) {
+                  setImpulsoEfeitoExtraAberto(true);
+                  return;
+                }
+                if (impulsoAberto.origem === 'energia') conexaoTelepatica.onGastarDado();
                 setImpulsoAberto(null);
               },
             },
           ]}
           onFechar={() => setImpulsoAberto(null)}
+        />
+      )}
+      {impulsoAberto && impulsoEfeitoExtraAberto && (
+        <EscolherEfeitoModal
+          titulo="💥 Efeito extra (opcional)"
+          opcoes={[
+            { nome: 'Nenhum', texto: 'Não escolhe efeito extra — só o empurrão/puxão de antes.' },
+            { nome: 'Impulso', texto: 'Aumenta a velocidade do alvo em 3 metros até o início do seu próximo turno.' },
+            {
+              nome: 'Desorientar',
+              texto: 'O alvo não consegue fazer Ataques de Oportunidade até o início do seu próximo turno.',
+            },
+            ...(impulsoAberto.valorDado !== null
+              ? [
+                  {
+                    nome: 'Projétil Telecinético',
+                    texto: `Causa ${danoProjetilTelecinetico(impulsoAberto.valorDado)} de dano de Força agora.`,
+                  },
+                ]
+              : []),
+          ]}
+          onEscolher={finalizarEfeitoTecnicasTelecineticas}
+          onFechar={() => finalizarEfeitoTecnicasTelecineticas(['Nenhum'])}
         />
       )}
       {golpeDeEscudoAberto && (

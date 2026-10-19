@@ -146,6 +146,24 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
     memoizando `reservaDadosDeVida` pelas 2 entradas reais (`classesAtual`, `dadosDeVidaGastos`) — quebra o
     ciclo sem tocar nos 2 `useEffect`. Confirmado com o mesmo script de navegador: console limpo, botão
     volta pra lista normalmente. `npx tsc -b`, `npm test -- --run` (1049/1049), `npm run build` verdes.
+  - [x] E6c-c — Técnicas Telecinéticas (nível 3): 2 melhorias ao Impulso Telecinético (Propulsão
+    Telecinética) da classe base. (1) 3ª opção de dado no popup — "Com 1d4" (rolagem comum, NÃO passa pelo
+    funil `rolarDadoDeEnergiaPsionica`, então Surto Psiônico/Força Vital Incandescente não se aplicam a
+    ela, por design — confirmado no código), nunca gasta recurso, distância = 5m × resultado, igual à opção
+    de Dado de Energia. (2) ao "Inimigo falhou" na salvaguarda, abre `EscolherEfeitoModal` (mesmo padrão de
+    Golpe Brutal) com Nenhum/Impulso (+3m veloc.)/Desorientar (sem Ataque de Oportunidade)/Projétil
+    Telecinético (dano de Força = valor do dado da Propulsão, energia OU d4 — Projétil só aparece na lista
+    se algum dado foi rolado). 2 chapéus de QA aplicados antes de codar (agora regra permanente, ver
+    CLAUDE.md §6.4 item 5): QA Técnico confirmou que quem não tem a característica mantém o fluxo de 2
+    opções de sempre; QA Jogador Noob achou 2 furos na proposta original (opção de Dado de Energia não
+    mostrava quantos restavam; texto de Projétil Telecinético não mostrava o dano calculado) — corrigidos
+    antes de codar. `core/tecnicasTelecineticas.ts` novo (`temTecnicasTelecineticas`/
+    `danoProjetilTelecinetico`, com testes). Testado ao vivo (navegador headless, 412px, Char Multiclasse,
+    3D dado desligado pra rolagem instantânea): as 3 opções de dado aparecem com contador de dados
+    restantes; escolher "Com 1d4" rola e NÃO gasta nenhum pip do Dado de Energia Psiônica; escolher "Com
+    Dado de Energia" + "Nenhum" no efeito extra GASTA 1 pip normalmente (regressão confirmada); "Projétil
+    Telecinético" mostra o dano certo na opção E no toast final. `npx tsc -b`, `npm test -- --run`
+    (1053/1053), `npm run build` verdes.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.
 

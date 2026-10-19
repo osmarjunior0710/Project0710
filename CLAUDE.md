@@ -389,17 +389,30 @@ histórico em `aprendizados/classes/monge-postmortem.md`):
 3. **Texto com "você pode" é opcional**: a proposta diz se é **automático ou escolha do
    jogador** *antes* de codar. Efeito opcional de "ao acertar" é botão no popup de dano.
 4. **Antes de criar modal/popup/caixa de escolha, consultar `CONVENCOES-UI.md`.**
-5. **Chapéu 4 — QA/Jogador leigo** (2026-10, pedido do Osmar): antes de apresentar a
-   proposta de qualquer entrega com tela/interação nova, releia ela vestindo o chapéu de
-   alguém que **não sabe D&D e não tem a ficha do personagem na cabeça** — só está olhando o
-   app. Essa pessoa consegue usar a tela sem precisar lembrar o que ativou em outra hora, sem
-   precisar entender uma regra de D&D que o app não explica, e sem margem pra errar o fluxo?
-   Se a proposta tem um card que o jogador "ativa" e precisa lembrar sozinho que ele está
-   ativo (ou quando ele acaba), ou se o fluxo só faz sentido pra quem já sabe a regra de cor,
-   **simplifique antes de apresentar** — não é o Osmar quem vai filtrar isso depois, é
-   trabalho deste chapéu antes da proposta chegar nele. Lembrete central: **o app é um wizard
-   pra fazer a vida de quem não sabe D&D ser o mais simples possível** — cada entrega é
-   julgada por esse padrão, não só "implementei a regra certo".
+5. **Chapéu 4 — 2 QAs, sempre os 2** (2026-10, pedido do Osmar; ampliado 2026-10): antes de
+   apresentar a proposta de qualquer entrega (não só as com tela/interação nova), vista os 2
+   chapéus abaixo, nessa ordem — nenhum substitui o outro:
+
+   - **QA Técnico**: valida se vai funcionar de verdade — quebra algo que já funcionava
+     (regressão)? O fluxo de quem NÃO tem a característica nova continua idêntico a antes? As
+     novas regras/cálculos estão certos (bate com o texto da fonte)? Interações com sistemas
+     existentes (Surto Psiônico, Multiclasse, economia de ação etc.) foram conferidas, não só
+     assumidas? Tem teste automatizado cobrindo o caso novo?
+   - **QA Jogador Noob**: releia a proposta vestindo o chapéu de alguém que **não sabe D&D e
+     não tem a ficha do personagem na cabeça** — só está olhando o app, sem explicação por
+     fora. Essa pessoa consegue usar a tela sem precisar lembrar o que ativou em outra hora,
+     sem precisar entender uma regra de D&D que o app não explica, e sem margem pra errar o
+     fluxo? Se a proposta tem um card que o jogador "ativa" e precisa lembrar sozinho que ele
+     está ativo (ou quando ele acaba), ou se o fluxo só faz sentido pra quem já sabe a regra de
+     cor, **simplifique antes de apresentar** — não é o Osmar quem vai filtrar isso depois, é
+     trabalho deste chapéu antes da proposta chegar nele. **Regra explícita de troca (A em
+     troca de B)**: toda vez que a entrega oferece escolher entre 2+ opções (gastar um recurso
+     por um efeito, um caminho mais forte mas mais caro, etc.), a proposta/tela explica O QUE É
+     cada lado da troca (não só o nome) — e se um dos lados é um recurso com quantidade
+     limitada (Dado de Energia Psiônica, Dado de Vida, usos por descanso...), **mostra quantos
+     o jogador tem, no próprio texto da opção**, não só desabilita o botão sem número. Lembrete
+     central: **o app é um wizard pra fazer a vida de quem não sabe D&D ser o mais simples
+     possível** — cada entrega é julgada por esse padrão, não só "implementei a regra certo".
 6. **Nunca deixe pro jogador lembrar/fazer manualmente o que o app pode fazer sozinho**
    (2026-10, pedido do Osmar): se a proposta tem um texto do tipo "você precisa lembrar de
    X depois" ou "aplique Y manualmente na hora certa", pare e pergunte: dá pra o app

@@ -45,6 +45,7 @@ export const ID_CARACTERISTICA_SUBCLASSE = {
   resplendorSagrado: 'Resplendor Sagrado',
   // Psiônico — Psicinético (homebrew, UA 2025)
   magiasDoPsicinetico: 'Magias do Psicinético',
+  tecnicasTelecineticas: 'Técnicas Telecinéticas',
 } as const;
 
 export type IdCaracteristicaSubclasse = keyof typeof ID_CARACTERISTICA_SUBCLASSE;
