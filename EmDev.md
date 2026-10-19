@@ -59,6 +59,15 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
   disciplina de conjuração (Bio-Retorno/Insinuação do Id/Pensamentos Destrutivos/Aperfeiçoamento de Precognição) — rolando
   baixo (1/2/3) pra ver o card "⚡ Surto Psiônico" aparecer, confirmar que o Dado de Vida é descontado (menor tipo) e que o
   valor final bate com o esperado depois do Surto.
+- [x] E5c.1 — Osmar testou ao vivo (Bio-Retorno, 3d12: 1/1/6) e achou 2 problemas de UX: (1) não entendeu o que o botão
+  fazia só pelo texto corrido; (2) não tinha como saber quantos Dados de Vida tinha sobrando pra decidir se valia a pena
+  (Dado de Vida não tem pips visíveis na aba Combate, diferente do Dado de Energia Psiônica). Corrigido: `ofertaSurtoPsionico`
+  virou `{titulo, descricao}` em vez de 1 string só — `titulo` = a AÇÃO (ex.: "Gastar 1 Dado de Vida (d12, 5 restantes)"),
+  `descricao` = o EFEITO (ex.: "Resultados 1, 2 ou 3 viram 4 (2 dados afetados)"), empilhados dentro do mesmo card
+  (`.ofertaCardDuasLinhas` novo no CSS). `SurtoPsionicoProvider` ganhou `proximoTipo: {tipo, restantes}` (o tipo que
+  `gastar` vai descontar, calculado em `FichaShell.tsx` a partir de `reservaDadosDeVida`) pra montar o texto sem o jogador
+  precisar ir atrás da informação em outra tela. `npx tsc -b`, `npm test -- --run` (1040/1040), `npm run build` verdes.
+  **Não testado ao vivo ainda** — pedir confirmação do novo card de 2 linhas.
 - [ ] E5d — Força Vital Incandescente (nível 20, precisa SDD próprio — mexe no motor de dado). E6a-d — subclasses. E7 — Talentos Selvagens.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.

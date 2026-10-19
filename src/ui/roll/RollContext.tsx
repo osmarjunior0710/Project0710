@@ -392,10 +392,14 @@ export interface DadoPsionicoProvider {
  * psiônico somado a um d20 (`RollState.dadoPsionico`, disciplinas
  * "+nDx") — nenhum dos dois precisa passar nada específico de Surto,
  * só existir. `disponivel` já cobre nível 7+ E ter Dado de Vida
- * sobrando; `gastar` desconta 1 Dado de Vida (o chamador escolhe de
- * qual tipo, ex.: sempre o menor disponível). */
+ * sobrando; `proximoTipo` diz qual tipo `gastar` vai descontar (sempre
+ * o menor disponível) e quantos restam DESSE tipo agora — mostrado no
+ * card (pedido do Osmar, 2026-10: sem isso o jogador não tem como
+ * saber se vale a pena gastar, já que Dado de Vida não tem pips
+ * visíveis na aba Combate). */
 export interface SurtoPsionicoProvider {
   disponivel: boolean;
+  proximoTipo: { tipo: string; restantes: number } | null;
   gastar: () => void;
 }
 
@@ -596,9 +600,12 @@ interface RollContextValue {
   /** Surto Psiônico (Psiônico nível 7) — ver `SurtoPsionicoProvider`.
    * `ofertaSurtoPsionico` já decide sozinho SE oferece (rolagem
    * concluída, marcada como Dado de Energia Psiônica OU com bônus de
-   * dado psiônico, ainda não usada, e pelo menos 1 valor ≤3) e o texto
-   * do card — `null` = não mostra nada. */
-  ofertaSurtoPsionico: { texto: string } | null;
+   * dado psiônico, ainda não usada, e pelo menos 1 valor ≤3) e o
+   * conteúdo do card, em 2 linhas (pedido do Osmar): `titulo` = a AÇÃO
+   * que o jogador toma (gastar 1 Dado de Vida de tal tipo, quantos
+   * restam), `descricao` = o EFEITO (quais/quantos dados viram 4).
+   * `null` = não mostra nada. */
+  ofertaSurtoPsionico: { titulo: string; descricao: string } | null;
   registrarSurtoPsionico: (provider: SurtoPsionicoProvider | null) => void;
   /** Aplica o Surto (todo valor ≤3 vira 4) e gasta 1 Dado de Vida —
    * sem efeito sem oferta válida. */
@@ -1347,15 +1354,18 @@ export function RollProvider({ children }: { children: ReactNode }) {
   const [surtoPsionicoProvider, setSurtoPsionicoProvider] = useState<SurtoPsionicoProvider | null>(null);
   const registrarSurtoPsionico = useCallback((provider: SurtoPsionicoProvider | null) => setSurtoPsionicoProvider(provider), []);
   const ofertaSurtoPsionico = (() => {
-    if (!surtoPsionicoProvider?.disponivel || !estado || estado.fase !== 'concluido' || estado.surtoPsionicoUsado) return null;
+    if (!surtoPsionicoProvider?.disponivel || !surtoPsionicoProvider.proximoTipo) return null;
+    if (!estado || estado.fase !== 'concluido' || estado.surtoPsionicoUsado) return null;
     const valoresEmJogo = estado.ehDadoDeEnergiaPsionica && estado.dadosIndividuais
       ? estado.dadosIndividuais.map((d) => d.valor).filter((v): v is number => typeof v === 'number')
       : (estado.dadoPsionico?.valores ?? null);
     if (!valoresEmJogo) return null;
     const elegiveis = dadosElegiveisSurtoPsionico(valoresEmJogo);
     if (elegiveis <= 0) return null;
+    const { tipo, restantes } = surtoPsionicoProvider.proximoTipo;
     return {
-      texto: `⚡ Surto Psiônico — gastar 1 Dado de Vida, ${elegiveis} dado${elegiveis > 1 ? 's' : ''} (1-3) vira${elegiveis > 1 ? 'm' : ''} 4`,
+      titulo: `Gastar 1 Dado de Vida (${tipo}, ${restantes} restante${restantes > 1 ? 's' : ''})`,
+      descricao: `Resultados 1, 2 ou 3 viram 4 (${elegiveis} dado${elegiveis > 1 ? 's' : ''} afetado${elegiveis > 1 ? 's' : ''})`,
     };
   })();
   const aplicarSurtoPsionico = useCallback(() => {

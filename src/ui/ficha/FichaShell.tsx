@@ -2790,8 +2790,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       registrarSurtoPsionico(null);
       return;
     }
+    const proximo = reservaDadosDeVida.find((r) => r.restantes > 0);
     registrarSurtoPsionico({
       disponivel: true,
+      proximoTipo: proximo ? { tipo: proximo.tipo, restantes: proximo.restantes } : null,
       gastar: () => {
         const tipo = reservaDadosDeVida.find((r) => r.restantes > 0)?.tipo;
         if (!tipo) return;

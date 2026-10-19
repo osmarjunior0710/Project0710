@@ -363,15 +363,16 @@ export default function RollOverlay() {
           <>
             {estado.surtoPsionicoUsado ? (
               <>
-                <div className={styles.ofertaTitulo}>Surto Psiônico</div>
+                <div className={styles.ofertaTitulo}>⚡ Surto Psiônico</div>
                 <div className={`${styles.ofertaCard} ${styles.ofertaCardUsada}`}>Já usada nesta rolagem</div>
               </>
             ) : (
               ofertaSurtoPsionico && (
                 <>
-                  <div className={styles.ofertaTitulo}>Surto Psiônico</div>
-                  <div className={styles.ofertaCard} onClick={aplicarSurtoPsionico}>
-                    {ofertaSurtoPsionico.texto}
+                  <div className={styles.ofertaTitulo}>⚡ Surto Psiônico</div>
+                  <div className={`${styles.ofertaCard} ${styles.ofertaCardDuasLinhas}`} onClick={aplicarSurtoPsionico}>
+                    <div className={styles.ofertaCardAcao}>{ofertaSurtoPsionico.titulo}</div>
+                    <div className={styles.ofertaCardEfeito}>{ofertaSurtoPsionico.descricao}</div>
                   </div>
                 </>
               )

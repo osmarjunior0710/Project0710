@@ -463,6 +463,27 @@
   cursor: default;
 }
 
+/* Surto Psiônico (Psiônico nível 7) — card com 2 linhas (ação do
+   jogador + efeito), em vez de 1 frase só, pra separar "o que eu
+   pago" de "o que eu ganho" (pedido do Osmar). */
+.ofertaCardDuasLinhas {
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.ofertaCardAcao {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.ofertaCardEfeito {
+  font-size: 11px;
+  font-weight: normal;
+  opacity: 0.85;
+}
+
 /* Dado que acabou de ter o valor TROCADO (não rerolado — ver
    `trocarOfertaDeDado`) — giro rápido + anel roxo, pra diferenciar
    visualmente de um reroll aleatório comum. */

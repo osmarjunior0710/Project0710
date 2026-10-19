@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2219
+
+Card "⚡ Surto Psiônico" ficou mais claro: agora mostra em 2 linhas
+separadas o que você paga (ex.: "Gastar 1 Dado de Vida (d12, 5
+restantes)") e o que acontece (ex.: "Resultados 1, 2 ou 3 viram 4 — 2
+dados afetados") — antes era 1 frase só, sem dizer quantos Dados de
+Vida sobravam pra decidir se valia a pena.
+
 ## v202610_1818
 
 Surto Psiônico (Psiônico, nível 7) ligado: depois de rolar um Dado de
