@@ -1114,3 +1114,25 @@ risco real de esquecer numa característica futura (pedido do Osmar, Surto Psiô
 
 Generaliza pra qualquer "dado especial que N características diferentes rolam" no futuro (ex.: um 2º dado de recurso de outra
 classe) — o padrão é sempre: motor marca o tipo, provider registrado decide se oferece, funil evita esquecer.
+
+## Efeito "1x por turno" ligado a conjuração — nunca trava fora de um contexto de turno (2026-10)
+
+Achado ao desenhar Força Vital Incandescente (E5d): o Modo de Ataque da Mente Aguçada (já publicado) tinha um bug latente —
+`menteAgucadaUsadaNoTurno` só zera no botão "Fim do Turno" (aba Combate), mas a troca também é oferecida em magias conjuradas
+pela aba Magias, que **não tem conceito de turno nenhum** (sem Ação/Ação Bônus/Reação). Resultado: conjurar fora de combate
+depois de já ter usado a troca numa luta anterior travava a troca pra sempre, sem motivo — o jogador nunca mais veria "Fim do
+Turno" pra destravar, porque nem estava em combate.
+
+Já existia um precedente parcial pra isso — `rolagemTemLimiteDeTurno()` em `disciplinasPsionicas.ts`, que só deixa "1
+disciplina por turno" valer em rolagens de ATAQUE (aba Combate); perícia solta pela aba Atributos é sempre livre. Generalizado
+pra conjuração: `DisciplinaPosConjuracaoPendente.temContextoDeTurno` (`core/conjurarMagia.ts`) — `true` quando a conjuração
+veio de um fluxo com Ação/Bônus/Reação (`useUsarMagiaPainel.tsx`, `ReacaoPanelContent.tsx`), `false` quando veio da aba Magias
+direto (`MagiasTab.tsx`, 3 pontos). Qualquer mecânica "1x por turno" ligada ao RESULTADO de uma conjuração (não só ao dano/
+ataque em si) recebe esse boolean e: (1) só lê `usadoNesteTurno` quando `temContextoDeTurno` é `true` — sem contexto, sempre
+oferece; (2) só CHAMA o setter que marca "usado" quando `temContextoDeTurno` é `true` — um uso sem contexto de turno nunca
+deve travar o próximo turno de verdade (aba Combate) por engano.
+
+**Regra pra qualquer efeito novo "1x por turno" que dependa de conjuração** (de qualquer classe): sempre aceitar esse boolean
+e aplicar as 2 regras acima — nunca assumir que "turno" é um conceito universal só porque existe na aba Combate. Hoje só o
+Psiônico tem esse padrão (Mente Aguçada, Força Vital Incandescente), mas qualquer classe futura com algo parecido reaproveita
+o mesmo campo em vez de inventar um novo.

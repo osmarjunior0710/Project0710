@@ -40,10 +40,15 @@ export function avaliarTrocaMenteAgucada(input: {
   ativa: boolean;
   anotado: number | null;
   usadoNesteTurno: boolean;
+  /** `false` = rolagem sem conceito de turno (ex.: conjuração livre pela
+   * aba Magias) — a trava "1x por turno" (`usadoNesteTurno`) nunca se
+   * aplica nesse caso, sempre oferece (mesma regra de
+   * `rolagemTemLimiteDeTurno` em `disciplinasPsionicas.ts`). */
+  temContextoDeTurno: boolean;
   dadosIndividuais: DadoRoladoMinimo[] | undefined;
 }): { texto: string; dadoId: string; novoValor: number } | null {
   if (input.tipoDano !== 'Psíquico') return null;
-  if (!input.ativa || input.usadoNesteTurno || input.anotado === null) return null;
+  if (!input.ativa || (input.temContextoDeTurno && input.usadoNesteTurno) || input.anotado === null) return null;
   const numericos = (input.dadosIndividuais ?? []).filter((d): d is DadoRoladoMinimo & { valor: number } => typeof d.valor === 'number');
   if (numericos.length === 0) return null;
   const menorDado = numericos.reduce((a, b) => (a.valor <= b.valor ? a : b));

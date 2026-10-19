@@ -345,8 +345,11 @@ interface MagiasTabProps {
    * `ui/roll/ofertaMenteAgucada.ts`. */
   menteAgucadaAtiva: boolean;
   menteAgucadaAnotado: number | null;
+  /** Ainda recebido mas só tem efeito teórico aqui: a aba Magias não tem
+   * conceito de turno, então o Modo de Ataque da Mente Aguçada nunca
+   * trava por aqui (`ofertaMenteAgucada(..., false, ...)` em cada call
+   * site) — mantido só porque `avaliarTrocaMenteAgucada` exige o campo. */
   menteAgucadaUsadaNoTurno: boolean;
-  onMenteAgucadaTrocada: () => void;
   /** Quais pills de info aparecem em cada linha de magia/truque —
    * preferência do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
@@ -452,7 +455,6 @@ export default function MagiasTab({
   menteAgucadaAtiva,
   menteAgucadaAnotado,
   menteAgucadaUsadaNoTurno,
-  onMenteAgucadaTrocada,
 }: MagiasTabProps) {
   const { rolarD20, rolarDados } = useRoll();
   const [telaCirculo, setTelaCirculo] = useState<{ magia: Magia; classeDonaDaMagia: string | null } | null>(null);
@@ -564,9 +566,11 @@ export default function MagiasTab({
               avisoDisciplina,
             }),
         },
-        ofertaTrocaDeDado: ofertaMenteAgucada(dano.tipo, menteAgucadaAtiva, menteAgucadaAnotado, menteAgucadaUsadaNoTurno, (novoTotal) => {
+        // Aba Magias — SEM conceito de turno: não trava `usadaNoTurno`
+        // (só atualiza `totalRolado`), senão um uso aqui travaria o
+        // Modo de Ataque indevidamente na aba Combate depois.
+        ofertaTrocaDeDado: ofertaMenteAgucada(dano.tipo, menteAgucadaAtiva, menteAgucadaAnotado, menteAgucadaUsadaNoTurno, false, (novoTotal) => {
           totalRolado = novoTotal;
-          onMenteAgucadaTrocada();
         }),
       });
     };
@@ -655,14 +659,17 @@ export default function MagiasTab({
     // Disciplina resolver (usou ou dispensou), já com o texto pronto
     // pra virar linha extra (ver `abrirSalvaguardaComAviso` abaixo).
     if (resultado.disciplinaPosConjuracao) {
+      // Aba Magias nunca tem conceito de turno (sem Ação/Bônus/Reação) —
+      // ver `DisciplinaPosConjuracaoPendente.temContextoDeTurno`.
       if (resultado.mecanica === 'salvaguarda') {
         onDisciplinaPosConjuracaoDisponivel({
           ...resultado.disciplinaPosConjuracao,
+          temContextoDeTurno: false,
           aoResolverSalvaguarda: (aviso) => abrirSalvaguardaComAviso(m, circuloUsado, aviso),
         });
         return;
       }
-      onDisciplinaPosConjuracaoDisponivel(resultado.disciplinaPosConjuracao);
+      onDisciplinaPosConjuracaoDisponivel({ ...resultado.disciplinaPosConjuracao, temContextoDeTurno: false });
     }
     if (resultado.rollAcerto) {
       const dano = resultado.danoPendente;
@@ -681,12 +688,14 @@ export default function MagiasTab({
                 mod: dano.mod,
                 explicacaoMod: dano.explicacaoMod,
                 confirmarFechamento: {},
+                // Aba Magias — SEM conceito de turno (ver comentário acima).
                 ofertaTrocaDeDado: ofertaMenteAgucada(
                   dano.tipo,
                   menteAgucadaAtiva,
                   menteAgucadaAnotado,
                   menteAgucadaUsadaNoTurno,
-                  onMenteAgucadaTrocada,
+                  false,
+                  () => {},
                 ),
               });
             };
@@ -764,12 +773,14 @@ export default function MagiasTab({
       rolarDados({
         ...resultado.rollDano,
         confirmarFechamento: {},
+        // Aba Magias — SEM conceito de turno (ver comentário acima).
         ofertaTrocaDeDado: ofertaMenteAgucada(
           resultado.rollDano.tipo,
           menteAgucadaAtiva,
           menteAgucadaAnotado,
           menteAgucadaUsadaNoTurno,
-          onMenteAgucadaTrocada,
+          false,
+          () => {},
         ),
       });
     }

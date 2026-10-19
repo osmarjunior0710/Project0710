@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2354
+
+Corrigido bug latente: o Modo de Ataque da Mente Aguçada podia ficar
+travado pra sempre se você conjurasse uma magia pela aba Magias fora
+de combate, depois de já ter usado a troca numa luta anterior (a
+trava só soltava no "Fim do Turno", que não existe fora da aba
+Combate). Agora, fora de combate, a troca sempre é oferecida.
+
 ## v202610_2234
 
 Card do "⚡ Surto Psiônico" reorganizado: o título agora fica dentro

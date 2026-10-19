@@ -11,19 +11,33 @@ import type { OfertaTrocaDeDado } from './RollContext';
  * qualquer total capturado ANTES da troca (ex.: `totalRolado` de
  * `abrirSalvaguarda`, que só é lido DEPOIS que o jogador fecha o popup —
  * sem isso, uma troca feita depois do `onResultado` inicial nunca
- * chegaria no total usado pela tela seguinte). */
+ * chegaria no total usado pela tela seguinte).
+ *
+ * `temContextoDeTurno`: `false` = rolagem sem conceito de turno (ex.:
+ * conjuração livre pela aba Magias) — a trava "1x por turno"
+ * (`usadoNesteTurno`) nunca se aplica, e quem chama NÃO deve travar o
+ * turno dentro de `onTrocado` nesse caso (ver `DECISOES-CLASSES.md`
+ * "Efeito 1x por turno ligado a conjuração"). */
 export function ofertaMenteAgucada(
   tipoDano: string | null | undefined,
   ativa: boolean,
   anotado: number | null,
   usadoNesteTurno: boolean,
+  temContextoDeTurno: boolean,
   onTrocado: (novoTotal: number) => void,
 ): OfertaTrocaDeDado | undefined {
   if (!ativa || tipoDano !== 'Psíquico') return undefined;
   return {
     titulo: '🧠 Mente Aguçada',
     avaliar: (estado) =>
-      avaliarTrocaMenteAgucada({ tipoDano, ativa, anotado, usadoNesteTurno, dadosIndividuais: estado.dadosIndividuais }),
+      avaliarTrocaMenteAgucada({
+        tipoDano,
+        ativa,
+        anotado,
+        usadoNesteTurno,
+        temContextoDeTurno,
+        dadosIndividuais: estado.dadosIndividuais,
+      }),
     onTrocado,
   };
 }

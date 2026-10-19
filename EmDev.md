@@ -87,6 +87,19 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
   ler"). `.ofertaCardTitulo`/`.ofertaCardSurto` novos no CSS; estado "já usada" também simplificado pra 1
   linha só dentro do mesmo card, sem título solto fora. `npx tsc -b`, `npm test -- --run` (1040/1040),
   `npm run build` verdes.
+- [x] E5d-prep — Flag `temContextoDeTurno` (preparação pro E5d, sugerida pelo Osmar): corrigido bug latente no Modo de
+  Ataque da Mente Aguçada (já publicado) — a troca é oferecida tanto em rolagens da aba Combate (COM turno) quanto da
+  aba Magias (SEM turno, sem Ação/Bônus/Reação), mas `menteAgucadaUsadaNoTurno` só zerava no "Fim do Turno" (botão que
+  só existe na aba Combate). Conjurar pela aba Magias fora de combate, depois de já ter usado a troca numa luta
+  anterior, travava a troca pra sempre sem motivo. Corrigido generalizando o precedente de
+  `rolagemTemLimiteDeTurno()` (já usado pelas Disciplinas de ataque): `DisciplinaPosConjuracaoPendente.temContextoDeTurno`
+  novo (`core/conjurarMagia.ts`), preenchido certo nos 3 pontos que decidem a conjuração
+  (`useUsarMagiaPainel.tsx`/`ReacaoPanelContent.tsx` = `true`, `MagiasTab.tsx` = `false`) e repassado pros 9 call sites
+  de `ofertaMenteAgucada` — sem contexto de turno, a troca sempre é oferecida E nunca trava o turno de verdade na aba
+  Combate depois. Padrão documentado em `DECISOES-CLASSES.md` "Efeito '1x por turno' ligado a conjuração". Prop
+  `onMenteAgucadaTrocada` removido de `MagiasTab.tsx` (ficou morto). `npx tsc -b`, `npm test -- --run` (1041/1041),
+  `npm run build` verdes. **Não testado ao vivo** — pedir ao Osmar pra confirmar que o Modo de Ataque continua
+  funcionando igual na aba Combate (não deveria ter mudado nada visível lá).
 - [ ] E5d — Força Vital Incandescente (nível 20, precisa SDD próprio — mexe no motor de dado). E6a-d — subclasses. E7 — Talentos Selvagens.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.

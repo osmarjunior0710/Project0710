@@ -1302,7 +1302,8 @@ export default function CombatTab({
         // `onTrocado` atualiza `totalRolado` (não só o `onResultado` original)
         // — sem isso, uma troca feita DEPOIS do resultado inicial nunca
         // chegaria no `danoRolado` passado pra tela de Sucesso/Falha.
-        ofertaTrocaDeDado: ofertaMenteAgucada(dano.tipo, menteAgucada.ativa, menteAgucada.anotado, menteAgucada.usadaNoTurno, (novoTotal) => {
+        // Aba Combate — TEM conceito de turno.
+        ofertaTrocaDeDado: ofertaMenteAgucada(dano.tipo, menteAgucada.ativa, menteAgucada.anotado, menteAgucada.usadaNoTurno, true, (novoTotal) => {
           totalRolado = novoTotal;
           menteAgucada.onTrocado();
         }),

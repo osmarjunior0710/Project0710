@@ -281,16 +281,19 @@ export default function ReacaoPanelContent({
     // Insinuação do Id/Pensamentos Destrutivos sempre vêm de magia com
     // salvaguarda — ver o mesmo comentário em `useUsarMagiaPainel.tsx`.
     if (resultado.disciplinaPosConjuracao) {
+      // Reação — TEM conceito de turno (ver
+      // `DisciplinaPosConjuracaoPendente.temContextoDeTurno`).
       if (resultado.mecanica === 'salvaguarda') {
         const circuloReal = m.circulo === 0 ? m.circulo : circuloUsado;
         onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
         onDisciplinaPosConjuracaoDisponivel({
           ...resultado.disciplinaPosConjuracao,
+          temContextoDeTurno: true,
           aoResolverSalvaguarda: (aviso) => onAbrirSalvaguarda(m, circuloReal, aviso),
         });
         return;
       }
-      onDisciplinaPosConjuracaoDisponivel(resultado.disciplinaPosConjuracao);
+      onDisciplinaPosConjuracaoDisponivel({ ...resultado.disciplinaPosConjuracao, temContextoDeTurno: true });
     }
     if (resultado.rollAcerto) {
       const dano = resultado.danoPendente;
@@ -309,11 +312,13 @@ export default function ReacaoPanelContent({
                 mod: dano.mod,
                 explicacaoMod: dano.explicacaoMod,
                 confirmarFechamento: {},
+                // Reação — TEM conceito de turno.
                 ofertaTrocaDeDado: ofertaMenteAgucada(
                   dano.tipo,
                   menteAgucadaAtiva,
                   menteAgucadaAnotado,
                   menteAgucadaUsadaNoTurno,
+                  true,
                   onMenteAgucadaTrocada,
                 ),
               });
@@ -392,11 +397,13 @@ export default function ReacaoPanelContent({
       rolarDados({
         ...resultado.rollDano,
         confirmarFechamento: {},
+        // Ataque-acerto na Reação — TEM conceito de turno.
         ofertaTrocaDeDado: ofertaMenteAgucada(
           resultado.rollDano.tipo,
           menteAgucadaAtiva,
           menteAgucadaAnotado,
           menteAgucadaUsadaNoTurno,
+          true,
           onMenteAgucadaTrocada,
         ),
       });

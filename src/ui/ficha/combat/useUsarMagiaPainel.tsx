@@ -225,15 +225,18 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
     // 2026-10). Em vez disso, SÓ abre a Salvaguarda depois que a
     // Disciplina resolver, já com o texto pronto pra virar linha extra.
     if (resultado.disciplinaPosConjuracao) {
+      // Ação/Ação Bônus na aba Combate — TEM conceito de turno (ver
+      // `DisciplinaPosConjuracaoPendente.temContextoDeTurno`).
       if (resultado.mecanica === 'salvaguarda') {
         p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
         p.onDisciplinaPosConjuracaoDisponivel({
           ...resultado.disciplinaPosConjuracao,
+          temContextoDeTurno: true,
           aoResolverSalvaguarda: (aviso) => p.onAbrirSalvaguarda(m, circuloUsado, aviso),
         });
         return;
       }
-      p.onDisciplinaPosConjuracaoDisponivel(resultado.disciplinaPosConjuracao);
+      p.onDisciplinaPosConjuracaoDisponivel({ ...resultado.disciplinaPosConjuracao, temContextoDeTurno: true });
     }
     if (resultado.rollAcerto) {
       const dano = resultado.danoPendente;
@@ -252,11 +255,13 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
                 mod: dano.mod,
                 explicacaoMod: dano.explicacaoMod,
                 confirmarFechamento: {},
+                // Ação/Ação Bônus na aba Combate — TEM conceito de turno.
                 ofertaTrocaDeDado: ofertaMenteAgucada(
                   dano.tipo,
                   p.menteAgucadaAtiva,
                   p.menteAgucadaAnotado,
                   p.menteAgucadaUsadaNoTurno,
+                  true,
                   p.onMenteAgucadaTrocada,
                 ),
               });
@@ -335,11 +340,13 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
       rolarDados({
         ...resultado.rollDano,
         confirmarFechamento: {},
+        // Ataque-acerto na aba Combate — TEM conceito de turno.
         ofertaTrocaDeDado: ofertaMenteAgucada(
           resultado.rollDano.tipo,
           p.menteAgucadaAtiva,
           p.menteAgucadaAnotado,
           p.menteAgucadaUsadaNoTurno,
+          true,
           p.onMenteAgucadaTrocada,
         ),
       });

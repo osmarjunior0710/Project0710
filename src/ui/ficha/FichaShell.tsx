@@ -99,6 +99,7 @@ import { podeAtivarMenteAgucada, temMenteAgucada } from '../../core/menteAgucada
 import { podeAtivarRetaliacaoPsiquica, temRetaliacaoPsiquica } from '../../core/retaliacaoPsiquica';
 import { podeUsarRestauracaoPsionica, temRestauracaoPsionica } from '../../core/restauracaoPsionica';
 import { temSurtoPsionico } from '../../core/surtoPsionico';
+import type { DisciplinaPosConjuracaoPendente } from '../../core/conjurarMagia';
 import { rolarDadoDeEnergiaPsionica } from '../roll/rolarDadoDeEnergiaPsionica';
 import { ofertaMenteAgucada } from '../roll/ofertaMenteAgucada';
 import { podeRerolarSalvaguardaComFoco, temSobreviventeDisciplinado } from '../../core/sobreviventeDisciplinado';
@@ -737,24 +738,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
    * de Precognição/Bio-Retorno/Insinuação do Id/Pensamentos Destrutivos) —
    * mesmo motivo da Colheita Macabra acima (mora fora da aba Magias/Combate
    * pra sobreviver à troca de aba), ver `DisciplinaPosConjuracaoModal.tsx`. */
-  const [disciplinaPosConjuracaoPendente, setDisciplinaPosConjuracaoPendente] = useState<{
-    id: string;
-    nome: string;
-    descricao: string;
-    quantidadeDados: number;
-    /** Presente só quando a magia que disparou essa Disciplina TAMBÉM
-     * abre `SalvaguardaDoAlvoModal` (Insinuação do Id/Pensamentos
-     * Destrutivos, que exigem salvaguarda — ver
-     * `disciplinaParaConjuracao`) — chamado com o texto do resultado
-     * (ou `null` se dispensou) assim que a Disciplina resolve, pra
-     * quem chamou abrir a Salvaguarda só DEPOIS, já com o texto pronto
-     * pra virar linha extra (pedido do Osmar, 2026-10: os 2 popups
-     * abrindo juntos fazia o resultado da Disciplina "sumir" atrás do
-     * popup de Salvaguarda). Sem isso, mostra o resultado no
-     * `AvisoModal` de sempre (Aperfeiçoamento de Precognição/
-     * Bio-Retorno, que nunca têm salvaguarda). */
-    aoResolverSalvaguarda?: (texto: string | null) => void;
-  } | null>(null);
+  const [disciplinaPosConjuracaoPendente, setDisciplinaPosConjuracaoPendente] = useState<DisciplinaPosConjuracaoPendente | null>(null);
   const [disciplinaPosConjuracaoResultado, setDisciplinaPosConjuracaoResultado] = useState<{ titulo: string; texto: string } | null>(null);
   const [levelUpAberto, setLevelUpAberto] = useState(false);
   // Carrega a classe junto (Entrega 5f) — cada classe tem sua própria
@@ -2878,12 +2862,22 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       confirmarFechamento: { aoTocar: () => aplicar(somaFinal) },
       // Pensamentos Destrutivos causa dano Psíquico direto — qualifica pro
       // "Modo de Ataque" da Mente Aguçada igual qualquer outro dano Psíquico.
+      // `d.temContextoDeTurno` já vem certo de quem disparou a conjuração
+      // (Combate/Reação = true, Magias = false) — só trava o turno quando
+      // fizer sentido (ver `DisciplinaPosConjuracaoPendente`).
       ofertaTrocaDeDado:
         d.id === 'pensamentos-destrutivos'
-          ? ofertaMenteAgucada('Psíquico', menteAgucadaAtiva, menteAgucadaAnotado, menteAgucadaUsadaNoTurno, (novoTotal) => {
-              somaFinal = novoTotal;
-              setMenteAgucadaUsadaNoTurno(true);
-            })
+          ? ofertaMenteAgucada(
+              'Psíquico',
+              menteAgucadaAtiva,
+              menteAgucadaAnotado,
+              menteAgucadaUsadaNoTurno,
+              d.temContextoDeTurno,
+              (novoTotal) => {
+                somaFinal = novoTotal;
+                if (d.temContextoDeTurno) setMenteAgucadaUsadaNoTurno(true);
+              },
+            )
           : undefined,
       // Surto Psiônico (Reserva — ver `rolarDadoDeEnergiaPsionica`): mesmo cuidado de staleness, atualiza `somaFinal`.
       onSurtoPsionicoAplicado: (novoTotal) => {
@@ -3727,7 +3721,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             menteAgucadaAtiva={menteAgucadaAtiva}
             menteAgucadaAnotado={menteAgucadaAnotado}
             menteAgucadaUsadaNoTurno={menteAgucadaUsadaNoTurno}
-            onMenteAgucadaTrocada={() => setMenteAgucadaUsadaNoTurno(true)}
             preferenciasPillsMagia={preferenciasPillsMagia}
           />
         )}

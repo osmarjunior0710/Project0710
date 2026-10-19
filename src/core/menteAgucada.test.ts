@@ -20,31 +20,85 @@ describe('menteAgucada', () => {
   ];
 
   it('oferece trocar o MENOR dado quando o anotado é maior', () => {
-    const r = avaliarTrocaMenteAgucada({ tipoDano: 'Psíquico', ativa: true, anotado: 10, usadoNesteTurno: false, dadosIndividuais: dados });
+    const r = avaliarTrocaMenteAgucada({
+      tipoDano: 'Psíquico',
+      ativa: true,
+      anotado: 10,
+      usadoNesteTurno: false,
+      temContextoDeTurno: true,
+      dadosIndividuais: dados,
+    });
     expect(r).toEqual({ texto: 'Trocar menor resultado (1) por (10)', dadoId: 'd1', novoValor: 10 });
   });
 
   it('não oferece quando o anotado é igual ou menor que o menor dado', () => {
     expect(
-      avaliarTrocaMenteAgucada({ tipoDano: 'Psíquico', ativa: true, anotado: 1, usadoNesteTurno: false, dadosIndividuais: dados }),
+      avaliarTrocaMenteAgucada({
+        tipoDano: 'Psíquico',
+        ativa: true,
+        anotado: 1,
+        usadoNesteTurno: false,
+        temContextoDeTurno: true,
+        dadosIndividuais: dados,
+      }),
     ).toBeNull();
   });
 
   it('não oferece pra dano que não é Psíquico', () => {
     expect(
-      avaliarTrocaMenteAgucada({ tipoDano: 'Fogo', ativa: true, anotado: 10, usadoNesteTurno: false, dadosIndividuais: dados }),
+      avaliarTrocaMenteAgucada({
+        tipoDano: 'Fogo',
+        ativa: true,
+        anotado: 10,
+        usadoNesteTurno: false,
+        temContextoDeTurno: true,
+        dadosIndividuais: dados,
+      }),
     ).toBeNull();
   });
 
   it('não oferece se não está ativa, sem anotado, ou já usado neste turno', () => {
     expect(
-      avaliarTrocaMenteAgucada({ tipoDano: 'Psíquico', ativa: false, anotado: 10, usadoNesteTurno: false, dadosIndividuais: dados }),
+      avaliarTrocaMenteAgucada({
+        tipoDano: 'Psíquico',
+        ativa: false,
+        anotado: 10,
+        usadoNesteTurno: false,
+        temContextoDeTurno: true,
+        dadosIndividuais: dados,
+      }),
     ).toBeNull();
     expect(
-      avaliarTrocaMenteAgucada({ tipoDano: 'Psíquico', ativa: true, anotado: null, usadoNesteTurno: false, dadosIndividuais: dados }),
+      avaliarTrocaMenteAgucada({
+        tipoDano: 'Psíquico',
+        ativa: true,
+        anotado: null,
+        usadoNesteTurno: false,
+        temContextoDeTurno: true,
+        dadosIndividuais: dados,
+      }),
     ).toBeNull();
     expect(
-      avaliarTrocaMenteAgucada({ tipoDano: 'Psíquico', ativa: true, anotado: 10, usadoNesteTurno: true, dadosIndividuais: dados }),
+      avaliarTrocaMenteAgucada({
+        tipoDano: 'Psíquico',
+        ativa: true,
+        anotado: 10,
+        usadoNesteTurno: true,
+        temContextoDeTurno: true,
+        dadosIndividuais: dados,
+      }),
     ).toBeNull();
+  });
+
+  it('sem contexto de turno (aba Magias), ignora usadoNesteTurno — sempre oferece', () => {
+    const r = avaliarTrocaMenteAgucada({
+      tipoDano: 'Psíquico',
+      ativa: true,
+      anotado: 10,
+      usadoNesteTurno: true,
+      temContextoDeTurno: false,
+      dadosIndividuais: dados,
+    });
+    expect(r).toEqual({ texto: 'Trocar menor resultado (1) por (10)', dadoId: 'd1', novoValor: 10 });
   });
 });

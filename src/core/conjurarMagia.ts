@@ -107,9 +107,20 @@ export interface DisciplinaPosConjuracaoInfo {
  * só vem preenchido quando a magia TAMBÉM abre `SalvaguardaDoAlvoModal` (Insinuação do
  * Id/Pensamentos Destrutivos, que exigem salvaguarda): quem chama usa isso pra só abrir a
  * Salvaguarda DEPOIS da Disciplina resolver, já com o texto do resultado pronto pra virar linha
- * extra — ver `FichaShell.tsx` `usarDisciplinaPosConjuracao`. */
+ * extra — ver `FichaShell.tsx` `usarDisciplinaPosConjuracao`.
+ *
+ * `temContextoDeTurno`: `true` quando a conjuração veio de um fluxo com
+ * Ação/Ação Bônus/Reação (aba Combate — `useUsarMagiaPainel`/
+ * `ReacaoPanelContent`), `false` quando veio da aba Magias (conjuração
+ * livre, sem o conceito de turno). Cada painel/aba que chama
+ * `onDisciplinaPosConjuracaoDisponivel` preenche o valor certo — ver
+ * `DECISOES-CLASSES.md` "Efeito 1x por turno ligado a conjuração". Usado
+ * por qualquer regra "1x por turno" que dependa dessa rolagem (Modo de
+ * Ataque da Mente Aguçada, Força Vital Incandescente): fora de um
+ * contexto de turno, a trava nunca se aplica — sempre oferece. */
 export interface DisciplinaPosConjuracaoPendente extends DisciplinaPosConjuracaoInfo {
   aoResolverSalvaguarda?: (texto: string | null) => void;
+  temContextoDeTurno: boolean;
 }
 
 /** Decide o que fazer ao conjurar `m`, usando `circuloUsado` pra
