@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0905
+
+Corrigido o botão de Voltar (topo da Ficha, do lado do nome) que parava de
+responder ao toque — só acontecia com personagens que têm o Psiônico no
+nível 7+ (ex.: o Char Multiclasse de teste). Era um loop de atualização
+infinito nos bastidores (Surto Psiônico/Força Vital Incandescente),
+consumindo a tela até travar o toque.
+
 ## v202610_0833
 
 Primeira entrega do Psicinético (subclasse homebrew do Psiônico, UA 2025):

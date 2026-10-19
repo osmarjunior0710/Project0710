@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import iconeMochilaTab from '../../assets/icones-tabbar/icone-mochila.webp';
 import iconeMagiasTab from '../../assets/icones-tabbar/icone-magias.webp';
@@ -1061,10 +1061,22 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const usosAncestralidadeGiganteRestantes = Math.max(0, usosAncestralidadeGiganteMaximo - ancestralidadeGiganteGasto);
   const formaGrandeDisponivel = selecao.especie === 'Golias' && nivelTotalAtual >= 5;
   const modConstituicaoAtual = modificador(conValorFinal);
-  const reservaDadosDeVida = reservaDeDadosDeVida(
-    classesAtual,
-    (nome) => catalogoClasses.find((c) => c.nome === nome)?.dadoDeVida,
-    dadosDeVidaGastos,
+  // Bug real corrigido (2026-10, achado testando E6c-a): sem `useMemo`, esse
+  // array nascia de novo a CADA render — os `useEffect` de Surto Psiônico e
+  // Força Vital Incandescente (abaixo) dependem dele, chamam `registrarX(...)`
+  // com objeto novo a cada vez, e o `setState` do RollContext disparava
+  // re-render de volta na Ficha — loop infinito só pra quem tem Psiônico
+  // nível 7+/20 ("Maximum update depth exceeded" no console, botão de
+  // Voltar e outros toques parando de responder no celular enquanto o loop
+  // consumia a thread principal). Memoizado pelas únicas 2 entradas reais.
+  const reservaDadosDeVida = useMemo(
+    () =>
+      reservaDeDadosDeVida(
+        classesAtual,
+        (nome) => catalogoClasses.find((c) => c.nome === nome)?.dadoDeVida,
+        dadosDeVidaGastos,
+      ),
+    [classesAtual, dadosDeVidaGastos],
   );
   const maosCurativasDisponivel = selecao.especie === 'Aasimar';
   const dadosMaosCurativas = bonusProficienciaAtual;

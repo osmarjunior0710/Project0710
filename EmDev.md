@@ -133,5 +133,18 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
     `npx tsc -b`, `npm test -- --run` (1054/1054), `npm run build` verdes. **Não testado ao vivo na tela**
     (sem navegador disponível nesta sessão) — pedir ao Osmar pra confirmar a seção na aba Magias e o picker
     "Usar Magia" da aba Combate antes de considerar 100% fechado.
+  - [x] E6c-a.1 — Osmar testou e reportou o botão de Voltar (topo da Ficha) não respondendo ao toque (só o
+    gesto de voltar do celular funcionava). Investigado com navegador headless (Playwright, emulando toque):
+    reproduzido só no Char Multiclasse (não no personagem demo) — console mostrava "Maximum update depth
+    exceeded" repetido. Causa raiz (BUG PRÉ-EXISTENTE, não introduzido pela E6c-a): `reservaDadosDeVida`
+    (`FichaShell.tsx`) nascia como array NOVO a cada render (sem `useMemo`); os `useEffect` de Surto Psiônico
+    e Força Vital Incandescente (E5c/E5d) dependem dele e chamam `registrarSurtoPsionico`/
+    `registrarForcaVitalIncandescente` com objeto novo sempre — o `setState` disparado no `RollContext`
+    re-renderiza a Ficha, que recria o array, que dispara o efeito de novo: loop infinito só pra quem tem
+    Psiônico nível 7+ (o Char Multiclasse sempre teve isso, mesmo antes da subclasse Psicinético — só não
+    tinha sido percebido até agora, com a aba Magias sendo visitada de novo nos testes de hoje). Corrigido
+    memoizando `reservaDadosDeVida` pelas 2 entradas reais (`classesAtual`, `dadosDeVidaGastos`) — quebra o
+    ciclo sem tocar nos 2 `useEffect`. Confirmado com o mesmo script de navegador: console limpo, botão
+    volta pra lista normalmente. `npx tsc -b`, `npm test -- --run` (1049/1049), `npm run build` verdes.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.
