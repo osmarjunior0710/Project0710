@@ -53,12 +53,8 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
   Aguçada, disciplinas de conjuração, Retaliação Psíquica) já tinham ou ganharam o cuidado de só aplicar o resultado ao
   FECHAR o popup (`confirmarFechamento.aoTocar`) — Conexão Telepática e Impulso Telecinético também passaram a fechar assim
   (antes aplicavam direto em `onResultado`), pro Surto não poder "sumir" atrás de um valor já aplicado antes de rolar.
-  `npx tsc -b`, `npm test -- --run` (1040/1040), `npm run build` verdes. **Não testado ao vivo na tela** (sem navegador
-  nesta sessão) — essa é a entrega mais arriscada até agora (mexeu no motor de dado em 5 pontos diferentes), pedir ao Osmar
-  pra testar BEM: Conexão Telepática, Mente Aguçada, Retaliação Psíquica, Impulso Telecinético (com dado) e alguma
-  disciplina de conjuração (Bio-Retorno/Insinuação do Id/Pensamentos Destrutivos/Aperfeiçoamento de Precognição) — rolando
-  baixo (1/2/3) pra ver o card "⚡ Surto Psiônico" aparecer, confirmar que o Dado de Vida é descontado (menor tipo) e que o
-  valor final bate com o esperado depois do Surto.
+  `npx tsc -b`, `npm test -- --run` (1040/1040), `npm run build` verdes. Osmar testou ao vivo (Bio-Retorno) e confirmou:
+  funcionando.
 - [x] E5c.1 — Osmar testou ao vivo (Bio-Retorno, 3d12: 1/1/6) e achou 2 problemas de UX: (1) não entendeu o que o botão
   fazia só pelo texto corrido; (2) não tinha como saber quantos Dados de Vida tinha sobrando pra decidir se valia a pena
   (Dado de Vida não tem pips visíveis na aba Combate, diferente do Dado de Energia Psiônica). Corrigido: `ofertaSurtoPsionico`
@@ -67,7 +63,7 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
   (`.ofertaCardDuasLinhas` novo no CSS). `SurtoPsionicoProvider` ganhou `proximoTipo: {tipo, restantes}` (o tipo que
   `gastar` vai descontar, calculado em `FichaShell.tsx` a partir de `reservaDadosDeVida`) pra montar o texto sem o jogador
   precisar ir atrás da informação em outra tela. `npx tsc -b`, `npm test -- --run` (1040/1040), `npm run build` verdes.
-  **Não testado ao vivo ainda** — pedir confirmação do novo card de 2 linhas.
+  Osmar confirmou ao vivo: funcionando.
 - [x] E5c.2 — Osmar testou com 0 Dados de Energia Psiônica restantes e achou o botão "Gastar N Dados..." do
   `DisciplinaPosConjuracaoModal` (Bio-Retorno etc.) ainda parecendo disponível (azul forte) mesmo desabilitado —
   a lógica já bloqueava o clique (`pointerEvents: 'none'`), mas `opacity: 0.5` sobre `btn-primary` (azul/negrito)
@@ -98,8 +94,7 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
   de `ofertaMenteAgucada` — sem contexto de turno, a troca sempre é oferecida E nunca trava o turno de verdade na aba
   Combate depois. Padrão documentado em `DECISOES-CLASSES.md` "Efeito '1x por turno' ligado a conjuração". Prop
   `onMenteAgucadaTrocada` removido de `MagiasTab.tsx` (ficou morto). `npx tsc -b`, `npm test -- --run` (1041/1041),
-  `npm run build` verdes. **Não testado ao vivo** — pedir ao Osmar pra confirmar que o Modo de Ataque continua
-  funcionando igual na aba Combate (não deveria ter mudado nada visível lá).
+  `npm run build` verdes. Osmar confirmou ao vivo: Modo de Ataque continua funcionando igual na aba Combate.
 - [x] E5d — Força Vital Incandescente (nível 20): mesma superfície do Surto Psiônico (`ehDadoDeEnergiaPsionica` OU
   `dadoPsionico`), mas rola dado(s) NOVO(S) de verdade (2D, sem motor 3D nesta 1ª versão — ver pendência abaixo) em vez
   de só transformar os já rolados, e respeita "1x por turno" de verdade usando a flag `temContextoDeTurno` preparada no
@@ -114,14 +109,13 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
   Todos os 5 pontos que usam o funil (`rolarDadoDeEnergiaPsionica`) ganharam `onForcaVitalAplicada` (mesmo cuidado de
   staleness do Surto). `npx tsc -b`, `npm test -- --run` (1044/1044), `npm run build` verdes. **Pendência conhecida,
   registrada em PENDENCIAS.md**: os dados extra rolam só em 2D (sem física do motor 3D) — diferente do resto do app,
-  que já usa 3D quando ativo; aceitável pra 1ª entrega, mas inconsistente visualmente. **Não testado ao vivo** — pedir
-  ao Osmar pra testar com Dados de Vida 0/1/2+ disponíveis, e também fora de combate (aba Magias) pra confirmar que o
-  card sempre aparece (sem travar "1x por turno" indevidamente).
+  que já usa 3D quando ativo; aceitável pra 1ª entrega, mas inconsistente visualmente.
 - [x] E5d.1 — Osmar testou ao vivo e achou o mesmo problema já corrigido no Surto Psiônico (E5c.1): os 2 botões não
   diziam quantos Dados de Vida sobravam pra decidir se valia a pena. Corrigido igual: `ForcaVitalIncandescenteProvider`
   ganhou `totalDisponivel` (contagem real, sem o teto de 2 do `maximo`), repassado em `ofertaForcaVitalIncandescente` e
   mostrado em cada botão ("Gastar 1 Dado de Vida (N disponíveis) — rola +1 dado extra"). `npx tsc -b`,
-  `npm test -- --run` (1044/1044), `npm run build` verdes.
+  `npm test -- --run` (1044/1044), `npm run build` verdes. Osmar testou ao vivo e confirmou: "Sucesso, tudo
+  funcional" — E5 (a/b/c/d) e a flag `temContextoDeTurno` 100% validados na tela.
 - [ ] E6a-d — subclasses (4, homebrew). E7 — Talentos Selvagens. Com E5 completo, só falta isso pra fechar o foco inteiro.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.
