@@ -42,9 +42,12 @@ import TickPips from '../../components/TickPips';
 import { useColapsavel } from '../../hooks/useColapsavel';
 import { useRoll } from '../../roll/RollContext';
 import { ofertaMenteAgucada } from '../../roll/ofertaMenteAgucada';
+import { rolarDadoDeEnergiaPsionica } from '../../roll/rolarDadoDeEnergiaPsionica';
+import { esmagamentoAprimoradoElegivel, AVISO_ESMAGAMENTO_APRIMORADO } from '../../../core/esmagamentoTelecineticoAprimorado';
 import EscolherCirculoShell from '../combat/EscolherCirculoShell';
 import SalvaguardaDoAlvoModal from '../combat/SalvaguardaDoAlvoModal';
 import SobrecargaEscolha from '../combat/SobrecargaEscolha';
+import EsmagamentoAprimoradoEscolha from '../combat/EsmagamentoAprimoradoEscolha';
 import EscolherMontariaModal from '../combat/EscolherMontariaModal';
 import CopiarMagiaShell from './CopiarMagiaShell';
 import styles from './MagiasTab.module.css';
@@ -233,6 +236,14 @@ interface MagiasTabProps {
   sobrecargaAtiva: boolean;
   sobrecargaUsosDesdeDescanso: number;
   onUsarSobrecarga: () => void;
+  /** Esmagamento Telecinético Aprimorado (Psiônico/Psicinético, nível 10, E6c-e) — mesmo formato
+   * do prop usado em `CombatTab.tsx`. */
+  esmagamentoAprimorado: {
+    disponivel: boolean;
+    dadosRestantes: number;
+    dadosLados: number;
+    onGastarDado: () => boolean;
+  };
   /** `true` = já reconjurado desde o último Descanso Curto/Longo —
    * botão "Reconjurar" fica travado até o próximo descanso. */
   livroDasSombrasGasto: boolean;
@@ -388,6 +399,7 @@ export default function MagiasTab({
   sobrecargaAtiva,
   sobrecargaUsosDesdeDescanso,
   onUsarSobrecarga,
+  esmagamentoAprimorado,
   desvantagemForcaDestreza,
   conjura,
   truquesAtuais,
@@ -499,6 +511,12 @@ export default function MagiasTab({
     aoRolarNormal: () => void;
     aoUsarSobrecarga: () => void;
   } | null>(null);
+  // Esmagamento Telecinético Aprimorado (Psiônico/Psicinético, E6c-e) — mesmo padrão de
+  // `escolhaSobrecarga` acima.
+  const [escolhaEsmagamentoAprimorado, setEscolhaEsmagamentoAprimorado] = useState<{
+    aoRolarNormal: () => void;
+    aoUsarAprimorado: () => void;
+  } | null>(null);
   // Convocar Montaria (Paladino) — mesmo padrão de `escolhaSobrecarga`
   // acima, ver `useUsarMagiaPainel.tsx`/`EscolherMontariaModal.tsx`.
   const [escolhaMontaria, setEscolhaMontaria] = useState<{ circuloUsado: number } | null>(null);
@@ -587,6 +605,72 @@ export default function MagiasTab({
         }),
       });
     };
+    // Esmagamento Telecinético Aprimorado (Psiônico/Psicinético, E6c-e) — mesmo cuidado de
+    // CombatTab.tsx (rola o Dado de Energia Psiônica PRIMEIRO, pelo funil). Aba Magias — SEM
+    // conceito de turno, igual o resto desta função.
+    const rolarComEsmagamentoAprimorado = () => {
+      if (!esmagamentoAprimorado.onGastarDado()) return;
+      let valorDado = 0;
+      rolarDadoDeEnergiaPsionica(rolarDados, {
+        label: '💥 Esmagamento Telecinético Aprimorado — Dado de Energia Psiônica',
+        formula: `1d${esmagamentoAprimorado.dadosLados}`,
+        quantidade: 1,
+        lados: esmagamentoAprimorado.dadosLados,
+        mod: 0,
+        onResultado: (total) => {
+          valorDado = total;
+        },
+        onSurtoPsionicoAplicado: (novoTotal) => {
+          valorDado = novoTotal;
+        },
+        onForcaVitalAplicada: (novoTotal) => {
+          valorDado = novoTotal;
+        },
+        confirmarFechamento: {
+          aoTocar: () => {
+            const avisoCombinado = [avisoDisciplina, AVISO_ESMAGAMENTO_APRIMORADO].filter(Boolean).join('\n\n');
+            let totalRolado = 0;
+            rolarDados({
+              label: `Dano — ✨ ${m.nome}`,
+              formula: `${dano.quantidade}d${dano.lados} + ${dano.mod + valorDado}`,
+              quantidade: dano.quantidade,
+              lados: dano.lados,
+              mod: dano.mod + valorDado,
+              explicacaoMod: dano.explicacao,
+              onResultado: (total) => {
+                totalRolado = total;
+              },
+              confirmarFechamento: {
+                aoTocar: () =>
+                  setTelaSalvaguarda({
+                    magia: m,
+                    circuloUsado,
+                    danoRolado: totalRolado,
+                    upcastNaoAutomatico: dano.upcastNaoAutomatico,
+                    avisoDisciplina: avisoCombinado,
+                  }),
+              },
+              ofertaTrocaDeDado: ofertaMenteAgucada(dano.tipo, menteAgucadaAtiva, menteAgucadaAnotado, menteAgucadaUsadaNoTurno, false, (novoTotal) => {
+                totalRolado = novoTotal;
+              }),
+            });
+          },
+        },
+      });
+    };
+    if (esmagamentoAprimoradoElegivel(m, esmagamentoAprimorado.disponivel, esmagamentoAprimorado.dadosRestantes)) {
+      setEscolhaEsmagamentoAprimorado({
+        aoRolarNormal: () => {
+          setEscolhaEsmagamentoAprimorado(null);
+          rolarNormal();
+        },
+        aoUsarAprimorado: () => {
+          setEscolhaEsmagamentoAprimorado(null);
+          rolarComEsmagamentoAprimorado();
+        },
+      });
+      return;
+    }
     if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {
       setEscolhaSobrecarga({
         nomeMagia: m.nome,
@@ -965,6 +1049,14 @@ export default function MagiasTab({
           danoMaximo={escolhaSobrecarga.danoMaximo}
           onRolarNormal={escolhaSobrecarga.aoRolarNormal}
           onUsarSobrecarga={escolhaSobrecarga.aoUsarSobrecarga}
+        />
+      )}
+      {escolhaEsmagamentoAprimorado && (
+        <EsmagamentoAprimoradoEscolha
+          dadosRestantes={esmagamentoAprimorado.dadosRestantes}
+          dadosLados={esmagamentoAprimorado.dadosLados}
+          onRolarNormal={escolhaEsmagamentoAprimorado.aoRolarNormal}
+          onUsarAprimorado={escolhaEsmagamentoAprimorado.aoUsarAprimorado}
         />
       )}
       {escolhaMontaria && (

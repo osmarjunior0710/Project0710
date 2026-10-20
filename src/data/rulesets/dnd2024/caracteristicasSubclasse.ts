@@ -582,4 +582,14 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     tipoAcao: 'Reação',
     statusImplementacao: 'codeimplementation',
   },
+  {
+    classe: 'Psiônico',
+    subclasse: 'Psicinético',
+    nivel: 10,
+    nome: 'Esmagamento Telecinético Aprimorado',
+    descricao:
+      'Quando você conjura Esmagamento Telecinético, pode gastar um Dado de Energia Psiônica para modificar a magia de forma que, quer a criatura falhe ou seja bem-sucedida no teste de resistência contra a magia, seu Deslocamento seja reduzido à metade até o início do seu próximo turno. Além disso, você pode rolar o Dado de Energia Psiônica gasto e adicionar o valor rolado a uma rolagem de dano da magia.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'codeimplementation',
+  },
 ];

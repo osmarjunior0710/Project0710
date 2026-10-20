@@ -197,6 +197,31 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
     Psíquica → Campo de Rebatimento" na ordem certa; rolar e escolher "Atacante falhou" aplicou "+14
     TEMP" no PV e gastou 1 pip de Dado de Energia corretamente. `npx tsc -b`, `npm test -- --run`
     (1067/1067), `npm run build` verdes.
+  - [x] E6c-e — Esmagamento Telecinético Aprimorado (nível 10): achado no caminho (CLAUDE.md §3) —
+    a magia "Esmagamento Telecinético" já importada tinha `danoBaseTipo: "Energético"` enquanto a
+    descrição completa diz "dano de Força" duas vezes; corrigido em `magiasPsionico.ts` (Osmar
+    aprovou corrigir na mesma entrega). `core/esmagamentoTelecineticoAprimorado.ts` novo
+    (`temEsmagamentoTelecineticoAprimorado`/`esmagamentoAprimoradoElegivel`/
+    `AVISO_ESMAGAMENTO_APRIMORADO`, com testes). Mesmo padrão de `SobrecargaEscolha.tsx` (Mago) —
+    `EsmagamentoAprimoradoEscolha.tsx` novo: ao conjurar especificamente "Esmagamento Telecinético"
+    com a característica e 1+ Dado de Energia, abre popup "Rolar Dano Normal" vs "Gastar 1 Dado de
+    Energia" ANTES da rolagem de dano. Escolhendo gastar: rola o Dado de Energia PRIMEIRO pelo funil
+    `rolarDadoDeEnergiaPsionica` (Surto Psiônico/Força Vital Incandescente só afetam esse dado, nunca
+    os dados normais da magia — isolamento confirmado ao vivo), soma o resultado ao `mod` do dano, e
+    acrescenta `AVISO_ESMAGAMENTO_APRIMORADO` ao `avisoDisciplina` já existente (reaproveitado, sem
+    campo novo em `telaSalvaguarda`) — aparece como aviso no popup de Salvaguarda, independente do
+    resultado. Como a magia é "Salvaguarda" (não "Ataque"), só 2 arquivos precisaram da lógica nova:
+    `CombatTab.tsx` (`abrirSalvaguarda`) e `MagiasTab.tsx` (`abrirSalvaguardaComAviso`) —
+    `useUsarMagiaPainel.tsx` só delega pra eles nesse caso, confirmado lendo o código antes de mexer.
+    Testado ao vivo (navegador headless, 412px, Char Multiclasse, 3D dado desligado): descrição da
+    magia mostra "5d6 Força" (confirma o fix do tipo de dano); popup de escolha aparece com o texto
+    certo e contador de dados; ao gastar, o Dado de Energia rola (resultado 6 no d12) e corretamente
+    oferece Força Vital Incandescente em seguida (prova que o funil está isolado certo). Não
+    consegui fechar a gravação automatizada até a tela final de dano/salvaguarda (a magia dispara
+    Bio-Retorno antes, que atrapalhou o script de teste) — a etapa final usa o mesmo mecanismo já
+    testado em Retaliação Psíquica/Campo de Rebatimento, sem motivo pra desconfiar, mas vale o Osmar
+    confirmar na tela a mensagem final de Deslocamento reduzido. `npx tsc -b`, `npm test -- --run`
+    (1073/1073), `npm run build` verdes.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.
 

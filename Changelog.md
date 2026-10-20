@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0547
+
+Psicinético (Psiônico, nível 10) — Esmagamento Telecinético Aprimorado: ao conjurar Esmagamento
+Telecinético, agora dá pra escolher gastar 1 Dado de Energia Psiônica — soma ao dano E reduz o
+Deslocamento do alvo à metade (falhando ou passando na salvaguarda). Corrigido de brinde: a magia
+mostrava o tipo de dano errado ("Energético" em vez de "Força").
+
 ## v202610_2019
 
 Psicinético (Psiônico, nível 6) — Campo de Rebatimento: novo card de Reação (💫 Retaliação

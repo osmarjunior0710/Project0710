@@ -43,6 +43,8 @@ import {
   danoCampoDeRebatimentoSucesso,
   explicarDanoCampoDeRebatimento,
 } from '../../../core/campoDeRebatimento';
+import { esmagamentoAprimoradoElegivel, AVISO_ESMAGAMENTO_APRIMORADO } from '../../../core/esmagamentoTelecineticoAprimorado';
+import EsmagamentoAprimoradoEscolha from '../combat/EsmagamentoAprimoradoEscolha';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico, dadoExtraPerfurador } from '../../../core/danoCritico';
 import {
@@ -449,6 +451,14 @@ interface CombatTabProps {
   /** Chamado com o valor de PV Temporário ganho (sempre, independente do resultado da
    * salvaguarda) — `FichaShell.tsx` aplica via `ganharPvTemporario`. */
   onGanharPvTempCampoDeRebatimento: (valor: number) => void;
+  /** Esmagamento Telecinético Aprimorado (Psiônico, subclasse Psicinético, nível 10, E6c-e) —
+   * sem `cd` própria (reaproveita a salvaguarda da magia em si). */
+  esmagamentoAprimorado: {
+    disponivel: boolean;
+    dadosRestantes: number;
+    dadosLados: number;
+    onGastarDado: () => boolean;
+  };
   restauracaoPsionica: {
     disponivel: boolean;
     usada: boolean;
@@ -894,6 +904,7 @@ export default function CombatTab({
   retaliacaoPsiquica,
   campoDeRebatimento,
   onGanharPvTempCampoDeRebatimento,
+  esmagamentoAprimorado,
   restauracaoPsionica,
   armaSagrada,
   resplendorSagrado,
@@ -1049,6 +1060,12 @@ export default function CombatTab({
     danoMaximo: number;
     aoRolarNormal: () => void;
     aoUsarSobrecarga: () => void;
+  } | null>(null);
+  // Esmagamento Telecinético Aprimorado (Psiônico/Psicinético, E6c-e) — mesmo padrão de tela
+  // flutuante de `escolhaSobrecarga` acima.
+  const [escolhaEsmagamentoAprimorado, setEscolhaEsmagamentoAprimorado] = useState<{
+    aoRolarNormal: () => void;
+    aoUsarAprimorado: () => void;
   } | null>(null);
   // Convocar Montaria (Paladino) — mesmo padrão de tela flutuante de
   // `escolhaSobrecarga` acima. `null` = fechado.
@@ -1380,6 +1397,74 @@ export default function CombatTab({
         }),
       });
     };
+    // Esmagamento Telecinético Aprimorado (Psiônico/Psicinético, E6c-e): rola o Dado de Energia
+    // Psiônica PRIMEIRO (pelo funil, pra Surto/Força Vital se aplicarem só a esse dado, nunca aos
+    // dados normais da magia), soma o resultado ao `mod` do dano e acrescenta o aviso de
+    // Deslocamento reduzido (vale falhando ou passando — vira o `aviso` do popup de Salvaguarda).
+    const rolarComEsmagamentoAprimorado = () => {
+      if (!esmagamentoAprimorado.onGastarDado()) return;
+      let valorDado = 0;
+      rolarDadoDeEnergiaPsionica(rolarDados, {
+        label: '💥 Esmagamento Telecinético Aprimorado — Dado de Energia Psiônica',
+        formula: `1d${esmagamentoAprimorado.dadosLados}`,
+        quantidade: 1,
+        lados: esmagamentoAprimorado.dadosLados,
+        mod: 0,
+        onResultado: (total) => {
+          valorDado = total;
+        },
+        onSurtoPsionicoAplicado: (novoTotal) => {
+          valorDado = novoTotal;
+        },
+        onForcaVitalAplicada: (novoTotal) => {
+          valorDado = novoTotal;
+        },
+        confirmarFechamento: {
+          aoTocar: () => {
+            const avisoCombinado = [avisoDisciplina, AVISO_ESMAGAMENTO_APRIMORADO].filter(Boolean).join('\n\n');
+            let totalRolado = 0;
+            rolarDados({
+              label: `Dano — ✨ ${magia.nome}`,
+              formula: `${dano.quantidade}d${dano.lados} + ${dano.mod + valorDado}`,
+              quantidade: dano.quantidade,
+              lados: dano.lados,
+              mod: dano.mod + valorDado,
+              explicacaoMod: dano.explicacao,
+              onResultado: (total) => {
+                totalRolado = total;
+              },
+              confirmarFechamento: {
+                aoTocar: () =>
+                  setTelaSalvaguarda({
+                    magia,
+                    circuloUsado,
+                    danoRolado: totalRolado,
+                    upcastNaoAutomatico: dano.upcastNaoAutomatico,
+                    avisoDisciplina: avisoCombinado,
+                  }),
+              },
+              ofertaTrocaDeDado: ofertaMenteAgucada(dano.tipo, menteAgucada.ativa, menteAgucada.anotado, menteAgucada.usadaNoTurno, true, (novoTotal) => {
+                totalRolado = novoTotal;
+                menteAgucada.onTrocado();
+              }),
+            });
+          },
+        },
+      });
+    };
+    if (esmagamentoAprimoradoElegivel(magia, esmagamentoAprimorado.disponivel, esmagamentoAprimorado.dadosRestantes)) {
+      setEscolhaEsmagamentoAprimorado({
+        aoRolarNormal: () => {
+          setEscolhaEsmagamentoAprimorado(null);
+          rolarNormal();
+        },
+        aoUsarAprimorado: () => {
+          setEscolhaEsmagamentoAprimorado(null);
+          rolarComEsmagamentoAprimorado();
+        },
+      });
+      return;
+    }
     if (sobrecargaElegivel(magia, circuloUsado, sobrecargaAtiva)) {
       setEscolhaSobrecarga({
         nomeMagia: magia.nome,
@@ -3151,6 +3236,15 @@ export default function CombatTab({
           danoMaximo={escolhaSobrecarga.danoMaximo}
           onRolarNormal={escolhaSobrecarga.aoRolarNormal}
           onUsarSobrecarga={escolhaSobrecarga.aoUsarSobrecarga}
+        />
+      )}
+
+      {escolhaEsmagamentoAprimorado && (
+        <EsmagamentoAprimoradoEscolha
+          dadosRestantes={esmagamentoAprimorado.dadosRestantes}
+          dadosLados={esmagamentoAprimorado.dadosLados}
+          onRolarNormal={escolhaEsmagamentoAprimorado.aoRolarNormal}
+          onUsarAprimorado={escolhaEsmagamentoAprimorado.aoUsarAprimorado}
         />
       )}
 

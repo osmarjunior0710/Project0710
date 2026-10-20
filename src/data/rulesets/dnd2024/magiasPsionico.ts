@@ -246,7 +246,7 @@ export const magiasUAPsionico: Magia[] = [
     "upcastAlvos": null,
     "upcastTexto": "Usando um Espaço de Magia Superior. O dano aumenta em 1d6 para cada nível de espaço de magia acima do 3º.",
     "danoBaseDado": "5d6",
-    "danoBaseTipo": "Energético",
+    "danoBaseTipo": "Força",
     "danoCondicionalDado": null,
     "danoCondicionalTexto": null,
     "curaBaseDado": null,

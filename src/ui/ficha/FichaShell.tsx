@@ -1108,6 +1108,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     tecnicasTelecineticas: temTecnicasTelecineticas,
     telecinesePoderoso: temTelecinesePoderoso,
     campoDeRebatimento: temCampoDeRebatimento,
+    esmagamentoTelecineticoAprimorado: temEsmagamentoTelecineticoAprimorado,
     armaSagrada: armaSagradaDisponivel,
     resplendorSagrado: resplendorSagradoDisponivel,
     palavrasDeInterrupcao: palavrasDeInterrupcaoDisponivel,
@@ -1131,6 +1132,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'tecnicasTelecineticas',
     'telecinesePoderoso',
     'campoDeRebatimento',
+    'esmagamentoTelecineticoAprimorado',
     'armaSagrada',
     'resplendorSagrado',
     'palavrasDeInterrupcao',
@@ -1155,6 +1157,18 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     cd: classePsionico ? (calcularResumoConjuracao(selecao, classePsionico, nivelTotalAtual)?.cd ?? null) : null,
     onGastarDado: (): boolean => {
       if (!podeAtivarCampoDeRebatimento(psionicoEntry?.nivel ?? 0, dadosEnergiaRestantes)) return false;
+      setDadosEnergiaPsionicaGasto((v) => v + 1);
+      return true;
+    },
+  };
+  // Esmagamento Telecinético Aprimorado (Psiônico, subclasse Psicinético, nível 10, E6c-e) — não
+  // tem CD própria (a salvaguarda é sempre da magia Esmagamento Telecinético em si).
+  const esmagamentoAprimorado = {
+    disponivel: temEsmagamentoTelecineticoAprimorado,
+    dadosRestantes: dadosEnergiaRestantes,
+    dadosLados: dadosEnergiaLados,
+    onGastarDado: (): boolean => {
+      if (!temEsmagamentoTelecineticoAprimorado || dadosEnergiaRestantes <= 0) return false;
       setDadosEnergiaPsionicaGasto((v) => v + 1);
       return true;
     },
@@ -3752,6 +3766,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             sobrecargaAtiva={sobrecargaAtiva}
             sobrecargaUsosDesdeDescanso={sobrecargaUsosDesdeDescanso}
             onUsarSobrecarga={usarSobrecarga}
+            esmagamentoAprimorado={esmagamentoAprimorado}
             modIntAtual={modIntAtual}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             conjura={conjura}
@@ -4015,6 +4030,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             retaliacaoPsiquica={retaliacaoPsiquica}
             campoDeRebatimento={campoDeRebatimento}
             onGanharPvTempCampoDeRebatimento={ganharPvTempCampoDeRebatimento}
+            esmagamentoAprimorado={esmagamentoAprimorado}
             restauracaoPsionica={restauracaoPsionica}
             armaSagrada={{
               disponivel: armaSagradaDisponivel,
