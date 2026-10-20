@@ -168,6 +168,8 @@ interface ReacaoPanelContentProps {
   /** Mente Aguçada (Psiônico UA, E4d-b) — "Modo de Ataque". Ver
    * `useUsarMagiaPainel.tsx`. */
   menteAgucadaAtiva: boolean;
+  /** Transe Destrutivo (Psiônico, Psicinético nível 6, E6c-f) — ver `core/transeDestrutivo.ts`. */
+  transeDestrutivoAtiva: boolean;
   menteAgucadaAnotado: number | null;
   menteAgucadaUsadaNoTurno: boolean;
   onMenteAgucadaTrocada: () => void;
@@ -233,6 +235,7 @@ export default function ReacaoPanelContent({
   disciplinaPsionicaBloqueadaNoTurno,
   onDisciplinaPosConjuracaoDisponivel,
   menteAgucadaAtiva,
+  transeDestrutivoAtiva,
   menteAgucadaAnotado,
   menteAgucadaUsadaNoTurno,
   onMenteAgucadaTrocada,
@@ -332,6 +335,9 @@ export default function ReacaoPanelContent({
                   true,
                   onMenteAgucadaTrocada,
                 ),
+                // Transe Destrutivo (Psicinético nível 6, E6c-f) — mesmo par
+                // `m.circulo > 0` já usado acima em `decidirConjuracao` pra excluir truque.
+                transeDestrutivoElegivel: transeDestrutivoAtiva && m.circulo > 0,
               });
             };
             if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {

@@ -222,6 +222,35 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
     testado em Retaliação Psíquica/Campo de Rebatimento, sem motivo pra desconfiar, mas vale o Osmar
     confirmar na tela a mensagem final de Deslocamento reduzido. `npx tsc -b`, `npm test -- --run`
     (1073/1073), `npm run build` verdes.
+  - [x] E6c-f — Transe Destrutivo (nível 6): 2 partes distintas do texto (seção 6.1 do CLAUDE.md —
+    separar antes de propor). **Parte A — ativação** (gasta 1 Dado de Energia Psiônica, mesmo
+    padrão de Defesa Psiônica/Mente Aguçada): card novo em Combate (grupo Psiônico), "Ativar" sem
+    rolar nada, texto informativo "Deslocamento de Voo 6m + pode pairar, 10 minutos" (o app não
+    rastreia voo de verdade). Duração "10 minutos" não bate com nenhum gatilho automático — encerra
+    manual (igual Mente Aguçada); Descanso Curto/Longo encerram sozinhos por serem bem mais longos.
+    `core/transeDestrutivo.ts` novo (`podeAtivarTranseDestrutivo`/`transeDestrutivoDanoElegivel`,
+    com testes). **Parte B — bônus de dano grátis**: enquanto ativo, toda magia conjurada com
+    Espaço de Magia de verdade (mesmo par `circuloUsado`/`gastouEspacoDeVerdade` já usado pela
+    Colheita Macabra) ganha a opção de rolar 1 Dado de Energia Psiônica e somar ao dano — SEM
+    gastar o dado (texto da regra explícito: "não consome"). Infraestrutura nova no
+    `RollContext.tsx`: `TranseDestrutivoProvider` (registrado 1x, só `disponivel`+`dadosLados`, sem
+    `gastar`/`maximo`/trava de turno — a regra não menciona "1x por turno"), `estado.
+    transeDestrutivoElegivel` (setado por quem chama `rolarDados`, diferente de
+    `ehDadoDeEnergiaPsionica`/`dadoPsionico` do Surto/Força Vital — essa superfície é QUALQUER
+    rolagem de dano de magia com espaço), `ofertaTranseDestrutivo`/`aplicarTranseDestrutivo`. Card
+    novo em `RollOverlay.tsx` com rótulo "🌀 Transe Destrutivo (grátis)" — pedido do Osmar: sem o
+    "(grátis)" o jogador pode achar que está gastando outro Dado de Energia, confundindo com
+    Esmagamento Telecinético Aprimorado (que gasta de verdade). Ligado nos 5 pontos que rolam dano
+    de magia com espaço: `CombatTab.abrirSalvaguarda` (normal + variante Esmagamento Aprimorado),
+    `MagiasTab.abrirSalvaguardaComAviso` (idem) + o `rollDano` de ataque-acerto da própria
+    `MagiasTab`, e `useUsarMagiaPainel.tsx`/`ReacaoPanelContent.tsx` (ataque-acerto, Ação/Bônus/
+    Reação). `transeDestrutivoAtivo` persistido (`PersonagemSalvo`), resetado em
+    `descansoCurto`/`descansoLongo`. Testado ao vivo (navegador headless, 412px, Char Multiclasse,
+    3D dado desligado): card Ativar/Encerrar funciona (consome 1 pip, mostra "ATIVO"); conjurar
+    Esmagamento Telecinético com Transe ativo mostra a oferta "🌀 Transe Destrutivo (grátis) —
+    Rolar 1 Dado de Energia Psiônica (d12) — Soma ao dano... não gasta nenhum Dado de Energia" no
+    popup de dano; clicar soma um 6º dado ao grid (5d6 → 10, +1d12 (2) → 20) e trava "já usado
+    nesta rolagem". `npx tsc -b`, `npm test -- --run` (1081/1081), `npm run build` verdes.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.
 - [x] Convenção de cor de botão (pedido do Osmar depois de ver `EsmagamentoAprimoradoEscolha` com "Rolar Dano Normal"

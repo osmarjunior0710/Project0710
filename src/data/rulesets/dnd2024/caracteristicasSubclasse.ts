@@ -576,6 +576,16 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     classe: 'Psiônico',
     subclasse: 'Psicinético',
     nivel: 6,
+    nome: 'Transe Destrutivo',
+    descricao:
+      'No início do seu turno, você pode gastar um Dado de Energia Psiônica para entrar em um estado destrutivo. Pelos próximos 10 minutos, você ganha Deslocamento de Voo de 6 metros e pode pairar. Além disso, sempre que você conjurar uma magia usando um espaço de magia, pode rolar seu Dado de Energia Psiônica e adicionar o valor rolado a uma rolagem de dano dessa magia. Essa rolagem não consome o Dado de Energia Psiônica.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'codeimplementation',
+  },
+  {
+    classe: 'Psiônico',
+    subclasse: 'Psicinético',
+    nivel: 6,
     nome: 'Campo de Rebatimento',
     descricao:
       'Quando você conjura Escudo Arcano em resposta a ser atingido por uma jogada de ataque e faz com que o ataque desencadeador erre, você pode gastar um Dado de Energia Psiônica para lançar a força de volta contra o atacante. O atacante realiza um teste de resistência de Destreza. Role um Dado de Energia Psiônica. Em uma falha, o atacante sofre dano de Força igual ao valor rolado + seu modificador de Inteligência. Em um sucesso, o atacante sofre metade desse dano. Independentemente do resultado do teste, você ganha Pontos de Vida Temporários iguais à quantidade de dano causado.',

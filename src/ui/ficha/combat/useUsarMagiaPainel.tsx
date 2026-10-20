@@ -134,6 +134,8 @@ interface UsarMagiaPainelParams {
    * dado de um dano Psíquico pelo número anotado, 1x por turno. Ver
    * `ui/roll/ofertaMenteAgucada.ts`. */
   menteAgucadaAtiva: boolean;
+  /** Transe Destrutivo (Psiônico, Psicinético nível 6, E6c-f) — ver `core/transeDestrutivo.ts`. */
+  transeDestrutivoAtiva: boolean;
   menteAgucadaAnotado: number | null;
   menteAgucadaUsadaNoTurno: boolean;
   onMenteAgucadaTrocada: () => void;
@@ -349,6 +351,9 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
           true,
           p.onMenteAgucadaTrocada,
         ),
+        // Transe Destrutivo (Psicinético nível 6, E6c-f) — mesmo par
+        // `circuloUsado`/`circulo !== null && !gratis` já usado acima em `decidirConjuracao`.
+        transeDestrutivoElegivel: p.transeDestrutivoAtiva && circulo !== null && !gratis && circuloUsado > 0,
       });
     }
     p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);

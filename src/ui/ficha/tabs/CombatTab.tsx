@@ -432,6 +432,18 @@ interface CombatTabProps {
     onEncerrar: () => void;
     onTrocado: () => void;
   };
+  /** Transe Destrutivo (Psiônico, Psicinético nível 6, E6c-f) — mesmo formato de
+   * `defesaPsionica`, mas com `onEncerrar` manual (igual Mente Aguçada, ver
+   * `core/transeDestrutivo.ts`). O bônus de dano (rolar o Dado de Energia grátis ao conjurar com
+   * Espaço de Magia) não precisa de callback aqui — é oferecido pelo motor de rolagem direto
+   * (`TranseDestrutivoProvider`), só exige `transeDestrutivo.ativa` ligado. */
+  transeDestrutivo: {
+    disponivel: boolean;
+    ativa: boolean;
+    dadosRestantes: number;
+    onAtivar: () => boolean;
+    onEncerrar: () => void;
+  };
   retaliacaoPsiquica: {
     disponivel: boolean;
     dadosRestantes: number;
@@ -901,6 +913,7 @@ export default function CombatTab({
   defesaSuperior,
   defesaPsionica,
   menteAgucada,
+  transeDestrutivo,
   retaliacaoPsiquica,
   campoDeRebatimento,
   onGanharPvTempCampoDeRebatimento,
@@ -1395,6 +1408,14 @@ export default function CombatTab({
           totalRolado = novoTotal;
           menteAgucada.onTrocado();
         }),
+        // Transe Destrutivo (Psicinético nível 6, E6c-f): rolar e somar é
+        // oferecido pelo motor direto (`TranseDestrutivoProvider`) — só precisa
+        // confirmar aqui que é dano de magia com Espaço de Magia de verdade
+        // (truque = `circuloUsado === 0`, já excluído).
+        transeDestrutivoElegivel: transeDestrutivo.ativa && circuloUsado > 0,
+        onTranseDestrutivoAplicado: (novoTotal) => {
+          totalRolado = novoTotal;
+        },
       });
     };
     // Esmagamento Telecinético Aprimorado (Psiônico/Psicinético, E6c-e): rola o Dado de Energia
@@ -1447,6 +1468,10 @@ export default function CombatTab({
                 totalRolado = novoTotal;
                 menteAgucada.onTrocado();
               }),
+              transeDestrutivoElegivel: transeDestrutivo.ativa && circuloUsado > 0,
+              onTranseDestrutivoAplicado: (novoTotal) => {
+                totalRolado = novoTotal;
+              },
             });
           },
         },
@@ -2928,6 +2953,38 @@ export default function CombatTab({
         </div>
       )}
 
+      {transeDestrutivo.disponivel && (
+        <div
+          className="opt-card"
+          style={{ marginBottom: 12, borderColor: transeDestrutivo.ativa ? corDoRecursoDaClasse('Psiônico')?.hex : undefined }}
+        >
+          <div className="opt-card-name">🌀 Transe Destrutivo {transeDestrutivo.ativa ? 'ATIVO' : ''}</div>
+          <div className="opt-card-desc">
+            {transeDestrutivo.ativa
+              ? 'Deslocamento de Voo de 6m e pode pairar. Sempre que conjurar uma magia usando um Espaço de Magia, pode rolar 1 Dado de Energia Psiônica GRÁTIS (não gasta) e somar ao dano — a opção aparece sozinha no popup de dano quando disponível. Dura 10 minutos — toque abaixo pra encerrar.'
+              : 'No início do seu turno, gaste 1 Dado de Energia Psiônica pra entrar num estado destrutivo: por 10 minutos, ganha Deslocamento de Voo de 6m + pode pairar, e pode rolar 1 Dado de Energia Psiônica GRÁTIS (sem gastar) em toda magia conjurada com Espaço de Magia, somando ao dano.'}
+          </div>
+          {!transeDestrutivo.ativa ? (
+            <div
+              className="btn"
+              style={transeDestrutivo.dadosRestantes > 0 ? { marginTop: 8 } : { marginTop: 8, opacity: 0.5, pointerEvents: 'none' }}
+              onClick={transeDestrutivo.onAtivar}
+            >
+              Ativar (gasta 1 Dado de Energia Psiônica — {transeDestrutivo.dadosRestantes} restante
+              {transeDestrutivo.dadosRestantes === 1 ? '' : 's'})
+            </div>
+          ) : (
+            <div
+              className="btn"
+              style={{ marginTop: 8, background: 'rgba(178, 59, 59, 0.16)', borderColor: '#b23b3b' }}
+              onClick={transeDestrutivo.onEncerrar}
+            >
+              Encerrar Transe Destrutivo
+            </div>
+          )}
+        </div>
+      )}
+
       {restauracaoPsionica.disponivel && (
         <div className="opt-card" style={{ marginBottom: 12 }}>
           <div className="opt-card-name">🧘 Restauração Psiônica</div>
@@ -3392,6 +3449,7 @@ export default function CombatTab({
           disciplinaPsionicaBloqueadaNoTurno={disciplinaPsionicaBloqueadaNoTurno}
           onDisciplinaPosConjuracaoDisponivel={onDisciplinaPosConjuracaoDisponivel}
           menteAgucadaAtiva={menteAgucada.ativa}
+          transeDestrutivoAtiva={transeDestrutivo.ativa}
           menteAgucadaAnotado={menteAgucada.anotado}
           menteAgucadaUsadaNoTurno={menteAgucada.usadaNoTurno}
           onMenteAgucadaTrocada={menteAgucada.onTrocado}
@@ -3516,6 +3574,7 @@ export default function CombatTab({
           disciplinaPsionicaBloqueadaNoTurno={disciplinaPsionicaBloqueadaNoTurno}
           onDisciplinaPosConjuracaoDisponivel={onDisciplinaPosConjuracaoDisponivel}
           menteAgucadaAtiva={menteAgucada.ativa}
+          transeDestrutivoAtiva={transeDestrutivo.ativa}
           menteAgucadaAnotado={menteAgucada.anotado}
           menteAgucadaUsadaNoTurno={menteAgucada.usadaNoTurno}
           onMenteAgucadaTrocada={menteAgucada.onTrocado}
@@ -3572,6 +3631,7 @@ export default function CombatTab({
           disciplinaPsionicaBloqueadaNoTurno={disciplinaPsionicaBloqueadaNoTurno}
           onDisciplinaPosConjuracaoDisponivel={onDisciplinaPosConjuracaoDisponivel}
           menteAgucadaAtiva={menteAgucada.ativa}
+          transeDestrutivoAtiva={transeDestrutivo.ativa}
           menteAgucadaAnotado={menteAgucada.anotado}
           menteAgucadaUsadaNoTurno={menteAgucada.usadaNoTurno}
           onMenteAgucadaTrocada={menteAgucada.onTrocado}

@@ -363,6 +363,8 @@ interface MagiasTabProps {
   /** Mente Aguçada (Psiônico UA, E4d-b) — "Modo de Ataque". Ver
    * `ui/roll/ofertaMenteAgucada.ts`. */
   menteAgucadaAtiva: boolean;
+  /** Transe Destrutivo (Psiônico, Psicinético nível 6, E6c-f) — ver `core/transeDestrutivo.ts`. */
+  transeDestrutivoAtiva: boolean;
   menteAgucadaAnotado: number | null;
   /** Ainda recebido mas só tem efeito teórico aqui: a aba Magias não tem
    * conceito de turno, então o Modo de Ataque da Mente Aguçada nunca
@@ -475,6 +477,7 @@ export default function MagiasTab({
   disciplinasPsionicasConhecidas,
   onDisciplinaPosConjuracaoDisponivel,
   menteAgucadaAtiva,
+  transeDestrutivoAtiva,
   menteAgucadaAnotado,
   menteAgucadaUsadaNoTurno,
 }: MagiasTabProps) {
@@ -603,6 +606,12 @@ export default function MagiasTab({
         ofertaTrocaDeDado: ofertaMenteAgucada(dano.tipo, menteAgucadaAtiva, menteAgucadaAnotado, menteAgucadaUsadaNoTurno, false, (novoTotal) => {
           totalRolado = novoTotal;
         }),
+        // Transe Destrutivo (Psicinético nível 6, E6c-f): o bônus é oferecido pelo motor direto —
+        // só precisa confirmar Espaço de Magia de verdade (truque = `circuloUsado === 0`).
+        transeDestrutivoElegivel: transeDestrutivoAtiva && circuloUsado > 0,
+        onTranseDestrutivoAplicado: (novoTotal) => {
+          totalRolado = novoTotal;
+        },
       });
     };
     // Esmagamento Telecinético Aprimorado (Psiônico/Psicinético, E6c-e) — mesmo cuidado de
@@ -653,6 +662,10 @@ export default function MagiasTab({
               ofertaTrocaDeDado: ofertaMenteAgucada(dano.tipo, menteAgucadaAtiva, menteAgucadaAnotado, menteAgucadaUsadaNoTurno, false, (novoTotal) => {
                 totalRolado = novoTotal;
               }),
+              transeDestrutivoElegivel: transeDestrutivoAtiva && circuloUsado > 0,
+              onTranseDestrutivoAplicado: (novoTotal) => {
+                totalRolado = novoTotal;
+              },
             });
           },
         },
@@ -794,6 +807,9 @@ export default function MagiasTab({
                   false,
                   () => {},
                 ),
+                // Transe Destrutivo (Psicinético nível 6, E6c-f) — mesmo par já usado acima em
+                // `decidirConjuracao`.
+                transeDestrutivoElegivel: transeDestrutivoAtiva && gastouEspacoDeVerdade && circuloUsado > 0,
               });
             };
             if (sobrecargaElegivel(m, circuloUsado, sobrecargaAtiva)) {
@@ -879,6 +895,7 @@ export default function MagiasTab({
           false,
           () => {},
         ),
+        transeDestrutivoElegivel: transeDestrutivoAtiva && gastouEspacoDeVerdade && circuloUsado > 0,
       });
     }
   }

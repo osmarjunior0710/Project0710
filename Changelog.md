@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1449
+
+Psicinético (Psiônico, nível 6) — Transe Destrutivo: no início do turno, gaste 1 Dado de Energia
+Psiônica pra entrar num estado destrutivo por 10 minutos (Deslocamento de Voo + pode pairar) —
+card novo em Combate. Enquanto ativo, toda magia conjurada com Espaço de Magia ganha a opção de
+rolar 1 Dado de Energia Psiônica GRÁTIS (sem gastar) e somar ao dano, direto no popup de dano.
+
 ## v202610_0914
 
 Ajuste visual: nos popups do Psiônico onde você escolhe entre 2 opções (ex.: Esmagamento

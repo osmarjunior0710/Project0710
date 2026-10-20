@@ -440,6 +440,9 @@ export interface PersonagemSalvo {
   menteAgucadaUsadaNoTurno?: boolean;
   /** `true` = Força Vital Incandescente (Psiônico nível 20) já usada NESTE turno (1x por turno) — reseta no Fim do Turno. */
   forcaVitalUsadaNoTurno?: boolean;
+  /** `true` = Transe Destrutivo (Psiônico, Psicinético nível 6) ativo — dura 10 minutos, encerra
+   * manual ou no Descanso Curto/Longo (ver `core/transeDestrutivo.ts`). */
+  transeDestrutivoAtivo?: boolean;
   /** `true` = Golpes Potencializados do Ápice Elemental (Monge/Elementos nível 17) já usado NESTE
    * turno — reseta no Fim do Turno. */
   apiceGolpesUsadoTurno?: boolean;

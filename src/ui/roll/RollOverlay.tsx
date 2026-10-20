@@ -57,6 +57,8 @@ export default function RollOverlay() {
     aplicarSurtoPsionico,
     ofertaForcaVitalIncandescente,
     aplicarForcaVitalIncandescente,
+    ofertaTranseDestrutivo,
+    aplicarTranseDestrutivo,
     rolarConfirmacaoCritico,
     usarRerollSe1,
     rerollDadoEscolhido,
@@ -412,6 +414,32 @@ export default function RollOverlay() {
                     </div>
                   )}
                 </>
+              )
+            )}
+          </>
+        )}
+        {/* Transe Destrutivo (Psiônico, Psicinético nível 6) — superfície PRÓPRIA
+            (`estado.transeDestrutivoElegivel`), diferente de Surto/Força Vital acima: oferece em
+            QUALQUER rolagem de dano de magia com Espaço de Magia, não só rolagem do Dado de
+            Energia Psiônica. Rótulo "(grátis)" junto do nome — pedido do Osmar: sem isso o
+            jogador pode achar que está gastando outro Dado de Energia Psiônica, confundindo com
+            Esmagamento Telecinético Aprimorado (que gasta de verdade). */}
+        {estado.fase === 'concluido' && estado.transeDestrutivoElegivel && (
+          <>
+            {estado.transeDestrutivo ? (
+              <div className={`${styles.ofertaCard} ${styles.ofertaCardUsada} ${styles.ofertaCardSurto}`}>
+                🌀 Transe Destrutivo — já usado nesta rolagem
+              </div>
+            ) : (
+              ofertaTranseDestrutivo && (
+                <div
+                  className={`${styles.ofertaCard} ${styles.ofertaCardDuasLinhas} ${styles.ofertaCardSurto}`}
+                  onClick={aplicarTranseDestrutivo}
+                >
+                  <div className={styles.ofertaCardTitulo}>🌀 Transe Destrutivo (grátis)</div>
+                  <div className={styles.ofertaCardAcao}>Rolar 1 Dado de Energia Psiônica (d{ofertaTranseDestrutivo.dadosLados})</div>
+                  <div className={styles.ofertaCardEfeito}>Soma ao dano desta magia — não gasta nenhum Dado de Energia.</div>
+                </div>
               )
             )}
           </>

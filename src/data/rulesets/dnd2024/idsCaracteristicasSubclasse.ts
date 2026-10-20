@@ -47,6 +47,7 @@ export const ID_CARACTERISTICA_SUBCLASSE = {
   magiasDoPsicinetico: 'Magias do Psicinético',
   tecnicasTelecineticas: 'Técnicas Telecinéticas',
   telecinesePoderoso: 'Telecinese Poderoso',
+  transeDestrutivo: 'Transe Destrutivo',
   campoDeRebatimento: 'Campo de Rebatimento',
   esmagamentoTelecineticoAprimorado: 'Esmagamento Telecinético Aprimorado',
 } as const;

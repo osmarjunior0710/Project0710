@@ -178,6 +178,8 @@ interface AcaoPanelContentProps {
   /** Mente Aguçada (Psiônico UA, E4d-b) — "Modo de Ataque". Ver
    * `useUsarMagiaPainel.tsx`. */
   menteAgucadaAtiva: boolean;
+  /** Transe Destrutivo (Psiônico, Psicinético nível 6, E6c-f) — ver `core/transeDestrutivo.ts`. */
+  transeDestrutivoAtiva: boolean;
   menteAgucadaAnotado: number | null;
   menteAgucadaUsadaNoTurno: boolean;
   onMenteAgucadaTrocada: () => void;
@@ -305,6 +307,7 @@ export default function AcaoPanelContent({
   disciplinaPsionicaBloqueadaNoTurno,
   onDisciplinaPosConjuracaoDisponivel,
   menteAgucadaAtiva,
+  transeDestrutivoAtiva,
   menteAgucadaAnotado,
   menteAgucadaUsadaNoTurno,
   onMenteAgucadaTrocada,
@@ -372,6 +375,7 @@ export default function AcaoPanelContent({
     disciplinaPsionicaBloqueadaNoTurno,
     onDisciplinaPosConjuracaoDisponivel,
     menteAgucadaAtiva,
+    transeDestrutivoAtiva,
     menteAgucadaAnotado,
     menteAgucadaUsadaNoTurno,
     onMenteAgucadaTrocada,

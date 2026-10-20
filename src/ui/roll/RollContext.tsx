@@ -244,6 +244,13 @@ export interface RollState {
   forcaVital?: { quantidade: 1 | 2; valores: number[] } | null;
   /** Ver `RollDadosOptions.onForcaVitalAplicada`. */
   onForcaVitalAplicada?: ((novoTotal: number) => void) | null;
+  /** Ver `RollDadosOptions.transeDestrutivoElegivel`. */
+  transeDestrutivoElegivel?: boolean;
+  /** Preenchido quando o Transe Destrutivo já foi aplicado NESTA rolagem
+   * (`valor` do dado extra rolado) — bloqueia reaplicar na mesma rolagem. */
+  transeDestrutivo?: { valor: number } | null;
+  /** Ver `RollDadosOptions.onTranseDestrutivoAplicado`. */
+  onTranseDestrutivoAplicado?: ((novoTotal: number) => void) | null;
   /** `true` = esta rolagem usou o motor 3D (física de verdade,
    * `@3d-dice/dice-box`) em vez de `Math.random()` — Fase B do dado 3D
    * (`sdd/sdd-dado-3d.md`). Pra 'd20': cobre o d20 simples E o 2º dado
@@ -451,6 +458,16 @@ export interface ForcaVitalIncandescenteProvider {
   marcarUsadaNoTurno: () => void;
 }
 
+/** Transe Destrutivo (Psiônico, Psicinético nível 6, E6c-f) — "sempre que você conjurar uma magia
+ * usando um Espaço de Magia, pode rolar seu Dado de Energia Psiônica e adicionar o valor rolado a
+ * uma rolagem de dano dessa magia. Essa rolagem NÃO consome o Dado de Energia Psiônica." Sem
+ * `gastar`/`maximo`/`marcarUsadaNoTurno` (diferente de Força Vital Incandescente): é sempre 1
+ * dado, sempre grátis, e a regra não menciona nenhuma trava de "1x por turno". */
+export interface TranseDestrutivoProvider {
+  disponivel: boolean;
+  dadosLados: number;
+}
+
 /** Sortudo (Talento de Origem): Pontos de Sorte pra dar Vantagem num d20 DEPOIS de ver o resultado —
  * rola um 2º d20 e fica com o maior (mesma mecânica da Vantagem escolhida pós-rolagem). `usar` devolve
  * `false` se não havia ponto pra gastar. */
@@ -544,6 +561,18 @@ export interface RollDadosOptions {
   /** Mesmo motivo de `onSurtoPsionicoAplicado`, pra Força Vital
    * Incandescente (soma dado(s) NOVO(S) ao total). */
   onForcaVitalAplicada?: (novoTotal: number) => void;
+  /** Transe Destrutivo (Psiônico, Psicinético nível 6) — `true` só quando
+   * quem chamou já confirmou que esta é uma rolagem de DANO de magia que
+   * usou um Espaço de Magia de verdade (mesmo par `circuloUsado > 0`/
+   * `gastouEspacoDeVerdade` da Colheita Macabra) — ver
+   * `core/transeDestrutivo.ts` `transeDestrutivoDanoElegivel`. Diferente
+   * de `ehDadoDeEnergiaPsionica`/`dadoPsionico` (Surto/Força Vital): essa
+   * superfície é QUALQUER rolagem de dano de magia com espaço, não só
+   * rolagens do próprio Dado de Energia Psiônica. */
+  transeDestrutivoElegivel?: boolean;
+  /** Mesmo motivo de `onSurtoPsionicoAplicado`, pro Transe Destrutivo
+   * (soma 1 dado NOVO, grátis, ao total). */
+  onTranseDestrutivoAplicado?: (novoTotal: number) => void;
   /** Quebra do dado base/Aprimoramento de Truque/Upcast (dano/cura de
    * magia, B8) — mesmo formato do "ⓘ" de CA/perícia/ataque, mas com
    * notação de dado em vez de número resolvido (ver
@@ -673,6 +702,16 @@ interface RollContextValue {
    * Energia Psiônica NOVOS e soma ao total — sem efeito sem oferta
    * válida ou `quantidade` maior que o oferecido. */
   aplicarForcaVitalIncandescente: (quantidade: 1 | 2) => void;
+  /** Transe Destrutivo (Psiônico, Psicinético nível 6) — ver
+   * `TranseDestrutivoProvider`. `ofertaTranseDestrutivo` já decide
+   * sozinho SE oferece — `null` = não mostra nada. Sempre 1 dado,
+   * sempre grátis (sem `max`/`totalDisponivel`, diferente de Força
+   * Vital Incandescente). */
+  ofertaTranseDestrutivo: { dadosLados: number } | null;
+  registrarTranseDestrutivo: (provider: TranseDestrutivoProvider | null) => void;
+  /** Rola 1 Dado de Energia Psiônica NOVO e soma ao total, sem gastar
+   * nada — sem efeito sem oferta válida. */
+  aplicarTranseDestrutivo: () => void;
   /** Sobrevivente Disciplinado (Monge nível 14) — ver `SobreviventeDisciplinadoProvider`. */
   sobreviventeDisciplinadoDisponivel: boolean;
   registrarSobreviventeDisciplinado: (provider: SobreviventeDisciplinadoProvider | null) => void;
@@ -1005,6 +1044,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
       forcarGrid,
       onSurtoPsionicoAplicado,
       onForcaVitalAplicada,
+      transeDestrutivoElegivel,
+      onTranseDestrutivoAplicado,
       explicacaoMod,
       onResultado,
       confirmarFechamento,
@@ -1114,6 +1155,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
           onSurtoPsionicoAplicado: onSurtoPsionicoAplicado ?? null,
           onForcaVitalAplicada: onForcaVitalAplicada ?? null,
           forcaVital: null,
+          transeDestrutivoElegivel,
+          onTranseDestrutivoAplicado: onTranseDestrutivoAplicado ?? null,
+          transeDestrutivo: null,
           explicacaoMod,
           motor3D: viaMotor3D,
           confirmarFechamento,
@@ -1545,6 +1589,43 @@ export function RollProvider({ children }: { children: ReactNode }) {
     [forcaVitalProvider, ofertaForcaVitalIncandescente, estado],
   );
 
+  // Transe Destrutivo (Psiônico, Psicinético nível 6, E6c-f) — ver
+  // `TranseDestrutivoProvider`. Diferente de Surto/Força Vital, a
+  // superfície não é `ehDadoDeEnergiaPsionica`/`dadoPsionico` (rolagens do
+  // próprio Dado de Energia) — é `estado.transeDestrutivoElegivel`,
+  // setado por quem chama `rolarDados` em QUALQUER rolagem de dano de
+  // magia que usou Espaço de Magia de verdade (ver
+  // `core/transeDestrutivo.ts`). Exige grid (`dadosIndividuais`) —
+  // mesma limitação já aceita por Força Vital Incandescente: rolagem de
+  // 1 dado só (`concluirUmDado`) nunca oferece.
+  const [transeDestrutivoProvider, setTranseDestrutivoProvider] = useState<TranseDestrutivoProvider | null>(null);
+  const registrarTranseDestrutivo = useCallback(
+    (provider: TranseDestrutivoProvider | null) => setTranseDestrutivoProvider(provider),
+    [],
+  );
+  const ofertaTranseDestrutivo = (() => {
+    if (!transeDestrutivoProvider?.disponivel) return null;
+    if (!estado || estado.fase !== 'concluido' || estado.transeDestrutivo) return null;
+    if (!estado.transeDestrutivoElegivel || !estado.dadosIndividuais) return null;
+    return { dadosLados: transeDestrutivoProvider.dadosLados };
+  })();
+  const aplicarTranseDestrutivo = useCallback(() => {
+    if (!transeDestrutivoProvider || !ofertaTranseDestrutivo) return;
+    if (!estado || estado.fase !== 'concluido' || estado.transeDestrutivo || !estado.dadosIndividuais) return;
+    const lados = ofertaTranseDestrutivo.dadosLados;
+    const valor = 1 + Math.floor(Math.random() * lados);
+    setEstado((prev) => {
+      if (!prev || !prev.dadosIndividuais) return prev;
+      const novoDado: DadoIndividual = { id: 'td0', lados: lados as LadosDado, valor };
+      const novosDados = [...prev.dadosIndividuais, novoDado];
+      const somaTotal = novosDados.reduce((acc, d) => acc + (typeof d.valor === 'number' ? d.valor : 0), 0);
+      const novoTotal = somaTotal + (prev.mod ?? 0);
+      return { ...prev, dadosIndividuais: novosDados, total: novoTotal, transeDestrutivo: { valor } };
+    });
+    const novoTotal = (estado.total ?? 0) + valor;
+    estado.onTranseDestrutivoAplicado?.(novoTotal);
+  }, [transeDestrutivoProvider, ofertaTranseDestrutivo, estado]);
+
   const rolarConfirmacaoCritico = useCallback(() => {
     if (!estado || estado.fase !== 'concluido' || !estado.confirmarAcerto || estado.confirmacaoCritico) return;
     const usar3D = !!estado.motor3D && dado3DAtivo;
@@ -1778,6 +1859,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
         ofertaForcaVitalIncandescente,
         registrarForcaVitalIncandescente,
         aplicarForcaVitalIncandescente,
+        ofertaTranseDestrutivo,
+        registrarTranseDestrutivo,
+        aplicarTranseDestrutivo,
         sortudoDisponivel: sortudoProvider?.disponivel ?? false,
         sortudoRestantes: sortudoProvider?.restantes ?? 0,
         registrarSortudo,

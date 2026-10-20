@@ -95,6 +95,7 @@ import { resistenciaApiceValida, temApiceElemental } from '../../core/apiceEleme
 import { CUSTO_FOCO_SINTONIA_ELEMENTAL, podeAtivarSintoniaElemental, temSintoniaElemental } from '../../core/sintoniaElemental';
 import { CUSTO_FOCO_DEFESA_SUPERIOR, podeAtivarDefesaSuperior, temDefesaSuperior } from '../../core/defesaSuperior';
 import { podeAtivarDefesaPsionica, temDefesaPsionica } from '../../core/defesaPsionica';
+import { podeAtivarTranseDestrutivo } from '../../core/transeDestrutivo';
 import { podeAtivarMenteAgucada, temMenteAgucada } from '../../core/menteAgucada';
 import { podeAtivarRetaliacaoPsiquica, temRetaliacaoPsiquica } from '../../core/retaliacaoPsiquica';
 import { podeAtivarCampoDeRebatimento } from '../../core/campoDeRebatimento';
@@ -301,6 +302,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     registrarDadoPsionico,
     registrarSurtoPsionico,
     registrarForcaVitalIncandescente,
+    registrarTranseDestrutivo,
     registrarSobreviventeDisciplinado,
     registrarForcaIndomavel,
     estado: rollEmAndamento,
@@ -562,6 +564,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [menteAgucadaUsadaNoTurno, setMenteAgucadaUsadaNoTurno] = useState(personagemSalvo.menteAgucadaUsadaNoTurno ?? false);
   // Força Vital Incandescente (Psiônico nível 20, E5d) — "1x por turno".
   const [forcaVitalUsadaNoTurno, setForcaVitalUsadaNoTurno] = useState(personagemSalvo.forcaVitalUsadaNoTurno ?? false);
+  // Transe Destrutivo (Psiônico, Psicinético nível 6, E6c-f) — dura 10 minutos, encerramento manual
+  // (mesmo caso de Mente Aguçada, ver `core/transeDestrutivo.ts`).
+  const [transeDestrutivoAtivo, setTranseDestrutivoAtivo] = useState(personagemSalvo.transeDestrutivoAtivo ?? false);
   const [apiceGolpesUsadoTurno, setApiceGolpesUsadoTurno] = useState(personagemSalvo.apiceGolpesUsadoTurno ?? false);
   const [passoDestrutivoAtivoTurno, setPassoDestrutivoAtivoTurno] = useState(personagemSalvo.passoDestrutivoAtivoTurno ?? false);
   const [resistenciaApiceElemental, setResistenciaApiceElemental] = useState<string | null>(
@@ -1107,6 +1112,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     magiasDoPsicinetico: magiasPsicineticoDisponivel,
     tecnicasTelecineticas: temTecnicasTelecineticas,
     telecinesePoderoso: temTelecinesePoderoso,
+    transeDestrutivo: temTranseDestrutivo,
     campoDeRebatimento: temCampoDeRebatimento,
     esmagamentoTelecineticoAprimorado: temEsmagamentoTelecineticoAprimorado,
     armaSagrada: armaSagradaDisponivel,
@@ -1131,6 +1137,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'magiasDoPsicinetico',
     'tecnicasTelecineticas',
     'telecinesePoderoso',
+    'transeDestrutivo',
     'campoDeRebatimento',
     'esmagamentoTelecineticoAprimorado',
     'armaSagrada',
@@ -1613,6 +1620,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     menteAgucadaAnotado,
     menteAgucadaUsadaNoTurno,
     forcaVitalUsadaNoTurno,
+    transeDestrutivoAtivo,
     apiceGolpesUsadoTurno,
     passoDestrutivoAtivoTurno,
     resistenciaApiceElemental,
@@ -1739,6 +1747,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       menteAgucadaAnotado,
       menteAgucadaUsadaNoTurno,
       forcaVitalUsadaNoTurno,
+      transeDestrutivoAtivo,
       apiceGolpesUsadoTurno,
       passoDestrutivoAtivoTurno,
       resistenciaApiceElemental,
@@ -1994,6 +2003,24 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setDadosEnergiaPsionicaGasto((v) => v + 1);
     setDefesaPsionicaAtiva(true);
     return true;
+  }
+
+  /** Transe Destrutivo (Psiônico, Psicinético nível 6) — ativar gasta 1 Dado de Energia Psiônica,
+   * sem rolar nada (igual Defesa Psiônica). Duração real "10 minutos" não bate com nenhum gatilho
+   * automático do app — encerra manual (mesmo caso de Mente Aguçada); Descanso Curto (1h) e Longo
+   * (8h) encerram sozinhos, por serem bem mais longos. O bônus de dano (rolar o Dado de Energia
+   * grátis ao conjurar com Espaço de Magia) é oferecido pelo motor de rolagem direto
+   * (`TranseDestrutivoProvider`, registrado abaixo) — não precisa de função própria aqui. */
+  function usarTranseDestrutivo(): boolean {
+    if (transeDestrutivoAtivo) return false;
+    if (!podeAtivarTranseDestrutivo(temTranseDestrutivo, dadosEnergiaRestantes)) return false;
+    setDadosEnergiaPsionicaGasto((v) => v + 1);
+    setTranseDestrutivoAtivo(true);
+    return true;
+  }
+
+  function encerrarTranseDestrutivo() {
+    setTranseDestrutivoAtivo(false);
   }
 
   /** Mente Aguçada (Psiônico, UA) — ativar gasta 1 Dado de Energia Psiônica
@@ -2296,6 +2323,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // Longo (8h) é bem mais longo que isso, então também encerra.
     setMenteAgucadaAtiva(false);
     setMenteAgucadaAnotado(null);
+    // Transe Destrutivo dura só "10 minutos" — Descanso Longo (8h) é
+    // bem mais longo que isso, então também encerra.
+    setTranseDestrutivoAtivo(false);
 
     // Paladino.
     setCanalizarDivindadeGasto(0);
@@ -2371,6 +2401,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // Descanso Curto também é mais longo que isso.
     setMenteAgucadaAtiva(false);
     setMenteAgucadaAnotado(null);
+    // Transe Destrutivo dura só "10 minutos" — 1h de Descanso Curto
+    // também é mais longo que isso.
+    setTranseDestrutivoAtivo(false);
 
     // Paladino.
     setCanalizarDivindadeGasto((v) => Math.max(0, v - 1));
@@ -2893,6 +2926,21 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     });
     return () => registrarForcaVitalIncandescente(null);
   }, [psionicoEntry?.nivel, reservaDadosDeVida, forcaVitalUsadaNoTurno, registrarForcaVitalIncandescente]);
+
+  // Transe Destrutivo (Psicinético nível 6, E6c-f) — registrado 1x. `disponivel` exige a
+  // característica E o estado ligado (`transeDestrutivoAtivo`); sem `gastar`/`maximo` — a
+  // rolagem bônus nunca consome o Dado de Energia Psiônica (ver `core/transeDestrutivo.ts`).
+  useEffect(() => {
+    if (!temTranseDestrutivo) {
+      registrarTranseDestrutivo(null);
+      return;
+    }
+    registrarTranseDestrutivo({
+      disponivel: transeDestrutivoAtivo,
+      dadosLados: dadosEnergiaLados,
+    });
+    return () => registrarTranseDestrutivo(null);
+  }, [temTranseDestrutivo, transeDestrutivoAtivo, dadosEnergiaLados, registrarTranseDestrutivo]);
 
   /** Dispensar a Disciplina pós-conjuração (E4c) não custa nada — o texto da regra é sempre "você
    * pode gastar", nunca automático. Se essa Disciplina ia virar linha extra num popup de Salvaguarda
@@ -3844,6 +3892,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             disciplinasPsionicasConhecidas={disciplinasPsionicasAtuais}
             onDisciplinaPosConjuracaoDisponivel={setDisciplinaPosConjuracaoPendente}
             menteAgucadaAtiva={menteAgucadaAtiva}
+            transeDestrutivoAtiva={transeDestrutivoAtivo}
             menteAgucadaAnotado={menteAgucadaAnotado}
             menteAgucadaUsadaNoTurno={menteAgucadaUsadaNoTurno}
             preferenciasPillsMagia={preferenciasPillsMagia}
@@ -4026,6 +4075,13 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               onAtivar: ativarMenteAgucada,
               onEncerrar: encerrarMenteAgucada,
               onTrocado: () => setMenteAgucadaUsadaNoTurno(true),
+            }}
+            transeDestrutivo={{
+              disponivel: temTranseDestrutivo,
+              ativa: transeDestrutivoAtivo,
+              dadosRestantes: dadosEnergiaRestantes,
+              onAtivar: usarTranseDestrutivo,
+              onEncerrar: encerrarTranseDestrutivo,
             }}
             retaliacaoPsiquica={retaliacaoPsiquica}
             campoDeRebatimento={campoDeRebatimento}
