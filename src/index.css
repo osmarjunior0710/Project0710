@@ -205,11 +205,36 @@ button {
 .btn-disabled {
   opacity: 0.35;
   pointer-events: none;
+  border-style: dashed;
 }
 
 .btn-primary {
   background: var(--accent-dim);
   border-color: var(--accent);
+  font-weight: bold;
+}
+
+/* Botão/opção que gasta ou representa um recurso específico de uma classe (ex.: Dado de
+   Energia Psiônica) — cor da classe em vez do azul padrão, pra o jogador distinguir "ação
+   comum" de "ação que usa recurso de personagem" (ver CONVENCOES-UI.md "Cores de botão"). */
+.btn-psionico {
+  border: 1.5px solid #b36bd6;
+  background: rgba(179, 107, 214, 0.1);
+  color: #7a3f99;
+  font-weight: bold;
+}
+
+.btn-psionico:active {
+  opacity: 0.7;
+}
+
+.opt-card-psionico {
+  border-color: #b36bd6;
+  background: rgba(179, 107, 214, 0.1);
+}
+
+.opt-card-psionico .opt-card-name {
+  color: #7a3f99;
   font-weight: bold;
 }
 

@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0914
+
+Ajuste visual: nos popups do Psiônico onde você escolhe entre 2 opções (ex.: Esmagamento
+Telecinético Aprimorado, Impulso Telecinético, Bio-Retorno e as outras Disciplinas), a opção que
+gasta Dado de Energia Psiônica agora aparece destacada em roxo — antes ficava cinza, parecendo
+desativada mesmo quando era uma escolha válida.
+
 ## v202610_0547
 
 Psicinético (Psiônico, nível 10) — Esmagamento Telecinético Aprimorado: ao conjurar Esmagamento

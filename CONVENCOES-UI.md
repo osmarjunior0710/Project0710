@@ -28,6 +28,28 @@
 - Efeito "ao acertar" é **botão no popup de dano**, não card solto na tela. Efeito "CD do jogador, alvo salva"
   usa o `SalvaguardaDoAlvoModal` que já existe — nunca um modal novo.
 
+## Cores de botão
+
+(2026-10, pedido do Osmar depois de ver `EsmagamentoAprimoradoEscolha` com "Rolar Dano Normal"
+azul/destacado e "Gastar 1 Dado de Energia" cinza/parecendo desativado, quando as duas eram opções
+igualmente válidas.)
+
+- **Azul (`.btn-primary`)** é o botão padrão de qualquer ação comum — "o botão que a gente sempre
+  usa". Não é reservado pra "opção recomendada"; não deixe uma opção válida parecer secundária só
+  por estar do lado de um botão azul.
+- **Cinza médio, borda contínua (`.btn` comum)** = fechar/cancelar/dispensar.
+- **Cinza claro, borda serrilhada (`.btn-disabled`, ganhou `border-style: dashed` nesta data)** =
+  desativado (sem recurso suficiente, pré-requisito não cumprido).
+- **Cor da classe (ou a mais próxima disponível)** = a opção gasta ou representa um recurso
+  específico daquela classe (ex.: Dado de Energia Psiônica, Ponto de Foco). Classes do Psiônico
+  usam `.btn-psionico`/`.opt-card-psionico` (roxo `#b36bd6`, mesmo tom do `.ofertaCard` de Surto
+  Psiônico/Força Vital Incandescente em `RollOverlay.module.css`) — outras classes ainda não têm
+  esses tokens; crie o par equivalente quando for a vez delas (ver `Backlog.md` "Auditoria de cor
+  de botão por classe").
+- **Nunca** deixe 2 opções do jogador com peso visual diferente quando as duas são igualmente
+  válidas (1 azul/negrito vs. 1 cinza) — se uma gasta recurso de classe e a outra não, a cor da
+  classe já resolve a diferenciação sem parecer "desativado".
+
 ## Texto e contadores
 
 - **Pips já mostram a quantidade**: não repetir "3/5" ao lado (`LICOES-RAPIDAS.md`).

@@ -48,7 +48,7 @@ export default function DisciplinaPosConjuracaoModal({
           </div>
         )}
         <div
-          className={`btn btn-primary${semDados ? ' btn-disabled' : ''}`}
+          className={`btn btn-psionico${semDados ? ' btn-disabled' : ''}`}
           style={{ marginBottom: 8 }}
           onClick={semDados ? undefined : onUsar}
         >

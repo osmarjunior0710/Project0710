@@ -28,7 +28,7 @@ export default function EsmagamentoAprimoradoEscolha({
         <div className="btn btn-primary" onClick={onRolarNormal}>
           🎲 Rolar Dano Normal
         </div>
-        <div className="btn" style={{ marginTop: 8 }} onClick={onUsarAprimorado}>
+        <div className="btn btn-psionico" style={{ marginTop: 8 }} onClick={onUsarAprimorado}>
           💥 Gastar 1 Dado de Energia (d{dadosLados})
         </div>
       </div>

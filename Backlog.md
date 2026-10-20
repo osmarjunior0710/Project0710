@@ -7,6 +7,31 @@ Melhoria conhecida e tecnicamente possível, mas que a gente decidiu
 (que é coisa que trava estruturalmente, sem outra opção). Aqui é
 "dá pra fazer, só não é a hora".
 
+## Auditoria de cor de botão por classe (2026-10-20)
+
+Corrigido agora só pro Psiônico (`EsmagamentoAprimoradoEscolha.tsx`, `ImpulsoTelecineticoModal.tsx`,
+`DisciplinaPosConjuracaoModal.tsx` — ver `CONVENCOES-UI.md` "Cores de botão", novo `.btn-psionico`/
+`.opt-card-psionico` em `index.css`, roxo `#b36bd6`). O Osmar pediu pra marcar pra revisar TODAS as
+classes contra essa convenção depois — cada classe que tem uma escolha "gasta recurso de classe vs.
+ação comum" num popup de 2 botões deveria ganhar o par de classes CSS equivalente (cor da classe ou a
+mais próxima legível), em vez de 1 botão azul/negrito vs. 1 cinza parecendo desativado.
+
+**Já identificado (mesmo padrão exato do Psiônico, mesma correção que falta):**
+- **Mago/Evocador — `SobrecargaEscolha.tsx`** (nível 14, "Rolar Dano" azul vs. "Sobrecarga" cinza) —
+  o 2º botão deveria ficar na cor do Mago (ou a mais próxima legível), mesma lógica do Psiônico.
+
+**Ainda não auditado:** todas as outras classes/subclasses com popup de escolha (Bárbaro, Bardo,
+Bruxo, Clérigo, Druida, Guerreiro, Ladino, Monge, Paladino, Ranger). Também vale revisitar os painéis
+Ação/Ação Bônus/Reação (`AcaoPanelContent`/`BonusPanelContent`/`ReacaoPanelContent`) — hoje toda linha
+usa o mesmo cinza neutro (`styles.row`) pra qualquer classe, sem diferenciar visualmente recurso de
+classe; não entra nessa rodada (escopo maior, muda o padrão de TODAS as linhas desses painéis, não só
+Psiônico) — decidir com o Osmar se vale estender pra lá também quando a auditoria completa acontecer.
+
+**Ideia relacionada (tentativa, ainda não decidida):** nomear funções/arquivos/classes CSS específicos
+de uma classe já incluindo o nome da classe (ex.: prefixo ou pasta por classe) pra facilitar achar
+"tudo que é dessa classe" numa auditoria futura como essa, sem precisar grep manual. Vale considerar
+quando a auditoria completa for puxada como foco, não decidir isoladamente agora.
+
 ## Remover 100% das referências ao dado 2D do app (2026-10-12)
 
 Pedido do Osmar: o dado de verdade é o 3D (física); toda aparição do dado "desenhado" 2D no popup de rolagem deve sumir do app. Aconteceu de novo

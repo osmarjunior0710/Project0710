@@ -224,6 +224,21 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
     (1073/1073), `npm run build` verdes.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.
+- [x] Convenção de cor de botão (pedido do Osmar depois de ver `EsmagamentoAprimoradoEscolha` com "Rolar Dano Normal"
+  azul/destacado e "Gastar 1 Dado de Energia" cinza/parecendo desativado, quando as 2 opções eram igualmente válidas).
+  Registrado como processo permanente em `CONVENCOES-UI.md` ("Cores de botão"): azul = botão padrão de qualquer ação
+  comum; cinza médio, borda contínua = fechar/cancelar; cinza claro, borda serrilhada = desativado (`.btn-disabled`
+  ganhou `border-style: dashed`); cor da classe (ou a mais próxima legível) = a opção gasta/representa um recurso
+  daquela classe. Aplicado em TODOS os popups Psiônico-exclusivos: `EsmagamentoAprimoradoEscolha.tsx` ("Gastar 1 Dado
+  de Energia" agora roxo), `ImpulsoTelecineticoModal.tsx` ("Com Dado de Energia" agora roxo; "Fechar" deixou de ser
+  azul, virou cinza médio), `DisciplinaPosConjuracaoModal.tsx` ("Gastar N Dados..." agora roxo). Novo `.btn-psionico`/
+  `.opt-card-psionico` em `index.css` (roxo `#b36bd6`, mesmo tom do `.ofertaCard` de Surto Psiônico/Força Vital
+  Incandescente). Deixado anotado em `Backlog.md` ("Auditoria de cor de botão por classe"): o Mago tem o MESMO
+  problema em `SobrecargaEscolha.tsx` (não corrigido agora, fora do foco Psiônico), e falta revisar todas as outras
+  classes contra essa convenção — vira foco próprio depois, sob demanda. Testado ao vivo (navegador headless, 412px,
+  Char Multiclasse, 3D dado desligado): Esmagamento Aprimorado, Impulso Telecinético e Bio-Retorno (Disciplina) — os
+  3 popups mostram a opção de gasto em roxo, claramente igual peso visual à opção comum. `npx tsc -b`,
+  `npm test -- --run` (1073/1073), `npm run build` verdes.
 
 ## Mini-fix: header da Ficha — "Multiclasse" com 3+ classes
 

@@ -36,7 +36,11 @@ export default function ImpulsoTelecineticoModal({
           <div className="opt-card-name">Sem dado</div>
           <div className="opt-card-desc">Empurra ou puxa 1,5 m. Não gasta nada.</div>
         </div>
-        <div className="opt-card" style={semDado ? { opacity: 0.5, pointerEvents: 'none' } : undefined} onClick={() => onEscolher('energia')}>
+        <div
+          className={`opt-card${semDado ? '' : ' opt-card-psionico'}`}
+          style={semDado ? { opacity: 0.5, borderStyle: 'dashed', pointerEvents: 'none' } : undefined}
+          onClick={() => onEscolher('energia')}
+        >
           <div className="opt-card-name">
             Com Dado de Energia (d{ladosDado}{semDado ? '' : `, ${dadosRestantes} restante${dadosRestantes === 1 ? '' : 's'}`})
           </div>
@@ -54,7 +58,7 @@ export default function ImpulsoTelecineticoModal({
             </div>
           </div>
         )}
-        <div className="btn btn-primary" style={{ marginTop: 12 }} onClick={onFechar}>
+        <div className="btn" style={{ marginTop: 12 }} onClick={onFechar}>
           Fechar
         </div>
       </div>
