@@ -3,6 +3,9 @@
 Fonte: `livros-referencia/unearthed-arcana/Psionico_Atualizacoes_UA_2025.pdf`; levantamento e texto literal em `sdd/sdd-psionico.md`. Abordagem: Psiônico nível 20 no
 Char Multiclasse desde o começo, tudo `[PH]`, mecânicas entrando aos poucos (`EmDev.md`).
 
+Subclasse **Psicinético** — ver `aprendizados/classes/psionico-psicinetico.md` (foco próprio, 100% fechado). As outras 3
+subclasses (Metamorfo, Dobrador Psíquico, Telepata) e os Talentos Selvagens (E7) ainda não têm foco próprio.
+
 ## E1a — esqueleto da classe
 - `classePsionico.ts` (tabelas conferidas vs PDF: espaços = Mago, truques pela tabela, Dados de Energia Psiônica) + características com texto literal, status `placeholder-*`.
 - Registrada em `classes.ts` / `caracteristicasClasse.ts` / proficiências / conjurador completo / cor (roxo) / multiclasse **igual ao Mago (provisório, decisão do Osmar)**.

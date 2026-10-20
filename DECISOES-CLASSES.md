@@ -1136,3 +1136,32 @@ deve travar o próximo turno de verdade (aba Combate) por engano.
 e aplicar as 2 regras acima — nunca assumir que "turno" é um conceito universal só porque existe na aba Combate. Hoje só o
 Psiônico tem esse padrão (Mente Aguçada, Força Vital Incandescente), mas qualquer classe futura com algo parecido reaproveita
 o mesmo campo em vez de inventar um novo.
+
+## Conjurar uma magia específica sem gastar Espaço, pagando outro recurso — reaproveitar o `circuloGratis` já existente (2026-10)
+
+Telecinese Intensificada (Psicinético nível 14, E6c-g — "conjure Telecinese sem gastar um Espaço de Magia, pagando 4 Dados de
+Energia Psiônica") é o MESMO formato de problema que Maestria de Magias/Assinatura Mágica/Magia Fixa de Classe já resolvem
+("essa magia pode ser conjurada sem gastar Espaço"), só que o custo alternativo não é "de graça 1x por descanso" — é um
+recurso diferente, pago todo uso. A solução reaproveitou a infra inteira em vez de inventar um sistema novo:
+
+1. `circuloGratisTelecineseIntensificada(nomeMagia, circuloBase, disponivel, recursoRestante)` segue o MESMO formato de
+   `circuloGratisMagiaFixaDeClasse`/`circuloGratisMaestria`/`circuloGratisAssinatura` (devolve o círculo BASE quando elegível,
+   `null` quando não) — e entra no MESMO encadeamento `??` que já existe em todo lugar que monta essa cadeia
+   (`SelecionarMagiaShell.tsx`, e os 2 `EscolherCirculoShell`/`opcoesGastoComPonte` de `useUsarMagiaPainel.tsx`/`MagiasTab.tsx`).
+   Zero UI nova pra "avisar que a magia pode ser conjurada sem Espaço" — a pill "🔮 Conjurar Grátis" e o desbloqueio de
+   `semEspaco`/`disponivel` já existiam pras 3 fontes antigas.
+2. A ORDEM do encadeamento `??` importa: a fonte REALMENTE grátis (Maestria/Assinatura/Magia Fixa) sempre vem ANTES da fonte
+   PAGA (Telecinese Intensificada) — se o personagem tivesse as 2 ao mesmo tempo pra mesma magia (caso raro, só multiclasse de
+   teste), a `??` garante que a fonte de graça "ganha" e a paga nunca cobra à toa.
+3. `onConjurar(circulo, classeNome, gratis)` recebe só um boolean `gratis` — não diz QUAL fonte grátis foi usada. Quando o
+   custo alternativo precisa de um passo A MAIS (aqui, abrir um popup de escolha e descontar o recurso certo), quem chama
+   precisa recomputar a mesma checagem (`circuloGratisMaestria(...) === null && ... === null`) pra confirmar que é ESSA fonte
+   específica antes de agir — e aí intercepta ANTES do fluxo padrão (`if (gratis) onUsarMagiaGratisDeClasse(...)`), nunca
+   deixa cair nele por engano (senão marcaria "uso grátis" de uma característica que nem foi usada).
+4. **A tela de Salvaguarda (`SalvaguardaDoAlvoModal`) não mostra a descrição completa da magia** — só diz "veja a descrição
+   (ⓘ)", que lê o catálogo global estático, nunca uma cópia modificada passada na hora. Por isso, qualquer efeito que MUDE o
+   texto de uma conjuração específica (duração, alvo, etc. — não dano/CD, que já tem campo próprio) usa o campo genérico
+   `aviso`/`avisoDisciplina` (o mesmo já usado por Esmagamento Telecinético Aprimorado e pelas Disciplinas Psiônicas pós-
+   conjuração) em vez de tentar copiar/alterar o objeto `Magia` em trânsito — a cópia nunca apareceria em lugar nenhum da UI.
+   Quando 2 avisos podem coexistir (aqui: o aviso de uma Disciplina tipo Bio-Retorno E o da Telecinese Intensificada), junta
+   os dois com `.filter(Boolean).join('\n\n')`, mesmo padrão já usado em Esmagamento Aprimorado.

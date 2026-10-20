@@ -89,6 +89,10 @@ gradual, sob demanda, não obrigatória de uma vez.)*
 
 - **`classes/psionico.md`** — Psiônico (UA 2025, não oficial): esqueleto da classe nível 20 (tudo [PH]), magias geradas (lista da classe + 18 novas) e achados
   (nomes da lista ≠ catálogo; Animar Mortos colado no texto de outra magia).
+- **`classes/psionico-psicinetico.md`** — subclasse Psicinético (7 características, 100% fechada): ordem das entregas, bug de loop
+  infinito pré-existente achado no caminho, bug de dado desatualizado (Esmagamento Telecinético), origem da convenção de cor de
+  botão (`CONVENCOES-UI.md`), e o padrão técnico de Telecinese Intensificada (reaproveitar `circuloGratis` + usar `aviso` em vez
+  de modificar o objeto `Magia`, ver `DECISOES-CLASSES.md`).
 
 ## `talentos/`
 
