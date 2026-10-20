@@ -227,6 +227,12 @@ interface BonusPanelContentProps {
   ) => void;
   /** Convocar Montaria (Paladino) — ver `useUsarMagiaPainel.tsx`. */
   onAbrirEscolhaDeMontaria: (circuloUsado: number) => void;
+  /** Telecinese Intensificada (Psiônico, subclasse Psicinético, nível 14, E6c-g) — ver
+   * `useUsarMagiaPainel.tsx`. */
+  telecineseIntensificadaDisponivel: boolean;
+  dadosEnergiaRestantes: number;
+  onGastarTelecineseIntensificada: () => boolean;
+  onAbrirEscolhaTelecineseIntensificada: (dados: { aoConjurarNormal: () => void; aoConjurarSemConcentracao: () => void } | null) => void;
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda, que vive em CombatTab. */
   onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null) => void;
@@ -355,6 +361,10 @@ export default function BonusPanelContent({
   onAlterarPv,
   onAbrirEscolhaSobrecarga,
   onAbrirEscolhaDeMontaria,
+  telecineseIntensificadaDisponivel,
+  dadosEnergiaRestantes,
+  onGastarTelecineseIntensificada,
+  onAbrirEscolhaTelecineseIntensificada,
   onAbrirSalvaguarda,
   onCuraDeMagiaAplicada,
   colheitaMacabraDisponivel,
@@ -406,6 +416,10 @@ export default function BonusPanelContent({
     onAlterarPv,
     onAbrirEscolhaSobrecarga,
     onAbrirEscolhaDeMontaria,
+    telecineseIntensificadaDisponivel,
+    dadosEnergiaRestantes,
+    onGastarTelecineseIntensificada,
+    onAbrirEscolhaTelecineseIntensificada,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     disciplinasPsionicasConhecidas,

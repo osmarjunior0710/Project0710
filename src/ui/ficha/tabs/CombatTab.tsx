@@ -45,6 +45,7 @@ import {
 } from '../../../core/campoDeRebatimento';
 import { esmagamentoAprimoradoElegivel, AVISO_ESMAGAMENTO_APRIMORADO } from '../../../core/esmagamentoTelecineticoAprimorado';
 import EsmagamentoAprimoradoEscolha from '../combat/EsmagamentoAprimoradoEscolha';
+import TelecineseIntensificadaEscolha from '../combat/TelecineseIntensificadaEscolha';
 import { resolverVantagem } from '../../../core/calculoPersonagem';
 import { danoComCritico, dadoExtraPerfurador } from '../../../core/danoCritico';
 import {
@@ -470,6 +471,15 @@ interface CombatTabProps {
     dadosRestantes: number;
     dadosLados: number;
     onGastarDado: () => boolean;
+  };
+  /** Telecinese Intensificada (Psiônico, subclasse Psicinético, nível 14, E6c-g) — gasta 4 Dados
+   * de Energia Psiônica (`onGastarDados` desconta os 4 de uma vez, igual nos 2 jeitos de
+   * conjurar). */
+  telecineseIntensificada: {
+    disponivel: boolean;
+    dadosRestantes: number;
+    dadosLados: number;
+    onGastarDados: () => boolean;
   };
   restauracaoPsionica: {
     disponivel: boolean;
@@ -918,6 +928,7 @@ export default function CombatTab({
   campoDeRebatimento,
   onGanharPvTempCampoDeRebatimento,
   esmagamentoAprimorado,
+  telecineseIntensificada,
   restauracaoPsionica,
   armaSagrada,
   resplendorSagrado,
@@ -1083,6 +1094,12 @@ export default function CombatTab({
   // Convocar Montaria (Paladino) — mesmo padrão de tela flutuante de
   // `escolhaSobrecarga` acima. `null` = fechado.
   const [escolhaMontaria, setEscolhaMontaria] = useState<{ circuloUsado: number } | null>(null);
+  // Telecinese Intensificada (Psiônico/Psicinético, E6c-g) — mesmo padrão de tela flutuante de
+  // `escolhaSobrecarga` acima.
+  const [escolhaTelecineseIntensificada, setEscolhaTelecineseIntensificada] = useState<{
+    aoConjurarNormal: () => void;
+    aoConjurarSemConcentracao: () => void;
+  } | null>(null);
   const [ataquesFeitos, setAtaquesFeitos] = useState(0);
   // Torrente de Golpes (Monge) — mesmo padrão de `numAtaques`/`ataquesFeitos`
   // do Ataque Extra, só que escopado à Ação Bônus: 0 = técnica ainda não
@@ -3305,6 +3322,15 @@ export default function CombatTab({
         />
       )}
 
+      {escolhaTelecineseIntensificada && (
+        <TelecineseIntensificadaEscolha
+          dadosRestantes={telecineseIntensificada.dadosRestantes}
+          dadosLados={telecineseIntensificada.dadosLados}
+          onConjurarNormal={escolhaTelecineseIntensificada.aoConjurarNormal}
+          onConjurarSemConcentracao={escolhaTelecineseIntensificada.aoConjurarSemConcentracao}
+        />
+      )}
+
       {escolhaMontaria && (
         <EscolherMontariaModal
           circuloUsado={escolhaMontaria.circuloUsado}
@@ -3368,6 +3394,10 @@ export default function CombatTab({
           gastarSlotCirculo={onGastarSlotCirculo}
           onAlterarPv={onAlterarPv}
           onAbrirEscolhaSobrecarga={setEscolhaSobrecarga}
+          telecineseIntensificadaDisponivel={telecineseIntensificada.disponivel}
+          dadosEnergiaRestantes={telecineseIntensificada.dadosRestantes}
+          onGastarTelecineseIntensificada={telecineseIntensificada.onGastarDados}
+          onAbrirEscolhaTelecineseIntensificada={setEscolhaTelecineseIntensificada}
           onAbrirEscolhaDeMontaria={(circuloUsado) => {
             onMarcarUsado('acao');
             setPainelAberto(null);
@@ -3561,6 +3591,10 @@ export default function CombatTab({
           onUsarSobrecarga={onUsarSobrecarga}
           onAlterarPv={onAlterarPv}
           onAbrirEscolhaSobrecarga={setEscolhaSobrecarga}
+          telecineseIntensificadaDisponivel={telecineseIntensificada.disponivel}
+          dadosEnergiaRestantes={telecineseIntensificada.dadosRestantes}
+          onGastarTelecineseIntensificada={telecineseIntensificada.onGastarDados}
+          onAbrirEscolhaTelecineseIntensificada={setEscolhaTelecineseIntensificada}
           onAbrirEscolhaDeMontaria={(circuloUsado) => {
             onMarcarUsado('bonus');
             setPainelAberto(null);

@@ -50,6 +50,7 @@ export const ID_CARACTERISTICA_SUBCLASSE = {
   transeDestrutivo: 'Transe Destrutivo',
   campoDeRebatimento: 'Campo de Rebatimento',
   esmagamentoTelecineticoAprimorado: 'Esmagamento Telecinético Aprimorado',
+  telecineseIntensificada: 'Telecinese Intensificada',
 } as const;
 
 export type IdCaracteristicaSubclasse = keyof typeof ID_CARACTERISTICA_SUBCLASSE;

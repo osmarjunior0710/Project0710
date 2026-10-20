@@ -602,4 +602,14 @@ export const caracteristicasSubclasse: CaracteristicaSubclasse[] = [
     tipoAcao: 'Passiva / Estática',
     statusImplementacao: 'codeimplementation',
   },
+  {
+    classe: 'Psiônico',
+    subclasse: 'Psicinético',
+    nivel: 14,
+    nome: 'Telecinese Intensificada',
+    descricao:
+      'Você pode conjurar Telecinese sem gastar um Espaço de Magia, gastando em vez disso 4 Dados de Energia Psiônica. Quando conjura Telecinese dessa forma, pode modificar a magia para que ela não exija Concentração. Se fizer isso, a duração da magia passa a ser 1 minuto para essa conjuração, e você pode ter como alvo criaturas e objetos Colossais.',
+    tipoAcao: 'Passiva / Estática',
+    statusImplementacao: 'codeimplementation',
+  },
 ];

@@ -10,6 +10,7 @@ import {
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import { circuloGratisMagiaFixaDeClasse, type MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
+import { circuloGratisTelecineseIntensificada } from '../../../core/telecineseIntensificada';
 import { iconesMagia } from '../../../core/classificarMagia';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
 import GrupoMagiaColapsavel from '../../components/GrupoMagiaColapsavel';
@@ -45,6 +46,11 @@ interface SelecionarMagiaShellProps {
    * mesmo tratamento acima, sempre no círculo BASE da magia. */
   magiasFixasClasseAtuais: MagiaFixaDeClasse[];
   magiasFixasClasseGastas: Record<string, number>;
+  /** Telecinese Intensificada (Psiônico, subclasse Psicinético, nível 14, E6c-g) — mesmo
+   * tratamento acima, mas só vale pra "Telecinese" e custa 4 Dados de Energia Psiônica (não é de
+   * graça de verdade — ver `EscolherCirculoShell`/`TelecineseIntensificadaEscolha`). */
+  telecineseIntensificadaDisponivel: boolean;
+  dadosEnergiaRestantes: number;
   onFechar: () => void;
   onEscolherTruque: (m: Magia, classe: string | null) => void;
   onEscolherMagia: (m: Magia, circulosDisponiveis: number[], classe: string | null) => void;
@@ -76,6 +82,8 @@ export default function SelecionarMagiaShell({
   assinaturaMagicaGastas,
   magiasFixasClasseAtuais,
   magiasFixasClasseGastas,
+  telecineseIntensificadaDisponivel,
+  dadosEnergiaRestantes,
   onFechar,
   onEscolherTruque,
   onEscolherMagia,
@@ -103,7 +111,8 @@ export default function SelecionarMagiaShell({
                   ? null
                   : (circuloGratisMaestria(m.nome, maestriaDeMagiasAtuais) ??
                     circuloGratisAssinatura(m.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas) ??
-                    circuloGratisMagiaFixaDeClasse(m.nome, m.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas));
+                    circuloGratisMagiaFixaDeClasse(m.nome, m.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas) ??
+                    circuloGratisTelecineseIntensificada(m.nome, m.circulo, telecineseIntensificadaDisponivel, dadosEnergiaRestantes));
                 const disponivel = truque || circulosDisponiveis.length > 0 || circuloGratis !== null;
                 return (
                   <div

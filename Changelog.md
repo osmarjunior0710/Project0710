@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2028
+
+Psicinético (Psiônico, nível 14) — Telecinese Intensificada: conjurar Telecinese agora tem uma
+opção extra "💠 4 Dados de Energia Psiônica (sem Espaço de Magia)" na tela de círculo. Escolhendo
+ela, dá pra conjurar normal (Concentração, 10 min, alvo Enorme ou menor) ou sem Concentração (dura
+1 minuto, alvo até Colossal) — a escolha fica clara na tela antes de confirmar. Isso fecha as 7
+características do Psicinético (todas implementadas).
+
 ## v202610_1449
 
 Psicinético (Psiônico, nível 6) — Transe Destrutivo: no início do turno, gaste 1 Dado de Energia

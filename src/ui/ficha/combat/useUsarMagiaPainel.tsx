@@ -11,6 +11,7 @@ import {
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import { circuloGratisMagiaFixaDeClasse, type MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
+import { circuloGratisTelecineseIntensificada, AVISO_TELECINESE_INTENSIFICADA_SEM_CONCENTRACAO } from '../../../core/telecineseIntensificada';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { decidirConjuracao, type DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
 import { truqueElegivelTruquePotente, sobrecargaElegivel, danoMaximoSobrecarga, danoNecroticoSobrecarga } from '../../../core/evocador';
@@ -92,6 +93,12 @@ interface UsarMagiaPainelParams {
    * `EscolherMontariaModal.tsx` (mesmo padrão de tela flutuante de
    * `onAbrirEscolhaSobrecarga`, vive em `CombatTab.tsx`). */
   onAbrirEscolhaDeMontaria: (circuloUsado: number) => void;
+  /** Telecinese Intensificada (Psiônico, subclasse Psicinético, nível 14, E6c-g) — mesmo padrão de
+   * tela flutuante de `onAbrirEscolhaSobrecarga` (precisa escapar do `SidePanel`). */
+  telecineseIntensificadaDisponivel: boolean;
+  dadosEnergiaRestantes: number;
+  onGastarTelecineseIntensificada: () => boolean;
+  onAbrirEscolhaTelecineseIntensificada: (dados: { aoConjurarNormal: () => void; aoConjurarSemConcentracao: () => void } | null) => void;
   colheitaMacabraDisponivel: boolean;
   onColheitaMacabraDisponivel: (cura: number) => void;
   /** Ids das Disciplinas Psiônicas conhecidas (Psiônico UA, E4c) — `[]` pra
@@ -173,6 +180,8 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
     classeDoEspaco: string = p.classeAtivaNome,
     gratis = false,
     classeDonaDaMagia: string | null = null,
+    viaTelecineseIntensificadaJaResolvida = false,
+    avisoExtra: string | null = null,
   ) {
     // Trava dupla — a linha "Usar Magia" já fica desabilitada quando
     // `desvantagemForcaDestreza` é true, mas essa checagem aqui é o
@@ -180,7 +189,37 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
     // Proficiência": bloqueio de conjuração é pra impedir de verdade,
     // não só avisar).
     if (p.desvantagemForcaDestreza) return;
-    if (gratis) p.onUsarMagiaGratisDeClasse(m.nome);
+    // Telecinese Intensificada (E6c-g): a "opção grátis" de Telecinese só é a Intensificada
+    // quando nenhuma outra fonte (Maestria/Assinatura/Magia Fixa) já cobre essa magia — essas
+    // continuam de graça de verdade, sem gastar Dado de Energia nenhum. `viaTelecineseIntensificadaJaResolvida`
+    // evita reabrir o popup na chamada recursiva de baixo (depois que o jogador já escolheu).
+    const viaTelecineseIntensificada =
+      !viaTelecineseIntensificadaJaResolvida &&
+      gratis &&
+      m.nome === 'Telecinese' &&
+      circulo === m.circulo &&
+      circuloGratisMaestria(m.nome, p.maestriaDeMagiasAtuais) === null &&
+      circuloGratisAssinatura(m.nome, p.assinaturaMagicaAtuais, p.assinaturaMagicaGastas) === null &&
+      circuloGratisMagiaFixaDeClasse(m.nome, m.circulo, p.magiasFixasClasseAtuais, p.magiasFixasClasseGastas) === null;
+    if (viaTelecineseIntensificada) {
+      setTelaMagia(null);
+      p.onAbrirEscolhaTelecineseIntensificada({
+        aoConjurarNormal: () => {
+          p.onAbrirEscolhaTelecineseIntensificada(null);
+          if (!p.onGastarTelecineseIntensificada()) return;
+          conjurarMagia(m, circulo, classeDoEspaco, true, classeDonaDaMagia, true);
+        },
+        aoConjurarSemConcentracao: () => {
+          p.onAbrirEscolhaTelecineseIntensificada(null);
+          if (!p.onGastarTelecineseIntensificada()) return;
+          conjurarMagia(m, circulo, classeDoEspaco, true, classeDonaDaMagia, true, AVISO_TELECINESE_INTENSIFICADA_SEM_CONCENTRACAO);
+        },
+      });
+      return;
+    }
+    // A conjuração via Telecinese Intensificada já gastou os 4 Dados de Energia acima — nunca
+    // marca "uso grátis" da Maestria/Assinatura/Magia Fixa pra essa conjuração específica.
+    if (gratis && !viaTelecineseIntensificadaJaResolvida) p.onUsarMagiaGratisDeClasse(m.nome);
     if (circulo !== null && !gratis) {
       const ok = p.gastarSlotCirculo(circulo, classeDoEspaco);
       if (!ok) return;
@@ -234,7 +273,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         p.onDisciplinaPosConjuracaoDisponivel({
           ...resultado.disciplinaPosConjuracao,
           temContextoDeTurno: true,
-          aoResolverSalvaguarda: (aviso) => p.onAbrirSalvaguarda(m, circuloUsado, aviso),
+          aoResolverSalvaguarda: (aviso) => p.onAbrirSalvaguarda(m, circuloUsado, [aviso, avisoExtra].filter(Boolean).join('\n\n') || null),
         });
         return;
       }
@@ -329,7 +368,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
     }
     if (resultado.mecanica === 'salvaguarda') {
       p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
-      p.onAbrirSalvaguarda(m, circuloUsado);
+      p.onAbrirSalvaguarda(m, circuloUsado, avisoExtra);
       return;
     }
     if (resultado.rollCura) {
@@ -373,6 +412,8 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         assinaturaMagicaGastas={p.assinaturaMagicaGastas}
         magiasFixasClasseAtuais={p.magiasFixasClasseAtuais}
         magiasFixasClasseGastas={p.magiasFixasClasseGastas}
+        telecineseIntensificadaDisponivel={p.telecineseIntensificadaDisponivel}
+        dadosEnergiaRestantes={p.dadosEnergiaRestantes}
         onFechar={() => setTelaMagia(null)}
         onEscolherTruque={(m, classe) => conjurarMagia(m, null, p.classeAtivaNome, false, classe)}
         onEscolherMagia={(m, circulosDisponiveis, classe) =>
@@ -397,6 +438,12 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
               telaMagia.magia.circulo,
               p.magiasFixasClasseAtuais,
               p.magiasFixasClasseGastas,
+            ) ??
+            circuloGratisTelecineseIntensificada(
+              telaMagia.magia.nome,
+              telaMagia.magia.circulo,
+              p.telecineseIntensificadaDisponivel,
+              p.dadosEnergiaRestantes,
             ),
         )}
         onVoltar={() => setTelaMagia('lista')}

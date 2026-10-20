@@ -66,6 +66,12 @@ interface AcaoPanelContentProps {
   ) => void;
   /** Convocar Montaria (Paladino) — ver `useUsarMagiaPainel.tsx`. */
   onAbrirEscolhaDeMontaria: (circuloUsado: number) => void;
+  /** Telecinese Intensificada (Psiônico, subclasse Psicinético, nível 14, E6c-g) — ver
+   * `useUsarMagiaPainel.tsx`. */
+  telecineseIntensificadaDisponivel: boolean;
+  dadosEnergiaRestantes: number;
+  onGastarTelecineseIntensificada: () => boolean;
+  onAbrirEscolhaTelecineseIntensificada: (dados: { aoConjurarNormal: () => void; aoConjurarSemConcentracao: () => void } | null) => void;
   /** Aplica a cura de MAGIA no PV E dispara o efeito visual de Cura
    * (ver `FichaShell.tsx` `onCuraDeMagiaAplicada`). */
   onCuraDeMagiaAplicada: (total: number) => void;
@@ -249,6 +255,10 @@ export default function AcaoPanelContent({
   onAlterarPv,
   onAbrirEscolhaSobrecarga,
   onAbrirEscolhaDeMontaria,
+  telecineseIntensificadaDisponivel,
+  dadosEnergiaRestantes,
+  onGastarTelecineseIntensificada,
+  onAbrirEscolhaTelecineseIntensificada,
   onCuraDeMagiaAplicada,
   nivel,
   espacos,
@@ -369,6 +379,10 @@ export default function AcaoPanelContent({
     onAlterarPv,
     onAbrirEscolhaSobrecarga,
     onAbrirEscolhaDeMontaria,
+    telecineseIntensificadaDisponivel,
+    dadosEnergiaRestantes,
+    onGastarTelecineseIntensificada,
+    onAbrirEscolhaTelecineseIntensificada,
     colheitaMacabraDisponivel,
     onColheitaMacabraDisponivel,
     disciplinasPsionicasConhecidas,

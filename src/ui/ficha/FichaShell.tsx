@@ -1115,6 +1115,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     transeDestrutivo: temTranseDestrutivo,
     campoDeRebatimento: temCampoDeRebatimento,
     esmagamentoTelecineticoAprimorado: temEsmagamentoTelecineticoAprimorado,
+    telecineseIntensificada: temTelecineseIntensificada,
     armaSagrada: armaSagradaDisponivel,
     resplendorSagrado: resplendorSagradoDisponivel,
     palavrasDeInterrupcao: palavrasDeInterrupcaoDisponivel,
@@ -1140,6 +1141,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     'transeDestrutivo',
     'campoDeRebatimento',
     'esmagamentoTelecineticoAprimorado',
+    'telecineseIntensificada',
     'armaSagrada',
     'resplendorSagrado',
     'palavrasDeInterrupcao',
@@ -1177,6 +1179,19 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     onGastarDado: (): boolean => {
       if (!temEsmagamentoTelecineticoAprimorado || dadosEnergiaRestantes <= 0) return false;
       setDadosEnergiaPsionicaGasto((v) => v + 1);
+      return true;
+    },
+  };
+  // Telecinese Intensificada (Psiônico, subclasse Psicinético, nível 14, E6c-g) — gasta 4 Dados de
+  // Energia Psiônica (os 2 jeitos de conjurar custam o mesmo, a escolha "sem Concentração" é de
+  // graça em cima disso).
+  const telecineseIntensificada = {
+    disponivel: temTelecineseIntensificada,
+    dadosRestantes: dadosEnergiaRestantes,
+    dadosLados: dadosEnergiaLados,
+    onGastarDados: (): boolean => {
+      if (!temTelecineseIntensificada || dadosEnergiaRestantes < 4) return false;
+      setDadosEnergiaPsionicaGasto((v) => v + 4);
       return true;
     },
   };
@@ -3815,6 +3830,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             sobrecargaUsosDesdeDescanso={sobrecargaUsosDesdeDescanso}
             onUsarSobrecarga={usarSobrecarga}
             esmagamentoAprimorado={esmagamentoAprimorado}
+            telecineseIntensificada={telecineseIntensificada}
             modIntAtual={modIntAtual}
             desvantagemForcaDestreza={desvantagemForcaDestreza}
             conjura={conjura}
@@ -4087,6 +4103,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             campoDeRebatimento={campoDeRebatimento}
             onGanharPvTempCampoDeRebatimento={ganharPvTempCampoDeRebatimento}
             esmagamentoAprimorado={esmagamentoAprimorado}
+            telecineseIntensificada={telecineseIntensificada}
             restauracaoPsionica={restauracaoPsionica}
             armaSagrada={{
               disponivel: armaSagradaDisponivel,

@@ -251,6 +251,35 @@ Fonte e quebra: `sdd/sdd-psionico.md` (decisões 2.1). Abordagem aprovada: Psiô
     Rolar 1 Dado de Energia Psiônica (d12) — Soma ao dano... não gasta nenhum Dado de Energia" no
     popup de dano; clicar soma um 6º dado ao grid (5d6 → 10, +1d12 (2) → 20) e trava "já usado
     nesta rolagem". `npx tsc -b`, `npm test -- --run` (1081/1081), `npm run build` verdes.
+  - [x] E6c-g — Telecinese Intensificada (nível 14): achado no caminho — a lista de 7 características
+    do Psicinético no SDD tinha essa 7ª que ainda não tinha sido implementada (CLAUDE.md §6.1.1,
+    nunca pular característica por achar que já fechou a subclasse). 2 partes distintas: (A) conjurar
+    Telecinese sem gastar Espaço de Magia, pagando 4 Dados de Energia Psiônica; (B) escolha de graça
+    em cima disso — "sem Concentração" (dura 1 minuto, alvo até Colossal) vs "normal" (Concentração,
+    10 min, alvo Enorme ou menor). `core/telecineseIntensificada.ts` novo
+    (`podeConjurarTelecineseIntensificada`/`circuloGratisTelecineseIntensificada`/
+    `AVISO_TELECINESE_INTENSIFICADA_SEM_CONCENTRACAO`, com testes) — `circuloGratisTelecineseIntensificada`
+    segue o mesmo formato de `circuloGratisMagiaFixaDeClasse`/`circuloGratisMaestria`, encadeado no
+    mesmo `??` já usado por Maestria/Assinatura/Magia Fixa (reuso direto, CLAUDE.md §6.5): a "opção
+    grátis" de Telecinese só vira a Intensificada quando nenhuma dessas 3 outras fontes já cobre a
+    magia (evita cobrar 4 dados de quem já tem Telecinese por Maestria/Assinatura de verdade).
+    `TelecineseIntensificadaEscolha.tsx` novo (mesmo padrão central de `EsmagamentoAprimoradoEscolha`/
+    `SobrecargaEscolha`, mas as 2 opções usam `.opt-card` neutro — os 4 dados já são gastos nos 2
+    casos, não é "gastar vs não gastar"). Achado ao testar: a tela de Salvaguarda não tem onde
+    mostrar a descrição completa modificada da magia (só diz "veja a descrição (ⓘ)", que lê o
+    catálogo global sem a mudança) — corrigido reaproveitando o campo `aviso`/`avisoDisciplina`
+    genérico (mesmo campo de Esmagamento Aprimorado/Disciplinas Psiônicas) em vez de tentar mudar o
+    objeto da magia; `conjurarMagia`/`processarMagiaAoUsar` ganharam um parâmetro `avisoExtra`
+    combinado com o aviso de Disciplina quando os dois coexistem (ex.: Bio-Retorno). Ligado nos 2
+    pontos que resolvem a tela de círculo pra conjurar (`useUsarMagiaPainel.tsx`, compartilhado por
+    Ação/Bônus, e `MagiasTab.tsx`) — `SelecionarMagiaShell.tsx` também ganhou o 4º fallback do
+    `circuloGratis` pro picker "Usar Magia" do Combate não escurecer a linha quando só resta a opção
+    Intensificada. Testado ao vivo (navegador headless, 412px, Char Multiclasse, 3D dado desligado):
+    opção "5º Círculo (combinado) — 🔮 Conjurar Grátis" aparece mesmo com espaço real sobrando;
+    popup de escolha mostra os 2 textos completos + "4 Dados de Energia Psiônica (d12, 12
+    restantes)"; "Sem Concentração" mostra o aviso certo no popup de Salvaguarda, "Normal" não
+    mostra aviso nenhum (comportamento limpo); pips de Dado de Energia confirmam 12→8 (gastou os 4)
+    nos dois casos. `npx tsc -b`, `npm test -- --run` (1088/1088), `npm run build` verdes.
 - [x] Psiônico ligado na criação de personagem com selo "UA · não oficial" (a partir de agora cada entrega já fica visível pra testar).
 - Decidido (2026-10): pré-requisito e proficiências de multiclasse = Mago (provisório, marcado UA); cor roxa #b36bd6.
 - [x] Convenção de cor de botão (pedido do Osmar depois de ver `EsmagamentoAprimoradoEscolha` com "Rolar Dano Normal"

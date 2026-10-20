@@ -44,10 +44,12 @@ import { useRoll } from '../../roll/RollContext';
 import { ofertaMenteAgucada } from '../../roll/ofertaMenteAgucada';
 import { rolarDadoDeEnergiaPsionica } from '../../roll/rolarDadoDeEnergiaPsionica';
 import { esmagamentoAprimoradoElegivel, AVISO_ESMAGAMENTO_APRIMORADO } from '../../../core/esmagamentoTelecineticoAprimorado';
+import { circuloGratisTelecineseIntensificada, AVISO_TELECINESE_INTENSIFICADA_SEM_CONCENTRACAO } from '../../../core/telecineseIntensificada';
 import EscolherCirculoShell from '../combat/EscolherCirculoShell';
 import SalvaguardaDoAlvoModal from '../combat/SalvaguardaDoAlvoModal';
 import SobrecargaEscolha from '../combat/SobrecargaEscolha';
 import EsmagamentoAprimoradoEscolha from '../combat/EsmagamentoAprimoradoEscolha';
+import TelecineseIntensificadaEscolha from '../combat/TelecineseIntensificadaEscolha';
 import EscolherMontariaModal from '../combat/EscolherMontariaModal';
 import CopiarMagiaShell from './CopiarMagiaShell';
 import styles from './MagiasTab.module.css';
@@ -244,6 +246,14 @@ interface MagiasTabProps {
     dadosLados: number;
     onGastarDado: () => boolean;
   };
+  /** Telecinese Intensificada (Psiônico/Psicinético, nível 14, E6c-g) — mesmo formato do prop
+   * usado em `CombatTab.tsx`. */
+  telecineseIntensificada: {
+    disponivel: boolean;
+    dadosRestantes: number;
+    dadosLados: number;
+    onGastarDados: () => boolean;
+  };
   /** `true` = já reconjurado desde o último Descanso Curto/Longo —
    * botão "Reconjurar" fica travado até o próximo descanso. */
   livroDasSombrasGasto: boolean;
@@ -402,6 +412,7 @@ export default function MagiasTab({
   sobrecargaUsosDesdeDescanso,
   onUsarSobrecarga,
   esmagamentoAprimorado,
+  telecineseIntensificada,
   desvantagemForcaDestreza,
   conjura,
   truquesAtuais,
@@ -519,6 +530,12 @@ export default function MagiasTab({
   const [escolhaEsmagamentoAprimorado, setEscolhaEsmagamentoAprimorado] = useState<{
     aoRolarNormal: () => void;
     aoUsarAprimorado: () => void;
+  } | null>(null);
+  // Telecinese Intensificada (Psiônico/Psicinético, E6c-g) — mesmo padrão de
+  // `escolhaEsmagamentoAprimorado` acima.
+  const [escolhaTelecineseIntensificada, setEscolhaTelecineseIntensificada] = useState<{
+    aoConjurarNormal: () => void;
+    aoConjurarSemConcentracao: () => void;
   } | null>(null);
   // Convocar Montaria (Paladino) — mesmo padrão de `escolhaSobrecarga`
   // acima, ver `useUsarMagiaPainel.tsx`/`EscolherMontariaModal.tsx`.
@@ -728,6 +745,7 @@ export default function MagiasTab({
     circuloUsado: number,
     gastouEspacoDeVerdade: boolean,
     classeDonaDaMagia: string | null = null,
+    avisoExtra: string | null = null,
   ) {
     // Convocar Montaria não roda a mecânica normal — vira Pet (ver
     // EscolherMontariaModal.tsx, mesmo desvio de useUsarMagiaPainel.tsx).
@@ -775,7 +793,7 @@ export default function MagiasTab({
         onDisciplinaPosConjuracaoDisponivel({
           ...resultado.disciplinaPosConjuracao,
           temContextoDeTurno: false,
-          aoResolverSalvaguarda: (aviso) => abrirSalvaguardaComAviso(m, circuloUsado, aviso),
+          aoResolverSalvaguarda: (aviso) => abrirSalvaguardaComAviso(m, circuloUsado, [aviso, avisoExtra].filter(Boolean).join('\n\n') || null),
         });
         return;
       }
@@ -873,7 +891,7 @@ export default function MagiasTab({
       return;
     }
     if (resultado.mecanica === 'salvaguarda') {
-      abrirSalvaguardaComAviso(m, circuloUsado, null);
+      abrirSalvaguardaComAviso(m, circuloUsado, avisoExtra);
       return;
     }
     if (resultado.rollCura) {
@@ -952,7 +970,8 @@ export default function MagiasTab({
       ponte,
       circuloGratisMaestria(m.nome, maestriaDeMagiasAtuais) ??
         circuloGratisAssinatura(m.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas) ??
-        circuloGratisMagiaFixaDeClasse(m.nome, m.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas),
+        circuloGratisMagiaFixaDeClasse(m.nome, m.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas) ??
+        circuloGratisTelecineseIntensificada(m.nome, m.circulo, telecineseIntensificada.disponivel, telecineseIntensificada.dadosRestantes),
     );
     if (opcoes.length === 0) return;
     setTelaCirculo({ magia: m, classeDonaDaMagia });
@@ -989,13 +1008,44 @@ export default function MagiasTab({
           ponte,
           circuloGratisMaestria(telaCirculo.magia.nome, maestriaDeMagiasAtuais) ??
             circuloGratisAssinatura(telaCirculo.magia.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas) ??
-            circuloGratisMagiaFixaDeClasse(telaCirculo.magia.nome, telaCirculo.magia.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas),
+            circuloGratisMagiaFixaDeClasse(telaCirculo.magia.nome, telaCirculo.magia.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas) ??
+            circuloGratisTelecineseIntensificada(
+              telaCirculo.magia.nome,
+              telaCirculo.magia.circulo,
+              telecineseIntensificada.disponivel,
+              telecineseIntensificada.dadosRestantes,
+            ),
         )}
         onVoltar={() => setTelaCirculo(null)}
         onConjurar={(circulo, classeNome, gratis) => {
-          const ok = gratis || onGastarSlotCirculo(circulo, classeNome);
           const magiaConjurada = telaCirculo.magia;
           const classeDonaDaMagia = telaCirculo.classeDonaDaMagia;
+          // Telecinese Intensificada (E6c-g): a "opção grátis" de Telecinese só é a Intensificada
+          // quando nenhuma outra fonte (Maestria/Assinatura/Magia Fixa) já cobre essa magia.
+          const viaTelecineseIntensificada =
+            gratis &&
+            magiaConjurada.nome === 'Telecinese' &&
+            circulo === magiaConjurada.circulo &&
+            circuloGratisMaestria(magiaConjurada.nome, maestriaDeMagiasAtuais) === null &&
+            circuloGratisAssinatura(magiaConjurada.nome, assinaturaMagicaAtuais, assinaturaMagicaGastas) === null &&
+            circuloGratisMagiaFixaDeClasse(magiaConjurada.nome, magiaConjurada.circulo, magiasFixasClasseAtuais, magiasFixasClasseGastas) === null;
+          if (viaTelecineseIntensificada) {
+            setTelaCirculo(null);
+            setEscolhaTelecineseIntensificada({
+              aoConjurarNormal: () => {
+                setEscolhaTelecineseIntensificada(null);
+                if (!telecineseIntensificada.onGastarDados()) return;
+                processarMagiaAoUsar(magiaConjurada, circulo, false, classeDonaDaMagia);
+              },
+              aoConjurarSemConcentracao: () => {
+                setEscolhaTelecineseIntensificada(null);
+                if (!telecineseIntensificada.onGastarDados()) return;
+                processarMagiaAoUsar(magiaConjurada, circulo, false, classeDonaDaMagia, AVISO_TELECINESE_INTENSIFICADA_SEM_CONCENTRACAO);
+              },
+            });
+            return;
+          }
+          const ok = gratis || onGastarSlotCirculo(circulo, classeNome);
           setTelaCirculo(null);
           if (!ok) return;
           if (gratis) onUsarMagiaGratisDeClasse(magiaConjurada.nome);
@@ -1074,6 +1124,14 @@ export default function MagiasTab({
           dadosLados={esmagamentoAprimorado.dadosLados}
           onRolarNormal={escolhaEsmagamentoAprimorado.aoRolarNormal}
           onUsarAprimorado={escolhaEsmagamentoAprimorado.aoUsarAprimorado}
+        />
+      )}
+      {escolhaTelecineseIntensificada && (
+        <TelecineseIntensificadaEscolha
+          dadosRestantes={telecineseIntensificada.dadosRestantes}
+          dadosLados={telecineseIntensificada.dadosLados}
+          onConjurarNormal={escolhaTelecineseIntensificada.aoConjurarNormal}
+          onConjurarSemConcentracao={escolhaTelecineseIntensificada.aoConjurarSemConcentracao}
         />
       )}
       {escolhaMontaria && (
@@ -1730,7 +1788,16 @@ export default function MagiasTab({
             Concedidas pela classe ou pela subclasse — sempre disponíveis, não contam na conta de Magias Preparadas.
           </div>
           {magiasSubclasse.map((m) => {
-            const semEspaco = m.circulo > 0 && opcoesGastoComPonte(m.circulo, classeAtivaNome, espacos, espacosGastosPorCirculo, ponte).length === 0;
+            const semEspaco =
+              m.circulo > 0 &&
+              opcoesGastoComPonte(
+                m.circulo,
+                classeAtivaNome,
+                espacos,
+                espacosGastosPorCirculo,
+                ponte,
+                circuloGratisTelecineseIntensificada(m.nome, m.circulo, telecineseIntensificada.disponivel, telecineseIntensificada.dadosRestantes),
+              ).length === 0;
             const temAcao = usarMagiaTemAcaoAutomatizada(m);
             return (
               <div key={m.id} className={styles.spellRowComPill}>
