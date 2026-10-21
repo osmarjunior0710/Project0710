@@ -87,8 +87,9 @@ Um arquivo por classe de D&D implementada no app.
 Bardo/Bruxo — continuam só em `DECISOES-CLASSES.md`; migração pra cá é
 gradual, sob demanda, não obrigatória de uma vez.)*
 
-- **`classes/psionico.md`** — Psiônico (UA 2025, não oficial): esqueleto da classe nível 20 (tudo [PH]), magias geradas (lista da classe + 18 novas) e achados
-  (nomes da lista ≠ catálogo; Animar Mortos colado no texto de outra magia).
+- **`classes/psionico.md`** — Psiônico (UA 2025, não oficial), classe base completa (E1-E5): esqueleto, magias geradas (achados
+  de nome ≠ catálogo, Animar Mortos colado em outra magia), Dados de Energia Psiônica, as 11 Disciplinas Psiônicas, e as 4
+  características de nível alto incluindo o "funil único" do Surto Psiônico (padrão-mãe reaproveitado no resto do foco).
 - **`classes/psionico-psicinetico.md`** — subclasse Psicinético (7 características, 100% fechada): ordem das entregas, bug de loop
   infinito pré-existente achado no caminho, bug de dado desatualizado (Esmagamento Telecinético), origem da convenção de cor de
   botão (`CONVENCOES-UI.md`), e o padrão técnico de Telecinese Intensificada (reaproveitar `circuloGratis` + usar `aviso` em vez
