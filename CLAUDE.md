@@ -191,11 +191,13 @@ Todo trabalho roda em cima de um **foco** (uma classe, uma aba, um
 sistema) registrado no `EmDev.md`. Nunca comece a implementar sem um
 plano aprovado.
 
-**Abrindo um foco:** siga os 3 chapéus abaixo (6.1, 6.2 e 6.3), nessa
-ordem, antes de escrever qualquer passo no `EmDev`/`EmDevB`. Só depois
-dos três aprovados pelo Osmar é que o plano vira checklist (seção 14)
-e entra em execução entrega por entrega (chapéu de execução, seção
-6.4).
+**Abrindo um foco:** siga os 3 chapéus abaixo (6.1, 6.2 e 6.3) nessa
+ordem, com os passos extras que cada um ganhou (6.1.3 olhar o todo +
+nome/cor por classe; 6.2.1 QA no SDD inteiro + 6.2.2 replanejamento; 6.3.1
+esqueleto de tudo), antes de escrever qualquer passo no `EmDev`/`EmDevB`.
+Só depois dos três aprovados pelo Osmar é que o plano vira checklist
+(seção 14) e entra em execução entrega por entrega (chapéu de execução,
+seção 6.4).
 
 ### 6.1 Chapéu 1 — Product Manager: entender e quebrar em entregas
 
@@ -299,6 +301,37 @@ nunca virou uma linha própria na aba "Características de Classe".)
   cada caixa de texto/parágrafo isolado é 1 bloco a avaliar sozinho
   antes de montar a lista de características.
 
+### 6.1.3 Olhar o todo vale pra QUALQUER escopo que vira foco, não só "classe"
+
+(2026-10, postmortem do Psiônico: fechei a subclasse Psicinético achando que
+tinha as 7 características quando só tinha 6 — a lista exaustiva da seção
+6.1.1 foi aplicada direito na classe base, mas não foi reconferida contra o
+SDD inteiro antes de considerar a subclasse "pronta".)
+
+A disciplina da seção 6.1.1 (nunca pular item, listar do nível 1 ao máximo,
+comparar texto-vs-código item por item) vale do mesmo jeito pra **qualquer**
+escopo que abre como foco — não só "todas as características de uma classe":
+uma subclasse nova (suas próprias características, do nível mais baixo ao
+mais alto), uma leva de magias (todas as magias do lote, não só as "óbvias"),
+uma leva de talentos (todos os talentos do grupo). Antes de considerar
+QUALQUER um desses "fechado", releia a lista inteira do SDD contra o que foi
+de fato implementado — a mesma pergunta de sempre, item por item: "isso já
+tem mecânica de verdade, ou é só texto solto que eu assumi que já tinha
+sido feito?"
+
+**Nome/label e cor por classe, decidida já nesta lista** (2026-10, pedido do
+Osmar): ao montar a lista exaustiva de um foco de classe/subclasse, já
+decida nomeando cada função nova de `core/` e cada componente/CSS novo de UI
+com o nome da classe no meio (ex.: `telecineseIntensificada`, não
+`intensificarMagia`) — facilita achar "tudo que é dessa classe" com um grep
+só numa auditoria futura (foi exatamente a falta disso que atrasou a
+auditoria de cor de botão do Psiônico). E todo botão/card que representa uma
+AÇÃO ou RECURSO daquela classe especificamente (não uma ação comum de
+qualquer personagem) já nasce com a cor da classe (`corDoRecursoDaClasse`),
+nunca azul padrão — ver `CONVENCOES-UI.md` "Cores de botão". Decidir isso na
+lista exaustiva, antes do SDD, evita ter que voltar depois em cada popup já
+construído pra recolorir.
+
 ### 6.2 Chapéu 2 — Game Designer: SDD da feature (garantir que vai funcionar)
 
 Com a quebra em entregas aprovada (chapéu 1), vista o chapéu de Game
@@ -337,6 +370,40 @@ planilha/PDF. Os chapéus 3 (Product/UI Design) e 4 (execução) usam
 esse SDD como referência principal de "como a mecânica funciona" ao
 planejar UI e implementação.
 
+### 6.2.1 Os 2 chapéus de QA revisam o SDD INTEIRO, antes de quebrar em entregas
+
+(2026-10, postmortem do Psiônico, pedido do Osmar: os 2 chapéus de QA da
+seção 6.4 item 5 — Técnico e Jogador Noob — já existiam, mas só rodavam
+entrega por entrega, isolada. Isso deixa passar problema que só aparece
+olhando o CONJUNTO: ex.: 2 telas de Salvaguarda diferentes construídas pra
+duas entregas quando já existia uma só reaproveitável, ou uma magia nova
+que só foi ligada na aba Magias e ficou faltando na aba Combate.)
+
+Com o SDD inteiro escrito (chapéu 2), antes de propor a quebra em entregas
+pro Osmar, vista os mesmos 2 chapéus da seção 6.4 item 5 — mas aplicados ao
+SDD **inteiro de uma vez**, não a uma entrega isolada:
+
+- **QA Técnico**: alguma mecânica nova do SDD já tem um sistema/componente
+  pronto que resolve (ver seção 6.5)? Alguma característica precisa
+  aparecer em MAIS DE UM lugar da UI (ex.: Magias E Combate, seção 6.6) e o
+  plano só cobre um? Duas características do MESMO SDD colidem ou se
+  sobrepõem de um jeito que muda como as duas devem ser implementadas?
+- **QA Jogador Noob**: olhando o conjunto das telas que vão nascer desse
+  SDD, o jogador vai ter 2 jeitos diferentes de fazer a mesma coisa (ex.:
+  2 popups parecidos mas não iguais)? Alguma tela nova deveria ser a MESMA
+  tela de uma característica já existente, só com texto diferente?
+
+### 6.2.2 Replanejamento — revisita a quebra em entregas do chapéu 1 com o que o QA achou
+
+Depois do QA no SDD inteiro (6.2.1), volte à quebra em entregas proposta no
+chapéu 1 (seção 6.1) e ajuste: agrupe itens que o QA mostrou serem a MESMA
+coisa (ex.: 3 características "trocar tipo de dano 1x/turno" viram 1
+entrega só, não 3), quebre mais uma entrega que o QA mostrou estar maior do
+que parecia, e já anote nela qual padrão/componente existente vai ser
+reaproveitado (em vez de descobrir isso no meio da implementação). Só
+depois desse replanejamento é que a quebra em entregas vai pro Osmar pra
+aprovação.
+
 ### 6.3 Chapéu 3 — Product/UI Design: plano holístico de encaixe na UI
 
 Com a quebra em entregas e o SDD da feature aprovados, vista o chapéu
@@ -350,6 +417,25 @@ que padrão de tela usa), consultando a família `DECISOES-*.md` antes
 
 Mesma regra do chapéu 1: dúvida ou informação faltando, pergunte — não
 assuma. O foco aqui é a usabilidade do app como um todo.
+
+### 6.3.1 Esqueleto de tudo, mesmo `[PH]`, antes de começar a 1ª entrega
+
+(2026-10, postmortem do Psiônico: as funções de `core/` eram criadas
+entrega por entrega, o que deixava o "mapa" do que falta só visível lendo
+o `EmDev.md` inteiro, não o código.)
+
+Com a quebra em entregas final aprovada (chapéus 1-3), antes de começar a
+implementar a 1ª entrega de verdade: crie de uma vez **a função própria em
+`core/` de TODA característica levantada na lista exaustiva** (seção
+6.1.1/6.1.3), mesmo as que só vão ganhar mecânica de verdade em entregas
+bem mais à frente — igual já manda a seção 12.1 (toda característica nova
+ganha função própria, com `statusImplementacao` na doc-comment), só que
+feito em LOTE logo no início do foco, não uma de cada vez conforme a
+entrega chega. Cada função nasce `[PH]`/`'placeholder-codeimplementation'`
+(ou `'placeholder-textonly'`, se ainda em dúvida) e vai virando
+`codeimplementation`/`textonly` conforme a entrega dela acontece de
+verdade. Isso deixa visível, só de abrir a pasta `core/` do foco, o que
+falta — sem precisar reler o `EmDev.md` inteiro pra saber.
 
 ### 6.4 Execução de cada entrega — UI Designer + Engenheiro juntos
 
@@ -367,15 +453,30 @@ São 2 óticas diferentes buscando a mesma entrega — "conversem" antes,
 resolvendo a tensão entre a melhor UI possível e o que é viável
 construir bem, e só decidam juntos a solução final.
 
-**Personagem de teste = o "Char Multiclasse" (nível 20 em todas as
-classes), sempre** (2026-10, pedido do Osmar, substitui a regra antiga de
-montar um personagem dedicado por foco): toda classe nova entra em
-`CLASSES_DO_CHAR_MULTICLASSE` (`core/personagemTesteMulticlasse.ts`) já
-na Entrega 1 do foco, no nível 20 — isso força criar todas as funções
-desde o começo e deixa o Osmar validar cada entrega num personagem
-"anormal" (todas as classes juntas), que também testa a interface cheia
-e a multiclasse de graça. Subclasse: a não homebrew já implementada, ou
-`null` enquanto não houver. Não criar atalho dedicado por foco.
+**Personagem de teste = os 2 juntos: "Char Multiclasse" sempre, + um
+"Personagem — Foco — {foco}" dedicado quando ajudar** (2026-10, pedido do
+Osmar — revisa a regra anterior, que só usava o Char Multiclasse e proibia
+atalho dedicado; o motivo de proibir não vale mais agora que a seção 6.3.1
+já força criar toda função cedo por outro caminho):
+
+- **Char Multiclasse** (nível 20 em todas as classes) continua sendo o
+  padrão pra toda entrega: toda classe nova entra em
+  `CLASSES_DO_CHAR_MULTICLASSE` (`core/personagemTesteMulticlasse.ts`) já
+  na Entrega 1 do foco, no nível 20. Testa a interface cheia e a
+  interação entre classes/multiclasse de graça (ex.: 2 características
+  Psiônicas disputando o mesmo Dado de Energia) — isso só aparece testando
+  nele, nunca num personagem isolado. Subclasse: a não homebrew já
+  implementada, ou `null` enquanto não houver.
+- **Personagem dedicado do foco** ("Personagem — Foco — {foco}", botão
+  próprio na criação de personagem) é **complementar**, não substitui o
+  Char Multiclasse — use quando o foco precisar de um estado específico
+  difícil/chato de alcançar no Char Multiclasse (ex.: "exatamente nível 3
+  dessa classe, nenhuma outra", "0 Dados de Energia restantes",
+  combinação específica de magias preparadas) sem precisar editar o Char
+  Multiclasse pra isso e desfazer depois. Criado só quando o foco
+  realmente precisar (não é obrigatório pra todo foco), e apagado ao
+  fechar o foco junto com qualquer outro atalho dedicado (ver "Fechando
+  um foco" abaixo) — nunca vira um protótipo permanente.
 
 **Regras de execução vindas do postmortem do Monge** (2026-10, aprovadas pelo Osmar;
 histórico em `aprendizados/classes/monge-postmortem.md`):
