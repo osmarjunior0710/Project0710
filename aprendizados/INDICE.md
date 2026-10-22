@@ -97,6 +97,14 @@ gradual, sob demanda, não obrigatória de uma vez.)*
 
 ## `talentos/`
 
+- **`talentos/atributo-asi-proprio.md`** — Atributo de conjuração/efeito "herdado do ASI do
+  próprio talento" (2026-10): 8 talentos + as 12 Dádivas Épicas com mod./CD errado ou faltando,
+  achado investigando a infra do E7 (Psiônico/Talentos Selvagens). Gaveta reaproveitada
+  (`escolhaAtributoTalentoGeral`), `core/conjuracaoDeTalento.ts` novo, 2 achados maiores no meio
+  do caminho (CD de Salvaguarda multiclasse também caía na classe ativa; as 12 Dádivas Épicas
+  nunca aplicavam o próprio ASI), e a reestruturação do topo da aba Magias (bloco principal +
+  grupo colapsável "Outros atributos de conjuração").
+
 - **`talentos/fase-4.md`** — Talentos Fase 4 (efeito mecânico de
   verdade): arquitetura `EfeitoMecanicoTalento`, os grupos A (Origem)/
   B (Geral já existente)/C (penalidades de proficiência)/D (reaudit

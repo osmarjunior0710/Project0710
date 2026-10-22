@@ -40,26 +40,27 @@ Sombra (efeito `'magia-geral-concedida'`: lista de truques + lista de `{nome, re
 'descansoLongo'}`). Reaproveitar DIRETO — zero mecanismo novo pra essa parte. Cada um dos 10
 Talentos Selvagens ganha uma entrada em `talentos.ts` com esse mesmo `efeitoMecanico`.
 
-### 1.2 Infra NOVA necessária: atributo de conjuração ESCOLHIDO pelo jogador, sem classe
+### 1.2 Infra: atributo de conjuração ESCOLHIDO pelo jogador, sem classe — JÁ EXISTE, reaproveitar
 
-Diferente de Iniciado em Magia (atributo fixo, vem da classe associada à Origem), aqui o jogador
-ESCOLHE Int/Sab/Car ao pegar o talento — e isso vale mesmo num personagem SEM nenhuma classe
-conjuradora (ex.: Guerreiro com Talento Selvagem). Hoje não existe conjuração "solta" (toda CD/
-acerto de magia passa por `resumoConjuracao(selecao, classe, nivel)`, que exige uma `Classe`).
+**Correção (2026-10):** esta seção propunha um módulo novo (`core/talentoSelvagem.ts`, gaveta
+própria `escolhaAtributoTalentoSelvagem`, sentinela opaca `'__talentoSelvagem:id__'`). Entre a
+escrita deste SDD e a execução, o foco "Atributo de conjuração herdado do ASI do próprio talento"
+(ver `aprendizados/talentos/atributo-asi-proprio.md` e `DECISOES-CLASSES.md` "Talento com atributo
+próprio do ASI") construiu exatamente essa infra pra outro grupo de talentos (Iniciado em Magia,
+mesma "escolha livre sem ASI" dos Talentos Selvagens) — reaproveitar em vez de duplicar (CLAUDE
+§6.5):
 
-**Decisão de arquitetura:** novo módulo `core/talentoSelvagem.ts` com:
-- `atributoTalentoSelvagemEscolhido(talentoId, escolhas): Atributo | null` — mesmo padrão de
-  `atributosResilienteEscolhidos` (`talentoAtributo.ts`), escolha salva em
-  `PersonagemSalvo.escolhaAtributoTalentoSelvagem: Record<string, Atributo>` (chave = id do
-  talento — futuro-proof pra Dádiva/repetição, mesmo cuidado de `talentoAtributo.ts`).
-- `resumoConjuracaoTalentoSelvagem(atributo, valorAtributo, bonusProficiencia): ResumoConjuracao` —
-  mesma fórmula de `resumoConjuracao` (CD = 8 + mod + BP; ataque = mod + BP), SEM precisar de
-  `Classe` — usa `bonusProficienciaAtual` (nível TOTAL do personagem) já calculado em
-  `FichaShell.tsx`, igual outras características cross-classe (Revelação Celestial etc.).
-- Esse resumo entra em `resumosPorClasse` com uma `classeNome` sentinela própria por talento (ex.:
-  `'__talentoSelvagem:atmocinese__'`) — `modAcertoConjuracaoPorClasse` (`magiasPersonagem.ts`) já
-  despacha por `classeNome` sem precisar mudar a assinatura da função; as magias do talento entram
-  marcadas com essa `classeNome` em `MagiaComClasseOpcional`, igual qualquer fonte multiclasse.
+- Gaveta: `PersonagemSalvo.escolhaAtributoTalentoGeral: Record<talentoId, Atributo>` (já existe,
+  mesmo formato que o proposto aqui) — cada Talento Selvagem grava sua escolha lá, chave = id do
+  talento, sem colisão com os outros usos (Resiliente, Iniciado em Magia, Grupo 1 do outro foco).
+- `core/conjuracaoDeTalento.ts` (`resumoConjuracaoDeTalento(atributo, valorAtributo,
+  bonusProficiencia): ResumoConjuracao`) — já existe, mesma fórmula proposta aqui, sem exigir
+  `Classe`.
+- Sentinela de `classeNome` = o NOME do talento (ex.: `"Atmocinese"`), não um prefixo opaco — já é
+  o padrão em uso; `modAcertoConjuracaoPorClasse`/`cdConjuracaoPorClasse` despachem por essa string
+  sem mudar assinatura nenhuma, e a magia concedida ganha de brinde uma pill com o nome do talento.
+- Único passo realmente novo: a sub-tela de escolha de atributo no Level Up/wizard (seção 2) —
+  Iniciado em Magia já tem uma tela assim (`TalentoOrigemEscolhasStep.tsx`), mesmo padrão.
 
 ## 2. Escolha de talento no Level Up/Wizard
 
@@ -120,13 +121,15 @@ abrir uma sub-tela de escolha do atributo de conjuração (Int/Sab/Car) — mesm
 
 ## 4. Proposta de quebra em entregas (pós-replanejamento, seção 6.2.2 do CLAUDE.md)
 
-1. **Entrega 1 — infra comum + esqueleto `[PH]` de tudo**: `core/talentoSelvagem.ts` (atributo
-   escolhido + resumo de conjuração sem classe), as 10 entradas em `talentos.ts`
-   (`efeitoMecanico: 'magia-geral-concedida'`, truques+magias+recarga — reuso direto de
-   `magiaTalentoGeral.ts`), sub-tela de escolha de atributo no Level Up/wizard, elegibilidade de
-   escolha (Origem OU qualquer Talento Geral). Confirma nome exato de "Passos Longos/Largos" e de
-   "Arremesso Telecinético" contra o catálogo antes de fechar o dado. Função própria `[PH]` em
-   `core/` pra cada 1 dos 10 benefícios únicos (seção 6.3.1 do CLAUDE.md).
+1. **Entrega 1 — infra comum + esqueleto `[PH]` de tudo** (menor do que quando este SDD foi
+   escrito — a infra de atributo sem classe já existe, ver 1.2 corrigida): as 10 entradas em
+   `talentos.ts` (`efeitoMecanico: 'magia-geral-concedida'`, truques+magias+recarga — reuso direto
+   de `magiaTalentoGeral.ts`; `usaAtributoProprioAsi` NÃO se aplica aqui, é escolha livre sem ASI,
+   mesmo caso de Iniciado em Magia), sub-tela de escolha de atributo no Level Up/wizard,
+   elegibilidade de escolha (Origem OU qualquer Talento Geral), wiring em `resumosPorClasse` +
+   `talentoDonoDaMagiaTalentoGeral`-like lookup pras magias concedidas. Confirma nome exato de
+   "Passos Longos/Largos" e de "Arremesso Telecinético" contra o catálogo antes de fechar o dado.
+   Função própria `[PH]` em `core/` pra cada 1 dos 10 benefícios únicos (seção 6.3.1 do CLAUDE.md).
 2. **Entrega 2 — Grupo A** (Atmocinese/Criocinese/Pirocinese): troca de tipo de dano 1x/turno —
    mesma mecânica 3x, 1 função genérica + 3 entradas de dado.
 3. **Entrega 3 — Grupo B** (Clarividência/Empata): Vantagem numa ação específica, N usos.

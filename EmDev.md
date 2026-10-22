@@ -311,111 +311,12 @@ classes certinho ("Bárbaro 20 (Trilha da Árvore do Mundo)", ..., "Guerreiro 20
 
 ---
 
-**Foco Psiônico PAUSADO aqui** (2026-10) — ainda falta E6a-b-d (3 subclasses) e E7 (Talentos
-Selvagens, SDD já em `sdd/sdd-talentos-selvagens.md`). Pausado pra abrir o foco abaixo, achado
-enquanto conferia a infra do E7 — retomar o Psiônico depois que esse foco fechar.
+**Foco "Atributo de conjuração herdado do ASI do próprio talento" FECHADO** (2026-10) — postmortem
+em `aprendizados/talentos/atributo-asi-proprio.md`, padrão reaproveitável em `DECISOES-CLASSES.md`
+("Talento com atributo próprio do ASI"), pendências do que ainda é só texto (Telecinético/
+Envenenador/dano de Dádiva do Ataque Irresistível) em `PENDENCIAS.md`. Retomando o Psiônico abaixo.
 
-## Foco: Atributo de conjuração "herdado do ASI do próprio talento" — 8 talentos com mod./CD errado ou faltando
-
-**Achado:** investigando a infra pro E7 (Talentos Selvagens — eles escolhem Int/Sab/Car livremente,
-sem classe), percebi que o talento "Iniciado em Magia" já faz exatamente essa escolha há tempos —
-só que a escolha (`atributoMagiaIniciadaEscolhido`) é capturada no wizard e **nunca lida em lugar
-nenhum do app**. As magias concedidas por ele entram marcadas `classe: null`
-(`useMagiasEConjuracao.ts`), e `modAcertoConjuracaoPorClasse` trata isso como "cai no fallback da
-classe ATIVA" — ou seja, usa o mod. de conjuração de qualquer classe que esteja com a pill
-selecionada no momento, nunca o atributo escolhido de verdade.
-
-Investigando mais fundo (varredura completa do capítulo de Talentos no PDF, buscando a frase
-"atributo aumentado por este talento"), achei que esse NÃO é um problema isolado — é uma categoria
-inteira de 7 outros talentos com a MESMA regra, só que derivada do próprio ASI do talento (não
-escolha livre): "o atributo de conjuração/bônus é o atributo que ESTE talento aumentou". Hoje só o
-talento Resiliente guarda "qual atributo foi escolhido por ESTE talento especificamente" — os
-outros 7 aplicam o ASI direto no total e esquecem a origem.
-
-### Lista exaustiva (apresentada e aprovada pelo Osmar, 2026-10)
-
-**Grupo 1 — atributo vem do próprio ASI do talento (precisa de gaveta nova por talento, só existia
-antes pra Resiliente):**
-- [x] **Telepático** (Geral, nível 4+) — atributo de conjuração de Detectar Pensamentos. Corrigido
-  (Entrega 2) — a gaveta `escolhaAtributoTalentoGeral` passou a ser reaproveitada (mesmo campo do
-  Resiliente), `core/conjuracaoDeTalento.ts` novo calcula sem exigir Classe, e o seletor de
-  Combate/Magias marca a magia com o NOME DO TALENTO (sentinela) em vez de `classe: null`.
-- [x] **Tocado pela Sombra** (Geral, nível 4+) — atributo de conjuração das magias (Invisibilidade
-  + escolhida). Corrigido junto com Telepático (Entrega 2).
-- [x] **Tocado pelas Fadas** (Geral, nível 4+) — atributo de conjuração das magias (Passo Nebuloso
-  + escolhida). Corrigido junto com Telepático (Entrega 2).
-- [x] **Conjurador Ritualista** (Geral, nível 4+) — atributo de conjuração das magias Rituais
-  escolhidas. Corrigido junto com Telepático (Entrega 2).
-- [x] **Envenenador** (Geral, nível 4+) — infra pronta (Entrega 1: gaveta + `usaAtributoProprioAsi`
-  + `core/conjuracaoDeTalento.ts`); a mecânica do veneno em si (CD da salvaguarda, 8+mod+BP) ainda
-  não tem função própria — fica pra entrega futura dedicada (ver Backlog.md).
-- [ ] **Telecinético** (Geral, nível 4+) — infra pronta (Entrega 1); CD do Empurrão Telecinético
-  (8+mod+BP) ainda não implementada — entrega futura dedicada.
-- [ ] **Dádiva do Ataque Irresistível** (Dádiva Épica, nível 19+) — achado maior durante a
-  implementação: essa categoria ("Dádiva Épica") nem aplica o próprio ASI hoje (não passa pelo
-  passo `asiAtributo` do Level Up) — bug maior que só "atributo de conjuração", registrado abaixo
-  como pendência própria. Fora desta rodada de propósito.
-
-**Grupo 2 — atributo é escolha livre, independente do ASI (já tinha a gaveta de estado, só não
-era lida):**
-- [x] **Iniciado em Magia** (Origem e Versátil/Espécie) — corrigido (Entrega 2): as 2 gavetas
-  (`atributoMagiaIniciadaEscolhido`/`...EspecieEscolhido`) agora alimentam `resumosPorClasse` com
-  2 sentinelas próprias ("Iniciado em Magia" / "Iniciado em Magia (Espécie)"), já que as 2 fontes
-  podem ter escolhido atributos diferentes.
-
-**Achado maior, corrigido na mesma entrega (pedido do Osmar ao ver o escopo durante a execução):**
-o popup de CD de Salvaguarda (`SalvaguardaDoAlvoModal`, em `CombatTab.tsx` E `MagiasTab.tsx`)
-**sempre usava a CD da classe ATIVA (pill)**, nunca a da classe/talento DONO da magia — o mesmo bug
-que já tinha sido corrigido pro ACERTO de ataque (`modAcertoConjuracaoPorClasse`,
-PENDENCIAS.md "Multiclasse — acerto/CD de magia..."), mas que tinha ficado de fora da CD de
-salvaguarda. Corrigido com `cdConjuracaoPorClasse` (nova, espelha `modAcertoConjuracaoPorClasse`)
-+ `classeDonaDaMagia` agora passado por todo o caminho até `telaSalvaguarda` (`abrirSalvaguarda`/
-`abrirSalvaguardaComAviso`, Combate e Magias). Afeta QUALQUER magia multiclasse com salvaguarda,
-não só os 8 talentos — bug mais antigo e maior do que o foco original.
-
-**Pendência nova, registrada em PENDENCIAS.md:** Dádiva do Ataque Irresistível não aplica o
-próprio ASI (categoria "Dádiva Épica" não passa pelo passo `asiAtributo`) — precisa de entrega
-própria que primeiro resolva isso antes de cuidar do atributo de conjuração.
-
-**Efeito visível pro Osmar:** magias concedidas por Iniciado em Magia/Telepático/Tocado pela
-Sombra/Tocado pelas Fadas/Conjurador Ritualista agora mostram uma pill com o NOME DO TALENTO (ex.:
-"Telepático") no seletor "Usar Magia" — igual já acontecia com pill de classe —, em vez de
-aparecer sem nenhuma marcação.
-
-Testado: `npx tsc -b`, `npm test -- --run` (1095 testes) e `npm run build`, todos limpos.
-
-### Extensão do foco — 2 pedidos novos do Osmar, ainda dentro do mesmo foco
-
-**1. 12 Dádivas Épicas não aplicavam o próprio ASI** (achado ao revisar Dádiva do Ataque
-Irresistível pro item anterior — generalizou pra todas as 12, não só ela):
-- [x] Novo passo `dadivaEpicaAtributo` no Level Up (`LevelUpShell`), paralelo a `asiAtributo` —
-  precisa ser separado porque nível 19 pode ter os 2 ASIs (talento normal + Dádiva Épica) no
-  mesmo Level Up. Aplica o +1 pras 12 Dádivas; só Dádiva do Ataque Irresistível
-  (`usaAtributoProprioAsi`) também grava na gaveta `escolhaAtributoTalentoGeral` (precisa lembrar
-  QUAL atributo pro "dano extra = valor do atributo").
-- [x] `core/levelUpAleatorio.ts` (Level Up Rápido/ferramenta de teste) e `FichaShell.confirmarLevelUp`
-  também corrigidos — os 2 ASIs possíveis se combinam sem se sobrescrever.
-
-**2. Aba Magias — bloco de atributo reestruturado + nova pill**
-- [x] Bug lateral achado: o bloco do topo só mostrava 1 linha por fonte quando havia 2+ fontes
-  (`.length > 1`); com exatamente 1 fonte (agora podendo ser um talento), caía no "resumo único"
-  que lia a classe ATIVA — um personagem só com Telepático (sem classe conjuradora) não via nada.
-- [x] Reestruturado: bloco "principal" sempre visível (classe ativa se ela conjurar, senão a 1ª
-  fonte da lista) + grupo colapsável "Outros atributos de conjuração (N)" pra qualquer fonte
-  extra (2ª classe real OU talento — tratadas igual, decisão explícita do Osmar). Usa
-  `useColapsavel` (lembra por aparelho), mesmo padrão já usado nas outras seções da aba.
-- [x] Nova pill "Atributo de Conjuração" (sigla de 3 letras) em `PreferenciasPillsMagia`
-  (`atributoConjuracao`, padrão desligado), configurável no menu do avatar — adicionada nos 4
-  pontos onde a pill de Classe já é dinâmica por item (SelecionarMagiaShell, ReacaoPanelContent,
-  as 2 listas "Magias Preparadas"/"Truques" com `classeDoItem` em MagiasTab). As ~18 listas de 1
-  fonte fixa só (Descobertas Mágicas, Pacto do Ínfero etc.) ficaram de fora por ora — prioridade
-  menor, já mostram a classe no cabeçalho da seção.
-- [x] Prop `resumo` (singular) do `MagiasTab` ficou morta depois da reestruturação — removida
-  (junto com `resumoConjuracao` em `FichaShell.tsx`).
-
-Testado de novo depois dos 2 itens: `npx tsc -b`, `npm test -- --run` (1097 testes) e
-`npm run build`, todos limpos. **Não testado visualmente no navegador** (sem ferramenta de
-browser nesta sessão) — ver passo a passo na resposta pro Osmar.
-
-Próximo passo: fechar este foco (postmortem + Backlog/Pendências) e retomar o foco Psiônico
-pausado (E6a-b-d e E7 Talentos Selvagens, SDD já em `sdd/sdd-talentos-selvagens.md`).
+**Foco Psiônico RETOMADO** (2026-10) — ainda falta E6a-b-d (3 subclasses) e E7 (Talentos
+Selvagens, SDD já em `sdd/sdd-talentos-selvagens.md`). Próximo passo: QA no SDD inteiro (6.2.1) +
+replanejamento (6.2.2), se ainda não feito — ver `sdd/sdd-talentos-selvagens.md` pra status —, e
+então retomar a quebra em entregas já proposta ao Osmar.

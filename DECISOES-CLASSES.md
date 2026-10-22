@@ -1165,3 +1165,29 @@ recurso diferente, pago todo uso. A solução reaproveitou a infra inteira em ve
    conjuração) em vez de tentar copiar/alterar o objeto `Magia` em trânsito — a cópia nunca apareceria em lugar nenhum da UI.
    Quando 2 avisos podem coexistir (aqui: o aviso de uma Disciplina tipo Bio-Retorno E o da Telecinese Intensificada), junta
    os dois com `.filter(Boolean).join('\n\n')`, mesmo padrão já usado em Esmagamento Aprimorado.
+
+## Talento com atributo próprio do ASI (ou escolha livre sem ASI) — reaproveitar a gaveta do Resiliente, nunca criar nova (2026-10)
+
+Achado completo em `aprendizados/talentos/atributo-asi-proprio.md` e `sdd/sdd-atributo-talento.md` (8 talentos + as 12
+Dádivas Épicas). Padrão pra QUALQUER talento futuro com a regra "o atributo de conjuração/CD/efeito é o atributo que o
+próprio ASI deste talento aumentou" (ou, sem ASI, escolhido livremente ao pegar o talento):
+
+1. **Nunca criar um campo novo** pra guardar a escolha — `PersonagemSalvo.escolhaAtributoTalentoGeral: Record<talentoId,
+   Atributo>` já existe (originalmente só do Resiliente) e serve pra qualquer talento, sem colisão: as funções que leem essa
+   gaveta sempre filtram por `efeitoMecanico.tipo` específico antes de usar o valor, então entradas de talentos diferentes
+   convivem na mesma gaveta sem se confundir.
+2. **`Talento.usaAtributoProprioAsi?: true`** marca quem usa esse padrão derivado do ASI (não cobre a escolha livre sem ASI,
+   tipo Iniciado em Magia, que já tinha campo próprio antes). No Level Up, o passo que concede o ASI (normal `asiAtributo`,
+   ou um paralelo dedicado se a categoria do talento não passar por ali — ver Dádiva Épica abaixo) grava o atributo escolhido
+   nessa gaveta no mesmo instante em que aplica o `+1`.
+3. **`core/conjuracaoDeTalento.ts` (`resumoConjuracaoDeTalento`)** calcula mod./CD/ataque a partir de atributo+valor+Bônus de
+   Proficiência, SEM exigir uma `Classe` — reaproveitável por qualquer talento/característica cross-classe futura que precise
+   da mesma fórmula sem classe dona.
+4. **Sentinela de `classeNome` = o NOME do talento**, nunca um prefixo técnico opaco — reaproveita 100% do `PillClasse`/
+   `modAcertoConjuracaoPorClasse`/`cdConjuracaoPorClasse` sem tradução nenhuma, e de bônus a magia/efeito concedido mostra
+   uma pill com o nome do talento (como já acontece com classe).
+5. **Categoria de talento que NÃO passa pelo passo normal de ASI** (ex.: "Dádiva Épica", que tem seu próprio passo de
+   escolha SEM aplicar ASI nenhum) precisa de um passo PRÓPRIO e SEPARADO pra pedir o atributo — nunca reusar o mesmo passo
+   do ASI normal, porque os 2 podem coexistir no MESMO Level Up (nível 19 tem ASI normal E Dádiva Épica juntos). O resultado
+   do Level Up ganha um campo `atributosAumentadosDadiva` (ou equivalente) separado de `atributosAumentados`, e
+   `confirmarLevelUp` aplica os 2 em sequência sem um sobrescrever o outro.

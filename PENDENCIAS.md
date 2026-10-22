@@ -36,11 +36,11 @@ atributo certo), fora do escopo dessa correção:
   função própria; só o truque Mãos Mágicas existe hoje.
 - **Envenenador** — fabricação/aplicação do veneno (Salv. Constituição CD 8+mod+BP) ainda não tem
   função própria.
-- **Dádiva do Ataque Irresistível** — achado maior: essa categoria ("Dádiva Épica") nem aplica o
-  próprio ASI hoje (`LevelUpShell` não passa pelo passo `asiAtributo` pra essa categoria) — precisa
-  de entrega própria que primeiro resolva isso (aplicar o +1 FOR/DES escolhido) antes de cuidar do
-  "dano extra = valor do atributo em crítico natural 20", que também usa o VALOR do atributo, não
-  o modificador (função própria diferente de `resumoConjuracaoDeTalento`).
+- **Dádiva do Ataque Irresistível** — o próprio ASI (+1 FOR/DES) já é aplicado e lembrado (achado
+  maior resolvido: as 12 Dádivas Épicas não aplicavam ASI nenhum, corrigido numa entrega extra do
+  mesmo foco). Falta só a mecânica em si: "dano extra = valor do atributo em crítico natural 20"
+  — usa o VALOR do atributo, não o modificador (função própria diferente de
+  `resumoConjuracaoDeTalento`).
 
 Ver `sdd/sdd-atributo-talento.md` e `EmDev.md` pro histórico completo desta correção.
 
