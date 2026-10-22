@@ -308,3 +308,51 @@ componente novo) listando 1 linha por classe, mesmo formato de texto que já era
 `npx tsc -b`, `npm test -- --run` (1049/1049), `npm run build` verdes. Testado ao vivo (navegador headless,
 360px-equivalente/Pixel 7, Char Multiclasse): "Multiclasse (Nível 160) ⓘ" aparece certo, popup lista as 8
 classes certinho ("Bárbaro 20 (Trilha da Árvore do Mundo)", ..., "Guerreiro 20" sem subclasse).
+
+---
+
+**Foco Psiônico PAUSADO aqui** (2026-10) — ainda falta E6a-b-d (3 subclasses) e E7 (Talentos
+Selvagens, SDD já em `sdd/sdd-talentos-selvagens.md`). Pausado pra abrir o foco abaixo, achado
+enquanto conferia a infra do E7 — retomar o Psiônico depois que esse foco fechar.
+
+## Foco: Atributo de conjuração "herdado do ASI do próprio talento" — 8 talentos com mod./CD errado ou faltando
+
+**Achado:** investigando a infra pro E7 (Talentos Selvagens — eles escolhem Int/Sab/Car livremente,
+sem classe), percebi que o talento "Iniciado em Magia" já faz exatamente essa escolha há tempos —
+só que a escolha (`atributoMagiaIniciadaEscolhido`) é capturada no wizard e **nunca lida em lugar
+nenhum do app**. As magias concedidas por ele entram marcadas `classe: null`
+(`useMagiasEConjuracao.ts`), e `modAcertoConjuracaoPorClasse` trata isso como "cai no fallback da
+classe ATIVA" — ou seja, usa o mod. de conjuração de qualquer classe que esteja com a pill
+selecionada no momento, nunca o atributo escolhido de verdade.
+
+Investigando mais fundo (varredura completa do capítulo de Talentos no PDF, buscando a frase
+"atributo aumentado por este talento"), achei que esse NÃO é um problema isolado — é uma categoria
+inteira de 7 outros talentos com a MESMA regra, só que derivada do próprio ASI do talento (não
+escolha livre): "o atributo de conjuração/bônus é o atributo que ESTE talento aumentou". Hoje só o
+talento Resiliente guarda "qual atributo foi escolhido por ESTE talento especificamente" — os
+outros 7 aplicam o ASI direto no total e esquecem a origem.
+
+### Lista exaustiva (apresentada e aprovada pelo Osmar, 2026-10)
+
+**Grupo 1 — atributo vem do próprio ASI do talento (precisa de gaveta nova por talento, só existe
+hoje pra Resiliente):**
+- [ ] **Telecinético** (Geral, nível 4+) — CD do Empurrão Telecinético (8+mod+BP). Não
+  implementado (só o truque Mãos Mágicas existe hoje).
+- [ ] **Telepático** (Geral, nível 4+) — atributo de conjuração de Detectar Pensamentos. Magia
+  concedida, mas com mod. errado (cai na classe ativa).
+- [ ] **Tocado pela Sombra** (Geral, nível 4+) — atributo de conjuração das magias (Invisibilidade
+  + escolhida). Magias concedidas, mod. errado.
+- [ ] **Tocado pelas Fadas** (Geral, nível 4+) — atributo de conjuração das magias (Passo Nebuloso
+  + escolhida). Magias concedidas, mod. errado.
+- [ ] **Conjurador Ritualista** (Geral, nível 4+) — atributo de conjuração das magias Rituais
+  escolhidas. Magias concedidas, mod. errado.
+- [ ] **Envenenador** (Geral, nível 4+) — CD da salvaguarda do veneno (8+mod+BP). Não implementado.
+- [ ] **Dádiva do Ataque Irresistível** (Dádiva Épica, nível 19+) — dano extra = VALOR (não mod.)
+  do atributo, em crítico natural 20. Não implementado.
+
+**Grupo 2 — atributo é escolha livre, independente do ASI (já tem a gaveta de estado, só não é lida):**
+- [ ] **Iniciado em Magia** (Origem) — escolha capturada no wizard, nunca usada; mod. cai na classe
+  ativa.
+
+Próximo passo: chapéu 2 (SDD) em `sdd/sdd-atributo-talento.md`, depois 6.2.1 (QA no SDD inteiro) e
+6.2.2 (replanejamento) antes de propor a quebra em entregas pro Osmar.
