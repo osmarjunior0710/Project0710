@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1725
+
+Os 10 Talentos Selvagens (Psiônico, não oficial) agora aparecem de verdade na escolha de talento
+do Level Up (categoria "Geral"), com o truque + magia(s) grátis de cada um funcionando (antes
+eram só texto, invisíveis em qualquer tela). Escolher um pede o atributo de conjuração
+(Inteligência/Sabedoria/Carisma) numa tela nova. Os benefícios únicos de cada um (troca de tipo de
+dano, Vantagem numa ação, etc.) ainda não têm mecânica própria — ficam para as próximas entregas.
+
 ## v202610_1503
 
 Corrigido bug grande: as 12 "Dádivas Épicas" (talentos de nível 19+) tinham "+1 num atributo"

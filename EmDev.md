@@ -317,6 +317,37 @@ em `aprendizados/talentos/atributo-asi-proprio.md`, padrão reaproveitável em `
 Envenenador/dano de Dádiva do Ataque Irresistível) em `PENDENCIAS.md`. Retomando o Psiônico abaixo.
 
 **Foco Psiônico RETOMADO** (2026-10) — ainda falta E6a-b-d (3 subclasses) e E7 (Talentos
-Selvagens, SDD já em `sdd/sdd-talentos-selvagens.md`). Próximo passo: QA no SDD inteiro (6.2.1) +
-replanejamento (6.2.2), se ainda não feito — ver `sdd/sdd-talentos-selvagens.md` pra status —, e
-então retomar a quebra em entregas já proposta ao Osmar.
+Selvagens). SDD completo (`sdd/sdd-talentos-selvagens.md`) com QA (6.2.1) e replanejamento (6.2.2)
+já feitos antes da pausa; corrigida a seção 1.2 agora (a infra que propunha criar já existe,
+construída no foco que acabou de fechar — ver aprendizados/talentos/atributo-asi-proprio.md).
+
+- [x] **E7 Entrega 1 — infra comum + esqueleto `[PH]`**: os 10 Talentos Selvagens (Atmocinese,
+  Biocinese, Clarividência, Criocinese, Empata, Modelador de Carne, Sussurrador Mental, Trapaceiro
+  Psiônico, Psicinético (Talento), Pirocinese) existiam só como texto solto em `talentosSelvagens`
+  — um array SEPARADO do `talentos` principal, invisível pra qualquer função/tela do app (achado
+  ao investigar por que nada aparecia). Corrigido: `talentosSelvagens` agora é um filtro derivado
+  de `talentos` (mesmo padrão de `talentosOrigem`), e os 10 ganharam `efeitoMecanico:
+  'magia-geral-concedida'` (truque + magia(s) grátis 1x/Descanso Longo) — reuso 100% de
+  `magiaTalentoGeral.ts`/`useMagiasEConjuracao.ts`/`FichaShell.tsx` (nenhuma mudança nesses
+  arquivos foi necessária pra isso funcionar, confirma que a infra do foco anterior generaliza
+  certo). Nomes de magia corrigidos contra o catálogo (planilha/PDF da UA divergem em 6: Névoa →
+  Névoa Obscurecente, Rajada de Vento → Lufada de Vento, Raio Abrasador → Raio Ardente, Criar
+  Chama → Criar Chamas, Poupar os Moribundos → Acudir os Moribundos; Passos Largos e Arremesso
+  Telecinético já confirmados antes). `TelaEscolherTalento.tsx` (Level Up) agora lista Talento
+  Selvagem junto da categoria "Geral" (regra real: elegível sempre que Talento Geral for) +
+  bloqueia pegar um 2º Talento Selvagem (novo mecanismo, `jaTemOutroTalentoSelvagem` — 1º caso de
+  exclusão mútua ENTRE talentos diferentes, não só contra repetir o mesmo). Novo passo
+  `talentoSelvagemAtributo` no Level Up pede o atributo de conjuração (Int/Sab/Car, escolha livre
+  sem ASI — mesmo padrão de Iniciado em Magia), gravado na gaveta `escolhaAtributoTalentoGeral`
+  reaproveitada. `FichaShell.tsx` amplia o filtro de `resumosTalentoConjuracao` pra incluir
+  categoria "Talento Selvagem" (antes só `usaAtributoProprioAsi`). Novo `core/talentosSelvagens.ts`
+  com função própria `[PH]` pra cada benefício único (3 funções agrupadas pros Grupos A/B/C + 3
+  sozinhas pro Grupo D — replanejamento do SDD, nunca 1 função repetida por talento), com testes.
+  Entrega de Origem (substituir o talento fixo da Origem por um Talento Selvagem) NÃO entrou nesta
+  rodada — exigiria tela nova no wizard (Origem não tem escolha de talento hoje, é sempre fixo);
+  Talentos Selvagens continuam alcançáveis a partir do nível 4 (1º ASI) sem essa tela. `npx tsc -b`,
+  `npm test -- --run` (1105 testes), `npm run build` limpos. **Não testado visualmente no
+  navegador** (sem ferramenta de browser nesta sessão).
+
+Próximo passo: Entrega 2 (Grupo A — troca de tipo de dano 1x/turno, Atmocinese/Criocinese/
+Pirocinese) ou decidir com o Osmar se a tela de substituição de talento da Origem entra antes.

@@ -1318,19 +1318,22 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       };
     })
     .filter((r): r is NonNullable<typeof r> => r !== null);
-  // Talentos Gerais cujo atributo de conjuração é "o atributo que o
-  // ASI deste PRÓPRIO talento aumentou" (Telecinético, Telepático,
-  // Tocado pela Sombra/Fadas, Conjurador Ritualista, Envenenador) —
-  // mesmo "classeNome" sentinela (o NOME do talento) usado como
-  // `classe`/`classeDonaDaMagia` em `useMagiasEConjuracao.ts`, pra
-  // `modAcertoConjuracaoPorClasse`/`cdConjuracaoPorClasse` acharem o
-  // resumo certo em vez de caírem na classe ativa. Ver
-  // `sdd/sdd-atributo-talento.md`. Sem entrada ainda (`undefined`) até
-  // o jogador escolher o atributo no Level Up — nesse meio-tempo, cai
-  // no fallback normal (classe ativa) como já era antes desta entrega.
+  // Talentos cujo atributo de conjuração não vem de classe nenhuma —
+  // Grupo 1 (`usaAtributoProprioAsi`: Telecinético, Telepático, Tocado
+  // pela Sombra/Fadas, Conjurador Ritualista, Envenenador — atributo
+  // derivado do ASI do próprio talento) OU Talento Selvagem (Psiônico
+  // UA 2025 — escolha livre, sem ASI, mesmo caso de Iniciado em
+  // Magia). Mesma "classeNome" sentinela (o NOME do talento) usada
+  // como `classe`/`classeDonaDaMagia` em `useMagiasEConjuracao.ts`,
+  // pra `modAcertoConjuracaoPorClasse`/`cdConjuracaoPorClasse`
+  // acharem o resumo certo em vez de caírem na classe ativa. Ver
+  // `sdd/sdd-atributo-talento.md` e `sdd/sdd-talentos-selvagens.md`.
+  // Sem entrada ainda (`undefined`) até o jogador escolher o atributo
+  // no Level Up — nesse meio-tempo, cai no fallback normal (classe
+  // ativa) como já era antes desta entrega.
   const resumosTalentoConjuracao: typeof resumosPorClasse = talentosEfetivos
     .map((id) => talentos.find((t) => t.id === id) ?? null)
-    .filter((t): t is Talento => !!t?.usaAtributoProprioAsi)
+    .filter((t): t is Talento => !!t && (t.usaAtributoProprioAsi === true || t.categoria === 'Talento Selvagem'))
     .map((t) => {
       const atributo = escolhaAtributoTalentoGeral[t.id] as Atributo | undefined;
       if (!atributo) return null;

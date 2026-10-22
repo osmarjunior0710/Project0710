@@ -1074,9 +1074,6 @@ export const talentos: Talento[] = [
     pagina: 211,
     fonte: "PHB 2024",
   },
-];
-
-export const talentosSelvagens: Talento[] = [
   {
     id: "atmocinese",
     nome: "Atmocinese",
@@ -1084,7 +1081,15 @@ export const talentosSelvagens: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: "Não pode possuir outro Talento Selvagem" },
     concedeAsi: { tipo: 'nenhum' },
-    beneficios: "1x/turno, ao conjurar magia ou acertar ataque com dano Contundente/Cortante/Perfurante/Psíquico, pode mudar o tipo pra Elétrico. Conhece Toque Chocante + tem Névoa sempre preparada (grátis 1x/Descanso Longo, depois com espaço); nível 3+: também Rajada de Vento do mesmo jeito. Atributo de conjuração (Int/Sab/Car) escolhido ao pegar o talento.",
+    efeitoMecanico: {
+      tipo: 'magia-geral-concedida',
+      truques: ['Toque Chocante'],
+      magias: [
+        { nome: 'Névoa Obscurecente', recarga: 'descansoLongo' },
+        { nome: 'Lufada de Vento', recarga: 'descansoLongo' },
+      ],
+    },
+    beneficios: "1x/turno, ao conjurar magia ou acertar ataque com dano Contundente/Cortante/Perfurante/Psíquico, pode mudar o tipo pra Elétrico. Conhece Toque Chocante + tem Névoa Obscurecente sempre preparada (grátis 1x/Descanso Longo, depois com espaço); nível 3+: também Lufada de Vento do mesmo jeito. Atributo de conjuração (Int/Sab/Car) escolhido ao pegar o talento.",
     pagina: 21,
     fonte: "UA Psiônico 2025",
   },
@@ -1095,7 +1100,15 @@ export const talentosSelvagens: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: "Não pode possuir outro Talento Selvagem" },
     concedeAsi: { tipo: 'nenhum' },
-    beneficios: "Quando magia sua cura PV, pode rolar 1d4 extra e somar à cura (usos = Bônus de Proficiência/Descanso Longo). Conhece Poupar os Moribundos + tem Palavra Curativa sempre preparada (grátis 1x/Descanso Longo); nível 3+: também Vigor Arcano do mesmo jeito.",
+    efeitoMecanico: {
+      tipo: 'magia-geral-concedida',
+      truques: ['Acudir os Moribundos'],
+      magias: [
+        { nome: 'Palavra Curativa', recarga: 'descansoLongo' },
+        { nome: 'Vigor Arcano', recarga: 'descansoLongo' },
+      ],
+    },
+    beneficios: "Quando magia sua cura PV, pode rolar 1d4 extra e somar à cura (usos = Bônus de Proficiência/Descanso Longo). Conhece Acudir os Moribundos + tem Palavra Curativa sempre preparada (grátis 1x/Descanso Longo); nível 3+: também Vigor Arcano do mesmo jeito.",
     pagina: 21,
     fonte: "UA Psiônico 2025",
   },
@@ -1106,6 +1119,14 @@ export const talentosSelvagens: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: "Não pode possuir outro Talento Selvagem" },
     concedeAsi: { tipo: 'nenhum' },
+    efeitoMecanico: {
+      tipo: 'magia-geral-concedida',
+      truques: ['Orientação'],
+      magias: [
+        { nome: 'Detectar o Bem e o Mal', recarga: 'descansoLongo' },
+        { nome: 'Ver o Invisível', recarga: 'descansoLongo' },
+      ],
+    },
     beneficios: "Ação Buscar: Vantagem no teste (usos = Bônus de Proficiência/Descanso Longo). Conhece Orientação + tem Detectar o Bem e o Mal sempre preparada (grátis 1x/Descanso Longo); nível 3+: também Ver o Invisível do mesmo jeito.",
     pagina: 21,
     fonte: "UA Psiônico 2025",
@@ -1117,6 +1138,14 @@ export const talentosSelvagens: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: "Não pode possuir outro Talento Selvagem" },
     concedeAsi: { tipo: 'nenhum' },
+    efeitoMecanico: {
+      tipo: 'magia-geral-concedida',
+      truques: ['Raio de Gelo'],
+      magias: [
+        { nome: 'Armadura de Agathys', recarga: 'descansoLongo' },
+        { nome: 'Faca de Gelo', recarga: 'descansoLongo' },
+      ],
+    },
     beneficios: "1x/turno, ao conjurar magia ou acertar ataque com dano Contundente/Cortante/Perfurante/Psíquico, pode mudar o tipo pra Gélido. Conhece Raio de Gelo + tem Armadura de Agathys e Faca de Gelo sempre preparadas (cada uma grátis 1x/Descanso Longo, depois com espaço).",
     pagina: 22,
     fonte: "UA Psiônico 2025",
@@ -1128,6 +1157,14 @@ export const talentosSelvagens: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: "Não pode possuir outro Talento Selvagem" },
     concedeAsi: { tipo: 'nenhum' },
+    efeitoMecanico: {
+      tipo: 'magia-geral-concedida',
+      truques: [],
+      magias: [
+        { nome: 'Enfeitiçar Pessoa', recarga: 'descansoLongo' },
+        { nome: 'Acalmar Emoções', recarga: 'descansoLongo' },
+      ],
+    },
     beneficios: "Ação Influenciar: Vantagem no teste (usos = Bônus de Proficiência/Descanso Longo). Tem Enfeitiçar Pessoa sempre preparada (grátis 1x/Descanso Longo); nível 3+: também Acalmar Emoções do mesmo jeito.",
     pagina: 22,
     fonte: "UA Psiônico 2025",
@@ -1139,6 +1176,14 @@ export const talentosSelvagens: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: "Não pode possuir outro Talento Selvagem" },
     concedeAsi: { tipo: 'nenhum' },
+    efeitoMecanico: {
+      tipo: 'magia-geral-concedida',
+      truques: [],
+      magias: [
+        { nome: 'Passos Largos', recarga: 'descansoLongo' },
+        { nome: 'Alterar-se', recarga: 'descansoLongo' },
+      ],
+    },
     beneficios: "Teste de Destreza (Acrobacia/Prestidigitação): +mod. Inteligência (mín +1), usos = Bônus de Proficiência/Descanso Longo. Tem Passos Largos sempre preparada (grátis 1x/Descanso Longo); nível 3+: também Alterar-se do mesmo jeito.",
     pagina: 22,
     fonte: "UA Psiônico 2025",
@@ -1150,6 +1195,11 @@ export const talentosSelvagens: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: "Não pode possuir outro Talento Selvagem" },
     concedeAsi: { tipo: 'nenhum' },
+    efeitoMecanico: {
+      tipo: 'magia-geral-concedida',
+      truques: ['Talho Mental'],
+      magias: [{ nome: 'Sussurros Dissonantes', recarga: 'descansoLongo' }],
+    },
     beneficios: "Ação: conexão telepática com 1 criatura vista a 36m, por 1h enquanto ficarem a 36m um do outro (precisa idioma comum; 1x/Descanso Curto ou Longo). Conhece Talho Mental + tem Sussurros Dissonantes sempre preparada (grátis 1x/Descanso Longo).",
     pagina: 22,
     fonte: "UA Psiônico 2025",
@@ -1161,6 +1211,11 @@ export const talentosSelvagens: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: "Não pode possuir outro Talento Selvagem" },
     concedeAsi: { tipo: 'nenhum' },
+    efeitoMecanico: {
+      tipo: 'magia-geral-concedida',
+      truques: ['Ilusão Menor'],
+      magias: [{ nome: 'Disfarçar-se', recarga: 'descansoLongo' }],
+    },
     beneficios: "Teste de Carisma (Enganação/Persuasão): +mod. Inteligência (mín +1), usos = Bônus de Proficiência/Descanso Longo. Conhece Ilusão Menor + tem Disfarçar-se sempre preparada (grátis 1x/Descanso Longo).",
     pagina: 23,
     fonte: "UA Psiônico 2025",
@@ -1172,6 +1227,11 @@ export const talentosSelvagens: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: "Não pode possuir outro Talento Selvagem" },
     concedeAsi: { tipo: 'nenhum' },
+    efeitoMecanico: {
+      tipo: 'magia-geral-concedida',
+      truques: ['Arremesso Telecinético'],
+      magias: [{ nome: 'Onda Trovejante', recarga: 'descansoLongo' }],
+    },
     beneficios: "Ação Correr: +3m de Deslocamento até o fim do turno (usos = Bônus de Proficiência/Descanso Longo). Conhece Arremesso Telecinético + tem Onda Trovejante sempre preparada (grátis 1x/Descanso Longo).",
     pagina: 23,
     fonte: "UA Psiônico 2025",
@@ -1183,7 +1243,15 @@ export const talentosSelvagens: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: null, atributosMinimos: [], outro: "Não pode possuir outro Talento Selvagem" },
     concedeAsi: { tipo: 'nenhum' },
-    beneficios: "1x/turno, ao conjurar magia ou acertar ataque com dano Contundente/Cortante/Perfurante/Psíquico, pode mudar o tipo pra Ígneo. Conhece Criar Chama + tem Mãos Flamejantes sempre preparada (grátis 1x/Descanso Longo); nível 3+: também Raio Abrasador do mesmo jeito.",
+    efeitoMecanico: {
+      tipo: 'magia-geral-concedida',
+      truques: ['Criar Chamas'],
+      magias: [
+        { nome: 'Mãos Flamejantes', recarga: 'descansoLongo' },
+        { nome: 'Raio Ardente', recarga: 'descansoLongo' },
+      ],
+    },
+    beneficios: "1x/turno, ao conjurar magia ou acertar ataque com dano Contundente/Cortante/Perfurante/Psíquico, pode mudar o tipo pra Ígneo. Conhece Criar Chamas + tem Mãos Flamejantes sempre preparada (grátis 1x/Descanso Longo); nível 3+: também Raio Ardente do mesmo jeito.",
     pagina: 23,
     fonte: "UA Psiônico 2025",
   },
@@ -1192,3 +1260,11 @@ export const talentosSelvagens: Talento[] = [
 /** Só os 10 Talentos de Origem — usado pelo wizard (Origem concede 1
  * automaticamente) e pela aba Perfil. */
 export const talentosOrigem: Talento[] = talentos.filter((t) => t.categoria === 'Origem');
+
+/** Só os 10 Talentos Selvagens (Psiônico UA 2025, não oficial) — ver
+ * `sdd/sdd-talentos-selvagens.md`. Mesmo padrão de `talentosOrigem`:
+ * filtro derivado de `talentos`, não array separado (fica achável por
+ * `talentos.find`/qualquer função existente sem precisar checar 2
+ * arrays). Elegibilidade real (Origem OU qualquer Talento Geral) vive
+ * em `TelaEscolherTalento.tsx`, não aqui. */
+export const talentosSelvagens: Talento[] = talentos.filter((t) => t.categoria === 'Talento Selvagem');

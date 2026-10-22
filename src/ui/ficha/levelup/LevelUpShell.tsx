@@ -59,6 +59,7 @@ import { talentos } from '../../../data/rulesets/dnd2024/talentos';
 import { opcoesMagiaEscolhidaPorEscola, opcoesMagiasRituais, quantidadeMagiasRituais } from '../../../core/magiaTalentoGeral';
 import { opcoesPericiaRestrita } from '../../../core/periciaTalentoGeral';
 import { opcoesAtributoResiliente } from '../../../core/talentoAtributo';
+import { ATRIBUTOS_CONJURACAO } from '../../wizard/steps/talentoEscolhasCompartilhado';
 import { armasElegiveisParaMaestriaExtra, armasParaMaestria, quantidadeMaestriaEmArma } from '../../../core/maestriaArma';
 import TelaEscolherTalento from './TelaEscolherTalento';
 import TrocarValorSimples from '../../components/TrocarValorSimples';
@@ -306,6 +307,7 @@ type LuStep =
   | 'especialista'
   | 'asi'
   | 'asiAtributo'
+  | 'talentoSelvagemAtributo'
   | 'talentoMagia'
   | 'periciaLivreTalento'
   | 'periciaRestritaTalento'
@@ -567,6 +569,15 @@ export default function LevelUpShell({
    * vez de aplicar em silêncio. Ver DECISOES-DESIGN.md. */
   const precisaEscolherAtributoDoTalento =
     talentoObjEscolhido !== null && talentoObjEscolhido.concedeAsi.tipo !== 'nenhum';
+  // Talento Selvagem (Psiônico UA 2025) — atributo de conjuração (Int/
+  // Sab/Car) é escolha LIVRE, sem ASI nenhum envolvido (diferente do
+  // Grupo 1 de `usaAtributoProprioAsi`, que deriva do próprio ASI) —
+  // mesmo padrão de Iniciado em Magia, só que pelo passo normal de
+  // talento em vez de uma tela própria do wizard. Grava na MESMA
+  // gaveta `escolhaAtributoTalentoGeral` — ver
+  // `sdd/sdd-talentos-selvagens.md` seção 1.2.
+  const precisaEscolherAtributoTalentoSelvagem = talentoObjEscolhido?.categoria === 'Talento Selvagem';
+  const [atributoTalentoSelvagemEscolhido, setAtributoTalentoSelvagemEscolhido] = useState<Atributo | null>(null);
   // Talento Geral com magia(s) ESCOLHIDA(S) — por escola restrita
   // (Tocado pela Sombra/Fadas, 1 magia) ou Rituais (Conjurador
   // Ritualista, N = Bônus de Proficiência) — passo extra só entra
@@ -760,6 +771,7 @@ export default function LevelUpShell({
     // pede escolha de atributo — mesma lista, mesma bolinha de
     // progresso, mesmo padrão de "Avançar" de todo o resto do wizard.
     if (precisaEscolherAtributoDoTalento) luSteps.push('asiAtributo');
+    if (precisaEscolherAtributoTalentoSelvagem) luSteps.push('talentoSelvagemAtributo');
     if (precisaEscolherMagiaDoTalentoNovo) luSteps.push('talentoMagia');
     if (concedeEspecializacaoExtra) luSteps.push('periciaLivreTalento');
     if (opcoesPericiaRestritaAtual.length > 0) luSteps.push('periciaRestritaTalento');
@@ -1130,6 +1142,7 @@ export default function LevelUpShell({
     especialista: 'Especialista',
     asi: 'Atributo ou Talento',
     asiAtributo: 'Atributo do Talento',
+    talentoSelvagemAtributo: 'Atributo de Conjuração',
     talentoMagia: 'Magia do Talento',
     periciaLivreTalento: 'Perícia do Talento',
     periciaRestritaTalento: 'Perícia do Talento',
@@ -1301,6 +1314,10 @@ export default function LevelUpShell({
         return;
       }
     }
+    if (step === 'talentoSelvagemAtributo' && atributoTalentoSelvagemEscolhido === null) {
+      setAviso('Escolha o atributo de conjuração antes de avançar.');
+      return;
+    }
     if (step === 'dadivaEpicaAtributo') {
       if (dadivaEpicaObjEscolhida && dadivaEpicaObjEscolhida.concedeAsi.tipo === 'distribuir-dois' && dadivaEpicaAsiEscolhas.length < PONTOS_ASI) {
         setAviso(`Distribua os ${PONTOS_ASI} pontos da Dádiva Épica antes de avançar.`);
@@ -1394,6 +1411,9 @@ export default function LevelUpShell({
             dadivaEpicaAsiEscolhas.length === 1
           ) {
             entradas[dadivaEpicaObjEscolhida.id] = dadivaEpicaAsiEscolhas[0];
+          }
+          if (luSteps.includes('talentoSelvagemAtributo') && talentoObjEscolhido && atributoTalentoSelvagemEscolhido) {
+            entradas[talentoObjEscolhido.id] = atributoTalentoSelvagemEscolhido;
           }
           return Object.keys(entradas).length > 0 ? entradas : null;
         })(),
@@ -2307,6 +2327,26 @@ export default function LevelUpShell({
                 })}
               </>
             )}
+          </>
+        )}
+
+        {step === 'talentoSelvagemAtributo' && talentoObjEscolhido && (
+          <>
+            <div className="section-title">{talentoObjEscolhido.nome}</div>
+            <div className="label" style={{ marginBottom: 10 }}>
+              Escolha o atributo de conjuração das magias deste talento — é com ele que a CD e o
+              acerto delas são calculados. Livre entre os 3, não precisa bater com o atributo da
+              sua classe.
+            </div>
+            {ATRIBUTOS_CONJURACAO.map(({ atributo, rotulo }) => (
+              <div
+                key={atributo}
+                className={`opt-card ${atributoTalentoSelvagemEscolhido === atributo ? 'selected' : ''}`}
+                onClick={() => setAtributoTalentoSelvagemEscolhido(atributo)}
+              >
+                <div className="opt-card-name">{rotulo}</div>
+              </div>
+            ))}
           </>
         )}
 

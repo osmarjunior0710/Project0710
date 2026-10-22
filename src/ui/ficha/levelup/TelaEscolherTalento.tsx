@@ -1,6 +1,6 @@
 import type { Atributo } from '../../../data/wizardFixtures';
 import type { Classe } from '../../../data/rulesets/dnd2024/classes';
-import { talentos, type CategoriaTalento, type Talento } from '../../../data/rulesets/dnd2024/talentos';
+import { talentos, talentosSelvagens, type CategoriaTalento, type Talento } from '../../../data/rulesets/dnd2024/talentos';
 import { talentoTemPlaceholder } from '../../../core/classificarTalento';
 import { classeProficienteComArmadura } from '../../../core/proficienciaArmadura';
 
@@ -29,6 +29,16 @@ interface TelaEscolherTalentoProps {
   onSelecionar: (id: string) => void;
 }
 
+/** Talentos Selvagens (Psiônico UA 2025) são mutuamente exclusivos entre si
+ * ("Não pode possuir outro Talento Selvagem") — diferente do resto dos
+ * talentos, que só travam contra REPETIR o MESMO. Único grupo assim hoje;
+ * ver `sdd/sdd-talentos-selvagens.md` seção 2. */
+function jaTemOutroTalentoSelvagem(t: Talento, talentosGeraisAtuais: string[]): boolean {
+  if (t.categoria !== 'Talento Selvagem') return false;
+  const idsSelvagens = new Set(talentosSelvagens.map((x) => x.id));
+  return talentosGeraisAtuais.some((id) => id !== t.id && idsSelvagens.has(id));
+}
+
 function motivoIndisponivel(
   t: Talento,
   nivelAtual: number,
@@ -36,6 +46,9 @@ function motivoIndisponivel(
   classe: Classe | undefined,
   talentosGeraisAtuais: string[],
 ): string | null {
+  if (jaTemOutroTalentoSelvagem(t, talentosGeraisAtuais)) {
+    return 'Já possui outro Talento Selvagem';
+  }
   if (t.prerequisitos.nivelMinimo !== null && nivelAtual < t.prerequisitos.nivelMinimo) {
     return `Requer nível ${t.prerequisitos.nivelMinimo}+`;
   }
@@ -155,8 +168,13 @@ export default function TelaEscolherTalento({
   selecionado,
   onSelecionar,
 }: TelaEscolherTalentoProps) {
+  // Talento Selvagem entra JUNTO da lista de Geral — regra real (PDF, p.21):
+  // "pode escolher um Talento Selvagem sempre que a regra do jogo permitir
+  // que você escolha um Talento Geral" (ver sdd/sdd-talentos-selvagens.md).
   const opcoes = talentos.filter(
-    (t) => t.categoria === categoria && (t.repetivel || !talentosGeraisAtuais.includes(t.id) || t.id === selecionado),
+    (t) =>
+      (t.categoria === categoria || (categoria === 'Geral' && t.categoria === 'Talento Selvagem')) &&
+      (t.repetivel || !talentosGeraisAtuais.includes(t.id) || t.id === selecionado),
   );
   const favoritosNaLista = opcoes.filter((t) => favoritos.includes(t.id) && t.id !== selecionado);
   const idsFavoritados = new Set(favoritosNaLista.map((t) => t.id));
