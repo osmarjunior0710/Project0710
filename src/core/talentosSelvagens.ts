@@ -3,10 +3,11 @@
 // (seção 1.1 do SDD) já funciona de verdade, reaproveitando
 // `core/magiaTalentoGeral.ts` direto (efeitoMecanico: 'magia-geral-
 // concedida') — este arquivo só cobre os 10 BENEFÍCIOS ÚNICOS (seção
-// 3 do SDD), cada um com função própria mesmo que ainda `[PH]`
-// (CLAUDE.md §6.3.1) — grupos com a MESMA mecânica reaproveitam 1
-// função parametrizada (seção 6 do SDD: "Grupos A/B/C agrupam o que
-// antes seriam 7 entregas em 3"), nunca 1 função por talento repetida.
+// 3 do SDD), cada um com função própria (CLAUDE.md §6.3.1) — grupos
+// com a MESMA mecânica reaproveitam 1 função parametrizada (seção 6
+// do SDD: "Grupos A/B/C agrupam o que antes seriam 7 entregas em 3"),
+// nunca 1 função por talento repetida. Grupo A já é `[codeimplementation]`
+// (Entrega 2); B/C/D ainda são `[PH]` (entregas futuras).
 
 /** IDs do Grupo A (Atmocinese/Criocinese/Pirocinese) — mesma mecânica,
  * só o tipo de dano muda; mapeado pra quando a mecânica real existir. */
@@ -20,8 +21,11 @@ const TIPO_DANO_POR_TALENTO_GRUPO_A: Record<string, string> = {
  * conjurar magia ou acertar ataque com dano Contundente/Cortante/
  * Perfurante/Psíquico, pode mudar o tipo pra X" — devolve o tipo de
  * dano do talento ATIVO deste grupo, ou `null` se não tiver nenhum.
- * [PH] [placeholder-codeimplementation] — entrega própria futura (ver
- * PENDENCIAS.md); a troca em si ainda não é aplicada em nenhum dano. */
+ * [codeimplementation] (Entrega 2) — card próprio no painel de Ação
+ * (`AcaoPanelContent.tsx`), 1x/turno; efeito só narrativo (o app não
+ * calcula resistência de alvo, mesmo espírito de
+ * `core/ataquesElementais.ts`), então não precisa aplicar o tipo em
+ * nenhum cálculo de dano de verdade — só declarar/avisar. */
 export function tipoDanoTrocaTalentoSelvagem(talentosAtuais: string[] | undefined): string | null {
   if (!talentosAtuais) return null;
   for (const id of talentosAtuais) {

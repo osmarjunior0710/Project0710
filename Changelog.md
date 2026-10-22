@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1849
+
+Quem tem Atmocinese, Criocinese ou Pirocinese (Talentos Selvagens, Psiônico não oficial) ganha um
+botão novo na aba Combate ("🔥/❄️/⚡ Trocar tipo de dano pra X") — toque declara a troca pro resto
+do turno (1x). É um efeito narrativo (o app não calcula resistência de monstro), então só avisa,
+não muda nenhum número.
+
 ## v202610_1725
 
 Os 10 Talentos Selvagens (Psiônico, não oficial) agora aparecem de verdade na escolha de talento

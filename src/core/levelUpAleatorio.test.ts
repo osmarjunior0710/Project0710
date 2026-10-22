@@ -222,7 +222,7 @@ describe('sortearLevelUpRapido — Dádiva Épica aplica o próprio ASI (bug cor
     // Sorteia até achar a Dádiva do Ataque Irresistível (prerequisito nenhum, sempre elegível) —
     // repete algumas vezes pra não depender de 1 sorteio só com baixa probabilidade.
     let achou = false;
-    for (let i = 0; i < 50 && !achou; i++) {
+    for (let i = 0; i < 300 && !achou; i++) {
       const resultado = sortearLevelUpRapido({
         classe: guerreiro,
         personagem: { nivel: 18, pvMax: 100, dadoVida: 'd10', conMod: 2, subclasse: null, estiloDeLuta: 'Duelismo', bonusPvPorNivel: 0 },

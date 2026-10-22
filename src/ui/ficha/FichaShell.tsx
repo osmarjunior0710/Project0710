@@ -147,6 +147,7 @@ import {
 } from '../../core/magiaTalentoGeral';
 import { talentos, type Talento } from '../../data/rulesets/dnd2024/talentos';
 import { resumoConjuracaoDeTalento } from '../../core/conjuracaoDeTalento';
+import { tipoDanoTrocaTalentoSelvagem } from '../../core/talentosSelvagens';
 import { temPerfurador } from '../../core/rerollDanoTalento';
 import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
 import { armaduraSemTreinamentoEquipada } from '../../core/proficienciaArmadura';
@@ -595,6 +596,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // Esmagador/Talhador — mesmo padrão 1x/turno, flags independentes
   // (o personagem pode ter os 2 talentos ao mesmo tempo).
   const [esmagadorUsadoTurno, setEsmagadorUsadoTurno] = useState(personagemSalvo.esmagadorUsadoTurno ?? false);
+  // Grupo A dos Talentos Selvagens (troca de tipo de dano) — mesmo
+  // padrão 1x por turno de `esmagadorUsadoTurno`.
+  const [trocaTipoDeDanoTalentoSelvagemUsadaTurno, setTrocaTipoDeDanoTalentoSelvagemUsadaTurno] = useState(
+    personagemSalvo.trocaTipoDeDanoTalentoSelvagemUsadaTurno ?? false,
+  );
   const [talhadorUsadoTurno, setTalhadorUsadoTurno] = useState(personagemSalvo.talhadorUsadoTurno ?? false);
   const [conhecimentoPrimordialPericiaEscolhida, setConhecimentoPrimordialPericiaEscolhida] = useState(
     personagemSalvo.conhecimentoPrimordialPericiaEscolhida ?? null,
@@ -1440,6 +1446,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const inspiracaoSuperiorDesbloqueada = temCaracteristica(classesCtx, 'Inspiração Superior');
   const temSentidoDePerigo = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.sentidoDePerigo);
   const temAtaqueImprudente = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.ataqueImprudente);
+  const tipoDanoTrocaSelvagemAtual = tipoDanoTrocaTalentoSelvagem(talentosEfetivos);
   const temInstintosPrimitivos = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.instintosPrimitivos);
   const temGolpeBrutal = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.golpeBrutal);
   /** 0 = ainda não chegou no nível 13; 1 = nível 13-16 (+2 efeitos);
@@ -1667,6 +1674,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     forcaRevigoranteUsadaTurno,
     esmagadorUsadoTurno,
     talhadorUsadoTurno,
+    trocaTipoDeDanoTalentoSelvagemUsadaTurno,
     conhecimentoPrimordialPericiaEscolhida,
     academicoPericiaEscolhida,
     pvMax: personagem.pvMax,
@@ -1798,6 +1806,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       forcaRevigoranteUsadaTurno,
       esmagadorUsadoTurno,
       talhadorUsadoTurno,
+      trocaTipoDeDanoTalentoSelvagemUsadaTurno,
       conhecimentoPrimordialPericiaEscolhida,
       pvTemporario,
       maestriaArma,
@@ -2241,6 +2250,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setForcaRevigoranteUsadaTurno(false);
     setEsmagadorUsadoTurno(false);
     setTalhadorUsadoTurno(false);
+    setTrocaTipoDeDanoTalentoSelvagemUsadaTurno(false);
     setDefesaPsionicaAtiva(false);
     setMenteAgucadaUsadaNoTurno(false);
     setForcaVitalUsadaNoTurno(false);
@@ -4086,6 +4096,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               disponivel: temAtaqueImprudente,
               ativo: ataqueImprudenteAtivo,
               onAtivar: () => setAtaqueImprudenteAtivo(true),
+            }}
+            trocaTipoDeDanoTalentoSelvagem={{
+              tipo: tipoDanoTrocaSelvagemAtual,
+              usadoTurno: trocaTipoDeDanoTalentoSelvagemUsadaTurno,
+              onUsar: () => setTrocaTipoDeDanoTalentoSelvagemUsadaTurno(true),
             }}
             golpeBrutal={{
               disponivel: temGolpeBrutal,

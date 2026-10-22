@@ -349,5 +349,18 @@ construída no foco que acabou de fechar — ver aprendizados/talentos/atributo-
   `npm test -- --run` (1105 testes), `npm run build` limpos. **Não testado visualmente no
   navegador** (sem ferramenta de browser nesta sessão).
 
-Próximo passo: Entrega 2 (Grupo A — troca de tipo de dano 1x/turno, Atmocinese/Criocinese/
-Pirocinese) ou decidir com o Osmar se a tela de substituição de talento da Origem entra antes.
+- [x] **E7 Entrega 2 — Grupo A (Atmocinese/Criocinese/Pirocinese)**: achado de escopo antes de
+  codar — o efeito é só o RÓTULO do tipo de dano (o app não calcula resistência de monstro, sem
+  ficha de inimigo; mesmo espírito já registrado em `core/ataquesElementais.ts`), mas o gatilho é
+  amplo (qualquer ataque OU magia com dano). Apresentado ao Osmar, que escolheu a versão simples:
+  card próprio (fora de qualquer popup de dano) no painel de Ação — toque declara a troca pro
+  resto do turno (1x) e mostra um aviso, sem precisar interceptar o resultado de cada rolagem de
+  dano individualmente (~10 pontos de entrada evitados). `tipoDanoTrocaTalentoSelvagem`
+  (`core/talentosSelvagens.ts`) virou `[codeimplementation]`; novo estado
+  `trocaTipoDeDanoTalentoSelvagemUsadaTurno` (reseta no Fim do Turno, mesmo padrão de
+  `esmagadorUsadoTurno`), persistido em `PersonagemSalvo`. Card novo em `AcaoPanelContent.tsx`
+  (grupo "Outras"). `npx tsc -b`, `npm test -- --run` (1105 testes), `npm run build` limpos. **Não
+  testado visualmente no navegador** (sem ferramenta de browser nesta sessão).
+
+Próximo passo: Entrega 3 (Grupo B — Clarividência/Empata, Vantagem numa ação específica) ou
+decidir com o Osmar se a tela de substituição de talento da Origem entra antes.

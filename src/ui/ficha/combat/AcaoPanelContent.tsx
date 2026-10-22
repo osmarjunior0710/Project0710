@@ -203,6 +203,16 @@ interface AcaoPanelContentProps {
   temGolpeDeEscudo: boolean;
   golpeDeEscudoUsadoTurno: boolean;
   onUsarGolpeDeEscudo: () => void;
+  /** Grupo A dos Talentos Selvagens (Atmocinese/Criocinese/Pirocinese,
+   * Psiônico UA 2025) — "1x/turno, ao conjurar magia ou acertar ataque
+   * com dano Contundente/Cortante/Perfurante/Psíquico, pode mudar o
+   * tipo pra X". Efeito só informativo (o app não calcula resistência
+   * de alvo) — toque declara a troca pro turno, sem popup, ver
+   * `core/talentosSelvagens.ts`. `tipoDanoTrocaTalentoSelvagem` =
+   * o novo tipo (ou `null` sem o talento). */
+  tipoDanoTrocaTalentoSelvagem: string | null;
+  trocaTipoDeDanoTalentoSelvagemUsadaTurno: boolean;
+  onUsarTrocaTipoDeDanoTalentoSelvagem: () => void;
   /** Ataque Desarmado, opções Empurrar/Imobilizar (Glossário) — sem jogada de ataque: gasta um dos
    * ataques da ação Atacar e abre o popup de salvaguarda do alvo (`CombatTab.tsx`). */
   onEmpurrarImobilizar: (tipo: 'empurrar' | 'imobilizar', info: AtaqueInfo) => void;
@@ -326,6 +336,9 @@ export default function AcaoPanelContent({
   temGolpeDeEscudo,
   golpeDeEscudoUsadoTurno,
   onUsarGolpeDeEscudo,
+  tipoDanoTrocaTalentoSelvagem,
+  trocaTipoDeDanoTalentoSelvagemUsadaTurno,
+  onUsarTrocaTipoDeDanoTalentoSelvagem,
   onEmpurrarImobilizar,
   explosaoElementalDisponivel,
   onExplosaoElemental,
@@ -751,6 +764,28 @@ export default function AcaoPanelContent({
                   <div className={styles.rowDesc}>
                     Ao acertar com essa arma: Salv. Força do alvo — falha empurra 1,5m ou derruba (Caído), à sua escolha.
                     1x por turno.
+                  </div>
+                )}
+              </div>
+            )
+    ) },
+    { grupo: 'Outras', no: (
+      tipoDanoTrocaTalentoSelvagem && !trocaTipoDeDanoTalentoSelvagemUsadaTurno && (
+              <div
+                className={styles.row}
+                onClick={() => {
+                  onUsarTrocaTipoDeDanoTalentoSelvagem();
+                  onEscolher(
+                    '🔥 Troca de Tipo de Dano',
+                    `Seu próximo dano de Contundente/Cortante/Perfurante/Psíquico (magia ou ataque) sai como ${tipoDanoTrocaTalentoSelvagem} até o fim do turno.`,
+                  );
+                }}
+              >
+                <div className={styles.rowName}>🔥 Trocar tipo de dano pra {tipoDanoTrocaTalentoSelvagem}</div>
+                {detalhesAtivo && (
+                  <div className={styles.rowDesc}>
+                    1x por turno, ao conjurar magia ou acertar ataque com dano Contundente/Cortante/Perfurante/
+                    Psíquico — efeito só narrativo (o app não calcula resistência de inimigo).
                   </div>
                 )}
               </div>

@@ -278,6 +278,10 @@ interface CombatTabProps {
    * no Fim do Turno. `onAtivar` só liga — nunca desliga manualmente
    * (a regra real não dá esse controle; só acaba no fim do turno). */
   ataqueImprudente: { disponivel: boolean; ativo: boolean; onAtivar: () => void };
+  /** Grupo A dos Talentos Selvagens (Atmocinese/Criocinese/Pirocinese) —
+   * `tipo` = o novo tipo de dano (ou `null` sem o talento);
+   * `usadoTurno` reseta no Fim do Turno. Ver `core/talentosSelvagens.ts`. */
+  trocaTipoDeDanoTalentoSelvagem: { tipo: string | null; usadoTurno: boolean; onUsar: () => void };
   /** Golpe Brutal (Bárbaro, nível 9+) — precisa do Ataque Imprudente
    * já ativo nesse turno (regra real). `dados` = 1 (nível 9-16) ou 2
    * (17+, "2d10"). `efeitosNivel13`/`escolhas` decidem quais efeitos
@@ -867,6 +871,11 @@ export default function CombatTab({
     disponivel: ataqueImprudenteDisponivel,
     ativo: ataqueImprudenteAtivo,
     onAtivar: onAtivarAtaqueImprudente,
+  },
+  trocaTipoDeDanoTalentoSelvagem: {
+    tipo: tipoDanoTrocaTalentoSelvagemAtual,
+    usadoTurno: trocaTipoDeDanoTalentoSelvagemUsadaTurno,
+    onUsar: onUsarTrocaTipoDeDanoTalentoSelvagem,
   },
   golpeBrutal: {
     disponivel: golpeBrutalDisponivel,
@@ -3480,6 +3489,9 @@ export default function CombatTab({
           temGolpeDeEscudo={golpeDeEscudoDisponivel}
           golpeDeEscudoUsadoTurno={golpeDeEscudoUsadoTurno}
           onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
+          tipoDanoTrocaTalentoSelvagem={tipoDanoTrocaTalentoSelvagemAtual}
+          trocaTipoDeDanoTalentoSelvagemUsadaTurno={trocaTipoDeDanoTalentoSelvagemUsadaTurno}
+          onUsarTrocaTipoDeDanoTalentoSelvagem={onUsarTrocaTipoDeDanoTalentoSelvagem}
           efeitosAoAcertar={efeitosAoAcertar}
           onPedirEfeitosAoAcertar={pedirEfeitosAoAcertar}
           onEmpurrarImobilizar={abrirEmpurrarImobilizar}

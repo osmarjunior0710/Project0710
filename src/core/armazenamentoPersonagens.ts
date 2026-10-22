@@ -349,6 +349,13 @@ export interface PersonagemSalvo {
    * Turno. Flags independentes (o personagem pode ter os 2). */
   esmagadorUsadoTurno?: boolean;
   talhadorUsadoTurno?: boolean;
+  /** Grupo A dos Talentos Selvagens (Atmocinese/Criocinese/Pirocinese) —
+   * "1x/turno, ao conjurar magia ou acertar ataque com dano Contundente/
+   * Cortante/Perfurante/Psíquico, pode mudar o tipo pra X" — mesmo
+   * padrão 1x por turno de `golpeDeEscudoUsadoTurno`. O app não calcula
+   * resistência de alvo (sem ficha de monstro), então o efeito é só
+   * informativo — ver `core/talentosSelvagens.ts`. */
+  trocaTipoDeDanoTalentoSelvagemUsadaTurno?: boolean;
   /** Cortar (Mestre em Armas Grandes) — `true` = liberado agora (após
    * Crítico ou confirmação manual de "reduziu a 0 PV"), reseta no Fim
    * do Turno. Ver `FichaShell.tsx`. */
