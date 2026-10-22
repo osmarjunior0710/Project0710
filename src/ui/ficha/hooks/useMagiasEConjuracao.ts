@@ -45,6 +45,7 @@ import {
   magiasGratisDosTalentosGerais,
   temRitualRapido,
   CHAVE_RITUAL_RAPIDO,
+  talentoDonoDaMagiaTalentoGeral,
 } from '../../../core/magiaTalentoGeral';
 import { acoesConvertidasEmBonus } from '../../../core/periciaTalentoGeral';
 import { acoesBase } from '../../../data/exampleCombat';
@@ -359,9 +360,22 @@ export function useMagiasEConjuracao(input: {
     (m) => m.nome !== NOME_FALAR_COM_ANIMAIS_GNOMO,
   );
   // Talento de Origem "Iniciado em Magia" (Acólito/Guia/Sábio) — fixo
-  // desde a criação, ver `core/magiaTalentoOrigem.ts`.
+  // desde a criação, ver `core/magiaTalentoOrigem.ts`. As 2 gavetas
+  // (Origem/Espécie) viram listas SEPARADAS aqui (não mais 1 lista só)
+  // porque cada uma pode ter escolhido um atributo de conjuração
+  // DIFERENTE (`atributoMagiaIniciadaEscolhido`/`...EspecieEscolhido`)
+  // — precisam de sentinelas de classe diferentes, ver
+  // `sdd/sdd-atributo-talento.md`.
   const magiasTalentoOrigemAtuais = [...truquesMagiaIniciada(selecao), ...magiasMagiaIniciada(selecao)];
   const magiasTalentoOrigemPreparadas = magiasPreparadasDoPersonagem(magiasTalentoOrigemAtuais);
+  const magiasTalentoOrigemPreparadasOrigem = magiasPreparadasDoPersonagem([
+    ...selecao.truquesMagiaIniciadaEscolhidos,
+    ...(selecao.magiaMagiaIniciadaEscolhida ? [selecao.magiaMagiaIniciadaEscolhida] : []),
+  ]);
+  const magiasTalentoOrigemPreparadasEspecie = magiasPreparadasDoPersonagem([
+    ...selecao.truquesMagiaIniciadaEspecieEscolhidos,
+    ...(selecao.magiaMagiaIniciadaEspecieEscolhida ? [selecao.magiaMagiaIniciadaEspecieEscolhida] : []),
+  ]);
   // Pra Substituição de Magia no Level Up (ver LevelUpShell) — só
   // preenchido quando a gaveta correspondente realmente tem algo
   // escolhido (a lista e a magia sempre são preenchidas juntas).
@@ -426,8 +440,21 @@ export function useMagiasEConjuracao(input: {
         classe: classeDaMagiaDeSubclasse(m),
       }),
     ),
-    ...magiasTalentoOrigemPreparadas.map(semClasse),
-    ...magiasTalentoGeralPreparadas.map(semClasse),
+    // Iniciado em Magia — sentinela por GAVETA (Origem/Espécie), não
+    // `semClasse`: cada uma pode ter escolhido um atributo de
+    // conjuração diferente (ver `sdd/sdd-atributo-talento.md`).
+    ...magiasTalentoOrigemPreparadasOrigem.map(comClasse('Iniciado em Magia')),
+    ...magiasTalentoOrigemPreparadasEspecie.map(comClasse('Iniciado em Magia (Espécie)')),
+    // Talentos Gerais com magia (Telepático, Tocado pela Sombra/Fadas,
+    // Conjurador Ritualista) — sentinela por TALENTO dono (não
+    // `semClasse`): cada um usa o atributo do PRÓPRIO ASI, pode ser
+    // diferente de talento pra talento.
+    ...magiasTalentoGeralPreparadas.map(
+      (m): MagiaComClasseOpcional => ({
+        magia: m,
+        classe: talentoDonoDaMagiaTalentoGeral(m.nome, talentosEfetivos, escolhaMagiaTalentoGeral)?.nome ?? null,
+      }),
+    ),
     ...magiasMaestriaConjuraveis.map(comClasse('Mago')),
     ...magiasAssinaturaConjuraveis.map(comClasse('Mago')),
   ];

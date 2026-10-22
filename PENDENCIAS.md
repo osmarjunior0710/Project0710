@@ -24,6 +24,26 @@ aparecem pelo pool combinado/ponte — conferir com um caso real de 2 conjurador
 escritas à mão (`entradaGuerreiro`, `entradaBarbaro`, `mongeEntry`, `entradaPaladino`) podem migrar pro módulo genérico quando forem
 tocadas. (O Bônus de Proficiência acima do nível 20 — Char Multiclasse, nível total 140 — já vale o maior da tabela, +6.)
 
+## Talentos com atributo "próprio do ASI" — 3 mecânicas ainda sem função real (2026-10)
+
+Foco "Atributo de conjuração herdado do ASI do próprio talento" corrigiu o mod./CD pros 6 talentos
+que já concediam magia (Telepático, Tocado pela Sombra/Fadas, Conjurador Ritualista, Iniciado em
+Magia) + preparou a infra genérica (`escolhaAtributoTalentoGeral` reaproveitado +
+`core/conjuracaoDeTalento.ts`). Travam estruturalmente por precisarem de mecânica NOVA (não só o
+atributo certo), fora do escopo dessa correção:
+
+- **Telecinético** — Empurrão Telecinético (Ação Bônus, Salv. Força CD 8+mod+BP) ainda não tem
+  função própria; só o truque Mãos Mágicas existe hoje.
+- **Envenenador** — fabricação/aplicação do veneno (Salv. Constituição CD 8+mod+BP) ainda não tem
+  função própria.
+- **Dádiva do Ataque Irresistível** — achado maior: essa categoria ("Dádiva Épica") nem aplica o
+  próprio ASI hoje (`LevelUpShell` não passa pelo passo `asiAtributo` pra essa categoria) — precisa
+  de entrega própria que primeiro resolva isso (aplicar o +1 FOR/DES escolhido) antes de cuidar do
+  "dano extra = valor do atributo em crítico natural 20", que também usa o VALOR do atributo, não
+  o modificador (função própria diferente de `resumoConjuracaoDeTalento`).
+
+Ver `sdd/sdd-atributo-talento.md` e `EmDev.md` pro histórico completo desta correção.
+
 ## Golpe Brutal (Bárbaro) — confirmar se tem limite de usos por descanso
 
 Pedido do Osmar (2026-09), enquanto discutíamos Esmagador/Talhador:

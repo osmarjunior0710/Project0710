@@ -20,7 +20,7 @@ import { iconesMagia, usarMagiaTemAcaoAutomatizada } from '../../../core/classif
 import { aplicarTelecinesePoderosoEmMagia } from '../../../core/telecinesePoderoso';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { decidirConjuracao, type DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
-import { cdConjuracao, modAcertoConjuracaoPorClasse, type ResumoConjuracao } from '../../../core/magiasPersonagem';
+import { cdConjuracao, modAcertoConjuracaoPorClasse, cdConjuracaoPorClasse, type ResumoConjuracao } from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
 import { circuloGratisMagiaFixaDeClasse, type MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
@@ -507,6 +507,9 @@ export default function MagiasTab({
     /** Resultado de uma Disciplina Psiônica que exige salvaguarda (E4c)
      * — ver o mesmo campo em `CombatTab.tsx`. */
     avisoDisciplina: string | null;
+    /** Classe (ou talento) DONA da magia — ver o mesmo campo em
+     * `CombatTab.tsx` (`cdConjuracaoPorClasse`). */
+    classeDonaDaMagia: string | null;
   } | null>(null);
   // Truque Potente (Mago/Evocador) no caso de ataque errado — aba
   // Magias não tem um banner de feedback como o Combate (`onEscolher`),
@@ -588,10 +591,15 @@ export default function MagiasTab({
    * Id/Pensamentos Destrutivos) vira linha extra no popup quando presente (ver `telaSalvaguarda`).
    * Mesmo fluxo de `CombatTab.tsx` `abrirSalvaguarda` (dano já rola sozinho ao abrir, sem botão
    * manual de "Rolar Dano" — ver DECISOES-COMBATE.md). */
-  function abrirSalvaguardaComAviso(m: Magia, circuloUsado: number, avisoDisciplina: string | null) {
+  function abrirSalvaguardaComAviso(
+    m: Magia,
+    circuloUsado: number,
+    avisoDisciplina: string | null,
+    classeDonaDaMagia: string | null = null,
+  ) {
     const danoBase = calcularDanoMagia(m, circuloUsado, nivelPersonagem);
     if (!danoBase) {
-      setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: null, upcastNaoAutomatico: false, avisoDisciplina });
+      setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: null, upcastNaoAutomatico: false, avisoDisciplina, classeDonaDaMagia });
       return;
     }
     const dano = aplicarEvocacaoPotencializadaAoDano(danoBase, m, evocacaoPotencializadaAtiva, modIntAtual);
@@ -615,6 +623,7 @@ export default function MagiasTab({
               danoRolado: totalRolado,
               upcastNaoAutomatico: dano.upcastNaoAutomatico,
               avisoDisciplina,
+              classeDonaDaMagia,
             }),
         },
         // Aba Magias — SEM conceito de turno: não trava `usadaNoTurno`
@@ -674,6 +683,7 @@ export default function MagiasTab({
                     danoRolado: totalRolado,
                     upcastNaoAutomatico: dano.upcastNaoAutomatico,
                     avisoDisciplina: avisoCombinado,
+                    classeDonaDaMagia,
                   }),
               },
               ofertaTrocaDeDado: ofertaMenteAgucada(dano.tipo, menteAgucadaAtiva, menteAgucadaAnotado, menteAgucadaUsadaNoTurno, false, (novoTotal) => {
@@ -714,7 +724,7 @@ export default function MagiasTab({
           const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, false);
           const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
           onUsarSobrecarga();
-          setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: max, upcastNaoAutomatico: dano.upcastNaoAutomatico, avisoDisciplina });
+          setTelaSalvaguarda({ magia: m, circuloUsado, danoRolado: max, upcastNaoAutomatico: dano.upcastNaoAutomatico, avisoDisciplina, classeDonaDaMagia });
           if (necrotico) {
             let totalNecrotico = 0;
             rolarDados({
@@ -793,7 +803,8 @@ export default function MagiasTab({
         onDisciplinaPosConjuracaoDisponivel({
           ...resultado.disciplinaPosConjuracao,
           temContextoDeTurno: false,
-          aoResolverSalvaguarda: (aviso) => abrirSalvaguardaComAviso(m, circuloUsado, [aviso, avisoExtra].filter(Boolean).join('\n\n') || null),
+          aoResolverSalvaguarda: (aviso) =>
+            abrirSalvaguardaComAviso(m, circuloUsado, [aviso, avisoExtra].filter(Boolean).join('\n\n') || null, classeDonaDaMagia),
         });
         return;
       }
@@ -891,7 +902,7 @@ export default function MagiasTab({
       return;
     }
     if (resultado.mecanica === 'salvaguarda') {
-      abrirSalvaguardaComAviso(m, circuloUsado, avisoExtra);
+      abrirSalvaguardaComAviso(m, circuloUsado, avisoExtra, classeDonaDaMagia);
       return;
     }
     if (resultado.rollCura) {
@@ -1107,6 +1118,14 @@ export default function MagiasTab({
   // Mesma CD de Repudiar Inimigos no Combate (`cdConjuracaoClasseAtual`
   // em `CombatTab.tsx`) — fórmula idêntica, reaproveitada aqui.
   const cdConjuracaoClasseAtual = modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null;
+  // CD pela classe/talento DONO da magia (multiclasse) — mesma
+  // correção feita em `CombatTab.tsx`, ver `sdd/sdd-atributo-talento.md`.
+  const cdSalvaguardaPorClasse = cdConjuracaoPorClasse(
+    resumosPorClasse,
+    telaSalvaguarda?.classeDonaDaMagia ?? null,
+    cdConjuracaoClasseAtual,
+    explicacaoCdConjuracao,
+  );
 
   return (
     <>
@@ -1278,8 +1297,8 @@ export default function MagiasTab({
         <SalvaguardaDoAlvoModal
           titulo={telaSalvaguarda.magia.nome}
           atributo={atributoSalvaguarda(telaSalvaguarda.magia)}
-          cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
-          explicacaoCd={explicacaoCdConjuracao}
+          cd={cdSalvaguardaPorClasse.cd}
+          explicacaoCd={cdSalvaguardaPorClasse.explicacao}
           textoSucesso={textoSucessoSalvaguarda}
           textoFalha={textoFalhaSalvaguarda}
           aviso={avisoSalvaguardaCompleto}

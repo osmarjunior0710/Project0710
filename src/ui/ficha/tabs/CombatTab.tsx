@@ -60,7 +60,7 @@ import EscolherMontariaModal from '../combat/EscolherMontariaModal';
 import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional, ResumoConjuracaoPorClasse } from '../../../core/magiasPersonagem';
 import type { AcaoBase, AtaqueInfo } from '../../../data/exampleCombat';
 import type { AjustesPet, Pet } from '../../../core/pets';
-import { cdConjuracao } from '../../../core/magiasPersonagem';
+import { cdConjuracao, cdConjuracaoPorClasse } from '../../../core/magiasPersonagem';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import { calcularDanoMagia, calcularDanoCondicionalMagia, atributoSalvaguarda, rotuloBotaoDanoMagia } from '../../../core/magiaDano';
 import { useRoll, type LadosDado } from '../../roll/RollContext';
@@ -1075,6 +1075,13 @@ export default function CombatTab({
      * "sumindo" atrás do outro). `null` = não usou a Disciplina (ou
      * não se aplica). */
     avisoDisciplina: string | null;
+    /** Classe (ou talento, ver `Talento.usaAtributoProprioAsi`) DONA
+     * da magia — usada pra achar a CD certa em `resumosPorClasse`
+     * (`cdConjuracaoPorClasse`), em vez de sempre cair na classe ATIVA
+     * (bug corrigido, ver `sdd/sdd-atributo-talento.md`). `null` =
+     * sem dono ambíguo possível de marcar (mesmo significado de
+     * `MagiaComClasseOpcional.classe`). */
+    classeDonaDaMagia: string | null;
   } | null>(null);
   // Sobrecarga (Mago/Evocador) — mesmo padrão de `MagiasTab.tsx`:
   // escolha "rolar normal vs. dano máximo", pausando a rolagem
@@ -1394,10 +1401,15 @@ export default function CombatTab({
   // magia tem fórmula de dano própria, já rola sozinho ao abrir (sem
   // botão manual de "Rolar Dano") — o popup final só abre depois que o
   // dado resolve, com Falha/Sucesso já calculados.
-  function abrirSalvaguarda(magia: Magia, circuloUsado: number, avisoDisciplina: string | null = null) {
+  function abrirSalvaguarda(
+    magia: Magia,
+    circuloUsado: number,
+    avisoDisciplina: string | null = null,
+    classeDonaDaMagia: string | null = null,
+  ) {
     const danoBase = calcularDanoMagia(magia, circuloUsado, nivel);
     if (!danoBase) {
-      setTelaSalvaguarda({ magia, circuloUsado, danoRolado: null, upcastNaoAutomatico: false, avisoDisciplina });
+      setTelaSalvaguarda({ magia, circuloUsado, danoRolado: null, upcastNaoAutomatico: false, avisoDisciplina, classeDonaDaMagia });
       return;
     }
     const dano = aplicarEvocacaoPotencializadaAoDano(danoBase, magia, evocacaoPotencializadaAtiva, modIntAtual);
@@ -1415,7 +1427,14 @@ export default function CombatTab({
         },
         confirmarFechamento: {
           aoTocar: () =>
-            setTelaSalvaguarda({ magia, circuloUsado, danoRolado: totalRolado, upcastNaoAutomatico: dano.upcastNaoAutomatico, avisoDisciplina }),
+            setTelaSalvaguarda({
+              magia,
+              circuloUsado,
+              danoRolado: totalRolado,
+              upcastNaoAutomatico: dano.upcastNaoAutomatico,
+              avisoDisciplina,
+              classeDonaDaMagia,
+            }),
         },
         // `onTrocado` atualiza `totalRolado` (não só o `onResultado` original)
         // — sem isso, uma troca feita DEPOIS do resultado inicial nunca
@@ -1479,6 +1498,7 @@ export default function CombatTab({
                     danoRolado: totalRolado,
                     upcastNaoAutomatico: dano.upcastNaoAutomatico,
                     avisoDisciplina: avisoCombinado,
+                    classeDonaDaMagia,
                   }),
               },
               ofertaTrocaDeDado: ofertaMenteAgucada(dano.tipo, menteAgucada.ativa, menteAgucada.anotado, menteAgucada.usadaNoTurno, true, (novoTotal) => {
@@ -1520,7 +1540,7 @@ export default function CombatTab({
           const max = danoMaximoSobrecarga(dano.quantidade, dano.lados, dano.mod, false);
           const necrotico = danoNecroticoSobrecarga(sobrecargaUsosDesdeDescanso, circuloUsado);
           onUsarSobrecarga();
-          setTelaSalvaguarda({ magia, circuloUsado, danoRolado: max, upcastNaoAutomatico: dano.upcastNaoAutomatico, avisoDisciplina });
+          setTelaSalvaguarda({ magia, circuloUsado, danoRolado: max, upcastNaoAutomatico: dano.upcastNaoAutomatico, avisoDisciplina, classeDonaDaMagia });
           if (necrotico) {
             let totalNecrotico = 0;
             rolarDados({
@@ -2627,6 +2647,15 @@ export default function CombatTab({
   // Psiônica (E4c, Insinuação do Id/Pensamentos Destrutivos) — os 2 são
   // independentes e raramente coincidem, mas nada impede.
   const avisoSalvaguardaCompleto = [avisoUpcastSalvaguarda, telaSalvaguarda?.avisoDisciplina].filter(Boolean).join('\n\n') || null;
+  // CD pela classe/talento DONO da magia (multiclasse) — mesma
+  // correção já feita pro acerto de ataque, agora também na CD de
+  // salvaguarda (bug real, ver `sdd/sdd-atributo-talento.md`).
+  const cdSalvaguardaPorClasse = cdConjuracaoPorClasse(
+    resumosPorClasse,
+    telaSalvaguarda?.classeDonaDaMagia ?? null,
+    modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null,
+    explicacaoCdConjuracao,
+  );
   // `${total} — ${texto original}` (nunca reescreve/assume a estrutura
   // do texto da planilha — ver PENDENCIAS.md "Salvaguarda do Alvo":
   // reconhecer TIPO de sucesso (metade/nenhum/cheio) precisa de coluna
@@ -3732,8 +3761,8 @@ export default function CombatTab({
         <SalvaguardaDoAlvoModal
           titulo={telaSalvaguarda.magia.nome}
           atributo={atributoSalvaguarda(telaSalvaguarda.magia)}
-          cd={modAcertoConjuracao !== null ? cdConjuracao(modAcertoConjuracao) : null}
-          explicacaoCd={explicacaoCdConjuracao}
+          cd={cdSalvaguardaPorClasse.cd}
+          explicacaoCd={cdSalvaguardaPorClasse.explicacao}
           textoSucesso={textoSucessoSalvaguarda}
           textoFalha={textoFalhaSalvaguarda}
           aviso={avisoSalvaguardaCompleto}

@@ -163,6 +163,36 @@ export interface MagiaGratisDeTalentoGeral {
   recarga: 'ilimitado' | 'descansoLongo';
 }
 
+/** Qual Talento Geral (dentre `talentosAtuais`) concedeu a magia
+ * `nomeMagia` — usado pra marcar a magia com o NOME DO TALENTO como
+ * "classeNome" sentinela no seletor de Combate/Magias, assim
+ * `modAcertoConjuracaoPorClasse`/`cdConjuracaoPorClasse` acham o
+ * resumo de conjuração certo (atributo do PRÓPRIO talento — ver
+ * `Talento.usaAtributoProprioAsi`/`sdd/sdd-atributo-talento.md`), em
+ * vez de caírem no fallback da classe ativa. `null` se nenhum talento
+ * atual concedeu essa magia. */
+export function talentoDonoDaMagiaTalentoGeral(
+  nomeMagia: string,
+  talentosAtuais: string[] | undefined,
+  escolhas: Record<string, string[]> | undefined,
+): Talento | null {
+  if (!talentosAtuais) return null;
+  for (const id of talentosAtuais) {
+    const t = talentos.find((x) => x.id === id);
+    if (!t?.efeitoMecanico) continue;
+    if (t.efeitoMecanico.tipo === 'magia-geral-concedida' && t.efeitoMecanico.magias.some((m) => m.nome === nomeMagia)) {
+      return t;
+    }
+    if (t.efeitoMecanico.tipo === 'magia-escolhida-por-escola') {
+      if (t.efeitoMecanico.magiaFixa === nomeMagia || escolhasDoTalento(t.id, escolhas).includes(nomeMagia)) return t;
+    }
+    if (t.efeitoMecanico.tipo === 'magias-rituais-por-proficiencia' && escolhasDoTalento(t.id, escolhas).includes(nomeMagia)) {
+      return t;
+    }
+  }
+  return null;
+}
+
 /** Deriva as magias com "conjura grátis 1x/Descanso Longo" concedidas
  * por Talentos Gerais — mesmo padrão de `magiasGratisDasInvocacoes`,
  * mas pra `talentosEfetivos`. Cobre `magia-geral-concedida` (Telepático)

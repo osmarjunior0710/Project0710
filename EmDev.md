@@ -334,25 +334,55 @@ outros 7 aplicam o ASI direto no total e esquecem a origem.
 
 ### Lista exaustiva (apresentada e aprovada pelo Osmar, 2026-10)
 
-**Grupo 1 — atributo vem do próprio ASI do talento (precisa de gaveta nova por talento, só existe
-hoje pra Resiliente):**
-- [ ] **Telecinético** (Geral, nível 4+) — CD do Empurrão Telecinético (8+mod+BP). Não
-  implementado (só o truque Mãos Mágicas existe hoje).
-- [ ] **Telepático** (Geral, nível 4+) — atributo de conjuração de Detectar Pensamentos. Magia
-  concedida, mas com mod. errado (cai na classe ativa).
-- [ ] **Tocado pela Sombra** (Geral, nível 4+) — atributo de conjuração das magias (Invisibilidade
-  + escolhida). Magias concedidas, mod. errado.
-- [ ] **Tocado pelas Fadas** (Geral, nível 4+) — atributo de conjuração das magias (Passo Nebuloso
-  + escolhida). Magias concedidas, mod. errado.
-- [ ] **Conjurador Ritualista** (Geral, nível 4+) — atributo de conjuração das magias Rituais
-  escolhidas. Magias concedidas, mod. errado.
-- [ ] **Envenenador** (Geral, nível 4+) — CD da salvaguarda do veneno (8+mod+BP). Não implementado.
-- [ ] **Dádiva do Ataque Irresistível** (Dádiva Épica, nível 19+) — dano extra = VALOR (não mod.)
-  do atributo, em crítico natural 20. Não implementado.
+**Grupo 1 — atributo vem do próprio ASI do talento (precisa de gaveta nova por talento, só existia
+antes pra Resiliente):**
+- [x] **Telepático** (Geral, nível 4+) — atributo de conjuração de Detectar Pensamentos. Corrigido
+  (Entrega 2) — a gaveta `escolhaAtributoTalentoGeral` passou a ser reaproveitada (mesmo campo do
+  Resiliente), `core/conjuracaoDeTalento.ts` novo calcula sem exigir Classe, e o seletor de
+  Combate/Magias marca a magia com o NOME DO TALENTO (sentinela) em vez de `classe: null`.
+- [x] **Tocado pela Sombra** (Geral, nível 4+) — atributo de conjuração das magias (Invisibilidade
+  + escolhida). Corrigido junto com Telepático (Entrega 2).
+- [x] **Tocado pelas Fadas** (Geral, nível 4+) — atributo de conjuração das magias (Passo Nebuloso
+  + escolhida). Corrigido junto com Telepático (Entrega 2).
+- [x] **Conjurador Ritualista** (Geral, nível 4+) — atributo de conjuração das magias Rituais
+  escolhidas. Corrigido junto com Telepático (Entrega 2).
+- [x] **Envenenador** (Geral, nível 4+) — infra pronta (Entrega 1: gaveta + `usaAtributoProprioAsi`
+  + `core/conjuracaoDeTalento.ts`); a mecânica do veneno em si (CD da salvaguarda, 8+mod+BP) ainda
+  não tem função própria — fica pra entrega futura dedicada (ver Backlog.md).
+- [ ] **Telecinético** (Geral, nível 4+) — infra pronta (Entrega 1); CD do Empurrão Telecinético
+  (8+mod+BP) ainda não implementada — entrega futura dedicada.
+- [ ] **Dádiva do Ataque Irresistível** (Dádiva Épica, nível 19+) — achado maior durante a
+  implementação: essa categoria ("Dádiva Épica") nem aplica o próprio ASI hoje (não passa pelo
+  passo `asiAtributo` do Level Up) — bug maior que só "atributo de conjuração", registrado abaixo
+  como pendência própria. Fora desta rodada de propósito.
 
-**Grupo 2 — atributo é escolha livre, independente do ASI (já tem a gaveta de estado, só não é lida):**
-- [ ] **Iniciado em Magia** (Origem) — escolha capturada no wizard, nunca usada; mod. cai na classe
-  ativa.
+**Grupo 2 — atributo é escolha livre, independente do ASI (já tinha a gaveta de estado, só não
+era lida):**
+- [x] **Iniciado em Magia** (Origem e Versátil/Espécie) — corrigido (Entrega 2): as 2 gavetas
+  (`atributoMagiaIniciadaEscolhido`/`...EspecieEscolhido`) agora alimentam `resumosPorClasse` com
+  2 sentinelas próprias ("Iniciado em Magia" / "Iniciado em Magia (Espécie)"), já que as 2 fontes
+  podem ter escolhido atributos diferentes.
 
-Próximo passo: chapéu 2 (SDD) em `sdd/sdd-atributo-talento.md`, depois 6.2.1 (QA no SDD inteiro) e
-6.2.2 (replanejamento) antes de propor a quebra em entregas pro Osmar.
+**Achado maior, corrigido na mesma entrega (pedido do Osmar ao ver o escopo durante a execução):**
+o popup de CD de Salvaguarda (`SalvaguardaDoAlvoModal`, em `CombatTab.tsx` E `MagiasTab.tsx`)
+**sempre usava a CD da classe ATIVA (pill)**, nunca a da classe/talento DONO da magia — o mesmo bug
+que já tinha sido corrigido pro ACERTO de ataque (`modAcertoConjuracaoPorClasse`,
+PENDENCIAS.md "Multiclasse — acerto/CD de magia..."), mas que tinha ficado de fora da CD de
+salvaguarda. Corrigido com `cdConjuracaoPorClasse` (nova, espelha `modAcertoConjuracaoPorClasse`)
++ `classeDonaDaMagia` agora passado por todo o caminho até `telaSalvaguarda` (`abrirSalvaguarda`/
+`abrirSalvaguardaComAviso`, Combate e Magias). Afeta QUALQUER magia multiclasse com salvaguarda,
+não só os 8 talentos — bug mais antigo e maior do que o foco original.
+
+**Pendência nova, registrada em PENDENCIAS.md:** Dádiva do Ataque Irresistível não aplica o
+próprio ASI (categoria "Dádiva Épica" não passa pelo passo `asiAtributo`) — precisa de entrega
+própria que primeiro resolva isso antes de cuidar do atributo de conjuração.
+
+**Efeito visível pro Osmar:** magias concedidas por Iniciado em Magia/Telepático/Tocado pela
+Sombra/Tocado pelas Fadas/Conjurador Ritualista agora mostram uma pill com o NOME DO TALENTO (ex.:
+"Telepático") no seletor "Usar Magia" — igual já acontecia com pill de classe —, em vez de
+aparecer sem nenhuma marcação.
+
+Testado: `npx tsc -b`, `npm test -- --run` (1095 testes) e `npm run build`, todos limpos.
+
+Próximo passo: fechar este foco (postmortem + Backlog/Pendências) e retomar o foco Psiônico
+pausado (E6a-b-d e E7 Talentos Selvagens, SDD já em `sdd/sdd-talentos-selvagens.md`).

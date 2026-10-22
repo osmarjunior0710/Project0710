@@ -145,6 +145,8 @@ import {
   CHAVE_RITUAL_RAPIDO,
   type MagiaGratisDeTalentoGeral,
 } from '../../core/magiaTalentoGeral';
+import { talentos, type Talento } from '../../data/rulesets/dnd2024/talentos';
+import { resumoConjuracaoDeTalento } from '../../core/conjuracaoDeTalento';
 import { temPerfurador } from '../../core/rerollDanoTalento';
 import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
 import { armaduraSemTreinamentoEquipada } from '../../core/proficienciaArmadura';
@@ -1317,6 +1319,67 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       };
     })
     .filter((r): r is NonNullable<typeof r> => r !== null);
+  // Talentos Gerais cujo atributo de conjuração é "o atributo que o
+  // ASI deste PRÓPRIO talento aumentou" (Telecinético, Telepático,
+  // Tocado pela Sombra/Fadas, Conjurador Ritualista, Envenenador) —
+  // mesmo "classeNome" sentinela (o NOME do talento) usado como
+  // `classe`/`classeDonaDaMagia` em `useMagiasEConjuracao.ts`, pra
+  // `modAcertoConjuracaoPorClasse`/`cdConjuracaoPorClasse` acharem o
+  // resumo certo em vez de caírem na classe ativa. Ver
+  // `sdd/sdd-atributo-talento.md`. Sem entrada ainda (`undefined`) até
+  // o jogador escolher o atributo no Level Up — nesse meio-tempo, cai
+  // no fallback normal (classe ativa) como já era antes desta entrega.
+  const resumosTalentoConjuracao: typeof resumosPorClasse = talentosEfetivos
+    .map((id) => talentos.find((t) => t.id === id) ?? null)
+    .filter((t): t is Talento => !!t?.usaAtributoProprioAsi)
+    .map((t) => {
+      const atributo = escolhaAtributoTalentoGeral[t.id] as Atributo | undefined;
+      if (!atributo) return null;
+      const valor = valorFinalAtributo(selecao, atributo);
+      if (valor === null) return null;
+      const resumo = resumoConjuracaoDeTalento(atributo, valor, bonusProficienciaAtual);
+      return { classeNome: t.nome, resumo, explicacaoAcerto: null, explicacaoCd: null };
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null);
+  // Iniciado em Magia (Origem ou Versátil/Espécie) — mesma ideia, mas
+  // o atributo é escolhido livremente (sem ASI), já numa gaveta
+  // própria (`atributoMagiaIniciadaEscolhido`/`...EspecieEscolhido`);
+  // as 2 fontes são independentes e podem ter escolhido atributos
+  // DIFERENTES, por isso 2 sentinelas separadas. "(Espécie)" só entra
+  // na 2ª pra não colidir com a 1ª quando as duas existem juntas.
+  const resumoIniciadoEmMagiaOrigem =
+    selecao.atributoMagiaIniciadaEscolhido && valorFinalAtributo(selecao, selecao.atributoMagiaIniciadaEscolhido) !== null
+      ? {
+          classeNome: 'Iniciado em Magia',
+          resumo: resumoConjuracaoDeTalento(
+            selecao.atributoMagiaIniciadaEscolhido,
+            valorFinalAtributo(selecao, selecao.atributoMagiaIniciadaEscolhido)!,
+            bonusProficienciaAtual,
+          ),
+          explicacaoAcerto: null,
+          explicacaoCd: null,
+        }
+      : null;
+  const resumoIniciadoEmMagiaEspecie =
+    selecao.atributoMagiaIniciadaEspecieEscolhido &&
+    valorFinalAtributo(selecao, selecao.atributoMagiaIniciadaEspecieEscolhido) !== null
+      ? {
+          classeNome: 'Iniciado em Magia (Espécie)',
+          resumo: resumoConjuracaoDeTalento(
+            selecao.atributoMagiaIniciadaEspecieEscolhido,
+            valorFinalAtributo(selecao, selecao.atributoMagiaIniciadaEspecieEscolhido)!,
+            bonusProficienciaAtual,
+          ),
+          explicacaoAcerto: null,
+          explicacaoCd: null,
+        }
+      : null;
+  const resumosPorClasseComTalentos: typeof resumosPorClasse = [
+    ...resumosPorClasse,
+    ...resumosTalentoConjuracao,
+    ...(resumoIniciadoEmMagiaOrigem ? [resumoIniciadoEmMagiaOrigem] : []),
+    ...(resumoIniciadoEmMagiaEspecie ? [resumoIniciadoEmMagiaEspecie] : []),
+  ];
   // Entrega 5f (Multiclasse) — cada classe tem sua PRÓPRIA cota de
   // Truques Conhecidos/Magias Preparadas, então o aviso "faltam X"
   // (e a tela de completar) precisam ser por classe, não só da
@@ -3819,7 +3882,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}
             resumo={resumoConjuracao}
-            resumosPorClasse={resumosPorClasse}
+            resumosPorClasse={resumosPorClasseComTalentos}
             explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             explicacaoCdConjuracao={explicacaoCdConjuracao}
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}
@@ -4149,7 +4212,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onUsarMagiaGratisDeClasse={usarMagiaGratis}
             magiasPreparadasReacao={magiasPreparadasReacao}
             modAcertoConjuracao={modAcertoConjuracao}
-            resumosPorClasse={resumosPorClasse}
+            resumosPorClasse={resumosPorClasseComTalentos}
             explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             explicacaoCdConjuracao={explicacaoCdConjuracao}
             truqueVinculadoAgonizante={invocacoesTruqueVinculado['explosao-agonizante']}

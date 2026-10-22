@@ -29,8 +29,10 @@ const ATRIBUTO_POR_NOME_COMPLETO: Record<string, Atributo> = {
 };
 
 /** Inverso de `ATRIBUTO_POR_NOME_COMPLETO` — nome completo pra exibir
- * (ex.: rótulo "Salvaguarda de Força"), a partir da sigla. */
-const NOME_COMPLETO_POR_ATRIBUTO = Object.fromEntries(
+ * (ex.: rótulo "Salvaguarda de Força"), a partir da sigla. Exportado
+ * pra `core/conjuracaoDeTalento.ts` reaproveitar (CLAUDE.md §6.5) em
+ * vez de duplicar o mapa. */
+export const NOME_COMPLETO_POR_ATRIBUTO = Object.fromEntries(
   Object.entries(ATRIBUTO_POR_NOME_COMPLETO).map(([nome, sigla]) => [sigla, nome]),
 ) as Record<Atributo, string>;
 

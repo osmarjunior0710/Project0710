@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0017
+
+Corrigido um bug de CD/acerto em magia de multiclasse: alguns talentos (Telepático, Tocado pela
+Sombra, Tocado pelas Fadas, Conjurador Ritualista, Iniciado em Magia) concediam magia com o
+modificador/CD errado quando outra classe estava "em foco" na tela — agora usam o atributo certo
+de cada talento, e a magia concedida por eles mostra uma pill com o nome do talento (igual já
+acontecia com classe). Também corrigido o mesmo tipo de erro na CD do popup de Salvaguarda do
+Alvo em personagens com mais de uma classe conjuradora — antes sempre usava a CD da classe ativa
+no momento, mesmo quando a magia era de outra classe/talento.
+
 ## v202610_2028
 
 Psicinético (Psiônico, nível 14) — Telecinese Intensificada: conjurar Telecinese agora tem uma

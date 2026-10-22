@@ -282,6 +282,18 @@ export interface Talento {
    * + atributo de conjuração (Int/Sab/Car), em vez da tela genérica de
    * `concedeProficiencias`. Ver `TalentoOrigemEscolhasStep`. */
   concedeMagiaIniciada?: true;
+  /** `true` só nos talentos cujo atributo de conjuração/CD é "o
+   * atributo que o ASI DESTE PRÓPRIO talento aumentou" (regra do
+   * livro, não um atributo de classe) — Telecinético, Telepático,
+   * Tocado pela Sombra, Tocado pelas Fadas, Conjurador Ritualista,
+   * Envenenador. A escolha feita no passo `asiAtributo` do Level Up
+   * (`LevelUpShell`) é gravada na MESMA gaveta do Resiliente
+   * (`PersonagemSalvo.escolhaAtributoTalentoGeral`, chave = id do
+   * talento) — ver `sdd/sdd-atributo-talento.md`. Dádiva do Ataque
+   * Irresistível tem a mesma regra no livro, mas ainda nem aplica o
+   * próprio ASI (categoria "Dádiva Épica" não passa pelo passo
+   * `asiAtributo`) — fica de fora por ora, entrega própria futura. */
+  usaAtributoProprioAsi?: true;
   /** Texto bruto da coluna "Benefícios" — Fase 2 classifica em
    * Ação/Ação Bônus/Reação/Passiva, quebrando em frases quando o
    * talento tiver múltiplos efeitos (ex: Conjurador Bélico). */
@@ -534,6 +546,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: ['INT', 'SAB', 'CAR'], outro: "Característica Conjuração ou Magia de Pacto" },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['INT', 'SAB', 'CAR'], maximo: 20 },
+    usaAtributoProprioAsi: true,
     efeitoMecanico: { tipo: 'magias-rituais-por-proficiencia' },
     beneficios: "Escolhe magias de 1º círculo com tag Ritual = seu Bônus de Proficiência: sempre preparadas, conjuráveis com qualquer espaço (atributo de conjuração = o atributo aumentado por este talento). Sempre que seu Bônus de Proficiência aumentar depois, pode adicionar mais 1 magia de 1º círculo com Ritual às sempre preparadas. Ritual Rápido: conjura 1 delas no tempo normal (não o de ritual), sem espaço, 1x/Descanso Longo.",
     pagina: 204,
@@ -557,6 +570,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['DES', 'INT'], maximo: 20 },
+    usaAtributoProprioAsi: true,
     beneficios: "Ignora Resistência a dano Venenoso. Proficiência com Kit de Veneno; 1h+50PO fabrica doses = Bônus Prof.; Ação Bônus aplica em arma/munição (dura 1min ou até causar dano). Quem sofre: Salv. Constituição ou 2d8 Venenoso + Envenenado.",
     pagina: 205,
     fonte: "PHB 2024",
@@ -851,6 +865,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['INT', 'SAB', 'CAR'], maximo: 20 },
+    usaAtributoProprioAsi: true,
     efeitoMecanico: { tipo: 'magia-geral-concedida', truques: ['Mãos Mágicas'], magias: [] },
     beneficios: "Aprende Mãos Mágicas (sem V/S, mão invisível, +9m de alcance/distância). Ação Bônus: empurra telecineticamente criatura à vista a 9m (Salv. Força CD 8+mod.+Bônus Prof. ou move 1,5m).",
     pagina: 208,
@@ -863,6 +878,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['INT', 'SAB', 'CAR'], maximo: 20 },
+    usaAtributoProprioAsi: true,
     efeitoMecanico: {
       tipo: 'magia-geral-concedida',
       truques: [],
@@ -879,6 +895,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['INT', 'SAB', 'CAR'], maximo: 20 },
+    usaAtributoProprioAsi: true,
     efeitoMecanico: { tipo: 'magia-escolhida-por-escola', escolas: ['Ilusão', 'Necromancia'], magiaFixa: 'Invisibilidade' },
     beneficios: "Escolhe 1 magia de 1º círculo (Ilusão ou Necromancia): ela + Invisibilidade ficam sempre preparadas, conjuráveis grátis 1x/Descanso Longo cada (ou com espaço depois).",
     pagina: 208,
@@ -891,6 +908,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 4, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['INT', 'SAB', 'CAR'], maximo: 20 },
+    usaAtributoProprioAsi: true,
     efeitoMecanico: { tipo: 'magia-escolhida-por-escola', escolas: ['Adivinhação', 'Encantamento'], magiaFixa: 'Passo Nebuloso' },
     beneficios: "Escolhe 1 magia de 1º círculo (Adivinhação ou Encantamento): ela + Passo Nebuloso ficam sempre preparadas, conjuráveis grátis 1x/Descanso Longo cada (ou com espaço depois).",
     pagina: 208,

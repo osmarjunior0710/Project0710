@@ -603,6 +603,10 @@ export interface ResumoConjuracaoPorClasse {
   classeNome: string;
   resumo: ResumoConjuracao;
   explicacaoAcerto: ExplicacaoCalculo | null;
+  /** Quebra da CD (B8) — opcional só pra não forçar todo chamador
+   * antigo a passar; sem ela, `cdConjuracaoPorClasse` cai no mesmo
+   * fallback de "achado sem explicação" (usa `resumo.cd` puro). */
+  explicacaoCd?: ExplicacaoCalculo | null;
 }
 
 /** Resolve o mod. de acerto de conjuração pela classe DONA da magia
@@ -630,4 +634,23 @@ export function modAcertoConjuracaoPorClasse(
     if (achado) return { mod: achado.resumo.modAtaque, explicacao: achado.explicacaoAcerto };
   }
   return { mod: modFallback, explicacao: explicacaoFallback };
+}
+
+/** Mesma resolução de `modAcertoConjuracaoPorClasse`, mas pra CD
+ * (salvaguarda do alvo) — bug real corrigido (ver
+ * `sdd/sdd-atributo-talento.md`): o popup de Salvaguarda sempre usava
+ * a CD da classe ATIVA (pill), nunca a da classe/talento DONO da
+ * magia — igual o acerto de ataque já tinha sido corrigido antes, mas
+ * a CD ficou de fora dessa correção. */
+export function cdConjuracaoPorClasse(
+  resumosPorClasse: ResumoConjuracaoPorClasse[],
+  classeDonaDaMagia: string | null,
+  cdFallback: number | null,
+  explicacaoCdFallback: ExplicacaoCalculo | null,
+): { cd: number | null; explicacao: ExplicacaoCalculo | null } {
+  if (classeDonaDaMagia) {
+    const achado = resumosPorClasse.find((r) => r.classeNome === classeDonaDaMagia);
+    if (achado) return { cd: achado.resumo.cd, explicacao: achado.explicacaoCd ?? null };
+  }
+  return { cd: cdFallback, explicacao: explicacaoCdFallback };
 }

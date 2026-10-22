@@ -1333,10 +1333,22 @@ export default function LevelUpShell({
           luSteps.includes('talentoMagia') && talentoMagiaAlvo && magiasEscolhidasTalento.length > 0
             ? { [talentoMagiaAlvo.id]: magiasEscolhidasTalento }
             : null,
-        escolhaAtributoTalentoGeral:
-          luSteps.includes('resilienteAtributo') && talentoObjEscolhido && atributoResilienteEscolhido
-            ? { [talentoObjEscolhido.id]: atributoResilienteEscolhido }
-            : null,
+        escolhaAtributoTalentoGeral: (() => {
+          // Mesma gaveta do Resiliente (`escolhaAtributoTalentoGeral`,
+          // chave = id do talento) também guarda, pros talentos com
+          // `usaAtributoProprioAsi`, qual atributo o ASI deste talento
+          // aumentou — ver `sdd/sdd-atributo-talento.md`. Os 2 casos
+          // nunca coincidem no mesmo talento (Resiliente não usa
+          // `concedeAsi`), então não há conflito de escrita.
+          const entradas: Record<string, string> = {};
+          if (luSteps.includes('resilienteAtributo') && talentoObjEscolhido && atributoResilienteEscolhido) {
+            entradas[talentoObjEscolhido.id] = atributoResilienteEscolhido;
+          }
+          if (luSteps.includes('asiAtributo') && talentoObjEscolhido?.usaAtributoProprioAsi && asiEscolhas.length === 1) {
+            entradas[talentoObjEscolhido.id] = asiEscolhas[0];
+          }
+          return Object.keys(entradas).length > 0 ? entradas : null;
+        })(),
         maestriaArmaTalentoEscolhida: luSteps.includes('maestriaArmaTalento') ? maestriaArmaTalentoEscolhida : null,
         maestriaArmaEscolhida: luSteps.includes('maestriaArmaCrescimento') ? maestriaArmaEscolhida : null,
         periciaLivreTalentoEscolhida: luSteps.includes('periciaLivreTalento') ? periciaLivreEscolhida : null,

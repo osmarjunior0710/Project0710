@@ -235,7 +235,7 @@ interface BonusPanelContentProps {
   onAbrirEscolhaTelecineseIntensificada: (dados: { aoConjurarNormal: () => void; aoConjurarSemConcentracao: () => void } | null) => void;
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda, que vive em CombatTab. */
-  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null) => void;
+  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null, classeDonaDaMagia?: string | null) => void;
   /** Colheita Macabra (Necromante, nível 3+) — `true` = personagem tem
    * a característica. Ver `core/necromante.ts`. */
   colheitaMacabraDisponivel: boolean;

@@ -9,6 +9,7 @@ import {
   talentosComEscolhaDeMagiaPendente,
   temRitualRapido,
   CHAVE_RITUAL_RAPIDO,
+  talentoDonoDaMagiaTalentoGeral,
 } from './magiaTalentoGeral';
 import { classes } from '../data/rulesets/dnd2024/classes';
 
@@ -177,5 +178,23 @@ describe('talentosComEscolhaDeMagiaPendente — magias-rituais-por-proficiencia'
       'conjurador-ritualista': ['Alarme', 'Identificar'],
     });
     expect(pendentes).toEqual([]);
+  });
+});
+
+describe('talentoDonoDaMagiaTalentoGeral', () => {
+  it('magia-geral-concedida (Telepático → Detectar Pensamentos)', () => {
+    expect(talentoDonoDaMagiaTalentoGeral('Detectar Pensamentos', ['telepatico'], undefined)?.id).toBe('telepatico');
+  });
+
+  it('magia-escolhida-por-escola: acha tanto a fixa quanto a escolhida', () => {
+    expect(talentoDonoDaMagiaTalentoGeral('Invisibilidade', ['tocado-pela-sombra'], undefined)?.id).toBe('tocado-pela-sombra');
+    expect(
+      talentoDonoDaMagiaTalentoGeral('Névoa Enganosa', ['tocado-pela-sombra'], { 'tocado-pela-sombra': ['Névoa Enganosa'] })?.id,
+    ).toBe('tocado-pela-sombra');
+  });
+
+  it('borda: magia de nenhum talento atual, ou sem talentos, devolve null', () => {
+    expect(talentoDonoDaMagiaTalentoGeral('Bola de Fogo', ['telepatico'], undefined)).toBeNull();
+    expect(talentoDonoDaMagiaTalentoGeral('Detectar Pensamentos', undefined, undefined)).toBeNull();
   });
 });

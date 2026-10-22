@@ -72,22 +72,35 @@ classe ativa não bate com o atributo real do talento (ou quando não existe cla
 
 ## 3. Arquitetura (1 infra, 2 formas de preencher a gaveta)
 
-### 3.1 A gaveta: `Record<string, Atributo>` por talento, genérico
+**Correção feita durante a implementação (CLAUDE §6.2):** a seção 3.1 abaixo propunha um campo
+NOVO (`atributosAsiTalentoEscolhidos`). Ao implementar, achei que a gaveta `escolhaAtributoTalentoGeral`
+(já existente, hoje só usada pelo Resiliente) já tinha exatamente o formato certo
+(`Record<talentoId, Atributo>`) — reaproveitada em vez de criar um campo paralelo (CLAUDE §6.5).
+`atributosResilienteEscolhidos` filtra estritamente por `efeitoMecanico.tipo ===
+'atributo-e-salvaguarda-escolhidos'`, então as novas entradas (outros talentos) convivem sem
+colisão nenhuma — confirmado por teste. O resto da seção (flag `usaAtributoProprioAsi`, o ponto de
+gravação em `LevelUpShell`, `core/conjuracaoDeTalento.ts`) foi implementado como descrito.
 
-Novo campo em `PersonagemSalvo`/`WizardSelection`: `atributosAsiTalentoEscolhidos: Record<string,
-Atributo>` (chave = `talento.id`) — mesmo espírito de `atributosResilienteEscolhidos`
-(`talentoAtributo.ts`), só que genérico pra qualquer talento, não só Resiliente. Resiliente
-CONTINUA com seu próprio campo (não migra agora — funciona, trocar é risco sem ganho, mesmo
-raciocínio já registrado em `Backlog.md` "Contatar Patrono" pra casos parecidos); o campo novo é só
-pros 7 do Grupo 1.
+### 3.1 A gaveta: reaproveitada, não criada
 
-**Novo campo no tipo `Talento`:** `usaAtributoProprioAsi?: true` — marca os 7 do Grupo 1. Em
-`FichaShell.confirmarLevelUp`, quando `resultado.atributosAumentados` tem exatamente 1 atributo
-(sempre o caso pra `escolha-unica`) E o talento escolhido (`talentoGeralEscolhido`/
-`dadivaEpicaEscolhida`) tem essa flag, grava
-`atributosAsiTalentoEscolhidos[id] = atributosAumentados[0]` no mesmo `setSelecao` que já aplica o
-ASI — 1 linha nova no ponto que já existe, não precisa de tela nova (a escolha de QUAL atributo já
-acontece no passo `asiAtributo` do Level Up, que já é obrigatório pra qualquer talento com ASI).
+Campo usado: `PersonagemSalvo.escolhaAtributoTalentoGeral: Record<string, string>` (chave =
+`talento.id`), o mesmo já escrito por `atributosResilienteEscolhidos`/`opcoesAtributoResiliente`
+(`talentoAtributo.ts`). Resiliente CONTINUA com seu próprio consumo (não migra — funciona, trocar
+é risco sem ganho).
+
+**Novo campo no tipo `Talento`:** `usaAtributoProprioAsi?: true` — marcado nos 6 talentos de
+categoria "Geral" do Grupo 1 (Telecinético, Telepático, Tocado pela Sombra, Tocado pelas Fadas,
+Conjurador Ritualista, Envenenador). Em `LevelUpShell`, ao confirmar, quando o passo `asiAtributo`
+rodou E o talento escolhido tem essa flag, grava `escolhaAtributoTalentoGeral[id] =
+asiEscolhas[0]` na MESMA chamada que já grava a escolha do Resiliente — 1 função, 2 casos, sem
+colidir (nunca o mesmo talento tem os dois `efeitoMecanico`s ao mesmo tempo).
+
+**Achado que tirou Dádiva do Ataque Irresistível do alcance desta rodada:** a categoria "Dádiva
+Épica" (Level Up) NUNCA passa pelo passo `asiAtributo` — ela tem seu próprio passo (`dadivaEpica`)
+que só escolhe QUAL dádiva, sem aplicar o ASI dela em lugar nenhum. Ou seja, hoje o talento nem
+soma o "+1 Força ou Destreza" no personagem — bug maior e anterior a este foco, registrado em
+PENDENCIAS.md. Por isso `usaAtributoProprioAsi` NÃO foi marcado nele: não adianta preparar a
+gaveta de atributo pra um ASI que ainda nem existe.
 
 ### 3.2 Resumo de conjuração sem classe (reaproveitado pelos 2 grupos)
 
@@ -102,11 +115,33 @@ do padrão já usado lá).
 
 ### 3.3 Plugando nas magias já concedidas (Grupo 1 com magia + Grupo 2)
 
-`useMagiasEConjuracao.ts` troca `classe: null` por uma `classeNome` sentinela só pra essas fontes:
-`'__talento:' + talentoId + '__'` (ex.: `'__talento:telepatico__'`). `FichaShell.tsx` registra 1
-entrada em `resumosPorClasse` pra cada talento ATIVO que precisa disso (Grupo 1 com atributo já
-escolhido + Grupo 2 com escolha feita), usando `resumoConjuracaoDeTalento` acima —
-`modAcertoConjuracaoPorClasse` já despacha por `classeNome` string sem precisar mudar a função.
+**Correção**: em vez do sentinela opaco `'__talento:' + id + '__'` proposto aqui, usei o NOME DO
+TALENTO direto (ex.: `'Telepático'`) como `classeNome`. Mais simples, reaproveita 100% do
+`PillClasse`/`modAcertoConjuracaoPorClasse` sem precisar de nenhuma tradução — e como efeito
+colateral BOM, a magia concedida por esses talentos agora mostra uma pill com o nome do talento no
+seletor de Combate/Magias (antes não mostrava pill nenhuma, por vir marcada `classe: null`). Novo
+`core/magiaTalentoGeral.ts` `talentoDonoDaMagiaTalentoGeral(nomeMagia, talentosAtuais, escolhas)`
+acha qual talento concedeu uma magia pelo nome. Iniciado em Magia usa 2 sentinelas distintas
+("Iniciado em Magia" / "Iniciado em Magia (Espécie)") porque Origem e Versátil são gavetas
+independentes que podem ter escolhido atributos diferentes. `FichaShell.tsx` monta 1 entrada em
+`resumosPorClasse` por talento ATIVO com atributo já escolhido, usando `resumoConjuracaoDeTalento`
+— `modAcertoConjuracaoPorClasse` despacha por `classeNome` string sem precisar mudar a função.
+
+### 3.3.1 Achado maior corrigido na mesma entrega: CD de Salvaguarda também caía na classe ativa
+
+Rastreando o caminho até o popup, achei que o CD mostrado em `SalvaguardaDoAlvoModal` (tanto em
+`CombatTab.tsx` quanto em `MagiasTab.tsx`) **sempre vinha do `modAcertoConjuracao`/`cdConjuracao`
+da classe ATIVA (pill)** — nunca passava pela classe/talento DONO da magia, mesmo depois que o
+ACERTO de ataque já tinha sido corrigido pra isso (`modAcertoConjuracaoPorClasse`,
+PENDENCIAS.md "Multiclasse — acerto/CD de magia..."). Ou seja: era um bug mais antigo e MAIOR que
+o escopo original deste SDD — afeta qualquer multiclasse com magia de salvaguarda, não só os 8
+talentos. Avisei o Osmar e ele pediu pra corrigir já, dentro deste mesmo foco (ver seção 4).
+
+**Fix:** nova `cdConjuracaoPorClasse` (`magiasPersonagem.ts`), espelha `modAcertoConjuracaoPorClasse`
+só que pra CD. `telaSalvaguarda` (estado em `CombatTab.tsx`/`MagiasTab.tsx`) ganhou o campo
+`classeDonaDaMagia`, propagado por `abrirSalvaguarda`/`abrirSalvaguardaComAviso` e pelos 4
+chamadores que já tinham essa informação em mãos (`useUsarMagiaPainel.tsx`,
+`ReacaoPanelContent.tsx`, e os 2 fluxos internos de `MagiasTab.tsx`).
 
 ### 3.4 Os 3 que ainda não têm mecânica nenhuma (Telecinético/Envenenador/Dádiva do Ataque Irresistível)
 
@@ -142,18 +177,22 @@ do resumo) — função separada e simples, não precisa do `ResumoConjuracao` i
 
 ## 5. Replanejamento (seção 6.2.2) — proposta de entregas
 
-1. **Entrega 1 — infra comum**: gaveta `atributosAsiTalentoEscolhidos`, flag
-   `usaAtributoProprioAsi`, gravação em `confirmarLevelUp`, `core/conjuracaoDeTalento.ts`
-   (`resumoConjuracaoDeTalento` + função separada pro valor puro).
-2. **Entrega 2 — conserta os 5 com magia já concedida**: Iniciado em Magia, Telepático, Tocado pela
-   Sombra, Tocado pelas Fadas, Conjurador Ritualista — troca `classe: null` pela sentinela, registra
-   em `resumosPorClasse`. 1 entrega só (mesmo padrão repetido 5x, baixo risco).
+1. **[x] Entrega 1 — infra comum**: gaveta reaproveitada (`escolhaAtributoTalentoGeral`), flag
+   `usaAtributoProprioAsi`, gravação em `LevelUpShell`, `core/conjuracaoDeTalento.ts`
+   (`resumoConjuracaoDeTalento`).
+2. **[x] Entrega 2 — conserta os 5 com magia já concedida**: Iniciado em Magia, Telepático, Tocado
+   pela Sombra, Tocado pelas Fadas, Conjurador Ritualista — troca `classe: null` pela sentinela
+   (nome do talento), registra em `resumosPorClasse`. Também corrigiu, na mesma entrega, o bug
+   maior achado (seção 3.3.1): CD de Salvaguarda usando a classe ativa em vez da dona da magia,
+   em QUALQUER multiclasse (não só os 8 talentos).
 3. **Entrega 3 — Telecinético**: Empurrão Telecinético (Ação Bônus, CD, popup de salvaguarda —
-   reaproveita `SalvaguardaDoAlvoModal`, seção 6.5).
+   reaproveita `SalvaguardaDoAlvoModal`, seção 6.5). Pendente, registrada em PENDENCIAS.md.
 4. **Entrega 4 — Envenenador**: aplicar veneno (Ação Bônus) + salvaguarda de quem é atingido.
-5. **Entrega 5 — Dádiva do Ataque Irresistível**: dano extra em crítico natural 20 (reaproveitar o
-   fluxo de confirmação de crítico já existente, seção 6.5).
+   Pendente, registrada em PENDENCIAS.md.
+5. **Entrega 5 — Dádiva do Ataque Irresistível**: precisa primeiro aplicar o próprio ASI (não
+   acontece hoje — achado durante a Entrega 1, seção 3.1), depois o dano extra em crítico natural
+   20. Pendente, registrada em PENDENCIAS.md.
 
 Entregas 3-5 são independentes entre si e de prioridade mais baixa (talentos avançados/épicos,
-menos usados) — a 1 e 2 são o conserto de verdade do bug achado; 3-5 são features novas que só
-ficam possíveis depois da infra.
+menos usados) — 1 e 2 eram o conserto de verdade do bug achado e já foram feitas; 3-5 são features
+novas que só ficam possíveis depois da infra, fora do escopo desta rodada.

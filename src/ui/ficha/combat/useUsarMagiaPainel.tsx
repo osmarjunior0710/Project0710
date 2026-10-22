@@ -37,7 +37,7 @@ interface UsarMagiaPainelParams {
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda (CD + atributo + sucesso/falha), que vive em
    * CombatTab (persiste depois do painel fechar). */
-  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null) => void;
+  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null, classeDonaDaMagia?: string | null) => void;
   gastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
   /** Nível do personagem — pro Aprimoramento de Truque (dano escala
    * nos níveis 5/11/17, ver `calcularDanoMagia`). */
@@ -273,7 +273,8 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         p.onDisciplinaPosConjuracaoDisponivel({
           ...resultado.disciplinaPosConjuracao,
           temContextoDeTurno: true,
-          aoResolverSalvaguarda: (aviso) => p.onAbrirSalvaguarda(m, circuloUsado, [aviso, avisoExtra].filter(Boolean).join('\n\n') || null),
+          aoResolverSalvaguarda: (aviso) =>
+            p.onAbrirSalvaguarda(m, circuloUsado, [aviso, avisoExtra].filter(Boolean).join('\n\n') || null, classeDonaDaMagia),
         });
         return;
       }
@@ -368,7 +369,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
     }
     if (resultado.mecanica === 'salvaguarda') {
       p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
-      p.onAbrirSalvaguarda(m, circuloUsado, avisoExtra);
+      p.onAbrirSalvaguarda(m, circuloUsado, avisoExtra, classeDonaDaMagia);
       return;
     }
     if (resultado.rollCura) {

@@ -49,7 +49,7 @@ interface AcaoPanelContentProps {
    * de Salvaguarda (CD + atributo + sucesso/falha), que vive em
    * CombatTab (persiste depois do painel fechar). `circuloUsado` é
    * pro upcast (igual `conjurarMagia` já calcula). */
-  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null) => void;
+  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null, classeDonaDaMagia?: string | null) => void;
   gastarSlotCirculo: (circulo: number, classeNome: string) => boolean;
   /** Aplica cura direto no PV do personagem ("Me curar", ver
    * `RollDadosOptions.confirmarAlvoCura`) — usado só por Mãos

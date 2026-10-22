@@ -5,6 +5,7 @@ import {
   poolDescobertasMagicas,
   cdConjuracao,
   modAcertoConjuracaoPorClasse,
+  cdConjuracaoPorClasse,
   modAcertoConjuracao,
   resumoConjuracao,
   explicarModAcertoConjuracao,
@@ -424,6 +425,22 @@ describe('modAcertoConjuracaoPorClasse (multiclasse — acerto/CD pela classe do
 
   it('classeDonaDaMagia null (magia de espécie/talento, sem dono ambíguo): cai no fallback', () => {
     expect(modAcertoConjuracaoPorClasse(resumosPorClasse, null, 11, null).mod).toBe(11);
+  });
+});
+
+describe('cdConjuracaoPorClasse (mesmo bug do acerto, só que na CD de salvaguarda)', () => {
+  const resumosPorClasse = [
+    { classeNome: 'Mago', resumo: { atributoNome: 'Inteligência', atributo: 'INT', modAtributo: 5, cd: 19, modAtaque: 11 } as const, explicacaoAcerto: null },
+    { classeNome: 'Bardo', resumo: { atributoNome: 'Carisma', atributo: 'CAR', modAtributo: 1, cd: 13, modAtaque: 5 } as const, explicacaoAcerto: null },
+  ];
+
+  it('classe encontrada: usa a CD dessa classe, não o fallback', () => {
+    expect(cdConjuracaoPorClasse(resumosPorClasse, 'Bardo', 17, null).cd).toBe(13);
+  });
+
+  it('borda: classe não encontrada (ou classeDonaDaMagia null) cai no fallback', () => {
+    expect(cdConjuracaoPorClasse(resumosPorClasse, 'Bruxo', 17, null).cd).toBe(17);
+    expect(cdConjuracaoPorClasse(resumosPorClasse, null, 17, null).cd).toBe(17);
   });
 });
 

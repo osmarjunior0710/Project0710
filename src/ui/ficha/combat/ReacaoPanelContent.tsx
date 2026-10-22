@@ -34,7 +34,7 @@ interface ReacaoPanelContentProps {
    * de Salvaguarda (CD + atributo + sucesso/falha), que vive em
    * CombatTab. Reação nunca faz upcast, então `circuloUsado` é sempre
    * `magia.circulo`. */
-  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null) => void;
+  onAbrirSalvaguarda: (magia: Magia, circuloUsado: number, avisoDisciplina?: string | null, classeDonaDaMagia?: string | null) => void;
   /** `classeNome` opcional — Reação sempre gasta da classe ATIVA (sem
    * ponte de Magia de Pacto ainda, ver PENDENCIAS.md "Painel de Reação
    * ainda usa a lista plana antiga"), então quem chama pode omitir. */
@@ -303,7 +303,7 @@ export default function ReacaoPanelContent({
         onDisciplinaPosConjuracaoDisponivel({
           ...resultado.disciplinaPosConjuracao,
           temContextoDeTurno: true,
-          aoResolverSalvaguarda: (aviso) => onAbrirSalvaguarda(m, circuloReal, aviso),
+          aoResolverSalvaguarda: (aviso) => onAbrirSalvaguarda(m, circuloReal, aviso, classeDonaDaMagia),
         });
         return;
       }
@@ -401,7 +401,7 @@ export default function ReacaoPanelContent({
     }
     if (resultado.mecanica === 'salvaguarda') {
       onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
-      onAbrirSalvaguarda(m, m.circulo === 0 ? m.circulo : circuloUsado);
+      onAbrirSalvaguarda(m, m.circulo === 0 ? m.circulo : circuloUsado, null, classeDonaDaMagia);
       return;
     }
     if (resultado.rollCura) {
