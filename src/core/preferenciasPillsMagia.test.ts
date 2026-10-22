@@ -17,6 +17,7 @@ describe('normalizarPreferenciasPillsMagia', () => {
     expect(PREFERENCIAS_PILLS_MAGIA_PADRAO.ataqueOuSalvaguarda).toBe(false);
     expect(PREFERENCIAS_PILLS_MAGIA_PADRAO.duracao).toBe(false);
     expect(PREFERENCIAS_PILLS_MAGIA_PADRAO.tipoAcao).toBe(false);
+    expect(PREFERENCIAS_PILLS_MAGIA_PADRAO.atributoConjuracao).toBe(false);
   });
 
   it('respeita um valor salvo válido', () => {

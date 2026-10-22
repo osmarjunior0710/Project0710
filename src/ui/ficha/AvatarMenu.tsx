@@ -113,7 +113,12 @@ export default function AvatarMenu({
   // por conta (ver `core/preferenciasPillsMagia.ts`).
   const pillsMagia = [
     { chave: 'circulo' as const, label: 'Círculo', desc: 'Mostra o círculo da magia (ou "Truque").' },
-    { chave: 'classe' as const, label: 'Classe', desc: 'Mostra a classe de onde a magia veio.' },
+    { chave: 'classe' as const, label: 'Classe', desc: 'Mostra a classe (ou talento) de onde a magia veio.' },
+    {
+      chave: 'atributoConjuracao' as const,
+      label: 'Atributo de Conjuração',
+      desc: 'Mostra o atributo (sigla) que essa magia usa pra CD/acerto — útil quando não é óbvio pela classe/talento.',
+    },
     { chave: 'escola' as const, label: 'Escola', desc: 'Mostra a escola de magia (Evocação, Ilusão, etc.).' },
     { chave: 'alcance' as const, label: 'Distância', desc: 'Mostra o alcance da magia.' },
     { chave: 'componenteV' as const, label: 'Componente Verbal', desc: 'Mostra quando a magia exige um componente Verbal.' },

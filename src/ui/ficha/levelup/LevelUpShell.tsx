@@ -114,6 +114,11 @@ interface LevelUpShellProps {
     atributosAumentados: Atributo[] | null;
     talentoGeralEscolhido: string | null;
     dadivaEpicaEscolhida: string | null;
+    /** +1 no atributo embutido na Dádiva Épica escolhida (bug
+     * corrigido, ver passo `dadivaEpicaAtributo`) — separado de
+     * `atributosAumentados` porque nível 19 pode ter os dois ASIs
+     * (talento normal + Dádiva Épica) no mesmo Level Up. */
+    atributosAumentadosDadiva: Atributo[] | null;
     /** Só os círculos que MUDARAM nesse level-up — escolha inicial de
      * um círculo novo, e/ou 1 troca de um círculo já conhecido (regra
      * real permite os dois no mesmo level-up). `null` = nada mudou. */
@@ -308,6 +313,7 @@ type LuStep =
   | 'maestriaArmaTalento'
   | 'maestriaArmaCrescimento'
   | 'dadivaEpica'
+  | 'dadivaEpicaAtributo'
   | 'arcanaMistica'
   | 'iniciadoEmMagia'
   | 'maestriaDeMagias'
@@ -494,9 +500,27 @@ export default function LevelUpShell({
     (especialistaDisparaAgora ? 2 : 0) +
     (talentoObjEscolhido?.efeitoMecanico?.tipo === 'pericia-livre-mais-especializacao' ? 1 : 0);
   // Dádiva Épica (nível 19) — mesma mecânica de "Talento Geral" do
-  // passo `asi`, só filtrada por categoria, sem aplicar ASI (Dádivas
-  // Épicas não concedem Aumento de Atributo).
+  // passo `asi`, só filtrada por categoria. Bug corrigido (2026-10,
+  // ver sdd/sdd-atributo-talento.md): as 12 Dádivas Épicas TÊM "+1 num
+  // atributo" embutido no texto (`concedeAsi.tipo !== 'nenhum'` em
+  // todas), mas isso nunca era aplicado — passo próprio
+  // `dadivaEpicaAtributo` (paralelo a `asiAtributo`, nunca o MESMO
+  // passo: nível 19 pode ter os dois ASIs no mesmo Level Up, escolhas
+  // independentes).
   const [dadivaEpicaEscolhida, setDadivaEpicaEscolhida] = useState<string | null>(null);
+  const dadivaEpicaObjEscolhida = dadivaEpicaEscolhida ? (talentos.find((t) => t.id === dadivaEpicaEscolhida) ?? null) : null;
+  const precisaEscolherAtributoDaDadiva = dadivaEpicaObjEscolhida !== null && dadivaEpicaObjEscolhida.concedeAsi.tipo !== 'nenhum';
+  const [dadivaEpicaAsiEscolhas, setDadivaEpicaAsiEscolhas] = useState<Atributo[]>([]);
+  /** Mesmo espírito de `aplicarAsiDoTalento`, mas pra Dádiva Épica —
+   * todas as 12 são `concedeAsi.tipo === 'escolha-unica'` hoje, nunca
+   * `distribuir-dois`, mas a função fica genérica igual a irmã. */
+  function aplicarAsiDaDadiva(t: (typeof talentos)[number]) {
+    if (t.concedeAsi.tipo === 'nenhum' || t.concedeAsi.tipo === 'distribuir-dois') {
+      setDadivaEpicaAsiEscolhas([]);
+      return;
+    }
+    setDadivaEpicaAsiEscolhas(t.concedeAsi.atributos.length === 1 ? [t.concedeAsi.atributos[0]] : []);
+  }
   // Arcana Mística (níveis 11/13/15/17) — o círculo novo é o que
   // aparece em `novoNivel` mas não em `personagem.nivel` (a diferença
   // entre os dois nunca é mais de 1 círculo, dado o espaçamento real
@@ -747,6 +771,7 @@ export default function LevelUpShell({
   // Bônus de Proficiência, não os níveis de Aumento de Atributo.
   if (precisaCrescerMagiaRitual) luSteps.push('talentoMagia');
   if (niveisComDadivaEpica(classe).includes(novoNivel)) luSteps.push('dadivaEpica');
+  if (precisaEscolherAtributoDaDadiva) luSteps.push('dadivaEpicaAtributo');
   // Também aparece em qualquer level-up seguinte (não só quando um
   // círculo novo desbloqueia) se o personagem já tiver pelo menos 1
   // arcanum escolhido — regra real permite trocar a qualquer momento.
@@ -1112,6 +1137,7 @@ export default function LevelUpShell({
     maestriaArmaTalento: 'Arma (Mestre das Armas)',
     maestriaArmaCrescimento: 'Maestria em Arma',
     dadivaEpica: 'Dádiva Épica',
+    dadivaEpicaAtributo: 'Atributo da Dádiva',
     arcanaMistica: 'Arcana Mística',
     iniciadoEmMagia: 'Iniciado em Magia',
     maestriaDeMagias: 'Maestria de Magias',
@@ -1275,6 +1301,16 @@ export default function LevelUpShell({
         return;
       }
     }
+    if (step === 'dadivaEpicaAtributo') {
+      if (dadivaEpicaObjEscolhida && dadivaEpicaObjEscolhida.concedeAsi.tipo === 'distribuir-dois' && dadivaEpicaAsiEscolhas.length < PONTOS_ASI) {
+        setAviso(`Distribua os ${PONTOS_ASI} pontos da Dádiva Épica antes de avançar.`);
+        return;
+      }
+      if (dadivaEpicaObjEscolhida && dadivaEpicaObjEscolhida.concedeAsi.tipo === 'escolha-unica' && dadivaEpicaAsiEscolhas.length === 0) {
+        setAviso('Escolha o atributo da Dádiva Épica antes de avançar.');
+        return;
+      }
+    }
     if (step === 'talentoMagia' && magiasEscolhidasTalento.length < maxMagiasTalento) {
       setAviso(
         maxMagiasTalento > 1
@@ -1320,6 +1356,11 @@ export default function LevelUpShell({
         atributosAumentados: luSteps.includes('asi') && asiEscolhas.length > 0 ? asiEscolhas : null,
         talentoGeralEscolhido: luSteps.includes('asi') ? talentoEscolhido : null,
         dadivaEpicaEscolhida: luSteps.includes('dadivaEpica') ? dadivaEpicaEscolhida : null,
+        // Bug corrigido (2026-10): as 12 Dádivas Épicas têm "+1 num
+        // atributo" embutido, mas nunca era aplicado — ver o novo passo
+        // `dadivaEpicaAtributo` acima.
+        atributosAumentadosDadiva:
+          luSteps.includes('dadivaEpicaAtributo') && dadivaEpicaAsiEscolhas.length > 0 ? dadivaEpicaAsiEscolhas : null,
         arcanaMisticaAlteracoes:
           luSteps.includes('arcanaMistica') && Object.keys(arcanaMisticaAlteracoesPendentes).length > 0
             ? arcanaMisticaAlteracoesPendentes
@@ -1346,6 +1387,13 @@ export default function LevelUpShell({
           }
           if (luSteps.includes('asiAtributo') && talentoObjEscolhido?.usaAtributoProprioAsi && asiEscolhas.length === 1) {
             entradas[talentoObjEscolhido.id] = asiEscolhas[0];
+          }
+          if (
+            luSteps.includes('dadivaEpicaAtributo') &&
+            dadivaEpicaObjEscolhida?.usaAtributoProprioAsi &&
+            dadivaEpicaAsiEscolhas.length === 1
+          ) {
+            entradas[dadivaEpicaObjEscolhida.id] = dadivaEpicaAsiEscolhas[0];
           }
           return Object.keys(entradas).length > 0 ? entradas : null;
         })(),
@@ -2413,8 +2461,40 @@ export default function LevelUpShell({
               onSelecionar={(id) => {
                 if (id === dadivaEpicaEscolhida) return;
                 setDadivaEpicaEscolhida(id);
+                const t = talentos.find((x) => x.id === id);
+                if (t) aplicarAsiDaDadiva(t);
               }}
             />
+          </>
+        )}
+
+        {step === 'dadivaEpicaAtributo' && dadivaEpicaObjEscolhida && (
+          <>
+            <div className="section-title">{dadivaEpicaObjEscolhida.nome}</div>
+            {dadivaEpicaObjEscolhida.concedeAsi.tipo === 'escolha-unica' && (
+              <>
+                <div className="label" style={{ marginBottom: 10 }}>
+                  {dadivaEpicaObjEscolhida.concedeAsi.atributos.length > 1
+                    ? `${dadivaEpicaObjEscolhida.nome} dá +1 num desses atributos, à sua escolha.`
+                    : `${dadivaEpicaObjEscolhida.nome} dá +1 nesse atributo.`}
+                </div>
+                {dadivaEpicaObjEscolhida.concedeAsi.atributos.map((a) => {
+                  const base = atributosAtuais[a] ?? 10;
+                  const maximo = dadivaEpicaObjEscolhida.concedeAsi.tipo !== 'nenhum' ? dadivaEpicaObjEscolhida.concedeAsi.maximo : 30;
+                  return (
+                    <div
+                      key={a}
+                      className={`opt-card ${dadivaEpicaAsiEscolhas[0] === a ? 'selected' : ''}`}
+                      onClick={() => setDadivaEpicaAsiEscolhas([a])}
+                    >
+                      <div className="opt-card-name">
+                        {a} {base} → {Math.min(base + 1, maximo)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
           </>
         )}
 

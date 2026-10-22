@@ -765,7 +765,7 @@ export default function ReacaoPanelContent({
                         {semEspaco && <span style={{ color: 'var(--text-faint)', fontSize: 11 }}> · sem espaço disponível</span>}
                       </span>
                       <span style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 4, maxWidth: '55%' }}>
-                        <PillsMagia magia={m} classe={classe} preferencias={preferenciasPillsMagia} />
+                        <PillsMagia magia={m} classe={classe} resumosPorClasse={resumosPorClasse} preferencias={preferenciasPillsMagia} />
                       </span>
                     </div>
                   );

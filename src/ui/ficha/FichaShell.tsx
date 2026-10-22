@@ -1296,7 +1296,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     temTelecinesePoderoso,
   });
   const modAcertoConjuracao = calcularModAcertoConjuracao(selecao, classe, nivelTotalAtual);
-  const resumoConjuracao = calcularResumoConjuracao(selecao, classe, nivelTotalAtual);
   const explicacaoAcertoConjuracao = explicarModAcertoConjuracao(selecao, classe, nivelTotalAtual);
   const explicacaoCdConjuracao = explicarCdConjuracao(selecao, classe, nivelTotalAtual);
   // Entrega 5c (Multiclasse, ver EmDev.md) — CD/Ataque Mágico dependem
@@ -3179,6 +3178,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     atributosAumentados: Atributo[] | null;
     talentoGeralEscolhido: string | null;
     dadivaEpicaEscolhida: string | null;
+    /** +1 no atributo embutido na Dádiva Épica escolhida (bug
+     * corrigido, ver `sdd/sdd-atributo-talento.md`) — separado de
+     * `atributosAumentados` porque nível 19 pode ter os dois ASIs no
+     * mesmo Level Up. */
+    atributosAumentadosDadiva: Atributo[] | null;
     arcanaMisticaAlteracoes: Record<number, string> | null;
     maestriaDeMagiasEscolhida: Record<number, string> | null;
     assinaturaMagicaEscolhida: string[] | null;
@@ -3200,9 +3204,20 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // resolvida em `classeParaLevelUp` (via `EscolherClasseLevelUp` ou
     // a única opção possível), nunca mais "a classe ativa no pill".
     const classeAlvo = classeParaLevelUp ?? classesAtual[0]?.classe ?? '';
-    const novosAtributos = resultado.atributosAumentados
-      ? aumentarAtributos(selecao.atributos, resultado.atributosAumentados)
-      : null;
+    // Combina os 2 ASIs possíveis no mesmo Level Up (talento normal +
+    // Dádiva Épica, só coincidem no nível 19) — aplicados em sequência,
+    // nunca um sobrescrevendo o outro.
+    let atributosAtualizados = selecao.atributos;
+    let algumAsiAplicado = false;
+    if (resultado.atributosAumentados) {
+      atributosAtualizados = aumentarAtributos(atributosAtualizados, resultado.atributosAumentados);
+      algumAsiAplicado = true;
+    }
+    if (resultado.atributosAumentadosDadiva) {
+      atributosAtualizados = aumentarAtributos(atributosAtualizados, resultado.atributosAumentadosDadiva);
+      algumAsiAplicado = true;
+    }
+    const novosAtributos = algumAsiAplicado ? atributosAtualizados : null;
     if (novosAtributos) setSelecao((prev) => ({ ...prev, atributos: novosAtributos }));
     // Grava o nível/subclasse novos na classe ALVO dentro de
     // `classesAtual` — cria a entrada se for a primeira vez que essa
@@ -3881,7 +3896,6 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             espacosParaConjurar={espacosParaConjurar}
             onGastarSlotCirculo={gastarSlotCirculo}
             modAcertoConjuracao={modAcertoConjuracao}
-            resumo={resumoConjuracao}
             resumosPorClasse={resumosPorClasseComTalentos}
             explicacaoAcertoConjuracao={explicacaoAcertoConjuracao}
             explicacaoCdConjuracao={explicacaoCdConjuracao}

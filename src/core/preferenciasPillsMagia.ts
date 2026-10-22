@@ -21,6 +21,13 @@ export interface PreferenciasPillsMagia {
   ataqueOuSalvaguarda: boolean;
   duracao: boolean;
   tipoAcao: boolean;
+  /** Atributo de conjuração usado por ESTA magia especificamente
+   * (sigla de 3 letras, ex.: "SAB") — diferente do pill de Classe
+   * (que mostra a fonte, não o atributo). Existe principalmente pra
+   * fontes cujo atributo não é óbvio pela classe/talento (ver
+   * `sdd/sdd-atributo-talento.md`); padrão desligado, pra não mudar a
+   * tela de quem não pediu. */
+  atributoConjuracao: boolean;
 }
 
 export const PREFERENCIAS_PILLS_MAGIA_PADRAO: PreferenciasPillsMagia = {
@@ -34,6 +41,7 @@ export const PREFERENCIAS_PILLS_MAGIA_PADRAO: PreferenciasPillsMagia = {
   ataqueOuSalvaguarda: false,
   duracao: false,
   tipoAcao: false,
+  atributoConjuracao: false,
 };
 
 /** Aceita qualquer coisa vinda do armazenamento: campo ausente, de tipo

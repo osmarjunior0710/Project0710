@@ -6,6 +6,7 @@ import {
   type EspacoDeMagiaAtivo,
   type MagiaComClasseOpcional,
   type PoolDePonte,
+  type ResumoConjuracaoPorClasse,
 } from '../../../core/magiasPersonagem';
 import { circuloGratisMaestria } from '../../../core/maestriaDeMagias';
 import { circuloGratisAssinatura } from '../../../core/assinaturaMagica';
@@ -60,6 +61,9 @@ interface SelecionarMagiaShellProps {
    * ligada: essa tela já agrupa por círculo (cabeçalho de cada grupo),
    * repetir na linha seria redundante. */
   preferenciasPillsMagia: PreferenciasPillsMagia;
+  /** Pra achar o atributo de conjuração de cada magia (pill "Atributo
+   * de Conjuração") — ver `sdd/sdd-atributo-talento.md`. */
+  resumosPorClasse: ResumoConjuracaoPorClasse[];
 }
 
 /** Tela cheia (Tela 2 do fluxo "Usar Magia") — lista Truques + Magias
@@ -88,6 +92,7 @@ export default function SelecionarMagiaShell({
   onEscolherTruque,
   onEscolherMagia,
   preferenciasPillsMagia,
+  resumosPorClasse,
 }: SelecionarMagiaShellProps) {
   const grupos = agruparMagiasComClassePorCirculo([...truques, ...magiasPreparadas]);
   const preferenciasSemCirculo = { ...preferenciasPillsMagia, circulo: false };
@@ -129,7 +134,7 @@ export default function SelecionarMagiaShell({
                         )}
                       </div>
                       <div className={localStyles.checkLabelLinha2}>
-                        <PillsMagia magia={m} classe={classe} preferencias={preferenciasSemCirculo} />
+                        <PillsMagia magia={m} classe={classe} resumosPorClasse={resumosPorClasse} preferencias={preferenciasSemCirculo} />
                       </div>
                     </div>
                   </div>

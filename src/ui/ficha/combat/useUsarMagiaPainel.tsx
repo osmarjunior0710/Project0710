@@ -421,6 +421,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
           setTelaMagia({ magia: m, circulos: circulosDisponiveis, classeDonaDaMagia: classe })
         }
         preferenciasPillsMagia={p.preferenciasPillsMagia}
+        resumosPorClasse={p.resumosPorClasse}
       />
     ) : telaMagia ? (
       <EscolherCirculoShell

@@ -192,3 +192,65 @@ describe('sortearLevelUpRapido — Psiônico (Disciplinas Psiônicas)', () => {
   });
 });
 
+describe('sortearLevelUpRapido — Dádiva Épica aplica o próprio ASI (bug corrigido)', () => {
+  it('nível 19 do Guerreiro sorteia uma Dádiva Épica E o +1 de atributo dela, dentro do máximo 30', () => {
+    const resultado = sortearLevelUpRapido({
+      classe: guerreiro,
+      personagem: { nivel: 18, pvMax: 100, dadoVida: 'd10', conMod: 2, subclasse: null, estiloDeLuta: 'Duelismo', bonusPvPorNivel: 0 },
+      truquesAtuais: [],
+      magiasPreparadasAtuais: [],
+      livroDeMagiasAtuais: [],
+      invocacoesMisticasAtuais: [],
+      invocacoesTruqueVinculadoAtuais: {},
+      arcanaMisticaAtuais: {},
+      periciasEspecialistaAtuais: [],
+      periciasProficientesDoPersonagem: [],
+      periciasSubclasseBonusAtuais: [],
+      magiasDescobertasMagicasAtuais: [],
+      atributosFinaisAtuais: { ...atributosFinaisNeutros },
+      talentosGeraisAtuais: [],
+      conhecimentoPrimordialPericiaAtual: null,
+      academicoPericiaAtual: null,
+      maestriaDeMagiasAtuais: {},
+      assinaturaMagicaAtuais: [],
+    });
+    expect(resultado.dadivaEpicaEscolhida).not.toBeNull();
+    expect(resultado.atributosAumentadosDadiva).toHaveLength(1);
+  });
+
+  it('borda: Dádiva do Ataque Irresistível sorteada grava o atributo escolhido na gaveta (precisa lembrar qual)', () => {
+    // Sorteia até achar a Dádiva do Ataque Irresistível (prerequisito nenhum, sempre elegível) —
+    // repete algumas vezes pra não depender de 1 sorteio só com baixa probabilidade.
+    let achou = false;
+    for (let i = 0; i < 50 && !achou; i++) {
+      const resultado = sortearLevelUpRapido({
+        classe: guerreiro,
+        personagem: { nivel: 18, pvMax: 100, dadoVida: 'd10', conMod: 2, subclasse: null, estiloDeLuta: 'Duelismo', bonusPvPorNivel: 0 },
+        truquesAtuais: [],
+        magiasPreparadasAtuais: [],
+        livroDeMagiasAtuais: [],
+        invocacoesMisticasAtuais: [],
+        invocacoesTruqueVinculadoAtuais: {},
+        arcanaMisticaAtuais: {},
+        periciasEspecialistaAtuais: [],
+        periciasProficientesDoPersonagem: [],
+        periciasSubclasseBonusAtuais: [],
+        magiasDescobertasMagicasAtuais: [],
+        atributosFinaisAtuais: { ...atributosFinaisNeutros },
+        talentosGeraisAtuais: [],
+        conhecimentoPrimordialPericiaAtual: null,
+        academicoPericiaAtual: null,
+        maestriaDeMagiasAtuais: {},
+        assinaturaMagicaAtuais: [],
+      });
+      if (resultado.dadivaEpicaEscolhida === 'dadiva-do-ataque-irresistivel') {
+        achou = true;
+        expect(resultado.escolhaAtributoTalentoGeral).toEqual({
+          'dadiva-do-ataque-irresistivel': resultado.atributosAumentadosDadiva?.[0],
+        });
+      }
+    }
+    expect(achou).toBe(true);
+  });
+});
+

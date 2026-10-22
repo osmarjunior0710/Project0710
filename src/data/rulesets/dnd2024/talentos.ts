@@ -282,17 +282,15 @@ export interface Talento {
    * + atributo de conjuração (Int/Sab/Car), em vez da tela genérica de
    * `concedeProficiencias`. Ver `TalentoOrigemEscolhasStep`. */
   concedeMagiaIniciada?: true;
-  /** `true` só nos talentos cujo atributo de conjuração/CD é "o
+  /** `true` só nos talentos cujo atributo de conjuração/CD/efeito é "o
    * atributo que o ASI DESTE PRÓPRIO talento aumentou" (regra do
    * livro, não um atributo de classe) — Telecinético, Telepático,
    * Tocado pela Sombra, Tocado pelas Fadas, Conjurador Ritualista,
-   * Envenenador. A escolha feita no passo `asiAtributo` do Level Up
-   * (`LevelUpShell`) é gravada na MESMA gaveta do Resiliente
-   * (`PersonagemSalvo.escolhaAtributoTalentoGeral`, chave = id do
-   * talento) — ver `sdd/sdd-atributo-talento.md`. Dádiva do Ataque
-   * Irresistível tem a mesma regra no livro, mas ainda nem aplica o
-   * próprio ASI (categoria "Dádiva Épica" não passa pelo passo
-   * `asiAtributo`) — fica de fora por ora, entrega própria futura. */
+   * Envenenador, Dádiva do Ataque Irresistível. A escolha feita no
+   * passo `asiAtributo` (talento normal) ou `dadivaEpicaAtributo`
+   * (Dádiva Épica) do Level Up (`LevelUpShell`) é gravada na MESMA
+   * gaveta do Resiliente (`PersonagemSalvo.escolhaAtributoTalentoGeral`,
+   * chave = id do talento) — ver `sdd/sdd-atributo-talento.md`. */
   usaAtributoProprioAsi?: true;
   /** Texto bruto da coluna "Benefícios" — Fase 2 classifica em
    * Ação/Ação Bônus/Reação/Passiva, quebrando em frases quando o
@@ -1049,6 +1047,7 @@ export const talentos: Talento[] = [
     repetivel: false,
     prerequisitos: { nivelMinimo: 19, atributosMinimos: [], outro: null },
     concedeAsi: { tipo: 'escolha-unica', atributos: ['FOR', 'DES'], maximo: 30 },
+    usaAtributoProprioAsi: true,
     beneficios: "+1 Força ou Destreza (máx. 30). Dano Contundente/Cortante/Perfurante sempre ignora Resistência. Tirou 20 no ataque: dano extra = valor do atributo aumentado.",
     pagina: 211,
     fonte: "PHB 2024",

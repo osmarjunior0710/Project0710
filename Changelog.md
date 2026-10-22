@@ -5,6 +5,16 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1503
+
+Corrigido bug grande: as 12 "Dádivas Épicas" (talentos de nível 19+) tinham "+1 num atributo"
+no texto, mas isso nunca era aplicado no personagem — agora o Level Up pede o atributo igual já
+pedia pros outros talentos. Aba Magias reorganizada: o topo agora mostra 1 bloco "principal" de
+atributo de conjuração sempre visível, e qualquer fonte extra (2ª classe conjuradora, ou talento
+como Telepático) entra num grupo "Outros atributos de conjuração" que pode abrir/fechar (lembra a
+preferência). Nova pill opcional "Atributo de Conjuração" (sigla de 3 letras) nas magias, ligável
+nas configurações de Pills do Perfil (desligada por padrão).
+
 ## v202610_0017
 
 Corrigido um bug de CD/acerto em magia de multiclasse: alguns talentos (Telepático, Tocado pela

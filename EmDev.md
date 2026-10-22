@@ -384,5 +384,38 @@ aparecer sem nenhuma marcação.
 
 Testado: `npx tsc -b`, `npm test -- --run` (1095 testes) e `npm run build`, todos limpos.
 
+### Extensão do foco — 2 pedidos novos do Osmar, ainda dentro do mesmo foco
+
+**1. 12 Dádivas Épicas não aplicavam o próprio ASI** (achado ao revisar Dádiva do Ataque
+Irresistível pro item anterior — generalizou pra todas as 12, não só ela):
+- [x] Novo passo `dadivaEpicaAtributo` no Level Up (`LevelUpShell`), paralelo a `asiAtributo` —
+  precisa ser separado porque nível 19 pode ter os 2 ASIs (talento normal + Dádiva Épica) no
+  mesmo Level Up. Aplica o +1 pras 12 Dádivas; só Dádiva do Ataque Irresistível
+  (`usaAtributoProprioAsi`) também grava na gaveta `escolhaAtributoTalentoGeral` (precisa lembrar
+  QUAL atributo pro "dano extra = valor do atributo").
+- [x] `core/levelUpAleatorio.ts` (Level Up Rápido/ferramenta de teste) e `FichaShell.confirmarLevelUp`
+  também corrigidos — os 2 ASIs possíveis se combinam sem se sobrescrever.
+
+**2. Aba Magias — bloco de atributo reestruturado + nova pill**
+- [x] Bug lateral achado: o bloco do topo só mostrava 1 linha por fonte quando havia 2+ fontes
+  (`.length > 1`); com exatamente 1 fonte (agora podendo ser um talento), caía no "resumo único"
+  que lia a classe ATIVA — um personagem só com Telepático (sem classe conjuradora) não via nada.
+- [x] Reestruturado: bloco "principal" sempre visível (classe ativa se ela conjurar, senão a 1ª
+  fonte da lista) + grupo colapsável "Outros atributos de conjuração (N)" pra qualquer fonte
+  extra (2ª classe real OU talento — tratadas igual, decisão explícita do Osmar). Usa
+  `useColapsavel` (lembra por aparelho), mesmo padrão já usado nas outras seções da aba.
+- [x] Nova pill "Atributo de Conjuração" (sigla de 3 letras) em `PreferenciasPillsMagia`
+  (`atributoConjuracao`, padrão desligado), configurável no menu do avatar — adicionada nos 4
+  pontos onde a pill de Classe já é dinâmica por item (SelecionarMagiaShell, ReacaoPanelContent,
+  as 2 listas "Magias Preparadas"/"Truques" com `classeDoItem` em MagiasTab). As ~18 listas de 1
+  fonte fixa só (Descobertas Mágicas, Pacto do Ínfero etc.) ficaram de fora por ora — prioridade
+  menor, já mostram a classe no cabeçalho da seção.
+- [x] Prop `resumo` (singular) do `MagiasTab` ficou morta depois da reestruturação — removida
+  (junto com `resumoConjuracao` em `FichaShell.tsx`).
+
+Testado de novo depois dos 2 itens: `npx tsc -b`, `npm test -- --run` (1097 testes) e
+`npm run build`, todos limpos. **Não testado visualmente no navegador** (sem ferramenta de
+browser nesta sessão) — ver passo a passo na resposta pro Osmar.
+
 Próximo passo: fechar este foco (postmortem + Backlog/Pendências) e retomar o foco Psiônico
 pausado (E6a-b-d e E7 Talentos Selvagens, SDD já em `sdd/sdd-talentos-selvagens.md`).

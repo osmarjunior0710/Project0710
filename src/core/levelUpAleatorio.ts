@@ -112,6 +112,10 @@ export interface ResultadoLevelUpRapido {
   atributosAumentados: Atributo[] | null;
   talentoGeralEscolhido: string | null;
   dadivaEpicaEscolhida: string | null;
+  /** +1 no atributo embutido na Dádiva Épica sorteada (bug corrigido,
+   * ver `LevelUpShell` passo `dadivaEpicaAtributo`) — sorteado com
+   * `sortearAsiDoTalento`, mesma função do talento normal acima. */
+  atributosAumentadosDadiva: Atributo[] | null;
   arcanaMisticaAlteracoes: Record<number, string> | null;
   /** Level Up Rápido nunca troca a magia de Iniciado em Magia (não faz
    * sentido sortear uma troca opcional) — sempre `null` aqui. */
@@ -123,9 +127,12 @@ export interface ResultadoLevelUpRapido {
    * manualmente num level-up de verdade. */
   escolhaMagiaTalentoGeral: Record<string, string[]> | null;
   /** Level Up Rápido nunca sorteia o atributo do Resiliente (mesma
-   * lógica de `escolhaMagiaTalentoGeral` acima) — sempre `null` aqui.
-   * Se o talento sorteado for Resiliente, o personagem fica sem o +1/
-   * proficiência de Salvaguarda até escolher manualmente depois. */
+   * lógica de `escolhaMagiaTalentoGeral` acima) — fica `null` nesse
+   * caso (sem o +1/proficiência de Salvaguarda até escolher
+   * manualmente depois). Preenchido, porém, quando a Dádiva Épica
+   * sorteada tem `usaAtributoProprioAsi` (Dádiva do Ataque
+   * Irresistível) — aí o atributo sorteado precisa ser lembrado, não
+   * só aplicado. */
   escolhaAtributoTalentoGeral: Record<string, string> | null;
   /** Level Up Rápido nunca sorteia a arma do slot extra de Mestre das
    * Armas (mesma lógica de `escolhaMagiaTalentoGeral` acima) — sempre
@@ -379,6 +386,8 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
   }
 
   let dadivaEpicaEscolhida: string | null = null;
+  let atributosAumentadosDadiva: Atributo[] | null = null;
+  let escolhaAtributoTalentoGeralDadiva: Record<string, string> | null = null;
   if (niveisComDadivaEpica(classe).includes(novoNivel)) {
     const opcoes = talentos.filter(
       (t) =>
@@ -386,7 +395,17 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
         (t.repetivel || !params.talentosGeraisAtuais.includes(t.id)) &&
         talentoDisponivel(t, novoNivel, params.atributosFinaisAtuais),
     );
-    dadivaEpicaEscolhida = sorteiaUm(opcoes)?.id ?? null;
+    const dadivaObj = sorteiaUm(opcoes);
+    dadivaEpicaEscolhida = dadivaObj?.id ?? null;
+    if (dadivaObj) {
+      // Bug corrigido (2026-10): as 12 Dádivas Épicas têm "+1 num
+      // atributo" embutido — mesma resolução do talento normal acima.
+      const codigos = sortearAsiDoTalento(dadivaObj);
+      atributosAumentadosDadiva = codigos.length > 0 ? codigos : null;
+      if (dadivaObj.usaAtributoProprioAsi && codigos.length === 1) {
+        escolhaAtributoTalentoGeralDadiva = { [dadivaObj.id]: codigos[0] };
+      }
+    }
   }
 
   let arcanaMisticaAlteracoes: Record<number, string> | null = null;
@@ -421,10 +440,11 @@ export function sortearLevelUpRapido(params: ParamsLevelUpRapido): ResultadoLeve
     atributosAumentados,
     talentoGeralEscolhido,
     dadivaEpicaEscolhida,
+    atributosAumentadosDadiva,
     arcanaMisticaAlteracoes,
     magiaIniciadaAlteracoes: null,
     escolhaMagiaTalentoGeral: null,
-    escolhaAtributoTalentoGeral: null,
+    escolhaAtributoTalentoGeral: escolhaAtributoTalentoGeralDadiva,
     maestriaArmaTalentoEscolhida: null,
     maestriaArmaEscolhida: null,
     periciaLivreTalentoEscolhida: null,
