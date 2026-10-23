@@ -352,13 +352,21 @@ construída no foco que acabou de fechar — ver aprendizados/talentos/atributo-
 - [x] **E7 Entrega 2 — Grupo A (Atmocinese/Criocinese/Pirocinese)**: 1ª versão (card "declarar
   antes" no painel de Ação) corrigida depois do Osmar notar a inconsistência com o Monge — a
   escolha de tipo de dano é feita DEPOIS do acerto/dano (igual Ataques Elementais do Monge), não
-  antes, e não é uma "ação" própria, é parte do próprio ataque/conjuração. Refeito reaproveitando
-  o sistema "Efeitos ao Acertar" (`CombatTab.efeitosAoAcertar`/`executarEfeitoAoAcertar`) — os 3
-  talentos entram como mais 1 opção na MESMA lista "🎯 Tipo de dano diferente do normal" já usada
-  por Golpes Potencializados (Monge) e Arma Sagrada (Paladino), zero popup novo. Cobre o lado de
-  ATAQUE (arma/desarmado); o lado de MAGIA ("ao conjurar") não passa pelo mesmo sistema — ficou
-  registrado como pendência própria em `PENDENCIAS.md`, entrega futura menor. `tipoDanoTrocaTalentoSelvagem`
-  (`core/talentosSelvagens.ts`) virou `[codeimplementation]` (lado de ataque); estado
+  antes, e não é uma "ação" própria, é parte do próprio ataque/conjuração. Lado de ATAQUE
+  (arma/desarmado) refeito reaproveitando o sistema "Efeitos ao Acertar"
+  (`CombatTab.efeitosAoAcertar`/`executarEfeitoAoAcertar`) — os 3 talentos entram como mais 1
+  opção na MESMA lista "🎯 Tipo de dano diferente do normal" já usada por Golpes Potencializados
+  (Monge) e Arma Sagrada (Paladino), zero popup novo. Lado de MAGIA ("ao conjurar") implementado
+  nos 3 pontos de conjuração — `useUsarMagiaPainel.tsx` (Ação/Ação Bônus), `ReacaoPanelContent.tsx`
+  (Reação, mesma trava de turno do ataque) e `MagiasTab.tsx` (sem conceito de turno, mesmo
+  tratamento já dado a Mente Aguçada ali) — via `elegivelTrocaTipoDeDanoTalentoSelvagem` nova
+  (lê `Magia.danoBaseTipo` do catálogo direto, sem precisar rodar `decidirConjuracao` antes),
+  mostrando a escolha com `EscolherEfeitoModal` bem na hora do acerto/conjuração. De quebra, achado
+  um bug latente: `avisoExtra` (texto extra pós-conjuração, ex.: Telecinese Intensificada) nunca
+  aparecia pro mecanismo de ATAQUE de magia (só salvaguarda mostrava) em `useUsarMagiaPainel.tsx`/
+  `ReacaoPanelContent.tsx` — corrigido junto; em `MagiasTab.tsx` (sem toast central) o aviso agora
+  usa o mesmo banner `feedbackAcaoMagica` de Sobrecarga/Truque Potente. `tipoDanoTrocaTalentoSelvagem`
+  (`core/talentosSelvagens.ts`) é `[codeimplementation]` (ataque + magia, completo); estado
   `trocaTipoDeDanoTalentoSelvagemUsadaTurno` (reseta no Fim do Turno, mesmo padrão de
   `esmagadorUsadoTurno`), persistido em `PersonagemSalvo`. `npx tsc -b`, `npm test -- --run`
   (1105 testes), `npm run build` limpos. **Não testado visualmente no navegador** (sem ferramenta

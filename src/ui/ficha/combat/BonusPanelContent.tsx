@@ -217,6 +217,12 @@ interface BonusPanelContentProps {
    * Necrótico auto-infligido de Sobrecarga. Mesma função pura de
    * `FichaShell.tsx` `alterarPv`. */
   onAlterarPv: (delta: number) => void;
+  /** Grupo A dos Talentos Selvagens, lado de MAGIA ("ao conjurar") —
+   * repassado pro `useUsarMagiaPainel` (ver
+   * `core/talentosSelvagens.ts`). */
+  tipoDanoTrocaTalentoSelvagem: string | null;
+  trocaTipoDeDanoTalentoSelvagemUsadaTurno: boolean;
+  onUsarTrocaTipoDeDanoTalentoSelvagem: () => void;
   /** Abre a tela de escolha "Rolar Dano vs. Sobrecarga" — vive em
    * `CombatTab.tsx` (mesmo padrão de `onAbrirSalvaguarda`), NUNCA
    * renderizada aqui dentro (ver `useUsarMagiaPainel.tsx` pro motivo:
@@ -378,6 +384,9 @@ export default function BonusPanelContent({
   menteAgucadaUsadaNoTurno,
   onMenteAgucadaTrocada,
   preferenciasPillsMagia,
+  tipoDanoTrocaTalentoSelvagem,
+  trocaTipoDeDanoTalentoSelvagemUsadaTurno,
+  onUsarTrocaTipoDeDanoTalentoSelvagem,
 }: BonusPanelContentProps) {
   const [escolhendoFormaRevelacao, setEscolhendoFormaRevelacao] = useState(false);
   const [escolhendoMestreDaMorte, setEscolhendoMestreDaMorte] = useState(false);
@@ -414,6 +423,9 @@ export default function BonusPanelContent({
     sobrecargaUsosDesdeDescanso,
     onUsarSobrecarga,
     onAlterarPv,
+    tipoDanoTrocaTalentoSelvagem,
+    trocaTipoDeDanoTalentoSelvagemUsadaTurno,
+    onUsarTrocaTipoDeDanoTalentoSelvagem,
     onAbrirEscolhaSobrecarga,
     onAbrirEscolhaDeMontaria,
     telecineseIntensificadaDisponivel,

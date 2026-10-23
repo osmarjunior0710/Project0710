@@ -4001,6 +4001,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             transeDestrutivoAtiva={transeDestrutivoAtivo}
             menteAgucadaAnotado={menteAgucadaAnotado}
             menteAgucadaUsadaNoTurno={menteAgucadaUsadaNoTurno}
+            tipoDanoTrocaTalentoSelvagem={tipoDanoTrocaSelvagemAtual}
+            trocaTipoDeDanoTalentoSelvagemUsadaTurno={trocaTipoDeDanoTalentoSelvagemUsadaTurno}
             preferenciasPillsMagia={preferenciasPillsMagia}
           />
         )}

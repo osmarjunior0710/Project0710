@@ -51,6 +51,8 @@ import SobrecargaEscolha from '../combat/SobrecargaEscolha';
 import EsmagamentoAprimoradoEscolha from '../combat/EsmagamentoAprimoradoEscolha';
 import TelecineseIntensificadaEscolha from '../combat/TelecineseIntensificadaEscolha';
 import EscolherMontariaModal from '../combat/EscolherMontariaModal';
+import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
+import { elegivelTrocaTipoDeDanoTalentoSelvagem } from '../../../core/talentosSelvagens';
 import CopiarMagiaShell from './CopiarMagiaShell';
 import styles from './MagiasTab.module.css';
 
@@ -378,6 +380,15 @@ interface MagiasTabProps {
    * trava por aqui (`ofertaMenteAgucada(..., false, ...)` em cada call
    * site) — mantido só porque `avaliarTrocaMenteAgucada` exige o campo. */
   menteAgucadaUsadaNoTurno: boolean;
+  /** Grupo A dos Talentos Selvagens (Atmocinese/Criocinese/Pirocinese,
+   * E7 — ver `core/talentosSelvagens.ts`) — "ao conjurar magia com dano
+   * Contundente/Cortante/Perfurante/Psíquico, pode mudar o tipo pra X".
+   * Mesmo tratamento de "sem conceito de turno" que
+   * `menteAgucadaUsadaNoTurno` acima: lê o estado real (compartilhado
+   * com o Combate) só pra elegibilidade, nunca marca "usado" a partir
+   * daqui. */
+  tipoDanoTrocaTalentoSelvagem: string | null;
+  trocaTipoDeDanoTalentoSelvagemUsadaTurno: boolean;
   /** Quais pills de info aparecem em cada linha de magia/truque —
    * preferência do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
@@ -487,9 +498,16 @@ export default function MagiasTab({
   transeDestrutivoAtiva,
   menteAgucadaAnotado,
   menteAgucadaUsadaNoTurno,
+  tipoDanoTrocaTalentoSelvagem,
+  trocaTipoDeDanoTalentoSelvagemUsadaTurno,
 }: MagiasTabProps) {
   const { rolarD20, rolarDados } = useRoll();
   const [telaCirculo, setTelaCirculo] = useState<{ magia: Magia; classeDonaDaMagia: string | null } | null>(null);
+  // Grupo A Talento Selvagem (ver prop acima) — mesmo padrão de
+  // `useUsarMagiaPainel.tsx`: escolha aparece ao conjurar, nunca antes.
+  const [trocaTipoDanoMagiaPendente, setTrocaTipoDanoMagiaPendente] = useState<{
+    continuar: (avisoExtra: string | null) => void;
+  } | null>(null);
   const [telaCopiarMagia, setTelaCopiarMagia] = useState(false);
   const [armaDePactoEscolhida, setArmaDePactoEscolhida] = useState('');
   // `danoRolado`/`upcastNaoAutomatico` — ver o mesmo padrão em
@@ -816,6 +834,10 @@ export default function MagiasTab({
         confirmarAcerto: {
           onAcertou: ({ critico }) => {
             if (!dano) return;
+            // `avisoExtra` (ex.: Talento Selvagem trocou o tipo de dano) — aba Magias não tem o
+            // toast central de `useUsarMagiaPainel.tsx`, então usa o mesmo banner de
+            // `feedbackAcaoMagica` (Sobrecarga/Truque Potente).
+            if (avisoExtra) setFeedbackAcaoMagica(avisoExtra);
             const rolarNormal = () => {
               const montado = danoComCritico({ quantidade: dano.quantidade, lados: dano.lados, mod: dano.mod }, critico);
               rolarDados({
@@ -911,6 +933,7 @@ export default function MagiasTab({
       });
     }
     if (resultado.rollDano) {
+      if (avisoExtra) setFeedbackAcaoMagica(avisoExtra);
       rolarDados({
         ...resultado.rollDano,
         confirmarFechamento: {},
@@ -926,6 +949,18 @@ export default function MagiasTab({
         transeDestrutivoElegivel: transeDestrutivoAtiva && gastouEspacoDeVerdade && circuloUsado > 0,
       });
     }
+  }
+
+  /** Grupo A Talento Selvagem — abre a escolha (se elegível) antes de
+   * `continuar` conjurar de verdade, repassando o texto escolhido como
+   * `avisoExtra`. Sem callback de "usar": ver doc-comment da prop
+   * `trocaTipoDeDanoTalentoSelvagemUsadaTurno` acima. */
+  function conjurarComEscolhaDeTipo(m: Magia, continuar: (avisoExtra: string | null) => void) {
+    if (!elegivelTrocaTipoDeDanoTalentoSelvagem(m.danoBaseTipo, tipoDanoTrocaTalentoSelvagem, trocaTipoDeDanoTalentoSelvagemUsadaTurno)) {
+      continuar(null);
+      return;
+    }
+    setTrocaTipoDanoMagiaPendente({ continuar });
   }
 
   // Ver `danoCondicionalDado` em magias.ts — só Badalar Fúnebre hoje
@@ -955,7 +990,7 @@ export default function MagiasTab({
     if (jaGasta) return;
     onUsarMagiaGratis(item);
     // Invocações Místicas são sempre do Bruxo.
-    processarMagiaAoUsar(item.magia, item.magia.circulo, false, 'Bruxo');
+    conjurarComEscolhaDeTipo(item.magia, (avisoExtra) => processarMagiaAoUsar(item.magia, item.magia.circulo, false, 'Bruxo', avisoExtra));
   }
 
   /** Adepto de Ritual — ilimitado de verdade (RAW não tem contador), sem
@@ -963,13 +998,13 @@ export default function MagiasTab({
   function usarMagiaRitual(m: Magia) {
     if (desvantagemForcaDestreza) return;
     // Vem do Livro de Magias — sempre do Mago.
-    processarMagiaAoUsar(m, m.circulo, false, 'Mago');
+    conjurarComEscolhaDeTipo(m, (avisoExtra) => processarMagiaAoUsar(m, m.circulo, false, 'Mago', avisoExtra));
   }
 
   function usarMagia(m: Magia, classeDonaDaMagia: string | null = null) {
     if (desvantagemForcaDestreza) return;
     if (m.circulo === 0) {
-      processarMagiaAoUsar(m, 0, false, classeDonaDaMagia);
+      conjurarComEscolhaDeTipo(m, (avisoExtra) => processarMagiaAoUsar(m, 0, false, classeDonaDaMagia, avisoExtra));
       return;
     }
     const opcoes = opcoesGastoComPonte(
@@ -1045,12 +1080,22 @@ export default function MagiasTab({
               aoConjurarNormal: () => {
                 setEscolhaTelecineseIntensificada(null);
                 if (!telecineseIntensificada.onGastarDados()) return;
-                processarMagiaAoUsar(magiaConjurada, circulo, false, classeDonaDaMagia);
+                conjurarComEscolhaDeTipo(magiaConjurada, (avisoExtra) =>
+                  processarMagiaAoUsar(magiaConjurada, circulo, false, classeDonaDaMagia, avisoExtra),
+                );
               },
               aoConjurarSemConcentracao: () => {
                 setEscolhaTelecineseIntensificada(null);
                 if (!telecineseIntensificada.onGastarDados()) return;
-                processarMagiaAoUsar(magiaConjurada, circulo, false, classeDonaDaMagia, AVISO_TELECINESE_INTENSIFICADA_SEM_CONCENTRACAO);
+                conjurarComEscolhaDeTipo(magiaConjurada, (avisoExtra) =>
+                  processarMagiaAoUsar(
+                    magiaConjurada,
+                    circulo,
+                    false,
+                    classeDonaDaMagia,
+                    [avisoExtra, AVISO_TELECINESE_INTENSIFICADA_SEM_CONCENTRACAO].filter(Boolean).join(' '),
+                  ),
+                );
               },
             });
             return;
@@ -1059,7 +1104,9 @@ export default function MagiasTab({
           setTelaCirculo(null);
           if (!ok) return;
           if (gratis) onUsarMagiaGratisDeClasse(magiaConjurada.nome);
-          processarMagiaAoUsar(magiaConjurada, circulo, !gratis, classeDonaDaMagia);
+          conjurarComEscolhaDeTipo(magiaConjurada, (avisoExtra) =>
+            processarMagiaAoUsar(magiaConjurada, circulo, !gratis, classeDonaDaMagia, avisoExtra),
+          );
         }}
       />
     );
@@ -1205,6 +1252,29 @@ export default function MagiasTab({
           dadosLados={telecineseIntensificada.dadosLados}
           onConjurarNormal={escolhaTelecineseIntensificada.aoConjurarNormal}
           onConjurarSemConcentracao={escolhaTelecineseIntensificada.aoConjurarSemConcentracao}
+        />
+      )}
+      {trocaTipoDanoMagiaPendente && (
+        <EscolherEfeitoModal
+          titulo="🎯 Qual tipo de dano foi dado?"
+          opcoes={[
+            { nome: 'Normal', texto: 'O tipo de dano normal da magia.' },
+            {
+              nome: tipoDanoTrocaTalentoSelvagem!,
+              texto: 'Talento Selvagem: troca o tipo de dano (1x/turno) — efeito só narrativo.',
+            },
+          ]}
+          onEscolher={(nomes) => {
+            const continuar = trocaTipoDanoMagiaPendente.continuar;
+            setTrocaTipoDanoMagiaPendente(null);
+            const escolhido = nomes[0];
+            continuar(escolhido === tipoDanoTrocaTalentoSelvagem ? `🎯 Tipo de dano: ${escolhido}.` : null);
+          }}
+          onFechar={() => {
+            const continuar = trocaTipoDanoMagiaPendente.continuar;
+            setTrocaTipoDanoMagiaPendente(null);
+            continuar(null);
+          }}
         />
       )}
       {escolhaMontaria && (

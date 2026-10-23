@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_2132
+
+Quem tem Atmocinese, Criocinese ou Pirocinese agora também pode trocar o tipo de dano ao
+CONJURAR uma magia (truque ou com espaço) com dano Contundente/Cortante/Perfurante/Psíquico — não
+só ao atacar com arma como na publicação anterior. A escolha aparece num popup bem na hora de
+conjurar (Ação, Ação Bônus, Reação ou na aba Magias), 1x por turno, e é só narrativa (não muda
+número de dano).
+
 ## v202610_2102
 
 Quem tem Atmocinese, Criocinese ou Pirocinese (Talentos Selvagens, Psiônico não oficial) ganha uma

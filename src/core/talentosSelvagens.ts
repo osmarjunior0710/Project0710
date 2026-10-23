@@ -21,16 +21,20 @@ const TIPO_DANO_POR_TALENTO_GRUPO_A: Record<string, string> = {
  * conjurar magia ou acertar ataque com dano Contundente/Cortante/
  * Perfurante/Psíquico, pode mudar o tipo pra X" — devolve o tipo de
  * dano do talento ATIVO deste grupo, ou `null` se não tiver nenhum.
- * [codeimplementation] (Entrega 2) pro lado de ATAQUE (arma/
- * desarmado): plugado no sistema "Efeitos ao Acertar"
- * (`CombatTab.efeitosAoAcertar`/`executarEfeitoAoAcertar`), mesma
- * opção genérica "🎯 Tipo de dano diferente do normal" já usada por
- * Golpes Potencializados (Monge) e Arma Sagrada (Paladino) — escolha
- * acontece DEPOIS do acerto, nunca antes (mesmo padrão de Ataques
- * Elementais, `core/ataquesElementais.ts`), e é só narrativa (o app
- * não calcula resistência de alvo). Lado de MAGIA ("ao conjurar") NÃO
- * está plugado ainda — fica como pendência (ver PENDENCIAS.md), já
- * que o fluxo de dano de magia não passa por esse mesmo sistema. */
+ * [codeimplementation] (Entrega 2, completo) — lado de ATAQUE plugado
+ * no sistema "Efeitos ao Acertar" (`CombatTab.efeitosAoAcertar`/
+ * `executarEfeitoAoAcertar`), mesma opção genérica "🎯 Tipo de dano
+ * diferente do normal" já usada por Golpes Potencializados (Monge) e
+ * Arma Sagrada (Paladino); lado de MAGIA plugado nos 3 lugares que
+ * conjuram magia (`useUsarMagiaPainel.tsx` — Ação/Ação Bônus;
+ * `ReacaoPanelContent.tsx` — Reação, com conceito de turno igual ao
+ * ataque; `MagiasTab.tsx` — sem conceito de turno, mesmo tratamento
+ * já dado a Mente Aguçada ali) via `elegivelTrocaTipoDeDanoTalentoSelvagem`
+ * abaixo, lendo `Magia.danoBaseTipo` direto do catálogo. Em todos os
+ * casos a escolha acontece DEPOIS do acerto/ao conjurar, nunca antes
+ * de atacar/conjurar (mesmo padrão de Ataques Elementais,
+ * `core/ataquesElementais.ts`), e é só narrativa (o app não calcula
+ * resistência de alvo). */
 export function tipoDanoTrocaTalentoSelvagem(talentosAtuais: string[] | undefined): string | null {
   if (!talentosAtuais) return null;
   for (const id of talentosAtuais) {
@@ -38,6 +42,22 @@ export function tipoDanoTrocaTalentoSelvagem(talentosAtuais: string[] | undefine
     if (tipo) return tipo;
   }
   return null;
+}
+
+/** Os 4 tipos que o Grupo A pode trocar (regra do livro). */
+export const TIPOS_DANO_TROCAVEIS_TALENTO_SELVAGEM = ['Contundente', 'Cortante', 'Perfurante', 'Psíquico'];
+
+/** `true` quando vale oferecer a troca pra uma magia específica —
+ * mesma checagem usada no lado de ataque (`CombatTab.efeitosAoAcertar`),
+ * só que a partir de `Magia.danoBaseTipo` em vez de `AtaqueInfo.danoTipo`
+ * (lado de magia, ver `useUsarMagiaPainel.tsx`/`MagiasTab.tsx`/
+ * `ReacaoPanelContent.tsx`). */
+export function elegivelTrocaTipoDeDanoTalentoSelvagem(
+  danoBaseTipo: string | null | undefined,
+  tipoNovo: string | null,
+  usadoNoTurno: boolean,
+): boolean {
+  return !!tipoNovo && !usadoNoTurno && !!danoBaseTipo && TIPOS_DANO_TROCAVEIS_TALENTO_SELVAGEM.includes(danoBaseTipo);
 }
 
 /** IDs do Grupo B (Clarividência/Empata) → a Ação que ganha Vantagem. */

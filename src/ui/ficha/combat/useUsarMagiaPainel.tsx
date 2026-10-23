@@ -19,8 +19,10 @@ import { danoComCritico } from '../../../core/danoCritico';
 import { useRoll } from '../../roll/RollContext';
 import { ofertaMenteAgucada } from '../../roll/ofertaMenteAgucada';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
+import { elegivelTrocaTipoDeDanoTalentoSelvagem } from '../../../core/talentosSelvagens';
 import SelecionarMagiaShell from './SelecionarMagiaShell';
 import EscolherCirculoShell from './EscolherCirculoShell';
+import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
 
 interface UsarMagiaPainelParams {
   /** `SidePanel.open` do drawer que hospeda este painel — o painel de
@@ -78,6 +80,14 @@ interface UsarMagiaPainelParams {
    * Necrótico auto-infligido de Sobrecarga. Mesma função pura de
    * `FichaShell.tsx` `alterarPv`. */
   onAlterarPv: (delta: number) => void;
+  /** Grupo A dos Talentos Selvagens (Atmocinese/Criocinese/Pirocinese)
+   * — "1x/turno, ao conjurar magia com dano Contundente/Cortante/
+   * Perfurante/Psíquico, pode mudar o tipo pra X". `tipoDanoTrocaTalentoSelvagem`
+   * = o novo tipo (ou `null` sem o talento) — ver
+   * `core/talentosSelvagens.ts`. */
+  tipoDanoTrocaTalentoSelvagem: string | null;
+  trocaTipoDeDanoTalentoSelvagemUsadaTurno: boolean;
+  onUsarTrocaTipoDeDanoTalentoSelvagem: () => void;
   /** Abre a tela de escolha "Rolar Dano vs. Sobrecarga" — vive em
    * `CombatTab.tsx` (mesmo padrão de `onAbrirSalvaguarda`), NUNCA
    * renderizada aqui dentro: este painel fica montado dentro de um
@@ -161,6 +171,24 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
     null,
   );
   const { rolarD20, rolarDados } = useRoll();
+  // Grupo A dos Talentos Selvagens, lado de MAGIA — ver `core/talentosSelvagens.ts`. `continuar`
+  // recebe o `avisoExtra` já combinado (ou `null` sem troca), seguindo o MESMO formato que
+  // `conjurarMagia` já aceita (ver Telecinese Intensificada, mesmo padrão).
+  const [trocaTipoDanoMagiaPendente, setTrocaTipoDanoMagiaPendente] = useState<{
+    continuar: (avisoExtra: string | null) => void;
+  } | null>(null);
+  /** Intercepta ANTES de `conjurarMagia`: se a magia qualifica (dano
+   * Contundente/Cortante/Perfurante/Psíquico) e o talento ainda não
+   * foi usado nesse turno, abre a escolha; senão já chama `continuar`
+   * direto, sem popup — mesmo espírito de "Tipo de dano diferente do
+   * normal" (ataque), seção 6.5 do CLAUDE.md. */
+  function conjurarComEscolhaDeTipo(m: Magia, continuar: (avisoExtra: string | null) => void) {
+    if (!elegivelTrocaTipoDeDanoTalentoSelvagem(m.danoBaseTipo, p.tipoDanoTrocaTalentoSelvagem, p.trocaTipoDeDanoTalentoSelvagemUsadaTurno)) {
+      continuar(null);
+      return;
+    }
+    setTrocaTipoDanoMagiaPendente({ continuar });
+  }
 
   // Fechar o drawer (backdrop/borda) não desmonta o painel — reseta o
   // picker manualmente pra não deixar `SelecionarMagiaShell`/seu Portal
@@ -364,7 +392,10 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
           },
         },
       });
-      p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
+      // `avisoExtra` (ex.: Talento Selvagem trocou o tipo de dano) nunca tinha aparecido
+      // pro mecanismo de ataque — só o de salvaguarda (`onAbrirSalvaguarda`) mostrava. Corrigido
+      // concatenando aqui também, mesmo texto final de sempre.
+      p.onEscolher(`✨ ${m.nome}`, [resultado.textoFeedback, avisoExtra].filter(Boolean).join(' '));
       return;
     }
     if (resultado.mecanica === 'salvaguarda') {
@@ -399,7 +430,7 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
     p.onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
   }
 
-  const picker =
+  const pickerBase =
     telaMagia === 'lista' ? (
       <SelecionarMagiaShell
         titulo="Usar Magia"
@@ -416,7 +447,9 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         telecineseIntensificadaDisponivel={p.telecineseIntensificadaDisponivel}
         dadosEnergiaRestantes={p.dadosEnergiaRestantes}
         onFechar={() => setTelaMagia(null)}
-        onEscolherTruque={(m, classe) => conjurarMagia(m, null, p.classeAtivaNome, false, classe)}
+        onEscolherTruque={(m, classe) =>
+          conjurarComEscolhaDeTipo(m, (avisoExtra) => conjurarMagia(m, null, p.classeAtivaNome, false, classe, false, avisoExtra))
+        }
         onEscolherMagia={(m, circulosDisponiveis, classe) =>
           setTelaMagia({ magia: m, circulos: circulosDisponiveis, classeDonaDaMagia: classe })
         }
@@ -450,10 +483,47 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
         )}
         onVoltar={() => setTelaMagia('lista')}
         onConjurar={(circulo, classeNome, gratis) =>
-          conjurarMagia(telaMagia.magia, circulo, classeNome, gratis, telaMagia.classeDonaDaMagia)
+          conjurarComEscolhaDeTipo(telaMagia.magia, (avisoExtra) =>
+            conjurarMagia(telaMagia.magia, circulo, classeNome, gratis, telaMagia.classeDonaDaMagia, false, avisoExtra),
+          )
         }
       />
     ) : null;
+
+  // Grupo A dos Talentos Selvagens — escolha aparece como tela extra (mesmo padrão de
+  // `EscolherCirculoShell`/`EscolherEfeitoModal` já usados aqui), sobreposta ao resto do fluxo
+  // normal (`pickerBase`) em vez de substituí-lo, já que o jogador pode estar vindo de qualquer
+  // passo (truque direto ou escolha de círculo).
+  const picker = trocaTipoDanoMagiaPendente ? (
+    <>
+      {pickerBase}
+      <EscolherEfeitoModal
+        titulo="🎯 Qual tipo de dano foi dado?"
+        opcoes={[
+          { nome: 'Normal', texto: 'O tipo de dano normal da magia.' },
+          { nome: p.tipoDanoTrocaTalentoSelvagem!, texto: 'Talento Selvagem: troca o tipo de dano (1x/turno) — efeito só narrativo.' },
+        ]}
+        onEscolher={(nomes) => {
+          const escolhido = nomes[0];
+          const continuar = trocaTipoDanoMagiaPendente.continuar;
+          setTrocaTipoDanoMagiaPendente(null);
+          if (escolhido === p.tipoDanoTrocaTalentoSelvagem) {
+            p.onUsarTrocaTipoDeDanoTalentoSelvagem();
+            continuar(`🎯 Tipo de dano: ${escolhido}.`);
+          } else {
+            continuar(null);
+          }
+        }}
+        onFechar={() => {
+          const continuar = trocaTipoDanoMagiaPendente.continuar;
+          setTrocaTipoDanoMagiaPendente(null);
+          continuar(null);
+        }}
+      />
+    </>
+  ) : (
+    pickerBase
+  );
 
   return { picker, abrirLista: () => setTelaMagia('lista') };
 }

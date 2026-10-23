@@ -16,7 +16,9 @@ import { danoComCritico } from '../../../core/danoCritico';
 import { truqueElegivelTruquePotente, sobrecargaElegivel, danoMaximoSobrecarga, danoNecroticoSobrecarga } from '../../../core/evocador';
 import { useRoll } from '../../roll/RollContext';
 import { ofertaMenteAgucada } from '../../roll/ofertaMenteAgucada';
+import { elegivelTrocaTipoDeDanoTalentoSelvagem } from '../../../core/talentosSelvagens';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
+import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
 import PillsMagia from '../../components/PillsMagia';
 import TickPips from '../../components/TickPips';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
@@ -173,6 +175,12 @@ interface ReacaoPanelContentProps {
   menteAgucadaAnotado: number | null;
   menteAgucadaUsadaNoTurno: boolean;
   onMenteAgucadaTrocada: () => void;
+  /** Grupo A dos Talentos Selvagens (Atmocinese/Criocinese/Pirocinese,
+   * E7 — ver `core/talentosSelvagens.ts`) — mesmo padrão de
+   * `useUsarMagiaPainel.tsx` (Reação também tem conceito de turno). */
+  tipoDanoTrocaTalentoSelvagem: string | null;
+  trocaTipoDeDanoTalentoSelvagemUsadaTurno: boolean;
+  onUsarTrocaTipoDeDanoTalentoSelvagem: () => void;
 }
 
 export default function ReacaoPanelContent({
@@ -239,10 +247,18 @@ export default function ReacaoPanelContent({
   menteAgucadaAnotado,
   menteAgucadaUsadaNoTurno,
   onMenteAgucadaTrocada,
+  tipoDanoTrocaTalentoSelvagem,
+  trocaTipoDeDanoTalentoSelvagemUsadaTurno,
+  onUsarTrocaTipoDeDanoTalentoSelvagem,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
   const { rolarD20, rolarDados } = useRoll();
+  // Grupo A Talento Selvagem (ver prop acima) — mesmo padrão de
+  // `useUsarMagiaPainel.tsx`: escolha aparece ao conjurar, nunca antes.
+  const [trocaTipoDanoMagiaPendente, setTrocaTipoDanoMagiaPendente] = useState<{
+    continuar: (avisoExtra: string | null) => void;
+  } | null>(null);
 
   function usarColheitaDosMortos(petId: string, cura: number) {
     onColheitaDosMortos(petId, cura);
@@ -250,7 +266,18 @@ export default function ReacaoPanelContent({
     onEscolher('💀 Colheita dos Mortos', `Morto-Vivo reduzido a 0 PV — você recupera ${cura} Pontos de Vida.`);
   }
 
-  function conjurarMagia(m: Magia, classeDonaDaMagia: string | null) {
+  /** Grupo A Talento Selvagem — abre a escolha (se elegível) antes de
+   * `continuar` conjurar de verdade, repassando o texto escolhido como
+   * `avisoExtra` — mesmo padrão de `useUsarMagiaPainel.tsx`. */
+  function conjurarComEscolhaDeTipo(m: Magia, continuar: (avisoExtra: string | null) => void) {
+    if (!elegivelTrocaTipoDeDanoTalentoSelvagem(m.danoBaseTipo, tipoDanoTrocaTalentoSelvagem, trocaTipoDeDanoTalentoSelvagemUsadaTurno)) {
+      continuar(null);
+      return;
+    }
+    setTrocaTipoDanoMagiaPendente({ continuar });
+  }
+
+  function conjurarMagia(m: Magia, classeDonaDaMagia: string | null, avisoExtra: string | null = null) {
     if (desvantagemForcaDestreza) return;
     // Reação não tem tela de escolha de círculo: gasta o MENOR espaço que
     // ainda sirva (>= círculo da magia) — regra normal de conjurar com
@@ -299,11 +326,11 @@ export default function ReacaoPanelContent({
       // `DisciplinaPosConjuracaoPendente.temContextoDeTurno`).
       if (resultado.mecanica === 'salvaguarda') {
         const circuloReal = m.circulo === 0 ? m.circulo : circuloUsado;
-        onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
+        onEscolher(`✨ ${m.nome}`, [resultado.textoFeedback, avisoExtra].filter(Boolean).join(' '));
         onDisciplinaPosConjuracaoDisponivel({
           ...resultado.disciplinaPosConjuracao,
           temContextoDeTurno: true,
-          aoResolverSalvaguarda: (aviso) => onAbrirSalvaguarda(m, circuloReal, aviso, classeDonaDaMagia),
+          aoResolverSalvaguarda: (aviso) => onAbrirSalvaguarda(m, circuloReal, [aviso, avisoExtra].filter(Boolean).join('\n\n') || null, classeDonaDaMagia),
         });
         return;
       }
@@ -396,12 +423,12 @@ export default function ReacaoPanelContent({
           },
         },
       });
-      onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
+      onEscolher(`✨ ${m.nome}`, [resultado.textoFeedback, avisoExtra].filter(Boolean).join(' '));
       return;
     }
     if (resultado.mecanica === 'salvaguarda') {
-      onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
-      onAbrirSalvaguarda(m, m.circulo === 0 ? m.circulo : circuloUsado, null, classeDonaDaMagia);
+      onEscolher(`✨ ${m.nome}`, [resultado.textoFeedback, avisoExtra].filter(Boolean).join(' '));
+      onAbrirSalvaguarda(m, m.circulo === 0 ? m.circulo : circuloUsado, avisoExtra, classeDonaDaMagia);
       return;
     }
     if (resultado.rollCura) {
@@ -425,7 +452,7 @@ export default function ReacaoPanelContent({
         ),
       });
     }
-    onEscolher(`✨ ${m.nome}`, resultado.textoFeedback);
+    onEscolher(`✨ ${m.nome}`, [resultado.textoFeedback, avisoExtra].filter(Boolean).join(' '));
   }
 
   function usarContraEncantamento() {
@@ -758,7 +785,7 @@ export default function ReacaoPanelContent({
                       key={`${m.id}-${classe ?? 'x'}`}
                       className={styles.spellMiniRow}
                       style={bloqueada ? { opacity: semEspaco ? 0.45 : 0.5, pointerEvents: 'none' } : undefined}
-                      onClick={() => conjurarMagia(m, classe)}
+                      onClick={() => conjurarComEscolhaDeTipo(m, (avisoExtra) => conjurarMagia(m, classe, avisoExtra))}
                     >
                       <span>
                         <MagiaComDescricao magia={m} /> {iconesMagia(m)}
@@ -780,5 +807,37 @@ export default function ReacaoPanelContent({
     ) },
   ];
 
-  return <GruposDoPainel blocos={blocos} />;
+  return (
+    <>
+      <GruposDoPainel blocos={blocos} />
+      {trocaTipoDanoMagiaPendente && (
+        <EscolherEfeitoModal
+          titulo="🎯 Qual tipo de dano foi dado?"
+          opcoes={[
+            { nome: 'Normal', texto: 'O tipo de dano normal da magia.' },
+            {
+              nome: tipoDanoTrocaTalentoSelvagem!,
+              texto: 'Talento Selvagem: troca o tipo de dano (1x/turno) — efeito só narrativo.',
+            },
+          ]}
+          onEscolher={(nomes) => {
+            const continuar = trocaTipoDanoMagiaPendente.continuar;
+            setTrocaTipoDanoMagiaPendente(null);
+            const escolhido = nomes[0];
+            if (escolhido === tipoDanoTrocaTalentoSelvagem) {
+              onUsarTrocaTipoDeDanoTalentoSelvagem();
+              continuar(`🎯 Tipo de dano: ${escolhido}.`);
+            } else {
+              continuar(null);
+            }
+          }}
+          onFechar={() => {
+            const continuar = trocaTipoDanoMagiaPendente.continuar;
+            setTrocaTipoDanoMagiaPendente(null);
+            continuar(null);
+          }}
+        />
+      )}
+    </>
+  );
 }

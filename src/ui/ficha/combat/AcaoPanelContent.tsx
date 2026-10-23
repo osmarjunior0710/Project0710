@@ -203,6 +203,12 @@ interface AcaoPanelContentProps {
   temGolpeDeEscudo: boolean;
   golpeDeEscudoUsadoTurno: boolean;
   onUsarGolpeDeEscudo: () => void;
+  /** Grupo A dos Talentos Selvagens, lado de MAGIA ("ao conjurar") —
+   * repassado pro `useUsarMagiaPainel` (ver
+   * `core/talentosSelvagens.ts`). */
+  tipoDanoTrocaTalentoSelvagem: string | null;
+  trocaTipoDeDanoTalentoSelvagemUsadaTurno: boolean;
+  onUsarTrocaTipoDeDanoTalentoSelvagem: () => void;
   /** Ataque Desarmado, opções Empurrar/Imobilizar (Glossário) — sem jogada de ataque: gasta um dos
    * ataques da ação Atacar e abre o popup de salvaguarda do alvo (`CombatTab.tsx`). */
   onEmpurrarImobilizar: (tipo: 'empurrar' | 'imobilizar', info: AtaqueInfo) => void;
@@ -326,6 +332,9 @@ export default function AcaoPanelContent({
   temGolpeDeEscudo,
   golpeDeEscudoUsadoTurno,
   onUsarGolpeDeEscudo,
+  tipoDanoTrocaTalentoSelvagem,
+  trocaTipoDeDanoTalentoSelvagemUsadaTurno,
+  onUsarTrocaTipoDeDanoTalentoSelvagem,
   onEmpurrarImobilizar,
   explosaoElementalDisponivel,
   onExplosaoElemental,
@@ -377,6 +386,9 @@ export default function AcaoPanelContent({
     sobrecargaUsosDesdeDescanso,
     onUsarSobrecarga,
     onAlterarPv,
+    tipoDanoTrocaTalentoSelvagem,
+    trocaTipoDeDanoTalentoSelvagemUsadaTurno,
+    onUsarTrocaTipoDeDanoTalentoSelvagem,
     onAbrirEscolhaSobrecarga,
     onAbrirEscolhaDeMontaria,
     telecineseIntensificadaDisponivel,

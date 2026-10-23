@@ -24,17 +24,6 @@ aparecem pelo pool combinado/ponte — conferir com um caso real de 2 conjurador
 escritas à mão (`entradaGuerreiro`, `entradaBarbaro`, `mongeEntry`, `entradaPaladino`) podem migrar pro módulo genérico quando forem
 tocadas. (O Bônus de Proficiência acima do nível 20 — Char Multiclasse, nível total 140 — já vale o maior da tabela, +6.)
 
-## Talentos Selvagens — Grupo A, lado de magia ainda não cobre a troca de tipo de dano (2026-10)
-
-Atmocinese/Criocinese/Pirocinese ("1x/turno, ao conjurar magia OU acertar ataque... pode mudar o
-tipo pra X") teve o lado de ATAQUE implementado (Entrega 2, plugado no sistema "Efeitos ao
-Acertar" de `CombatTab.tsx` — mesma opção "🎯 Tipo de dano diferente do normal" já usada por
-Golpes Potencializados/Arma Sagrada). O lado de MAGIA ("ao conjurar") ainda não tem equivalente —
-o fluxo de dano de magia (`decidirConjuracao`/`conjurarMagia.ts`, usado em `MagiasTab.tsx`/
-`useUsarMagiaPainel.tsx`/`ReacaoPanelContent.tsx`) não passa pelo mesmo sistema de "Efeitos ao
-Acertar", então precisaria de um ponto de integração próprio (ou um equivalente simplificado) —
-entrega futura, menor que a de ataque. Ver `core/talentosSelvagens.ts`.
-
 ## Talentos com atributo "próprio do ASI" — 3 mecânicas ainda sem função real (2026-10)
 
 Foco "Atributo de conjuração herdado do ASI do próprio talento" corrigiu o mod./CD pros 6 talentos

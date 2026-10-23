@@ -8,6 +8,7 @@ import type { DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagi
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import { TEXTO_EMPURRAO_ELEMENTAL, podeAtaqueElemental } from '../../../core/ataquesElementais';
+import { elegivelTrocaTipoDeDanoTalentoSelvagem } from '../../../core/talentosSelvagens';
 import {
   cdEmpurrarImobilizar,
   explicarCdEmpurrarImobilizar,
@@ -2303,13 +2304,9 @@ export default function CombatTab({
     // nunca abre popup próprio, só mais 1 opção na mesma lista de "Tipo de dano diferente do
     // normal". `onUsarTrocaTipoDeDanoTalentoSelvagem` marca o uso só quando essa opção é a
     // escolhida de fato (ver `executarEfeitoAoAcertar`), não quando só aparece na lista.
-    if (
-      tipoDanoTrocaTalentoSelvagemAtual &&
-      !trocaTipoDeDanoTalentoSelvagemUsadaTurno &&
-      ['Contundente', 'Cortante', 'Perfurante', 'Psíquico'].includes(ataque.danoTipo ?? '')
-    ) {
+    if (elegivelTrocaTipoDeDanoTalentoSelvagem(ataque.danoTipo, tipoDanoTrocaTalentoSelvagemAtual, trocaTipoDeDanoTalentoSelvagemUsadaTurno)) {
       opcoesTipo.push({
-        nome: tipoDanoTrocaTalentoSelvagemAtual,
+        nome: tipoDanoTrocaTalentoSelvagemAtual!,
         texto: 'Talento Selvagem: troca o tipo de dano (1x/turno) — efeito só narrativo.',
       });
       origensTipo.push('Talento');
@@ -3509,6 +3506,9 @@ export default function CombatTab({
           temGolpeDeEscudo={golpeDeEscudoDisponivel}
           golpeDeEscudoUsadoTurno={golpeDeEscudoUsadoTurno}
           onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
+          tipoDanoTrocaTalentoSelvagem={tipoDanoTrocaTalentoSelvagemAtual}
+          trocaTipoDeDanoTalentoSelvagemUsadaTurno={trocaTipoDeDanoTalentoSelvagemUsadaTurno}
+          onUsarTrocaTipoDeDanoTalentoSelvagem={onUsarTrocaTipoDeDanoTalentoSelvagem}
           efeitosAoAcertar={efeitosAoAcertar}
           onPedirEfeitosAoAcertar={pedirEfeitosAoAcertar}
           onEmpurrarImobilizar={abrirEmpurrarImobilizar}
@@ -3648,6 +3648,9 @@ export default function CombatTab({
           sobrecargaUsosDesdeDescanso={sobrecargaUsosDesdeDescanso}
           onUsarSobrecarga={onUsarSobrecarga}
           onAlterarPv={onAlterarPv}
+          tipoDanoTrocaTalentoSelvagem={tipoDanoTrocaTalentoSelvagemAtual}
+          trocaTipoDeDanoTalentoSelvagemUsadaTurno={trocaTipoDeDanoTalentoSelvagemUsadaTurno}
+          onUsarTrocaTipoDeDanoTalentoSelvagem={onUsarTrocaTipoDeDanoTalentoSelvagem}
           onAbrirEscolhaSobrecarga={setEscolhaSobrecarga}
           telecineseIntensificadaDisponivel={telecineseIntensificada.disponivel}
           dadosEnergiaRestantes={telecineseIntensificada.dadosRestantes}
@@ -3727,6 +3730,9 @@ export default function CombatTab({
           menteAgucadaAnotado={menteAgucada.anotado}
           menteAgucadaUsadaNoTurno={menteAgucada.usadaNoTurno}
           onMenteAgucadaTrocada={menteAgucada.onTrocado}
+          tipoDanoTrocaTalentoSelvagem={tipoDanoTrocaTalentoSelvagemAtual}
+          trocaTipoDeDanoTalentoSelvagemUsadaTurno={trocaTipoDeDanoTalentoSelvagemUsadaTurno}
+          onUsarTrocaTipoDeDanoTalentoSelvagem={onUsarTrocaTipoDeDanoTalentoSelvagem}
           detalhesAtivo={detalhesAtivo}
           contraEncantamentoDisponivel={contraEncantamentoDisponivel}
           palavrasDeInterrupcaoDisponivel={palavrasDeInterrupcaoDisponivel}
