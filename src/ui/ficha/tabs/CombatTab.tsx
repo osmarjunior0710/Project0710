@@ -2297,6 +2297,23 @@ export default function CombatTab({
       opcoesTipo.push({ nome: 'Radiante', texto: 'Arma Sagrada: dano Radiante no lugar do tipo normal da arma.' });
       origensTipo.push('Paladino');
     }
+    // Grupo A dos Talentos Selvagens (Atmocinese/Criocinese/Pirocinese) — "1x/turno, ao acertar
+    // ataque com dano Contundente/Cortante/Perfurante/Psíquico, pode mudar o tipo pra X". Mesmo
+    // mecanismo de Golpes Potencializados/Arma Sagrada acima (reuso direto, CLAUDE.md §6.5) —
+    // nunca abre popup próprio, só mais 1 opção na mesma lista de "Tipo de dano diferente do
+    // normal". `onUsarTrocaTipoDeDanoTalentoSelvagem` marca o uso só quando essa opção é a
+    // escolhida de fato (ver `executarEfeitoAoAcertar`), não quando só aparece na lista.
+    if (
+      tipoDanoTrocaTalentoSelvagemAtual &&
+      !trocaTipoDeDanoTalentoSelvagemUsadaTurno &&
+      ['Contundente', 'Cortante', 'Perfurante', 'Psíquico'].includes(ataque.danoTipo ?? '')
+    ) {
+      opcoesTipo.push({
+        nome: tipoDanoTrocaTalentoSelvagemAtual,
+        texto: 'Talento Selvagem: troca o tipo de dano (1x/turno) — efeito só narrativo.',
+      });
+      origensTipo.push('Talento');
+    }
     if (opcoesTipo.length > 1) {
       opcoesTipoDanoRef.current = opcoesTipo;
       lista.push({
@@ -2450,6 +2467,9 @@ export default function CombatTab({
           if (nome === 'Elemental') {
             abrirElemental(aoFechar);
             return;
+          }
+          if (nome === tipoDanoTrocaTalentoSelvagemAtual) {
+            onUsarTrocaTipoDeDanoTalentoSelvagem();
           }
           setFeedback(`🎯 Tipo de dano: ${nome}.`);
           aoFechar();
@@ -3489,9 +3509,6 @@ export default function CombatTab({
           temGolpeDeEscudo={golpeDeEscudoDisponivel}
           golpeDeEscudoUsadoTurno={golpeDeEscudoUsadoTurno}
           onUsarGolpeDeEscudo={abrirGolpeDeEscudo}
-          tipoDanoTrocaTalentoSelvagem={tipoDanoTrocaTalentoSelvagemAtual}
-          trocaTipoDeDanoTalentoSelvagemUsadaTurno={trocaTipoDeDanoTalentoSelvagemUsadaTurno}
-          onUsarTrocaTipoDeDanoTalentoSelvagem={onUsarTrocaTipoDeDanoTalentoSelvagem}
           efeitosAoAcertar={efeitosAoAcertar}
           onPedirEfeitosAoAcertar={pedirEfeitosAoAcertar}
           onEmpurrarImobilizar={abrirEmpurrarImobilizar}

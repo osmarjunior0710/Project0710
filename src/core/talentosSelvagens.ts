@@ -21,11 +21,16 @@ const TIPO_DANO_POR_TALENTO_GRUPO_A: Record<string, string> = {
  * conjurar magia ou acertar ataque com dano Contundente/Cortante/
  * Perfurante/Psíquico, pode mudar o tipo pra X" — devolve o tipo de
  * dano do talento ATIVO deste grupo, ou `null` se não tiver nenhum.
- * [codeimplementation] (Entrega 2) — card próprio no painel de Ação
- * (`AcaoPanelContent.tsx`), 1x/turno; efeito só narrativo (o app não
- * calcula resistência de alvo, mesmo espírito de
- * `core/ataquesElementais.ts`), então não precisa aplicar o tipo em
- * nenhum cálculo de dano de verdade — só declarar/avisar. */
+ * [codeimplementation] (Entrega 2) pro lado de ATAQUE (arma/
+ * desarmado): plugado no sistema "Efeitos ao Acertar"
+ * (`CombatTab.efeitosAoAcertar`/`executarEfeitoAoAcertar`), mesma
+ * opção genérica "🎯 Tipo de dano diferente do normal" já usada por
+ * Golpes Potencializados (Monge) e Arma Sagrada (Paladino) — escolha
+ * acontece DEPOIS do acerto, nunca antes (mesmo padrão de Ataques
+ * Elementais, `core/ataquesElementais.ts`), e é só narrativa (o app
+ * não calcula resistência de alvo). Lado de MAGIA ("ao conjurar") NÃO
+ * está plugado ainda — fica como pendência (ver PENDENCIAS.md), já
+ * que o fluxo de dano de magia não passa por esse mesmo sistema. */
 export function tipoDanoTrocaTalentoSelvagem(talentosAtuais: string[] | undefined): string | null {
   if (!talentosAtuais) return null;
   for (const id of talentosAtuais) {

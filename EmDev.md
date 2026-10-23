@@ -349,18 +349,20 @@ construída no foco que acabou de fechar — ver aprendizados/talentos/atributo-
   `npm test -- --run` (1105 testes), `npm run build` limpos. **Não testado visualmente no
   navegador** (sem ferramenta de browser nesta sessão).
 
-- [x] **E7 Entrega 2 — Grupo A (Atmocinese/Criocinese/Pirocinese)**: achado de escopo antes de
-  codar — o efeito é só o RÓTULO do tipo de dano (o app não calcula resistência de monstro, sem
-  ficha de inimigo; mesmo espírito já registrado em `core/ataquesElementais.ts`), mas o gatilho é
-  amplo (qualquer ataque OU magia com dano). Apresentado ao Osmar, que escolheu a versão simples:
-  card próprio (fora de qualquer popup de dano) no painel de Ação — toque declara a troca pro
-  resto do turno (1x) e mostra um aviso, sem precisar interceptar o resultado de cada rolagem de
-  dano individualmente (~10 pontos de entrada evitados). `tipoDanoTrocaTalentoSelvagem`
-  (`core/talentosSelvagens.ts`) virou `[codeimplementation]`; novo estado
+- [x] **E7 Entrega 2 — Grupo A (Atmocinese/Criocinese/Pirocinese)**: 1ª versão (card "declarar
+  antes" no painel de Ação) corrigida depois do Osmar notar a inconsistência com o Monge — a
+  escolha de tipo de dano é feita DEPOIS do acerto/dano (igual Ataques Elementais do Monge), não
+  antes, e não é uma "ação" própria, é parte do próprio ataque/conjuração. Refeito reaproveitando
+  o sistema "Efeitos ao Acertar" (`CombatTab.efeitosAoAcertar`/`executarEfeitoAoAcertar`) — os 3
+  talentos entram como mais 1 opção na MESMA lista "🎯 Tipo de dano diferente do normal" já usada
+  por Golpes Potencializados (Monge) e Arma Sagrada (Paladino), zero popup novo. Cobre o lado de
+  ATAQUE (arma/desarmado); o lado de MAGIA ("ao conjurar") não passa pelo mesmo sistema — ficou
+  registrado como pendência própria em `PENDENCIAS.md`, entrega futura menor. `tipoDanoTrocaTalentoSelvagem`
+  (`core/talentosSelvagens.ts`) virou `[codeimplementation]` (lado de ataque); estado
   `trocaTipoDeDanoTalentoSelvagemUsadaTurno` (reseta no Fim do Turno, mesmo padrão de
-  `esmagadorUsadoTurno`), persistido em `PersonagemSalvo`. Card novo em `AcaoPanelContent.tsx`
-  (grupo "Outras"). `npx tsc -b`, `npm test -- --run` (1105 testes), `npm run build` limpos. **Não
-  testado visualmente no navegador** (sem ferramenta de browser nesta sessão).
+  `esmagadorUsadoTurno`), persistido em `PersonagemSalvo`. `npx tsc -b`, `npm test -- --run`
+  (1105 testes), `npm run build` limpos. **Não testado visualmente no navegador** (sem ferramenta
+  de browser nesta sessão).
 
 Próximo passo: Entrega 3 (Grupo B — Clarividência/Empata, Vantagem numa ação específica) ou
 decidir com o Osmar se a tela de substituição de talento da Origem entra antes.

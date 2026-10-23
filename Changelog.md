@@ -5,12 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
-## v202610_1849
+## v202610_2102
 
-Quem tem Atmocinese, Criocinese ou Pirocinese (Talentos Selvagens, Psiônico não oficial) ganha um
-botão novo na aba Combate ("🔥/❄️/⚡ Trocar tipo de dano pra X") — toque declara a troca pro resto
-do turno (1x). É um efeito narrativo (o app não calcula resistência de monstro), então só avisa,
-não muda nenhum número.
+Quem tem Atmocinese, Criocinese ou Pirocinese (Talentos Selvagens, Psiônico não oficial) ganha uma
+opção nova ao ACERTAR um ataque com dano Contundente/Cortante/Perfurante/Psíquico: na mesma lista
+"Tipo de dano diferente do normal" que já existia (Monge/Paladino), agora também aparece a opção
+de trocar pro tipo do seu talento — 1x por turno. É um efeito narrativo (o app não calcula
+resistência de monstro), então só avisa, não muda nenhum número.
 
 ## v202610_1725
 
