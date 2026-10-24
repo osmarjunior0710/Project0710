@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0415
+
+Quem tem Clarividência ou Empata (Talentos Selvagens) agora pode usar os cards "Procurar" ou
+"Influenciar" (painel de Ação, grupo "Outras") com Vantagem — toca no card, escolhe "Com
+Vantagem" e gasta 1 uso (recupera no Descanso Longo). Sem uso sobrando, o card continua funcionando
+normal, sem popup extra.
+
 ## v202610_2132
 
 Quem tem Atmocinese, Criocinese ou Pirocinese agora também pode trocar o tipo de dano ao

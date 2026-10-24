@@ -17,6 +17,7 @@ import type { LadosDado } from '../../roll/RollContext';
 import { CUSTO_FOCO_EXPLOSAO_ELEMENTAL } from '../../../core/explosaoElemental';
 import type { DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
+import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
 import styles from './PanelRows.module.css';
 import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
 
@@ -209,6 +210,13 @@ interface AcaoPanelContentProps {
   tipoDanoTrocaTalentoSelvagem: string | null;
   trocaTipoDeDanoTalentoSelvagemUsadaTurno: boolean;
   onUsarTrocaTipoDeDanoTalentoSelvagem: () => void;
+  /** Grupo B dos Talentos Selvagens (Clarividência/Empata) — `acao` =
+   * "Procurar" ou "Influenciar" (nome igual ao de `data/exampleCombat.ts`
+   * `acoesBase`), ou `null` sem o talento. Ver `core/talentosSelvagens.ts`. */
+  acaoVantagemTalentoSelvagem: string | null;
+  usosVantagemTalentoSelvagemMaximo: number;
+  usosVantagemTalentoSelvagemRestantes: number;
+  onUsarVantagemTalentoSelvagem: () => boolean;
   /** Ataque Desarmado, opções Empurrar/Imobilizar (Glossário) — sem jogada de ataque: gasta um dos
    * ataques da ação Atacar e abre o popup de salvaguarda do alvo (`CombatTab.tsx`). */
   onEmpurrarImobilizar: (tipo: 'empurrar' | 'imobilizar', info: AtaqueInfo) => void;
@@ -335,6 +343,9 @@ export default function AcaoPanelContent({
   tipoDanoTrocaTalentoSelvagem,
   trocaTipoDeDanoTalentoSelvagemUsadaTurno,
   onUsarTrocaTipoDeDanoTalentoSelvagem,
+  acaoVantagemTalentoSelvagem,
+  usosVantagemTalentoSelvagemRestantes,
+  onUsarVantagemTalentoSelvagem,
   onEmpurrarImobilizar,
   explosaoElementalDisponivel,
   onExplosaoElemental,
@@ -354,6 +365,12 @@ export default function AcaoPanelContent({
   onUsarRepudiarInimigos,
 }: AcaoPanelContentProps) {
   const { rolarD20, rolarDados } = useRoll();
+  // Grupo B dos Talentos Selvagens (Clarividência/Empata) — mesmo
+  // padrão de `trocaTipoDanoMagiaPendente` em `useUsarMagiaPainel.tsx`.
+  const [vantagemTalentoSelvagemPendente, setVantagemTalentoSelvagemPendente] = useState<{
+    nome: string;
+    desc: string;
+  } | null>(null);
   const { picker, abrirLista } = useUsarMagiaPainel({
     aberto,
     desvantagemForcaDestreza,
@@ -924,16 +941,56 @@ export default function AcaoPanelContent({
             )
     ) },
     { grupo: 'Outras', no: (
-      acoesBase.map((a) => (
-              <div key={a.nome} className={styles.row} onClick={() => onEscolher(`${a.icone} ${a.nome}`, a.desc)}>
-                <div className={styles.rowName}>
-                  {a.icone} {a.nome}
+      acoesBase.map((a) => {
+              // Grupo B dos Talentos Selvagens (Clarividência/Empata) — só a ação certa, e só
+              // com uso sobrando, ganha a escolha "Normal vs. Com Vantagem" (ver
+              // `core/talentosSelvagens.ts`); sem uso sobrando, o card funciona normal.
+              const temVantagemAqui = a.nome === acaoVantagemTalentoSelvagem && usosVantagemTalentoSelvagemRestantes > 0;
+              return (
+                <div
+                  key={a.nome}
+                  className={styles.row}
+                  onClick={() =>
+                    temVantagemAqui
+                      ? setVantagemTalentoSelvagemPendente({ nome: `${a.icone} ${a.nome}`, desc: a.desc })
+                      : onEscolher(`${a.icone} ${a.nome}`, a.desc)
+                  }
+                >
+                  <div className={styles.rowName}>
+                    {a.icone} {a.nome}
+                  </div>
+                  {detalhesAtivo && <div className={styles.rowDesc}>{a.desc}</div>}
                 </div>
-                {detalhesAtivo && <div className={styles.rowDesc}>{a.desc}</div>}
-              </div>
-            ))
+              );
+            })
     ) },
   ];
 
-  return <GruposDoPainel blocos={blocos} />;
+  return (
+    <>
+      <GruposDoPainel blocos={blocos} />
+      {vantagemTalentoSelvagemPendente && (
+        <EscolherEfeitoModal
+          titulo={`${vantagemTalentoSelvagemPendente.nome} — como?`}
+          opcoes={[
+            { nome: 'Normal', texto: vantagemTalentoSelvagemPendente.desc },
+            {
+              nome: 'Com Vantagem',
+              texto: `Talento Selvagem: Vantagem no teste (resta ${usosVantagemTalentoSelvagemRestantes} uso(s) até o Descanso Longo).`,
+            },
+          ]}
+          onEscolher={(nomes) => {
+            const pendente = vantagemTalentoSelvagemPendente;
+            setVantagemTalentoSelvagemPendente(null);
+            if (nomes[0] === 'Com Vantagem' && onUsarVantagemTalentoSelvagem()) {
+              onEscolher(pendente.nome, `${pendente.desc} Com Vantagem (Talento Selvagem).`);
+            } else {
+              onEscolher(pendente.nome, pendente.desc);
+            }
+          }}
+          onFechar={() => setVantagemTalentoSelvagemPendente(null)}
+        />
+      )}
+    </>
+  );
 }

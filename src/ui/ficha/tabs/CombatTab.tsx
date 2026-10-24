@@ -283,6 +283,11 @@ interface CombatTabProps {
    * `tipo` = o novo tipo de dano (ou `null` sem o talento);
    * `usadoTurno` reseta no Fim do Turno. Ver `core/talentosSelvagens.ts`. */
   trocaTipoDeDanoTalentoSelvagem: { tipo: string | null; usadoTurno: boolean; onUsar: () => void };
+  /** Grupo B dos Talentos Selvagens (Clarividência/Empata) — `acao` =
+   * "Procurar" ou "Influenciar" (ou `null` sem o talento); usos =
+   * Bônus de Proficiência/Descanso Longo, mesmo `RecursoContado` de
+   * Ancestralidade Gigante. Ver `core/talentosSelvagens.ts`. */
+  vantagemTalentoSelvagem: RecursoContado & { acao: string | null };
   /** Golpe Brutal (Bárbaro, nível 9+) — precisa do Ataque Imprudente
    * já ativo nesse turno (regra real). `dados` = 1 (nível 9-16) ou 2
    * (17+, "2d10"). `efeitosNivel13`/`escolhas` decidem quais efeitos
@@ -877,6 +882,12 @@ export default function CombatTab({
     tipo: tipoDanoTrocaTalentoSelvagemAtual,
     usadoTurno: trocaTipoDeDanoTalentoSelvagemUsadaTurno,
     onUsar: onUsarTrocaTipoDeDanoTalentoSelvagem,
+  },
+  vantagemTalentoSelvagem: {
+    acao: acaoVantagemTalentoSelvagemAtual,
+    maximo: usosVantagemTalentoSelvagemMaximo,
+    restantes: usosVantagemTalentoSelvagemRestantes,
+    onUsar: onUsarVantagemTalentoSelvagem,
   },
   golpeBrutal: {
     disponivel: golpeBrutalDisponivel,
@@ -3509,6 +3520,10 @@ export default function CombatTab({
           tipoDanoTrocaTalentoSelvagem={tipoDanoTrocaTalentoSelvagemAtual}
           trocaTipoDeDanoTalentoSelvagemUsadaTurno={trocaTipoDeDanoTalentoSelvagemUsadaTurno}
           onUsarTrocaTipoDeDanoTalentoSelvagem={onUsarTrocaTipoDeDanoTalentoSelvagem}
+          acaoVantagemTalentoSelvagem={acaoVantagemTalentoSelvagemAtual}
+          usosVantagemTalentoSelvagemMaximo={usosVantagemTalentoSelvagemMaximo}
+          usosVantagemTalentoSelvagemRestantes={usosVantagemTalentoSelvagemRestantes}
+          onUsarVantagemTalentoSelvagem={onUsarVantagemTalentoSelvagem}
           efeitosAoAcertar={efeitosAoAcertar}
           onPedirEfeitosAoAcertar={pedirEfeitosAoAcertar}
           onEmpurrarImobilizar={abrirEmpurrarImobilizar}

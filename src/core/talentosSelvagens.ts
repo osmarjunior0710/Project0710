@@ -6,8 +6,9 @@
 // 3 do SDD), cada um com função própria (CLAUDE.md §6.3.1) — grupos
 // com a MESMA mecânica reaproveitam 1 função parametrizada (seção 6
 // do SDD: "Grupos A/B/C agrupam o que antes seriam 7 entregas em 3"),
-// nunca 1 função por talento repetida. Grupo A já é `[codeimplementation]`
-// (Entrega 2); B/C/D ainda são `[PH]` (entregas futuras).
+// nunca 1 função por talento repetida. Grupo A (Entrega 2) e Grupo B
+// (Entrega 3) já são `[codeimplementation]`; C/D ainda são `[PH]`
+// (entregas futuras).
 
 /** IDs do Grupo A (Atmocinese/Criocinese/Pirocinese) — mesma mecânica,
  * só o tipo de dano muda; mapeado pra quando a mecânica real existir. */
@@ -60,17 +61,24 @@ export function elegivelTrocaTipoDeDanoTalentoSelvagem(
   return !!tipoNovo && !usadoNoTurno && !!danoBaseTipo && TIPOS_DANO_TROCAVEIS_TALENTO_SELVAGEM.includes(danoBaseTipo);
 }
 
-/** IDs do Grupo B (Clarividência/Empata) → a Ação que ganha Vantagem. */
+/** IDs do Grupo B (Clarividência/Empata) → a Ação que ganha Vantagem.
+ * "Buscar" na planilha é a mesma ação de D&D que o app já lista como
+ * "Procurar" (`data/exampleCombat.ts` `acoesBase`) — só tradução
+ * diferente, por isso o valor aqui é 'Procurar', não 'Buscar'. */
 const ACAO_VANTAGEM_POR_TALENTO_GRUPO_B: Record<string, string> = {
-  clarividencia: 'Buscar',
+  clarividencia: 'Procurar',
   empata: 'Influenciar',
 };
 
 /** Grupo B (Clarividência/Empata) — "ao usar a Ação X, pode conceder
  * Vantagem a si mesmo num teste feito como parte dela" (usos = Bônus
  * de Proficiência/Descanso Longo) — devolve a Ação do talento ATIVO
- * deste grupo, ou `null`. [PH] [placeholder-codeimplementation] —
- * ainda não concede a Vantagem de verdade. */
+ * deste grupo, ou `null`. [codeimplementation] (Entrega 3) — plugado
+ * em `AcaoPanelContent.tsx`: tocar no card da ação certa (com usos
+ * sobrando) abre a escolha "Normal" vs. "Com Vantagem" via
+ * `EscolherEfeitoModal`, mesmo padrão do Grupo A. Contador de usos
+ * (`usosMaximo = Bônus de Proficiência`, reseta no Descanso Longo)
+ * vive em `FichaShell.tsx`, mesmo padrão de Ancestralidade Gigante. */
 export function acaoVantagemTalentoSelvagem(talentosAtuais: string[] | undefined): string | null {
   if (!talentosAtuais) return null;
   for (const id of talentosAtuais) {

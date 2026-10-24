@@ -23,7 +23,7 @@ describe('tipoDanoTrocaTalentoSelvagem (Grupo A)', () => {
 
 describe('acaoVantagemTalentoSelvagem (Grupo B)', () => {
   it('Clarividência/Empata devolvem a Ação certa', () => {
-    expect(acaoVantagemTalentoSelvagem(['clarividencia'])).toBe('Buscar');
+    expect(acaoVantagemTalentoSelvagem(['clarividencia'])).toBe('Procurar');
     expect(acaoVantagemTalentoSelvagem(['empata'])).toBe('Influenciar');
   });
 

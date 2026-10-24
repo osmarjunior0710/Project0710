@@ -147,7 +147,7 @@ import {
 } from '../../core/magiaTalentoGeral';
 import { talentos, type Talento } from '../../data/rulesets/dnd2024/talentos';
 import { resumoConjuracaoDeTalento } from '../../core/conjuracaoDeTalento';
-import { tipoDanoTrocaTalentoSelvagem } from '../../core/talentosSelvagens';
+import { tipoDanoTrocaTalentoSelvagem, acaoVantagemTalentoSelvagem } from '../../core/talentosSelvagens';
 import { temPerfurador } from '../../core/rerollDanoTalento';
 import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
 import { armaduraSemTreinamentoEquipada } from '../../core/proficienciaArmadura';
@@ -600,6 +600,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // padrão 1x por turno de `esmagadorUsadoTurno`.
   const [trocaTipoDeDanoTalentoSelvagemUsadaTurno, setTrocaTipoDeDanoTalentoSelvagemUsadaTurno] = useState(
     personagemSalvo.trocaTipoDeDanoTalentoSelvagemUsadaTurno ?? false,
+  );
+  // Grupo B dos Talentos Selvagens (Clarividência/Empata) — usos =
+  // Bônus de Proficiência/Descanso Longo, mesmo padrão de
+  // `ancestralidadeGiganteGasto`.
+  const [vantagemTalentoSelvagemGasto, setVantagemTalentoSelvagemGasto] = useState(
+    personagemSalvo.vantagemTalentoSelvagemGasto ?? 0,
   );
   const [talhadorUsadoTurno, setTalhadorUsadoTurno] = useState(personagemSalvo.talhadorUsadoTurno ?? false);
   const [conhecimentoPrimordialPericiaEscolhida, setConhecimentoPrimordialPericiaEscolhida] = useState(
@@ -1447,6 +1453,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const temSentidoDePerigo = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.sentidoDePerigo);
   const temAtaqueImprudente = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.ataqueImprudente);
   const tipoDanoTrocaSelvagemAtual = tipoDanoTrocaTalentoSelvagem(talentosEfetivos);
+  // Grupo B dos Talentos Selvagens (Clarividência/Empata) — mesmo
+  // cálculo de usos de `usosAncestralidadeGiganteMaximo` abaixo.
+  const acaoVantagemSelvagemAtual = acaoVantagemTalentoSelvagem(talentosEfetivos);
+  const usosVantagemTalentoSelvagemMaximo = acaoVantagemSelvagemAtual && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
+  const usosVantagemTalentoSelvagemRestantes = Math.max(0, usosVantagemTalentoSelvagemMaximo - vantagemTalentoSelvagemGasto);
   const temInstintosPrimitivos = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.instintosPrimitivos);
   const temGolpeBrutal = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.golpeBrutal);
   /** 0 = ainda não chegou no nível 13; 1 = nível 13-16 (+2 efeitos);
@@ -1675,6 +1686,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     esmagadorUsadoTurno,
     talhadorUsadoTurno,
     trocaTipoDeDanoTalentoSelvagemUsadaTurno,
+    vantagemTalentoSelvagemGasto,
     conhecimentoPrimordialPericiaEscolhida,
     academicoPericiaEscolhida,
     pvMax: personagem.pvMax,
@@ -1807,6 +1819,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       esmagadorUsadoTurno,
       talhadorUsadoTurno,
       trocaTipoDeDanoTalentoSelvagemUsadaTurno,
+      vantagemTalentoSelvagemGasto,
       conhecimentoPrimordialPericiaEscolhida,
       pvTemporario,
       maestriaArma,
@@ -2012,6 +2025,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   }
 
   const ancestralidadeGigante = recursoContado(usosAncestralidadeGiganteMaximo, ancestralidadeGiganteGasto, setAncestralidadeGiganteGasto);
+  const vantagemTalentoSelvagem = recursoContado(
+    usosVantagemTalentoSelvagemMaximo,
+    vantagemTalentoSelvagemGasto,
+    setVantagemTalentoSelvagemGasto,
+  );
   function usarAncestralidadeGigante(): boolean {
     return ancestralidadeGigante.usar();
   }
@@ -2371,6 +2389,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
 
     // Talento Geral.
     setPontosDeSorteGasto(0); // Sortudo
+    setVantagemTalentoSelvagemGasto(0); // Talento Selvagem (Grupo B)
 
     // Bárbaro.
     setFuriaImplacavelUsos(0);
@@ -4103,6 +4122,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               tipo: tipoDanoTrocaSelvagemAtual,
               usadoTurno: trocaTipoDeDanoTalentoSelvagemUsadaTurno,
               onUsar: () => setTrocaTipoDeDanoTalentoSelvagemUsadaTurno(true),
+            }}
+            vantagemTalentoSelvagem={{
+              acao: acaoVantagemSelvagemAtual,
+              maximo: usosVantagemTalentoSelvagemMaximo,
+              restantes: usosVantagemTalentoSelvagemRestantes,
+              onUsar: vantagemTalentoSelvagem.usar,
             }}
             golpeBrutal={{
               disponivel: temGolpeBrutal,

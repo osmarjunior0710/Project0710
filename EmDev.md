@@ -372,5 +372,17 @@ construída no foco que acabou de fechar — ver aprendizados/talentos/atributo-
   (1105 testes), `npm run build` limpos. **Não testado visualmente no navegador** (sem ferramenta
   de browser nesta sessão).
 
-Próximo passo: Entrega 3 (Grupo B — Clarividência/Empata, Vantagem numa ação específica) ou
-decidir com o Osmar se a tela de substituição de talento da Origem entra antes.
+- [x] **E7 Entrega 3 — Grupo B (Clarividência/Empata)**: "Ação Buscar/Influenciar: Vantagem no
+  teste" (usos = Bônus de Proficiência/Descanso Longo). "Buscar" da planilha é a mesma ação que o
+  app já lista como "Procurar" (`data/exampleCombat.ts` `acoesBase`) — `acaoVantagemTalentoSelvagem`
+  (`core/talentosSelvagens.ts`) agora devolve 'Procurar', não 'Buscar' (só tradução, mesmo ID de
+  talento). Card "Outras" do painel de Ação (Procurar/Influenciar), ao ser tocado com uso sobrando,
+  abre escolha "Normal vs. Com Vantagem" via `EscolherEfeitoModal` (mesmo padrão do Grupo A);
+  sem uso sobrando, o card funciona normal, sem popup. Contador `vantagemTalentoSelvagemGasto`
+  (usosMaximo = Bônus de Proficiência, reseta no Descanso Longo, mesmo padrão de
+  `ancestralidadeGiganteGasto`), persistido em `PersonagemSalvo`. `acaoVantagemTalentoSelvagem` virou
+  `[codeimplementation]`. `npx tsc -b`, `npm test -- --run` (1105 testes), `npm run build` limpos.
+  **Não testado visualmente no navegador** (sem ferramenta de browser nesta sessão).
+
+Próximo passo: Entrega 4 (Grupo C — Modelador de Carne/Trapaceiro Psiônico, +mod. Int num teste
+específico) ou decidir com o Osmar se a tela de substituição de talento da Origem entra antes.

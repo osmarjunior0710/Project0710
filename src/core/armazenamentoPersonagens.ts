@@ -356,6 +356,11 @@ export interface PersonagemSalvo {
    * resistência de alvo (sem ficha de monstro), então o efeito é só
    * informativo — ver `core/talentosSelvagens.ts`. */
   trocaTipoDeDanoTalentoSelvagemUsadaTurno?: boolean;
+  /** Grupo B dos Talentos Selvagens (Clarividência/Empata) — "Ação
+   * Procurar/Influenciar: Vantagem no teste" (usos = Bônus de
+   * Proficiência/Descanso Longo) — mesmo padrão de contador de
+   * `ancestralidadeGiganteGasto` abaixo. Ver `core/talentosSelvagens.ts`. */
+  vantagemTalentoSelvagemGasto?: number;
   /** Cortar (Mestre em Armas Grandes) — `true` = liberado agora (após
    * Crítico ou confirmação manual de "reduziu a 0 PV"), reseta no Fim
    * do Turno. Ver `FichaShell.tsx`. */
