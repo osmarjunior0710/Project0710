@@ -17,7 +17,7 @@ import type { LadosDado } from '../../roll/RollContext';
 import { CUSTO_FOCO_EXPLOSAO_ELEMENTAL } from '../../../core/explosaoElemental';
 import type { DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
-import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
+import type { PedidoEscolhaDeEfeito } from '../../components/EscolherEfeitoModal';
 import styles from './PanelRows.module.css';
 import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
 
@@ -73,6 +73,11 @@ interface AcaoPanelContentProps {
   dadosEnergiaRestantes: number;
   onGastarTelecineseIntensificada: () => boolean;
   onAbrirEscolhaTelecineseIntensificada: (dados: { aoConjurarNormal: () => void; aoConjurarSemConcentracao: () => void } | null) => void;
+  /** Ponte genérica pro mesmo motivo de `onAbrirEscolhaSobrecarga` acima —
+   * qualquer escolha "Normal vs. Opção X" (Grupo A/B dos Talentos
+   * Selvagens, ver `core/talentosSelvagens.ts`) passa por aqui em vez de
+   * guardar estado/`EscolherEfeitoModal` próprio. */
+  onAbrirEscolhaDeEfeito: (pedido: PedidoEscolhaDeEfeito) => void;
   /** Aplica a cura de MAGIA no PV E dispara o efeito visual de Cura
    * (ver `FichaShell.tsx` `onCuraDeMagiaAplicada`). */
   onCuraDeMagiaAplicada: (total: number) => void;
@@ -273,6 +278,7 @@ export default function AcaoPanelContent({
   dadosEnergiaRestantes,
   onGastarTelecineseIntensificada,
   onAbrirEscolhaTelecineseIntensificada,
+  onAbrirEscolhaDeEfeito,
   onCuraDeMagiaAplicada,
   nivel,
   espacos,
@@ -365,12 +371,6 @@ export default function AcaoPanelContent({
   onUsarRepudiarInimigos,
 }: AcaoPanelContentProps) {
   const { rolarD20, rolarDados } = useRoll();
-  // Grupo B dos Talentos Selvagens (Clarividência/Empata) — mesmo
-  // padrão de `trocaTipoDanoMagiaPendente` em `useUsarMagiaPainel.tsx`.
-  const [vantagemTalentoSelvagemPendente, setVantagemTalentoSelvagemPendente] = useState<{
-    nome: string;
-    desc: string;
-  } | null>(null);
   const { picker, abrirLista } = useUsarMagiaPainel({
     aberto,
     desvantagemForcaDestreza,
@@ -406,6 +406,7 @@ export default function AcaoPanelContent({
     tipoDanoTrocaTalentoSelvagem,
     trocaTipoDeDanoTalentoSelvagemUsadaTurno,
     onUsarTrocaTipoDeDanoTalentoSelvagem,
+    onAbrirEscolhaDeEfeito,
     onAbrirEscolhaSobrecarga,
     onAbrirEscolhaDeMontaria,
     telecineseIntensificadaDisponivel,
@@ -946,14 +947,31 @@ export default function AcaoPanelContent({
               // com uso sobrando, ganha a escolha "Normal vs. Com Vantagem" (ver
               // `core/talentosSelvagens.ts`); sem uso sobrando, o card funciona normal.
               const temVantagemAqui = a.nome === acaoVantagemTalentoSelvagem && usosVantagemTalentoSelvagemRestantes > 0;
+              const nomeCompleto = `${a.icone} ${a.nome}`;
               return (
                 <div
                   key={a.nome}
                   className={styles.row}
                   onClick={() =>
                     temVantagemAqui
-                      ? setVantagemTalentoSelvagemPendente({ nome: `${a.icone} ${a.nome}`, desc: a.desc })
-                      : onEscolher(`${a.icone} ${a.nome}`, a.desc)
+                      ? onAbrirEscolhaDeEfeito({
+                          titulo: `${nomeCompleto} — como?`,
+                          opcoes: [
+                            { nome: 'Normal', texto: a.desc },
+                            {
+                              nome: 'Com Vantagem',
+                              texto: `Talento Selvagem: Vantagem no teste (resta ${usosVantagemTalentoSelvagemRestantes} uso(s) até o Descanso Longo).`,
+                            },
+                          ],
+                          onEscolher: (nomes) => {
+                            if (nomes[0] === 'Com Vantagem' && onUsarVantagemTalentoSelvagem()) {
+                              onEscolher(nomeCompleto, `${a.desc} Com Vantagem (Talento Selvagem).`);
+                            } else {
+                              onEscolher(nomeCompleto, a.desc);
+                            }
+                          },
+                        })
+                      : onEscolher(nomeCompleto, a.desc)
                   }
                 >
                   <div className={styles.rowName}>
@@ -966,31 +984,5 @@ export default function AcaoPanelContent({
     ) },
   ];
 
-  return (
-    <>
-      <GruposDoPainel blocos={blocos} />
-      {vantagemTalentoSelvagemPendente && (
-        <EscolherEfeitoModal
-          titulo={`${vantagemTalentoSelvagemPendente.nome} — como?`}
-          opcoes={[
-            { nome: 'Normal', texto: vantagemTalentoSelvagemPendente.desc },
-            {
-              nome: 'Com Vantagem',
-              texto: `Talento Selvagem: Vantagem no teste (resta ${usosVantagemTalentoSelvagemRestantes} uso(s) até o Descanso Longo).`,
-            },
-          ]}
-          onEscolher={(nomes) => {
-            const pendente = vantagemTalentoSelvagemPendente;
-            setVantagemTalentoSelvagemPendente(null);
-            if (nomes[0] === 'Com Vantagem' && onUsarVantagemTalentoSelvagem()) {
-              onEscolher(pendente.nome, `${pendente.desc} Com Vantagem (Talento Selvagem).`);
-            } else {
-              onEscolher(pendente.nome, pendente.desc);
-            }
-          }}
-          onFechar={() => setVantagemTalentoSelvagemPendente(null)}
-        />
-      )}
-    </>
-  );
+  return <GruposDoPainel blocos={blocos} />;
 }

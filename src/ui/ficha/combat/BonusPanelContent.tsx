@@ -14,6 +14,7 @@ import InfoTexto from '../../components/InfoTexto';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
 import type { DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
+import type { PedidoEscolhaDeEfeito } from '../../components/EscolherEfeitoModal';
 import styles from './PanelRows.module.css';
 import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
 
@@ -231,6 +232,9 @@ interface BonusPanelContentProps {
   onAbrirEscolhaSobrecarga: (
     dados: { nomeMagia: string; danoMaximo: number; aoRolarNormal: () => void; aoUsarSobrecarga: () => void } | null,
   ) => void;
+  /** Mesmo motivo/padrão de `onAbrirEscolhaSobrecarga` acima, só que
+   * genérico — ver `useUsarMagiaPainel.tsx`. */
+  onAbrirEscolhaDeEfeito: (pedido: PedidoEscolhaDeEfeito) => void;
   /** Convocar Montaria (Paladino) — ver `useUsarMagiaPainel.tsx`. */
   onAbrirEscolhaDeMontaria: (circuloUsado: number) => void;
   /** Telecinese Intensificada (Psiônico, subclasse Psicinético, nível 14, E6c-g) — ver
@@ -366,6 +370,7 @@ export default function BonusPanelContent({
   onUsarSobrecarga,
   onAlterarPv,
   onAbrirEscolhaSobrecarga,
+  onAbrirEscolhaDeEfeito,
   onAbrirEscolhaDeMontaria,
   telecineseIntensificadaDisponivel,
   dadosEnergiaRestantes,
@@ -426,6 +431,7 @@ export default function BonusPanelContent({
     tipoDanoTrocaTalentoSelvagem,
     trocaTipoDeDanoTalentoSelvagemUsadaTurno,
     onUsarTrocaTipoDeDanoTalentoSelvagem,
+    onAbrirEscolhaDeEfeito,
     onAbrirEscolhaSobrecarga,
     onAbrirEscolhaDeMontaria,
     telecineseIntensificadaDisponivel,

@@ -18,7 +18,7 @@ import { useRoll } from '../../roll/RollContext';
 import { ofertaMenteAgucada } from '../../roll/ofertaMenteAgucada';
 import { elegivelTrocaTipoDeDanoTalentoSelvagem } from '../../../core/talentosSelvagens';
 import MagiaComDescricao from '../../components/MagiaComDescricao';
-import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
+import type { PedidoEscolhaDeEfeito } from '../../components/EscolherEfeitoModal';
 import PillsMagia from '../../components/PillsMagia';
 import TickPips from '../../components/TickPips';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
@@ -181,6 +181,12 @@ interface ReacaoPanelContentProps {
   tipoDanoTrocaTalentoSelvagem: string | null;
   trocaTipoDeDanoTalentoSelvagemUsadaTurno: boolean;
   onUsarTrocaTipoDeDanoTalentoSelvagem: () => void;
+  /** Abre a escolha "Normal vs. Opção X" — vive em `CombatTab.tsx`
+   * (mesmo padrão de `onAbrirEscolhaSobrecarga`), NUNCA renderizada
+   * aqui dentro: este painel fica montado dentro de um `SidePanel` com
+   * `transform`, que quebra `position: fixed` de um popup renderizado
+   * aqui (ver `useUsarMagiaPainel.tsx`). */
+  onAbrirEscolhaDeEfeito: (pedido: PedidoEscolhaDeEfeito) => void;
 }
 
 export default function ReacaoPanelContent({
@@ -250,15 +256,11 @@ export default function ReacaoPanelContent({
   tipoDanoTrocaTalentoSelvagem,
   trocaTipoDeDanoTalentoSelvagemUsadaTurno,
   onUsarTrocaTipoDeDanoTalentoSelvagem,
+  onAbrirEscolhaDeEfeito,
 }: ReacaoPanelContentProps) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [telaColheitaDosMortos, setTelaColheitaDosMortos] = useState(false);
   const { rolarD20, rolarDados } = useRoll();
-  // Grupo A Talento Selvagem (ver prop acima) — mesmo padrão de
-  // `useUsarMagiaPainel.tsx`: escolha aparece ao conjurar, nunca antes.
-  const [trocaTipoDanoMagiaPendente, setTrocaTipoDanoMagiaPendente] = useState<{
-    continuar: (avisoExtra: string | null) => void;
-  } | null>(null);
 
   function usarColheitaDosMortos(petId: string, cura: number) {
     onColheitaDosMortos(petId, cura);
@@ -268,13 +270,31 @@ export default function ReacaoPanelContent({
 
   /** Grupo A Talento Selvagem — abre a escolha (se elegível) antes de
    * `continuar` conjurar de verdade, repassando o texto escolhido como
-   * `avisoExtra` — mesmo padrão de `useUsarMagiaPainel.tsx`. */
+   * `avisoExtra` — mesmo padrão de `useUsarMagiaPainel.tsx`, via
+   * `onAbrirEscolhaDeEfeito` (nunca um `EscolherEfeitoModal` guardado
+   * aqui dentro — ver doc-comment da prop). */
   function conjurarComEscolhaDeTipo(m: Magia, continuar: (avisoExtra: string | null) => void) {
     if (!elegivelTrocaTipoDeDanoTalentoSelvagem(m.danoBaseTipo, tipoDanoTrocaTalentoSelvagem, trocaTipoDeDanoTalentoSelvagemUsadaTurno)) {
       continuar(null);
       return;
     }
-    setTrocaTipoDanoMagiaPendente({ continuar });
+    onAbrirEscolhaDeEfeito({
+      titulo: '🎯 Qual tipo de dano foi dado?',
+      opcoes: [
+        { nome: 'Normal', texto: 'O tipo de dano normal da magia.' },
+        { nome: tipoDanoTrocaTalentoSelvagem!, texto: 'Talento Selvagem: troca o tipo de dano (1x/turno) — efeito só narrativo.' },
+      ],
+      onEscolher: (nomes) => {
+        const escolhido = nomes[0];
+        if (escolhido === tipoDanoTrocaTalentoSelvagem) {
+          onUsarTrocaTipoDeDanoTalentoSelvagem();
+          continuar(`🎯 Tipo de dano: ${escolhido}.`);
+        } else {
+          continuar(null);
+        }
+      },
+      onFechar: () => continuar(null),
+    });
   }
 
   function conjurarMagia(m: Magia, classeDonaDaMagia: string | null, avisoExtra: string | null = null) {
@@ -807,37 +827,5 @@ export default function ReacaoPanelContent({
     ) },
   ];
 
-  return (
-    <>
-      <GruposDoPainel blocos={blocos} />
-      {trocaTipoDanoMagiaPendente && (
-        <EscolherEfeitoModal
-          titulo="🎯 Qual tipo de dano foi dado?"
-          opcoes={[
-            { nome: 'Normal', texto: 'O tipo de dano normal da magia.' },
-            {
-              nome: tipoDanoTrocaTalentoSelvagem!,
-              texto: 'Talento Selvagem: troca o tipo de dano (1x/turno) — efeito só narrativo.',
-            },
-          ]}
-          onEscolher={(nomes) => {
-            const continuar = trocaTipoDanoMagiaPendente.continuar;
-            setTrocaTipoDanoMagiaPendente(null);
-            const escolhido = nomes[0];
-            if (escolhido === tipoDanoTrocaTalentoSelvagem) {
-              onUsarTrocaTipoDeDanoTalentoSelvagem();
-              continuar(`🎯 Tipo de dano: ${escolhido}.`);
-            } else {
-              continuar(null);
-            }
-          }}
-          onFechar={() => {
-            const continuar = trocaTipoDanoMagiaPendente.continuar;
-            setTrocaTipoDanoMagiaPendente(null);
-            continuar(null);
-          }}
-        />
-      )}
-    </>
-  );
+  return <GruposDoPainel blocos={blocos} />;
 }

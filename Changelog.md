@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0106
+
+Corrigido um bug visual reportado pelo Osmar: o popup "Normal vs. Com Vantagem" de
+Clarividência/Empata (e o de troca de tipo de dano ao conjurar magia, Atmocinese/Criocinese/
+Pirocinese) aparecia cortado/sobreposto pela lista do painel atrás dele. Agora abre certo, cobrindo
+a tela inteira.
+
 ## v202610_0415
 
 Quem tem Clarividência ou Empata (Talentos Selvagens) agora pode usar os cards "Procurar" ou

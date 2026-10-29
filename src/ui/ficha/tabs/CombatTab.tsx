@@ -89,7 +89,7 @@ import {
   removerDaFila,
   type EfeitoAoAcertar,
 } from '../../../core/efeitosAoAcertar';
-import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
+import EscolherEfeitoModal, { type PedidoEscolhaDeEfeito } from '../../components/EscolherEfeitoModal';
 import AtivarEfeitoModal from '../../components/AtivarEfeitoModal';
 import BonusPanelContent from '../combat/BonusPanelContent';
 import ReacaoPanelContent from '../combat/ReacaoPanelContent';
@@ -1128,6 +1128,14 @@ export default function CombatTab({
     aoConjurarNormal: () => void;
     aoConjurarSemConcentracao: () => void;
   } | null>(null);
+  // Ponte genérica de "abrir popup de escolha de efeito a partir de dentro de um SidePanel" —
+  // AcaoPanelContent/BonusPanelContent/ReacaoPanelContent/useUsarMagiaPainel chamam
+  // `onAbrirEscolhaDeEfeito(pedido)` em vez de guardar o próprio estado/`EscolherEfeitoModal`
+  // (que ficaria preso dentro do `transform` do SidePanel — ver doc-comment de
+  // `EscolherEfeitoModal.tsx`). Mesmo espírito de `escolhaSobrecarga` acima, só que reaproveitável
+  // por QUALQUER característica nova que precise só de "Normal vs. Opção X", sem um state próprio
+  // pra cada uma (pedido do Osmar, 2026-10).
+  const [escolhaEfeitoGenerica, setEscolhaEfeitoGenerica] = useState<PedidoEscolhaDeEfeito | null>(null);
   const [ataquesFeitos, setAtaquesFeitos] = useState(0);
   // Torrente de Golpes (Monge) — mesmo padrão de `numAtaques`/`ataquesFeitos`
   // do Ataque Extra, só que escopado à Ação Bônus: 0 = técnica ainda não
@@ -3405,6 +3413,24 @@ export default function CombatTab({
         />
       )}
 
+      {escolhaEfeitoGenerica && (
+        <EscolherEfeitoModal
+          titulo={escolhaEfeitoGenerica.titulo}
+          opcoes={escolhaEfeitoGenerica.opcoes}
+          maxEscolhas={escolhaEfeitoGenerica.maxEscolhas}
+          onEscolher={(nomes) => {
+            const pedido = escolhaEfeitoGenerica;
+            setEscolhaEfeitoGenerica(null);
+            pedido.onEscolher(nomes);
+          }}
+          onFechar={() => {
+            const pedido = escolhaEfeitoGenerica;
+            setEscolhaEfeitoGenerica(null);
+            pedido.onFechar?.();
+          }}
+        />
+      )}
+
       {golpeBrutalEfeitoPendente && (
         <EscolherEfeitoModal
           titulo={golpeBrutalEscolhas > 1 ? `🔨 Golpe Brutal — escolha ${golpeBrutalEscolhas} efeitos` : '🔨 Golpe Brutal — escolha 1 efeito'}
@@ -3460,6 +3486,7 @@ export default function CombatTab({
           gastarSlotCirculo={onGastarSlotCirculo}
           onAlterarPv={onAlterarPv}
           onAbrirEscolhaSobrecarga={setEscolhaSobrecarga}
+          onAbrirEscolhaDeEfeito={setEscolhaEfeitoGenerica}
           telecineseIntensificadaDisponivel={telecineseIntensificada.disponivel}
           dadosEnergiaRestantes={telecineseIntensificada.dadosRestantes}
           onGastarTelecineseIntensificada={telecineseIntensificada.onGastarDados}
@@ -3667,6 +3694,7 @@ export default function CombatTab({
           trocaTipoDeDanoTalentoSelvagemUsadaTurno={trocaTipoDeDanoTalentoSelvagemUsadaTurno}
           onUsarTrocaTipoDeDanoTalentoSelvagem={onUsarTrocaTipoDeDanoTalentoSelvagem}
           onAbrirEscolhaSobrecarga={setEscolhaSobrecarga}
+          onAbrirEscolhaDeEfeito={setEscolhaEfeitoGenerica}
           telecineseIntensificadaDisponivel={telecineseIntensificada.disponivel}
           dadosEnergiaRestantes={telecineseIntensificada.dadosRestantes}
           onGastarTelecineseIntensificada={telecineseIntensificada.onGastarDados}
@@ -3735,6 +3763,7 @@ export default function CombatTab({
           onUsarSobrecarga={onUsarSobrecarga}
           onAlterarPv={onAlterarPv}
           onAbrirEscolhaSobrecarga={setEscolhaSobrecarga}
+          onAbrirEscolhaDeEfeito={setEscolhaEfeitoGenerica}
           colheitaMacabraDisponivel={colheitaMacabraDisponivel}
           onColheitaMacabraDisponivel={onColheitaMacabraDisponivel}
           disciplinasPsionicasConhecidas={disciplinasPsionicasConhecidas}

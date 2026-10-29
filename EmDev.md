@@ -384,5 +384,19 @@ construída no foco que acabou de fechar — ver aprendizados/talentos/atributo-
   `[codeimplementation]`. `npx tsc -b`, `npm test -- --run` (1105 testes), `npm run build` limpos.
   **Não testado visualmente no navegador** (sem ferramenta de browser nesta sessão).
 
+- [x] **Correção pós-Entrega 3 — popup preso dentro do SidePanel (bug reportado pelo Osmar com
+  captura de tela)**: `EscolherEfeitoModal` do Grupo A (lado de magia, `useUsarMagiaPainel.tsx`/
+  `ReacaoPanelContent.tsx`) e do Grupo B (`AcaoPanelContent.tsx`) tinham sido renderizados DENTRO
+  desses arquivos — que vivem dentro de um `SidePanel` com `transform`, prendendo o
+  `position: fixed` do popup (mesmo bug já documentado em `onAbrirEscolhaSobrecarga`,
+  `CONVENCOES-UI.md`). Corrigido com uma ponte genérica reaproveitável: `escolhaEfeitoGenerica`/
+  `onAbrirEscolhaDeEfeito` em `CombatTab.tsx` (mesmo padrão de `escolhaSobrecarga`), tipo
+  `PedidoEscolhaDeEfeito` exportado de `EscolherEfeitoModal.tsx`; os 3 arquivos afetados passaram a
+  chamar essa ponte em vez de guardar estado/modal próprio. `EscolherEfeitoModal` também ganhou
+  z-index fixo 120 (valor documentado em `CONVENCOES-UI.md`, estava 60). Registrado em
+  `LICOES-RAPIDAS.md` (2ª ocorrência do mesmo bug). `npx tsc -b`, `npm test -- --run` (1105 testes),
+  `npm run build` limpos. **Não testado visualmente no navegador** (sem ferramenta de browser nesta
+  sessão) — pendente confirmação do Osmar de que o popup aparece certo agora.
+
 Próximo passo: Entrega 4 (Grupo C — Modelador de Carne/Trapaceiro Psiônico, +mod. Int num teste
 específico) ou decidir com o Osmar se a tela de substituição de talento da Origem entra antes.

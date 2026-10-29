@@ -11,6 +11,26 @@
 
 ---
 
+## Popup de escolha criado DENTRO de AcaoPanelContent/BonusPanelContent/ReacaoPanelContent/useUsarMagiaPainel (preso pelo `transform` do SidePanel)
+
+1ª ocorrência já registrada em comentário no código (`onAbrirEscolhaSobrecarga` em `AcaoPanelContent.tsx`/
+`useUsarMagiaPainel.tsx`): `SobrecargaEscolha` tinha sido renderizada dentro do painel e ficava presa
+visualmente — corrigido subindo o estado pra `CombatTab.tsx` (mesmo padrão de `onAbrirSalvaguarda`),
+documentado também em `CONVENCOES-UI.md` ("Modal de escolha... z-index 120... painel lateral usa
+transform"). **2ª ocorrência (2026-10, Talentos Selvagens Grupo A lado de magia + Grupo B):** criei
+`EscolherEfeitoModal` renderizado direto dentro de `useUsarMagiaPainel.tsx`/`ReacaoPanelContent.tsx`/
+`AcaoPanelContent.tsx` de novo — mesmo bug, visível na captura de tela do Osmar (popup cortado,
+sobreposto pela lista do painel por trás). Corrigido com uma ponte genérica
+(`onAbrirEscolhaDeEfeito`/`escolhaEfeitoGenerica` em `CombatTab.tsx`, `PedidoEscolhaDeEfeito` exportado
+de `EscolherEfeitoModal.tsx`) reaproveitável por qualquer escolha futura "Normal vs. Opção X" — e o
+z-index do componente foi corrigido pra 120 fixo (regra do `CONVENCOES-UI.md`), não mais 60. **Regra
+prática pra não repetir:** antes de renderizar QUALQUER modal/popup a partir de dentro de
+`AcaoPanelContent`/`BonusPanelContent`/`ReacaoPanelContent`/`useUsarMagiaPainel` (ou qualquer tela
+nova que viva dentro de um `SidePanel`), usar `onAbrirEscolhaDeEfeito` (se for só "Normal vs. Opção X")
+ou o mesmo padrão de estado-no-CombatTab (se precisar de layout próprio) — nunca `useState` local +
+JSX do modal dentro do painel. (3ª ocorrência: parar e decidir com o Osmar se vira regra do
+`CLAUDE.md` em vez de só `CONVENCOES-UI.md`.)
+
 ## Planilha pode ter erro de resumo/paráfrase — conferir contra o livro quando o Osmar fornecer
 
 1ª ocorrência (2026-09, revisão de Talentos de Origem, Grupo A.1):
