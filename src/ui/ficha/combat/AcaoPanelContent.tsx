@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { acoesBase, type AtaqueInfo } from '../../../data/exampleCombat';
+import { acoesBase, type AcaoBase, type AtaqueInfo } from '../../../data/exampleCombat';
 import type { ExplicacaoCalculo } from '../../../core/calculoPersonagem';
 import type { Magia } from '../../../data/rulesets/dnd2024/magias';
 import type { AtaqueResolvido } from '../../../core/ataque';
 import type { EspacoDeMagiaAtivo, PoolDePonte, MagiaComClasseOpcional } from '../../../core/magiasPersonagem';
 import type { PreferenciasPillsMagia } from '../../../core/preferenciasPillsMagia';
 import type { MagiaFixaDeClasse } from '../../../core/magiasFixasDeClasse';
-import { resolverVantagem, fmtMod } from '../../../core/calculoPersonagem';
+import { resolverVantagem, fmtMod, type PericiaFinal } from '../../../core/calculoPersonagem';
 import type { ResumoConjuracaoPorClasse } from '../../../core/magiasPersonagem';
 import { danoComCritico, dadoExtraPerfurador } from '../../../core/danoCritico';
 import type { EfeitoAoAcertar } from '../../../core/efeitosAoAcertar';
@@ -45,6 +45,13 @@ interface AcaoPanelContentProps {
    * magia (`modAcertoConjuracao`) não é afetado — usa o atributo de
    * conjuração, não Força/Destreza. */
   desvantagemForcaDestreza: boolean;
+  /** Mesma lista da aba Atributos — usada pelas Ações genéricas do
+   * Cap. 1 que têm `periciasTeste` (`data/exampleCombat.ts`), pra
+   * rolar de verdade em vez de só mostrar texto. */
+  pericias: PericiaFinal[];
+  /** Mesmo campo de `AtributosTab.tsx` — Desvantagem de Furtividade
+   * imposta pela armadura equipada, independente de treinamento. */
+  desvantagemFurtividadeArmadura: string | null;
   onEscolher: (nome: string, desc: string) => void;
   /** Magia com `ataqueOuSalvaguarda` de tipo salvaguarda — abre o Modal
    * de Salvaguarda (CD + atributo + sucesso/falha), que vive em
@@ -268,6 +275,8 @@ export default function AcaoPanelContent({
   onPedirEfeitosAoAcertar,
   aberto,
   desvantagemForcaDestreza,
+  pericias,
+  desvantagemFurtividadeArmadura,
   onEscolher,
   onAbrirSalvaguarda,
   gastarSlotCirculo,
@@ -425,6 +434,80 @@ export default function AcaoPanelContent({
     onMenteAgucadaTrocada,
     preferenciasPillsMagia,
   });
+
+  /** Rola o teste de `p` de verdade (mesma conta/ⓘ de `AtributosTab.tsx`) a
+   * partir de uma Ação genérica do Cap. 1 (`a.periciasTeste`) — `comVantagemTalento`
+   * já vem resolvido por `tocarAcaoComTeste` abaixo (Grupo B dos Talentos
+   * Selvagens, se elegível). */
+  function rolarPericiaDaAcao(p: PericiaFinal, comVantagemTalento: boolean) {
+    const desvantagemFurtividade = p.nome === 'Furtividade' && desvantagemFurtividadeArmadura !== null;
+    const explicacaoComDesvantagem = desvantagemFurtividade
+      ? { ...p.explicacao, linhas: [...p.explicacao.linhas, { label: 'Desvantagem', valor: `Armadura (${desvantagemFurtividadeArmadura})` }] }
+      : p.explicacao;
+    rolarD20({
+      label: p.nome,
+      formula: `1d20 ${p.mod >= 0 ? '+' : '-'} ${Math.abs(p.mod)}`,
+      mod: p.mod,
+      explicacaoMod: explicacaoComDesvantagem,
+      categoria: 'atributoOuSalvaguarda',
+      permiteForcaIndomavel: p.atributo === 'FOR',
+      vantagem: resolverVantagem(
+        comVantagemTalento,
+        (desvantagemForcaDestreza && (p.atributo === 'FOR' || p.atributo === 'DES')) || desvantagemFurtividade,
+      ),
+    });
+  }
+
+  /** Decide se oferece a escolha "Normal vs. Com Vantagem" do Grupo B dos
+   * Talentos Selvagens (Clarividência/Empata) antes de `rolarPericiaDaAcao` —
+   * só quando a Ação tocada é a certa e ainda sobra uso. */
+  function rolarComEscolhaDeVantagem(nomeAcao: string, p: PericiaFinal) {
+    if (nomeAcao !== acaoVantagemTalentoSelvagem || usosVantagemTalentoSelvagemRestantes <= 0) {
+      rolarPericiaDaAcao(p, false);
+      return;
+    }
+    onAbrirEscolhaDeEfeito({
+      titulo: `${p.nome} — como?`,
+      opcoes: [
+        { nome: 'Normal', texto: `Teste de ${p.nome}.` },
+        {
+          nome: 'Com Vantagem',
+          texto: `Talento Selvagem: Vantagem no teste (resta ${usosVantagemTalentoSelvagemRestantes} uso(s) até o Descanso Longo).`,
+        },
+      ],
+      onEscolher: (nomes) => {
+        const comVantagem = nomes[0] === 'Com Vantagem' && onUsarVantagemTalentoSelvagem();
+        rolarPericiaDaAcao(p, comVantagem);
+      },
+      onFechar: () => rolarPericiaDaAcao(p, false),
+    });
+  }
+
+  /** Ponto de entrada do toque numa Ação genérica do Cap. 1
+   * (`data/exampleCombat.ts`) — `a.periciasTeste` ausente/sem nenhuma
+   * perícia encontrada = comportamento de sempre (só toast); 1 perícia
+   * encontrada = rola direto; mais de 1 = escolhe qual rolar primeiro
+   * (ex.: Procurar tem 4 perícias possíveis). */
+  function tocarAcaoComTeste(a: AcaoBase) {
+    const nomeCompleto = `${a.icone} ${a.nome}`;
+    const candidatas = (a.periciasTeste ?? []).map((nome) => pericias.find((p) => p.nome === nome)).filter((p): p is PericiaFinal => !!p);
+    if (candidatas.length === 0) {
+      onEscolher(nomeCompleto, a.desc);
+      return;
+    }
+    if (candidatas.length === 1) {
+      rolarComEscolhaDeVantagem(a.nome, candidatas[0]);
+      return;
+    }
+    onAbrirEscolhaDeEfeito({
+      titulo: `${nomeCompleto} — qual perícia?`,
+      opcoes: candidatas.map((p) => ({ nome: p.nome, texto: `${p.atributo} ${fmtMod(p.mod)}` })),
+      onEscolher: (nomes) => {
+        const escolhida = candidatas.find((p) => p.nome === nomes[0]);
+        if (escolhida) rolarComEscolhaDeVantagem(a.nome, escolhida);
+      },
+    });
+  }
 
   function usarMaosCurativas() {
     if (!onUsarMaosCurativas()) return;
@@ -942,45 +1025,14 @@ export default function AcaoPanelContent({
             )
     ) },
     { grupo: 'Outras', no: (
-      acoesBase.map((a) => {
-              // Grupo B dos Talentos Selvagens (Clarividência/Empata) — só a ação certa, e só
-              // com uso sobrando, ganha a escolha "Normal vs. Com Vantagem" (ver
-              // `core/talentosSelvagens.ts`); sem uso sobrando, o card funciona normal.
-              const temVantagemAqui = a.nome === acaoVantagemTalentoSelvagem && usosVantagemTalentoSelvagemRestantes > 0;
-              const nomeCompleto = `${a.icone} ${a.nome}`;
-              return (
-                <div
-                  key={a.nome}
-                  className={styles.row}
-                  onClick={() =>
-                    temVantagemAqui
-                      ? onAbrirEscolhaDeEfeito({
-                          titulo: `${nomeCompleto} — como?`,
-                          opcoes: [
-                            { nome: 'Normal', texto: a.desc },
-                            {
-                              nome: 'Com Vantagem',
-                              texto: `Talento Selvagem: Vantagem no teste (resta ${usosVantagemTalentoSelvagemRestantes} uso(s) até o Descanso Longo).`,
-                            },
-                          ],
-                          onEscolher: (nomes) => {
-                            if (nomes[0] === 'Com Vantagem' && onUsarVantagemTalentoSelvagem()) {
-                              onEscolher(nomeCompleto, `${a.desc} Com Vantagem (Talento Selvagem).`);
-                            } else {
-                              onEscolher(nomeCompleto, a.desc);
-                            }
-                          },
-                        })
-                      : onEscolher(nomeCompleto, a.desc)
-                  }
-                >
+      acoesBase.map((a) => (
+                <div key={a.nome} className={styles.row} onClick={() => tocarAcaoComTeste(a)}>
                   <div className={styles.rowName}>
                     {a.icone} {a.nome}
                   </div>
                   {detalhesAtivo && <div className={styles.rowDesc}>{a.desc}</div>}
                 </div>
-              );
-            })
+            ))
     ) },
   ];
 

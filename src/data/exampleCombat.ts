@@ -8,17 +8,37 @@ export interface AcaoBase {
   nome: string;
   desc: string;
   icone: string;
+  /** Nomes de `PericiaFinal` (ver `core/calculoPersonagem.ts`) que essa ação
+   * pode rolar — `undefined` = ação sem teste próprio (continua só texto).
+   * Quando tem mais de 1 nome, o toque abre uma escolha de qual perícia
+   * rolar antes de rolar (ver `AcaoPanelContent.tsx`). */
+  periciasTeste?: string[];
 }
 
 export const acoesBase: AcaoBase[] = [
   { nome: 'Ajudar', desc: 'Ajuda o teste de atributo/ataque de outra criatura, ou presta primeiros socorros', icone: '🤝' },
-  { nome: 'Analisar', desc: 'Teste de Inteligência (Arcanismo, História, Investigação, Natureza ou Religião)', icone: '🔍' },
+  {
+    nome: 'Analisar',
+    desc: 'Teste de Inteligência (Arcanismo, História, Investigação, Natureza ou Religião)',
+    icone: '🔍',
+    periciasTeste: ['Arcanismo', 'História', 'Investigação', 'Natureza', 'Religião'],
+  },
   { nome: 'Correr', desc: 'Ganha movimento adicional igual ao seu Deslocamento', icone: '🏃‍♂️' },
-  { nome: 'Esconder', desc: 'Teste de Destreza (Furtividade)', icone: '🫥' },
+  { nome: 'Esconder', desc: 'Teste de Destreza (Furtividade)', icone: '🫥', periciasTeste: ['Furtividade'] },
   { nome: 'Esquivar', desc: 'Ataques contra você têm Desvantagem; suas salvaguardas de Destreza ganham Vantagem', icone: '🛡' },
-  { nome: 'Influenciar', desc: 'Teste de Carisma (Atuação, Enganação, Intimidação, Persuasão) ou Sabedoria (Lidar com Animais)', icone: '💬' },
+  {
+    nome: 'Influenciar',
+    desc: 'Teste de Carisma (Atuação, Enganação, Intimidação, Persuasão) ou Sabedoria (Lidar com Animais)',
+    icone: '💬',
+    periciasTeste: ['Atuação', 'Enganação', 'Intimidação', 'Persuasão', 'Lidar com Animais'],
+  },
   { nome: 'Preparar', desc: 'Prepara uma ação para executar em resposta a um gatilho definido por você', icone: '⏳' },
-  { nome: 'Procurar', desc: 'Teste de Sabedoria (Intuição, Medicina, Percepção ou Sobrevivência)', icone: '👁' },
+  {
+    nome: 'Procurar',
+    desc: 'Teste de Sabedoria (Intuição, Medicina, Percepção ou Sobrevivência)',
+    icone: '👁',
+    periciasTeste: ['Intuição', 'Medicina', 'Percepção', 'Sobrevivência'],
+  },
   { nome: 'Usar Objeto', desc: 'Utilizar um objeto não mágico', icone: '🎒' },
 ];
 

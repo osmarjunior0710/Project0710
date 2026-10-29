@@ -47,7 +47,7 @@ import {
 import { esmagamentoAprimoradoElegivel, AVISO_ESMAGAMENTO_APRIMORADO } from '../../../core/esmagamentoTelecineticoAprimorado';
 import EsmagamentoAprimoradoEscolha from '../combat/EsmagamentoAprimoradoEscolha';
 import TelecineseIntensificadaEscolha from '../combat/TelecineseIntensificadaEscolha';
-import { resolverVantagem } from '../../../core/calculoPersonagem';
+import { resolverVantagem, type PericiaFinal } from '../../../core/calculoPersonagem';
 import { danoComCritico, dadoExtraPerfurador } from '../../../core/danoCritico';
 import {
   truqueElegivelTruquePotente,
@@ -123,6 +123,16 @@ interface CombatTabProps {
    * Afeta Iniciativa e qualquer rolagem de ataque (todo ataque com
    * arma/desarmado usa Força ou Destreza). */
   desvantagemForcaDestreza: boolean;
+  /** As perícias finais do personagem (mesma lista da aba Atributos,
+   * `core/calculoPersonagem.ts` `PericiaFinal[]`) — usado só pelas 4
+   * Ações genéricas do Cap. 1 que têm teste de perícia próprio
+   * (Analisar/Esconder/Influenciar/Procurar, ver `data/exampleCombat.ts`
+   * `periciasTeste`), pra rolar com o mod./ⓘ certos em vez de só
+   * mostrar texto. */
+  pericias: PericiaFinal[];
+  /** Nome da armadura equipada quando ela impõe Desvantagem em
+   * Furtividade — mesmo campo/mesma regra de `AtributosTab.tsx`. */
+  desvantagemFurtividadeArmadura: string | null;
   /** Bárbaro nível 7 (Instintos Primitivos) — Vantagem em Iniciativa.
    * Combinada com `desvantagemForcaDestreza` via `resolverVantagem`
    * (se coincidirem, cancelam — regra real). */
@@ -785,6 +795,8 @@ const EFEITOS_GOLPE_BRUTAL: { nome: string; texto: string; nivelMinimo: 9 | 13 }
 
 export default function CombatTab({
   desvantagemForcaDestreza,
+  pericias,
+  desvantagemFurtividadeArmadura,
   temInstintosPrimitivos,
   pvAtual,
   pvMax,
@@ -3481,6 +3493,8 @@ export default function CombatTab({
         <AcaoPanelContent
           aberto={painelAberto === 'acao'}
           desvantagemForcaDestreza={desvantagemForcaDestreza}
+          pericias={pericias}
+          desvantagemFurtividadeArmadura={desvantagemFurtividadeArmadura}
           onEscolher={(nome, desc) => escolherNoPainel('acao', nome, desc)}
           onAbrirSalvaguarda={abrirSalvaguarda}
           gastarSlotCirculo={onGastarSlotCirculo}

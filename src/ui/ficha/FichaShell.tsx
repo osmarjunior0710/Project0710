@@ -4028,6 +4028,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
         {tab === 'combat' && (
           <CombatTab
             desvantagemForcaDestreza={desvantagemForcaDestreza}
+            pericias={pericias}
+            desvantagemFurtividadeArmadura={desvantagemFurtividadeArmadura}
             temInstintosPrimitivos={temInstintosPrimitivos}
             acoesGenericasBonus={acoesGenericasBonus}
             pvAtual={pvAtual}

@@ -5,6 +5,13 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_1614
+
+4 das Ações genéricas do painel de Ação (Analisar, Esconder, Influenciar, Procurar) agora rolam o
+teste de perícia de verdade — toca no card e, se tiver mais de uma perícia possível, escolhe qual
+rolar primeiro. Isso também faz a Vantagem de Clarividência/Empata (Talentos Selvagens) valer de
+verdade: aparece como opção antes de rolar, quando ainda sobra uso.
+
 ## v202610_0106
 
 Corrigido um bug visual reportado pelo Osmar: o popup "Normal vs. Com Vantagem" de

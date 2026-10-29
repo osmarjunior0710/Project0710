@@ -398,5 +398,18 @@ construída no foco que acabou de fechar — ver aprendizados/talentos/atributo-
   `npm run build` limpos. **Não testado visualmente no navegador** (sem ferramenta de browser nesta
   sessão) — pendente confirmação do Osmar de que o popup aparece certo agora.
 
+- [x] **Correção pós-Entrega 3 — Analisar/Esconder/Influenciar/Procurar agora rolam dado de
+  verdade (achado pelo Osmar testando a Vantagem do Grupo B)**: essas 4 das 9 Ações genéricas do
+  Cap. 1 (`data/exampleCombat.ts`) descrevem teste de perícia mas só mostravam texto — sem isso, a
+  Vantagem de Clarividência/Empata não tinha efeito nenhum. Adicionado `periciasTeste?: string[]`
+  em `AcaoBase` (as outras 5 ações continuam só texto); `pericias`/`desvantagemFurtividadeArmadura`
+  (mesmos dados já usados em `AtributosTab.tsx`) agora também chegam em `CombatTab.tsx` →
+  `AcaoPanelContent.tsx`. Toque na ação: 1 perícia elegível → rola direto (mesmo mod/ⓘ/Desvantagem
+  por Armadura de Furtividade da aba Atributos); mais de 1 → abre escolha de qual perícia primeiro
+  (`onAbrirEscolhaDeEfeito`); Grupo B entra como passo extra só quando a Ação bate e sobra uso,
+  perguntando Normal vs. Com Vantagem antes de rolar. `npx tsc -b`, `npm test -- --run`
+  (1105 testes), `npm run build` limpos. **Não testado visualmente no navegador** (sem ferramenta
+  de browser nesta sessão).
+
 Próximo passo: Entrega 4 (Grupo C — Modelador de Carne/Trapaceiro Psiônico, +mod. Int num teste
 específico) ou decidir com o Osmar se a tela de substituição de talento da Origem entra antes.
