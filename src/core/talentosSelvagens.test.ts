@@ -3,6 +3,7 @@ import {
   tipoDanoTrocaTalentoSelvagem,
   acaoVantagemTalentoSelvagem,
   testeBonificadoTalentoSelvagem,
+  bonusTesteTalentoSelvagem,
   temBiocinese,
   temSussurradorMental,
   temPsicineticoTalento,
@@ -33,12 +34,14 @@ describe('acaoVantagemTalentoSelvagem (Grupo B)', () => {
 });
 
 describe('testeBonificadoTalentoSelvagem (Grupo C)', () => {
-  it('Modelador de Carne/Trapaceiro Psiônico devolvem atributo+perícias certos', () => {
+  it('Modelador de Carne/Trapaceiro Psiônico devolvem nome+atributo+perícias certos', () => {
     expect(testeBonificadoTalentoSelvagem(['modelador-de-carne'])).toEqual({
+      nome: 'Modelador de Carne',
       atributo: 'Destreza',
       pericias: ['Acrobacia', 'Prestidigitação'],
     });
     expect(testeBonificadoTalentoSelvagem(['trapaceiro-psionico'])).toEqual({
+      nome: 'Trapaceiro Psiônico',
       atributo: 'Carisma',
       pericias: ['Enganação', 'Persuasão'],
     });
@@ -46,6 +49,17 @@ describe('testeBonificadoTalentoSelvagem (Grupo C)', () => {
 
   it('borda: sem talento do grupo devolve null', () => {
     expect(testeBonificadoTalentoSelvagem(['biocinese'])).toBeNull();
+  });
+});
+
+describe('bonusTesteTalentoSelvagem (Grupo C)', () => {
+  it('usa o mod. de Inteligência quando positivo', () => {
+    expect(bonusTesteTalentoSelvagem(3)).toBe(3);
+  });
+
+  it('borda: mínimo +1 mesmo com mod. 0 ou negativo', () => {
+    expect(bonusTesteTalentoSelvagem(0)).toBe(1);
+    expect(bonusTesteTalentoSelvagem(-2)).toBe(1);
   });
 });
 

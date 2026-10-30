@@ -361,6 +361,11 @@ export interface PersonagemSalvo {
    * Proficiência/Descanso Longo) — mesmo padrão de contador de
    * `ancestralidadeGiganteGasto` abaixo. Ver `core/talentosSelvagens.ts`. */
   vantagemTalentoSelvagemGasto?: number;
+  /** Grupo C dos Talentos Selvagens (Modelador de Carne/Trapaceiro
+   * Psiônico) — "+mod. Inteligência (mín. +1) num teste de perícia
+   * específica", mesmo padrão de contador de `vantagemTalentoSelvagemGasto`
+   * acima. Ver `core/talentosSelvagens.ts`. */
+  testeBonificadoTalentoSelvagemGasto?: number;
   /** Cortar (Mestre em Armas Grandes) — `true` = liberado agora (após
    * Crítico ou confirmação manual de "reduziu a 0 PV"), reseta no Fim
    * do Turno. Ver `FichaShell.tsx`. */

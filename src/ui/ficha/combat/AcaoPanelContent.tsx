@@ -18,6 +18,7 @@ import { CUSTO_FOCO_EXPLOSAO_ELEMENTAL } from '../../../core/explosaoElemental';
 import type { DisciplinaPosConjuracaoPendente } from '../../../core/conjurarMagia';
 import { corDoRecursoDaClasse } from '../../../core/corRecursoClasse';
 import type { PedidoEscolhaDeEfeito } from '../../components/EscolherEfeitoModal';
+import { bonusTesteTalentoSelvagem } from '../../../core/talentosSelvagens';
 import styles from './PanelRows.module.css';
 import GruposDoPainel, { type BlocoPainel } from './GruposDoPainel';
 
@@ -229,6 +230,14 @@ interface AcaoPanelContentProps {
   usosVantagemTalentoSelvagemMaximo: number;
   usosVantagemTalentoSelvagemRestantes: number;
   onUsarVantagemTalentoSelvagem: () => boolean;
+  /** Grupo C dos Talentos Selvagens (Modelador de Carne/Trapaceiro
+   * Psiônico) — `pericias` afetadas inclui Enganação/Persuasão, que o
+   * card "Influenciar" também rola (ver CLAUDE.md §6.6, mesma regra
+   * de "conferir os 2 lugares"). `null` sem o talento. */
+  testeBonificadoTalentoSelvagem: { nome: string; atributo: string; pericias: string[] } | null;
+  usosTesteBonificadoTalentoSelvagemMaximo: number;
+  usosTesteBonificadoTalentoSelvagemRestantes: number;
+  onUsarTesteBonificadoTalentoSelvagem: () => boolean;
   /** Ataque Desarmado, opções Empurrar/Imobilizar (Glossário) — sem jogada de ataque: gasta um dos
    * ataques da ação Atacar e abre o popup de salvaguarda do alvo (`CombatTab.tsx`). */
   onEmpurrarImobilizar: (tipo: 'empurrar' | 'imobilizar', info: AtaqueInfo) => void;
@@ -361,6 +370,9 @@ export default function AcaoPanelContent({
   acaoVantagemTalentoSelvagem,
   usosVantagemTalentoSelvagemRestantes,
   onUsarVantagemTalentoSelvagem,
+  testeBonificadoTalentoSelvagem,
+  usosTesteBonificadoTalentoSelvagemRestantes,
+  onUsarTesteBonificadoTalentoSelvagem,
   onEmpurrarImobilizar,
   explosaoElementalDisponivel,
   onExplosaoElemental,
@@ -436,21 +448,28 @@ export default function AcaoPanelContent({
   });
 
   /** Rola o teste de `p` de verdade (mesma conta/ⓘ de `AtributosTab.tsx`) a
-   * partir de uma Ação genérica do Cap. 1 (`a.periciasTeste`) — `comVantagemTalento`
-   * já vem resolvido por `rolarComEscolhaDeVantagem` abaixo (Grupo B dos
-   * Talentos Selvagens, se elegível). Chama `onEscolher` igual a ação sem
-   * teste próprio fazia — marca a Ação como usada e fecha o painel (bug
+   * partir de uma Ação genérica do Cap. 1 (`a.periciasTeste`) — `comVantagemTalento`/
+   * `bonusTalentoExtra` já vêm resolvidos por `rolarComEscolhaDeTalento` abaixo
+   * (Grupo B/C dos Talentos Selvagens, se elegível). Chama `onEscolher` igual a
+   * ação sem teste próprio fazia — marca a Ação como usada e fecha o painel (bug
    * achado pelo Osmar: sem isso a Ação nunca era consumida). */
-  function rolarPericiaDaAcao(nomeCompleto: string, p: PericiaFinal, comVantagemTalento: boolean) {
+  function rolarPericiaDaAcao(nomeCompleto: string, p: PericiaFinal, comVantagemTalento: boolean, bonusTalentoExtra: number) {
     const desvantagemFurtividade = p.nome === 'Furtividade' && desvantagemFurtividadeArmadura !== null;
-    const explicacaoComDesvantagem = desvantagemFurtividade
+    const modFinal = p.mod + bonusTalentoExtra;
+    let explicacaoFinal = desvantagemFurtividade
       ? { ...p.explicacao, linhas: [...p.explicacao.linhas, { label: 'Desvantagem', valor: `Armadura (${desvantagemFurtividadeArmadura})` }] }
       : p.explicacao;
+    if (bonusTalentoExtra !== 0) {
+      explicacaoFinal = {
+        ...explicacaoFinal,
+        linhas: [...explicacaoFinal.linhas, { label: 'Talento Selvagem (mod. Inteligência)', valor: fmtMod(bonusTalentoExtra) }],
+      };
+    }
     rolarD20({
       label: p.nome,
-      formula: `1d20 ${p.mod >= 0 ? '+' : '-'} ${Math.abs(p.mod)}`,
-      mod: p.mod,
-      explicacaoMod: explicacaoComDesvantagem,
+      formula: `1d20 ${modFinal >= 0 ? '+' : '-'} ${Math.abs(modFinal)}`,
+      mod: modFinal,
+      explicacaoMod: explicacaoFinal,
       categoria: 'atributoOuSalvaguarda',
       permiteForcaIndomavel: p.atributo === 'FOR',
       vantagem: resolverVantagem(
@@ -458,32 +477,54 @@ export default function AcaoPanelContent({
         (desvantagemForcaDestreza && (p.atributo === 'FOR' || p.atributo === 'DES')) || desvantagemFurtividade,
       ),
     });
-    onEscolher(nomeCompleto, comVantagemTalento ? `Teste de ${p.nome} — Com Vantagem (Talento Selvagem).` : `Teste de ${p.nome}.`);
+    const notaTalento = comVantagemTalento ? ' — Com Vantagem (Talento Selvagem)' : bonusTalentoExtra !== 0 ? ' — Com bônus (Talento Selvagem)' : '';
+    onEscolher(nomeCompleto, `Teste de ${p.nome}${notaTalento}.`);
   }
 
-  /** Decide se oferece a escolha "Normal vs. Com Vantagem" do Grupo B dos
-   * Talentos Selvagens (Clarividência/Empata) antes de `rolarPericiaDaAcao` —
-   * só quando a Ação tocada é a certa e ainda sobra uso. */
-  function rolarComEscolhaDeVantagem(nomeAcao: string, nomeCompleto: string, p: PericiaFinal) {
-    if (nomeAcao !== acaoVantagemTalentoSelvagem || usosVantagemTalentoSelvagemRestantes <= 0) {
-      rolarPericiaDaAcao(nomeCompleto, p, false);
+  /** Decide se oferece a escolha "Normal vs. Com Vantagem/Com bônus" de um
+   * Talento Selvagem antes de `rolarPericiaDaAcao` — Grupo B (Vantagem,
+   * Ação inteira) e Grupo C (+mod. Inteligência, perícia específica) nunca
+   * coexistem no mesmo personagem (só pode ter 1 Talento Selvagem), mas o
+   * código checa os 2 por clareza. Sem nenhum dos dois elegível, rola
+   * direto, sem popup. */
+  function rolarComEscolhaDeTalento(nomeAcao: string, nomeCompleto: string, p: PericiaFinal) {
+    if (nomeAcao === acaoVantagemTalentoSelvagem && usosVantagemTalentoSelvagemRestantes > 0) {
+      onAbrirEscolhaDeEfeito({
+        titulo: `${p.nome} — como?`,
+        opcoes: [
+          { nome: 'Normal', texto: `Teste de ${p.nome}.` },
+          {
+            nome: 'Com Vantagem',
+            texto: `Talento Selvagem: Vantagem no teste (resta ${usosVantagemTalentoSelvagemRestantes} uso(s) até o Descanso Longo).`,
+          },
+        ],
+        onEscolher: (nomes) => {
+          const comVantagem = nomes[0] === 'Com Vantagem' && onUsarVantagemTalentoSelvagem();
+          rolarPericiaDaAcao(nomeCompleto, p, comVantagem, 0);
+        },
+        onFechar: () => rolarPericiaDaAcao(nomeCompleto, p, false, 0),
+      });
       return;
     }
-    onAbrirEscolhaDeEfeito({
-      titulo: `${p.nome} — como?`,
-      opcoes: [
-        { nome: 'Normal', texto: `Teste de ${p.nome}.` },
-        {
-          nome: 'Com Vantagem',
-          texto: `Talento Selvagem: Vantagem no teste (resta ${usosVantagemTalentoSelvagemRestantes} uso(s) até o Descanso Longo).`,
+    if (testeBonificadoTalentoSelvagem?.pericias.includes(p.nome) && usosTesteBonificadoTalentoSelvagemRestantes > 0) {
+      onAbrirEscolhaDeEfeito({
+        titulo: `${p.nome} — como?`,
+        opcoes: [
+          { nome: 'Normal', texto: `Teste de ${p.nome}.` },
+          {
+            nome: 'Com bônus',
+            texto: `${testeBonificadoTalentoSelvagem.nome}: +mod. Inteligência no teste (resta ${usosTesteBonificadoTalentoSelvagemRestantes} uso(s) até o Descanso Longo).`,
+          },
+        ],
+        onEscolher: (nomes) => {
+          const comBonus = nomes[0] === 'Com bônus' && onUsarTesteBonificadoTalentoSelvagem();
+          rolarPericiaDaAcao(nomeCompleto, p, false, comBonus ? bonusTesteTalentoSelvagem(modIntAtual) : 0);
         },
-      ],
-      onEscolher: (nomes) => {
-        const comVantagem = nomes[0] === 'Com Vantagem' && onUsarVantagemTalentoSelvagem();
-        rolarPericiaDaAcao(nomeCompleto, p, comVantagem);
-      },
-      onFechar: () => rolarPericiaDaAcao(nomeCompleto, p, false),
-    });
+        onFechar: () => rolarPericiaDaAcao(nomeCompleto, p, false, 0),
+      });
+      return;
+    }
+    rolarPericiaDaAcao(nomeCompleto, p, false, 0);
   }
 
   /** Ponto de entrada do toque numa Ação genérica do Cap. 1
@@ -499,7 +540,7 @@ export default function AcaoPanelContent({
       return;
     }
     if (candidatas.length === 1) {
-      rolarComEscolhaDeVantagem(a.nome, nomeCompleto, candidatas[0]);
+      rolarComEscolhaDeTalento(a.nome, nomeCompleto, candidatas[0]);
       return;
     }
     onAbrirEscolhaDeEfeito({
@@ -507,7 +548,7 @@ export default function AcaoPanelContent({
       opcoes: candidatas.map((p) => ({ nome: p.nome, texto: `${p.atributo} ${fmtMod(p.mod)}` })),
       onEscolher: (nomes) => {
         const escolhida = candidatas.find((p) => p.nome === nomes[0]);
-        if (escolhida) rolarComEscolhaDeVantagem(a.nome, nomeCompleto, escolhida);
+        if (escolhida) rolarComEscolhaDeTalento(a.nome, nomeCompleto, escolhida);
       },
     });
   }

@@ -147,7 +147,11 @@ import {
 } from '../../core/magiaTalentoGeral';
 import { talentos, type Talento } from '../../data/rulesets/dnd2024/talentos';
 import { resumoConjuracaoDeTalento } from '../../core/conjuracaoDeTalento';
-import { tipoDanoTrocaTalentoSelvagem, acaoVantagemTalentoSelvagem } from '../../core/talentosSelvagens';
+import {
+  tipoDanoTrocaTalentoSelvagem,
+  acaoVantagemTalentoSelvagem,
+  testeBonificadoTalentoSelvagem,
+} from '../../core/talentosSelvagens';
 import { temPerfurador } from '../../core/rerollDanoTalento';
 import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
 import { armaduraSemTreinamentoEquipada } from '../../core/proficienciaArmadura';
@@ -606,6 +610,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   // `ancestralidadeGiganteGasto`.
   const [vantagemTalentoSelvagemGasto, setVantagemTalentoSelvagemGasto] = useState(
     personagemSalvo.vantagemTalentoSelvagemGasto ?? 0,
+  );
+  // Grupo C dos Talentos Selvagens (Modelador de Carne/Trapaceiro
+  // Psiônico) — mesmo padrão do Grupo B acima.
+  const [testeBonificadoTalentoSelvagemGasto, setTesteBonificadoTalentoSelvagemGasto] = useState(
+    personagemSalvo.testeBonificadoTalentoSelvagemGasto ?? 0,
   );
   const [talhadorUsadoTurno, setTalhadorUsadoTurno] = useState(personagemSalvo.talhadorUsadoTurno ?? false);
   const [conhecimentoPrimordialPericiaEscolhida, setConhecimentoPrimordialPericiaEscolhida] = useState(
@@ -1458,6 +1467,14 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const acaoVantagemSelvagemAtual = acaoVantagemTalentoSelvagem(talentosEfetivos);
   const usosVantagemTalentoSelvagemMaximo = acaoVantagemSelvagemAtual && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
   const usosVantagemTalentoSelvagemRestantes = Math.max(0, usosVantagemTalentoSelvagemMaximo - vantagemTalentoSelvagemGasto);
+  // Grupo C dos Talentos Selvagens (Modelador de Carne/Trapaceiro
+  // Psiônico) — mesmo cálculo de usos do Grupo B acima.
+  const testeBonificadoSelvagemAtual = testeBonificadoTalentoSelvagem(talentosEfetivos);
+  const usosTesteBonificadoTalentoSelvagemMaximo = testeBonificadoSelvagemAtual && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
+  const usosTesteBonificadoTalentoSelvagemRestantes = Math.max(
+    0,
+    usosTesteBonificadoTalentoSelvagemMaximo - testeBonificadoTalentoSelvagemGasto,
+  );
   const temInstintosPrimitivos = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.instintosPrimitivos);
   const temGolpeBrutal = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.golpeBrutal);
   /** 0 = ainda não chegou no nível 13; 1 = nível 13-16 (+2 efeitos);
@@ -1687,6 +1704,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     talhadorUsadoTurno,
     trocaTipoDeDanoTalentoSelvagemUsadaTurno,
     vantagemTalentoSelvagemGasto,
+    testeBonificadoTalentoSelvagemGasto,
     conhecimentoPrimordialPericiaEscolhida,
     academicoPericiaEscolhida,
     pvMax: personagem.pvMax,
@@ -1820,6 +1838,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       talhadorUsadoTurno,
       trocaTipoDeDanoTalentoSelvagemUsadaTurno,
       vantagemTalentoSelvagemGasto,
+      testeBonificadoTalentoSelvagemGasto,
       conhecimentoPrimordialPericiaEscolhida,
       pvTemporario,
       maestriaArma,
@@ -2029,6 +2048,11 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     usosVantagemTalentoSelvagemMaximo,
     vantagemTalentoSelvagemGasto,
     setVantagemTalentoSelvagemGasto,
+  );
+  const testeBonificadoTalentoSelvagemRecurso = recursoContado(
+    usosTesteBonificadoTalentoSelvagemMaximo,
+    testeBonificadoTalentoSelvagemGasto,
+    setTesteBonificadoTalentoSelvagemGasto,
   );
   function usarAncestralidadeGigante(): boolean {
     return ancestralidadeGigante.usar();
@@ -2390,6 +2414,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     // Talento Geral.
     setPontosDeSorteGasto(0); // Sortudo
     setVantagemTalentoSelvagemGasto(0); // Talento Selvagem (Grupo B)
+    setTesteBonificadoTalentoSelvagemGasto(0); // Talento Selvagem (Grupo C)
 
     // Bárbaro.
     setFuriaImplacavelUsos(0);
@@ -3878,6 +3903,9 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             vigorImplacavelGasto={vigorImplacavelGasto}
             inspiracaoHeroicaAtiva={inspiracaoHeroicaAtiva}
             onAlternarInspiracaoHeroica={alternarInspiracaoHeroica}
+            testeBonificadoTalentoSelvagem={testeBonificadoSelvagemAtual}
+            usosTesteBonificadoTalentoSelvagemRestantes={usosTesteBonificadoTalentoSelvagemRestantes}
+            onUsarTesteBonificadoTalentoSelvagem={testeBonificadoTalentoSelvagemRecurso.usar}
           />
         )}
         {tab === 'perfil' && (
@@ -4130,6 +4158,12 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               maximo: usosVantagemTalentoSelvagemMaximo,
               restantes: usosVantagemTalentoSelvagemRestantes,
               onUsar: vantagemTalentoSelvagem.usar,
+            }}
+            testeBonificadoTalentoSelvagem={{
+              atual: testeBonificadoSelvagemAtual,
+              maximo: usosTesteBonificadoTalentoSelvagemMaximo,
+              restantes: usosTesteBonificadoTalentoSelvagemRestantes,
+              onUsar: testeBonificadoTalentoSelvagemRecurso.usar,
             }}
             golpeBrutal={{
               disponivel: temGolpeBrutal,

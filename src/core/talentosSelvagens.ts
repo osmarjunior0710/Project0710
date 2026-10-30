@@ -6,9 +6,9 @@
 // 3 do SDD), cada um com função própria (CLAUDE.md §6.3.1) — grupos
 // com a MESMA mecânica reaproveitam 1 função parametrizada (seção 6
 // do SDD: "Grupos A/B/C agrupam o que antes seriam 7 entregas em 3"),
-// nunca 1 função por talento repetida. Grupo A (Entrega 2) e Grupo B
-// (Entrega 3) já são `[codeimplementation]`; C/D ainda são `[PH]`
-// (entregas futuras).
+// nunca 1 função por talento repetida. Grupo A (Entrega 2), Grupo B
+// (Entrega 3) e Grupo C (Entrega 4) já são `[codeimplementation]`; D
+// ainda é `[PH]` (entregas futuras).
 
 /** IDs do Grupo A (Atmocinese/Criocinese/Pirocinese) — mesma mecânica,
  * só o tipo de dano muda; mapeado pra quando a mecânica real existir. */
@@ -88,27 +88,41 @@ export function acaoVantagemTalentoSelvagem(talentosAtuais: string[] | undefined
   return null;
 }
 
-/** IDs do Grupo C (Modelador de Carne/Trapaceiro Psiônico) → atributo +
+/** IDs do Grupo C (Modelador de Carne/Trapaceiro Psiônico) → nome do
+ * talento (pro botão de escolha, pedido do Osmar — sem isso o
+ * jogador não sabe POR QUE a opção de bônus apareceu) + atributo +
  * perícias do teste bonificado. */
-const TESTE_BONIFICADO_POR_TALENTO_GRUPO_C: Record<string, { atributo: string; pericias: string[] }> = {
-  'modelador-de-carne': { atributo: 'Destreza', pericias: ['Acrobacia', 'Prestidigitação'] },
-  'trapaceiro-psionico': { atributo: 'Carisma', pericias: ['Enganação', 'Persuasão'] },
+const TESTE_BONIFICADO_POR_TALENTO_GRUPO_C: Record<string, { nome: string; atributo: string; pericias: string[] }> = {
+  'modelador-de-carne': { nome: 'Modelador de Carne', atributo: 'Destreza', pericias: ['Acrobacia', 'Prestidigitação'] },
+  'trapaceiro-psionico': { nome: 'Trapaceiro Psiônico', atributo: 'Carisma', pericias: ['Enganação', 'Persuasão'] },
 };
 
 /** Grupo C (Modelador de Carne/Trapaceiro Psiônico) — "num teste de X
  * (perícia A ou B), soma mod. Inteligência (mín. +1)" (usos = Bônus
- * de Proficiência/Descanso Longo) — devolve o atributo/perícias do
- * talento ATIVO deste grupo, ou `null`. [PH]
- * [placeholder-codeimplementation] — ainda não soma o bônus de verdade. */
+ * de Proficiência/Descanso Longo) — devolve nome/atributo/perícias do
+ * talento ATIVO deste grupo, ou `null`. [codeimplementation]
+ * (Entrega 4) — plugado em `AtributosTab.tsx` (todas as perícias) e
+ * `AcaoPanelContent.tsx` (card "Influenciar", que também rola
+ * Enganação/Persuasão — ver CLAUDE.md §6.6, mesma regra de "conferir
+ * os 2 lugares" aplicada aqui a perícia em vez de magia). Mesmo
+ * padrão de escolha "Normal vs. Com bônus" do Grupo B, via
+ * `bonusTesteTalentoSelvagem` abaixo pro valor numérico. */
 export function testeBonificadoTalentoSelvagem(
   talentosAtuais: string[] | undefined,
-): { atributo: string; pericias: string[] } | null {
+): { nome: string; atributo: string; pericias: string[] } | null {
   if (!talentosAtuais) return null;
   for (const id of talentosAtuais) {
     const teste = TESTE_BONIFICADO_POR_TALENTO_GRUPO_C[id];
     if (teste) return teste;
   }
   return null;
+}
+
+/** Valor do bônus do Grupo C — "+mod. Inteligência (mínimo +1)",
+ * mesmo padrão de `Math.max(1, modInt)` já usado em outras contas do
+ * app (ex.: `core/necromante.ts`, dano da Colheita Macabra). */
+export function bonusTesteTalentoSelvagem(modInt: number): number {
+  return Math.max(1, modInt);
 }
 
 /** Biocinese — "quando magia sua cura PV, pode rolar 1d4 extra e

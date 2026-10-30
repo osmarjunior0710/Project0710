@@ -5,6 +5,14 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0946
+
+Quem tem Modelador de Carne ou Trapaceiro Psiônico (Talentos Selvagens) agora pode somar o mod. de
+Inteligência num teste de Acrobacia/Prestidigitação ou Enganação/Persuasão — toca na perícia
+(aba Atributos, ou o card "Influenciar" do Combate pra Enganação/Persuasão), escolhe "Com bônus" e
+gasta 1 uso (recupera no Descanso Longo). A opção já mostra o nome do talento, pra ficar claro de
+onde ela vem.
+
 ## v202610_0815
 
 Corrigido: rolar Analisar/Esconder/Influenciar/Procurar agora consome a Ação do turno de verdade

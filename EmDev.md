@@ -418,5 +418,19 @@ construída no foco que acabou de fechar — ver aprendizados/talentos/atributo-
   tsc -b`, `npm test -- --run` (1105 testes), `npm run build` limpos. **Não testado visualmente no
   navegador** (sem ferramenta de browser nesta sessão).
 
-Próximo passo: Entrega 4 (Grupo C — Modelador de Carne/Trapaceiro Psiônico, +mod. Int num teste
-específico) ou decidir com o Osmar se a tela de substituição de talento da Origem entra antes.
+- [x] **E7 Entrega 4 — Grupo C (Modelador de Carne/Trapaceiro Psiônico)**: "Teste de X (perícia A
+  ou B): +mod. Inteligência (mín. +1), usos = Bônus de Proficiência/Descanso Longo". Toca na
+  perícia certa (`testeBonificadoTalentoSelvagem.pericias`) com uso sobrando → escolha "Normal vs.
+  Com bônus" (mesmo `EscolherEfeitoModal`, texto da opção já leva o NOME do talento — ex.: "Modelador
+  de Carne: +mod. Inteligência...", pedido do Osmar depois do Grupo B: sem isso o jogador não sabe
+  por que a opção apareceu) → soma no mod./ⓘ do dado. Cobre os 2 lugares que rolam Enganação/
+  Persuasão (aba Atributos E o card "Influenciar" do Combate, CLAUDE.md §6.6); Acrobacia/
+  Prestidigitação só existem na aba Atributos hoje. `bonusTesteTalentoSelvagem` (novo, com teste) =
+  `Math.max(1, modInt)`; `testeBonificadoTalentoSelvagem` ganhou o campo `nome` (pro texto do
+  botão); contador `testeBonificadoTalentoSelvagemGasto` (usosMaximo = Bônus de Proficiência,
+  reseta no Descanso Longo), persistido em `PersonagemSalvo`. `testeBonificadoTalentoSelvagem`
+  virou `[codeimplementation]`. `npx tsc -b`, `npm test -- --run` (1107 testes), `npm run build`
+  limpos. **Não testado visualmente no navegador** (sem ferramenta de browser nesta sessão).
+
+Próximo passo: Entrega 5 (Biocinese — dado extra em cura) ou decidir com o Osmar se a tela de
+substituição de talento da Origem entra antes.

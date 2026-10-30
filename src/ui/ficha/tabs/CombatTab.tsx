@@ -298,6 +298,12 @@ interface CombatTabProps {
    * Bônus de Proficiência/Descanso Longo, mesmo `RecursoContado` de
    * Ancestralidade Gigante. Ver `core/talentosSelvagens.ts`. */
   vantagemTalentoSelvagem: RecursoContado & { acao: string | null };
+  /** Grupo C dos Talentos Selvagens (Modelador de Carne/Trapaceiro
+   * Psiônico) — `atual` é `nome`/`atributo`/`pericias` do talento
+   * ATIVO, ou `null` sem o talento. Afeta o card "Influenciar"
+   * (Enganação/Persuasão também são roladas lá — ver CLAUDE.md §6.6).
+   * Ver `core/talentosSelvagens.ts`. */
+  testeBonificadoTalentoSelvagem: RecursoContado & { atual: { nome: string; atributo: string; pericias: string[] } | null };
   /** Golpe Brutal (Bárbaro, nível 9+) — precisa do Ataque Imprudente
    * já ativo nesse turno (regra real). `dados` = 1 (nível 9-16) ou 2
    * (17+, "2d10"). `efeitosNivel13`/`escolhas` decidem quais efeitos
@@ -900,6 +906,12 @@ export default function CombatTab({
     maximo: usosVantagemTalentoSelvagemMaximo,
     restantes: usosVantagemTalentoSelvagemRestantes,
     onUsar: onUsarVantagemTalentoSelvagem,
+  },
+  testeBonificadoTalentoSelvagem: {
+    atual: testeBonificadoTalentoSelvagemAtual,
+    maximo: usosTesteBonificadoTalentoSelvagemMaximo,
+    restantes: usosTesteBonificadoTalentoSelvagemRestantes,
+    onUsar: onUsarTesteBonificadoTalentoSelvagem,
   },
   golpeBrutal: {
     disponivel: golpeBrutalDisponivel,
@@ -3565,6 +3577,10 @@ export default function CombatTab({
           usosVantagemTalentoSelvagemMaximo={usosVantagemTalentoSelvagemMaximo}
           usosVantagemTalentoSelvagemRestantes={usosVantagemTalentoSelvagemRestantes}
           onUsarVantagemTalentoSelvagem={onUsarVantagemTalentoSelvagem}
+          testeBonificadoTalentoSelvagem={testeBonificadoTalentoSelvagemAtual}
+          usosTesteBonificadoTalentoSelvagemMaximo={usosTesteBonificadoTalentoSelvagemMaximo}
+          usosTesteBonificadoTalentoSelvagemRestantes={usosTesteBonificadoTalentoSelvagemRestantes}
+          onUsarTesteBonificadoTalentoSelvagem={onUsarTesteBonificadoTalentoSelvagem}
           efeitosAoAcertar={efeitosAoAcertar}
           onPedirEfeitosAoAcertar={pedirEfeitosAoAcertar}
           onEmpurrarImobilizar={abrirEmpurrarImobilizar}

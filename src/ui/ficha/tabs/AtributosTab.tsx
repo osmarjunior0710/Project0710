@@ -6,12 +6,15 @@ import type { ReservaDadoVida } from '../../../core/dadosDeVida';
 import InfoTexto from '../../components/InfoTexto';
 import {
   resolverVantagem,
+  fmtMod,
   type AtributoFinal,
   type ExplicacaoCalculo,
   type FerramentaFinal,
   type PericiaFinal,
   type SalvaguardaFinal,
 } from '../../../core/calculoPersonagem';
+import { bonusTesteTalentoSelvagem } from '../../../core/talentosSelvagens';
+import EscolherEfeitoModal from '../../components/EscolherEfeitoModal';
 import type { Arma } from '../../../data/rulesets/dnd2024/armas';
 import { buscarDescricaoMaestria } from '../../../data/rulesets/dnd2024/propriedadesMaestria';
 import { NOME_SENTIDO, type TipoSentido } from '../../../data/rulesets/dnd2024/sentidos';
@@ -125,6 +128,13 @@ interface AtributosTabProps {
    * contador). O jogador liga/desliga tocando na caixa. */
   inspiracaoHeroicaAtiva: boolean;
   onAlternarInspiracaoHeroica: () => void;
+  /** Grupo C dos Talentos Selvagens (Modelador de Carne/Trapaceiro
+   * Psiônico, E7 — ver `core/talentosSelvagens.ts`) — `null` sem o
+   * talento. `pericias` são as perícias afetadas (ex.: Acrobacia/
+   * Prestidigitação). */
+  testeBonificadoTalentoSelvagem: { nome: string; atributo: string; pericias: string[] } | null;
+  usosTesteBonificadoTalentoSelvagemRestantes: number;
+  onUsarTesteBonificadoTalentoSelvagem: () => boolean;
 }
 
 export default function AtributosTab({
@@ -174,9 +184,54 @@ export default function AtributosTab({
   vigorImplacavelGasto,
   inspiracaoHeroicaAtiva,
   onAlternarInspiracaoHeroica,
+  testeBonificadoTalentoSelvagem,
+  usosTesteBonificadoTalentoSelvagemRestantes,
+  onUsarTesteBonificadoTalentoSelvagem,
 }: AtributosTabProps) {
   const { rolarD20 } = useRoll();
   const sentidosParaExibir = sentidosAtivos(sentidos);
+  // Grupo C dos Talentos Selvagens (Modelador de Carne/Trapaceiro
+  // Psiônico) — aba Atributos não vive dentro de um SidePanel (sem o
+  // bug de `transform` documentado em `CONVENCOES-UI.md`), então o
+  // modal pode morar aqui mesmo, igual `MagiasTab.tsx` já faz.
+  const [escolhaBonusSelvagemPendente, setEscolhaBonusSelvagemPendente] = useState<{
+    p: PericiaFinal;
+    explicacaoMod: ExplicacaoCalculo;
+    desvantagem: boolean;
+  } | null>(null);
+  const modIntAtual = atributos.find((a) => a.atributo === 'INT')?.mod ?? 0;
+
+  /** Rola `p` de verdade — `bonusExtra` já vem resolvido (0 sem o Grupo C,
+   * ou `bonusTesteTalentoSelvagem(modIntAtual)` quando escolhido). */
+  function rolarPericiaFinal(p: PericiaFinal, explicacaoMod: ExplicacaoCalculo, desvantagem: boolean, bonusExtra: number) {
+    const modFinal = p.mod + bonusExtra;
+    const explicacaoFinal =
+      bonusExtra !== 0
+        ? { ...explicacaoMod, linhas: [...explicacaoMod.linhas, { label: 'Talento Selvagem (mod. Inteligência)', valor: fmtMod(bonusExtra) }] }
+        : explicacaoMod;
+    rolarD20({
+      label: p.nome,
+      formula: `1d20 ${modFinal >= 0 ? '+' : '-'} ${Math.abs(modFinal)}`,
+      mod: modFinal,
+      explicacaoMod: explicacaoFinal,
+      categoria: 'atributoOuSalvaguarda',
+      permiteForcaIndomavel: p.atributo === 'FOR',
+      vantagem: desvantagem ? 'desvantagem' : undefined,
+    });
+  }
+
+  /** Toque numa linha de perícia — só oferece a escolha "Normal vs. Com
+   * bônus" do Grupo C quando essa perícia específica está na lista do
+   * talento ATIVO e ainda sobra uso; senão rola direto, como sempre. */
+  function tocarPericia(p: PericiaFinal, explicacaoMod: ExplicacaoCalculo, desvantagem: boolean) {
+    const elegivel =
+      testeBonificadoTalentoSelvagem?.pericias.includes(p.nome) && usosTesteBonificadoTalentoSelvagemRestantes > 0;
+    if (!elegivel) {
+      rolarPericiaFinal(p, explicacaoMod, desvantagem, 0);
+      return;
+    }
+    setEscolhaBonusSelvagemPendente({ p, explicacaoMod, desvantagem });
+  }
 
   // O selo de Level Up só entra DEPOIS do anel terminar de encher (senão
   // o selo cortava a animação do XP). Já nascendo liberado (ficha abriu
@@ -415,24 +470,12 @@ export default function AtributosTab({
               linhas: [...p.explicacao.linhas, { label: 'Desvantagem', valor: `Armadura (${desvantagemFurtividadeArmadura})` }],
             }
           : p.explicacao;
+        const desvantagem = (desvantagemForcaDestreza && (p.atributo === 'FOR' || p.atributo === 'DES')) || desvantagemFurtividade;
         return (
           <div
             key={p.nome}
             className={styles.skillRow}
-            onClick={() =>
-              rolarD20({
-                label: p.nome,
-                formula: `1d20 ${p.mod >= 0 ? '+' : '-'} ${Math.abs(p.mod)}`,
-                mod: p.mod,
-                explicacaoMod: explicacaoComDesvantagem,
-                categoria: 'atributoOuSalvaguarda',
-                permiteForcaIndomavel: p.atributo === 'FOR',
-                vantagem:
-                  (desvantagemForcaDestreza && (p.atributo === 'FOR' || p.atributo === 'DES')) || desvantagemFurtividade
-                    ? 'desvantagem'
-                    : undefined,
-              })
-            }
+            onClick={() => tocarPericia(p, explicacaoComDesvantagem, desvantagem)}
           >
             <span>
               {p.proficiente ? '🔵' : '⚫'} {p.especialista && '⭐ '}
@@ -589,6 +632,29 @@ export default function AtributosTab({
         </>
       )}
 
+      {escolhaBonusSelvagemPendente && (
+        <EscolherEfeitoModal
+          titulo={`${escolhaBonusSelvagemPendente.p.nome} — como?`}
+          opcoes={[
+            { nome: 'Normal', texto: `Teste de ${escolhaBonusSelvagemPendente.p.nome}.` },
+            {
+              nome: 'Com bônus',
+              texto: `${testeBonificadoTalentoSelvagem?.nome}: +mod. Inteligência no teste (resta ${usosTesteBonificadoTalentoSelvagemRestantes} uso(s) até o Descanso Longo).`,
+            },
+          ]}
+          onEscolher={(nomes) => {
+            const pendente = escolhaBonusSelvagemPendente;
+            setEscolhaBonusSelvagemPendente(null);
+            const comBonus = nomes[0] === 'Com bônus' && onUsarTesteBonificadoTalentoSelvagem();
+            rolarPericiaFinal(pendente.p, pendente.explicacaoMod, pendente.desvantagem, comBonus ? bonusTesteTalentoSelvagem(modIntAtual) : 0);
+          }}
+          onFechar={() => {
+            const pendente = escolhaBonusSelvagemPendente;
+            setEscolhaBonusSelvagemPendente(null);
+            rolarPericiaFinal(pendente.p, pendente.explicacaoMod, pendente.desvantagem, 0);
+          }}
+        />
+      )}
     </>
   );
 }
