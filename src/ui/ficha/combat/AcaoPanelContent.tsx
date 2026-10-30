@@ -437,9 +437,11 @@ export default function AcaoPanelContent({
 
   /** Rola o teste de `p` de verdade (mesma conta/ⓘ de `AtributosTab.tsx`) a
    * partir de uma Ação genérica do Cap. 1 (`a.periciasTeste`) — `comVantagemTalento`
-   * já vem resolvido por `tocarAcaoComTeste` abaixo (Grupo B dos Talentos
-   * Selvagens, se elegível). */
-  function rolarPericiaDaAcao(p: PericiaFinal, comVantagemTalento: boolean) {
+   * já vem resolvido por `rolarComEscolhaDeVantagem` abaixo (Grupo B dos
+   * Talentos Selvagens, se elegível). Chama `onEscolher` igual a ação sem
+   * teste próprio fazia — marca a Ação como usada e fecha o painel (bug
+   * achado pelo Osmar: sem isso a Ação nunca era consumida). */
+  function rolarPericiaDaAcao(nomeCompleto: string, p: PericiaFinal, comVantagemTalento: boolean) {
     const desvantagemFurtividade = p.nome === 'Furtividade' && desvantagemFurtividadeArmadura !== null;
     const explicacaoComDesvantagem = desvantagemFurtividade
       ? { ...p.explicacao, linhas: [...p.explicacao.linhas, { label: 'Desvantagem', valor: `Armadura (${desvantagemFurtividadeArmadura})` }] }
@@ -456,14 +458,15 @@ export default function AcaoPanelContent({
         (desvantagemForcaDestreza && (p.atributo === 'FOR' || p.atributo === 'DES')) || desvantagemFurtividade,
       ),
     });
+    onEscolher(nomeCompleto, comVantagemTalento ? `Teste de ${p.nome} — Com Vantagem (Talento Selvagem).` : `Teste de ${p.nome}.`);
   }
 
   /** Decide se oferece a escolha "Normal vs. Com Vantagem" do Grupo B dos
    * Talentos Selvagens (Clarividência/Empata) antes de `rolarPericiaDaAcao` —
    * só quando a Ação tocada é a certa e ainda sobra uso. */
-  function rolarComEscolhaDeVantagem(nomeAcao: string, p: PericiaFinal) {
+  function rolarComEscolhaDeVantagem(nomeAcao: string, nomeCompleto: string, p: PericiaFinal) {
     if (nomeAcao !== acaoVantagemTalentoSelvagem || usosVantagemTalentoSelvagemRestantes <= 0) {
-      rolarPericiaDaAcao(p, false);
+      rolarPericiaDaAcao(nomeCompleto, p, false);
       return;
     }
     onAbrirEscolhaDeEfeito({
@@ -477,9 +480,9 @@ export default function AcaoPanelContent({
       ],
       onEscolher: (nomes) => {
         const comVantagem = nomes[0] === 'Com Vantagem' && onUsarVantagemTalentoSelvagem();
-        rolarPericiaDaAcao(p, comVantagem);
+        rolarPericiaDaAcao(nomeCompleto, p, comVantagem);
       },
-      onFechar: () => rolarPericiaDaAcao(p, false),
+      onFechar: () => rolarPericiaDaAcao(nomeCompleto, p, false),
     });
   }
 
@@ -496,7 +499,7 @@ export default function AcaoPanelContent({
       return;
     }
     if (candidatas.length === 1) {
-      rolarComEscolhaDeVantagem(a.nome, candidatas[0]);
+      rolarComEscolhaDeVantagem(a.nome, nomeCompleto, candidatas[0]);
       return;
     }
     onAbrirEscolhaDeEfeito({
@@ -504,7 +507,7 @@ export default function AcaoPanelContent({
       opcoes: candidatas.map((p) => ({ nome: p.nome, texto: `${p.atributo} ${fmtMod(p.mod)}` })),
       onEscolher: (nomes) => {
         const escolhida = candidatas.find((p) => p.nome === nomes[0]);
-        if (escolhida) rolarComEscolhaDeVantagem(a.nome, escolhida);
+        if (escolhida) rolarComEscolhaDeVantagem(a.nome, nomeCompleto, escolhida);
       },
     });
   }

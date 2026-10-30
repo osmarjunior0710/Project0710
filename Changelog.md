@@ -5,6 +5,11 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202610_0815
+
+Corrigido: rolar Analisar/Esconder/Influenciar/Procurar agora consome a Ação do turno de verdade
+(fechava o painel errado antes — rolava o dado mas a Ação continuava livre pra usar de novo).
+
 ## v202610_1614
 
 4 das Ações genéricas do painel de Ação (Analisar, Esconder, Influenciar, Procurar) agora rolam o

@@ -411,5 +411,12 @@ construída no foco que acabou de fechar — ver aprendizados/talentos/atributo-
   (1105 testes), `npm run build` limpos. **Não testado visualmente no navegador** (sem ferramenta
   de browser nesta sessão).
 
+- [x] **Correção pós-Entrega 3 — Ação não era consumida ao rolar perícia (achado pelo Osmar)**: ao
+  trocar os 4 cards por rolagem de verdade, o fluxo novo chamava `rolarD20` mas nunca `onEscolher` —
+  que é quem marca a Ação como usada e fecha o painel (`escolherNoPainel` → `onMarcarUsado`).
+  Corrigido: `rolarPericiaDaAcao` agora chama os dois, igual as outras ações sempre fizeram. `npx
+  tsc -b`, `npm test -- --run` (1105 testes), `npm run build` limpos. **Não testado visualmente no
+  navegador** (sem ferramenta de browser nesta sessão).
+
 Próximo passo: Entrega 4 (Grupo C — Modelador de Carne/Trapaceiro Psiônico, +mod. Int num teste
 específico) ou decidir com o Osmar se a tela de substituição de talento da Origem entra antes.
