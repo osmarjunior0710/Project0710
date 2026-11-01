@@ -251,6 +251,13 @@ export interface RollState {
   transeDestrutivo?: { valor: number } | null;
   /** Ver `RollDadosOptions.onTranseDestrutivoAplicado`. */
   onTranseDestrutivoAplicado?: ((novoTotal: number) => void) | null;
+  /** Ver `RollDadosOptions.biocineseElegivel`. */
+  biocineseElegivel?: boolean;
+  /** Preenchido quando Biocinese já foi aplicado NESTA rolagem (`valor`
+   * do 1d4 extra rolado) — bloqueia reaplicar na mesma rolagem. */
+  biocinese?: { valor: number } | null;
+  /** Ver `RollDadosOptions.onBiocineseAplicado`. */
+  onBiocineseAplicado?: ((novoTotal: number) => void) | null;
   /** `true` = esta rolagem usou o motor 3D (física de verdade,
    * `@3d-dice/dice-box`) em vez de `Math.random()` — Fase B do dado 3D
    * (`sdd/sdd-dado-3d.md`). Pra 'd20': cobre o d20 simples E o 2º dado
@@ -468,6 +475,17 @@ export interface TranseDestrutivoProvider {
   dadosLados: number;
 }
 
+/** Biocinese (Talento Selvagem, E7, ver `core/talentosSelvagens.ts`) — "quando magia sua cura PV,
+ * pode rolar 1d4 extra e somar à cura". Diferente de Transe Destrutivo: GASTA 1 uso (`restantes`),
+ * nunca grátis/ilimitado — `onUsar` consome 1 e devolve `false` sem uso sobrando (mesmo contrato de
+ * `RecursoContado.usar`, `ui/ficha/hooks/recursoGasto.ts`). Dado sempre d4 fixo (sem upcast — regra
+ * oficial confirmada no PDF, UA 2025 p.21). */
+export interface BiocineseProvider {
+  disponivel: boolean;
+  restantes: number;
+  onUsar: () => boolean;
+}
+
 /** Sortudo (Talento de Origem): Pontos de Sorte pra dar Vantagem num d20 DEPOIS de ver o resultado —
  * rola um 2º d20 e fica com o maior (mesma mecânica da Vantagem escolhida pós-rolagem). `usar` devolve
  * `false` se não havia ponto pra gastar. */
@@ -573,6 +591,18 @@ export interface RollDadosOptions {
   /** Mesmo motivo de `onSurtoPsionicoAplicado`, pro Transe Destrutivo
    * (soma 1 dado NOVO, grátis, ao total). */
   onTranseDestrutivoAplicado?: (novoTotal: number) => void;
+  /** Biocinese (Talento Selvagem, E7) — `true` só quando quem chamou já
+   * confirmou que esta é uma rolagem de CURA de magia (`resultado.rollCura`
+   * de `decidirConjuracao`) — ver `core/talentosSelvagens.ts`. Diferente
+   * de Transe Destrutivo: GASTA 1 uso (Bônus de Proficiência/Descanso
+   * Longo, ver `BiocineseProvider`), não é grátis/ilimitado. Sempre
+   * combinado com `forcarGrid: true` — cura de truque/magia de 1º círculo
+   * costuma rolar 1 dado só (ex.: Palavra Curativa), que sem isso usaria
+   * o atalho `concluirUmDado` (sem grid, sem ofertas). */
+  biocineseElegivel?: boolean;
+  /** Mesmo motivo de `onSurtoPsionicoAplicado`, pro Biocinese (soma 1d4
+   * NOVO à cura). */
+  onBiocineseAplicado?: (novoTotal: number) => void;
   /** Quebra do dado base/Aprimoramento de Truque/Upcast (dano/cura de
    * magia, B8) — mesmo formato do "ⓘ" de CA/perícia/ataque, mas com
    * notação de dado em vez de número resolvido (ver
@@ -712,6 +742,16 @@ interface RollContextValue {
   /** Rola 1 Dado de Energia Psiônica NOVO e soma ao total, sem gastar
    * nada — sem efeito sem oferta válida. */
   aplicarTranseDestrutivo: () => void;
+  /** Biocinese (Talento Selvagem, E7) — ver `BiocineseProvider`.
+   * `ofertaBiocinese` já decide sozinho SE oferece (precisa de
+   * `restantes > 0`) — `null` = não mostra nada. Mostra `restantes` pro
+   * card já dizer quantos usos sobram (pedido do Osmar, mesmo padrão
+   * do Grupo B/C). */
+  ofertaBiocinese: { restantes: number } | null;
+  registrarBiocinese: (provider: BiocineseProvider | null) => void;
+  /** Rola 1d4 NOVO e soma ao total, gastando 1 uso de Biocinese — sem
+   * efeito sem oferta válida. */
+  aplicarBiocinese: () => void;
   /** Sobrevivente Disciplinado (Monge nível 14) — ver `SobreviventeDisciplinadoProvider`. */
   sobreviventeDisciplinadoDisponivel: boolean;
   registrarSobreviventeDisciplinado: (provider: SobreviventeDisciplinadoProvider | null) => void;
@@ -1046,6 +1086,8 @@ export function RollProvider({ children }: { children: ReactNode }) {
       onForcaVitalAplicada,
       transeDestrutivoElegivel,
       onTranseDestrutivoAplicado,
+      biocineseElegivel,
+      onBiocineseAplicado,
       explicacaoMod,
       onResultado,
       confirmarFechamento,
@@ -1158,6 +1200,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
           transeDestrutivoElegivel,
           onTranseDestrutivoAplicado: onTranseDestrutivoAplicado ?? null,
           transeDestrutivo: null,
+          biocineseElegivel,
+          onBiocineseAplicado: onBiocineseAplicado ?? null,
+          biocinese: null,
           explicacaoMod,
           motor3D: viaMotor3D,
           confirmarFechamento,
@@ -1626,6 +1671,38 @@ export function RollProvider({ children }: { children: ReactNode }) {
     estado.onTranseDestrutivoAplicado?.(novoTotal);
   }, [transeDestrutivoProvider, ofertaTranseDestrutivo, estado]);
 
+  // Biocinese (Talento Selvagem, E7, ver `core/talentosSelvagens.ts`) —
+  // mesmo formato de `transeDestrutivoProvider` acima, só que GASTA 1 uso
+  // (`provider.onUsar`) em vez de ser grátis, e o dado é sempre d4 fixo
+  // (sem upcast — regra oficial). Superfície é `estado.biocineseElegivel`,
+  // setado só em rolagem de CURA (`resultado.rollCura`), sempre combinado
+  // com `forcarGrid: true` por quem chama (cura de truque costuma ser 1
+  // dado só, que sem isso usaria `concluirUmDado`, sem grid, sem ofertas).
+  const [biocineseProvider, setBiocineseProvider] = useState<BiocineseProvider | null>(null);
+  const registrarBiocinese = useCallback((provider: BiocineseProvider | null) => setBiocineseProvider(provider), []);
+  const ofertaBiocinese = (() => {
+    if (!biocineseProvider?.disponivel || biocineseProvider.restantes <= 0) return null;
+    if (!estado || estado.fase !== 'concluido' || estado.biocinese) return null;
+    if (!estado.biocineseElegivel || !estado.dadosIndividuais) return null;
+    return { restantes: biocineseProvider.restantes };
+  })();
+  const aplicarBiocinese = useCallback(() => {
+    if (!biocineseProvider || !ofertaBiocinese) return;
+    if (!estado || estado.fase !== 'concluido' || estado.biocinese || !estado.dadosIndividuais) return;
+    if (!biocineseProvider.onUsar()) return;
+    const valor = 1 + Math.floor(Math.random() * 4);
+    setEstado((prev) => {
+      if (!prev || !prev.dadosIndividuais) return prev;
+      const novoDado: DadoIndividual = { id: 'bio0', lados: 4, valor };
+      const novosDados = [...prev.dadosIndividuais, novoDado];
+      const somaTotal = novosDados.reduce((acc, d) => acc + (typeof d.valor === 'number' ? d.valor : 0), 0);
+      const novoTotal = somaTotal + (prev.mod ?? 0);
+      return { ...prev, dadosIndividuais: novosDados, total: novoTotal, biocinese: { valor } };
+    });
+    const novoTotal = (estado.total ?? 0) + valor;
+    estado.onBiocineseAplicado?.(novoTotal);
+  }, [biocineseProvider, ofertaBiocinese, estado]);
+
   const rolarConfirmacaoCritico = useCallback(() => {
     if (!estado || estado.fase !== 'concluido' || !estado.confirmarAcerto || estado.confirmacaoCritico) return;
     const usar3D = !!estado.motor3D && dado3DAtivo;
@@ -1862,6 +1939,9 @@ export function RollProvider({ children }: { children: ReactNode }) {
         ofertaTranseDestrutivo,
         registrarTranseDestrutivo,
         aplicarTranseDestrutivo,
+        ofertaBiocinese,
+        registrarBiocinese,
+        aplicarBiocinese,
         sortudoDisponivel: sortudoProvider?.disponivel ?? false,
         sortudoRestantes: sortudoProvider?.restantes ?? 0,
         registrarSortudo,

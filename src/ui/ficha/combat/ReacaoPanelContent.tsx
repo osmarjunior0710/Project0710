@@ -175,6 +175,9 @@ interface ReacaoPanelContentProps {
   menteAgucadaAnotado: number | null;
   menteAgucadaUsadaNoTurno: boolean;
   onMenteAgucadaTrocada: () => void;
+  /** Biocinese (Talento Selvagem, E7) — "quando magia sua cura PV, pode
+   * rolar 1d4 extra e somar" (ver `core/talentosSelvagens.ts`). */
+  temBiocineseAtiva: boolean;
   /** Grupo A dos Talentos Selvagens (Atmocinese/Criocinese/Pirocinese,
    * E7 — ver `core/talentosSelvagens.ts`) — mesmo padrão de
    * `useUsarMagiaPainel.tsx` (Reação também tem conceito de turno). */
@@ -253,6 +256,7 @@ export default function ReacaoPanelContent({
   menteAgucadaAnotado,
   menteAgucadaUsadaNoTurno,
   onMenteAgucadaTrocada,
+  temBiocineseAtiva,
   tipoDanoTrocaTalentoSelvagem,
   trocaTipoDeDanoTalentoSelvagemUsadaTurno,
   onUsarTrocaTipoDeDanoTalentoSelvagem,
@@ -455,6 +459,8 @@ export default function ReacaoPanelContent({
       rolarDados({
         ...resultado.rollCura,
         confirmarAlvoCura: { onMeCurar: (total) => onCuraDeMagiaAplicada(total) },
+        biocineseElegivel: temBiocineseAtiva,
+        forcarGrid: temBiocineseAtiva,
       });
     }
     if (resultado.rollDano) {

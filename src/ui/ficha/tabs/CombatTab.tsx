@@ -304,6 +304,10 @@ interface CombatTabProps {
    * (Enganação/Persuasão também são roladas lá — ver CLAUDE.md §6.6).
    * Ver `core/talentosSelvagens.ts`. */
   testeBonificadoTalentoSelvagem: RecursoContado & { atual: { nome: string; atributo: string; pericias: string[] } | null };
+  /** Biocinese (Talento Selvagem, E7) — "quando magia sua cura PV, pode
+   * rolar 1d4 extra e somar" (ver `core/talentosSelvagens.ts`); repassado
+   * pros 3 painéis que conjuram magia com cura. */
+  temBiocineseAtiva: boolean;
   /** Golpe Brutal (Bárbaro, nível 9+) — precisa do Ataque Imprudente
    * já ativo nesse turno (regra real). `dados` = 1 (nível 9-16) ou 2
    * (17+, "2d10"). `efeitosNivel13`/`escolhas` decidem quais efeitos
@@ -913,6 +917,7 @@ export default function CombatTab({
     restantes: usosTesteBonificadoTalentoSelvagemRestantes,
     onUsar: onUsarTesteBonificadoTalentoSelvagem,
   },
+  temBiocineseAtiva,
   golpeBrutal: {
     disponivel: golpeBrutalDisponivel,
     dados: golpeBrutalDados,
@@ -3610,6 +3615,7 @@ export default function CombatTab({
           onDisciplinaPosConjuracaoDisponivel={onDisciplinaPosConjuracaoDisponivel}
           menteAgucadaAtiva={menteAgucada.ativa}
           transeDestrutivoAtiva={transeDestrutivo.ativa}
+          temBiocineseAtiva={temBiocineseAtiva}
           menteAgucadaAnotado={menteAgucada.anotado}
           menteAgucadaUsadaNoTurno={menteAgucada.usadaNoTurno}
           onMenteAgucadaTrocada={menteAgucada.onTrocado}
@@ -3743,6 +3749,7 @@ export default function CombatTab({
           onDisciplinaPosConjuracaoDisponivel={onDisciplinaPosConjuracaoDisponivel}
           menteAgucadaAtiva={menteAgucada.ativa}
           transeDestrutivoAtiva={transeDestrutivo.ativa}
+          temBiocineseAtiva={temBiocineseAtiva}
           menteAgucadaAnotado={menteAgucada.anotado}
           menteAgucadaUsadaNoTurno={menteAgucada.usadaNoTurno}
           onMenteAgucadaTrocada={menteAgucada.onTrocado}
@@ -3801,6 +3808,7 @@ export default function CombatTab({
           onDisciplinaPosConjuracaoDisponivel={onDisciplinaPosConjuracaoDisponivel}
           menteAgucadaAtiva={menteAgucada.ativa}
           transeDestrutivoAtiva={transeDestrutivo.ativa}
+          temBiocineseAtiva={temBiocineseAtiva}
           menteAgucadaAnotado={menteAgucada.anotado}
           menteAgucadaUsadaNoTurno={menteAgucada.usadaNoTurno}
           onMenteAgucadaTrocada={menteAgucada.onTrocado}

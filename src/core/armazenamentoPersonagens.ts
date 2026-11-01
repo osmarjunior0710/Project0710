@@ -366,6 +366,10 @@ export interface PersonagemSalvo {
    * específica", mesmo padrão de contador de `vantagemTalentoSelvagemGasto`
    * acima. Ver `core/talentosSelvagens.ts`. */
   testeBonificadoTalentoSelvagemGasto?: number;
+  /** Biocinese (Talento Selvagem) — "quando magia sua cura PV, pode
+   * rolar 1d4 extra e somar", mesmo padrão de contador de
+   * `vantagemTalentoSelvagemGasto` acima. Ver `core/talentosSelvagens.ts`. */
+  biocineseTalentoGasto?: number;
   /** Cortar (Mestre em Armas Grandes) — `true` = liberado agora (após
    * Crítico ou confirmação manual de "reduziu a 0 PV"), reseta no Fim
    * do Turno. Ver `FichaShell.tsx`. */

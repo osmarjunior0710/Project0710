@@ -432,5 +432,19 @@ construída no foco que acabou de fechar — ver aprendizados/talentos/atributo-
   virou `[codeimplementation]`. `npx tsc -b`, `npm test -- --run` (1107 testes), `npm run build`
   limpos. **Não testado visualmente no navegador** (sem ferramenta de browser nesta sessão).
 
-Próximo passo: Entrega 5 (Biocinese — dado extra em cura) ou decidir com o Osmar se a tela de
-substituição de talento da Origem entra antes.
+- [x] **E7 Entrega 5 — Biocinese**: "quando magia sua cura PV, pode rolar 1d4 extra e somar"
+  (usos = Bônus de Proficiência/Descanso Longo; confirmei no PDF — UA 2025 p.21 — que não tem
+  upcast, 1d4 fixo mesmo). Reaproveitou MUITO do que já existia: `confirmarAlvoCura` ("Me curar"/
+  "Curar outro") já resolvia a escolha de alvo, sem precisar de tela nova; a mecânica em si copiou
+  o padrão de Transe Destrutivo (`RollContext.tsx`/`RollOverlay.tsx`) — card "💉 Biocinese" no popup
+  de qualquer rolagem de cura, só que GASTA 1 uso de verdade (`BiocineseProvider`, diferente do
+  Transe Destrutivo que é grátis). `forcarGrid: true` garante que o card apareça mesmo em cura de
+  truque (1 dado só, ex.: Palavra Curativa). Plugado nos 3 lugares que conjuram magia
+  (`useUsarMagiaPainel.tsx`/`MagiasTab.tsx`/`ReacaoPanelContent.tsx`), gate real é
+  `temBiocineseAtiva` repassado de `FichaShell.tsx`. Contador `biocineseTalentoGasto`, persistido
+  em `PersonagemSalvo`. `temBiocinese` virou `[codeimplementation]`. `npx tsc -b`,
+  `npm test -- --run` (1107 testes), `npm run build` limpos. **Não testado visualmente no
+  navegador** (sem ferramenta de browser nesta sessão).
+
+Próximo passo: Entrega 6 (Sussurrador Mental — conexão telepática) ou decidir com o Osmar se a
+tela de substituição de talento da Origem entra antes.

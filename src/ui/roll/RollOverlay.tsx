@@ -59,6 +59,8 @@ export default function RollOverlay() {
     aplicarForcaVitalIncandescente,
     ofertaTranseDestrutivo,
     aplicarTranseDestrutivo,
+    ofertaBiocinese,
+    aplicarBiocinese,
     rolarConfirmacaoCritico,
     usarRerollSe1,
     rerollDadoEscolhido,
@@ -439,6 +441,29 @@ export default function RollOverlay() {
                   <div className={styles.ofertaCardTitulo}>🌀 Transe Destrutivo (grátis)</div>
                   <div className={styles.ofertaCardAcao}>Rolar 1 Dado de Energia Psiônica (d{ofertaTranseDestrutivo.dadosLados})</div>
                   <div className={styles.ofertaCardEfeito}>Soma ao dano desta magia — não gasta nenhum Dado de Energia.</div>
+                </div>
+              )
+            )}
+          </>
+        )}
+        {/* Biocinese (Talento Selvagem, E7) — mesma superfície PRÓPRIA de Transe Destrutivo
+            acima (`estado.biocineseElegivel`), mas GASTA 1 uso de verdade (sem rótulo "(grátis)")
+            — ver `BiocineseProvider`. */}
+        {estado.fase === 'concluido' && estado.biocineseElegivel && (
+          <>
+            {estado.biocinese ? (
+              <div className={`${styles.ofertaCard} ${styles.ofertaCardUsada} ${styles.ofertaCardSurto}`}>
+                💉 Biocinese — já usado nesta rolagem
+              </div>
+            ) : (
+              ofertaBiocinese && (
+                <div
+                  className={`${styles.ofertaCard} ${styles.ofertaCardDuasLinhas} ${styles.ofertaCardSurto}`}
+                  onClick={aplicarBiocinese}
+                >
+                  <div className={styles.ofertaCardTitulo}>💉 Biocinese (resta {ofertaBiocinese.restantes} uso(s))</div>
+                  <div className={styles.ofertaCardAcao}>Rolar 1d4</div>
+                  <div className={styles.ofertaCardEfeito}>Soma à cura desta magia.</div>
                 </div>
               )
             )}

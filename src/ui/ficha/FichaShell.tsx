@@ -151,6 +151,7 @@ import {
   tipoDanoTrocaTalentoSelvagem,
   acaoVantagemTalentoSelvagem,
   testeBonificadoTalentoSelvagem,
+  temBiocinese,
 } from '../../core/talentosSelvagens';
 import { temPerfurador } from '../../core/rerollDanoTalento';
 import { usosSorteDoTenebroso } from '../../core/sorteDoTenebroso';
@@ -310,6 +311,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     registrarSurtoPsionico,
     registrarForcaVitalIncandescente,
     registrarTranseDestrutivo,
+    registrarBiocinese,
     registrarSobreviventeDisciplinado,
     registrarForcaIndomavel,
     estado: rollEmAndamento,
@@ -616,6 +618,8 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
   const [testeBonificadoTalentoSelvagemGasto, setTesteBonificadoTalentoSelvagemGasto] = useState(
     personagemSalvo.testeBonificadoTalentoSelvagemGasto ?? 0,
   );
+  // Biocinese (Talento Selvagem, E7) — mesmo padrão do Grupo B/C acima.
+  const [biocineseTalentoGasto, setBiocineseTalentoGasto] = useState(personagemSalvo.biocineseTalentoGasto ?? 0);
   const [talhadorUsadoTurno, setTalhadorUsadoTurno] = useState(personagemSalvo.talhadorUsadoTurno ?? false);
   const [conhecimentoPrimordialPericiaEscolhida, setConhecimentoPrimordialPericiaEscolhida] = useState(
     personagemSalvo.conhecimentoPrimordialPericiaEscolhida ?? null,
@@ -1475,6 +1479,10 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     0,
     usosTesteBonificadoTalentoSelvagemMaximo - testeBonificadoTalentoSelvagemGasto,
   );
+  // Biocinese (Talento Selvagem, E7) — mesmo cálculo de usos do Grupo B/C acima.
+  const temBiocineseAtivo = temBiocinese(talentosEfetivos);
+  const usosBiocineseMaximo = temBiocineseAtivo && classe ? bonusProficiencia(classe, nivelTotalAtual) : 0;
+  const usosBiocineseRestantes = Math.max(0, usosBiocineseMaximo - biocineseTalentoGasto);
   const temInstintosPrimitivos = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.instintosPrimitivos);
   const temGolpeBrutal = temCaracteristica(classesCtx, ID_CARACTERISTICA_CLASSE.golpeBrutal);
   /** 0 = ainda não chegou no nível 13; 1 = nível 13-16 (+2 efeitos);
@@ -1705,6 +1713,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     trocaTipoDeDanoTalentoSelvagemUsadaTurno,
     vantagemTalentoSelvagemGasto,
     testeBonificadoTalentoSelvagemGasto,
+    biocineseTalentoGasto,
     conhecimentoPrimordialPericiaEscolhida,
     academicoPericiaEscolhida,
     pvMax: personagem.pvMax,
@@ -1839,6 +1848,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
       trocaTipoDeDanoTalentoSelvagemUsadaTurno,
       vantagemTalentoSelvagemGasto,
       testeBonificadoTalentoSelvagemGasto,
+      biocineseTalentoGasto,
       conhecimentoPrimordialPericiaEscolhida,
       pvTemporario,
       maestriaArma,
@@ -2415,6 +2425,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     setPontosDeSorteGasto(0); // Sortudo
     setVantagemTalentoSelvagemGasto(0); // Talento Selvagem (Grupo B)
     setTesteBonificadoTalentoSelvagemGasto(0); // Talento Selvagem (Grupo C)
+    setBiocineseTalentoGasto(0); // Talento Selvagem (Biocinese)
 
     // Bárbaro.
     setFuriaImplacavelUsos(0);
@@ -3075,6 +3086,27 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
     });
     return () => registrarTranseDestrutivo(null);
   }, [temTranseDestrutivo, transeDestrutivoAtivo, dadosEnergiaLados, registrarTranseDestrutivo]);
+
+  // Biocinese (Talento Selvagem, E7) — registrado 1x, mesmo padrão de Transe Destrutivo acima,
+  // mas GASTA 1 uso de verdade (`restantes`/`onUsar`, ver `BiocineseProvider`).
+  useEffect(() => {
+    if (!temBiocineseAtivo) {
+      registrarBiocinese(null);
+      return;
+    }
+    registrarBiocinese({
+      disponivel: usosBiocineseRestantes > 0,
+      restantes: usosBiocineseRestantes,
+      // Mesmo contrato de `recursoContado.usar` (`ui/ficha/hooks/recursoGasto.ts`), reimplementado
+      // direto aqui pra não depender do objeto (referência nova a cada render) no array de deps.
+      onUsar: () => {
+        if (usosBiocineseRestantes <= 0) return false;
+        setBiocineseTalentoGasto((v) => v + 1);
+        return true;
+      },
+    });
+    return () => registrarBiocinese(null);
+  }, [temBiocineseAtivo, usosBiocineseRestantes, registrarBiocinese]);
 
   /** Dispensar a Disciplina pós-conjuração (E4c) não custa nada — o texto da regra é sempre "você
    * pode gastar", nunca automático. Se essa Disciplina ia virar linha extra num popup de Salvaguarda
@@ -4046,6 +4078,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
             onDisciplinaPosConjuracaoDisponivel={setDisciplinaPosConjuracaoPendente}
             menteAgucadaAtiva={menteAgucadaAtiva}
             transeDestrutivoAtiva={transeDestrutivoAtivo}
+            temBiocineseAtiva={temBiocineseAtivo}
             menteAgucadaAnotado={menteAgucadaAnotado}
             menteAgucadaUsadaNoTurno={menteAgucadaUsadaNoTurno}
             tipoDanoTrocaTalentoSelvagem={tipoDanoTrocaSelvagemAtual}
@@ -4165,6 +4198,7 @@ function FichaConteudo({ personagemSalvo }: { personagemSalvo: PersonagemSalvo }
               restantes: usosTesteBonificadoTalentoSelvagemRestantes,
               onUsar: testeBonificadoTalentoSelvagemRecurso.usar,
             }}
+            temBiocineseAtiva={temBiocineseAtivo}
             golpeBrutal={{
               disponivel: temGolpeBrutal,
               dados: golpeBrutalDados,

@@ -263,6 +263,9 @@ interface BonusPanelContentProps {
   menteAgucadaAnotado: number | null;
   menteAgucadaUsadaNoTurno: boolean;
   onMenteAgucadaTrocada: () => void;
+  /** Biocinese (Talento Selvagem, E7) — repassado pro `useUsarMagiaPainel`
+   * (ver `core/talentosSelvagens.ts`). */
+  temBiocineseAtiva: boolean;
   /** Quais pills de info aparecem em cada linha de magia — preferência
    * do aparelho (ver `core/preferenciasPillsMagia.ts`). */
   preferenciasPillsMagia: PreferenciasPillsMagia;
@@ -388,6 +391,7 @@ export default function BonusPanelContent({
   menteAgucadaAnotado,
   menteAgucadaUsadaNoTurno,
   onMenteAgucadaTrocada,
+  temBiocineseAtiva,
   preferenciasPillsMagia,
   tipoDanoTrocaTalentoSelvagem,
   trocaTipoDeDanoTalentoSelvagemUsadaTurno,
@@ -448,6 +452,7 @@ export default function BonusPanelContent({
     menteAgucadaAnotado,
     menteAgucadaUsadaNoTurno,
     onMenteAgucadaTrocada,
+    temBiocineseAtiva,
     preferenciasPillsMagia,
   });
   const temMagiaBonus = conjura && (truques.length > 0 || magiasPreparadas.length > 0);

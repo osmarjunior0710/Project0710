@@ -374,6 +374,9 @@ interface MagiasTabProps {
   menteAgucadaAtiva: boolean;
   /** Transe Destrutivo (Psiônico, Psicinético nível 6, E6c-f) — ver `core/transeDestrutivo.ts`. */
   transeDestrutivoAtiva: boolean;
+  /** Biocinese (Talento Selvagem, E7) — "quando magia sua cura PV, pode
+   * rolar 1d4 extra e somar" (ver `core/talentosSelvagens.ts`). */
+  temBiocineseAtiva: boolean;
   menteAgucadaAnotado: number | null;
   /** Ainda recebido mas só tem efeito teórico aqui: a aba Magias não tem
    * conceito de turno, então o Modo de Ataque da Mente Aguçada nunca
@@ -496,6 +499,7 @@ export default function MagiasTab({
   onDisciplinaPosConjuracaoDisponivel,
   menteAgucadaAtiva,
   transeDestrutivoAtiva,
+  temBiocineseAtiva,
   menteAgucadaAnotado,
   menteAgucadaUsadaNoTurno,
   tipoDanoTrocaTalentoSelvagem,
@@ -930,6 +934,8 @@ export default function MagiasTab({
       rolarDados({
         ...resultado.rollCura,
         confirmarAlvoCura: { onMeCurar: (total) => onCuraDeMagiaAplicada(total) },
+        biocineseElegivel: temBiocineseAtiva,
+        forcarGrid: temBiocineseAtiva,
       });
     }
     if (resultado.rollDano) {

@@ -5,6 +5,12 @@
 > nova sempre primeiro, nunca reordenar as antigas, sempre pelo menos
 > 1 linha em branco entre 2 entradas.
 
+## v202611_1956
+
+Quem tem Biocinese (Talento Selvagem) agora pode somar 1d4 extra a qualquer cura de magia — toca no
+card "💉 Biocinese" que aparece no popup do dado depois de rolar a cura, antes de escolher "Me
+curar" ou "Curar outro". Gasta 1 uso (recupera no Descanso Longo).
+
 ## v202610_0946
 
 Quem tem Modelador de Carne ou Trapaceiro Psiônico (Talentos Selvagens) agora pode somar o mod. de

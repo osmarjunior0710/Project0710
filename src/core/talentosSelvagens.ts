@@ -7,8 +7,10 @@
 // com a MESMA mecânica reaproveitam 1 função parametrizada (seção 6
 // do SDD: "Grupos A/B/C agrupam o que antes seriam 7 entregas em 3"),
 // nunca 1 função por talento repetida. Grupo A (Entrega 2), Grupo B
-// (Entrega 3) e Grupo C (Entrega 4) já são `[codeimplementation]`; D
-// ainda é `[PH]` (entregas futuras).
+// (Entrega 3), Grupo C (Entrega 4) e Biocinese (Entrega 5, Grupo D) já
+// são `[codeimplementation]`; Sussurrador Mental e Psicinético
+// (Talento) ainda são `[PH]` (entregas futuras — Psicinético bloqueado
+// por PENDENCIAS.md).
 
 /** IDs do Grupo A (Atmocinese/Criocinese/Pirocinese) — mesma mecânica,
  * só o tipo de dano muda; mapeado pra quando a mecânica real existir. */
@@ -126,8 +128,13 @@ export function bonusTesteTalentoSelvagem(modInt: number): number {
 }
 
 /** Biocinese — "quando magia sua cura PV, pode rolar 1d4 extra e
- * somar à cura" (usos = Bônus de Proficiência/Descanso Longo). [PH]
- * [placeholder-codeimplementation]. */
+ * somar à cura" (usos = Bônus de Proficiência/Descanso Longo).
+ * [codeimplementation] (Entrega 5) — plugado no `RollContext.tsx`/
+ * `RollOverlay.tsx` via `BiocineseProvider` (mesmo padrão de Transe
+ * Destrutivo, mas GASTA 1 uso de verdade), card "💉 Biocinese" no
+ * popup de qualquer rolagem de CURA (`resultado.rollCura`) nos 3
+ * lugares que conjuram magia. Dado sempre 1d4 fixo, sem upcast
+ * (confirmado no PDF, UA 2025 p.21). */
 export function temBiocinese(talentosAtuais: string[] | undefined): boolean {
   return !!talentosAtuais?.includes('biocinese');
 }

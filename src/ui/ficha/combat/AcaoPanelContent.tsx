@@ -203,6 +203,9 @@ interface AcaoPanelContentProps {
   menteAgucadaAnotado: number | null;
   menteAgucadaUsadaNoTurno: boolean;
   onMenteAgucadaTrocada: () => void;
+  /** Biocinese (Talento Selvagem, E7) — repassado pro `useUsarMagiaPainel`
+   * (ver `core/talentosSelvagens.ts`). */
+  temBiocineseAtiva: boolean;
   /** Cortar (Mestre em Armas Grandes) — `podeOferecerCortar` = talento
    * + arma Corpo a Corpo equipada, mostra o botão manual "Reduziu a 0
    * PV?" ao lado de Atacar (Crítico já é detectado sozinho pelo
@@ -359,6 +362,7 @@ export default function AcaoPanelContent({
   menteAgucadaAnotado,
   menteAgucadaUsadaNoTurno,
   onMenteAgucadaTrocada,
+  temBiocineseAtiva,
   podeOferecerCortar,
   onConfirmarCortarReduzirAZero,
   temGolpeDeEscudo,
@@ -444,6 +448,7 @@ export default function AcaoPanelContent({
     menteAgucadaAnotado,
     menteAgucadaUsadaNoTurno,
     onMenteAgucadaTrocada,
+    temBiocineseAtiva,
     preferenciasPillsMagia,
   });
 

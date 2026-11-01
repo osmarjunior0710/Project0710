@@ -161,6 +161,12 @@ interface UsarMagiaPainelParams {
   menteAgucadaAnotado: number | null;
   menteAgucadaUsadaNoTurno: boolean;
   onMenteAgucadaTrocada: () => void;
+  /** Biocinese (Talento Selvagem, E7) — "quando magia sua cura PV, pode
+   * rolar 1d4 extra e somar" (ver `core/talentosSelvagens.ts`). Habilita
+   * `biocineseElegivel`/`forcarGrid` em toda rolagem de cura — o card só
+   * aparece de verdade pra quem tem o talento (gate real é
+   * `BiocineseProvider.disponivel`, registrado em `FichaShell.tsx`). */
+  temBiocineseAtiva: boolean;
 }
 
 /** Fluxo completo de "Usar Magia" dentro de um painel do Combate
@@ -424,6 +430,8 @@ export function useUsarMagiaPainel(p: UsarMagiaPainelParams) {
       rolarDados({
         ...resultado.rollCura,
         confirmarAlvoCura: { onMeCurar: (total) => p.onCuraDeMagiaAplicada(total) },
+        biocineseElegivel: p.temBiocineseAtiva,
+        forcarGrid: p.temBiocineseAtiva,
       });
     }
     if (resultado.rollDano) {
